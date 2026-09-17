@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Ked.Progression;
+using UnityEngine;
 
 // 게임에서 Scene 실행 순서를 소유하는 유일한 runner.
 // 진행 상태 계산은 SceneProgress에 위임하고 playback/replay/lifecycle 순서만 조립한다.
@@ -21,9 +22,7 @@ public sealed class SceneRunner : ISceneRunner
     private readonly ProgressionReplayState _replayState;
     private readonly RollbackHistory _rollbackHistory;
     private readonly IScenePersistence _persistence;
-    private readonly ProgressionLifecycleLog _lifecycleLog;
     private readonly BacklogRecorder _backlog;
-    private readonly UnityProgressionLog _log;
 
     public SceneRunner(
         IScenePlayback playback,
@@ -31,18 +30,14 @@ public sealed class SceneRunner : ISceneRunner
         ProgressionReplayState replayState,
         RollbackHistory rollbackHistory,
         IScenePersistence persistence,
-        ProgressionLifecycleLog lifecycleLog,
-        BacklogRecorder backlog,
-        UnityProgressionLog log)
+        BacklogRecorder backlog)
     {
-        _playback = playback ?? throw new ArgumentNullException(nameof(playback));
-        _options = options ?? throw new ArgumentNullException(nameof(options));
-        _replayState = replayState ?? throw new ArgumentNullException(nameof(replayState));
-        _rollbackHistory = rollbackHistory ?? throw new ArgumentNullException(nameof(rollbackHistory));
-        _persistence = persistence ?? throw new ArgumentNullException(nameof(persistence));
-        _lifecycleLog = lifecycleLog ?? throw new ArgumentNullException(nameof(lifecycleLog));
-        _backlog = backlog ?? throw new ArgumentNullException(nameof(backlog));
-        _log = log ?? throw new ArgumentNullException(nameof(log));
+        _playback = playback;
+        _options = options;
+        _replayState = replayState;
+        _rollbackHistory = rollbackHistory;
+        _persistence = persistence;
+        _backlog = backlog;
     }
 
     public async Task<SceneRunResult> RunAsync(
@@ -126,11 +121,6 @@ public sealed class SceneRunner : ISceneRunner
             ctx.Progress.Definition.ChapterId,
             ctx.Progress.SceneId,
             ctx.Progress.EntryState);
-
-        _lifecycleLog.ReportSceneEntered(
-            ctx.Progress.Definition.ChapterId,
-            ctx.Progress.SceneId,
-            ctx.Progress.EntryState);
     }
 
     private async Task<SceneStepKind> RunEpisodeStepAsync(
@@ -139,11 +129,6 @@ public sealed class SceneRunner : ISceneRunner
         CancellationToken cancellationToken)
     {
         EpisodeNode episode = progression.CurrentEpisode;
-
-        _lifecycleLog.ReportEpisodeEntered(
-            scene.Progress.Definition.ChapterId,
-            scene.Progress.SceneId,
-            episode);
 
         await PlayNodeAsync(
             episode.DialogueEntryId,
@@ -154,11 +139,6 @@ public sealed class SceneRunner : ISceneRunner
             return SceneStepKind.Replay;
 
         progression.NoteCurrentEpisodeWatched(_rollbackHistory.LastHistoryIndex);
-
-        _lifecycleLog.ReportEpisodeExited(
-            scene.Progress.Definition.ChapterId,
-            scene.Progress.SceneId,
-            episode);
 
         SceneChoiceResolution resolution;
 
@@ -176,7 +156,7 @@ public sealed class SceneRunner : ISceneRunner
 
             if (_replayState.IsSeekingActive)
             {
-                _log.Warning(
+                Debug.LogWarning(
                     "[장면] 시크 표적을 못 찾은 채 선택지에 닿았다 - 시크를 끄고 일반 재생으로 전환한다.");
 
                 _replayState.ClearSeek();
@@ -221,7 +201,7 @@ public sealed class SceneRunner : ISceneRunner
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        _log.Info($"[진행] {description} 시작 — \"{nodeName}\"");
+        Debug.LogWarning($"[진행] {description} 시작 — \"{nodeName}\"");
 
         await _playback.PlayNodeAsync(nodeName);
 
@@ -254,7 +234,7 @@ public sealed class SceneRunner : ISceneRunner
         {
             ResolvedOption resolved = advance.Options[0];
 
-            _log.Info($"[장면] 자동 간선 - {resolved.Option}");
+            Debug.LogWarning($"[장면] 자동 간선 - {resolved.Option}");
 
             return SceneChoiceResolution.FromChoice(
                 new SceneChoice(
@@ -338,7 +318,7 @@ public sealed class SceneRunner : ISceneRunner
         progression.RestartReplay();
         ctx.ClearReplayRequest();
 
-        _log.Info(
+        Debug.LogWarning(
             $"[장면] 리플레이 — 루트부터. " +
             $"자동 응답할 선택 {progression.RecordedChoiceCount}개");
     }
@@ -364,7 +344,7 @@ public sealed class SceneRunner : ISceneRunner
     {
         SceneCommitResult commitResult = progression.CreateCommitResult();
 
-        _log.Info(
+        Debug.LogWarning(
             $"[장면] 확정 — 선택 {commitResult.Choices.Count}개, " +
             $"시청 {commitResult.WatchedEpisodeIds.Count}개 → {commitResult.State.CurrentEpisodeId}");
 
@@ -373,18 +353,6 @@ public sealed class SceneRunner : ISceneRunner
             ctx.Progress.SceneId,
             commitResult,
             outcome);
-
-        _lifecycleLog.ReportSceneCommitted(
-            ctx.Progress.Definition.ChapterId,
-            ctx.Progress.SceneId,
-            commitResult.Choices,
-            commitResult.WatchedEpisodeIds,
-            commitResult.State);
-
-        _lifecycleLog.ReportSceneExited(
-            ctx.Progress.Definition.ChapterId,
-            ctx.Progress.SceneId,
-            commitResult.State);
 
         return new SceneRunResult(outcome, commitResult.State);
     }

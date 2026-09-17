@@ -43,12 +43,14 @@ public sealed class ScenePlaybackSession : IScenePlayback
 
     public async Task BeginSceneAsync()
     {
-        await AwaitStopAsync();
+        await AwaitCurrentStopAsync();
         await StopAsync();
 
         _choiceHistory.ClearChoiceRecords();
 
-        BeginPlayback();
+        _vnScreenBindings.GoToPresentationView();
+        _presentationStage.Clear();
+        _presentationScope.Start();
     }
 
     public async Task PlayNodeAsync(string nodeName)
@@ -69,9 +71,12 @@ public sealed class ScenePlaybackSession : IScenePlayback
     {
         // Replay 요청 측 Stop과 RunAsync 측 Replay 준비가
         // 동시에 진행되더라도 이전 Stop이 끝난 뒤 다시 시작한다.
-        await AwaitStopAsync();
+        await AwaitCurrentStopAsync();
 
-        BeginPlayback();
+        _vnScreenBindings.GoToPresentationView();
+        
+        _presentationStage.Clear();
+        _presentationScope.Start();
     }
 
     public async Task StopAsync()
@@ -95,14 +100,6 @@ public sealed class ScenePlaybackSession : IScenePlayback
         }
     }
 
-    private void BeginPlayback()
-    {
-        _vnScreenBindings.GoToPresentationView();
-
-        _presentationStage.Clear();
-        _presentationScope.Start();
-    }
-
     private async Task StopPlaybackAsync()
     {
         _episodeSkipController.Cancel();
@@ -116,7 +113,7 @@ public sealed class ScenePlaybackSession : IScenePlayback
         _presentationScope.End();
     }
 
-    private async Task AwaitStopAsync()
+    private async Task AwaitCurrentStopAsync()
     {
         Task stop = _stopTask;
 

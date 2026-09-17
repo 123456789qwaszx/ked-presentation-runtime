@@ -406,8 +406,6 @@ public class VNAppBootstrap : MonoBehaviour
 
         // 진행 런타임은 아래 계약만 안다.
         // Stage / Save로 잇는 일은 전부 이 자리에서 끝난다.
-        UnityProgressionLog progressionLog = new();
-
         ProgressionReplayState replayState = new(
             _linePresentationAdvanceState,
             _choiceHistory);
@@ -418,17 +416,13 @@ public class VNAppBootstrap : MonoBehaviour
             _backlogRecorder,
             _choiceHistory);
 
-        ProgressionLifecycleLog lifecycleLog = new();
-
         SceneRunner sceneRunner = new SceneRunner(
             _scenePlayback,
             _progressionOptions,
             replayState,
             _rollbackHistory,
             savePersistence,
-            lifecycleLog,
-            _backlogRecorder,
-            progressionLog);
+            _backlogRecorder);
 
         _progressionDriver = new ProgressionDriver(sceneRunner);
 
