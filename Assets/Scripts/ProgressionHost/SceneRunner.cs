@@ -4,8 +4,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Ked.Progression;
 
-// Scene 실행 순서를 소유하는 유일한 Runtime runner.
-// 진행 상태 계산은 SceneProgression에 위임하고 playback/replay/lifecycle 순서만 조립한다.
+// 게임에서 Scene 실행 순서를 소유하는 유일한 runner.
+// 진행 상태 계산은 SceneProgress에 위임하고 playback/replay/lifecycle 순서만 조립한다.
 public sealed class SceneRunner : ISceneRunner
 {
     private enum SceneStepKind
@@ -18,31 +18,31 @@ public sealed class SceneRunner : ISceneRunner
 
     private readonly IScenePlayback _playback;
     private readonly IChapterOptionsView _options;
-    private readonly ISceneReplayState _replayState;
-    private readonly IRollbackHistory _rollbackHistory;
+    private readonly ProgressionReplayState _replayState;
+    private readonly RollbackHistory _rollbackHistory;
     private readonly IScenePersistence _persistence;
-    private readonly IProgressionReporter _reporter;
-    private readonly ISceneBacklog _backlog;
-    private readonly IProgressionLog _log;
+    private readonly ProgressionLifecycleLog _lifecycleLog;
+    private readonly BacklogRecorder _backlog;
+    private readonly UnityProgressionLog _log;
 
     public SceneRunner(
         IScenePlayback playback,
         IChapterOptionsView options,
-        ISceneReplayState replayState,
-        IRollbackHistory rollbackHistory,
+        ProgressionReplayState replayState,
+        RollbackHistory rollbackHistory,
         IScenePersistence persistence,
-        IProgressionReporter reporter,
-        ISceneBacklog backlog,
-        IProgressionLog log = null)
+        ProgressionLifecycleLog lifecycleLog,
+        BacklogRecorder backlog,
+        UnityProgressionLog log)
     {
-        _playback = playback;
-        _options = options;
-        _replayState = replayState;
-        _rollbackHistory = rollbackHistory;
+        _playback = playback ?? throw new ArgumentNullException(nameof(playback));
+        _options = options ?? throw new ArgumentNullException(nameof(options));
+        _replayState = replayState ?? throw new ArgumentNullException(nameof(replayState));
+        _rollbackHistory = rollbackHistory ?? throw new ArgumentNullException(nameof(rollbackHistory));
         _persistence = persistence ?? throw new ArgumentNullException(nameof(persistence));
-        _reporter = reporter;
-        _backlog = backlog;
-        _log = log;
+        _lifecycleLog = lifecycleLog ?? throw new ArgumentNullException(nameof(lifecycleLog));
+        _backlog = backlog ?? throw new ArgumentNullException(nameof(backlog));
+        _log = log ?? throw new ArgumentNullException(nameof(log));
     }
 
     public async Task<SceneRunResult> RunAsync(
@@ -127,7 +127,7 @@ public sealed class SceneRunner : ISceneRunner
             ctx.Progress.SceneId,
             ctx.Progress.EntryState);
 
-        _reporter.ReportSceneEntered(
+        _lifecycleLog.ReportSceneEntered(
             ctx.Progress.Definition.ChapterId,
             ctx.Progress.SceneId,
             ctx.Progress.EntryState);
@@ -140,7 +140,7 @@ public sealed class SceneRunner : ISceneRunner
     {
         EpisodeNode episode = progression.CurrentEpisode;
 
-        _reporter.ReportEpisodeEntered(
+        _lifecycleLog.ReportEpisodeEntered(
             scene.Progress.Definition.ChapterId,
             scene.Progress.SceneId,
             episode);
@@ -155,7 +155,7 @@ public sealed class SceneRunner : ISceneRunner
 
         progression.NoteCurrentEpisodeWatched(_rollbackHistory.LastHistoryIndex);
 
-        _reporter.ReportEpisodeExited(
+        _lifecycleLog.ReportEpisodeExited(
             scene.Progress.Definition.ChapterId,
             scene.Progress.SceneId,
             episode);
@@ -332,8 +332,8 @@ public sealed class SceneRunner : ISceneRunner
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        if (_rollbackHistory.TryTakeRollbackTarget(out int historyIndex))
-            progression.RewindAfter(historyIndex);
+        if (_rollbackHistory.TakeRollbackTarget(out RollbackPoint target))
+            progression.RewindAfter(target.historyIndex);
 
         progression.RestartReplay();
         ctx.ClearReplayRequest();
@@ -374,14 +374,14 @@ public sealed class SceneRunner : ISceneRunner
             commitResult,
             outcome);
 
-        _reporter.ReportSceneCommitted(
+        _lifecycleLog.ReportSceneCommitted(
             ctx.Progress.Definition.ChapterId,
             ctx.Progress.SceneId,
             commitResult.Choices,
             commitResult.WatchedEpisodeIds,
             commitResult.State);
 
-        _reporter.ReportSceneExited(
+        _lifecycleLog.ReportSceneExited(
             ctx.Progress.Definition.ChapterId,
             ctx.Progress.SceneId,
             commitResult.State);

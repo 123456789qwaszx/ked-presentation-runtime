@@ -412,8 +412,6 @@ public class VNAppBootstrap : MonoBehaviour
             _linePresentationAdvanceState,
             _choiceHistory);
 
-        ProgressionRollbackHistory rollbackHistory = new(_rollbackHistory);
-
         // 저장은 실행이고, 아래 lifecycle 로그는 관찰이다. 둘을 합치지 않는다.
         ProgressionSaveBridge savePersistence = new(
             _saveCoordinator,
@@ -426,7 +424,7 @@ public class VNAppBootstrap : MonoBehaviour
             _scenePlayback,
             _progressionOptions,
             replayState,
-            rollbackHistory,
+            _rollbackHistory,
             savePersistence,
             lifecycleLog,
             _backlogRecorder,

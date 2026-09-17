@@ -51,8 +51,12 @@ public sealed class ProgressionDriver
 // Launcher가 실행 전에 staging한다는 것만 지킨다.
 public sealed class ProgressionReplayState
 {
-    public int Stages;
+    public int PreparedLoads;
     public SaveLineTarget StagedTarget;
-    public void Stage(IReadOnlyList<VNChoiceRecord> yarnChoices, SaveLineTarget target)
-    { Stages++; StagedTarget = target; }
+
+    public void PrepareLoad(SavedLoadPlan plan)
+    {
+        PreparedLoads++;
+        StagedTarget = plan?.Target;
+    }
 }

@@ -19,7 +19,7 @@ public struct DialogueLogEntry
 //
 // 백점프: 항목이 현재 장면 것이면 라인 단위로 되돌아간다(롤백과 같은 기전). 항목의 장면 소속은
 // "장면 진입 시점의 순번" 하나로 판정한다 — 항목마다 태그를 싣지 않는다.
-public sealed class BacklogRecorder : Ked.Progression.ISceneBacklog
+public sealed class BacklogRecorder
 {
     // 세션 연속 로그의 상한. 넘치면 앞(오래된 쪽)에서 밀려난다 —
     // 뒤(최신 쪽)는 롤백 truncate의 좌표라 건드리면 안 된다.

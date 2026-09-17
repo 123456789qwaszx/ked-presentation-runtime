@@ -1,6 +1,6 @@
 using Ked.Progression;
 
-public sealed class ProgressionReplayState : ISceneReplayState
+public sealed class ProgressionReplayState
 {
     private readonly VNLinePresentationState _lineState;
     private readonly ChoiceHistory _choiceHistory;

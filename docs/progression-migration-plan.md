@@ -32,12 +32,13 @@ M4  THIN ADAPTER     ✔ 완료
 M5  Save 분리        ✔ 완료
 M6  Launcher/조립    ✔ 완료
 M7  실기 검증·문서    ◐ 문서만 완료 — G3/G4가 남았다
+M8  SceneRunner Host 정리  ✔ 완료    고정 구현은 구체 타입, 비동기·실패 경계만 계약 유지
 ```
 
 검증 상태:
 
 ```text
-✔ ProgressionCore   41 PASS   반입 코어 21 + Scene/Runtime 층 20
+✔ ProgressionCore   28 PASS   현재 활성화된 순수 코어 테스트
 ✔ SaveLifecycle     14 PASS
 ✗ Unity 컴파일               (미실행)
 ✗ G3 통로 10개               (미실행)
@@ -527,6 +528,8 @@ VNAppBootstrap.CreateScenePlayback
 검증   Unity 컴파일 · 전체 EditMode PASS · SaveLifecycle 초록
 ```
 
+> 위 조립표는 M6 완료 당시의 기록이다. `ProgressionRollbackHistory`를 포함한 최신 Host 조립은 M8을 따른다.
+
 ## M7 — 실기 검증과 문서 정리
 
 ```text
@@ -534,6 +537,46 @@ VNAppBootstrap.CreateScenePlayback
 vendoring.md 표 갱신 — 원본 저장소/브랜치/커밋, 마지막 동기화 날짜, 방향
 SCOPE-BOUNDARY.md §3.3 "✅ 돌아왔다" 문단 갱신 — 새 원본과 어휘(ChapterDefinition, SceneProgress)
 ked-progression-runtime/PLAN.md §12, ADAPTER_MAP.md §12 결과 반영
+```
+
+## M8 — SceneRunner Host 의존성 정리
+
+`SceneRunner`가 `Ked.Progression` 밖의 `ProgressionHost`로 이동한 뒤에도 남아 있던
+Host 계약을 실제 책임 기준으로 다시 줄인다. 구현을 바꿔 끼우기 위한 추상화는 만들지 않고,
+결정적인 단위 테스트가 필요한 비동기·실패 경계만 유지한다.
+
+```text
+유지  ISceneRunner          ProgressionDriver → 게임 SceneRunner의 어셈블리 경계
+유지  IScenePlayback        재생 대기·Stop·Replay 경쟁 조건을 가짜 playback으로 재현
+유지  IChapterOptionsView   선택 대기·취소·응답을 UI 없이 재현
+유지  IScenePersistence     저장 실패 시 Commit/Exit 금지를 재현
+
+직접  ProgressionReplayState   게임의 Load/Seek 상태
+직접  RollbackHistory          장면 안 롤백 기록의 실제 소유자
+직접  ProgressionLifecycleLog  게임 런타임의 Scene 관찰자
+직접  BacklogRecorder          회차 백로그와 장면 시작 순번의 실제 소유자
+직접  UnityProgressionLog      Unity 콘솔 로그 구현
+```
+
+`ProgressionRollbackHistory`는 `RollbackPoint.historyIndex` 하나만 꺼내던 전달 객체라 삭제한다.
+`ISceneReplayState`·`IRollbackHistory`·`ISceneBacklog`도 활성 사용처가 없어 함께 삭제한다.
+
+`IProgressionReporter`와 `IProgressionLog`는 `ProgressionDriver`가 여전히 사용하는 순수 진행 계층의
+선택적 관찰 경계이므로 파일은 유지한다. 다만 게임의 `SceneRunner`에서는 각각
+`ProgressionLifecycleLog`, `UnityProgressionLog`를 직접 받는다.
+
+검증 과정에서 기존 SaveLifecycle 하네스의 `ProgressionReplayState` 대역이 실제
+`PrepareLoad(SavedLoadPlan)` 대신 폐기된 `Stage(...)`를 흉내 내고 있던 것도 고쳤다.
+같은 테스트가 드러낸 `resume == null` 경로의 `NullReferenceException`도 Launcher에서 새 게임으로
+떨어지도록 복구했다. 둘 다 SceneRunner 의존성 변경과 별개의 기존 회귀지만, 검증 게이트를 다시
+초록으로 만들기 위해 같은 단계에서 닫았다.
+
+검증:
+
+```text
+ProgressionCore · SaveLifecycle 회귀 테스트
+활성 Runtime 코드에서 삭제한 세 계약과 ProgressionRollbackHistory 참조 0건
+Unity 컴파일과 G3/G4 실기 검증은 M7의 미완료 항목으로 유지
 ```
 
 ---

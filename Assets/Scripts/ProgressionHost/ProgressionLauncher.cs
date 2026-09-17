@@ -162,6 +162,9 @@ public sealed class ProgressionLauncher
     {
         savedChapter = null;
 
+        if (resume == null)
+            return false;
+
         if (resume.ChapterCompleted)
         {
             Debug.Log($"[진행] 완료된 챕터의 세이브({resume.ChapterId}). 새로 시작.");

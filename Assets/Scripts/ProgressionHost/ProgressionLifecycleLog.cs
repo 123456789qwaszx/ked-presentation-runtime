@@ -4,11 +4,11 @@ using UnityEngine;
 
 // 진행이 실제로 어떤 경계를 지났는지 관찰만 한다.
 //
-// ⚠ 여기서 저장하지 않는다. 저장은 ProgressionSaveBridge(IScenePersistence)의 일이다.
+// ⚠ 여기서 저장하지 않는다. 저장은 ProgressionSaveBridge의 일이다.
 //   둘을 다시 하나로 합치지 않는다 — 실패의 의미가 다르다.
 //   관찰자가 던지는 예외는 진행을 멈출 이유가 되지 못하므로, 여기서는 아무것도 판정하지 않는다.
 //
-// SceneRunner는 Enter/Commit 양쪽에서 persistence를 먼저, 이 관찰자를 나중에 부른다.
+// SceneRunner는 Enter/Commit 양쪽에서 저장을 먼저, 이 관찰자를 나중에 부른다.
 // 따라서 저장이 실패하면 아래 Commit/Exit 로그는 아예 나오지 않는다.
 public sealed class ProgressionLifecycleLog : IProgressionReporter
 {
