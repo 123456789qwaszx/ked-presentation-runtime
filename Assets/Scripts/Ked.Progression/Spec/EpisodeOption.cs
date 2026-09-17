@@ -66,10 +66,6 @@ namespace Ked.Progression
                 isAuto);
         }
 
-        // 자동 간선. 조건·스탯은 받지 않는다 — 있으면 자동일 수 없다.
-        public static EpisodeOption Auto(string targetEpisodeId) =>
-            new(string.Empty, targetEpisodeId, null, null, null, null, isAuto: true);
-
         public override string ToString()
         {
             string head = IsAuto ? "(자동)" : $"\"{ChoiceLabel}\"";

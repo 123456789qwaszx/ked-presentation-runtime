@@ -30,7 +30,6 @@ public class VNAppBootstrap : MonoBehaviour
     private PresentationScopeSession _presentationScopeSession;
     private VNFeatureController _vnFeatureController;
     private ScenePlaybackSession _scenePlayback;
-    private ScenePlaybackDebugRunner _debugPlayback;
 
     private IChapterOptionsView _progressionOptions;
     private ProgressionDriver _progressionDriver;
@@ -79,14 +78,6 @@ public class VNAppBootstrap : MonoBehaviour
 
     [SerializeField] private VNOptionsPresenter vnOptionsPresenter;
     [SerializeField] private VNOptionItem optionItem;
-
-    [Header("Entry Keys")]
-    [Tooltip("디버그 키(2번)와 타이틀에서 재생할 yarn 노드 이름.")]
-    [SerializeField] private string yarnEntryKey;
-
-    [Tooltip("진행 층 없이 노드 사슬만 시험한다. " +
-             "씬에 값이 없으면 여기 적힌 기본값을 쓴다.")]
-    [SerializeField] private string[] debugEpisodeChain = { "new01", "new02" };
 
     [Header("진행 층")]
     [Tooltip("툴이 낸 챕터 JSON. Assets/@Dialogue/ChapterProgression/ 아래의 .json 을 넣는다. " +
@@ -406,10 +397,6 @@ public class VNAppBootstrap : MonoBehaviour
             _presentationScopeSession,
             _choiceHistory,
             _episodeSkipController);
-
-        _debugPlayback = new ScenePlaybackDebugRunner(
-            _scenePlayback,
-            _backlogRecorder);
 
         _progressionOptions = new ChapterOptionsView(
             uiManager.GetUI<VNDefaultOptionsPanel>(),

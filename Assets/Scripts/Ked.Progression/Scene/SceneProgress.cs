@@ -23,7 +23,6 @@ namespace Ked.Progression
         public string RootEpisodeId { get; }
         public string CurrentEpisodeId { get; private set; }
 
-        public EpisodeNode RootEpisode => GetEpisode(RootEpisodeId);
         public EpisodeNode CurrentEpisode => GetEpisode(CurrentEpisodeId);
 
         public ProgressionState WorkingState =>
@@ -143,26 +142,5 @@ namespace Ked.Progression
             throw new InvalidOperationException(
                 $"에피소드 '{episodeId}'가 챕터 '{Definition.ChapterId}'에 없다.");
         }
-        
-        #region Test
-        
-        // Core 테스트나 단순 호출자를 위한 원자적 편의 API.
-        // Runtime SceneRunner는 기록과 커서 이동을 나눠 쓴다.
-        public void Advance(ResolvedOption selected, SceneChoiceSource source, int rollbackAnchor)
-        {
-            if (!selected.IsSelectable)
-                throw new ArgumentException("잠긴 선택지는 진행에 사용할 수 없다.", nameof(selected));
-
-            var choice = new SceneChoice(
-                selected.Option,
-                CurrentEpisodeId,
-                selected.SourceIndex,
-                source);
-
-            RecordChoice(choice, rollbackAnchor);
-            MoveTo(selected.Option.TargetEpisodeId);
-        }
-        
-        #endregion
     }
 }

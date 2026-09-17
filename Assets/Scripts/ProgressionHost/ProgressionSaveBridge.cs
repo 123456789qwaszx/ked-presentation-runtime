@@ -4,7 +4,7 @@ using Ked.Progression;
 // 장면 경계에서 저장을 실행하는 자리.
 //
 // 진행 런타임은 순수 진행 데이터(SceneCommitResult, SceneRunOutcome)까지만 건네고,
-// Yarn 변수 · Yarn 선택 · 백로그는 여기서 그 순간에 캡처해 장면 기록으로 조립한다.
+// Yarn 선택 기록과 백로그는 여기서 그 순간에 캡처해 장면 기록으로 조립한다.
 //
 // ⚠ 스냅샷을 찍는 시점이 계약이다.
 //   EnterScene   : BeginSceneAsync + MarkSceneStart 직후 — 변수 체크포인트와 백로그 순번이 장면 진입 값이다.
