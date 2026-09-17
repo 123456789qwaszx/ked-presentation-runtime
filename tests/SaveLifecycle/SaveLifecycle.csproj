@@ -10,13 +10,13 @@
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <Compile Include="../../Assets/Scripts/Save/**/*.cs" />
-    <Compile Include="../../Assets/Scripts/Progression/Response/*.cs" />
-    <Compile Include="../../Assets/Scripts/Progression/IProgressionReporter.cs" />
-    <Compile Include="../../Assets/Scripts/Progression/ProgressionLauncher.cs" />
-    <Compile Include="../../Assets/Scripts/Ked.Progression/Spec/*.cs" />
-    <Compile Include="../../Assets/Scripts/Ked.Progression/State/*.cs" />
-    <Compile Include="../../Assets/Scripts/Ked.Progression/Transition/*.cs" />
-    <Compile Include="../../Assets/Scripts/Ked.Progression/Vocabulary/*.cs" />
+    <Compile Include="../../Assets/Scripts/ProgressionHost/ProgressionLauncher.cs" />
+    <!--
+      진행 코어/런타임은 순수 C#이라 그대로 컴파일한다.
+      ProgressionDriver만 뺀다 - 실행 횟수와 Stop을 관찰해야 해서 Stubs.cs가 대역을 세운다.
+    -->
+    <Compile Include="../../Assets/Scripts/Ked.Progression/**/*.cs"
+             Exclude="../../Assets/Scripts/Ked.Progression/Tests/**/*.cs;../../Assets/Scripts/Ked.Progression/ProgressionDriver.cs" />
     <Compile Include="../../Assets/Scripts/FeatureController/BacklogRecorder.cs" />
     <Compile Include="../../Assets/Scripts/DialoguePresenter/VNOptionFlow/VNChoiceRecord.cs" />
     <Compile Include="Stubs.cs" />

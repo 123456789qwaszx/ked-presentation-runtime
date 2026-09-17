@@ -34,12 +34,30 @@ public static class ProgressionContentPreflight
 public sealed class ProgressionDriver
 {
     public bool IsRunning;
-    public IReadOnlyList<CommittedChoice> PendingPath = Array.Empty<CommittedChoice>();
+    public IReadOnlyList<Ked.Progression.CommittedChoice> PendingPath = Array.Empty<Ked.Progression.CommittedChoice>();
     public Func<Task> OnStop;
     public int Starts;
     public Task RequestReplayAsync() => Task.CompletedTask;
     public async Task StopAsync() { if (OnStop != null) await OnStop(); IsRunning = false; }
-    public void Start(object yarn, Ked.Progression.ChapterDefinition chapter, Ked.Progression.ProgressionState state,
-        YarnVariableSnapshot variables, IReadOnlyList<DialogueLogEntry> backlog, SavedLoadPlan plan)
-    { Starts++; IsRunning = true; }
+    public void Start(Ked.Progression.ChapterDefinition chapter, Ked.Progression.ProgressionState state,
+        IReadOnlyList<Ked.Progression.ScenePathStep> restorePath)
+    { Starts++; IsRunning = true; LastRestorePath = restorePath; }
+
+    // 로드 계획이 진행 좌표로 잘려 들어왔는지 본다. null과 빈 목록은 다른 뜻이다.
+    public IReadOnlyList<Ked.Progression.ScenePathStep> LastRestorePath;
+}
+
+// Yarn 변수 복원과 라인 시크 복원은 이 harness의 관심사가 아니다.
+// Launcher가 실행 전에 staging한다는 것만 지킨다.
+public sealed class ProgressionChapterLifecycle
+{
+    public int Stages;
+    public void Stage(object project, YarnVariableSnapshot restoreVariables) => Stages++;
+}
+public sealed class ProgressionReplayState
+{
+    public int Stages;
+    public SaveLineTarget StagedTarget;
+    public void Stage(IReadOnlyList<VNChoiceRecord> yarnChoices, SaveLineTarget target)
+    { Stages++; StagedTarget = target; }
 }

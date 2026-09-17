@@ -8,7 +8,7 @@ on:
       - 'Assets/Scripts/Game/**'
       - 'Assets/Scripts/UI/**'
       - 'Assets/Scripts/FeatureController/**'
-      - 'Assets/Scripts/Progression/**'
+      - 'Assets/Scripts/ProgressionHost/**'
       - 'tests/SaveLifecycle/**'
       - '.github/workflows/save-lifecycle.yml'
   workflow_dispatch:

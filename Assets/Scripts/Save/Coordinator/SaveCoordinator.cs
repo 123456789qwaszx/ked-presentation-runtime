@@ -4,7 +4,7 @@ using System.Globalization;
 using UnityEngine;
 
 // 장면 보고를 로컬 회차 snapshot으로 확정한다. 네트워크에 의존하지 않는다.
-public sealed partial class SaveCoordinator : IProgressionReporter
+public sealed partial class SaveCoordinator : ISceneRecordReporter
 {
     private readonly ILocalSaveStore _localStore;
     private readonly string _contentVersion;

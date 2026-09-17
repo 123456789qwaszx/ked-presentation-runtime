@@ -1,0 +1,26 @@
+<!--
+  진행 코어 회귀 게이트.
+
+  Assets/Scripts/Ked.Progression 은 noEngineReferences: true 인 순수 C# 어셈블리이고
+  그 EditMode 테스트도 순수 NUnit이다. 따라서 Unity 없이 그대로 돌릴 수 있다.
+
+  glob 하나로 반입본 전체를 잡는다 - 새 파일이 반입돼도 이 파일을 고치지 않는다.
+-->
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <LangVersion>9.0</LangVersion>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="NUnit" Version="3.14.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="../../Assets/Scripts/Ked.Progression/**/*.cs" />
+  </ItemGroup>
+</Project>

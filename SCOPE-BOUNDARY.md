@@ -75,7 +75,9 @@
 | **새 주인** | **별도 프로젝트(순수 C#).** 에피소드·챕터를 잇고 그리는 방식은 **게임 공용**이다. 순수 층으로 빼면 툴과 런타임이 **같은 평가기**를 쓰므로 G7의 불일치가 원천 소멸한다.<br>`Ked.Presentation.Core`가 그 선례다 — 같은 수를 진행 층에 한 번 더 두는 것이다 |
 | **이 저장소와의 경계** | `EpisodePlayer.StartGameAsync(nodeName)`.<br>진행 층은 **"이 노드를 재생해 줘"** 까지 말하고, 그 안쪽은 이 저장소가 전부 책임진다 |
 | **커밋** | `1805c555` |
-| **✅ 돌아왔다** | 새 주인이 실제로 섰다 — `ked-progression`(형제 저장소, 순수 C#·자체 dotnet 테스트). 그 `Runtime/`이 `Assets/Scripts/Ked.Progression/`으로 **복사 반입**돼 있고([vendoring.md](Assets/Scripts/Ked.Progression/Documentation~/vendoring.md)), 순서는 `Assets/Scripts/Progression/ProgressionDriver.cs`가 쥔다. 진행은 더 이상 "빠진 것"이 아니다 |
+| **✅ 돌아왔다** | 새 주인이 실제로 섰다 — `ked-progression-runtime`(형제 저장소). 판정 규칙(Core)뿐 아니라 **실행 순서(Runtime)까지** 그쪽이 소유하고, 그 `Assets/Progression/Runtime/`이 `Assets/Scripts/Ked.Progression/`으로 **복사 반입**돼 있다([vendoring.md](Assets/Scripts/Ked.Progression/Documentation~/vendoring.md)). 진행은 더 이상 "빠진 것"이 아니다 |
+| **이 저장소에 남은 몫** | **Host 구현뿐이다.** 진행 층은 `IScenePlayback` · `IChapterOptionsView` · `ISceneReplayState` · `IRollbackHistory` · `ISceneBacklog` · `IChapterLifecycle` · `IScenePersistence` · `IProgressionReporter` · `IProgressionLog` 아홉 계약으로만 바깥에 닿고, 그것을 Yarn/Stage/Save로 잇는 자리가 `Assets/Scripts/ProgressionHost/`다.<br>⚠ 이전 판의 `Assets/Scripts/Progression/ProgressionDriver.cs`는 **없다.** 실행 순서는 반입본 안의 `Ked.Progression/ProgressionDriver.cs`가 쥔다 |
+| **자동 검증** | `dotnet test tests/ProgressionCore/ProgressionCore.csproj` — 반입본은 `noEngineReferences: true`인 순수 C#이라 유니티 없이 돈다. `.github/workflows/progression-core.yml`이 게이트다 |
 
 ### 3.4 플레이어 스탯 — 카탈로그만
 

@@ -80,12 +80,17 @@ Yarn Spinner를 기반으로 제작한 **비주얼 노벨 화면 연출 런타�
 
 ### 6. 진행 층
 
-* `Assets/Scripts/Ked.Progression/` — 챕터·에피소드 판정 코어(엔진 의존 0, 복사 반입)
-* `Assets/Scripts/Progression/` — 로딩·프리플라이트·드라이버(호스트 접착)
+* `Assets/Scripts/Ked.Progression/` — 판정 코어 **와 실행 순서**(엔진 의존 0, 복사 반입)
+* `Assets/Scripts/ProgressionHost/` — 로딩·프리플라이트·계약 어댑터(호스트 접착)
 
 챕터 JSON을 실어 불변식을 검사하고, 대사 재생 뒤 한 번 판정해 선택지를 띄우고
-스탯 반영과 이동을 한 연산으로 커밋하는 루프는
-[ProgressionDriver.cs](Assets/Scripts/Progression/ProgressionDriver.cs)에 있습니다.
+스탯 반영과 이동을 장면 경계에서 한 번에 커밋하는 루프는
+[ProgressionDriver.cs](Assets/Scripts/Ked.Progression/ProgressionDriver.cs)와
+[SceneRunner.cs](Assets/Scripts/Ked.Progression/Scene/SceneRunner.cs)에 있습니다.
+
+진행 층은 아홉 개 계약으로만 바깥에 닿습니다(`Ked.Progression/Contracts/`). Yarn·Stage·Save로
+잇는 구현은 전부 `ProgressionHost/`에 있고, 코어는 유니티 없이 돕니다 —
+`dotnet test tests/ProgressionCore/ProgressionCore.csproj`.
 
 ## 개발 환경
 

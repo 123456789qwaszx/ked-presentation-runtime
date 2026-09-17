@@ -1,4 +1,5 @@
 using System.IO;
+using Ked.Progression;
 using UnityEngine;
 using UnityEngine.Serialization;
 using Yarn.Unity;
@@ -422,28 +423,52 @@ public class VNAppBootstrap : MonoBehaviour
 
         _saveCoordinator = CreateSaveCoordinator();
 
+        // 진행 런타임은 아래 계약만 안다.
+        // Yarn / Stage / Save로 잇는 일은 전부 이 자리에서 끝난다.
+        UnityProgressionLog progressionLog = new();
+
+        ProgressionChapterLifecycle chapterLifecycle = new(yarnBridge);
+
+        ProgressionReplayState replayState = new(
+            _linePresentationAdvanceState,
+            _choiceHistory);
+
+        ProgressionRollbackHistory rollbackHistory = new(_rollbackHistory);
+
+        // 저장은 실행이고, 아래 lifecycle 로그는 관찰이다. 둘을 합치지 않는다.
+        ProgressionSaveBridge savePersistence = new(
+            _saveCoordinator,
+            yarnBridge,
+            _backlogRecorder,
+            _choiceHistory);
+
+        ProgressionLifecycleLog lifecycleLog = new();
+
         SceneRunner sceneRunner = new SceneRunner(
             _scenePlayback,
             _progressionOptions,
-            _linePresentationAdvanceState,
-            _rollbackHistory,
-            _saveCoordinator,
+            replayState,
+            rollbackHistory,
+            savePersistence,
+            lifecycleLog,
             _backlogRecorder,
-            _choiceHistory,
-            yarnBridge.Capture);
+            progressionLog);
 
         _progressionDriver = new ProgressionDriver(
             sceneRunner,
-            _backlogRecorder,
-            yarnBridge);
+            chapterLifecycle,
+            lifecycleLog,
+            progressionLog);
 
         _progressionLauncher = new ProgressionLauncher(
             _progressionDriver,
             dialogueRunner,
             _chapterJson,
             _saveCoordinator.LoadActiveResumePoint,
-            _saveCoordinator.PrepareNewPlaythroughAsync);
-
+            _saveCoordinator.PrepareNewPlaythroughAsync,
+            _backlogRecorder,
+            chapterLifecycle,
+            replayState);
     }
 
     // 모든 실행 모드에서 로컬 저장을 기본으로 사용한다.

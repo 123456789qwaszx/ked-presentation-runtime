@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Ked.Progression;
 using UnityEngine;
 
 // 수동 저장/불러오기 흐름.

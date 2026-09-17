@@ -21,6 +21,48 @@ ked-progression/feat/host-integration @ 82b3cf0
 
 ---
 
+# 0. 진행 현황 (2026-09-17)
+
+```text
+M0  게이트          ✔ 실질 통과    Source EditMode 20 PASS (dotnet으로 실행)
+M1  코어 정렬        ✔ 완료        커밋 c1abc130
+M2  Runtime 교체     ✔ 완료
+M3  DIRECT 연결      ✔ 완료
+M4  THIN ADAPTER     ✔ 완료
+M5  Save 분리        ✔ 완료
+M6  Launcher/조립    ✔ 완료
+M7  실기 검증·문서    ◐ 문서만 완료 — G3/G4가 남았다
+```
+
+검증 상태:
+
+```text
+✔ ProgressionCore   41 PASS   반입 코어 21 + Scene/Runtime 층 20
+✔ SaveLifecycle     14 PASS
+✗ Unity 컴파일               (미실행)
+✗ G3 통로 10개               (미실행)
+✗ G4 저장 파일 회귀           (미실행)
+```
+
+M0은 원래 "Unity 컴파일 + EditMode PASS + PlayMode smoke"였다. 이 중 EditMode는
+**Source의 Runtime이 `noEngineReferences: true`인 순수 C#이고 테스트도 순수 NUnit이라**
+유니티 없이 그대로 돌려 통과를 확인했다. Unity 컴파일과 PlayMode Debug Host smoke는 남았지만,
+Debug Host는 이관 대상이 아니므로(§4.5) M2를 막는 근거가 되지 않는다고 보고 진행했다.
+
+이관 중에 계획에 없던 것 둘이 나왔다.
+
+```text
+SaveLifecycle 하네스가 6커밋째 빨간불이었다
+  fede0693에서 ForkFromSaveSlot 인자가 늘었는데 하네스를 안 고쳤다.
+  dev가 워크플로 push 목록에 없어 아무도 못 봤다 → dev·main을 목록에 넣었다.
+
+진행 코어에 CI 게이트가 없었다
+  tests/ProgressionCore + .github/workflows/progression-core.yml 로 세웠다.
+  ⚠ .gitignore의 *.csproj에 걸리므로 예외(!tests/ProgressionCore/ProgressionCore.csproj)가 함께 있어야 한다.
+```
+
+---
+
 # 1. Source 분석 — ked-progression-runtime에 실제로 서 있는 것
 
 ## 1.1 구조

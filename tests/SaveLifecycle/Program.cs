@@ -66,7 +66,7 @@ internal static class Program
     private static Ked.Progression.ProgressionState State(string episode = "scene1") =>
         Ked.Progression.ProgressionState.CreateInitial(Array.Empty<Ked.Progression.StatDefinition>(), episode);
     private static SceneEntryReport Entry() => new("chapter", State(), null, 0);
-    private static SceneCommitReport Completion() => new("chapter", Array.Empty<CommittedChoice>(),
+    private static SceneCommitReport Completion() => new("chapter", Array.Empty<Ked.Progression.CommittedChoice>(),
         Array.Empty<VNChoiceRecord>(), Array.Empty<string>(), State("scene2"), null,
         Array.Empty<DialogueLogEntry>(), 0, false);
 
@@ -246,7 +246,8 @@ internal static class Program
                 var driver = new ProgressionDriver { IsRunning = true };
                 var stopped = new TaskCompletionSource<bool>(); driver.OnStop = () => stopped.Task;
                 var launcher = new ProgressionLauncher(driver, new Yarn.Unity.DialogueRunner(),
-                    new UnityEngine.TextAsset(), () => null, () => Task.CompletedTask);
+                    new UnityEngine.TextAsset(), () => null, () => Task.CompletedTask,
+                    new BacklogRecorder(), new ProgressionChapterLifecycle(), new ProgressionReplayState());
                 int prepares = 0; Task first = launcher.TransitionAsync(() => { prepares++; return Task.CompletedTask; });
                 await launcher.TransitionAsync(() => { prepares++; return Task.CompletedTask; });
                 stopped.SetResult(true); await first;

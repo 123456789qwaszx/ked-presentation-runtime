@@ -1,10 +1,11 @@
 using System.Threading.Tasks;
+using Ked.Progression;
 
 // 한 Scene 동안 Yarn / Presentation playback의 수명을 관리한다.
 //
 // SceneRunner는 어디로 진행할지를 결정하고,
 // 이 클래스는 현재 Yarn node의 실행 / 중단 / 복원을 책임진다.
-public sealed class ScenePlaybackSession
+public sealed class ScenePlaybackSession : IScenePlayback
 {
     private readonly IEpisodeNodeRunner _nodeRunner;
     private readonly VNScreenBindings _vnScreenBindings;
