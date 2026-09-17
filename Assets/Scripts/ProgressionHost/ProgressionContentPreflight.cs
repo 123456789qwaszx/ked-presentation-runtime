@@ -36,18 +36,6 @@ public static class ProgressionContentPreflight
             foreach (EpisodeNode node in chapter.Nodes)
             {
                 Verify(report, available, node.DialogueEntryId, "대사", chapter.ChapterId, node.EpisodeId);
-
-                IReadOnlyList<EpisodeOption> options = node.NextOptions;
-
-                for (int i = 0; i < options.Count; i++)
-                {
-                    if (options[i].HasVia)
-                    {
-                        Verify(
-                            report, available, options[i].ViaNodeId,
-                            "연출", chapter.ChapterId, $"{node.EpisodeId}→{options[i].TargetEpisodeId}");
-                    }
-                }
             }
         }
 

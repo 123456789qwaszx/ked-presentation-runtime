@@ -256,10 +256,13 @@ namespace Ked.Progression.Tests
         }
 
         [Test]
-        public async Task Driver_StopDuringVia_DoesNotCommitPendingChoice()
+        // Via가 있던 시절에는 "선택을 기록했지만 커서는 아직 안 옮긴" 창이 있었고 거기서 이것을 쟀다.
+        // Via를 걷으면서 그 창은 사라졌지만 보증은 남는다 — 같은 장면의 다음 Episode를 재생하는 동안
+        // Stop이 들어와도 이미 기록된 선택을 확정하지 않는다.
+        public async Task Driver_StopWithPendingChoice_DoesNotCommitPendingChoice()
         {
-            ChapterDefinition chapter = TestChapterFactory.CreateViaAcrossSceneChapter();
-            var playback = new ViaBlockingScenePlayback();
+            ChapterDefinition chapter = TestChapterFactory.CreateWithinSceneChoiceChapter();
+            var playback = new NodeBlockingScenePlayback("node-1b");
             var reporter = new FakeProgressionReporter();
 
             var runner = new SceneRunner(
@@ -277,7 +280,7 @@ namespace Ked.Progression.Tests
                 reporter);
 
             driver.Start(chapter, chapter.CreateEntryState());
-            await playback.ViaStarted;
+            await playback.Blocked;
 
             Assert.That(driver.PendingPath.Count, Is.EqualTo(1));
 
@@ -377,17 +380,29 @@ namespace Ked.Progression.Tests
                 new[] { first, second });
         }
 
-        public static ChapterDefinition CreateViaAcrossSceneChapter()
+        // 장면을 나가지 않는 선택 하나 — 고른 뒤에도 같은 Scene에 남으므로 pending이 확정되지 않는다.
+        public static ChapterDefinition CreateWithinSceneChoiceChapter()
         {
-            EpisodeOption toSecond = EpisodeOption.Choice(
+            EpisodeOption toMiddle = EpisodeOption.Choice(
                 choiceLabel: "next",
-                targetEpisodeId: "ep-2",
-                viaNodeId: "via-1");
+                targetEpisodeId: "ep-1b");
+
+            EpisodeOption toSecond = EpisodeOption.Choice(
+                choiceLabel: "out",
+                targetEpisodeId: "ep-2");
 
             var first = new EpisodeNode(
                 episodeId: "ep-1",
                 title: "Episode 1",
                 dialogueEntryId: "node-1",
+                nextOptions: new[] { toMiddle },
+                eventKey: string.Empty,
+                sceneId: "scene-1");
+
+            var middle = new EpisodeNode(
+                episodeId: "ep-1b",
+                title: "Episode 1b",
+                dialogueEntryId: "node-1b",
                 nextOptions: new[] { toSecond },
                 eventKey: string.Empty,
                 sceneId: "scene-1");
@@ -405,7 +420,7 @@ namespace Ked.Progression.Tests
                 "Chapter",
                 "ep-1",
                 Array.Empty<StatDefinition>(),
-                new[] { first, second });
+                new[] { first, middle, second });
         }
     }
 
@@ -446,27 +461,34 @@ namespace Ked.Progression.Tests
         }
     }
 
-    internal sealed class ViaBlockingScenePlayback : FakeScenePlayback
+    // 지정한 노드 하나에서만 멈춰 선다. 그 앞의 재생은 그대로 흘려보낸다.
+    internal sealed class NodeBlockingScenePlayback : FakeScenePlayback
     {
-        private readonly TaskCompletionSource<bool> _viaStarted = new();
-        private readonly TaskCompletionSource<bool> _viaStopped = new();
+        private readonly string _blockAt;
+        private readonly TaskCompletionSource<bool> _blocked = new();
+        private readonly TaskCompletionSource<bool> _released = new();
 
-        public Task ViaStarted => _viaStarted.Task;
+        public NodeBlockingScenePlayback(string blockAt)
+        {
+            _blockAt = blockAt;
+        }
+
+        public Task Blocked => _blocked.Task;
 
         public override Task PlayNodeAsync(string nodeName)
         {
             PlayedNodes.Add(nodeName);
 
-            if (!string.Equals(nodeName, "via-1", StringComparison.Ordinal))
+            if (!string.Equals(nodeName, _blockAt, StringComparison.Ordinal))
                 return Task.CompletedTask;
 
-            _viaStarted.TrySetResult(true);
-            return _viaStopped.Task;
+            _blocked.TrySetResult(true);
+            return _released.Task;
         }
 
         public override Task StopAsync()
         {
-            _viaStopped.TrySetResult(true);
+            _released.TrySetResult(true);
             return Task.CompletedTask;
         }
     }
