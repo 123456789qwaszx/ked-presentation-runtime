@@ -441,8 +441,7 @@ public class VNAppBootstrap : MonoBehaviour
             _progressionDriver,
             dialogueRunner,
             _chapterJson,
-            _saveCoordinator.LoadActiveResumePoint,
-            _saveCoordinator.PrepareNewPlaythroughAsync,
+            _saveCoordinator,
             _backlogRecorder,
             replayState);
 

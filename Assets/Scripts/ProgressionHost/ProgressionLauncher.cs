@@ -13,8 +13,8 @@ public sealed class ProgressionLauncher
     private readonly ProgressionDriver _driver;
     private readonly DialogueRunner _dialogueRunner; //"DialogueRunner.YarnProject"를 꺼내 대조 및 검사.
     private readonly TextAsset _chapterJson;
-    private readonly Func<ProgressionResumePoint> _loadResumePoint;
-    private readonly Func<Task> _prepareNewPlaythrough;
+
+    private readonly SaveCoordinator _saveCoordinator;
 
     // 진행 런타임이 모르는 복원 payload를 실행 전에 준비해 두는 자리들.
     private readonly BacklogRecorder _backlog;
@@ -26,16 +26,14 @@ public sealed class ProgressionLauncher
         ProgressionDriver driver,
         DialogueRunner dialogueRunner,
         TextAsset chapterJson,
-        Func<ProgressionResumePoint> loadResumePoint,
-        Func<Task> prepareNewPlaythrough,
+        SaveCoordinator saveCoordinator,
         BacklogRecorder backlog,
         ProgressionReplayState replayState)
     {
         _driver = driver;
         _dialogueRunner = dialogueRunner;
         _chapterJson = chapterJson;
-        _loadResumePoint = loadResumePoint;
-        _prepareNewPlaythrough = prepareNewPlaythrough;
+        _saveCoordinator = saveCoordinator;
         _backlog = backlog;
         _replayState = replayState;
     }
@@ -101,7 +99,7 @@ public sealed class ProgressionLauncher
         IReadOnlyList<DialogueLogEntry> backlog = null;
         SavedLoadPlan loadPlan = null;
 
-        ProgressionResumePoint resume = _loadResumePoint();
+        ProgressionResumePoint resume = _saveCoordinator.LoadActiveResumePoint();
 
         bool resumeAccepted = false;
         if (resume != null)
@@ -135,7 +133,7 @@ public sealed class ProgressionLauncher
         }
 
         if (resume != null && !resumeAccepted)
-            await _prepareNewPlaythrough();
+            await _saveCoordinator.PrepareNewPlaythroughAsync();
 
         // 진행 런타임에는 ScenePathStep[]만 들어간다.
         // Yarn 프로젝트/변수, 백로그, Yarn 선택, 라인 표적은 실행 전에 Host가 준비한다.

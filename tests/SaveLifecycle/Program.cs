@@ -246,7 +246,7 @@ internal static class Program
                 var driver = new ProgressionDriver { IsRunning = true };
                 var stopped = new TaskCompletionSource<bool>(); driver.OnStop = () => stopped.Task;
                 var launcher = new ProgressionLauncher(driver, new Yarn.Unity.DialogueRunner(),
-                    new UnityEngine.TextAsset(), () => null, () => Task.CompletedTask,
+                    new UnityEngine.TextAsset(), new SaveCoordinator(new LocalFileSaveStore(Dir()), ContentVersion),
                     new BacklogRecorder(), new ProgressionReplayState());
                 int prepares = 0; Task first = launcher.TransitionAsync(() => { prepares++; return Task.CompletedTask; });
                 await launcher.TransitionAsync(() => { prepares++; return Task.CompletedTask; });
