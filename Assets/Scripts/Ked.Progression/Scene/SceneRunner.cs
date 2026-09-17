@@ -350,20 +350,11 @@ namespace Ked.Progression
         {
             IReadOnlyList<ScenePathStep> path = ctx.RestorePath;
 
-            // null은 일반 진입. 빈 path는 유효한 restore 진입이다.
+            // null : NewGame
             if (path == null)
                 return;
 
-            if (!progression.TryRestorePath(path))
-            {
-                _log.Warning(
-                    "[장면] 복원 경로가 현재 챕터와 맞지 않는다 - " +
-                    "경로 전체를 버리고 Scene root에서 일반 진행한다.");
-                return;
-            }
-
-            // YarnChoices + line target 복원은 Host implementation이 소유한다.
-            // progression path 검증이 성공한 뒤에만 시작한다.
+            progression.RestorePath(path);
             _replayState.BeginLoadReplay();
         }
 

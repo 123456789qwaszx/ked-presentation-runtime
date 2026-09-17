@@ -100,14 +100,13 @@ namespace Ked.Progression.Tests
             ChapterDefinition chapter = CreateChapter();
             var scene = new SceneProgress(chapter, chapter.CreateEntryState());
 
-            bool restored = scene.TryRestorePath(
+            scene.RestorePath(
                 new[]
                 {
                     new ScenePathStep("a", 0),
                     new ScenePathStep("b", 0),
                 });
 
-            Assert.That(restored, Is.True);
             Assert.That(scene.CurrentEpisodeId, Is.EqualTo("a"));
             Assert.That(scene.RecordedChoiceCount, Is.EqualTo(2));
 
@@ -119,26 +118,6 @@ namespace Ked.Progression.Tests
 
             Assert.That(scene.CurrentEpisodeId, Is.EqualTo("c"));
             Assert.That(scene.HasRecordedChoice, Is.False);
-        }
-
-        [Test]
-        public void InvalidRestorePath_clears_entire_recorded_path_and_falls_back_to_root()
-        {
-            ChapterDefinition chapter = CreateChapter();
-            var scene = new SceneProgress(chapter, chapter.CreateEntryState());
-
-            bool restored = scene.TryRestorePath(
-                new[]
-                {
-                    new ScenePathStep("a", 0),
-                    new ScenePathStep("wrong", 0),
-                });
-
-            Assert.That(restored, Is.False);
-            Assert.That(scene.RecordedChoiceCount, Is.Zero);
-            Assert.That(scene.HasRecordedChoice, Is.False);
-            Assert.That(scene.CurrentEpisodeId, Is.EqualTo("a"));
-            Assert.That(scene.WorkingState.CurrentEpisodeId, Is.EqualTo("a"));
         }
 
         [Test]

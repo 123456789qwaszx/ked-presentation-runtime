@@ -41,8 +41,8 @@ namespace Ked.Progression
             Definition = definition;
             EntryState = entryState;
 
-            definition.TryGetNode(entryState.CurrentEpisodeId, out EpisodeNode root);
-            
+            EpisodeNode root = GetEpisode(entryState.CurrentEpisodeId);
+
             RootEpisodeId = root.EpisodeId;
             CurrentEpisodeId = root.EpisodeId;
             SceneId = root.SceneId;
@@ -59,16 +59,12 @@ namespace Ked.Progression
         // 기록이 끝난 뒤 Runtime이 실제 Episode cursor를 옮긴다.
         public void MoveTo(string episodeId) => CurrentEpisodeId = episodeId;
         
-        // 저장된 Scene 선택 경로가 현재 Chapter 그래프에서도 여전히 유효한지 검사하고,
-        // 유효하면 그 경로를 “root부터 다시 소비할 recorded choice로”으로 복원 및 적재
-        public bool TryRestorePath(IReadOnlyList<ScenePathStep> path)
+        // 저장된 Scene 선택 경로를 recorded choice로 복원.
+        // - empty: Scene root에서 시작
+        // - non-empty: root부터 저장된 선택 경로를 다시 소비
+        public void RestorePath(IReadOnlyList<ScenePathStep> path)
         {
-            // 버전 이슈로 복원경로와 현재 챕터 구조 불일치
-            if (path == null)
-                throw new ArgumentNullException(nameof(path));
-
             _history.ClearChoices();
-            CurrentEpisodeId = RootEpisodeId;
 
             string cursor = RootEpisodeId;
 
@@ -76,24 +72,19 @@ namespace Ked.Progression
             {
                 ScenePathStep step = path[i];
 
-                if (!string.Equals(step.FromEpisodeId, cursor, StringComparison.Ordinal) ||
-                    !Definition.TryGetNode(cursor, out EpisodeNode episode) ||
-                    step.OptionIndex < 0 ||
-                    step.OptionIndex >= episode.NextOptions.Count)
-                {
-                    _history.ClearChoices();
-                    CurrentEpisodeId = RootEpisodeId;
-                    return false;
-                }
-
+                EpisodeNode episode = GetEpisode(cursor);
                 EpisodeOption option = episode.NextOptions[step.OptionIndex];
-                _history.RestoreChoice(option, cursor, step.OptionIndex);
+
+                _history.RestoreChoice(
+                    option,
+                    cursor,
+                    step.OptionIndex);
+
                 cursor = option.TargetEpisodeId;
             }
 
             _history.ResetRecordedChoiceCursor();
             CurrentEpisodeId = RootEpisodeId;
-            return true;
         }
 
         // Load/replay에서 저장된 선택 하나를 다시 소비한다.
