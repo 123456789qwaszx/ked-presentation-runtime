@@ -17,7 +17,7 @@ public sealed class ProgressionDriver
     private readonly BacklogRecorder _backlog;
     private readonly ProgressionYarnBridge _yarnBridge;
 
-    private ChapterProgression _chapter;
+    private ChapterDefinition _chapter;
     private ProgressionState _state;
     private YarnProject _yarnProject;
 
@@ -49,7 +49,7 @@ public sealed class ProgressionDriver
 
     public void Start(
         YarnProject project,
-        ChapterProgression chapter,
+        ChapterDefinition chapter,
         ProgressionState entryState,
         YarnVariableSnapshot restoreVariables = null,
         IReadOnlyList<DialogueLogEntry> restoreBacklog = null,
@@ -72,7 +72,7 @@ public sealed class ProgressionDriver
 
     private async Task RunAsync(
         YarnProject project,
-        ChapterProgression chapter,
+        ChapterDefinition chapter,
         ProgressionState entryState,
         YarnVariableSnapshot restoreVariables,
         IReadOnlyList<DialogueLogEntry> restoreBacklog,

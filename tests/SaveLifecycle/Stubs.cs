@@ -22,7 +22,7 @@ public static class ProgressionContentLoader
 {
     public static Ked.Progression.ScenarioProgression LoadSingleChapter(UnityEngine.TextAsset asset)
     {
-        var chapter = new Ked.Progression.ChapterProgression("chapter", "", "scene1", null,
+        var chapter = new Ked.Progression.ChapterDefinition("chapter", "", "scene1", null,
             new[] { new Ked.Progression.EpisodeNode("scene1", "", "node") });
         return new Ked.Progression.ScenarioProgression("scenario", "", "chapter", new[] { chapter });
     }
@@ -39,7 +39,7 @@ public sealed class ProgressionDriver
     public int Starts;
     public Task RequestReplayAsync() => Task.CompletedTask;
     public async Task StopAsync() { if (OnStop != null) await OnStop(); IsRunning = false; }
-    public void Start(object yarn, Ked.Progression.ChapterProgression chapter, Ked.Progression.ProgressionState state,
+    public void Start(object yarn, Ked.Progression.ChapterDefinition chapter, Ked.Progression.ProgressionState state,
         YarnVariableSnapshot variables, IReadOnlyList<DialogueLogEntry> backlog, SavedLoadPlan plan)
     { Starts++; IsRunning = true; }
 }

@@ -3,7 +3,7 @@ using Ked.Progression;
 
 public sealed class SceneTransaction
 {
-    public ChapterProgression Chapter { get; }
+    public ChapterDefinition Chapter { get; }
     public ProgressionState EntryState { get; }
 
     public string RootEpisodeId { get; }
@@ -24,7 +24,7 @@ public sealed class SceneTransaction
     internal ScenePendingHistory History { get; } = new();
 
     public SceneTransaction(
-        ChapterProgression chapter,
+        ChapterDefinition chapter,
         ProgressionState entryState,
         SavedLoadPlan loadPlan = null)
     {

@@ -15,16 +15,22 @@ namespace Ked.Progression
     // - 위와 같은 구조적 무결성은 보장하지만,
     // - 진행 그래프의 유효성을 증명하진 않음.
     // (끊긴 노드, 불가능한 조건 등)
-    public sealed class ChapterProgression
+    public sealed class ChapterDefinition
     {
         private readonly Dictionary<string, EpisodeNode> _nodesById;
         
         // Stats: 챕터에서 어떤 스탯을 쓰는지 확인.
         // StatsByKey: 특정 스탯의 정의 및 수치 확인.
         private readonly Dictionary<string, StatDefinition> _statsByKey;
+        
+        // 각 Scene들의 시작점이 되는 EpisodeId
+        // 개별 Scene에 진입하는 유일한 통로들
+        private readonly HashSet<string> _sceneRoots;
 
         public string ChapterId { get; }
         public string DisplayName { get; }
+        
+        // Chapter가 시작될 때처음 진입하는 Scene의 Root Episode
         public string StartEpisodeId { get; }
 
         public IReadOnlyList<EpisodeNode> Nodes { get; } // 챕터 내 에피소드들
@@ -36,7 +42,7 @@ namespace Ked.Progression
         // (진행 상태 시스템과 챕터 정의 사이의 공식 경계.)
         public IReadOnlyDictionary<string, StatDefinition> StatsByKey => _statsByKey;
 
-        public ChapterProgression(
+        public ChapterDefinition(
             string chapterId,
             string displayName,
             string startEpisodeId,
@@ -63,17 +69,14 @@ namespace Ked.Progression
             if (diagnostics.Count > 0)
                 throw new ArgumentException(diagnostics[0].ToString());
 
-            _sceneRoots = CollectSceneRoots();
+            _sceneRoots = CollectScenesRootEpisodeIds();
         }
-
-        // 장면 루트 = 밖에서 들어오는 간선이 착지하는 자리(챕터 시작 포함). 불변식이 장면마다
-        // 하나임을 보장한다. 이어하기가 재개할 수 있는 자리는 이것뿐이다 — 무대 기준선이 여기 선다.
-        private readonly HashSet<string> _sceneRoots;
-
+        
         public bool IsSceneRoot(string episodeId) =>
             episodeId != null && _sceneRoots.Contains(episodeId);
 
-        private HashSet<string> CollectSceneRoots()
+        // 각 Scene들의 시작점이 되는 EpisodeId 수집
+        private HashSet<string> CollectScenesRootEpisodeIds()
         {
             var roots = new HashSet<string>(StringComparer.Ordinal) { StartEpisodeId };
 

@@ -87,7 +87,7 @@ public sealed class ProgressionLauncher
             return;
 
         // 기본값은 새 게임 시작.
-        ChapterProgression chapter = scenario.StartChapter;
+        ChapterDefinition chapter = scenario.StartChapter;
         ProgressionState state = chapter.CreateEntryState();
 
         YarnVariableSnapshot variables = null;
@@ -103,7 +103,7 @@ public sealed class ProgressionLauncher
             {
                 Debug.Log($"[진행] 완료된 챕터의 세이브({resume.ChapterId}). 새로 시작.");
             }
-            else if (!scenario.TryGetChapter(resume.ChapterId, out ChapterProgression savedChapter)
+            else if (!scenario.TryGetChapter(resume.ChapterId, out ChapterDefinition savedChapter)
                      || !savedChapter.TryGetNode(resume.EpisodeId, out _))
             {
                 Debug.LogWarning(

@@ -165,7 +165,8 @@ internal static class Program
                 var store = new LocalFileSaveStore(Dir());
                 store.WriteSaveSlot(SlotEntry("slot"), SlotData("slot"));
                 var save = new SaveCoordinator(store, ContentVersion);
-                await save.ForkFromSaveSlot(store.LoadSaveSlotIndex().Slots.Single());
+                SaveSlotEntry slot = store.LoadSaveSlotIndex().Slots.Single();
+                await save.ForkFromSaveSlot(slot, save.LoadSaveSlot(slot.Id));
                 string loadedId = store.ActiveId;
                 store.Open(loadedId).Commit(Save(loadedId, 8));
                 Check(store.LoadSaveSlot("slot").LoadPlan.Target.LineId == "L", "slot followed autosave");

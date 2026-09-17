@@ -12,7 +12,7 @@ public sealed class SceneBoundaryTests
     public void SceneId가_비면_에피소드마다_다른_장면이다()
     {
         // 장면 칸이 서기 전에 나간 JSON — 퇴화 상태로 실려야 한다.
-        ChapterProgression chapter = Load(
+        ChapterDefinition chapter = Load(
             Chapter("A",
                 Node("A", null, "B"),
                 Node("B", null)));
@@ -25,7 +25,7 @@ public sealed class SceneBoundaryTests
     [Test]
     public void SceneId가_같으면_한_장면이다()
     {
-        ChapterProgression chapter = Load(
+        ChapterDefinition chapter = Load(
             Chapter("A",
                 Node("A", "교실", "B"),
                 Node("B", "교실", "C"),
@@ -38,7 +38,7 @@ public sealed class SceneBoundaryTests
     [Test]
     public void 모르는_에피소드는_다른_장면으로_읽는다()
     {
-        ChapterProgression chapter = Load(
+        ChapterDefinition chapter = Load(
             Chapter("A", Node("A", "교실")));
 
         Assert.That(chapter.IsSameScene("A", "없는것"), Is.False);
@@ -66,7 +66,7 @@ public sealed class SceneBoundaryTests
     public void 같은_자리로_여러_간선이_들어오는_것은_통과한다()
     {
         // 자리의 수만 센다 — 들어오는 간선의 수가 아니다.
-        ChapterProgression chapter = Load(
+        ChapterDefinition chapter = Load(
             Chapter("A",
                 Node("A", "교실", "B", "C"),
                 Node("B", "교실", "C"),
@@ -79,7 +79,7 @@ public sealed class SceneBoundaryTests
     public void 장면을_나갔다_되돌아오는_것은_통과한다()
     {
         // 허브 구조. 재진입은 루트에서 다시 여는 새 장면 방문일 뿐이라 막지 않는다.
-        ChapterProgression chapter = Load(
+        ChapterDefinition chapter = Load(
             Chapter("교실_도착",
                 Node("교실_도착", "교실", "복도_이동"),
                 Node("복도_이동", "복도", "교실_도착")));
@@ -104,7 +104,7 @@ public sealed class SceneBoundaryTests
     [Test]
     public void 장면_루트는_밖에서_들어오는_자리다()
     {
-        ChapterProgression chapter = Load(
+        ChapterDefinition chapter = Load(
             Chapter("A",
                 Node("A", "교실", "B"),
                 Node("B", "교실", "C"),
@@ -121,7 +121,7 @@ public sealed class SceneBoundaryTests
     [Test]
     public void 퇴화_상태에서는_모든_에피소드가_루트다()
     {
-        ChapterProgression chapter = Load(
+        ChapterDefinition chapter = Load(
             Chapter("A", Node("A", null, "B"), Node("B", null, "C"), Node("C", null)));
 
         Assert.That(chapter.IsSceneRoot("A"), Is.True);
@@ -131,7 +131,7 @@ public sealed class SceneBoundaryTests
 
     // ── 재료 ────────────────────────────────────────────────────────────────
 
-    private static ChapterProgression Load(ChapterProgressionDto dto)
+    private static ChapterDefinition Load(ChapterProgressionDto dto)
     {
         ProgressionLoadResult result = ProgressionLoader.Load(dto);
 

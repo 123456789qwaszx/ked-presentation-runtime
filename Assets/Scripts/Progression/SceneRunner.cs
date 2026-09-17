@@ -475,7 +475,7 @@ public sealed class SceneRunner
     }
 
     private static bool TryResolveSavedChoice(
-        ChapterProgression chapter,
+        ChapterDefinition chapter,
         string cursor,
         SavedChoice step,
         out EpisodeOption option)

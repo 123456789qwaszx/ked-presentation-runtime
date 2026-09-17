@@ -31,7 +31,7 @@ public static class ProgressionContentPreflight
 
         var available = new HashSet<string>(project.NodeNames, System.StringComparer.Ordinal);
 
-        foreach (ChapterProgression chapter in scenario.Chapters)
+        foreach (ChapterDefinition chapter in scenario.Chapters)
         {
             foreach (EpisodeNode node in chapter.Nodes)
             {

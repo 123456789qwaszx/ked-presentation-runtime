@@ -8,7 +8,7 @@ public sealed class AutoEdgeTests
     [Test]
     public void 자동_간선은_판정이_AutoAdvance다()
     {
-        ChapterProgression chapter = Load(
+        ChapterDefinition chapter = Load(
             Chapter("A",
                 Node("A", "교실", AutoTo("B")),
                 Node("B", "교실")));
@@ -94,7 +94,7 @@ public sealed class AutoEdgeTests
 
     // ── 재료 ────────────────────────────────────────────────────────────────
 
-    private static ChapterProgression Load(ChapterProgressionDto dto)
+    private static ChapterDefinition Load(ChapterProgressionDto dto)
     {
         ProgressionLoadResult result = ProgressionLoader.Load(dto);
 

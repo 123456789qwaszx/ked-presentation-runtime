@@ -1,0 +1,27 @@
+name: Progression core
+on:
+  push:
+    branches: [dev, main]
+  pull_request:
+    paths:
+      - 'Assets/Scripts/Ked.Progression/**'
+      - 'tests/ProgressionCore/**'
+      - '.github/workflows/progression-core.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  progression-core:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            Assets/Scripts/Ked.Progression
+            tests/ProgressionCore
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Run progression core tests
+        run: dotnet test tests/ProgressionCore/ProgressionCore.csproj --configuration Release
