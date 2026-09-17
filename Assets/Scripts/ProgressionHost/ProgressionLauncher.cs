@@ -18,7 +18,6 @@ public sealed class ProgressionLauncher
 
     // 진행 런타임이 모르는 복원 payload를 실행 전에 준비해 두는 자리들.
     private readonly BacklogRecorder _backlog;
-    private readonly ProgressionChapterLifecycle _chapterLifecycle;
     private readonly ProgressionReplayState _replayState;
 
     private bool _isTransitioning;
@@ -30,7 +29,6 @@ public sealed class ProgressionLauncher
         Func<ProgressionResumePoint> loadResumePoint,
         Func<Task> prepareNewPlaythrough,
         BacklogRecorder backlog,
-        ProgressionChapterLifecycle chapterLifecycle,
         ProgressionReplayState replayState)
     {
         _driver = driver;
@@ -39,7 +37,6 @@ public sealed class ProgressionLauncher
         _loadResumePoint = loadResumePoint;
         _prepareNewPlaythrough = prepareNewPlaythrough;
         _backlog = backlog;
-        _chapterLifecycle = chapterLifecycle;
         _replayState = replayState;
     }
 
@@ -101,7 +98,6 @@ public sealed class ProgressionLauncher
         ChapterDefinition chapter = scenario.StartChapter;
         ProgressionState state = chapter.CreateEntryState();
 
-        YarnVariableSnapshot variables = null;
         IReadOnlyList<DialogueLogEntry> backlog = null;
         SavedLoadPlan loadPlan = null;
 
@@ -130,12 +126,11 @@ public sealed class ProgressionLauncher
                 resumeAccepted = true;
                 chapter = savedChapter;
                 state = ProgressionState.Restore(savedChapter, resume.EpisodeId, resume.Stats);
-                variables = resume.Variables;
                 backlog = resume.Backlog;
                 loadPlan = resume.LoadPlan;
 
                 Debug.Log(
-                    $"[진행] 재개 - {resume.ChapterId}/{resume.EpisodeId}, Yarn 변수 {variables?.Count ?? 0}개");
+                    $"[진행] 재개 - {resume.ChapterId}/{resume.EpisodeId}");
             }
         }
 
@@ -145,7 +140,6 @@ public sealed class ProgressionLauncher
         // 진행 런타임에는 ScenePathStep[]만 들어간다.
         // Yarn 프로젝트/변수, 백로그, Yarn 선택, 라인 표적은 실행 전에 Host가 준비한다.
         _backlog.Restore(backlog);
-        _chapterLifecycle.Stage(_dialogueRunner.YarnProject, variables);
         _replayState.Stage(loadPlan?.YarnChoices, loadPlan?.Target);
 
         _driver.Start(chapter, state, BuildRestorePath(loadPlan));

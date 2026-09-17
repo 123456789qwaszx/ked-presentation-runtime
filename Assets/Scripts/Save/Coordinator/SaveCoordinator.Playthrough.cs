@@ -54,7 +54,6 @@ public sealed partial class SaveCoordinator
             save.ChapterId,
             save.CurrentEpisodeId,
             save.Stats,
-            save.Variables,
             save.Backlog,
             save.PendingLoad,
             save.ChapterCompleted);

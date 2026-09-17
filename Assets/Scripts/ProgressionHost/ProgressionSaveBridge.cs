@@ -16,18 +16,15 @@ using Ked.Progression;
 public sealed class ProgressionSaveBridge : IScenePersistence
 {
     private readonly ISceneRecordReporter _records;
-    private readonly ProgressionYarnBridge _yarnBridge;
     private readonly BacklogRecorder _backlog;
     private readonly ChoiceHistory _choiceHistory;
 
     public ProgressionSaveBridge(
         ISceneRecordReporter records,
-        ProgressionYarnBridge yarnBridge,
         BacklogRecorder backlog,
         ChoiceHistory choiceHistory)
     {
         _records = records;
-        _yarnBridge = yarnBridge;
         _backlog = backlog;
         _choiceHistory = choiceHistory;
     }
@@ -41,7 +38,6 @@ public sealed class ProgressionSaveBridge : IScenePersistence
             new SceneEntryReport(
                 chapterId,
                 entryState,
-                _yarnBridge.Capture(),
                 _backlog.NextSerial));
     }
 
@@ -58,7 +54,6 @@ public sealed class ProgressionSaveBridge : IScenePersistence
                 _choiceHistory.CreateChoiceSnapshot(),
                 result.WatchedEpisodeIds,
                 result.State,
-                _yarnBridge.Capture(),
                 new List<DialogueLogEntry>(_backlog.Entries),
                 _backlog.NextSerial,
                 outcome == SceneRunOutcome.ChapterEnded));

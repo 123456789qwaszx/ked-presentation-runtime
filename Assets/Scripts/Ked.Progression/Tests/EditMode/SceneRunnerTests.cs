@@ -145,7 +145,6 @@ namespace Ked.Progression.Tests
 
             var playback = new FakeScenePlayback();
             var reporter = new FakeProgressionReporter();
-            var lifecycle = new FakeChapterLifecycle();
 
             var runner = new SceneRunner(
                 playback,
@@ -158,14 +157,12 @@ namespace Ked.Progression.Tests
 
             var driver = new ProgressionDriver(
                 runner,
-                lifecycle,
                 reporter);
 
             driver.Start(chapter, chapter.CreateEntryState());
             await driver.Completion;
 
             Assert.That(driver.IsRunning, Is.False);
-            Assert.That(lifecycle.BeginCount, Is.EqualTo(1));
             Assert.That(playback.PlayedNodes, Is.EqualTo(new[] { "node-1", "node-2" }));
             Assert.That(reporter.SceneCommittedCount, Is.EqualTo(2));
             Assert.That(
@@ -205,7 +202,6 @@ namespace Ked.Progression.Tests
 
             var driver = new ProgressionDriver(
                 runner,
-                new FakeChapterLifecycle(),
                 reporter);
 
             driver.Start(
@@ -238,7 +234,6 @@ namespace Ked.Progression.Tests
 
             var driver = new ProgressionDriver(
                 runner,
-                new FakeChapterLifecycle(),
                 reporter);
 
             driver.Start(chapter, chapter.CreateEntryState());
@@ -276,7 +271,6 @@ namespace Ked.Progression.Tests
 
             var driver = new ProgressionDriver(
                 runner,
-                new FakeChapterLifecycle(),
                 reporter);
 
             driver.Start(chapter, chapter.CreateEntryState());
@@ -336,7 +330,6 @@ namespace Ked.Progression.Tests
 
             var driver = new ProgressionDriver(
                 runner,
-                new FakeChapterLifecycle(),
                 new FakeProgressionReporter());
 
             driver.Start(chapter, chapter.CreateEntryState());
@@ -664,13 +657,4 @@ namespace Ked.Progression.Tests
         }
     }
 
-    internal sealed class FakeChapterLifecycle : IChapterLifecycle
-    {
-        public int BeginCount { get; private set; }
-
-        public void BeginChapter(ChapterDefinition chapter)
-        {
-            BeginCount++;
-        }
-    }
 }

@@ -47,13 +47,8 @@ public sealed class ProgressionDriver
     public IReadOnlyList<Ked.Progression.ScenePathStep> LastRestorePath;
 }
 
-// Yarn 변수 복원과 라인 시크 복원은 이 harness의 관심사가 아니다.
+// 라인 시크 복원은 이 harness의 관심사가 아니다.
 // Launcher가 실행 전에 staging한다는 것만 지킨다.
-public sealed class ProgressionChapterLifecycle
-{
-    public int Stages;
-    public void Stage(object project, YarnVariableSnapshot restoreVariables) => Stages++;
-}
 public sealed class ProgressionReplayState
 {
     public int Stages;

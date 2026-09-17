@@ -163,7 +163,6 @@ public sealed partial class SaveCoordinator
                 checkpoint.Stats,
                 StringComparer.Ordinal),
 
-            Variables = checkpoint.Variables,
 
             ChapterCompleted = false,
 
@@ -261,7 +260,6 @@ public sealed partial class SaveCoordinator
                 checkpoint.Stats,
                 StringComparer.Ordinal),
 
-            Variables = checkpoint.Variables,
 
             ChapterCompleted = false,
 

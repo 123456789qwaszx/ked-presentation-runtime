@@ -13,7 +13,6 @@ namespace Ked.Progression
     public sealed class ProgressionDriver
     {
         private readonly SceneRunner _sceneRunner;
-        private readonly IChapterLifecycle _chapterLifecycle;
         private readonly IProgressionReporter _reporter;
         private readonly IProgressionLog _log;
 
@@ -43,12 +42,10 @@ namespace Ked.Progression
 
         public ProgressionDriver(
             SceneRunner sceneRunner,
-            IChapterLifecycle chapterLifecycle,
             IProgressionReporter reporter,
             IProgressionLog log = null)
         {
             _sceneRunner = sceneRunner;
-            _chapterLifecycle = chapterLifecycle;
             _reporter = reporter;
             _log = log ?? NullProgressionLog.Instance;
         }
@@ -87,7 +84,6 @@ namespace Ked.Progression
 
             try
             {
-                _chapterLifecycle.BeginChapter(_chapterDef);
                 _reporter.ReportChapterEntered(_chapterDef.ChapterId, _chapterState);
 
                 await RunChapterAsync(cancellation.Token);

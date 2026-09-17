@@ -74,7 +74,6 @@ public static class SaveDataValidator
 
         ValidateScenes(save.Scenes);
         ValidateLoadPlan(save.PendingLoad, required: false);
-        ValidateVariables(save.Variables);
         ValidateBacklog(save.Backlog);
     }
 
@@ -103,7 +102,6 @@ public static class SaveDataValidator
             || !ValidUtc(checkpoint.EnteredAtUtc))
             throw Invalid("장면 체크포인트가 손상됐다.");
 
-        ValidateVariables(checkpoint.Variables);
     }
 
     private static void ValidateLoadPlan(SavedLoadPlan plan, bool required)
@@ -130,13 +128,6 @@ public static class SaveDataValidator
         foreach (char c in value)
             if (!char.IsLetterOrDigit(c) && c != '-' && c != '_') return false;
         return true;
-    }
-
-    private static void ValidateVariables(YarnVariableSnapshot variables)
-    {
-        if (variables != null
-            && (variables.Floats == null || variables.Strings == null || variables.Bools == null))
-            throw Invalid("Yarn 변수 snapshot이 손상됐다.");
     }
 
     private static void ValidateBacklog(IReadOnlyList<DialogueLogEntry> backlog)

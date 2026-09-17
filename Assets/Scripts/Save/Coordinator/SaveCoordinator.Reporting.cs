@@ -21,7 +21,6 @@ public sealed partial class SaveCoordinator
                 p => p.Key,
                 p => p.Value,
                 StringComparer.Ordinal),
-            Variables = report.Variables,
             BacklogSerialStart = report.BacklogSerialStart,
             PlaySecondsAtEntry = TotalSeconds,
             EnteredAtUtc = NowUtc(),
@@ -36,7 +35,6 @@ public sealed partial class SaveCoordinator
                 ChapterId = report.ChapterId, 
                 CurrentEpisodeId = report.State.CurrentEpisodeId,
                 Stats = new Dictionary<string, int>(_currentEntry.Stats),
-                Variables = report.Variables,
                 SavedAtUtc = NowUtc(),
                 PlaySeconds = TotalSeconds,
             };
@@ -88,7 +86,6 @@ public sealed partial class SaveCoordinator
             ChapterId = report.ChapterId,
             CurrentEpisodeId = report.State.CurrentEpisodeId,
             Stats = report.State.Stats.ToDictionary(p => p.Key, p => p.Value, StringComparer.Ordinal),
-            Variables = report.Variables,
             ChapterCompleted = report.ChapterCompleted,
             Scenes = scenes,
             Backlog = new List<DialogueLogEntry>(report.Backlog),
@@ -103,7 +100,7 @@ public sealed partial class SaveCoordinator
 
         Debug.Log(
             $"[저장] 장면 확정 - 선택 {report.Choices.Count}, Yarn 선택 {report.YarnChoices.Count}, " +
-            $"시청 {report.WatchedEpisodeIds.Count}, [3] {report.Variables?.Count ?? 0}개, 백로그 {report.Backlog.Count}줄, " +
+            $"시청 {report.WatchedEpisodeIds.Count}, 백로그 {report.Backlog.Count}줄, " +
             $"기록 {_scenes.Count}개, 시간 {snapshot.PlaySeconds}s → {report.State.CurrentEpisodeId}" +
             (report.ChapterCompleted ? " (챕터 완료)" : string.Empty));
     }

@@ -14,7 +14,6 @@ public sealed class ScenePlaybackSession : IScenePlayback
     private readonly PresentationShotResponseSystem _shotResponseSystem;
     private readonly PresentationStage _presentationStage;
     private readonly PresentationScopeSession _presentationScope;
-    private readonly YarnVariableCheckpoint _variableCheckpoint;
     private readonly ChoiceHistory _choiceHistory;
     private readonly EpisodeSkipController _episodeSkipController;
 
@@ -28,7 +27,6 @@ public sealed class ScenePlaybackSession : IScenePlayback
         PresentationShotResponseSystem shotResponseSystem,
         PresentationStage presentationStage,
         PresentationScopeSession presentationScope,
-        YarnVariableCheckpoint variableCheckpoint,
         ChoiceHistory choiceHistory,
         EpisodeSkipController episodeSkipController)
     {
@@ -39,7 +37,6 @@ public sealed class ScenePlaybackSession : IScenePlayback
         _shotResponseSystem = shotResponseSystem;
         _presentationStage = presentationStage;
         _presentationScope = presentationScope;
-        _variableCheckpoint = variableCheckpoint;
         _choiceHistory = choiceHistory;
         _episodeSkipController = episodeSkipController;
     }
@@ -49,7 +46,6 @@ public sealed class ScenePlaybackSession : IScenePlayback
         await AwaitStopAsync();
         await StopAsync();
 
-        _variableCheckpoint.Capture();
         _choiceHistory.ClearChoiceRecords();
 
         BeginPlayback();
@@ -74,8 +70,6 @@ public sealed class ScenePlaybackSession : IScenePlayback
         // Replay 요청 측 Stop과 RunAsync 측 Replay 준비가
         // 동시에 진행되더라도 이전 Stop이 끝난 뒤 다시 시작한다.
         await AwaitStopAsync();
-
-        _variableCheckpoint.Restore();
 
         BeginPlayback();
     }

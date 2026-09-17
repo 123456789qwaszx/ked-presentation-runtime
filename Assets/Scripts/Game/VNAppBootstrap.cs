@@ -98,8 +98,9 @@ public class VNAppBootstrap : MonoBehaviour
     [Tooltip("기존 학습용 콘텐츠와 saves-learning 경로를 선택한다. 저장 기능과 네트워크 사용 여부에는 영향이 없다.")]
     [SerializeField] private bool useLearningSaveData;
     [SerializeField] private TextAsset learningChapterJson;
-    [Tooltip("저장과 현재 대본의 호환성을 판별한다. 복원에 영향을 주는 대본 변경 시 값을 올린다.")]
-    [SerializeField] private string saveContentVersion = "1";
+    [Tooltip("저장과 현재 대본의 호환성을 판별한다. 복원에 영향을 주는 대본 변경 시 값을 올린다.\n" +
+             "2 — Yarn 변수 층 제거(2026-09-17). 1로 저장된 회차는 대사가 $작가변수를 읽던 대본이라 재개할 수 없다.")]
+    [SerializeField] private string saveContentVersion = "2";
 
     [Header("Album")]
     [SerializeField] private VNAlbumDatabaseSO albumDatabase;
@@ -395,9 +396,6 @@ public class VNAppBootstrap : MonoBehaviour
         IEpisodeNodeRunner nodeRunner =
             new YarnEpisodeNodeRunner(dialogueRunner);
 
-        YarnVariableCheckpoint variableCheckpoint =
-            new YarnVariableCheckpoint(dialogueRunner.VariableStorage);
-
         _scenePlayback = new ScenePlaybackSession(
             nodeRunner,
             _screenBindings,
@@ -406,7 +404,6 @@ public class VNAppBootstrap : MonoBehaviour
             _presentationResponseRig,
             _presentationStage,
             _presentationScopeSession,
-            variableCheckpoint,
             _choiceHistory,
             _episodeSkipController);
 
@@ -418,16 +415,11 @@ public class VNAppBootstrap : MonoBehaviour
             uiManager.GetUI<VNDefaultOptionsPanel>(),
             optionItem);
 
-        ProgressionYarnBridge yarnBridge =
-            new ProgressionYarnBridge(dialogueRunner.VariableStorage);
-
         _saveCoordinator = CreateSaveCoordinator();
 
         // 진행 런타임은 아래 계약만 안다.
-        // Yarn / Stage / Save로 잇는 일은 전부 이 자리에서 끝난다.
+        // Stage / Save로 잇는 일은 전부 이 자리에서 끝난다.
         UnityProgressionLog progressionLog = new();
-
-        ProgressionChapterLifecycle chapterLifecycle = new(yarnBridge);
 
         ProgressionReplayState replayState = new(
             _linePresentationAdvanceState,
@@ -438,7 +430,6 @@ public class VNAppBootstrap : MonoBehaviour
         // 저장은 실행이고, 아래 lifecycle 로그는 관찰이다. 둘을 합치지 않는다.
         ProgressionSaveBridge savePersistence = new(
             _saveCoordinator,
-            yarnBridge,
             _backlogRecorder,
             _choiceHistory);
 
@@ -456,7 +447,6 @@ public class VNAppBootstrap : MonoBehaviour
 
         _progressionDriver = new ProgressionDriver(
             sceneRunner,
-            chapterLifecycle,
             lifecycleLog,
             progressionLog);
 
@@ -467,7 +457,6 @@ public class VNAppBootstrap : MonoBehaviour
             _saveCoordinator.LoadActiveResumePoint,
             _saveCoordinator.PrepareNewPlaythroughAsync,
             _backlogRecorder,
-            chapterLifecycle,
             replayState);
 
         // 대사가 스탯을 읽는 길. 드라이버가 선 뒤에 등록해야 람다가 null을 잡지 않는다.

@@ -11,7 +11,6 @@ public sealed class SceneCommitReport
     public IReadOnlyList<VNChoiceRecord> YarnChoices { get; }   // 장면 안 Yarn 인라인 선택 기록.
     public IReadOnlyList<string> WatchedEpisodeIds { get; }     // EventKey가 달린 에피소드를 다 본 것.
     public ProgressionState State { get; }
-    public YarnVariableSnapshot Variables { get; }              // [3] 통덤프. 장면 끝 시점.
 
     // 지금까지의 백로그 전부 - 다음 장면 입장에서는 "이전 장면들"이다.
     public IReadOnlyList<DialogueLogEntry> Backlog { get; }
@@ -27,7 +26,6 @@ public sealed class SceneCommitReport
         IReadOnlyList<VNChoiceRecord> yarnChoices,
         IReadOnlyList<string> watchedEpisodeIds,
         ProgressionState state,
-        YarnVariableSnapshot variables,
         IReadOnlyList<DialogueLogEntry> backlog,
         int backlogSerialStart,
         bool chapterCompleted)
@@ -37,7 +35,6 @@ public sealed class SceneCommitReport
         YarnChoices = yarnChoices;
         WatchedEpisodeIds = watchedEpisodeIds;
         State = state;
-        Variables = variables;
         Backlog = backlog;
         BacklogSerialStart = backlogSerialStart;
         ChapterCompleted = chapterCompleted;

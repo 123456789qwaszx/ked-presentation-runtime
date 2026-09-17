@@ -8,7 +8,6 @@ public sealed class LocalSaveFile
     public string ChapterId;
     public string CurrentEpisodeId;
     public Dictionary<string, int> Stats = new();
-    public YarnVariableSnapshot Variables;
     public bool ChapterCompleted;
     public List<SceneRecord> Scenes = new();
     public List<DialogueLogEntry> Backlog = new();
@@ -31,7 +30,6 @@ public sealed class SceneCheckpoint
     public string ChapterId;
     public string EpisodeId;
     public Dictionary<string, int> Stats = new();
-    public YarnVariableSnapshot Variables;
     public int BacklogSerialStart;
     public int PlaySecondsAtEntry;
     public string EnteredAtUtc;
