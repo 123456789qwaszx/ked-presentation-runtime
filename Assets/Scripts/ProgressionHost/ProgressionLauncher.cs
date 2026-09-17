@@ -83,11 +83,8 @@ public sealed class ProgressionLauncher
 
     private async Task LaunchCoreAsync()
     {
-        ScenarioProgression scenario =
+        ScenarioDefinition scenario =
             ProgressionContentLoader.LoadSingleChapter(_chapterJson);
-
-        if (scenario == null)
-            return;
 
         if (!ProgressionContentPreflight.CheckAndLog(scenario, _dialogueRunner.YarnProject))
             return;

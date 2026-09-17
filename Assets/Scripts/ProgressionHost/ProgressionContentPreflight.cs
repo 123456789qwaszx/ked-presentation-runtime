@@ -16,7 +16,7 @@ public static class ProgressionContentPreflight
     }
 
     // 시나리오가 부르는 대사 노드와 연출 노드를 전부 모아 project와 대조.
-    public static Report Check(ScenarioProgression scenario, YarnProject project)
+    public static Report Check(ScenarioDefinition scenario, YarnProject project)
     {
         var report = new Report();
 
@@ -42,7 +42,7 @@ public static class ProgressionContentPreflight
         return report;
     }
 
-    public static bool CheckAndLog(ScenarioProgression scenario, YarnProject project)
+    public static bool CheckAndLog(ScenarioDefinition scenario, YarnProject project)
     {
         Report report = Check(scenario, project);
 

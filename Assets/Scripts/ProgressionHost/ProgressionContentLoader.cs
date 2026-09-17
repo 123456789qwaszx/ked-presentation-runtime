@@ -8,7 +8,7 @@ using UnityEngine;
 public static class ProgressionContentLoader
 {
     // 챕터 하나를 단일 챕터 시나리오로 싣는다. 
-    public static ScenarioProgression LoadSingleChapter(TextAsset chapterJson)
+    public static ScenarioDefinition LoadSingleChapter(TextAsset chapterJson)
     {
         if (chapterJson == null)
         {
