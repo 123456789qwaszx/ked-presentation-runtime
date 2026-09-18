@@ -1,17 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using Ked.Progression;
 using UnityEngine;
 
-// Progression의 Scene 경계 저장 계약을 로컬 회차 snapshot으로 확정한다.
-// Backlog와 Yarn 선택 기록은 Host 상태이므로 이 구현이 직접 캡처한다.
-public sealed partial class SaveCoordinator : IScenePersistence
+// 캡처된 Scene 경계 데이터를 로컬 회차 snapshot으로 확정한다.
+// 실행 중인 Backlog/Yarn 상태를 직접 읽지 않고, 저장 정책과 회차 수명만 소유한다.
+public sealed partial class SaveCoordinator
 {
     private readonly ILocalSaveStore _localStore;
     private readonly string _contentVersion;
-    private readonly BacklogRecorder _backlog;
-    private readonly ChoiceHistory _choiceHistory;
 
     private PlaythroughSession _active;
 
@@ -24,19 +21,14 @@ public sealed partial class SaveCoordinator : IScenePersistence
 
     public SaveCoordinator(
         ILocalSaveStore localStore,
-        string contentVersion,
-        BacklogRecorder backlog,
-        ChoiceHistory choiceHistory)
+        string contentVersion)
     {
         _localStore = localStore ?? throw new ArgumentNullException(nameof(localStore));
 
         if (string.IsNullOrWhiteSpace(contentVersion))
             throw new ArgumentException("저장 콘텐츠 버전이 비어 있다.", nameof(contentVersion));
 
-        _backlog = backlog ?? throw new ArgumentNullException(nameof(backlog));
-        _choiceHistory = choiceHistory ?? throw new ArgumentNullException(nameof(choiceHistory));
         _contentVersion = contentVersion;
-
         _localStore.Initialize();
     }
 

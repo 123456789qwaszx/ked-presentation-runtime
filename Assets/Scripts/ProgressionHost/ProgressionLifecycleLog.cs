@@ -5,7 +5,7 @@ using UnityEngine;
 // 진행이 실제로 어떤 경계를 지났는지 관찰만 한다.
 //
 // ⚠ 여기서 저장하지 않는다. 저장은 IScenePersistence 구현이 담당한다.
-//   현재 Host에서는 SaveCoordinator가 그 계약을 직접 구현한다.
+//   현재 Host에서는 ProgressionSaveBridge가 실행 상태를 캡처해 SaveCoordinator로 넘긴다.
 //   관찰자가 던지는 예외는 진행을 멈출 이유가 되지 못하므로, 여기서는 아무것도 판정하지 않는다.
 public sealed class ProgressionLifecycleLog : IProgressionReporter
 {

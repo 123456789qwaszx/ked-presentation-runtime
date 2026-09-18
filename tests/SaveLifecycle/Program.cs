@@ -83,14 +83,8 @@ internal static class Program
 
     private static SaveCoordinator Coordinator(
         ILocalSaveStore store,
-        string contentVersion = ContentVersion,
-        BacklogRecorder backlog = null,
-        ChoiceHistory choiceHistory = null) =>
-        new(
-            store,
-            contentVersion,
-            backlog ?? new BacklogRecorder(),
-            choiceHistory ?? new ChoiceHistory());
+        string contentVersion = ContentVersion) =>
+        new(store, contentVersion);
 
     private static SceneCommitResult Completion() => new(
         State("scene2"),
@@ -206,9 +200,9 @@ internal static class Program
                 { if (fail) throw new IOException(); AtomicFile.WriteAllText(path, json); });
                 store.Create(Save("A")); store.SetActive("A"); var save = Coordinator(store);
                 save.LoadActiveResumePoint(); save.BeginNewPlaythrough(); string id = save.PlaythroughId;
-                fail = true; Throws<IOException>(() => save.EnterScene("chapter", State()));
+                fail = true; Throws<IOException>(() => save.EnterScene("chapter", State(), 0));
                 Check(store.ActiveId == "A", "old active was lost");
-                fail = false; save.EnterScene("chapter", State());
+                fail = false; save.EnterScene("chapter", State(), 0);
                 Check(store.ActiveId == id, "new game was not activated");
             });
 
@@ -219,11 +213,49 @@ internal static class Program
                 { if (fail && Path.GetFileName(path) == "active.json") throw new IOException(); AtomicFile.WriteAllText(path, json); });
                 store.Create(Save("A")); store.SetActive("A"); var save = Coordinator(store);
                 save.LoadActiveResumePoint(); save.BeginNewPlaythrough(); string id = save.PlaythroughId;
-                fail = true; Throws<IOException>(() => save.EnterScene("chapter", State()));
+                fail = true; Throws<IOException>(() => save.EnterScene("chapter", State(), 0));
                 Check(store.ActiveId == "A", "old active was lost");
-                fail = false; save.EnterScene("chapter", State()); save.CommitScene("chapter", Completion(), SceneRunOutcome.SceneEnded);
+                fail = false; save.EnterScene("chapter", State(), 0); save.CommitScene(
+                    "chapter",
+                    Completion(),
+                    Array.Empty<VNChoiceRecord>(),
+                    Array.Empty<DialogueLogEntry>(),
+                    0,
+                    SceneRunOutcome.SceneEnded);
                 Check(store.ActiveId == id && store.LoadActive().CurrentEpisodeId == "scene2", "retry failed");
             });
+
+            await Test("ProgressionSaveBridge captures Host state at the Scene boundary", () => Run(() =>
+            {
+                var store = new LocalFileSaveStore(Dir());
+                var backlog = new BacklogRecorder();
+                var choiceHistory = new ChoiceHistory();
+                var save = Coordinator(store);
+                var bridge = new ProgressionSaveBridge(save, backlog, choiceHistory);
+
+                backlog.Record(new YarnLineMeta
+                {
+                    lineId = "old-line",
+                    nodeName = "old-node",
+                    rawText = "old",
+                });
+                backlog.MarkSceneBoundary();
+
+                save.BeginNewPlaythrough();
+                bridge.EnterScene("chapter", State());
+                bridge.CommitScene(
+                    "chapter",
+                    Completion(),
+                    SceneRunOutcome.SceneEnded);
+
+                LocalSaveFile snapshot = store.LoadActive();
+                SceneRecord scene = snapshot.Scenes.Single();
+
+                Check(scene.Checkpoint.BacklogSerialStart == 1, "entry boundary was not captured");
+                Check(scene.BacklogSerialEnd == 1, "commit boundary was not captured");
+                Check(snapshot.Backlog.Count == 1 && snapshot.Backlog[0].lineId == "old-line",
+                    "backlog snapshot was not captured by the bridge");
+            }));
 
             await Test("Completed scene fork preserves replay path and elapsed time", async () =>
             {
@@ -287,12 +319,9 @@ internal static class Program
                 store.Create(file);
                 store.SetActive("A");
 
-                var backlog = new BacklogRecorder();
-                backlog.Restore(file.Backlog);
-
-                var save = Coordinator(store, backlog: backlog);
+                var save = Coordinator(store);
                 save.LoadActiveResumePoint();
-                save.EnterScene("chapter", StateWithScore(20));
+                save.EnterScene("chapter", StateWithScore(20), 1);
 
                 save.UpdateResumePoint(
                     new[] { new Ked.Progression.CommittedChoice("scene1", 2) },
@@ -324,7 +353,7 @@ internal static class Program
                 });
                 var save = Coordinator(store);
                 save.BeginNewPlaythrough();
-                save.EnterScene("chapter", State());
+                save.EnterScene("chapter", State(), 0);
                 save.UpdateResumePoint(
                     Array.Empty<Ked.Progression.CommittedChoice>(),
                     Array.Empty<VNChoiceRecord>(),
@@ -348,13 +377,19 @@ internal static class Program
                 var store = new LocalFileSaveStore(Dir());
                 var save = Coordinator(store);
                 save.BeginNewPlaythrough();
-                save.EnterScene("chapter", State());
+                save.EnterScene("chapter", State(), 0);
                 save.UpdateResumePoint(
                     Array.Empty<Ked.Progression.CommittedChoice>(),
                     Array.Empty<VNChoiceRecord>(),
                     new SaveLineTarget { NodeName = "node", LineId = "line", Occurrence = 1 });
 
-                save.CommitScene("chapter", Completion(), SceneRunOutcome.SceneEnded);
+                save.CommitScene(
+                    "chapter",
+                    Completion(),
+                    Array.Empty<VNChoiceRecord>(),
+                    Array.Empty<DialogueLogEntry>(),
+                    0,
+                    SceneRunOutcome.SceneEnded);
 
                 Check(store.LoadActive().PendingLoad == null, "committed scene kept a line resume plan");
             }));

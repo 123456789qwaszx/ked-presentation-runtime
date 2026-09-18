@@ -6,11 +6,11 @@ using UnityEngine;
 
 public sealed partial class SaveCoordinator
 {
-    // Scene 진입 상태를 체크포인트로 잡는다.
-    // Backlog 경계는 SceneRunner가 MarkSceneBoundary를 끝낸 직후의 값을 캡처한다.
+    // Scene 진입 시점에 이미 캡처된 진행 상태와 Backlog 경계를 체크포인트로 확정한다.
     public void EnterScene(
         string chapterId,
-        ChapterState entryState)
+        ChapterState entryState,
+        int backlogSequenceStart)
     {
         if (_playthroughId == null)
             BecomePlaythrough(NewPlaythroughId(), 0, null);
@@ -29,7 +29,7 @@ public sealed partial class SaveCoordinator
                 p => p.Key,
                 p => p.Value,
                 StringComparer.Ordinal),
-            BacklogSerialStart = _backlog.NextLineSequence,
+            BacklogSerialStart = backlogSequenceStart,
             PlaySecondsAtEntry = TotalSeconds,
             EnteredAtUtc = NowUtc(),
         };
@@ -55,12 +55,14 @@ public sealed partial class SaveCoordinator
         }
     }
 
-    // 정상 Scene 완료에서만 호출된다.
-    // Progression 결과와 Host의 Yarn 선택/Backlog snapshot을 한 번에 확정한다.
+    // 정상 Scene 완료 시점에 캡처된 Progression 결과와 Host 기록을 하나의 snapshot으로 확정한다.
     // 디스크 확정 성공 뒤에만 메모리 Scene 기록을 교체한다.
     public void CommitScene(
         string chapterId,
         SceneCommitResult result,
+        IReadOnlyList<VNChoiceRecord> yarnChoices,
+        IReadOnlyList<DialogueLogEntry> backlog,
+        int backlogSequenceEnd,
         SceneRunOutcome outcome)
     {
         if (_playthroughId == null)
@@ -70,15 +72,6 @@ public sealed partial class SaveCoordinator
             throw new InvalidOperationException("장면 진입 없이 장면 커밋이 호출됐다.");
 
         string now = NowUtc();
-
-        List<VNChoiceRecord> yarnChoices =
-            _choiceHistory.CreateChoiceSnapshot();
-
-        var backlog =
-            new List<DialogueLogEntry>(_backlog.Entries);
-
-        int backlogSerialEnd =
-            _backlog.NextLineSequence;
 
         var path = new List<SavedChoice>(result.Choices.Count);
 
@@ -96,8 +89,8 @@ public sealed partial class SaveCoordinator
         {
             Checkpoint = _currentEntry,
             Path = path,
-            YarnChoices = yarnChoices,
-            BacklogSerialEnd = backlogSerialEnd,
+            YarnChoices = new List<VNChoiceRecord>(yarnChoices),
+            BacklogSerialEnd = backlogSequenceEnd,
         });
 
         bool chapterCompleted =
@@ -115,7 +108,7 @@ public sealed partial class SaveCoordinator
                 StringComparer.Ordinal),
             ChapterCompleted = chapterCompleted,
             Scenes = scenes,
-            Backlog = backlog,
+            Backlog = new List<DialogueLogEntry>(backlog),
             PendingLoad = null,
             PlaySeconds = TotalSeconds,
             SavedAtUtc = now,

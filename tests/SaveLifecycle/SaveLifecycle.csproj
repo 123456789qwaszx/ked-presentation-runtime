@@ -11,6 +11,7 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <Compile Include="../../Assets/Scripts/Save/**/*.cs" />
     <Compile Include="../../Assets/Scripts/ProgressionHost/ProgressionLauncher.cs" />
+    <Compile Include="../../Assets/Scripts/ProgressionHost/ProgressionSaveBridge.cs" />
     <!--
       진행 코어/런타임은 순수 C#이라 그대로 컴파일한다.
       ProgressionDriver만 뺀다 - 실행 횟수와 Stop을 관찰해야 해서 Stubs.cs가 대역을 세운다.
