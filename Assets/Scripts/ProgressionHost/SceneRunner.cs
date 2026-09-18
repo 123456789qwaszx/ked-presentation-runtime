@@ -83,7 +83,7 @@ public sealed class SceneRunner : ISceneRunner
 
     public async Task RequestReplayAsync(SceneRunSession scene)
     {
-        if (!scene.RequestReplay())
+        if (!scene.TryRequestReplay())
             return;
 
         Task stopTask = StopPlaybackAsync();
@@ -108,7 +108,7 @@ public sealed class SceneRunner : ISceneRunner
 
         _presentation.BeginScene();
 
-        _backlog.MarkSceneStart();
+        _backlog.MarkSceneBoundary();
 
         _persistence.EnterScene(
             progress.Definition.ChapterId,

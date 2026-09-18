@@ -165,7 +165,7 @@ public sealed class VNFeatureController
     {
         target = default;
 
-        int historyIndex = _backlogRecorder.HistoryIndexOf(entry);
+        int historyIndex = _backlogRecorder.GetCurrentSceneHistoryIndex(entry);
 
         if (historyIndex < 0 || historyIndex >= _rollbackController.LastHistoryIndex)
             return false;

@@ -39,7 +39,7 @@ public readonly struct SaveForkTarget
 public sealed partial class SaveCoordinator
 {
     public bool CanForkFrom(in DialogueLogEntry entry) 
-        => FindSceneIndexBySerial(entry.lineSerial) >= 0;
+        => FindSceneIndexBySerial(entry.lineSequence) >= 0;
     
     public void ForkFromScene(SaveForkTarget forkTarget)
         => ForkFromScene(forkTarget.SceneIndex, forkTarget.LineTarget);
@@ -48,7 +48,7 @@ public sealed partial class SaveCoordinator
     {
         forkTarget = default;
 
-        int sceneIndex = FindSceneIndexBySerial(entry.lineSerial);
+        int sceneIndex = FindSceneIndexBySerial(entry.lineSequence);
 
         if (sceneIndex < 0)
             return false;
@@ -102,8 +102,8 @@ public sealed partial class SaveCoordinator
             DialogueLogEntry candidate = current.Backlog[i];
 
             // 이 Scene 이전의 대사와 선택한 대사 이후는 제외.
-            if (candidate.lineSerial < sceneStartSerial 
-                || candidate.lineSerial > entry.lineSerial)
+            if (candidate.lineSequence < sceneStartSerial 
+                || candidate.lineSequence > entry.lineSequence)
                 continue;
 
             if (!string.Equals(candidate.nodeName, entry.nodeName, StringComparison.Ordinal)
@@ -206,7 +206,7 @@ public sealed partial class SaveCoordinator
         {
             DialogueLogEntry entry = current.Backlog[i];
 
-            if (entry.lineSerial < sceneStartSerial)
+            if (entry.lineSequence < sceneStartSerial)
                 inherited.Add(entry);
         }
 

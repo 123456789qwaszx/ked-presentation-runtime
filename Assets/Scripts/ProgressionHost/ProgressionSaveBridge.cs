@@ -38,7 +38,7 @@ public sealed class ProgressionSaveBridge : IScenePersistence
             new SceneEntryReport(
                 chapterId,
                 entryState,
-                _backlog.NextSerial));
+                _backlog.NextLineSequence));
     }
 
     public void CommitScene(
@@ -55,7 +55,7 @@ public sealed class ProgressionSaveBridge : IScenePersistence
                 result.WatchedEpisodeIds,
                 result.State,
                 new List<DialogueLogEntry>(_backlog.Entries),
-                _backlog.NextSerial,
+                _backlog.NextLineSequence,
                 outcome == SceneRunOutcome.ChapterEnded));
     }
 }

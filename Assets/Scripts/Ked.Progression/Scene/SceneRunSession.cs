@@ -44,7 +44,7 @@ namespace Ked.Progression
                 startsFromRestore: true);
         }
 
-        public bool RequestReplay()
+        public bool TryRequestReplay()
         {
             if (ReplayPending)
                 return false;

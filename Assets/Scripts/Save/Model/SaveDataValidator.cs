@@ -135,9 +135,9 @@ public static class SaveDataValidator
         int previous = -1;
         foreach (DialogueLogEntry entry in backlog)
         {
-            if (entry.lineSerial < 0 || entry.lineSerial <= previous)
+            if (entry.lineSequence < 0 || entry.lineSequence <= previous)
                 throw Invalid("백로그 순번이 잘못됐다.");
-            previous = entry.lineSerial;
+            previous = entry.lineSequence;
         }
     }
 
