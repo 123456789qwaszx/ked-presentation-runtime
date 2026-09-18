@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Ked.Progression;
 using Newtonsoft.Json.Linq;
 
 internal static class Program
@@ -80,10 +81,21 @@ internal static class Program
             },
             "scene1");
 
-    private static SceneEntryReport Entry() => new("chapter", State(), 0);
-    private static SceneCommitReport Completion() => new("chapter", Array.Empty<Ked.Progression.CommittedChoice>(),
-        Array.Empty<VNChoiceRecord>(), Array.Empty<string>(), State("scene2"),
-        Array.Empty<DialogueLogEntry>(), 0, false);
+    private static SaveCoordinator Coordinator(
+        ILocalSaveStore store,
+        string contentVersion = ContentVersion,
+        BacklogRecorder backlog = null,
+        ChoiceHistory choiceHistory = null) =>
+        new(
+            store,
+            contentVersion,
+            backlog ?? new BacklogRecorder(),
+            choiceHistory ?? new ChoiceHistory());
+
+    private static SceneCommitResult Completion() => new(
+        State("scene2"),
+        Array.Empty<CommittedChoice>(),
+        Array.Empty<string>());
 
     public static async Task Main()
     {
@@ -122,7 +134,7 @@ internal static class Program
             await Test("A different content version is not resumed", () => Run(() =>
             {
                 var store = new LocalFileSaveStore(Dir()); store.Create(Save("A")); store.SetActive("A");
-                Check(new SaveCoordinator(store, "test-v2").LoadActiveResumePoint() == null, "incompatible save resumed");
+                Check(Coordinator(store, "test-v2").LoadActiveResumePoint() == null, "incompatible save resumed");
             }));
 
             await Test("Save slot index is light and overwrite is atomic", () => Run(() =>
@@ -170,7 +182,7 @@ internal static class Program
                 var store = new LocalFileSaveStore(Dir());
                 SaveSlotData data = SlotData("slot"); data.ContentVersion = "test-v2";
                 store.WriteSaveSlot(SlotEntry("slot"), data);
-                var save = new SaveCoordinator(store, ContentVersion);
+                var save = Coordinator(store);
                 Throws<InvalidOperationException>(() => save.LoadSaveSlot("slot"));
                 Check(store.ActiveId == null, "incompatible slot changed active save");
             }));
@@ -179,7 +191,7 @@ internal static class Program
             {
                 var store = new LocalFileSaveStore(Dir());
                 store.WriteSaveSlot(SlotEntry("slot"), SlotData("slot"));
-                var save = new SaveCoordinator(store, ContentVersion);
+                var save = Coordinator(store);
                 SaveSlotEntry slot = store.LoadSaveSlotIndex().Slots.Single();
                 save.ForkFromSaveSlot(slot, save.LoadSaveSlot(slot.Id));
                 string loadedId = store.ActiveId;
@@ -192,11 +204,11 @@ internal static class Program
                 string dir = Dir(); bool fail = false;
                 var store = new LocalFileSaveStore(dir, (path, json) =>
                 { if (fail) throw new IOException(); AtomicFile.WriteAllText(path, json); });
-                store.Create(Save("A")); store.SetActive("A"); var save = new SaveCoordinator(store, ContentVersion);
+                store.Create(Save("A")); store.SetActive("A"); var save = Coordinator(store);
                 save.LoadActiveResumePoint(); save.BeginNewPlaythrough(); string id = save.PlaythroughId;
-                fail = true; Throws<IOException>(() => save.ReportSceneEntered(Entry()));
+                fail = true; Throws<IOException>(() => save.EnterScene("chapter", State()));
                 Check(store.ActiveId == "A", "old active was lost");
-                fail = false; save.ReportSceneEntered(Entry());
+                fail = false; save.EnterScene("chapter", State());
                 Check(store.ActiveId == id, "new game was not activated");
             });
 
@@ -205,11 +217,11 @@ internal static class Program
                 string dir = Dir(); bool fail = false;
                 var store = new LocalFileSaveStore(dir, (path, json) =>
                 { if (fail && Path.GetFileName(path) == "active.json") throw new IOException(); AtomicFile.WriteAllText(path, json); });
-                store.Create(Save("A")); store.SetActive("A"); var save = new SaveCoordinator(store, ContentVersion);
+                store.Create(Save("A")); store.SetActive("A"); var save = Coordinator(store);
                 save.LoadActiveResumePoint(); save.BeginNewPlaythrough(); string id = save.PlaythroughId;
-                fail = true; Throws<IOException>(() => save.ReportSceneEntered(Entry()));
+                fail = true; Throws<IOException>(() => save.EnterScene("chapter", State()));
                 Check(store.ActiveId == "A", "old active was lost");
-                fail = false; save.ReportSceneEntered(Entry()); save.ReportSceneCommitted(Completion());
+                fail = false; save.EnterScene("chapter", State()); save.CommitScene("chapter", Completion(), SceneRunOutcome.SceneEnded);
                 Check(store.ActiveId == id && store.LoadActive().CurrentEpisodeId == "scene2", "retry failed");
             });
 
@@ -222,7 +234,7 @@ internal static class Program
                     Checkpoint = Checkpoint(12), BacklogSerialEnd = 0,
                     Path = new List<SavedChoice> { new() { FromEpisodeId = "scene1", OptionIndex = 1 } },
                 });
-                store.Create(file); store.SetActive("A"); var save = new SaveCoordinator(store, ContentVersion);
+                store.Create(file); store.SetActive("A"); var save = Coordinator(store);
                 save.LoadActiveResumePoint();
                 save.ForkFromScene(new SaveForkTarget(0,
                     new SaveLineTarget { NodeName = "node", LineId = "L", Occurrence = 1 }));
@@ -268,16 +280,19 @@ internal static class Program
                 file.Backlog.Add(new DialogueLogEntry
                 {
                     lineId = "old-line",
-                    lineSerial = 0,
+                    lineSequence = 0,
                     nodeName = "old-node",
                     rawText = "old",
                 });
                 store.Create(file);
                 store.SetActive("A");
 
-                var save = new SaveCoordinator(store, ContentVersion);
+                var backlog = new BacklogRecorder();
+                backlog.Restore(file.Backlog);
+
+                var save = Coordinator(store, backlog: backlog);
                 save.LoadActiveResumePoint();
-                save.ReportSceneEntered(new SceneEntryReport("chapter", StateWithScore(20), 1));
+                save.EnterScene("chapter", StateWithScore(20));
 
                 save.UpdateResumePoint(
                     new[] { new Ked.Progression.CommittedChoice("scene1", 2) },
@@ -307,9 +322,9 @@ internal static class Program
 
                     AtomicFile.WriteAllText(path, json);
                 });
-                var save = new SaveCoordinator(store, ContentVersion);
+                var save = Coordinator(store);
                 save.BeginNewPlaythrough();
-                save.ReportSceneEntered(Entry());
+                save.EnterScene("chapter", State());
                 save.UpdateResumePoint(
                     Array.Empty<Ked.Progression.CommittedChoice>(),
                     Array.Empty<VNChoiceRecord>(),
@@ -331,15 +346,15 @@ internal static class Program
             await Test("Scene commit clears the active line resume plan", () => Run(() =>
             {
                 var store = new LocalFileSaveStore(Dir());
-                var save = new SaveCoordinator(store, ContentVersion);
+                var save = Coordinator(store);
                 save.BeginNewPlaythrough();
-                save.ReportSceneEntered(Entry());
+                save.EnterScene("chapter", State());
                 save.UpdateResumePoint(
                     Array.Empty<Ked.Progression.CommittedChoice>(),
                     Array.Empty<VNChoiceRecord>(),
                     new SaveLineTarget { NodeName = "node", LineId = "line", Occurrence = 1 });
 
-                save.ReportSceneCommitted(Completion());
+                save.CommitScene("chapter", Completion(), SceneRunOutcome.SceneEnded);
 
                 Check(store.LoadActive().PendingLoad == null, "committed scene kept a line resume plan");
             }));
@@ -356,7 +371,7 @@ internal static class Program
                     driver,
                     new Yarn.Unity.DialogueRunner(),
                     new UnityEngine.TextAsset(),
-                    new SaveCoordinator(store, ContentVersion),
+                    Coordinator(store),
                     new BacklogRecorder(),
                     replay);
 
@@ -390,7 +405,7 @@ internal static class Program
                     driver,
                     new Yarn.Unity.DialogueRunner(),
                     new UnityEngine.TextAsset(),
-                    new SaveCoordinator(store, ContentVersion),
+                    Coordinator(store),
                     new BacklogRecorder(),
                     replay);
 
@@ -406,7 +421,7 @@ internal static class Program
                 var driver = new ProgressionDriver { IsRunning = true };
                 var stopped = new TaskCompletionSource<bool>(); driver.OnStop = () => stopped.Task;
                 var launcher = new ProgressionLauncher(driver, new Yarn.Unity.DialogueRunner(),
-                    new UnityEngine.TextAsset(), new SaveCoordinator(new LocalFileSaveStore(Dir()), ContentVersion),
+                    new UnityEngine.TextAsset(), Coordinator(new LocalFileSaveStore(Dir())),
                     new BacklogRecorder(), new ProgressionReplayState());
                 int prepares = 0; Task first = launcher.TransitionAndResumeAsync(() => prepares++);
                 await launcher.TransitionAndResumeAsync(() => prepares++);

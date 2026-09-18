@@ -412,18 +412,14 @@ public class VNAppBootstrap : MonoBehaviour
             _linePresentationAdvanceState,
             _choiceHistory);
 
-        // 저장은 실행이고, 아래 lifecycle 로그는 관찰이다. 둘을 합치지 않는다.
-        ProgressionSaveBridge savePersistence = new(
-            _saveCoordinator,
-            _backlogRecorder,
-            _choiceHistory);
-
+        // Progression은 IScenePersistence만 알고,
+        // 실제 저장 조립과 확정은 SaveCoordinator가 직접 맡는다.
         SceneRunner sceneRunner = new SceneRunner(
             _scenePlayback,
             _progressionOptions,
             replayState,
             _rollbackHistory,
-            savePersistence,
+            _saveCoordinator,
             _backlogRecorder);
 
         _progressionDriver = new ProgressionDriver(sceneRunner);
@@ -445,7 +441,11 @@ public class VNAppBootstrap : MonoBehaviour
     private SaveCoordinator CreateSaveCoordinator()
     {
         _localSaveStore = new LocalFileSaveStore(_saveRoot);
-        return new SaveCoordinator(_localSaveStore, saveContentVersion);
+        return new SaveCoordinator(
+            _localSaveStore,
+            saveContentVersion,
+            _backlogRecorder,
+            _choiceHistory);
     }
 
     private void BootstrapPlaybackControls()

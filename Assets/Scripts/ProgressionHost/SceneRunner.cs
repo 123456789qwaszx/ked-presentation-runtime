@@ -112,7 +112,6 @@ public sealed class SceneRunner : ISceneRunner
 
         _persistence.EnterScene(
             progress.Definition.ChapterId,
-            progress.SceneId,
             progress.EntryState);
     }
     
@@ -124,7 +123,6 @@ public sealed class SceneRunner : ISceneRunner
 
         _persistence.CommitScene(
             progress.Definition.ChapterId,
-            progress.SceneId,
             commit,
             outcome);
 

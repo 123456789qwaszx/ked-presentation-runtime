@@ -8,12 +8,10 @@ namespace Ked.Progression
     {
         void EnterScene(
             string chapterId,
-            string sceneId,
             ChapterState entryState);
 
         void CommitScene(
             string chapterId,
-            string sceneId,
             SceneCommitResult result,
             SceneRunOutcome outcome);
     }
