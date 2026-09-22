@@ -87,7 +87,9 @@ public sealed class SceneRunner : ISceneRunner
             return;
 
         Task stopTask = StopPlaybackAsync();
+
         _options.Cancel();
+
         await stopTask;
     }
 
@@ -97,7 +99,6 @@ public sealed class SceneRunner : ISceneRunner
         await StopPlaybackAsync();
     }
 
-    
     private async Task EnterSceneAsync(
         SceneProgress progress,
         CancellationToken cancellationToken)
@@ -114,7 +115,7 @@ public sealed class SceneRunner : ISceneRunner
             progress.Definition.ChapterId,
             progress.EntryState);
     }
-    
+
     private SceneRunResult CommitScene(
         SceneProgress progress,
         SceneRunOutcome outcome)
@@ -131,7 +132,6 @@ public sealed class SceneRunner : ISceneRunner
             commit.State);
     }
 
-    
     private async Task<SceneStepKind> RunEpisodeStepAsync(
         SceneRunSession session,
         CancellationToken cancellationToken)
@@ -145,83 +145,88 @@ public sealed class SceneRunner : ISceneRunner
         cancellationToken.ThrowIfCancellationRequested();
 
         if (session.ReplayPending)
-            return SceneStepKind.Replay;
-
-        progress.NoteCurrentEpisodeWatched(
-            _rollbackHistory.LastHistoryIndex);
-
-        SceneChoiceResolution resolution;
-
-        if (_replayState.IsSeekingActive && progress.HasRecordedChoice)
-        {
-            SceneChoice recorded =
-                progress.TakeRecordedChoice(_rollbackHistory.LastHistoryIndex);
-
-            resolution = SceneChoiceResolution.FromChoice(recorded);
-        }
-        else
-        {
-            if (progress.HasRecordedChoice)
-                progress.DiscardUnconsumedChoices();
-
-            if (_replayState.IsSeekingActive)
-            {
-                Debug.LogError(
-                    "[장면] Seeking 중 선택지에 닿았으나, 기록된 기록이 없다" +
-                    " - 시크를 끄고 일반 재생으로 전환.");
-
-                _replayState.ClearSeek();
-            }
-
-            resolution =
-                await ResolveNextChoiceAsync(session, cancellationToken);
-        }
-
-        if (session.ReplayPending ||
-            resolution.Kind == SceneChoiceResolutionKind.ReplayRequested)
         {
             return SceneStepKind.Replay;
         }
 
-        if (resolution.Kind == SceneChoiceResolutionKind.ChapterEnded)
+        progress.NoteCurrentEpisodeWatched(_rollbackHistory.LastHistoryIndex);
+
+        SceneChoiceResult choiceResult =
+            await ResolveSceneChoiceAsync(session, cancellationToken);
+
+        if (session.ReplayPending 
+            || choiceResult.Kind == SceneChoiceResultKind.ReplayRequested)
+        {
+            return SceneStepKind.Replay;
+        }
+
+        if (choiceResult.Kind == SceneChoiceResultKind.ChapterEnded)
+        {
             return SceneStepKind.ChapterEnded;
+        }
 
-        SceneChoice choice = resolution.Choice;
+        SceneChoice choice = choiceResult.Choice;
 
         // 새로 결정된 선택만 기록
         // (만약 Recorded라면 Load나 Replay 중 기존 선택 기록을 다시 소비한 것임)
         if (choice.Source != SceneChoiceSource.Recorded)
-        {
-            progress.RecordChoice(
-                choice,
-                _rollbackHistory.LastHistoryIndex);
-        }
+            progress.RecordChoice(choice, _rollbackHistory.LastHistoryIndex);
 
-        // 선택을 기록하는 것과 별개로, 현재 위치를 이동.
+        // 선택 기록과 별개로 실제 진행 위치를 이동한다.
         progress.AdvanceTo(choice.Option.TargetEpisodeId);
 
         // 씬 경계를 넘었는 지 확인
-        if (!progress.Definition.IsSameScene(
-                choice.FromEpisodeId,
-                progress.CurrentEpisodeId))
+        if (!progress.Definition.IsSameScene(choice.FromEpisodeId, progress.CurrentEpisodeId))
         {
             return SceneStepKind.SceneEnded;
         }
 
         return SceneStepKind.Continue;
     }
-    
-    
+
+    private async Task<SceneChoiceResult> ResolveSceneChoiceAsync(
+        SceneRunSession session,
+        CancellationToken cancellationToken)
+    {
+        SceneProgress progress = session.Progress;
+
+        // Seeking 중이고 기존 선택 기록이 있다면
+        // 새 선택을 결정하지 않고 기록된 선택을 그대로 소비한다.
+        if (_replayState.IsSeekingActive && progress.HasRecordedChoice)
+        {
+            SceneChoice recorded =
+                progress.TakeRecordedChoice(_rollbackHistory.LastHistoryIndex);
+
+            return SceneChoiceResult.FromChoice(recorded);
+        }
+
+        // 여기부터는 일반 진행 경로.
+        // Seeking으로 소비하지 못한 과거 선택 기록은 더 이상 유효하지 않다.
+        if (progress.HasRecordedChoice)
+            progress.DiscardUnconsumedChoices();
+
+        if (_replayState.IsSeekingActive)
+        {
+            Debug.LogError(
+                "[장면] Seeking 중 선택지에 닿았으나, 기록된 선택이 없다" +
+                " - 시크를 끄고 일반 재생으로 전환.");
+
+            _replayState.ClearSeek();
+        }
+
+        return await ResolveNextChoiceAsync(session, cancellationToken);
+    }
+
     // 세 가지 중 하나 반환
     // 1. 자동 간선 또는 사용자 선택
     // 2. Chapter 종료
     // 3. 선택 UI를 기다리는 중 들어온 Replay 요청
-    private async Task<SceneChoiceResolution> ResolveNextChoiceAsync(
+    private async Task<SceneChoiceResult> ResolveNextChoiceAsync(
         SceneRunSession session,
         CancellationToken cancellationToken)
     {
         if (session.ReplayPending)
-            return SceneChoiceResolution.ReplayRequested();
+            return SceneChoiceResult.ReplayRequested();
 
         ChapterAdvance advance =
             ChapterTransition.Resolve(
@@ -229,10 +234,10 @@ public sealed class SceneRunner : ISceneRunner
                 session.Progress.EffectiveState);
 
         if (session.ReplayPending)
-            return SceneChoiceResolution.ReplayRequested();
+            return SceneChoiceResult.ReplayRequested();
 
         if (advance.Kind == ChapterAdvanceKind.ChapterEnded)
-            return SceneChoiceResolution.ChapterEnded();
+            return SceneChoiceResult.ChapterEnded();
 
         if (advance.Kind == ChapterAdvanceKind.AutoAdvance)
         {
@@ -240,7 +245,7 @@ public sealed class SceneRunner : ISceneRunner
 
             Debug.Log($"[장면] 자동 간선 - {resolved.Option}");
 
-            return SceneChoiceResolution.FromChoice(
+            return SceneChoiceResult.FromChoice(
                 new SceneChoice(
                     resolved.Option,
                     session.Progress.CurrentEpisode.EpisodeId,
@@ -249,7 +254,7 @@ public sealed class SceneRunner : ISceneRunner
         }
 
         if (session.ReplayPending)
-            return SceneChoiceResolution.ReplayRequested();
+            return SceneChoiceResult.ReplayRequested();
 
         try
         {
@@ -257,9 +262,9 @@ public sealed class SceneRunner : ISceneRunner
                 await PickAsync(advance, cancellationToken);
 
             if (session.ReplayPending)
-                return SceneChoiceResolution.ReplayRequested();
+                return SceneChoiceResult.ReplayRequested();
 
-            return SceneChoiceResolution.FromChoice(
+            return SceneChoiceResult.FromChoice(
                 new SceneChoice(
                     resolved.Option,
                     session.Progress.CurrentEpisode.EpisodeId,
@@ -270,7 +275,7 @@ public sealed class SceneRunner : ISceneRunner
             when (!cancellationToken.IsCancellationRequested &&
                   session.ReplayPending)
         {
-            return SceneChoiceResolution.ReplayRequested();
+            return SceneChoiceResult.ReplayRequested();
         }
     }
 
@@ -303,7 +308,6 @@ public sealed class SceneRunner : ISceneRunner
 
         return resolved;
     }
-    
 
     private async Task RestartReplayAsync(
         SceneRunSession session,
@@ -324,7 +328,6 @@ public sealed class SceneRunner : ISceneRunner
         session.Progress.ResetForReplay();
         session.CompleteReplayRequest();
     }
-    
 
     private Task StopPlaybackAsync()
     {
