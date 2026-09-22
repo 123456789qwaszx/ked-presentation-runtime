@@ -41,7 +41,9 @@ public class VNAppBootstrap : MonoBehaviour
     private ILocalSaveStore _localSaveStore;
     private bool _useLearningSaveData;
     private string _saveRoot;
+    
     private TextAsset _chapterJson;
+    private ScenarioDefinition _scenarioDef;
     
     private AlbumUnlockService _albumUnlockService;
     private AlbumController _albumController;
@@ -133,27 +135,8 @@ public class VNAppBootstrap : MonoBehaviour
 
     private void Awake()
     {
-        // 실행 중 Inspector를 바꿔도 저장 경로와 기능 구성이 서로 엇갈리지 않는다.
-        _useLearningSaveData = useLearningSaveData;
-        _saveRoot = Path.Combine(Application.persistentDataPath,
-            _useLearningSaveData ? "saves-learning" : "saves");
-        _chapterJson = _useLearningSaveData ? learningChapterJson : progressionChapterJson;
-
-        //Debug.Log($"[저장] 경로: {_saveRoot}");
-
-        if (_useLearningSaveData && _chapterJson == null)
-        {
-            Debug.LogError("[학습] Learning Chapter Json에 qwer_scene.progression.json을 지정해야 한다.");
-            enabled = false;
+        if (!TryBootstrapProgressionData())
             return;
-        }
-
-        if (string.IsNullOrWhiteSpace(saveContentVersion))
-        {
-            Debug.LogError("[저장] Save Content Version을 지정해야 한다.");
-            enabled = false;
-            return;
-        }
 
         BootstrapUIManager();
         
@@ -174,6 +157,51 @@ public class VNAppBootstrap : MonoBehaviour
         BootstrapScreenBindings();
 
         BootstrapEquivalenceHarness();
+    }
+    
+    private bool TryBootstrapProgressionData()
+    {
+        // 실행 중 Inspector를 바꿔도 저장 경로와 기능 구성이 서로 엇갈리지 않는다.
+        _useLearningSaveData = useLearningSaveData;
+
+        _saveRoot = Path.Combine(
+            Application.persistentDataPath,
+            _useLearningSaveData ? "saves-learning" : "saves");
+
+        _chapterJson =
+            _useLearningSaveData
+                ? learningChapterJson
+                : progressionChapterJson;
+
+        if (_chapterJson == null)
+        {
+            Debug.LogError(
+                _useLearningSaveData
+                    ? "[학습] Learning Chapter Json을 지정해야 한다."
+                    : "[진행] Progression Chapter Json을 지정해야 한다.");
+
+            enabled = false;
+            return false;
+        }
+
+        if (string.IsNullOrWhiteSpace(saveContentVersion))
+        {
+            Debug.LogError("[저장] Save Content Version을 지정해야 한다.");
+
+            enabled = false;
+            return false;
+        }
+
+        _scenarioDef =
+            ProgressionContentLoader.LoadSingleChapter(_chapterJson);
+
+        if (_scenarioDef == null)
+        {
+            enabled = false;
+            return false;
+        }
+
+        return true;
     }
 
     private void BootstrapUIManager()
@@ -431,8 +459,7 @@ public class VNAppBootstrap : MonoBehaviour
 
         _progressionLauncher = new ProgressionLauncher(
             _progressionDriver,
-            dialogueRunner,
-            _chapterJson,
+            _scenarioDef,
             _saveCoordinator,
             _backlogRecorder,
             replayState);

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Ked.Progression;
 using UnityEngine;
-using Yarn.Unity;
 
 // 진행 시작 자리
 // - 새 게임 또는 복원 결정
@@ -11,8 +10,7 @@ using Yarn.Unity;
 public sealed class ProgressionLauncher
 {
     private readonly ProgressionDriver _driver;
-    private readonly DialogueRunner _dialogueRunner; // DialogueRunner.YarnProject를 꺼내 대조 및 검사.
-    private readonly TextAsset _chapterJson;
+    private readonly ScenarioDefinition _scenarioDef;
 
     private readonly SaveCoordinator _saveCoordinator;
 
@@ -23,15 +21,13 @@ public sealed class ProgressionLauncher
 
     public ProgressionLauncher(
         ProgressionDriver driver,
-        DialogueRunner dialogueRunner,
-        TextAsset chapterJson,
+        ScenarioDefinition scenarioDef,
         SaveCoordinator saveCoordinator,
         BacklogRecorder backlog,
         ProgressionReplayState replayState)
     {
         _driver = driver;
-        _dialogueRunner = dialogueRunner;
-        _chapterJson = chapterJson;
+        _scenarioDef = scenarioDef;
         _saveCoordinator = saveCoordinator;
         _backlog = backlog;
         _replayState = replayState;
@@ -48,23 +44,18 @@ public sealed class ProgressionLauncher
 
         _saveCoordinator.BeginNewPlaythrough();
 
-        ScenarioDefinition scenarioDef = LoadScenarioDef();
-
-        LaunchNewGame(scenarioDef.StartChapter);
+        LaunchNewGame();
     }
-
     
     public void Resume()
     {
         if (_isTransitioning)
             return;
 
-        ProgressionResumePoint resume = 
+        ProgressionResumePoint resume =
             _saveCoordinator.LoadActiveResumePoint();
-        
-        ScenarioDefinition scenarioDef = LoadScenarioDef();
 
-        LaunchResume(scenarioDef, resume);
+        LaunchResume(resume);
     }
 
     public async Task TransitionAndResumeAsync(Action change)
@@ -80,12 +71,10 @@ public sealed class ProgressionLauncher
 
             change();
 
-            ProgressionResumePoint resume = 
+            ProgressionResumePoint resume =
                 _saveCoordinator.LoadActiveResumePoint();
-            
-            ScenarioDefinition scenarioDef = LoadScenarioDef();
 
-            LaunchResume(scenarioDef, resume);
+            LaunchResume(resume);
         }
         finally
         {
@@ -116,8 +105,10 @@ public sealed class ProgressionLauncher
     }
     
     
-    private void LaunchNewGame(ChapterDefinition chapterDef)
+    private void LaunchNewGame()
     {
+        ChapterDefinition chapterDef = _scenarioDef.StartChapter;
+        
         ChapterState chapterState =
             chapterDef.CreateEntryState();
 
@@ -130,14 +121,12 @@ public sealed class ProgressionLauncher
             restorePath: null);
     }
     
-    private void LaunchResume(
-        ScenarioDefinition scenarioDef,
-        ProgressionResumePoint resume)
+    private void LaunchResume(ProgressionResumePoint resume)
     {
-        if (!TryResolveResumeChapter(scenarioDef, resume, out ChapterDefinition chapterDef))
+        if (!TryResolveResumeChapter(resume, out ChapterDefinition chapterDef))
         {
             _saveCoordinator.BeginNewPlaythrough();
-            LaunchNewGame(scenarioDef.StartChapter);
+            LaunchNewGame();
             return;
         }
 
@@ -156,7 +145,6 @@ public sealed class ProgressionLauncher
     }
     
     private bool TryResolveResumeChapter(
-        ScenarioDefinition scenarioDef,
         ProgressionResumePoint resume,
         out ChapterDefinition savedChapter)
     {
@@ -171,7 +159,7 @@ public sealed class ProgressionLauncher
             return false;
         }
 
-        if (!scenarioDef.TryGetChapter(resume.ChapterId, out savedChapter)
+        if (!_scenarioDef.TryGetChapter(resume.ChapterId, out savedChapter)
             || !savedChapter.TryGetNode(resume.EpisodeId, out _))
         {
             Debug.LogWarning($"[진행] 저장 지점 {resume.ChapterId}/{resume.EpisodeId}가 현재 콘텐츠에 없다. 새로 시작.");
@@ -185,19 +173,6 @@ public sealed class ProgressionLauncher
         }
 
         return true;
-    }
-    
-    private ScenarioDefinition LoadScenarioDef()
-    {
-        ScenarioDefinition scenarioDef = ProgressionContentLoader.LoadSingleChapter(_chapterJson);
-
-        if (!ProgressionContentPreflight.CheckAndLog(scenarioDef, _dialogueRunner.YarnProject))
-        {
-            throw new InvalidOperationException(
-                "Progression 콘텐츠 Preflight 검증에 실패했다.");
-        }
-
-        return scenarioDef;
     }
     
     // 저장된 Scene 경로를 Progression의 복원 경로로 변환한다.
