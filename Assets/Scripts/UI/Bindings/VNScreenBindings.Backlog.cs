@@ -33,8 +33,8 @@ public sealed partial class VNScreenBindings
             return true;
 
         // 완료된 이전 Scene이라면 새 회차로 갈라질 수 있다.
-        return _saveCoordinator != null &&
-               _saveCoordinator.CanForkFrom(entry);
+        return _manualSaveFlow != null &&
+               _manualSaveFlow.CanForkFrom(entry);
     }
 
     private async void HandleBacklogJump(DialogueLogEntry entry)
@@ -53,18 +53,14 @@ public sealed partial class VNScreenBindings
         }
 
         // 이전 Scene:
-        // SaveCoordinator가
+        // ManualSaveFlow가
         //  - 어느 Scene인지
         //  - 정확한 라인까지 replay 가능한지
         //  - 불가능하면 Scene 루트로 fallback할지
-        // 를 모두 판단.
-        if (_saveCoordinator == null ||
-            !_saveCoordinator.TryResolveForkTarget(entry, out SaveForkTarget forkTarget))
+        // 를 모두 판단하고 회차 전환까지 맡는다.
+        if (_manualSaveFlow == null)
             return;
 
-        ClosePanel();
-
-        await _progressionLauncher.TransitionAndResumeAsync(
-            () => _saveCoordinator.ForkFromScene(forkTarget));
+        await _manualSaveFlow.ForkFromBacklogAsync(entry, ClosePanel);
     }
 }

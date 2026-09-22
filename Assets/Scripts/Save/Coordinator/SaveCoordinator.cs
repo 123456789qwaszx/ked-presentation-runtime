@@ -1,10 +1,14 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using UnityEngine;
 
-// 캡처된 Scene 경계 데이터를 로컬 회차 snapshot으로 확정한다.
-// 실행 중인 Backlog/Yarn 상태를 직접 읽지 않고, 저장 정책과 회차 수명만 소유한다.
+// 현재 Playthrough의 저장 세션을 소유한다.
+// Scene 진입 시 checkpoint를 만들고, 진행 중 resume point를 갱신하며,
+// 정상 Scene 종료 시 snapshot과 Scene history를 확정한다.
+//
+// 실행 중인 Backlog/Yarn 상태는 직접 읽지 않는다 — 캡처된 값만 받는다.
+// 수동 슬롯(SaveSlotService), 갈라지기(PlaythroughForkService),
+// 파일 정리(LocalSaveMaintenance)는 여기 없다.
 public sealed partial class SaveCoordinator
 {
     private readonly ILocalSaveStore _localStore;
@@ -32,8 +36,30 @@ public sealed partial class SaveCoordinator
         _localStore.Initialize();
     }
 
-    public IReadOnlyList<SceneRecord> Scenes => _scenes;
     public string PlaythroughId => _playthroughId;
+
+    // 밖에서 쓰는 저장 유스케이스가 현재 상태를 보는 유일한 창.
+    // _scenes 목록과 _currentEntry 원본은 넘기지 않는다.
+    public PlaythroughSaveSnapshot Capture() =>
+        new(
+            _playthroughId,
+            new List<SceneRecord>(_scenes),
+            CopyEntry(_currentEntry),
+            TotalSeconds);
+
+    // 백로그 한 줄마다 물어보는 자리가 있어 값 복사로 둔다.
+    private static SceneCheckpoint CopyEntry(SceneCheckpoint entry) =>
+        entry == null
+            ? null
+            : new SceneCheckpoint
+            {
+                ChapterId = entry.ChapterId,
+                EpisodeId = entry.EpisodeId,
+                Stats = new Dictionary<string, int>(entry.Stats, StringComparer.Ordinal),
+                BacklogSerialStart = entry.BacklogSerialStart,
+                PlaySecondsAtEntry = entry.PlaySecondsAtEntry,
+                EnteredAtUtc = entry.EnteredAtUtc,
+            };
 
     private int TotalSeconds => _playSecondsBase + (int)(Time.realtimeSinceStartup - _startedAt);
 
@@ -57,9 +83,4 @@ public sealed partial class SaveCoordinator
 
         _playthroughSession = _localStore.Open(id);
     }
-
-    private static string NewPlaythroughId() => Guid.NewGuid().ToString("N");
-
-    private static string NowUtc() =>
-        DateTime.UtcNow.ToString("o", CultureInfo.InvariantCulture);
 }

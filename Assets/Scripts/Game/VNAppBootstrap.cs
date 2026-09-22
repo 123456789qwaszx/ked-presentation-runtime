@@ -38,6 +38,9 @@ public class VNAppBootstrap : MonoBehaviour
     private ProgressionLauncher _progressionLauncher;
 
     private SaveCoordinator _saveCoordinator;
+    private SaveSlotService _saveSlotService;
+    private PlaythroughForkService _playthroughForkService;
+    private LocalSaveMaintenance _saveMaintenance;
     private ILocalSaveStore _localSaveStore;
     private bool _useLearningSaveData;
     private string _saveRoot;
@@ -432,7 +435,7 @@ public class VNAppBootstrap : MonoBehaviour
             uiManager.GetUI<VNDefaultOptionsPanel>(),
             optionItem);
 
-        _saveCoordinator = CreateSaveCoordinator();
+        CreateSaveServices();
 
         // 진행 런타임은 아래 계약만 안다.
         // Stage / Save로 잇는 일은 전부 이 자리에서 끝난다.
@@ -470,12 +473,29 @@ public class VNAppBootstrap : MonoBehaviour
     }
 
     // 모든 실행 모드에서 로컬 저장을 기본으로 사용한다.
-    private SaveCoordinator CreateSaveCoordinator()
+    //
+    // 네 책임이 같은 저장소를 공유한다.
+    // - Coordinator: 지금 회차의 저장 세션과 Scene 경계
+    // - SlotService: 수동 슬롯
+    // - ForkService: 과거 지점에서 새 회차 만들기
+    // - Maintenance: 참조가 끝난 파일 정리
+    private void CreateSaveServices()
     {
         _localSaveStore = new LocalFileSaveStore(_saveRoot);
-        return new SaveCoordinator(
+
+        _saveCoordinator = new SaveCoordinator(
             _localSaveStore,
             saveContentVersion);
+
+        _saveSlotService = new SaveSlotService(
+            _localSaveStore,
+            saveContentVersion);
+
+        _playthroughForkService = new PlaythroughForkService(
+            _localSaveStore,
+            saveContentVersion);
+
+        _saveMaintenance = new LocalSaveMaintenance(_localSaveStore);
     }
 
     private void BootstrapPlaybackControls()
@@ -529,6 +549,8 @@ public class VNAppBootstrap : MonoBehaviour
 
         ManualSaveFlow manualSaveFlow = new(
             _saveCoordinator,
+            _saveSlotService,
+            _playthroughForkService,
             _progressionLauncher,
             _vnFeatureController);
         
@@ -536,7 +558,7 @@ public class VNAppBootstrap : MonoBehaviour
             _vnFeatureController,
             _dialogueAdvanceDispatcher,
             _progressionLauncher,
-            _saveCoordinator,
+            _saveSlotService,
             _albumController,
             manualSaveFlow);
     }
@@ -566,7 +588,7 @@ public class VNAppBootstrap : MonoBehaviour
 
     private void Update()
     {
-        _saveCoordinator?.TickMaintenance(Time.realtimeSinceStartup);
+        _saveMaintenance?.Tick(Time.realtimeSinceStartup);
     }
     
     private void OpenInitialScreen()

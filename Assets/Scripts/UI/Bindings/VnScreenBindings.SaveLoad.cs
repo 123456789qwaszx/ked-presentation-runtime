@@ -100,7 +100,7 @@ public sealed partial class VNScreenBindings
 
     private void RefreshSavePage(SavePage page)
     {
-        IReadOnlyList<SaveSlotEntry> slots = _saveCoordinator.SaveSlots;
+        IReadOnlyList<SaveSlotEntry> slots = _saveSlots.Slots;
         VNSaveSlotMeta[] metas = new VNSaveSlotMeta[slots.Count + 1];
 
         for (int i = 0; i < slots.Count; i++)
@@ -113,7 +113,7 @@ public sealed partial class VNScreenBindings
 
     private void RefreshLoadPage(LoadPage page)
     {
-        IReadOnlyList<SaveSlotEntry> slots = _saveCoordinator.SaveSlots;
+        IReadOnlyList<SaveSlotEntry> slots = _saveSlots.Slots;
         VNSaveSlotMeta[] metas = new VNSaveSlotMeta[slots.Count];
 
         for (int i = 0; i < slots.Count; i++)

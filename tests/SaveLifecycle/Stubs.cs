@@ -13,24 +13,9 @@ namespace UnityEngine
         public static void LogWarning(object value) { }
         public static void LogError(object value) { Errors.Add(value.ToString()); }
     }
-    public sealed class TextAsset { public byte[] bytes = Array.Empty<byte>(); }
 }
-namespace Yarn.Unity { public sealed class DialogueRunner { public object YarnProject; } }
 public struct YarnLineMeta { public string lineId, nodeName, rawText; }
 public sealed class RollbackPoint { public int historyIndex; }
-public static class ProgressionContentLoader
-{
-    public static Ked.Progression.ScenarioDefinition LoadSingleChapter(UnityEngine.TextAsset asset)
-    {
-        var chapter = new Ked.Progression.ChapterDefinition("chapter", "", "scene1", null,
-            new[] { new Ked.Progression.EpisodeNode("scene1", "", "node") });
-        return new Ked.Progression.ScenarioDefinition("scenario", "", "chapter", new[] { chapter });
-    }
-}
-public static class ProgressionContentPreflight
-{
-    public static bool CheckAndLog(Ked.Progression.ScenarioDefinition scenario, object yarn) => true;
-}
 public sealed class ProgressionDriver
 {
     public bool IsRunning;

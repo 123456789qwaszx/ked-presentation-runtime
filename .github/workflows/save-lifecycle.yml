@@ -1,7 +1,7 @@
 name: Save lifecycle
 on:
   push:
-    branches: [dev, main, server_DB_Test, learning/vn-play-analytics, refactor/offline-local-save]
+    branches: [dev, main, saveCoordinator, server_DB_Test, learning/vn-play-analytics, refactor/offline-local-save]
   pull_request:
     paths:
       - 'Assets/Scripts/Save/**'

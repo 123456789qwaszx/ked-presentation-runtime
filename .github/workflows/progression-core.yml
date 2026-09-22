@@ -1,7 +1,7 @@
 name: Progression core
 on:
   push:
-    branches: [dev, main]
+    branches: [dev, main, saveCoordinator]
   pull_request:
     paths:
       - 'Assets/Scripts/Ked.Progression/**'

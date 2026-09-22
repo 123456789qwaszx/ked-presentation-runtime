@@ -4,7 +4,7 @@ using UnityEngine;
 public sealed partial class SaveCoordinator
 {
     public void BeginNewPlaythrough() 
-        => BecomePlaythrough(NewPlaythroughId(), 0, null);
+        => BecomePlaythrough(SaveStamp.NewId(), 0, null);
 
     // active pointer가 가리키는 저장 파일을 읽어옴.
     // 예) 만약 'active = playthrough-B' -> playthrough-B.json
@@ -27,7 +27,7 @@ public sealed partial class SaveCoordinator
         }
 
         string id = string.IsNullOrEmpty(save.PlaythroughId)
-            ? NewPlaythroughId()
+            ? SaveStamp.NewId()
             : save.PlaythroughId;
 
         BecomePlaythrough(

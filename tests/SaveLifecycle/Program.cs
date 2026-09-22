@@ -86,6 +86,31 @@ internal static class Program
         string contentVersion = ContentVersion) =>
         new(store, contentVersion);
 
+    private static SaveSlotService Slots(
+        ILocalSaveStore store,
+        string contentVersion = ContentVersion) =>
+        new(store, contentVersion);
+
+    private static PlaythroughForkService Forks(
+        ILocalSaveStore store,
+        string contentVersion = ContentVersion) =>
+        new(store, contentVersion);
+
+    private static ScenarioDefinition Scenario() =>
+        new(
+            "scenario",
+            "",
+            "chapter",
+            new[]
+            {
+                new ChapterDefinition(
+                    "chapter",
+                    "",
+                    "scene1",
+                    null,
+                    new[] { new EpisodeNode("scene1", "", "node") }),
+            });
+
     private static SceneCommitResult Completion() => new(
         State("scene2"),
         Array.Empty<CommittedChoice>(),
@@ -176,8 +201,7 @@ internal static class Program
                 var store = new LocalFileSaveStore(Dir());
                 SaveSlotData data = SlotData("slot"); data.ContentVersion = "test-v2";
                 store.WriteSaveSlot(SlotEntry("slot"), data);
-                var save = Coordinator(store);
-                Throws<InvalidOperationException>(() => save.LoadSaveSlot("slot"));
+                Throws<InvalidOperationException>(() => Slots(store).Load("slot"));
                 Check(store.ActiveId == null, "incompatible slot changed active save");
             }));
 
@@ -185,9 +209,8 @@ internal static class Program
             {
                 var store = new LocalFileSaveStore(Dir());
                 store.WriteSaveSlot(SlotEntry("slot"), SlotData("slot"));
-                var save = Coordinator(store);
                 SaveSlotEntry slot = store.LoadSaveSlotIndex().Slots.Single();
-                save.ForkFromSaveSlot(slot, save.LoadSaveSlot(slot.Id));
+                Forks(store).ForkFromSaveSlot(slot, Slots(store).Load(slot.Id));
                 string loadedId = store.ActiveId;
                 store.Open(loadedId).Commit(Save(loadedId, 8));
                 Check(store.LoadSaveSlot("slot").LoadPlan.Target.LineId == "L", "slot followed autosave");
@@ -268,7 +291,7 @@ internal static class Program
                 });
                 store.Create(file); store.SetActive("A"); var save = Coordinator(store);
                 save.LoadActiveResumePoint();
-                save.ForkFromScene(new SaveForkTarget(0,
+                Forks(store).ForkFromScene(save.Capture(), new SaveForkTarget(0,
                     new SaveLineTarget { NodeName = "node", LineId = "L", Occurrence = 1 }));
                 LocalSaveFile fork = store.LoadActive();
                 Check(fork.PlaythroughId != "A" && fork.PendingLoad.Path.Single().OptionIndex == 1
@@ -394,6 +417,165 @@ internal static class Program
                 Check(store.LoadActive().PendingLoad == null, "committed scene kept a line resume plan");
             }));
 
+            await Test("A new playthrough drops the old history and waits for its first scene", () => Run(() =>
+            {
+                var store = new LocalFileSaveStore(Dir());
+                LocalSaveFile file = Save("A");
+                file.PlaySeconds = 30;
+                file.Scenes.Add(new SceneRecord { Checkpoint = Checkpoint(12), BacklogSerialEnd = 1 });
+                store.Create(file);
+                store.SetActive("A");
+
+                var save = Coordinator(store);
+                save.LoadActiveResumePoint();
+                Check(save.PlaythroughId == "A" && save.Capture().Scenes.Count == 1, "active playthrough was not adopted");
+
+                save.BeginNewPlaythrough();
+                Check(save.PlaythroughId != "A" && save.Capture().Scenes.Count == 0,
+                    "new playthrough inherited the old scene history");
+                Check(store.ActiveId == "A",
+                    "new playthrough moved the active pointer before its first scene existed");
+
+                save.EnterScene("chapter", State(), 0);
+                Check(store.ActiveId == save.PlaythroughId, "first scene entry did not adopt the new playthrough");
+                Check(store.LoadActive().Scenes.Count == 0, "first scene entry inherited old scene records");
+            }));
+
+            await Test("Scene commit failure keeps the entry checkpoint and permits retry", () => Run(() =>
+            {
+                bool fail = false;
+                var store = new LocalFileSaveStore(Dir(), (path, json) =>
+                {
+                    if (fail) throw new IOException();
+                    AtomicFile.WriteAllText(path, json);
+                });
+
+                var save = Coordinator(store);
+                save.BeginNewPlaythrough();
+                save.EnterScene("chapter", State(), 0);
+
+                fail = true;
+                Throws<IOException>(() => save.CommitScene(
+                    "chapter",
+                    Completion(),
+                    Array.Empty<VNChoiceRecord>(),
+                    Array.Empty<DialogueLogEntry>(),
+                    0,
+                    SceneRunOutcome.SceneEnded));
+
+                Check(save.Capture().Scenes.Count == 0, "failed commit adopted the scene record in memory");
+
+                fail = false;
+                save.CommitScene(
+                    "chapter",
+                    Completion(),
+                    Array.Empty<VNChoiceRecord>(),
+                    Array.Empty<DialogueLogEntry>(),
+                    0,
+                    SceneRunOutcome.SceneEnded);
+
+                Check(save.Capture().Scenes.Single().Checkpoint.EpisodeId == "scene1",
+                    "retry lost the scene entry checkpoint");
+            }));
+
+            await Test("Resuming an active playthrough restores its history and elapsed time", () => Run(() =>
+            {
+                var store = new LocalFileSaveStore(Dir());
+                LocalSaveFile file = Save("A");
+                file.PlaySeconds = 41;
+                file.Scenes.Add(new SceneRecord { Checkpoint = Checkpoint(12), BacklogSerialEnd = 3 });
+                store.Create(file);
+                store.SetActive("A");
+
+                var save = Coordinator(store);
+                ProgressionResumePoint resume = save.LoadActiveResumePoint();
+
+                Check(resume.ChapterId == "chapter" && resume.EpisodeId == "scene1",
+                    "resume point lost its coordinates");
+                Check(save.Capture().Scenes.Count == 1 && save.Capture().Scenes[0].BacklogSerialEnd == 3,
+                    "scene history was not restored");
+
+                save.EnterScene("chapter", State("scene2"), 3);
+                save.CommitScene(
+                    "chapter",
+                    Completion(),
+                    Array.Empty<VNChoiceRecord>(),
+                    Array.Empty<DialogueLogEntry>(),
+                    4,
+                    SceneRunOutcome.SceneEnded);
+
+                LocalSaveFile snapshot = store.LoadActive();
+                Check(snapshot.PlaythroughId == "A", "resume opened a different playthrough file");
+                Check(snapshot.Scenes.Count == 2, "restored history was replaced instead of extended");
+                Check(snapshot.PlaySeconds >= 41, "elapsed time restarted from zero");
+            }));
+
+            await Test("A backlog line resolves to a fork target only after its scene is committed", () => Run(() =>
+            {
+                var store = new LocalFileSaveStore(Dir());
+                LocalSaveFile file = Save("A");
+                file.Scenes.Add(new SceneRecord
+                {
+                    Checkpoint = Checkpoint(5),
+                    BacklogSerialEnd = 2,
+                    Path = new List<SavedChoice> { new() { FromEpisodeId = "scene1", OptionIndex = 1 } },
+                });
+                file.Backlog.Add(new DialogueLogEntry { lineId = "line", nodeName = "node", lineSequence = 0, rawText = "a" });
+                file.Backlog.Add(new DialogueLogEntry { lineId = "line", nodeName = "node", lineSequence = 1, rawText = "b" });
+                store.Create(file);
+                store.SetActive("A");
+
+                var save = Coordinator(store);
+                save.LoadActiveResumePoint();
+
+                var forks = Forks(store);
+                PlaythroughSaveSnapshot playthrough = save.Capture();
+
+                DialogueLogEntry second = store.LoadActive().Backlog[1];
+                Check(forks.CanForkFrom(playthrough, second), "a committed scene line was not forkable");
+                Check(forks.TryResolveForkTarget(playthrough, second, out SaveForkTarget target),
+                    "fork target was not resolved");
+                Check(target.SceneIndex == 0 && target.LineTarget.Occurrence == 2,
+                    "line occurrence inside the scene was lost");
+
+                var pending = new DialogueLogEntry { lineId = "line", nodeName = "node", lineSequence = 9, rawText = "c" };
+                Check(!forks.CanForkFrom(playthrough, pending), "an uncommitted line was treated as forkable");
+            }));
+
+            await Test("Manual slot capture and reload round-trip the current scene", () => Run(() =>
+            {
+                var store = new LocalFileSaveStore(Dir());
+                var save = Coordinator(store);
+                var slots = Slots(store);
+                save.BeginNewPlaythrough();
+                save.EnterScene("chapter", StateWithScore(7), 0);
+
+                SaveSlotEntry slot = slots.Create(
+                    save.Capture(),
+                    new[] { new Ked.Progression.CommittedChoice("scene1", 1) },
+                    new[] { new VNChoiceRecord(0, 0, 1, "choice-line") },
+                    new SaveLineTarget { NodeName = "node", LineId = "line", Occurrence = 1 },
+                    "preview");
+
+                Check(slot != null && slots.Find(slot.Id) != null, "manual slot was not indexed");
+
+                SaveSlotData data = slots.Load(slot.Id);
+                Check(data.Checkpoint.Stats["score"] == 7, "entry stats were not captured");
+                Check(data.LoadPlan.Path.Single().OptionIndex == 1, "progression path was not captured");
+
+                string before = save.PlaythroughId;
+                Forks(store).ForkFromSaveSlot(slot, data);
+
+                // 갈라지기는 파일을 만들고 active로 세우는 데서 끝난다.
+                // 그 회차에 붙는 일은 LoadActiveResumePoint()가 한다.
+                Check(store.ActiveId != before, "slot load did not activate a new playthrough");
+                Check(save.PlaythroughId == before, "fork attached the coordinator by itself");
+
+                save.LoadActiveResumePoint();
+                Check(save.PlaythroughId == store.ActiveId, "resume did not attach the new playthrough");
+                Check(store.LoadActive().Stats["score"] == 7, "forked playthrough lost the slot state");
+            }));
+
             await Test("Resume without a load plan starts from the scene root", () => Run(() =>
             {
                 var store = new LocalFileSaveStore(Dir());
@@ -404,8 +586,7 @@ internal static class Program
                 var replay = new ProgressionReplayState();
                 var launcher = new ProgressionLauncher(
                     driver,
-                    new Yarn.Unity.DialogueRunner(),
-                    new UnityEngine.TextAsset(),
+                    Scenario(),
                     Coordinator(store),
                     new BacklogRecorder(),
                     replay);
@@ -438,8 +619,7 @@ internal static class Program
                 var replay = new ProgressionReplayState();
                 var launcher = new ProgressionLauncher(
                     driver,
-                    new Yarn.Unity.DialogueRunner(),
-                    new UnityEngine.TextAsset(),
+                    Scenario(),
                     Coordinator(store),
                     new BacklogRecorder(),
                     replay);
@@ -455,8 +635,8 @@ internal static class Program
             {
                 var driver = new ProgressionDriver { IsRunning = true };
                 var stopped = new TaskCompletionSource<bool>(); driver.OnStop = () => stopped.Task;
-                var launcher = new ProgressionLauncher(driver, new Yarn.Unity.DialogueRunner(),
-                    new UnityEngine.TextAsset(), Coordinator(new LocalFileSaveStore(Dir())),
+                var launcher = new ProgressionLauncher(driver, Scenario(),
+                    Coordinator(new LocalFileSaveStore(Dir())),
                     new BacklogRecorder(), new ProgressionReplayState());
                 int prepares = 0; Task first = launcher.TransitionAndResumeAsync(() => prepares++);
                 await launcher.TransitionAndResumeAsync(() => prepares++);

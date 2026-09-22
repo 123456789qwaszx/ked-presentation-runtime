@@ -36,39 +36,60 @@ public readonly struct SaveForkTarget
     }
 }
 
-public sealed partial class SaveCoordinator
+// 확정된 과거 지점에서 새 회차 파일을 만들고 active로 세운다.
+//
+// 여기서 끝이다. 만들어진 회차에 SaveCoordinator를 붙이는 일은
+// 곧이어 호출되는 LoadActiveResumePoint()가 한다.
+public sealed class PlaythroughForkService
 {
-    public bool CanForkFrom(in DialogueLogEntry entry) 
-        => FindSceneIndexBySerial(entry.lineSequence) >= 0;
-    
-    public void ForkFromScene(SaveForkTarget forkTarget)
-        => ForkFromScene(forkTarget.SceneIndex, forkTarget.LineTarget);
+    private readonly ILocalSaveStore _store;
+    private readonly string _contentVersion;
 
-    public bool TryResolveForkTarget(in DialogueLogEntry entry, out SaveForkTarget forkTarget)
+    public PlaythroughForkService(
+        ILocalSaveStore store,
+        string contentVersion)
+    {
+        _store = store ?? throw new ArgumentNullException(nameof(store));
+
+        if (string.IsNullOrWhiteSpace(contentVersion))
+            throw new ArgumentException("저장 콘텐츠 버전이 비어 있다.", nameof(contentVersion));
+
+        _contentVersion = contentVersion;
+    }
+
+    public bool CanForkFrom(PlaythroughSaveSnapshot playthrough, in DialogueLogEntry entry)
+        => FindSceneIndexBySerial(playthrough, entry.lineSequence) >= 0;
+
+    public bool TryResolveForkTarget(
+        PlaythroughSaveSnapshot playthrough,
+        in DialogueLogEntry entry,
+        out SaveForkTarget forkTarget)
     {
         forkTarget = default;
 
-        int sceneIndex = FindSceneIndexBySerial(entry.lineSequence);
+        int sceneIndex = FindSceneIndexBySerial(playthrough, entry.lineSequence);
 
         if (sceneIndex < 0)
             return false;
 
-        TryMakeLineTarget(entry, sceneIndex, out SaveLineTarget lineTarget);
+        TryMakeLineTarget(playthrough, entry, sceneIndex, out SaveLineTarget lineTarget);
 
         forkTarget = new SaveForkTarget(sceneIndex, lineTarget);
         return true;
     }
-    
+
     // 백로그 serial이 속한 완료된 Scene을 찾는다.
     // 현재 Scene처럼 아직 SceneRecord로 확정되지 않았으면 -1.
-    private int FindSceneIndexBySerial(int lineSerial)
+    private static int FindSceneIndexBySerial(PlaythroughSaveSnapshot playthrough, int lineSerial)
     {
-        for (int i = 0; i < _scenes.Count; i++)
+        IReadOnlyList<SceneRecord> scenes = playthrough.Scenes;
+
+        for (int i = 0; i < scenes.Count; i++)
         {
-            SceneRecord scene = _scenes[i];
+            SceneRecord scene = scenes[i];
             SceneCheckpoint checkpoint = scene.Checkpoint;
 
-            if (lineSerial >= checkpoint.BacklogSerialStart 
+            if (lineSerial >= checkpoint.BacklogSerialStart
                 && lineSerial < scene.BacklogSerialEnd)
                 return i;
         }
@@ -81,19 +102,20 @@ public sealed partial class SaveCoordinator
     // occurrence는 (NodeName, LineId)가 해당 Scene에서 몇 번째인지.
     // (첫 번째 = 1, 두 번째 = 2, ...)
     private bool TryMakeLineTarget(
+        PlaythroughSaveSnapshot playthrough,
         in DialogueLogEntry entry,
         int sceneIndex,
         out SaveLineTarget target)
     {
         target = null;
 
-        LocalSaveFile current = _localStore.LoadActive();
+        LocalSaveFile current = _store.LoadActive();
 
         if (current?.Backlog == null)
             return false;
 
         int sceneStartSerial =
-            _scenes[sceneIndex].Checkpoint.BacklogSerialStart;
+            playthrough.Scenes[sceneIndex].Checkpoint.BacklogSerialStart;
 
         int occurrence = 0;
 
@@ -102,12 +124,12 @@ public sealed partial class SaveCoordinator
             DialogueLogEntry candidate = current.Backlog[i];
 
             // 이 Scene 이전의 대사와 선택한 대사 이후는 제외.
-            if (candidate.lineSequence < sceneStartSerial 
+            if (candidate.lineSequence < sceneStartSerial
                 || candidate.lineSequence > entry.lineSequence)
                 continue;
 
             if (!string.Equals(candidate.nodeName, entry.nodeName, StringComparison.Ordinal)
-                || !string.Equals(candidate.lineId, entry.lineId, StringComparison.Ordinal)) 
+                || !string.Equals(candidate.lineId, entry.lineId, StringComparison.Ordinal))
                 continue;
 
             occurrence++;
@@ -128,28 +150,30 @@ public sealed partial class SaveCoordinator
 
     // 과거 Scene 하나를 출발점으로 새로운 Playthrough를 만든다.
     //
-    // 1. 로컬 회차 선택 확정
-    // 2. 해당 Scene 진입 Checkpoint 복원
-    // 3. 그 Scene 이전 기록만 상속
-    // 4. target이 있으면 저장된 선택을 replay
-    // 5. 새로운 Playthrough로 저장
-    private void ForkFromScene(
-        int sceneIndex,
-        SaveLineTarget target = null)
+    // 1. 해당 Scene 진입 Checkpoint 복원
+    // 2. 그 Scene 이전 기록만 상속
+    // 3. target이 있으면 저장된 선택을 replay
+    // 4. 새로운 Playthrough 파일로 저장하고 active로 세움
+    public void ForkFromScene(
+        PlaythroughSaveSnapshot playthrough,
+        SaveForkTarget forkTarget)
     {
-        if (sceneIndex < 0 || sceneIndex >= _scenes.Count)
-            throw new ArgumentOutOfRangeException(nameof(sceneIndex));
+        int sceneIndex = forkTarget.SceneIndex;
+        SaveLineTarget target = forkTarget.LineTarget;
 
-        SceneRecord origin = _scenes[sceneIndex];
+        if (sceneIndex < 0 || sceneIndex >= playthrough.Scenes.Count)
+            throw new ArgumentOutOfRangeException(nameof(forkTarget));
+
+        SceneRecord origin = playthrough.Scenes[sceneIndex];
         SceneCheckpoint checkpoint = origin.Checkpoint;
 
-        LocalSaveFile current = _localStore.LoadActive();
+        LocalSaveFile current = _store.LoadActive();
 
         List<DialogueLogEntry> inheritedBacklog =
             BuildBacklogBefore(checkpoint.BacklogSerialStart, current);
 
-        string fromId = _playthroughId;
-        string newId = NewPlaythroughId();
+        string fromId = playthrough.PlaythroughId;
+        string newId = SaveStamp.NewId();
 
         var file = new LocalSaveFile
         {
@@ -167,7 +191,7 @@ public sealed partial class SaveCoordinator
 
             // 갈라질 Scene은 새 회차에서 다시 실행하므로
             // 그 이전 Scene까지만 물려받는다.
-            Scenes = _scenes.Take(sceneIndex).ToList(),
+            Scenes = playthrough.Scenes.Take(sceneIndex).ToList(),
 
             Backlog = inheritedBacklog,
 
@@ -177,10 +201,10 @@ public sealed partial class SaveCoordinator
 
             PlaySeconds = checkpoint.PlaySecondsAtEntry,
 
-            SavedAtUtc = NowUtc(),
+            SavedAtUtc = SaveStamp.NowUtc(),
         };
 
-        SaveAndActivateFork(file);
+        SaveAndActivate(file);
 
         Debug.Log(
             $"[저장] 갈라지기 — " +
@@ -245,7 +269,7 @@ public sealed partial class SaveCoordinator
         List<SceneRecord> inheritedScenes =
             PlaythroughSession.Copy(data.Scenes);
 
-        string newId = NewPlaythroughId();
+        string newId = SaveStamp.NewId();
 
         var file = new LocalSaveFile
         {
@@ -266,10 +290,10 @@ public sealed partial class SaveCoordinator
             PendingLoad = PlaythroughSession.Copy(data.LoadPlan),
             PlaySeconds = data.PlaySeconds,
 
-            SavedAtUtc = NowUtc(),
+            SavedAtUtc = SaveStamp.NowUtc(),
         };
 
-        SaveAndActivateFork(file);
+        SaveAndActivate(file);
 
         Debug.Log(
             $"[저장] 수동 슬롯 불러오기 — " +
@@ -279,10 +303,9 @@ public sealed partial class SaveCoordinator
             $"시간 {data.PlaySeconds}s");
     }
 
-    private void SaveAndActivateFork(LocalSaveFile file)
+    private void SaveAndActivate(LocalSaveFile file)
     {
-        _localStore.Create(file);
-        _localStore.SetActive(file.PlaythroughId);
-        BecomePlaythrough(file.PlaythroughId, file.PlaySeconds, file.Scenes);
+        _store.Create(file);
+        _store.SetActive(file.PlaythroughId);
     }
 }

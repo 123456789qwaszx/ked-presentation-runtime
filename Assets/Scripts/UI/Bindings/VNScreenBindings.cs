@@ -10,7 +10,7 @@ public sealed partial class VNScreenBindings : IDisposable
     private DialogueAdvanceDispatcher _dialogueAdvanceDispatcher;
 
     private ProgressionLauncher _progressionLauncher;
-    private SaveCoordinator _saveCoordinator;
+    private SaveSlotService _saveSlots;
 
     private AlbumController _albumController;
     private ManualSaveFlow _manualSaveFlow;
@@ -25,7 +25,7 @@ public sealed partial class VNScreenBindings : IDisposable
         VNFeatureController vnFeatures,
         DialogueAdvanceDispatcher dialogueAdvanceDispatcher,
         ProgressionLauncher progressionLauncher,
-        SaveCoordinator saveCoordinator,
+        SaveSlotService saveSlots,
         AlbumController albumController,
         ManualSaveFlow manualSaveFlow)
     {
@@ -33,7 +33,7 @@ public sealed partial class VNScreenBindings : IDisposable
         _dialogueAdvanceDispatcher = dialogueAdvanceDispatcher;
 
         _progressionLauncher = progressionLauncher;
-        _saveCoordinator = saveCoordinator;
+        _saveSlots = saveSlots;
 
         _albumController = albumController;
         _manualSaveFlow = manualSaveFlow;

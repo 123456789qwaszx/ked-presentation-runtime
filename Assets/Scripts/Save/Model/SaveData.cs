@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Ked.Progression;
 
 // 자동 저장 한 건. 완료 장면의 시작 상태와 경로를 보존하여 이어하기와 과거 장면 이동을 지원한다.
 public sealed class LocalSaveFile
@@ -56,6 +57,38 @@ public sealed class SavedLoadPlan
     public List<SavedChoice> Path = new();
     public List<VNChoiceRecord> YarnChoices = new();
     public SaveLineTarget Target;
+
+    // 지금 진행 중인 Scene의 좌표를 재생 계획으로 옮긴다.
+    // 이어하기 지점과 수동 슬롯이 같은 계획을 쓴다.
+    public static SavedLoadPlan Create(
+        IReadOnlyList<CommittedChoice> path,
+        IReadOnlyList<VNChoiceRecord> yarnChoices,
+        SaveLineTarget target)
+    {
+        var savedPath = new List<SavedChoice>(path.Count);
+
+        for (int i = 0; i < path.Count; i++)
+        {
+            savedPath.Add(new SavedChoice
+            {
+                FromEpisodeId = path[i].FromEpisodeId,
+                OptionIndex = path[i].OptionIndex,
+            });
+        }
+
+        return new SavedLoadPlan
+        {
+            Path = savedPath,
+            YarnChoices = new List<VNChoiceRecord>(yarnChoices),
+
+            Target = new SaveLineTarget
+            {
+                NodeName = target.NodeName,
+                LineId = target.LineId,
+                Occurrence = target.Occurrence,
+            },
+        };
+    }
 }
 
 // 슬롯 목록 파일에 들어가는 가벼운 표시 정보.

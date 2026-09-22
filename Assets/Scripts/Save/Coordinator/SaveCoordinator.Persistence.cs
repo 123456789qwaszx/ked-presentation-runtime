@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Ked.Progression;
-using UnityEngine;
 
 public sealed partial class SaveCoordinator
 {
@@ -22,7 +21,7 @@ public sealed partial class SaveCoordinator
                 StringComparer.Ordinal),
             BacklogSerialStart = backlogSequenceStart,
             PlaySecondsAtEntry = TotalSeconds,
-            EnteredAtUtc = NowUtc(),
+            EnteredAtUtc = SaveStamp.NowUtc(),
         };
 
         if (_playthroughSession == null)
@@ -34,7 +33,7 @@ public sealed partial class SaveCoordinator
                 ChapterId = chapterId,
                 CurrentEpisodeId = entryState.CurrentEpisodeId,
                 Stats = new Dictionary<string, int>(_currentEntry.Stats),
-                SavedAtUtc = NowUtc(),
+                SavedAtUtc = SaveStamp.NowUtc(),
                 PlaySeconds = TotalSeconds,
             };
 
@@ -46,6 +45,36 @@ public sealed partial class SaveCoordinator
             
             _playthroughSession = session;
         }
+    }
+
+    // 현재 Scene을 확정하지 않고, Scene 진입점부터 표시된 Line까지의 재생 계획만 갱신한다.
+    public void UpdateResumePoint(
+        IReadOnlyList<CommittedChoice> path,
+        IReadOnlyList<VNChoiceRecord> yarnChoices,
+        SaveLineTarget target)
+    {
+        if (_playthroughId == null || _playthroughSession == null)
+            throw new InvalidOperationException("활성 회차 없이 이어하기 지점을 저장할 수 없다.");
+
+        if (_currentEntry == null)
+            throw new InvalidOperationException("장면 진입 보고 없이 이어하기 지점이 호출됐다.");
+
+        if (target == null)
+            throw new ArgumentNullException(nameof(target));
+
+        LocalSaveFile snapshot = _playthroughSession.Read().Snapshot;
+
+        snapshot.ChapterId = _currentEntry.ChapterId;
+        snapshot.CurrentEpisodeId = _currentEntry.EpisodeId;
+        snapshot.Stats = new Dictionary<string, int>(
+            _currentEntry.Stats,
+            StringComparer.Ordinal);
+        snapshot.ChapterCompleted = false;
+        snapshot.PendingLoad = SavedLoadPlan.Create(path, yarnChoices, target);
+        snapshot.PlaySeconds = TotalSeconds;
+        snapshot.SavedAtUtc = SaveStamp.NowUtc();
+
+        _playthroughSession.Commit(snapshot);
     }
 
     // 정상 Scene 완료 시점에 캡처된 Progression 결과와 Host 기록을 하나의 snapshot으로 확정한다.
@@ -91,7 +120,7 @@ public sealed partial class SaveCoordinator
             Backlog = new List<DialogueLogEntry>(backlog),
             PendingLoad = null,
             PlaySeconds = TotalSeconds,
-            SavedAtUtc = NowUtc(),
+            SavedAtUtc = SaveStamp.NowUtc(),
         };
 
         _playthroughSession.Commit(snapshot);
