@@ -42,6 +42,8 @@ public sealed class SceneRunner : ISceneRunner
         _backlog = backlog;
     }
 
+    #region Runner Control
+    
     public async Task<SceneRunResult> RunAsync(
         SceneRunSession session,
         CancellationToken cancellationToken)
@@ -98,7 +100,11 @@ public sealed class SceneRunner : ISceneRunner
         _options.Cancel();
         await StopPlaybackAsync();
     }
-
+    
+    #endregion
+    
+    #region Scene Lifecycle
+    
     private async Task EnterSceneAsync(
         SceneProgress progress,
         CancellationToken cancellationToken)
@@ -115,7 +121,7 @@ public sealed class SceneRunner : ISceneRunner
             progress.Definition.ChapterId,
             progress.EntryState);
     }
-
+    
     private SceneRunResult CommitScene(
         SceneProgress progress,
         SceneRunOutcome outcome)
@@ -131,7 +137,11 @@ public sealed class SceneRunner : ISceneRunner
             outcome,
             commit.State);
     }
-
+    
+    #endregion
+    
+    #region Episode Execution
+    
     private async Task<SceneStepKind> RunEpisodeStepAsync(
         SceneRunSession session,
         CancellationToken cancellationToken)
@@ -308,7 +318,11 @@ public sealed class SceneRunner : ISceneRunner
 
         return resolved;
     }
-
+    
+    #endregion
+    
+    #region Replay
+    
     private async Task RestartReplayAsync(
         SceneRunSession session,
         CancellationToken cancellationToken)
@@ -328,7 +342,11 @@ public sealed class SceneRunner : ISceneRunner
         session.Progress.ResetForReplay();
         session.CompleteReplayRequest();
     }
-
+    
+    #endregion
+    
+    #region Helpers
+    
     private Task StopPlaybackAsync()
     {
         if (!_stopPlaybackTask.IsCompleted)
@@ -337,4 +355,6 @@ public sealed class SceneRunner : ISceneRunner
         _stopPlaybackTask = _presentation.StopAsync();
         return _stopPlaybackTask;
     }
+    
+    #endregion
 }
