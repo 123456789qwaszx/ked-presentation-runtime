@@ -26,7 +26,9 @@ public sealed class PlaythroughSession
     {
         lock (_gate)
         {
-            if (_closed) throw new InvalidOperationException("정리된 회차에는 쓸 수 없다.");
+            if (_closed) 
+                throw new InvalidOperationException("정리된 회차에는 쓸 수 없다.");
+            
             PlaythroughFile next = Copy(_file);
             change(next);
             _write(_path, SaveJson.SerializePretty(next));
@@ -38,11 +40,13 @@ public sealed class PlaythroughSession
     {
         if (snapshot.PlaythroughId != Id)
             throw new InvalidOperationException("회차가 다른 snapshot이다.");
+        
         var file = new PlaythroughFile
         {
             FormatVersion = SaveFormat.PlaythroughVersion,
             Snapshot = Copy(snapshot),
         };
+        
         SaveDataValidator.ValidatePlaythrough(file, Id);
         Update(next => next.Snapshot = file.Snapshot);
     }

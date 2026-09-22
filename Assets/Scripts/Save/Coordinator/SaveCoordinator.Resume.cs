@@ -10,7 +10,7 @@ public sealed partial class SaveCoordinator
         IReadOnlyList<VNChoiceRecord> yarnChoices,
         SaveLineTarget target)
     {
-        if (_playthroughId == null || _active == null)
+        if (_playthroughId == null || _playthroughSession == null)
             throw new InvalidOperationException("활성 회차 없이 이어하기 지점을 저장할 수 없다.");
 
         if (_currentEntry == null)
@@ -19,7 +19,7 @@ public sealed partial class SaveCoordinator
         if (target == null)
             throw new ArgumentNullException(nameof(target));
 
-        LocalSaveFile snapshot = _active.Read().Snapshot;
+        LocalSaveFile snapshot = _playthroughSession.Read().Snapshot;
 
         snapshot.ChapterId = _currentEntry.ChapterId;
         snapshot.CurrentEpisodeId = _currentEntry.EpisodeId;
@@ -31,7 +31,7 @@ public sealed partial class SaveCoordinator
         snapshot.PlaySeconds = TotalSeconds;
         snapshot.SavedAtUtc = NowUtc();
 
-        _active.Commit(snapshot);
+        _playthroughSession.Commit(snapshot);
     }
 
     private static SavedLoadPlan CreateLoadPlan(

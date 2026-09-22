@@ -10,7 +10,7 @@ public sealed partial class SaveCoordinator
     private readonly ILocalSaveStore _localStore;
     private readonly string _contentVersion;
 
-    private PlaythroughSession _active;
+    private PlaythroughSession _playthroughSession;
 
     private float _startedAt = Time.realtimeSinceStartup;
     private int _playSecondsBase;
@@ -55,7 +55,7 @@ public sealed partial class SaveCoordinator
 
         _currentEntry = null;
 
-        _active = _localStore.Open(id);
+        _playthroughSession = _localStore.Open(id);
     }
 
     private static string NewPlaythroughId() => Guid.NewGuid().ToString("N");
