@@ -53,6 +53,6 @@
         }
     },
     "definitions": [
-        "..\\..\\ProjectSettings\\Packages\\dev.yarnspinner\\Assembly-CSharp-generated.ysls.json"
+        "..\\..\\..\\ProjectSettings\\Packages\\dev.yarnspinner\\Assembly-CSharp-generated.ysls.json"
     ]
 }

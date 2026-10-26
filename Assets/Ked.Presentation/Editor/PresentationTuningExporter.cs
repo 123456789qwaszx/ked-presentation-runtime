@@ -31,7 +31,7 @@ using Object = UnityEngine.Object;
 // ─────────────────────────────────────────────────────────────────────────────
 public static class PresentationTuningExporter
 {
-    private const string ScenePath = "Assets/Scenes/PresentationSample.unity";
+    private const string ScenePath = "Assets/Samples/Scenes/PresentationSample.unity";
 
     /// <summary>리그를 세울 때 쓰는 임시 부모. 캡처가 끝나면 지운다.</summary>
     private const string ExportStageName = "__U12ExportStage";
@@ -41,25 +41,25 @@ public static class PresentationTuningExporter
 
     private static readonly (string group, string path)[] PresetAssets =
     {
-        ("visual-focus",    "Assets/Data/ScreenEffect/CharacterVisualFocusPresetDB.asset"),
-        ("mask-motion",     "Assets/Data/Generated/StageMaskMotionPresetDB.asset"),
-        ("screen-flash",    "Assets/Data/ScreenEffect/ScreenFlashPresetDB.asset"),
-        ("screen-noise",    "Assets/Data/ScreenEffect/ScreenNoisePresetDB.asset"),
-        ("screen-vignette", "Assets/Data/ScreenEffect/ScreenVignettePresetDB.asset"),
-        ("depth",           "Assets/Data/Generated/CharacterDepthTuning.asset"),
-        ("focus-tuning",    "Assets/Data/Generated/CharacterFocusTuningDB.asset"),
-        ("role-anchor",     "Assets/Data/Generated/RoleAnchorTuningDB.asset"),
-        ("surface-layout",  "Assets/Data/Generated/DialogueSurfaceLayoutPresetDB.asset"),
+        ("visual-focus",    "Assets/Ked.Presentation/Data/ScreenEffect/CharacterVisualFocusPresetDB.asset"),
+        ("mask-motion",     "Assets/Ked.Presentation/Data/Generated/StageMaskMotionPresetDB.asset"),
+        ("screen-flash",    "Assets/Ked.Presentation/Data/ScreenEffect/ScreenFlashPresetDB.asset"),
+        ("screen-noise",    "Assets/Ked.Presentation/Data/ScreenEffect/ScreenNoisePresetDB.asset"),
+        ("screen-vignette", "Assets/Ked.Presentation/Data/ScreenEffect/ScreenVignettePresetDB.asset"),
+        ("depth",           "Assets/Ked.Presentation/Data/Generated/CharacterDepthTuning.asset"),
+        ("focus-tuning",    "Assets/Ked.Presentation/Data/Generated/CharacterFocusTuningDB.asset"),
+        ("role-anchor",     "Assets/Ked.Presentation/Data/Generated/RoleAnchorTuningDB.asset"),
+        ("surface-layout",  "Assets/Samples/Data/DialogueSurfaceLayoutPresetDB.asset"),
     };
 
     /// <summary>초상 치수의 원천. 스프라이트 참조라 EditorJsonUtility로는 해석할 수 없어 따로 낸다.</summary>
-    private const string PortraitDbPath = "Assets/Data/Generated/PortraitGeneratedDB.asset";
+    private const string PortraitDbPath = "Assets/Samples/Data/PortraitGeneratedDB.asset";
 
     // 이번 범위에 없어서 내보내지 않는 것들. 존재는 기록한다 —
     // 조용히 빠뜨린 것과 알고서 뺀 것은 다르다.
     private static readonly string[] KnownButOutOfScope =
     {
-        "Assets/Data/Generated/DialogueSpeakerPresentationPolicyDB.asset (speaker policy — 범위 밖)",
+        "Assets/Samples/Data/DialogueSpeakerPresentationPolicyDB.asset (speaker policy — 범위 밖)",
         "Assets/Data/Generated/CharacterEmojiVisualPreset.asset (emoji preset — 범위 밖)",
         "Assets/Data/Generated/CharacterEmojiLibrary.asset (emoji library — 범위 밖)",
     };

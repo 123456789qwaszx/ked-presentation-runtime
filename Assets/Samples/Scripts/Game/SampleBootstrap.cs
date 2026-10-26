@@ -64,7 +64,7 @@ public class SampleBootstrap : MonoBehaviour, IRigPrefabSource
              "둘 다 타이틀에서 시작한다.")]
     [SerializeField] private SampleExample example = SampleExample.ProgressionAndSave;
 
-    [Tooltip("연출 단독 예제가 재생할 Yarn 노드 이름(title:). 기본은 연출 데모(Assets/@Dialogue/Demo_Presentation.yarn).")]
+    [Tooltip("연출 단독 예제가 재생할 Yarn 노드 이름(title:). 기본은 연출 데모(Assets/Samples/Dialogue/Demo_Presentation.yarn).")]
     [SerializeField] private string presentationEntryNode = "Demo_Presentation";
 
     [Header("UIManager")]
@@ -103,7 +103,7 @@ public class SampleBootstrap : MonoBehaviour, IRigPrefabSource
     [SerializeField] private VNOptionItem optionItem;
 
     [Header("진행 층")]
-    [Tooltip("툴이 낸 챕터 JSON. Assets/@Dialogue/ChapterProgression/ 아래의 .json 을 넣는다. " +
+    [Tooltip("툴이 낸 챕터 JSON. Assets/Samples/Dialogue/ChapterProgression/ 아래의 .json 을 넣는다. " +
              "경로 문자열이 아니라 에셋 참조다 — 머신에 안 매이고 빌드에도 실린다.")]
     [SerializeField] private TextAsset progressionChapterJson;
 

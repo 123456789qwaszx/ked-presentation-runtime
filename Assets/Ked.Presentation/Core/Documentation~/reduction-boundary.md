@@ -87,7 +87,7 @@ Ledger.Publish   DOTween 종점     claim.ApplyTo(tree)
 > ⚠ **이 절은 조사 시점의 기록이다.** 아래에 근거로 든 커맨드 중
 > 절차적 연기 계열(`Tremble` · `Sway` · `Breath` · `Walk` · `Hop` · `Bounce`)과
 > `ColorTo` · 오버레이/이모지 리그는 **이후 삭제됐다**(연기는 Spine으로 주인이 바뀌었다 —
-> [SCOPE-BOUNDARY.md](../../../SCOPE-BOUNDARY.md) 참조).
+> [SCOPE-BOUNDARY.md](../../../../SCOPE-BOUNDARY.md) 참조).
 > 이름을 남겨 둔 이유는 **경계가 왜 여기 그어졌는지의 근거**이기 때문이다.
 > 코드에서 찾지 말 것.
 

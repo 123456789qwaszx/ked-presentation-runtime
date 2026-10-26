@@ -1,4 +1,4 @@
-// Assets/Editor/ReplaceTMPFontTool.cs
+// Assets/Samples/Editor/ReplaceTMPFontTool.cs
 #if UNITY_EDITOR
 using System;
 using System.Collections.Generic;

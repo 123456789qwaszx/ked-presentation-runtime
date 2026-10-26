@@ -234,7 +234,7 @@ public sealed class PresentationAssembler
             _refs.SpeakerPolicyDb);
 
         EaseCurveLibrary easeCurves = EaseCurveLibrary.LoadFrom(
-            System.IO.Path.Combine(Application.dataPath, "@Dialogue", EaseCurveLibrary.BundleFileName));
+            System.IO.Path.Combine(DialogueFolder, EaseCurveLibrary.BundleFileName));
 
         _ = new YarnCommandBridge(
             _refs.DialogueRunner,

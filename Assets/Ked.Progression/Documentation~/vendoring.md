@@ -5,10 +5,10 @@
 
 ```
 원본   ked-progression-runtime   (형제 폴더 · Unity 프로젝트 · 진행 코어의 집 + 최소 샘플)
-반입   Assets/Scripts/Ked.Progression/   ← 이 폴더
+반입   Assets/Ked.Progression/   ← 이 폴더
 ```
 
-`Assets/Scripts/Ked.Presentation.Core`가 저작 도구(VnTool)에 `src/Ked.Presentation.Core`로
+`Assets/Ked.Presentation/Core`가 저작 도구(VnTool)에 `src/Ked.Presentation.Core`로
 복사 반입돼 있는 것과 같은 방식이다. **다만 방향이 반대다** — 연출 코어는 여기가 원본이고,
 진행 코어는 여기가 사본이다.
 
@@ -60,7 +60,7 @@
 ```bash
 diff -r -q --strip-trailing-cr -x "*.meta" \
   ../ked-progression-runtime/Assets/Progression/Runtime \
-  Assets/Scripts/Ked.Progression | grep -v "^Only in"
+  Assets/Ked.Progression | grep -v "^Only in"
 ```
 
 2026-10-26 기준 이 명령의 출력은 **0줄**이다. `Only in`으로 나오는 `Documentation~`(이 문서)와 `Tests`는 사본에만 있는 자리다.
@@ -70,7 +70,7 @@ diff -r -q --strip-trailing-cr -x "*.meta" \
 ```bash
 diff -r -q --strip-trailing-cr -x "*.meta" \
   ../ked-progression-runtime/Assets/Progression/Tests/EditMode \
-  Assets/Scripts/Ked.Progression/Tests/EditMode
+  Assets/Ked.Progression/Tests/EditMode
 ```
 
 2026-10-26 기준 이 명령의 출력도 **0줄**이다.
@@ -78,13 +78,13 @@ diff -r -q --strip-trailing-cr -x "*.meta" \
 ## 반입 — 원본 → 사본
 
 ```bash
-rm -rf Assets/Scripts/Ked.Progression/{Contracts,Loading,Response,Save,Scene,Spec,State,Transition,Vocabulary}
-cp -r ../ked-progression-runtime/Assets/Progression/Runtime/. Assets/Scripts/Ked.Progression/
+rm -rf Assets/Ked.Progression/{Contracts,Loading,Response,Save,Scene,Spec,State,Transition,Vocabulary}
+cp -r ../ked-progression-runtime/Assets/Progression/Runtime/. Assets/Ked.Progression/
 cp ../ked-progression-runtime/Assets/Progression/Tests/EditMode/*.cs* \
-   Assets/Scripts/Ked.Progression/Tests/EditMode/
+   Assets/Ked.Progression/Tests/EditMode/
 
 # 사본이 자기 GUID를 쓰는 .meta 넷은 되돌린다 (아래 ".meta GUID" 참고)
-git checkout -- Assets/Scripts/Ked.Progression/{Ked.Progression.asmdef,Spec,State,Vocabulary}.meta
+git checkout -- Assets/Ked.Progression/{Ked.Progression.asmdef,Spec,State,Vocabulary}.meta
 ```
 
 asmdef는 양쪽 이름과 설정이 같다(`Ked.Progression` · `noEngineReferences: true`). 이 저장소의 asmdef들은
@@ -100,9 +100,9 @@ asmdef는 양쪽 이름과 설정이 같다(`Ked.Progression` · `noEngineRefere
 ```bash
 cd ../ked-progression-runtime
 rm -rf Assets/Progression/Runtime/{Contracts,Loading,Response,Save,Scene,Spec,State,Transition,Vocabulary}
-cp -r ../ked-presentation-runtime/Assets/Scripts/Ked.Progression/{Contracts,Loading,Response,Save,Scene,Spec,State,Transition,Vocabulary} \
+cp -r ../ked-presentation-runtime/Assets/Ked.Progression/{Contracts,Loading,Response,Save,Scene,Spec,State,Transition,Vocabulary} \
       Assets/Progression/Runtime/
-cp ../ked-presentation-runtime/Assets/Scripts/Ked.Progression/*.cs* Assets/Progression/Runtime/
+cp ../ked-presentation-runtime/Assets/Ked.Progression/*.cs* Assets/Progression/Runtime/
 ```
 
 `Documentation~`·`Tests`·asmdef는 보내지 않는다. 테스트는 아래 표대로 고른다.
@@ -152,7 +152,7 @@ dotnet run --project tests/ProgressionHost/ProgressionHost.csproj
 | `Tests/PlayMode/` | `UnityEngine.TestTools`에 매인 smoke 1건. 어셈블리 이름만 확인하는 내용이라 여기서는 뜻이 없다 |
 
 `Reachability/`는 **2026-09-17에 걷었다.** 도달성 증명의 주인은 저작 도구 하나다 — 이유는
-[SCOPE-BOUNDARY.md](../../../../SCOPE-BOUNDARY.md) §3.3에 있다.
+[SCOPE-BOUNDARY.md](../../../SCOPE-BOUNDARY.md) §3.3에 있다.
 
 ## `.meta` GUID — 항상 갈려 보이는 네 개
 

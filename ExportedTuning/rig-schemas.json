@@ -6,7 +6,7 @@
     "rigs": [
         {
             "rigKind": "character",
-            "sourcePrefab": "Assets/CharacterRig.prefab",
+            "sourcePrefab": "Assets/Ked.Presentation/Prefabs/CharacterRig.prefab",
             "nodes": [
                 {
                     "id": "__root",
@@ -1052,7 +1052,7 @@
         },
         {
             "rigKind": "background",
-            "sourcePrefab": "Assets/BackgroundRig.prefab",
+            "sourcePrefab": "Assets/Ked.Presentation/Prefabs/BackgroundRig.prefab",
             "nodes": [
                 {
                     "id": "__root",

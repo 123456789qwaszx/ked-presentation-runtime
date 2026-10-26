@@ -13,7 +13,7 @@ public sealed class SetPortraitPoseCommandSpecCharR : CharacterRigCommandSpecBas
 // pose는 cast의 변형만 갈아 끼우고 스프라이트는 건드리지 않는다.
 // 화면의 초상 폭(sizeDelta)은 다음 show/face/face_swap에서야 바뀐다 —
 // 코어의 PortraitSizingReduction이 pose를 접지 않는 근거가 이것이다
-// (Ked.Presentation.Core/Documentation~/reduction-boundary.md 초상 절).
+// (Ked.Presentation/Core/Documentation~/reduction-boundary.md 초상 절).
 public sealed class SetPortraitPoseCommandCharR : CommandBase
 {
     private readonly SetPortraitPoseCommandSpecCharR _spec;

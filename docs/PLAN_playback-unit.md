@@ -56,7 +56,7 @@
 `UI/DialogueBox/`(예제)에 남고 Playback은 그 계약만 안다. `PresentationAssembler` · `PresentationSceneRefs`는 `Game/`(예제 조립)으로 갔다.
 이름도 저장에서 떼었다 — `PresentationSaveState` → `Memory/PresentationMemory`(자기 JSON 설정, 형식은 그대로),
 `SaveLineTarget` → `LineTarget`, `PresentationLoadPlan` → `PresentationResumePoint`. 옮긴 파일의 `.meta` GUID는 그대로다.
-근거는 [ASSEMBLY-BOUNDARY.md](../Assets/Scripts/Ked.Presentation.Runtime/ASSEMBLY-BOUNDARY.md) §1·§3.
+근거는 [ASSEMBLY-BOUNDARY.md](../Assets/Ked.Presentation/Runtime/ASSEMBLY-BOUNDARY.md) §1·§3.
 
 ### P3. 얇은 어댑터와 연출 단독 저장 (이 레포)
 

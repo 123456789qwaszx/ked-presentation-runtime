@@ -1,6 +1,6 @@
 # ExportedTuning — 연출 기준값 덤프 스키마
 
-`Assets/Editor/PresentationTuningExporter.cs`가 내보낸다.
+`Assets/Ked.Presentation/Editor/PresentationTuningExporter.cs`가 내보낸다.
 **이 JSON들의 스키마가 곧 `Ked.Presentation.Core`의 Tuning 타입 모양이 된다** —
 코어는 게임별 값을 코드로 갖지 않고 여기서 읽는다(코어 계약 2).
 
@@ -19,7 +19,7 @@
 "값이 0인 것"과 "필드가 없는 것"을 구분할 수단(bool 게이트 등)을 같이 넣어야 한다.
 
 **좌표 규약.** 픽셀 단위, 기준 해상도(1920×1080) 공간, **y는 위가 양수**.
-코어의 좌표 규약 전문은 `Assets/Ked.Presentation.Core/Documentation~/transform-math-and-epsilon.md`.
+코어의 좌표 규약 전문은 `Assets/Ked.Presentation/Core/Documentation~/transform-math-and-epsilon.md`.
 
 ---
 
@@ -220,7 +220,7 @@ MonoBehaviour.entries[] : { key(캐릭터), offset(px, Vec2), visualScale(무단
 
 ## 4. `portrait-dimensions.json`
 
-`Assets/Data/Generated/PortraitGeneratedDB.asset` → (캐릭터 · 변형 · 표정) → 초상 스프라이트 픽셀 치수.
+`Assets/Samples/Data/PortraitGeneratedDB.asset` → (캐릭터 · 변형 · 표정) → 초상 스프라이트 픽셀 치수.
 
 프리셋과 달리 직렬화 그대로 낼 수 없어 따로 있다: DB가 들고 있는 건 `Sprite` **참조**이고,
 `EditorJsonUtility`는 그걸 `instanceID`로만 적는다 — 덤프만으로는 해석되지 않는 값이다.

@@ -156,7 +156,7 @@ CharacterRigSchema.Nodes            코드      ← 유일한 소유자
 리그를 세우는 것이 이 전제를 데이터로 못박은 것이고, 그래서 등가성 하네스의 판정이
 의미를 갖는다.
 
-> 리덕션 쪽 규약은 [reduction-boundary.md](../../../Ked.Presentation.Core/Documentation~/reduction-boundary.md).
+> 리덕션 쪽 규약은 [reduction-boundary.md](../../../Core/Documentation~/reduction-boundary.md).
 
 ---
 
@@ -357,5 +357,5 @@ CharSlot_Track_Focus          place 계열          ← 슬롯 축 (무대 배�
 ## 참고
 
 * [ASSEMBLY-BOUNDARY.md](../../ASSEMBLY-BOUNDARY.md) — 어셈블리 경계
-* [reduction-boundary.md](../../../Ked.Presentation.Core/Documentation~/reduction-boundary.md) — 스펙 → 목표 상태 규약
+* [reduction-boundary.md](../../../Core/Documentation~/reduction-boundary.md) — 스펙 → 목표 상태 규약
 * [SCOPE-BOUNDARY.md](../../../../../SCOPE-BOUNDARY.md) — 저장소 경계

@@ -1,6 +1,6 @@
 # 어셈블리 경계 (U13-a, 2026-10-26 Playback 분리)
 
-이 폴더(`Assets/Scripts/Ked.Presentation.Runtime/`)는 **하나의 어셈블리**다. 왜 이렇게 생겼는지를 여기 남긴다.
+이 폴더(`Assets/Ked.Presentation/Runtime/`)는 **하나의 어셈블리**다. 왜 이렇게 생겼는지를 여기 남긴다.
 경계는 코드 어디에도 안 보이고 `.asmdef` 파일 안에만 있어서, 근거가 없으면 다음 사람이
 "왜 폴더가 이렇게 묶여 있지"를 알 수 없다.
 
@@ -14,22 +14,26 @@
 
 | 어셈블리 | 위치 | 내용 |
 |---|---|---|
-| `Ked.Presentation.Core` | `Assets/Scripts/Ked.Presentation.Core/` | 순수 상태 계산 — 정지 프레임 리듀스·이징·튜닝 (**엔진 의존 0**, 참조 0) |
-| `Ked.Presentation.Runtime` | `Assets/Scripts/Ked.Presentation.Runtime/` | 연출 실행 계층 — PresentationCore · Commands · CharacterRig · ShotResponse · BackgroundRig · ScreenEffect · StageMask · Audio (참조: Core · TextMeshPro · DOTween.Modules) |
-| `Ked.Presentation.Playback` | `Assets/Scripts/Ked.Presentation.Playback/` | 대사 재생 루프와 연출 기억 — 줄 진행·선택지(DialoguePresenter) · 재생 제어·롤백 기록·백로그(FeatureController) · Yarn 커맨드 번역(YarnBridge) · 재생 호스트 계약·재생 단위(Host) · 연출 기억과 그 입구 `PlaybackMemory`(Memory) (참조: Core · Runtime · YarnSpinner.Unity · TextMeshPro · UnityEngine.UI · DOTween.Modules) |
-| `Ked.Progression` · `Ked.Progression.Save` | `Assets/Scripts/Ked.Progression/` | 진행 판정 코어와 진행 저장 (**엔진 의존 0**. 원본은 형제 저장소 `ked-progression-runtime`, [vendoring.md](../Ked.Progression/Documentation~/vendoring.md)) |
-| `Assembly-CSharp` (기본) | `Assets/Scripts/` 나머지 | **예제 층** — Game(부트스트랩·조립·저장 흐름) · UI · ProgressionHost(진행 런타임을 꽂는 어댑터) |
-| `Assembly-CSharp-Editor` (기본) | `Assets/Editor/` | 에디터 도구 — 초상 DB 빌더 · 튜닝 덤프 익스포터 · 폰트 교체 |
-| `Ked.Presentation.Core.Tests` | `Assets/Scripts/Ked.Presentation.Core/Tests/EditMode/` | EditMode 테스트 (참조: Core · Runtime) |
+| `Ked.Presentation.Core` | `Assets/Ked.Presentation/Core/` | 순수 상태 계산 — 정지 프레임 리듀스·이징·튜닝 (**엔진 의존 0**, 참조 0) |
+| `Ked.Presentation.Runtime` | `Assets/Ked.Presentation/Runtime/` | 연출 실행 계층 — PresentationCore · Commands · CharacterRig · ShotResponse · BackgroundRig · ScreenEffect · StageMask · Audio (참조: Core · TextMeshPro · DOTween.Modules) |
+| `Ked.Presentation.Playback` | `Assets/Ked.Presentation/Playback/` | 대사 재생 루프와 연출 기억 — 줄 진행·선택지(DialoguePresenter) · 재생 제어·롤백 기록·백로그(FeatureController) · Yarn 커맨드 번역(YarnBridge) · 재생 호스트 계약·재생 단위(Host) · 연출 기억과 그 입구 `PlaybackMemory`(Memory) · 등가성 하네스(Diagnostics) (참조: Core · Runtime · YarnSpinner.Unity · TextMeshPro · UnityEngine.UI · DOTween.Modules) |
+| `Ked.Progression` · `Ked.Progression.Save` | `Assets/Ked.Progression/` | 진행 판정 코어와 진행 저장 (**엔진 의존 0**. 원본은 형제 저장소 `ked-progression-runtime`, [vendoring.md](../../Ked.Progression/Documentation~/vendoring.md)) |
+| `Ked.Presentation.Editor` (에디터 전용) | `Assets/Ked.Presentation/Editor/` | 본체 에디터 도구 — 초상 DB 빌더 · 튜닝 덤프 익스포터 · 이징 골든 (참조: Core · Runtime · TextMeshPro · UnityEngine.UI · DOTween.Modules) |
+| `Assembly-CSharp` (기본) | `Assets/Samples/Scripts/` | **예제 층** — Game(부트스트랩·조립·저장 흐름) · UI · ProgressionHost(진행 런타임을 꽂는 어댑터) |
+| `Assembly-CSharp-Editor` (기본) | `Assets/Samples/Editor/` | 예제 쪽 도구 — 폰트 교체 |
+| `Ked.Presentation.Core.Tests` | `Assets/Ked.Presentation/Core/Tests/EditMode/` | EditMode 테스트 (참조: Core · Runtime) |
 
 > **에디터 도구는 런타임 폴더 안에 두지 않는다.** 한때 런타임 트리 안에 에디터 전용
 > 어셈블리가 하나 더 있었으나, 그러면 폴더를 읽는 사람이 매번 "이건 빌드에 들어가나"를
-> 확인해야 한다. `Assets/Editor/`로 모으면 **위치가 곧 답이다.**
+> 확인해야 한다. 본체 뿌리의 `Assets/Ked.Presentation/Editor/`로 모으면 **위치가 곧 답이다.**
+> 그 폴더는 에디터 전용 어셈블리라 예제 타입을 쓰면 컴파일이 깨진다 — 씬에서는 본체 계약
+> (`IStageMaskProvider` · `IRigPrefabSource`)으로만 찾는다.
 
 **의존 방향은 한쪽뿐이다.**
 
 ```
 Assembly-CSharp (예제) ──> Ked.Presentation.Playback ──> Ked.Presentation.Runtime ──> Ked.Presentation.Core
+Ked.Presentation.Editor (에디터 전용) ────────────────────> Ked.Presentation.Runtime
         └────────────────> Ked.Progression.Save ──> Ked.Progression
         ✗ 역방향 불가 (컴파일러가 막는다)
 ```
@@ -97,7 +101,7 @@ U13-b(순수 코어 추출)의 전제다. Yarn을 아는 것은 Playback부터�
 이 저장소는 "provider 계약과 그 구현을 한 파일에 둔다"는 관습이 있었다. 읽기엔 좋지만
 경계에서는 정확히 벽이 된다 — 계약은 코어가, 구현은 UI가 가져야 하는데 한 파일이라 못 가른다.
 
-**그래서 생긴 것이 `Assets/Scripts/UI/Providers/`다.**
+**그래서 생긴 것이 `Assets/Samples/Scripts/UI/Providers/`다.**
 UI 타입이 기능 폴더의 계약을 구현하는 partial을 전부 여기 모았다.
 
 | UI/Providers/ | 구현하는 계약 | 계약의 위치 |

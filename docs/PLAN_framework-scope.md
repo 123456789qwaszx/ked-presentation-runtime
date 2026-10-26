@@ -4,8 +4,8 @@
 작업: `refactor/framework-scope`
 기준 기록: [baseline-framework-scope.md](baseline-framework-scope.md)
 
-**현재 위치(2026-10-26):** 0–4단계 끝. 3단계 뒤에 저장 분할과 재생 단위 계획([PLAN_playback-unit.md](PLAN_playback-unit.md) P0–P4)을
-먼저 끝냈다 — 이 레포가 무엇을 소유하는지가 거기서 정해졌다. 4단계는 Unity 확인과 타이틀 버튼 배치가 남았다. 다음은 5단계(폴더 경계).
+**현재 위치(2026-10-26):** 0–5단계 끝. 3단계 뒤에 저장 분할과 재생 단위 계획([PLAN_playback-unit.md](PLAN_playback-unit.md) P0–P4)을
+먼저 끝냈다 — 이 레포가 무엇을 소유하는지가 거기서 정해졌다. 4·5단계는 Unity 확인이 남았다(4단계는 타이틀 버튼 배치도). 다음은 6단계(문서).
 
 ## 목표 한 문장
 
@@ -41,24 +41,28 @@ SCOPE-BOUNDARY.md §1은 "여기 적힌 것은 전부 필요한 기능이고 주
 
 ## 분류표
 
+위치는 `Assets/` 기준이다(5단계 이후). 지운 것(게임 층·잔재)은 당시 위치로 둔다.
+
 | 영역 | 위치 | 분류 | 비고 |
 |---|---|---|---|
-| 순수 코어 (폴드·등가성) | `Scripts/Ked.Presentation.Core/` | 본체 | |
-| 커맨드·리그·실행 수명 | `Scripts/Ked.Presentation.Runtime/` | 본체 | |
-| Yarn 파싱·브리지 | `Scripts/Ked.Presentation.Playback/YarnBridge/` | 본체 | |
-| 라인 표시 트랜잭션 | `Scripts/Ked.Presentation.Playback/DialoguePresenter/` | 본체 | 대사창·선택지 뷰 베이스는 `UI/DialogueBox/`(예제)로 갈랐다 — `PLAN_playback-unit.md` P2 |
-| 전진·스킵·롤백·백로그 | `Scripts/Ked.Presentation.Playback/FeatureController/` | 본체 | 키 `2`~`7` 바인딩은 소비자 없음 — 3단계에서 처리 |
-| 재생 단위·연출 기억 | `Scripts/Ked.Presentation.Playback/{Host,Memory}/` | 본체 | 호스트가 보는 면은 `PlaybackUnit`·`PlaybackMemory` 둘 — `PLAN_playback-unit.md` |
-| 진행 판정·실행 | `Scripts/Ked.Progression/` | 꽂힌 모듈 (반입본) | 원본은 ked-progression-runtime. 고칠 일은 원본과 함께(vendoring) |
-| 저장 모델·조정자·포크 | `Scripts/Ked.Progression/Save/` | 꽂힌 모듈 (반입본) | 진행 겹. 과거 장면 루트 보관(E3)은 여기 몫 |
-| 로컬 파일 저장 | `Scripts/Ked.Progression/Save/{Persistence,Slots,Maintenance}` | 꽂힌 모듈 (기본 제공 구현) | D2. 연출 겹은 `PlaybackMemory`가 문자열로 싣는다 |
-| 진행 어댑터 | `Scripts/ProgressionHost/` | 샘플 (진행·저장 예제) | 진행 코어를 연출에 꽂는 얇은 어댑터. `Unit`·`Memory`만 쓴다 |
-| 등가성 하네스 | `Scripts/Game/StageEquivalenceHarness.cs` | 본체 (Diagnostics) | `Game/`에서 꺼낸다 |
-| 에디터 도구 | `Assets/Editor/` | 본체 (Editor) | |
-| 익스포트 산출물·하네스 | `ExportedTuning/`, `tests/` | 본체 | CI 게이트 3개 유지 (+ 원본의 ProgressionSave) |
-| 부트스트랩·세이브 플로우 | `Scripts/Game/` (하네스 제외) | 샘플 | `SampleBootstrap`(예제 고르기) · `PresentationAssembler`(조립) · `NodePlaythrough`(연출 단독 이어하기) · 저장 흐름. 학습 토글은 통합 샘플에만(D1) |
-| UI 프레임·화면·바인딩 | `Scripts/UI/` | 샘플 | 두 예제가 타이틀([처음부터]·[이어하기])을 같이 쓴다. 예제 고르기는 아직 인스펙터 칸 |
-| 예제 대본·진행 JSON | `Assets/@Dialogue/` | 샘플 | 재캐스팅 대상 |
+| 순수 코어 (폴드·등가성) | `Ked.Presentation/Core/` | 본체 | |
+| 커맨드·리그·실행 수명 | `Ked.Presentation/Runtime/` | 본체 | |
+| Yarn 파싱·브리지 | `Ked.Presentation/Playback/YarnBridge/` | 본체 | |
+| 라인 표시 트랜잭션 | `Ked.Presentation/Playback/DialoguePresenter/` | 본체 | 대사창·선택지 뷰 베이스는 `Samples/Scripts/UI/DialogueBox/`(예제)로 갈랐다 — `PLAN_playback-unit.md` P2 |
+| 전진·스킵·롤백·백로그 | `Ked.Presentation/Playback/FeatureController/` | 본체 | 소비자 없던 키 `2`~`7` 바인딩은 4단계에서 걷었다 |
+| 재생 단위·연출 기억 | `Ked.Presentation/Playback/{Host,Memory}/` | 본체 | 호스트가 보는 면은 `PlaybackUnit`·`PlaybackMemory` 둘 — `PLAN_playback-unit.md` |
+| 등가성 하네스 | `Ked.Presentation/Playback/Diagnostics/` | 본체 (Diagnostics) | 본체 타입만 쓴다. 대본 폴더는 호스트가 넘긴다 |
+| 에디터 도구 | `Ked.Presentation/Editor/` | 본체 (Editor) | `Ked.Presentation.Editor` asmdef(에디터 전용). 씬에서는 본체 계약으로만 찾는다 |
+| 본체 에셋 | `Ked.Presentation/{Prefabs,Audio,Resources,Shaders,Data}/` | 본체 | 리그 프리팹 3 · 믹서 · VisualEffects 재질(이름으로 읽는다) · 셰이더 · 화면 효과 프리셋·튜닝 |
+| 진행 판정·실행 | `Ked.Progression/` | 꽂힌 모듈 (반입본) | 원본은 ked-progression-runtime. 고칠 일은 원본과 함께(vendoring) |
+| 저장 모델·조정자·포크 | `Ked.Progression/Save/` | 꽂힌 모듈 (반입본) | 진행 겹. 과거 장면 루트 보관(E3)은 여기 몫 |
+| 로컬 파일 저장 | `Ked.Progression/Save/{Persistence,Slots,Maintenance}` | 꽂힌 모듈 (기본 제공 구현) | D2. 연출 겹은 `PlaybackMemory`가 문자열로 싣는다 |
+| 익스포트 산출물·하네스 | `ExportedTuning/`, `tests/` (레포 루트) | 본체 | CI 게이트 3개 유지 (+ 원본의 ProgressionSave) |
+| 진행 어댑터 | `Samples/Scripts/ProgressionHost/` | 샘플 (진행·저장 예제) | 진행 코어를 연출에 꽂는 얇은 어댑터. `Unit`·`Memory`만 쓴다 |
+| 부트스트랩·세이브 플로우 | `Samples/Scripts/Game/` | 샘플 | `SampleBootstrap`(예제 고르기) · `PresentationAssembler`(조립) · `NodePlaythrough`(연출 단독 이어하기) · 저장 흐름. 학습 토글은 통합 샘플에만(D1) |
+| UI 프레임·화면·바인딩 | `Samples/Scripts/UI/` | 샘플 | 두 예제가 타이틀([처음부터]·[이어하기]·[다른 예제로])을 같이 쓴다 |
+| 예제 대본·진행 JSON·커브 | `Samples/Dialogue/` | 샘플 | `curves.json`은 작가 자산이라 대본 곁에 산다 |
+| 예제 에셋 | `Samples/{Prefabs,Resources,Scenes,Data,Portraits,Art,Editor}/` | 샘플 | 대사창 항목·선택지·저장 슬롯 프리팹 · 배경·음원·UI 이미지 · 씬 · 초상화 DB·대사창 배치·화자 정책 · 공개 초상화 · 이모지(참조 없음) · 폰트 교체 도구 |
 | 앨범·CG 해금·앨범 저장 | `Scripts/Album/`, `UI/Screens/AlbumUIRoot.cs`, `UI/Bindings/VnScreenBindings.Album.cs`, `Data/Album/`, `VNAlbumSlotButton.prefab` | 게임 층 | 제거 |
 | Settings 버튼 | `TitleUIRoot`·`VNScreenBindings.Title` | 미구현 메뉴 | 제거 (D3) |
 | URP 템플릿 잔해 | `Assets/TutorialInfo/`, `Assets/Readme.asset` | 잔재 | 제거 |
@@ -148,14 +152,49 @@ SCOPE-BOUNDARY.md §1은 "여기 적힌 것은 전부 필요한 기능이고 주
   이력에 한 번도 없던 스프라이트 참조 9건(씬 7·프리팹 2)은 되살릴 수 없다 — 빨리 넘기기 아이콘은 `13_스킵`, 퀵메뉴 배경은 `21_button_box`로 잇고,
   나머지(되감기·백로그·펼치기·속도 아이콘, 백로그 딤 배경, 슬롯 버튼의 B 위젯 둘)는 비웠다. 그림이 생기면 그 자리에 넣는다.
   씬·프리팹이 가리키는 스프라이트 중 끊긴 것은 0건(패키지 스프라이트 제외).
-- `Assets/@Dialogue/Demo_Presentation.yarn` — S1 배경·BGM·등장 … S7 퇴장. Yarn 컴파일러로 문법 0오류, 명령 이름·인자 수·배경·음원·초상화 키를 대조했다.
+- `Assets/Samples/Dialogue/Demo_Presentation.yarn` — S1 배경·BGM·등장 … S7 퇴장. Yarn 컴파일러로 문법 0오류, 명령 이름·인자 수·배경·음원·초상화 키를 대조했다.
   `SampleBootstrap.presentationEntryNode` 기본값을 `Demo_Presentation`으로.
 - `SampleExampleSwitch` + 타이틀의 `ExampleLabel_Text` · `SwitchExampleButton_Button`(TitleUIRoot Refs). 씬에 두 오브젝트가 없으면 경고만 하고 타이틀은 그대로 돈다.
 
-### 5. 폴더 경계 정리
-1. 샘플 코드를 `Assets/Samples/` 아래로: 부트스트랩·세이브 플로우·`UI/`·`@Dialogue/`·샘플 프리팹.
-2. 본체 코드를 한 뿌리 아래로. asmdef는 아직 만들지 않는다.
-3. 본체 → 샘플·진행·저장 방향 참조 0건을 grep으로 확인.
+### 5. 폴더 경계 정리 ✅ (Unity 확인 남음)
+
+당시 계획(기록): 샘플 코드를 `Assets/Samples/` 아래로 · 본체 코드를 한 뿌리 아래로(asmdef는 아직 만들지 않는다) ·
+본체 → 샘플·진행·저장 방향 참조 0건을 grep으로 확인.
+
+**정한 것(2026-10-26).**
+
+| | 결정 |
+|---|---|
+| 뿌리 | 본체 `Assets/Ked.Presentation/` · 반입본 `Assets/Ked.Progression/` · 예제 `Assets/Samples/`. 본체 안 폴더는 `Core`·`Runtime`·`Playback`·`Editor`로 줄였다 — asmdef 이름과 GUID는 그대로 |
+| 본체 에셋 | 같이 옮긴다. 기준은 **"특정 그림·인물·대사창 아트에 맞춘 값이면 샘플, 아니면 본체"**. 프리셋 DB의 타입은 모두 본체에 있다 — 값을 보고 갈랐다 |
+| 에디터 도구 | 본체 계약으로 찾게 바꾸고 에디터 전용 asmdef(`Ked.Presentation.Editor`)를 둔다. "asmdef는 아직 만들지 않는다"는 본체 asmdef가 없던 때 문장이다 — 본체 셋과 진행 둘은 이미 asmdef였고, 본체 → 예제 코드 참조는 처음부터 컴파일러가 막고 있었다. 막히지 않던 곳은 에디터 도구뿐이었다 |
+| `curves.json` | 작가 자산이다(EaseCurveLibrary 주석: 대본 번들 곁에 산다, 없으면 정상). 대본과 함께 `Samples/Dialogue/`로. 읽는 곳은 예제 조립기 하나 |
+
+**결과.**
+- `259ee8d3` 이동만 — 1245개 이름 바꾸기, 내용 변경 0. 새 폴더 `.meta` 10개, 빈 `Material/` 제거.
+  `Assets/Art/`에는 비공개 아트만 남아 추적을 끊고 통째로 무시한다(`.gitignore`).
+- `9b5939b8` 본체 도구가 예제 타입을 모르게 — `Ked.Presentation.Editor` asmdef, 리그 프리팹 계약 `IRigPrefabSource`(SampleBootstrap이 구현),
+  튜닝 덤프는 기준 해상도를 `IStageMaskProvider` 무대에서 읽음, 초상 DB 빌더는 설정을 타입으로 찾음,
+  등가성 하네스는 대본 폴더를 호스트에게 받고 하위 폴더까지 읽음(전에는 `test/`의 `qwer_scene`을 못 찾았다).
+- 이어서 경로 문자열 — 조립기의 커브 경로, 툴팁, 덤프 대상 상수, 빌드 설정·템플릿 씬, Yarn 프로젝트의 정의 파일 경로, 생성된 ysls,
+  테스트 프로젝트 셋, `ExportedTuning`, 살아 있는 문서(README·SCOPE-BOUNDARY·ASSEMBLY-BOUNDARY·vendoring·schema·BLUR).
+- 본체 → 예제 코드 참조 0건: 본체 넷(Core·Runtime·Playback·Editor)과 진행 둘의 asmdef가 컴파일로 막고, 타입 이름 대조로도 0건. 문서의 상대 링크 0건 끊김.
+- 일부러 남긴 문자열(옮긴 것을 가리키지 않음): `PortraitBuildSettings`의 기본값(새 설정 에셋용), 초상 DB 빌더의 기본 생성 자리,
+  덤프의 '범위 밖' 기록 중 이모지 에셋 둘(존재하지 않음), 기록 문서(baseline·learning·migration 등)의 당시 경로 — 6단계에서 archive로.
+- 덤프 대상 경로는 예제 쪽을 가리킨다 — 튜닝 덤프는 이 레포의 기준 구성(예제 씬과 그 DB)을 내는 도구라 의도한 것이다.
+
+**워크플로 경로(이 레포 밖에서 갱신).** 체크아웃이 sparse라 옛 경로로는 하네스가 소스를 못 받는다.
+- progression-core: `Assets/Scripts/Ked.Progression` → `Assets/Ked.Progression` (paths·sparse 둘 다)
+- progression-host: sparse `Assets/Scripts` → `Assets/Ked.Progression` · `Assets/Ked.Presentation/Playback` · `Assets/Samples/Scripts/ProgressionHost`.
+  paths는 `Assets/Ked.Progression/**` · `Assets/Samples/Scripts/ProgressionHost/SceneRunner.cs` · `Assets/Ked.Presentation/Playback/Host/**` ·
+  `Assets/Ked.Presentation/Playback/FeatureController/{RollbackHistory,BacklogRecorder}.cs`
+- save-lifecycle: sparse `Assets/Scripts` → `Assets/Ked.Progression` · `Assets/Ked.Presentation/Playback` · `Assets/Samples/Scripts`.
+  paths는 `Assets/Ked.Progression/**` · `Assets/Ked.Presentation/Playback/**` · `Assets/Samples/Scripts/**`(옛 `DialoguePresenter/**`·`FeatureController/**`는 P2부터 이미 낡았다)
+
+**새로 본 것.**
+- 화자 정책 DB의 항목 둘(`tyrant`·`iris`)은 공개 3인이 아니다 — 6단계에서 비울지 본다.
+- `curves.json`은 `Application.dataPath`로 파일을 직접 읽어 빌드에서는 안 읽힐 것으로 보인다 — 별도 작업 후보.
+- 이모지 그림 34장·이모지 재질·셰이더, 분리 블러 재질은 어디서도 참조하지 않는다 — 지울지는 따로.
 
 ### 6. 문서
 1. `README.md`: 목표 한 문장, 클론 후 실행법, 예제, DSL 입구, 리그 생성 입구, 확장 방법, 지원 범위와 제한. 죽은 키 안내 제거.

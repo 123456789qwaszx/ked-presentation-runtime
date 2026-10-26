@@ -14,5 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PortraitBuildSettings
   scanFolders:
   - Assets/Samples/Portraits
-  generatedDbPath: Assets/Data/Generated/PortraitGeneratedDB.asset
+  generatedDbPath: Assets/Samples/Data/PortraitGeneratedDB.asset
   strictMode: 0

@@ -89,7 +89,7 @@ Bjørge, *Bandwidth-Efficient Rendering*, SIGGRAPH 2015 Mobile Graphics (ARM).
 
 ### 캐릭터 — 밉맵 + 십자 4탭
 
-`Assets/Shaders/CharacterBlur.hlsl`.
+`Assets/Ked.Presentation/Shaders/CharacterBlur.hlsl`.
 
 **밉맵은 이미 블러다.** 밉 체인은 로드 시점에 박스 필터로 만들어진다 — 레벨 n은 2ⁿ×2ⁿ 영역의 평균이다.
 LOD 4를 읽는 것은 16×16 박스 블러를 **1탭**에 얻는 것이고, 메모리는 +33%(1+¼+⅟₁₆+… = 4/3)뿐이다.

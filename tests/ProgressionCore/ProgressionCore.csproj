@@ -1,7 +1,7 @@
 <!--
   진행 코어 회귀 게이트.
 
-  Assets/Scripts/Ked.Progression 은 noEngineReferences: true 인 순수 C# 어셈블리이고
+  Assets/Ked.Progression 은 noEngineReferences: true 인 순수 C# 어셈블리이고
   그 EditMode 테스트도 순수 NUnit이다. 따라서 Unity 없이 그대로 돌릴 수 있다.
 
   glob 하나로 반입본 전체를 잡는다 - 새 파일이 반입돼도 이 파일을 고치지 않는다.
@@ -22,7 +22,7 @@
   </ItemGroup>
   <ItemGroup>
     <!-- Save/ 는 Newtonsoft에 매인 별도 어셈블리(Ked.Progression.Save)라 여기서 빼고, tests/SaveLifecycle이 본다. -->
-    <Compile Include="../../Assets/Scripts/Ked.Progression/**/*.cs"
-             Exclude="../../Assets/Scripts/Ked.Progression/Save/**/*.cs" />
+    <Compile Include="../../Assets/Ked.Progression/**/*.cs"
+             Exclude="../../Assets/Ked.Progression/Save/**/*.cs" />
   </ItemGroup>
 </Project>

@@ -23,18 +23,18 @@
     <IsPackable>false</IsPackable>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="../../Assets/Scripts/Ked.Progression/**/*.cs"
-             Exclude="../../Assets/Scripts/Ked.Progression/Tests/**/*.cs;../../Assets/Scripts/Ked.Progression/Save/**/*.cs" />
-    <Compile Include="../../Assets/Scripts/ProgressionHost/SceneRunner.cs" />
-    <Compile Include="../../Assets/Scripts/Ked.Presentation.Playback/Host/IPlaybackStage.cs" />
-    <Compile Include="../../Assets/Scripts/Ked.Presentation.Playback/Host/PlaybackUnit.cs" />
-    <Compile Include="../../Assets/Scripts/Ked.Presentation.Playback/Host/IPlaybackHost.cs" />
-    <Compile Include="../../Assets/Scripts/Ked.Presentation.Playback/Host/NodePlaybackHost.cs" />
-    <Compile Include="../../Assets/Scripts/Ked.Presentation.Playback/FeatureController/RollbackHistory.cs" />
-    <Compile Include="../../Assets/Scripts/Ked.Presentation.Playback/FeatureController/BacklogRecorder.cs" />
-    <Compile Include="../../Assets/Scripts/Ked.Presentation.Playback/Memory/PresentationResumePoint.cs" />
-    <Compile Include="../../Assets/Scripts/Ked.Presentation.Playback/DialoguePresenter/VNLinePresentationFlow/LineTarget.cs" />
-    <Compile Include="../../Assets/Scripts/Ked.Presentation.Playback/DialoguePresenter/VNOptionFlow/VNChoiceRecord.cs" />
+    <Compile Include="../../Assets/Ked.Progression/**/*.cs"
+             Exclude="../../Assets/Ked.Progression/Tests/**/*.cs;../../Assets/Ked.Progression/Save/**/*.cs" />
+    <Compile Include="../../Assets/Samples/Scripts/ProgressionHost/SceneRunner.cs" />
+    <Compile Include="../../Assets/Ked.Presentation/Playback/Host/IPlaybackStage.cs" />
+    <Compile Include="../../Assets/Ked.Presentation/Playback/Host/PlaybackUnit.cs" />
+    <Compile Include="../../Assets/Ked.Presentation/Playback/Host/IPlaybackHost.cs" />
+    <Compile Include="../../Assets/Ked.Presentation/Playback/Host/NodePlaybackHost.cs" />
+    <Compile Include="../../Assets/Ked.Presentation/Playback/FeatureController/RollbackHistory.cs" />
+    <Compile Include="../../Assets/Ked.Presentation/Playback/FeatureController/BacklogRecorder.cs" />
+    <Compile Include="../../Assets/Ked.Presentation/Playback/Memory/PresentationResumePoint.cs" />
+    <Compile Include="../../Assets/Ked.Presentation/Playback/DialoguePresenter/VNLinePresentationFlow/LineTarget.cs" />
+    <Compile Include="../../Assets/Ked.Presentation/Playback/DialoguePresenter/VNOptionFlow/VNChoiceRecord.cs" />
     <Compile Include="Stubs.cs" />
     <Compile Include="Fakes.cs" />
     <Compile Include="Program.cs" />
