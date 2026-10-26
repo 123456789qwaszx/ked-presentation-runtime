@@ -1,0 +1,30 @@
+name: Progression host
+on:
+  push:
+    branches: [dev, main]
+  pull_request:
+    paths:
+      - 'Assets/Scripts/Ked.Progression/**'
+      - 'Assets/Scripts/ProgressionHost/SceneRunner.cs'
+      - 'Assets/Scripts/FeatureController/RollbackHistory.cs'
+      - 'Assets/Scripts/FeatureController/BacklogRecorder.cs'
+      - 'tests/ProgressionHost/**'
+      - '.github/workflows/progression-host.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  progression-host:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            Assets/Scripts
+            tests/ProgressionHost
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Run host SceneRunner regression harness
+        run: dotnet run --project tests/ProgressionHost/ProgressionHost.csproj --configuration Release
