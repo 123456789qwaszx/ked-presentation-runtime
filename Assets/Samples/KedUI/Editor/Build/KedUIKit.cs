@@ -396,6 +396,7 @@ namespace Ked.Samples.UI.Editor
             bool choice = false)
         {
             KedNode node = Node(parent, name, design, anchor ?? KedAnchor.TopLeft);
+            CenterPivot(node.Rect);
 
             string sprite = style switch
             {
@@ -438,6 +439,7 @@ namespace Ked.Samples.UI.Editor
             bool withBase = true)
         {
             KedNode node = Node(parent, name, design, anchor ?? KedAnchor.TopLeft);
+            CenterPivot(node.Rect);
 
             KedNode baseNode = Fill(node, name + "Base");
             Image hit = withBase
@@ -464,6 +466,7 @@ namespace Ked.Samples.UI.Editor
         public KedButton Tab(KedNode parent, string name, string textName, string text, Rect design, Rect textDesign)
         {
             KedNode node = Node(parent, name, design, KedAnchor.TopLeft);
+            CenterPivot(node.Rect);
             Image background = Image(node, "tab_normal", raycast: true);
 
             Button button = AddButton(node, background);
@@ -507,6 +510,7 @@ namespace Ked.Samples.UI.Editor
         public KedButton LinkButton(KedNode parent, string name, string labelName, string text, Rect design, float fontSize, Color color)
         {
             KedNode node = Node(parent, name, design, KedAnchor.TopLeft);
+            CenterPivot(node.Rect);
             Image hit = Clear(node);
 
             Button button = AddButton(node, hit);
@@ -523,6 +527,16 @@ namespace Ked.Samples.UI.Editor
                 backgroundSelected: new Color(1f, 1f, 1f, 0f),
                 labelNormal: color,
                 labelSelected: color);
+        }
+
+        // 버튼은 가운데를 기준점으로 — 누름 연출(ButtonAnimation, localScale)이 가운데로 줄어들게. 자리는 그대로 둔다.
+        private static void CenterPivot(RectTransform rect)
+        {
+            Vector2 center = new(0.5f, 0.5f);
+            Vector2 delta = center - rect.pivot;
+
+            rect.pivot = center;
+            rect.anchoredPosition += new Vector2(delta.x * rect.sizeDelta.x, delta.y * rect.sizeDelta.y);
         }
 
         private Button AddButton(KedNode node, Graphic target)

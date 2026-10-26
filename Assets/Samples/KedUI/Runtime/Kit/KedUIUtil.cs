@@ -79,6 +79,47 @@ namespace Ked.Samples.UI
                 system.SetSelectedGameObject(null);
         }
 
+        public static GameObject CurrentFocus()
+        {
+            EventSystem system = EventSystem.current;
+            return system != null ? system.currentSelectedGameObject : null;
+        }
+
+        /// <summary>그 대상이 아직 보이고 누를 수 있으면 포커스를 준다.</summary>
+        public static bool TryFocus(GameObject target)
+        {
+            if (target == null || !target.activeInHierarchy)
+                return false;
+
+            if (!target.TryGetComponent(out Selectable selectable) || !selectable.IsInteractable())
+                return false;
+
+            EventSystem system = EventSystem.current;
+            if (system == null)
+                return false;
+
+            system.SetSelectedGameObject(target);
+            return true;
+        }
+
+        /// <summary>그 화면 안에서 누를 수 있는 첫 버튼·조작에 포커스(키보드 이동이 None인 것은 건너뛴다).</summary>
+        public static void FocusFirstIn(Component root)
+        {
+            if (root == null)
+                return;
+
+            foreach (Selectable selectable in root.GetComponentsInChildren<Selectable>())
+            {
+                if (selectable.navigation.mode == Navigation.Mode.None)
+                    continue;
+
+                if (TryFocus(selectable.gameObject))
+                    return;
+            }
+
+            ClearFocus();
+        }
+
         // 두 자리 슬롯 번호("01").
         public static string TwoDigits(int number) => number.ToString("00");
 

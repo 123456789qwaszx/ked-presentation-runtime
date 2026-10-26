@@ -104,6 +104,8 @@ namespace Ked.Samples.UI.Editor
 
             KedButton jump = kit.IconButton(row, nameof(W.RowJump), "rollback", new Rect(1352, 176, 46, 46), padding: 12f);
             Fixed(jump.gameObject, 46f, 46f);
+            // 이동 버튼 위에서 시작한 끌기도 목록을 끈다(버튼 피드백이 끌기 사건을 받아 멈추지 않게).
+            jump.gameObject.AddComponent<KedDragToScroll>();
 
             KedNode divider = kit.StretchX(row, nameof(W.RowDivider), new Rect(145, 258, 1230, 1), 0f);
             divider.Rect.anchoredPosition = new Vector2(divider.Rect.anchoredPosition.x, 1f);

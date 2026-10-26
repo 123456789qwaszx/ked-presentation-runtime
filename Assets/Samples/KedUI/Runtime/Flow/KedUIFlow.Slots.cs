@@ -130,6 +130,7 @@ namespace Ked.Samples.UI
             return loadable;
         }
 
+        // 쪽을 넘기면 선택도 그 쪽의 첫 칸으로 옮긴다 — 보이지 않는 칸에 실행이 걸리지 않게.
         private void TurnSlotPage(int delta)
         {
             int next = Mathf.Clamp(_slotPage + delta, 0, PageCount - 1);
@@ -137,8 +138,26 @@ namespace Ked.Samples.UI
                 return;
 
             _slotPage = next;
+            _slotSelected = FirstSelectableOnPage(_slotPage);
             RedrawSlots(focus: false);
         }
+
+        private int FirstSelectableOnPage(int page)
+        {
+            int first = page * SaveLoadPanel.SlotsPerPage;
+            int end = Mathf.Min(CellCount, first + SaveLoadPanel.SlotsPerPage);
+
+            for (int cell = first; cell < end; cell++)
+            {
+                if (IsSelectableCell(cell))
+                    return cell;
+            }
+
+            return -1;
+        }
+
+        private bool IsOnCurrentPage(int cell) =>
+            cell >= 0 && cell / SaveLoadPanel.SlotsPerPage == _slotPage;
 
         private void SelectSlotCard(int indexOnPage)
         {
@@ -168,7 +187,7 @@ namespace Ked.Samples.UI
             else
                 hint = Text(save ? "slots.hint.save" : "slots.hint.load");
 
-            bool actionEnabled = !_slotBusy && IsSelectableCell(_slotSelected) &&
+            bool actionEnabled = !_slotBusy && IsOnCurrentPage(_slotSelected) && IsSelectableCell(_slotSelected) &&
                                  (!save || _slotPort.CanSave);
 
             _slots.Present(new SaveLoadPanel.Model
@@ -243,7 +262,7 @@ namespace Ked.Samples.UI
 
         private void ActOnSelectedSlot()
         {
-            if (_slotBusy || !IsSelectableCell(_slotSelected))
+            if (_slotBusy || !IsOnCurrentPage(_slotSelected) || !IsSelectableCell(_slotSelected))
                 return;
 
             if (_slotMode == SlotMode.Save)
@@ -344,6 +363,7 @@ namespace Ked.Samples.UI
                 Task load = _slotPort.LoadAsync(slotId, () =>
                 {
                     transitionStarted = true;
+                    StopFastForward();
                     CloseAllPanels();
                 });
 

@@ -84,6 +84,7 @@ namespace Ked.Samples.UI
         private KedButton _autoButton;
         private KedButton _fastForwardButton;
         private bool _hudHidden;
+        private GameObject _focusBeforeHide;
         private string _chapterLabel;
         private Localizer _texts;
 
@@ -170,13 +171,46 @@ namespace Ked.Samples.UI
 
         public void SetHudHidden(bool hidden)
         {
+            bool changed = hidden != _hudHidden;
             _hudHidden = hidden;
+
+            // 숨길 때 포커스(재생 쪽이 고른 선택지일 수 있다)를 기억했다가 다시 보일 때 돌려준다.
+            if (changed && hidden)
+                _focusBeforeHide = KedUIUtil.CurrentFocus();
 
             KedUIUtil.SetCanvasGroup(View.CanvasGroup(Refs.HudRoot), visible: !hidden, interactive: !hidden);
 
             Button restore = View.Button(Refs.RestoreArea);
             if (restore != null)
                 KedUIUtil.SetActive(restore, hidden);
+
+            if (hidden)
+            {
+                KedUIUtil.ClearFocus();
+            }
+            else if (changed)
+            {
+                if (!KedUIUtil.TryFocus(_focusBeforeHide))
+                    RestoreFocus();
+
+                _focusBeforeHide = null;
+            }
+        }
+
+        /// <summary>떠 있는 선택지가 있으면 첫 항목에 포커스(Panel이 닫히거나 UI가 다시 보일 때). 없으면 포커스를 비운다.</summary>
+        public void RestoreFocus()
+        {
+            CanvasGroup options = View.CanvasGroup(Refs.OptionsRoot);
+            RectTransform container = View.Rect(Refs.OptionsContainer);
+
+            if (options != null && options.alpha > 0f && options.interactable && container != null)
+            {
+                foreach (Selectable item in container.GetComponentsInChildren<Selectable>())
+                {
+                    if (KedUIUtil.TryFocus(item.gameObject))
+                        return;
+                }
+            }
 
             KedUIUtil.ClearFocus();
         }

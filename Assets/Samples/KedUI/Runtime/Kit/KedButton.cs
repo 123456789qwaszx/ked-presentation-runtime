@@ -40,6 +40,7 @@ namespace Ked.Samples.UI
         private bool _focused;
         private bool _selectedLook;
         private bool _lastInteractable = true;
+        private bool _lastReachable = true;
         private bool _feedbackBound;
 
         public Button Button => button;
@@ -69,11 +70,14 @@ namespace Ked.Samples.UI
                 focusRing.SetActive(false);
         }
 
+        // 막힘 모양은 버튼 자신의 값(interactable)으로 본다. 부모 CanvasGroup이 막은 경우(가려진 Panel · Panel 아래 Root)는
+        // 반투명하게 만들지 않는다 — 그건 "이 버튼을 쓸 수 없다"가 아니라 "지금 위에 다른 화면이 있다"다.
         private void LateUpdate()
         {
-            bool interactable = button != null && button.IsInteractable();
+            bool own = button == null || button.interactable;
+            bool reachable = button == null || button.IsInteractable();
 
-            if (interactable != _lastInteractable)
+            if (own != _lastInteractable || reachable != _lastReachable)
                 Refresh();
         }
 
@@ -143,20 +147,22 @@ namespace Ked.Samples.UI
 
         private void Refresh()
         {
-            bool interactable = button == null || button.IsInteractable();
+            bool interactable = button == null || button.interactable;
+            bool reachable = button == null || button.IsInteractable();
             _lastInteractable = interactable;
+            _lastReachable = reachable;
 
             if (canvasGroup != null)
                 canvasGroup.alpha = interactable ? 1f : KedColors.DisabledAlpha;
 
             if (focusRing != null)
-                focusRing.SetActive(interactable && (_hovered || _focused) && !_selectedLook);
+                focusRing.SetActive(reachable && (_hovered || _focused) && !_selectedLook);
 
             if (background != null)
             {
                 Sprite sprite = _selectedLook && selectedSprite != null
                     ? selectedSprite
-                    : interactable && _hovered && hoverSprite != null
+                    : reachable && _hovered && hoverSprite != null
                         ? hoverSprite
                         : normalSprite;
 

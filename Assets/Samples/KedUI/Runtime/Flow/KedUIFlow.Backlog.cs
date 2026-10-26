@@ -116,7 +116,11 @@ namespace Ked.Samples.UI
         {
             try
             {
-                await _slotPort.ForkFromBacklogAsync(entry, CloseAllPanels);
+                await _slotPort.ForkFromBacklogAsync(entry, () =>
+                {
+                    StopFastForward();
+                    CloseAllPanels();
+                });
             }
             catch (Exception error)
             {

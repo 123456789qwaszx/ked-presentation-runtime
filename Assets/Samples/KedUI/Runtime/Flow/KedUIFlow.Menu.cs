@@ -60,20 +60,26 @@ namespace Ked.Samples.UI
             });
         }
 
+        // 나가는 동안(ExitAsync)은 입력을 UI가 쥐고 Root를 막는다 — 정지와 되감기·메뉴가 겹치지 않게.
         private async void ReturnToTitle()
         {
+            _exiting = true;
+
             try
             {
+                StopFastForward();
                 CloseAllPanels();
 
                 if (_playback?.Host != null)
                     await _playback.Host.ExitAsync();
-
-                GoToTitle();
             }
             catch (Exception error)
             {
                 Debug.LogException(error);
+            }
+            finally
+            {
+                _exiting = false;
                 GoToTitle();
             }
         }
