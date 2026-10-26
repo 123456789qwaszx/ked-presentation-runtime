@@ -1,10 +1,10 @@
 # 이 폴더는 복사 반입본이다
 
 `Ked.Progression`은 **다른 저장소가 원본**이다. 여기 있는 것은 그 저장소의
-`Assets/Progression/Runtime/`을 그대로 옮겨 놓은 한 벌이다.
+`Assets/Progression/Runtime/`과 같은 내용을 담은 한 벌이다.
 
 ```
-원본   ked-progression-runtime   (형제 폴더 · Unity 프로젝트 · 진행 코어와 런타임의 집)
+원본   ked-progression-runtime   (형제 폴더 · Unity 프로젝트 · 진행 코어의 집 + 최소 샘플)
 반입   Assets/Scripts/Ked.Progression/   ← 이 폴더
 ```
 
@@ -12,14 +12,20 @@
 복사 반입돼 있는 것과 같은 방식이다. **다만 방향이 반대다** — 연출 코어는 여기가 원본이고,
 진행 코어는 여기가 사본이다.
 
+사본에서 먼저 고치는 일은 생긴다. 그때는 **원본에도 같은 손을 대서** 두 벌을 다시 맞춘다.
+2026-10-26의 동기화가 그 경우다.
+
 ## 스냅샷
 
 | | |
 |---|---|
-| 원본 | `ked-progression-runtime` · `dev` @ `581233e` |
-| 마지막 동기화 | 2026-09-17 · **원본 → 사본** |
-| 가져온 것 | 코어(Spec/State/Transition/Vocabulary/Loading) + Scene · Contracts · Response · ProgressionDriver + EditMode 테스트 |
-| 코드 일치 | `diff -r` 0건 |
+| 원본 | `ked-progression-runtime` · `sync/from-presentation` @ `185dc68` (코드는 `99677cb`에서 맞춤) |
+| 마지막 동기화 | 2026-10-26 · **사본 → 원본** (역반입) |
+| 맞춘 것 | `Runtime/` 전체(Spec · State · Transition · Vocabulary · Loading · Scene · Contracts · Response · `ProgressionDriver` · `ISceneRunner`) + EditMode 테스트 |
+| 코드 일치 | `.cs` 기준 `diff -r` 0건 (아래 "대조" 명령) |
+| 원본 쪽 정리 | 옛 `SceneRunner`·`SceneRunContext`·`ProgressionState`·디버그 호스트 삭제, `Assets/Progression/Samples/` 최소 샘플 추가, README 갱신 |
+
+원본 브랜치 `sync/from-presentation`은 아직 원본 `dev`에 합치지 않았다. 합치면 이 표의 브랜치를 고친다.
 
 **갈리면 이 표를 고친다.** 표가 낡으면 사본이 어디서 왔는지 아무도 모른다.
 
@@ -29,45 +35,73 @@
 ## 왜 UPM 패키지가 아닌가
 
 `0.2.0` 태그를 git URL로 물리는 방식으로 한 번 세웠고 실제로 섰다
-(`feat/progression-driver` 브랜치 `5b3aa2c8`). 그런데 진행 코어는 지금 **매일 바뀌는 중**이라,
-한 줄 고칠 때마다 커밋 → 태그 → 푸시 → 유니티 재해결이 붙는다.
-그 왕복이 지금 작업의 가장 큰 비용이다.
+(`feat/progression-driver` 브랜치 `5b3aa2c8`). 그런데 진행 코어는 그때 **매일 바뀌는 중**이라,
+한 줄 고칠 때마다 커밋 → 태그 → 푸시 → 유니티 재해결이 붙었다.
 
 복사 반입은 그 왕복을 0으로 만든다. 대신 **갈림을 사람이 지킨다** — 아래 대조를 쓴다.
 
-## 대조와 반입
+## 대조
 
-원본과 갈렸는지 본다(양쪽 모두 `Library`·`obj`가 섞이지 않는 경로만 본다):
+원본과 갈렸는지 본다(양쪽 모두 `Library`·`obj`가 섞이지 않는 경로만 본다). 코드만 보려면:
 
 ```bash
-diff -r --strip-trailing-cr \
+diff -r -q --strip-trailing-cr -x "*.meta" \
   ../ked-progression-runtime/Assets/Progression/Runtime \
-  Assets/Scripts/Ked.Progression
+  Assets/Scripts/Ked.Progression | grep -v "^Only in"
 ```
 
-`Tests/`(양쪽 구성이 다름)는 차이로 나온다. 그것은 아래를 본다.
+2026-10-26 기준 이 명령의 출력은 **0줄**이다. `Only in`으로 나오는 `Documentation~`(이 문서)와 `Tests`는 사본에만 있는 자리다.
 
-원본 → 사본으로 다시 받는다:
+테스트는 따로 본다:
+
+```bash
+diff -r -q --strip-trailing-cr -x "*.meta" \
+  ../ked-progression-runtime/Assets/Progression/Tests/EditMode \
+  Assets/Scripts/Ked.Progression/Tests/EditMode
+```
+
+2026-10-26 기준 출력은 `Only in ...: SceneRunnerTests.cs` 한 줄이다. 아래 "테스트"를 본다.
+
+## 반입 — 원본 → 사본
 
 ```bash
 rm -rf Assets/Scripts/Ked.Progression/{Contracts,Loading,Response,Scene,Spec,State,Transition,Vocabulary}
 cp -r ../ked-progression-runtime/Assets/Progression/Runtime/. Assets/Scripts/Ked.Progression/
+cp ../ked-progression-runtime/Assets/Progression/Tests/EditMode/*.cs* \
+   Assets/Scripts/Ked.Progression/Tests/EditMode/
+
+# 사본이 자기 GUID를 쓰는 .meta 넷은 되돌린다 (아래 ".meta GUID" 참고)
+git checkout -- Assets/Scripts/Ked.Progression/{Ked.Progression.asmdef,Spec,State,Vocabulary}.meta
 ```
 
-asmdef는 양쪽 이름과 설정이 같으므로(`Ked.Progression` · `noEngineReferences: true`) 덮어써도 안전하다.
+asmdef는 양쪽 이름과 설정이 같다(`Ked.Progression` · `noEngineReferences: true`). 이 저장소의 asmdef들은
+`Ked.Progression`을 GUID가 아니라 이름으로 참조하므로 asmdef 파일을 덮어써도 참조는 끊기지 않는다.
 
-⚠ **테스트는 위 명령에 딸려 오지 않는다.** 원본에서 테스트는 `Runtime/` 밖(`Assets/Progression/Tests/`)에 있다.
-Scene/Runtime 층의 characterization은 그 세 파일이 전부이므로 함께 받아야 한다.
+## 역반입 — 사본 → 원본
+
+이 폴더에서 먼저 고쳤다면 같은 내용을 원본으로 보낸다. 방향만 바꾼 같은 명령이다.
 
 ```bash
-cp ../ked-progression-runtime/Assets/Progression/Tests/EditMode/{SceneProgressTests,SceneRunnerTests,ScenePendingHistoryTests}.cs* \
-   Assets/Scripts/Ked.Progression/Tests/EditMode/
+cd ../ked-progression-runtime
+rm -rf Assets/Progression/Runtime/{Contracts,Loading,Response,Scene,Spec,State,Transition,Vocabulary}
+cp -r ../ked-presentation-runtime/Assets/Scripts/Ked.Progression/{Contracts,Loading,Response,Scene,Spec,State,Transition,Vocabulary} \
+      Assets/Progression/Runtime/
+cp ../ked-presentation-runtime/Assets/Scripts/Ked.Progression/*.cs* Assets/Progression/Runtime/
 ```
 
-`Tests/EditMode/`의 나머지(`AutoEdgeTests` · `ProgressionStateFoldTests` · `SceneBoundaryTests`)는
-**사본에만 있다.** 덮어쓰지 않는다.
+`Documentation~`·`Tests`·asmdef는 보내지 않는다. 테스트는 아래 표대로 고른다.
+원본 README의 구조 설명(§3 경계, §8 계약)이 바뀐 코드와 맞는지도 함께 본다.
 
-여기서 고친 것은 **원본 저장소에도 같은 손을 대야 한다.**
+## 테스트
+
+| 테스트 | 원본 | 사본 | 비고 |
+|---|---|---|---|
+| `AutoEdgeTests` | ✓ | ✓ | 자동 간선 규칙 |
+| `SceneBoundaryTests` | ✓ | ✓ | 장면 경계 · 착지점 규칙 |
+| `SceneProgressTests` | ✓ | ✓ | pending · 롤백 · 리플레이 · 경로 복원 · commit |
+| `ProgressionStateFoldTests` | ✓ | ✓ | 선택 적용 · 스탯 범위 |
+| `ScenePendingHistoryTests` | ✓ | ✓ | 양쪽 모두 주석 처리 상태 |
+| `SceneRunnerTests` | — | ✓ | **사본에만 있다.** 대상 `SceneRunner`가 코어가 아니라 이 저장소의 `ProgressionHost/`에 있다. 지금은 주석 처리 상태다 |
 
 ## 자동 검증
 
@@ -79,24 +113,23 @@ dotnet test tests/ProgressionCore/ProgressionCore.csproj
 ```
 
 `.github/workflows/progression-core.yml`이 이것을 CI 게이트로 세운다.
-따라서 "유니티 쪽엔 이 층의 테스트가 0"이던 시절의 서술은 더 이상 유효하지 않다.
 
 ## 안 가져온 것
 
 | | 왜 |
 |---|---|
 | `Ked.Progression.asmdef` | 사본이 자기 것을 갖는다. 이름·설정이 같으므로 실질 차이는 없다 |
-| `Debug/` (원본의 Progression Debug Host) | 원본의 uGUI 프레임워크(`UIManager`·`UIBase`·`UIRoot`)가 이 저장소의 동명 타입과 충돌한다. 통로 검증은 여기서 실제 Presentation으로 한다 |
-| `Tests/PlayMode/` | `UnityEngine.TestTools`에 매인 smoke 1건. 여기서는 어셈블리 이름만 확인하는 내용이라 뜻이 없다 |
+| `Samples/` (원본의 최소 진행 샘플) | 코어만으로 도는 예제다. 이 저장소에는 실제 호스트(`ProgressionHost/`)가 있다 |
+| `Tests/PlayMode/` | `UnityEngine.TestTools`에 매인 smoke 1건. 어셈블리 이름만 확인하는 내용이라 여기서는 뜻이 없다 |
 
 `Reachability/`는 **2026-09-17에 걷었다.** 도달성 증명의 주인은 저작 도구 하나다 — 이유는
 [SCOPE-BOUNDARY.md](../../../../SCOPE-BOUNDARY.md) §3.3에 있다.
 
 ## `.meta` GUID — 항상 갈려 보이는 네 개
 
-새로 반입한 것(`Contracts` · `Scene` · `Response`와 그 아래 파일들)은 `.meta`까지 원본에서 그대로 받아
-GUID가 두 저장소에서 같다. 반면 **이전 원본(`ked-progression`) 시절부터 있던 폴더**는 사본이 자기 GUID를
-계속 쓴다. 그래서 `diff -r`를 돌리면 아래 넷은 **언제나** 갈린 것으로 나온다.
+대부분의 `.meta`는 두 저장소에서 GUID가 같다.
+반면 **이전 원본(`ked-progression`) 시절부터 있던 넷**은 두 저장소가 각자 GUID를 쓴다.
+그래서 `.meta`를 포함해 `diff -r`를 돌리면 아래 넷은 **언제나** 갈린 것으로 나온다.
 
 ```text
 Ked.Progression.asmdef.meta
@@ -105,12 +138,4 @@ State.meta
 Vocabulary.meta
 ```
 
-이것은 표류가 아니다. **`.cs`가 하나라도 갈리면 그때가 표류다.** 코드만 보려면 이렇게 본다.
-
-```bash
-diff -r -q --strip-trailing-cr -x "*.meta" \
-  ../ked-progression-runtime/Assets/Progression/Runtime \
-  Assets/Scripts/Ked.Progression | grep -v "^Only in"
-```
-
-2026-09-17 기준 이 명령의 출력은 **0줄**이다.
+이것은 표류가 아니다. **`.cs`가 하나라도 갈리면 그때가 표류다.** 테스트 asmdef의 `.meta`도 같은 이유로 갈려 보인다.
