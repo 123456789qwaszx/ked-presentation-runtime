@@ -229,12 +229,12 @@ public static class PresentationTuningExporter
     private static (RectTransform character, RectTransform background)
         ResolveRigPrefabs(List<string> warnings)
     {
-        VNAppBootstrap bootstrap = Object.FindFirstObjectByType<VNAppBootstrap>(FindObjectsInactive.Include);
+        SampleBootstrap bootstrap = Object.FindFirstObjectByType<SampleBootstrap>(FindObjectsInactive.Include);
 
         if (bootstrap == null)
         {
             warnings.Add(
-                "VNAppBootstrap을 씬에서 찾지 못했다. 리그를 프리팹 없이(스키마 베이크) 세웠다 — " +
+                "SampleBootstrap을 씬에서 찾지 못했다. 리그를 프리팹 없이(스키마 베이크) 세웠다 — " +
                 "런타임과 다를 수 있다.");
 
             return (null, null);
