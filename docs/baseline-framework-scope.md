@@ -140,3 +140,7 @@ NUnit 패키지를 받을 수 없는 환경이라 실행하지 못했다. GitHub
 3. README "사용법"의 키 `2`/`3`/`4`·"Yarn Entry Key" 필드는 현재 구현과 맞지 않는다(5단계에서 정리).
 4. **없는 음원 키가 조용히 무시된다.** 예제의 `<<bgm bgm_school_morning>>`·`<<sfx sfx_school_bell>>`은 `Resources/`에 해당 파일이 없다.
    `ResourcesAudioClipResolver`가 null을 돌려주고 명령은 소리 없이 끝난다 — 경고도 없다. "실패는 묵묵히 흡수되지 않는다"는 규율과 어긋난다.
+5. **튜닝 덤프가 코드보다 뒤처져 있다.** `ExportedTuning/`은 2026-08-21에 마지막으로 내보냈다. 그 뒤 대사창 레이아웃 프리셋에
+   `overrideImage`·`image`(스프라이트 **참조**)가 더해져, 재출력하면 `surface-layout.json`에 `{"instanceID": 0}`이 들어가고
+   익스포터가 경고한다. `schema.md`의 "현재 9개 파일 모두 `instanceID` 없음"도 그 순간 거짓이 된다.
+   덤프만으로 해석할 수 없는 값이 코어 스키마로 흘러드는 문제라, 2단계에서는 `portrait-dimensions.json`만 반영했다.
