@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using Ked.Progression;
+using Ked.Progression.Save;
 using UnityEngine;
 using UnityEngine.Serialization;
 using Yarn.Unity;
@@ -337,21 +338,29 @@ public class SampleBootstrap : MonoBehaviour
     // - Maintenance: 참조가 끝난 파일 정리
     private void CreateSaveServices()
     {
+        // 저장 계층은 엔진을 모른다. 시계와 로그를 여기서 꽂는다.
+        UnityProgressionLog log = new();
+        Func<double> clock = () => Time.realtimeSinceStartupAsDouble;
+
         _localSaveStore = new LocalFileSaveStore(_saveRoot);
 
         _saveCoordinator = new SaveCoordinator(
             _localSaveStore,
-            saveContentVersion);
+            saveContentVersion,
+            clock,
+            log);
 
         _saveSlotService = new SaveSlotService(
             _localSaveStore,
-            saveContentVersion);
+            saveContentVersion,
+            log);
 
         _playthroughForkService = new PlaythroughForkService(
             _localSaveStore,
-            saveContentVersion);
+            saveContentVersion,
+            log);
 
-        _saveMaintenance = new LocalSaveMaintenance(_localSaveStore);
+        _saveMaintenance = new LocalSaveMaintenance(_localSaveStore, log);
     }
 
     private void ConfigureProgressionScreens()
@@ -368,7 +377,8 @@ public class SampleBootstrap : MonoBehaviour
             _saveSlotService,
             _playthroughForkService,
             _progressionLauncher,
-            _runtime.Features);
+            _runtime.Features,
+            _runtime.Backlog);
 
         _screenBindings.ConfigureProgression(
             _progressionLauncher,
@@ -391,7 +401,7 @@ public class SampleBootstrap : MonoBehaviour
 
     private void Update()
     {
-        _saveMaintenance?.Tick(Time.realtimeSinceStartup);
+        _saveMaintenance?.Tick(Time.realtimeSinceStartupAsDouble);
     }
 
     [ContextMenu("Save/Log current snapshot")]
@@ -403,7 +413,7 @@ public class SampleBootstrap : MonoBehaviour
             return;
         }
 
-        LocalSaveFile snapshot = _localSaveStore.LoadActive();
+        PlaythroughSave snapshot = _localSaveStore.LoadActive();
 
         if (snapshot == null)
         {

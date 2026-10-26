@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using Ked.Progression;
+using Ked.Progression.Save;
 using UnityEngine;
 
 // 진행 시작 자리
@@ -53,7 +55,7 @@ public sealed class ProgressionLauncher : IPlaybackHost
         if (_isTransitioning)
             return;
 
-        ProgressionResumePoint resume =
+        ResumePoint resume =
             _saveCoordinator.LoadActiveResumePoint();
 
         LaunchResume(resume);
@@ -72,7 +74,7 @@ public sealed class ProgressionLauncher : IPlaybackHost
 
             change();
 
-            ProgressionResumePoint resume =
+            ResumePoint resume =
                 _saveCoordinator.LoadActiveResumePoint();
 
             LaunchResume(resume);
@@ -122,7 +124,7 @@ public sealed class ProgressionLauncher : IPlaybackHost
             restorePath: null);
     }
     
-    private void LaunchResume(ProgressionResumePoint resume)
+    private void LaunchResume(ResumePoint resume)
     {
         if (!TryResolveResumeChapter(resume, out ChapterDefinition chapterDef))
         {
@@ -134,19 +136,36 @@ public sealed class ProgressionLauncher : IPlaybackHost
         ChapterState chapterState =
             ChapterState.Restore(chapterDef, resume.EpisodeId, resume.Stats);
 
-        SavedLoadPlan loadPlan = resume.LoadPlan;
+        // 저장된 연출 상태를 되읽는다. 깨져 있으면 저장 파일 손상과 같은 뜻이다 — 새로 시작한다.
+        List<DialogueLogEntry> backlog;
+        PresentationLoadPlan loadPlan;
 
-        _backlog.Restore(resume.Backlog);
+        try
+        {
+            backlog = PresentationSaveState.ReadPlaythrough(resume.HostState);
+            loadPlan = resume.LoadPlan == null
+                ? null
+                : PresentationSaveState.ReadLoad(resume.LoadPlan.HostState);
+        }
+        catch (InvalidDataException error)
+        {
+            Debug.LogWarning($"[진행] 저장된 연출 상태를 읽지 못했다. 새로 시작. — {error.Message}");
+            _saveCoordinator.BeginNewPlaythrough();
+            LaunchNewGame();
+            return;
+        }
+
+        _backlog.Restore(backlog);
         _replayState.PrepareLoad(loadPlan);
 
         _driver.Start(
             chapterDef,
             chapterState,
-            restorePath: ToScenePath(loadPlan));
+            restorePath: ToScenePath(resume.LoadPlan));
     }
     
     private bool TryResolveResumeChapter(
-        ProgressionResumePoint resume,
+        ResumePoint resume,
         out ChapterDefinition savedChapter)
     {
         savedChapter = null;

@@ -23,7 +23,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="../../Assets/Scripts/Ked.Progression/**/*.cs"
-             Exclude="../../Assets/Scripts/Ked.Progression/Tests/**/*.cs" />
+             Exclude="../../Assets/Scripts/Ked.Progression/Tests/**/*.cs;../../Assets/Scripts/Ked.Progression/Save/**/*.cs" />
     <Compile Include="../../Assets/Scripts/ProgressionHost/SceneRunner.cs" />
     <Compile Include="../../Assets/Scripts/FeatureController/RollbackHistory.cs" />
     <Compile Include="../../Assets/Scripts/FeatureController/BacklogRecorder.cs" />

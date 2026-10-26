@@ -19,11 +19,12 @@
 
 | | |
 |---|---|
-| 원본 | `ked-progression-runtime` · `sync/from-presentation` @ `185dc68` (코드는 `99677cb`에서 맞춤) |
+| 원본 | `ked-progression-runtime` · `sync/from-presentation` @ `fb5c4cb` (코어 코드는 `99677cb`, 저장은 `fb5c4cb`에서 맞춤) |
 | 마지막 동기화 | 2026-10-26 · **사본 → 원본** (역반입) |
-| 맞춘 것 | `Runtime/` 전체(Spec · State · Transition · Vocabulary · Loading · Scene · Contracts · Response · `ProgressionDriver` · `ISceneRunner`) + EditMode 테스트 |
+| 맞춘 것 | `Runtime/` 전체(Spec · State · Transition · Vocabulary · Loading · Scene · Contracts · Response · `ProgressionDriver` · `ISceneRunner`) + `Save/`(`Ked.Progression.Save`) + EditMode 테스트 |
 | 코드 일치 | `.cs` 기준 `diff -r` 0건 (아래 "대조" 명령) |
 | 원본 쪽 정리 | 옛 `SceneRunner`·`SceneRunContext`·`ProgressionState`·디버그 호스트 삭제, `Assets/Progression/Samples/` 최소 샘플 추가, README 갱신 |
+| 같은 날 두 번째 | 이 저장소의 `Assets/Scripts/Save/`에서 **진행 겹을 떼어** `Save/`로 반입본에 넣고 원본에 보냈다. 연출 겹(줄 좌표·Yarn 선택·백로그)은 `ProgressionHost/PresentationSaveState`가 `HostState` 문자열로 싣는다 |
 
 원본 브랜치 `sync/from-presentation`은 아직 원본 `dev`에 합치지 않았다. 합치면 이 표의 브랜치를 고친다.
 
@@ -65,7 +66,7 @@ diff -r -q --strip-trailing-cr -x "*.meta" \
 ## 반입 — 원본 → 사본
 
 ```bash
-rm -rf Assets/Scripts/Ked.Progression/{Contracts,Loading,Response,Scene,Spec,State,Transition,Vocabulary}
+rm -rf Assets/Scripts/Ked.Progression/{Contracts,Loading,Response,Save,Scene,Spec,State,Transition,Vocabulary}
 cp -r ../ked-progression-runtime/Assets/Progression/Runtime/. Assets/Scripts/Ked.Progression/
 cp ../ked-progression-runtime/Assets/Progression/Tests/EditMode/*.cs* \
    Assets/Scripts/Ked.Progression/Tests/EditMode/
@@ -77,14 +78,17 @@ git checkout -- Assets/Scripts/Ked.Progression/{Ked.Progression.asmdef,Spec,Stat
 asmdef는 양쪽 이름과 설정이 같다(`Ked.Progression` · `noEngineReferences: true`). 이 저장소의 asmdef들은
 `Ked.Progression`을 GUID가 아니라 이름으로 참조하므로 asmdef 파일을 덮어써도 참조는 끊기지 않는다.
 
+`Save/`는 자기 asmdef(`Ked.Progression.Save`, Newtonsoft 참조, 엔진 참조 없음)를 가진 두 번째 어셈블리다.
+코어 `Ked.Progression`은 Newtonsoft를 모른다. `Save/`의 `.meta`는 두 저장소에서 GUID가 같다.
+
 ## 역반입 — 사본 → 원본
 
 이 폴더에서 먼저 고쳤다면 같은 내용을 원본으로 보낸다. 방향만 바꾼 같은 명령이다.
 
 ```bash
 cd ../ked-progression-runtime
-rm -rf Assets/Progression/Runtime/{Contracts,Loading,Response,Scene,Spec,State,Transition,Vocabulary}
-cp -r ../ked-presentation-runtime/Assets/Scripts/Ked.Progression/{Contracts,Loading,Response,Scene,Spec,State,Transition,Vocabulary} \
+rm -rf Assets/Progression/Runtime/{Contracts,Loading,Response,Save,Scene,Spec,State,Transition,Vocabulary}
+cp -r ../ked-presentation-runtime/Assets/Scripts/Ked.Progression/{Contracts,Loading,Response,Save,Scene,Spec,State,Transition,Vocabulary} \
       Assets/Progression/Runtime/
 cp ../ked-presentation-runtime/Assets/Scripts/Ked.Progression/*.cs* Assets/Progression/Runtime/
 ```
@@ -116,6 +120,9 @@ dotnet test tests/ProgressionCore/ProgressionCore.csproj
 ```
 
 `.github/workflows/progression-core.yml`이 이것을 CI 게이트로 세운다.
+
+저장 겹은 `tests/SaveLifecycle`(이 저장소, 연출 코덱·브리지·런처)과 원본의 `tests/ProgressionSave`(저장 정책)가 나눠 본다.
+`Save/`를 고치면 둘 다 돌린다.
 
 코어를 바꾸면 호스트 쪽 Scene 실행 순서도 함께 돌려 본다. 진짜 `SceneRunner` · `RollbackHistory` · `BacklogRecorder`와
 코어 전체를 컴파일하고, Unity·Yarn에 매인 것만 대역으로 둔다.

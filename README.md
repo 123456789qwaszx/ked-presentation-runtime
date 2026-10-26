@@ -95,6 +95,11 @@ Yarn Spinner를 기반으로 제작한 **비주얼 노벨 화면 연출 런타�
 SceneRunner의 실행 순서와 리플레이·롤백·로드·정지 규칙도 유니티 없이 검증합니다 —
 `dotnet run --project tests/ProgressionHost/ProgressionHost.csproj`.
 
+저장도 같은 경계로 나뉩니다. 챕터·장면·경로·스탯과 슬롯·갈라지기는 반입본의 `Ked.Progression.Save`가,
+줄 위치·Yarn 선택·백로그는 연출이 들고 있다가 문자열 한 칸(`HostState`)으로 실립니다 —
+[PresentationSaveState.cs](Assets/Scripts/ProgressionHost/PresentationSaveState.cs).
+`dotnet run --project tests/SaveLifecycle/SaveLifecycle.csproj`.
+
 ## 개발 환경
 
 * Unity `6000.3.16f1`

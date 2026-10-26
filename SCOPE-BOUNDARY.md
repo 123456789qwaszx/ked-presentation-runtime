@@ -67,6 +67,7 @@
 | **재료는 이미 있다** | `Ked.Presentation.Core`의 `StageState` / `StageReducer`가 정확히 *"N번 라인 시점의 확정된 무대"*다. 등가성 하네스에 이은 **정지 프레임의 두 번째 고객**이 세이브다 |
 | **저장 위치** | 런타임이 정하지 않는다. `ISaveStore` 같은 포트를 두고 구현은 호스트가 갖는다 — `IInputSource` · `ITimeSource` · `ILaneRunner`와 같은 규율 |
 | **커밋** | `18df6f78` |
+| **✅ 2026-10-26 — 두 겹으로 갈라 돌아왔다** | 저장은 **진행 겹**과 **연출 겹**으로 나뉜다.<br>진행 겹(챕터·장면·경로·스탯·완료 장면·슬롯·갈라지기·원자적 파일)은 `ked-progression-runtime`의 `Ked.Progression.Save`가 소유하고, 이 저장소에는 `Assets/Scripts/Ked.Progression/Save/`로 반입돼 있다. 엔진을 모른다 — 시계와 로그를 꽂아 쓴다.<br>연출 겹(줄 좌표 `SaveLineTarget`, Yarn 선택 기록, 백로그)은 저장이 없어도 연출이 늘 들고 있는 것이다. 진행 저장은 그것을 `HostState` 문자열 한 칸으로만 받고, 만들고 되읽는 코덱은 `ProgressionHost/PresentationSaveState`다.<br>위 ⚠ 셋은 그대로다 — 리플레이 방식의 파생이고, 스냅샷 기반 세이브는 여전히 열려 있다. 바뀐 것은 "어느 층이 무엇을 아는가"뿐이다 |
 
 ### 3.3 에피소드 · 챕터 진행
 
@@ -79,7 +80,7 @@
 | **커밋** | `1805c555` |
 | **✅ 돌아왔다** | 새 주인이 실제로 섰다 — `ked-progression-runtime`(형제 저장소). 판정 규칙(Core)과 **Chapter 실행 경계**(`ProgressionDriver`)를 그쪽이 소유하고, 그 `Assets/Progression/Runtime/`이 `Assets/Scripts/Ked.Progression/`으로 **복사 반입**돼 있다([vendoring.md](Assets/Scripts/Ked.Progression/Documentation~/vendoring.md)). 진행은 더 이상 "빠진 것"이 아니다.<br>**Scene 실행 순서는 코어에 없다.** 재생·리플레이·저장 시점은 호스트 자원에 묶여 있어서, 코어는 `ISceneRunner` 계약만 두고 순서는 이 저장소가 준다.<br>2026-10-26에 이 사본에서 발전한 코어를 원본으로 **역반입**했다(원본 `sync/from-presentation`). 원본에는 코어만으로 도는 최소 샘플(`Assets/Progression/Samples/`)이 함께 있다 |
 | **이 저장소에 남은 몫** | **Host 구현뿐이다.** 드라이버가 직접 받는 것은 `ISceneRunner`와 `IProgressionLog` 둘이고, `Contracts/`의 `IScenePresentation` · `IChapterOptionsView` · `IScenePersistence`는 runner가 쓰는 공용 어휘다. 이것들을 Yarn/Stage/Save로 잇는 자리가 `Assets/Scripts/ProgressionHost/`다 — `SceneRunner`(Scene 실행 순서), `ScenePresentationProgressionAdapter`, `ChapterOptionsView`, `ProgressionSaveBridge`, `UnityProgressionLog`.<br>롤백 기록 · 백로그 · 리플레이 상태(seek)는 계약이 아니라 호스트 `SceneRunner`의 내부 협력자다. 예전 판의 `IScenePlayback` · `ISceneReplayState` · `IRollbackHistory` · `ISceneBacklog` · `IChapterLifecycle` · `IProgressionReporter`는 **없다** |
-| **자동 검증** | `dotnet test tests/ProgressionCore/ProgressionCore.csproj` — 반입본은 `noEngineReferences: true`인 순수 C#이라 유니티 없이 돈다. `.github/workflows/progression-core.yml`이 게이트다 |
+| **자동 검증** | 반입본은 `noEngineReferences: true`인 순수 C#이라 유니티 없이 돈다. `dotnet test tests/ProgressionCore/ProgressionCore.csproj`(코어 규칙), `dotnet run --project tests/ProgressionHost/ProgressionHost.csproj`(호스트 SceneRunner), `dotnet run --project tests/SaveLifecycle/SaveLifecycle.csproj`(저장의 연출 겹). 저장 정책 자체는 원본의 `tests/ProgressionSave`가 본다 |
 | **함께 나간 것 — 도달성 증명** | `Reachability/`(5파일)를 반입본에서 걷었다(2026-09-17). **도달성은 저작 시각의 판정**이고 실행 중에 증명할 일이 없다 — 이 저장소에서 부르는 곳이 0건이었다.<br>새 주인은 **저작 도구의 `ChapterReachabilityProver`** 하나다. 그동안은 두 구현이 서로를 검증했으나(`ked-progression`의 `ReachabilityEquivalenceTests` + `reachability-oracle.json` 코퍼스), 그 저장소가 은퇴하면서 함께 닫혔다.<br>⚠ **잃은 것을 적어 둔다**: 저작 도구의 증명기가 **두 번째 증인을 잃었다.** 이제 그쪽 프루버를 고쳐도 여기서 울지 않는다 — 대신 두 구현이 조용히 갈릴 위험도 함께 사라졌다 |
 
 ### 3.4 플레이어 스탯 — 카탈로그만

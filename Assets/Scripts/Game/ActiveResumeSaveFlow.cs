@@ -1,5 +1,7 @@
-// 정상적으로 표시가 끝난 Line을 현재 회차의 Continue 지점으로 저장한다.
-// Line 표시 시점과 Progression/저장 상태를 잇는 게임 조립 계층이다.
+using Ked.Progression.Save;
+
+// 정상적으로 표시가 끝난 줄을 현재 회차의 이어하기 지점으로 저장한다.
+// 줄 표시 시점과 Progression/저장 상태를 잇는 게임 조립 계층이다.
 public sealed class ActiveResumeSaveFlow
 {
     private readonly SaveCoordinator _saveCoordinator;
@@ -26,7 +28,6 @@ public sealed class ActiveResumeSaveFlow
 
         _saveCoordinator.UpdateResumePoint(
             _progressionLauncher.PendingPath,
-            _vnFeatures.CreateYarnChoiceSnapshot(),
-            target);
+            PresentationSaveState.Load(target, _vnFeatures.CreateYarnChoiceSnapshot()));
     }
 }

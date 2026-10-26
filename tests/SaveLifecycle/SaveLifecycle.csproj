@@ -1,3 +1,13 @@
+<!--
+  저장의 호스트(연출) 겹 회귀 하네스.
+
+  진행 저장(Ked.Progression.Save)은 호스트 상태를 문자열 한 칸으로만 받는다.
+  그 문자열을 만들고 되읽는 코덱(PresentationSaveState), 장면 경계에서 그것을 싣는 브리지,
+  이어하기 때 되읽어 재생을 세우는 런처, 백로그 한 줄을 과거 장면의 줄 좌표로 바꾸는 셈법을 본다.
+
+  저장 정책 자체(세션·슬롯·갈라지기·검증)는 원본 ked-progression-runtime의 tests/ProgressionSave가 맡는다.
+  진행 코어/저장은 순수 C#이라 그대로 컴파일한다. ProgressionDriver만 대역이다(실행 횟수와 Stop을 관찰).
+-->
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -9,18 +19,16 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <Compile Include="../../Assets/Scripts/Save/**/*.cs" />
-    <Compile Include="../../Assets/Scripts/ProgressionHost/ProgressionLauncher.cs" />
-    <Compile Include="../../Assets/Scripts/Playback/IPlaybackHost.cs" />
-    <Compile Include="../../Assets/Scripts/ProgressionHost/ProgressionSaveBridge.cs" />
-    <!--
-      진행 코어/런타임은 순수 C#이라 그대로 컴파일한다.
-      ProgressionDriver만 뺀다 - 실행 횟수와 Stop을 관찰해야 해서 Stubs.cs가 대역을 세운다.
-    -->
     <Compile Include="../../Assets/Scripts/Ked.Progression/**/*.cs"
              Exclude="../../Assets/Scripts/Ked.Progression/Tests/**/*.cs;../../Assets/Scripts/Ked.Progression/ProgressionDriver.cs" />
+    <Compile Include="../../Assets/Scripts/Playback/IPlaybackHost.cs" />
+    <Compile Include="../../Assets/Scripts/ProgressionHost/ProgressionLauncher.cs" />
+    <Compile Include="../../Assets/Scripts/ProgressionHost/ProgressionSaveBridge.cs" />
+    <Compile Include="../../Assets/Scripts/ProgressionHost/PresentationSaveState.cs" />
+    <Compile Include="../../Assets/Scripts/ProgressionHost/BacklogForkPoints.cs" />
     <Compile Include="../../Assets/Scripts/FeatureController/BacklogRecorder.cs" />
     <Compile Include="../../Assets/Scripts/DialoguePresenter/VNOptionFlow/VNChoiceRecord.cs" />
+    <Compile Include="../../Assets/Scripts/DialoguePresenter/VNLinePresentationFlow/SaveLineTarget.cs" />
     <Compile Include="Stubs.cs" />
     <Compile Include="Program.cs" />
   </ItemGroup>

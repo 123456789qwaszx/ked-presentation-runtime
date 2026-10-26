@@ -21,6 +21,8 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="../../Assets/Scripts/Ked.Progression/**/*.cs" />
+    <!-- Save/ 는 Newtonsoft에 매인 별도 어셈블리(Ked.Progression.Save)라 여기서 빼고, tests/SaveLifecycle이 본다. -->
+    <Compile Include="../../Assets/Scripts/Ked.Progression/**/*.cs"
+             Exclude="../../Assets/Scripts/Ked.Progression/Save/**/*.cs" />
   </ItemGroup>
 </Project>

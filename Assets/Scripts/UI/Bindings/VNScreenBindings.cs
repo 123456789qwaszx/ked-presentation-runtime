@@ -1,3 +1,4 @@
+using Ked.Progression.Save;
 using System;
 using System.Collections.Generic;
 
@@ -117,4 +118,4 @@ public sealed partial class VNScreenBindings : IPresentationView, IDisposable
     }
     
     #endregion
-}
+}

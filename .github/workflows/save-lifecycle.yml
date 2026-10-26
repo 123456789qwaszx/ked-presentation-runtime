@@ -4,7 +4,8 @@ on:
     branches: [dev, main, saveCoordinator, server_DB_Test, learning/vn-play-analytics, refactor/offline-local-save]
   pull_request:
     paths:
-      - 'Assets/Scripts/Save/**'
+      - 'Assets/Scripts/Ked.Progression/**'
+      - 'Assets/Scripts/DialoguePresenter/**'
       - 'Assets/Scripts/Game/**'
       - 'Assets/Scripts/UI/**'
       - 'Assets/Scripts/FeatureController/**'

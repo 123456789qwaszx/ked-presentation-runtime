@@ -1,3 +1,4 @@
+using Ked.Progression.Save;
 public sealed class VNSaveSlotMeta
 {
     public string Id;
@@ -35,4 +36,4 @@ public sealed class VNSaveSlotMeta
             IsNewSlot = true,
         };
     }
-}
+}

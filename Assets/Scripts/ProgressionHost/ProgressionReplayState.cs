@@ -1,9 +1,11 @@
+// 로드 리플레이의 연출 쪽 상태. 런처가 재생 계획을 올려 두면(PrepareLoad),
+// SceneRunner가 복원 장면에 들어설 때 그것으로 시크를 연다(BeginLoadReplay).
 public sealed class ProgressionReplayState
 {
     private readonly VNLinePresentationState _lineState;
     private readonly ChoiceHistory _choiceHistory;
 
-    private SavedLoadPlan _stagedPlan;
+    private PresentationLoadPlan _stagedPlan;
 
     public ProgressionReplayState(
         VNLinePresentationState lineState,
@@ -13,7 +15,7 @@ public sealed class ProgressionReplayState
         _choiceHistory = choiceHistory;
     }
 
-    public void PrepareLoad(SavedLoadPlan plan)
+    public void PrepareLoad(PresentationLoadPlan plan)
     {
         _stagedPlan = plan;
     }
