@@ -265,9 +265,22 @@ public static class PortraitDbBuilder
     private static bool HasErrors(List<string> report)
         => report.Any(r => r.Contains("[ERROR]"));
 
+    // 설정 에셋은 타입으로 찾는다 — 어느 폴더에 두든 된다(예제는 Assets/Samples/Data/).
+    // 하나도 없을 때만 기본 자리(DefaultSettingsPath)에 새로 만든다.
     private static PortraitBuildSettings LoadOrCreateSettings()
     {
-        var settings = AssetDatabase.LoadAssetAtPath<PortraitBuildSettings>(DefaultSettingsPath);
+        PortraitBuildSettings settings = null;
+
+        string[] guids = AssetDatabase.FindAssets($"t:{nameof(PortraitBuildSettings)}");
+        if (guids.Length > 0)
+        {
+            string path = AssetDatabase.GUIDToAssetPath(guids[0]);
+            if (guids.Length > 1)
+                Debug.LogWarning($"PortraitBuildSettings가 {guids.Length}개 있다. 첫 번째를 쓴다: {path}");
+
+            settings = AssetDatabase.LoadAssetAtPath<PortraitBuildSettings>(path);
+        }
+
         if (!settings)
         {
             EnsureFolder(Path.GetDirectoryName(DefaultSettingsPath));

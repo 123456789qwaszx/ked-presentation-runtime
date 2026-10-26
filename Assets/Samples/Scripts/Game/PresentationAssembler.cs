@@ -11,6 +11,10 @@ using UnityEngine;
 /// </summary>
 public sealed class PresentationAssembler
 {
+    /// <summary>예제 대본 번들 폴더(Assets/Samples/Dialogue). 커브(curves.json)도 대본 곁에 산다.</summary>
+    private static string DialogueFolder =>
+        System.IO.Path.Combine(Application.dataPath, "Samples", "Dialogue");
+
     private readonly PresentationSceneRefs _refs;
     private readonly IPresentationView _presentationView;
 
@@ -349,6 +353,7 @@ public sealed class PresentationAssembler
             _vnRuntimeStateProvider,
             _presentationScopeSession,
             _presentationResponseRig,
-            _dialogueAdvanceDispatcher);
+            _dialogueAdvanceDispatcher,
+            DialogueFolder);
     }
 }

@@ -55,6 +55,7 @@ public sealed class StageEquivalenceHarness : MonoBehaviour
     private DialogueAdvanceDispatcher _dispatcher;
 
     private StageReducerTuning _tuning;
+    private string _dialogueFolder;
 
     private readonly Dictionary<string, List<YarnLineGroup>> _nodeGroups = new(StringComparer.Ordinal);
     private readonly List<string> _extractWarnings = new();
@@ -97,16 +98,19 @@ public sealed class StageEquivalenceHarness : MonoBehaviour
         public List<string> finalUnhandled = new();
     }
 
+    /// <param name="dialogueFolder">대본(.yarn) 폴더의 절대 경로. 하위 폴더까지 읽는다 — 어디에 두는지는 호스트가 정한다.</param>
     public void Initialize(
         VNRuntimeStateProvider provider,
         PresentationScopeSession session,
         PresentationShotResponseSystem shotSystem,
-        DialogueAdvanceDispatcher dispatcher)
+        DialogueAdvanceDispatcher dispatcher,
+        string dialogueFolder)
     {
         _provider = provider;
         _session = session;
         _shotSystem = shotSystem;
         _dispatcher = dispatcher;
+        _dialogueFolder = dialogueFolder;
 
         try
         {
@@ -211,9 +215,7 @@ public sealed class StageEquivalenceHarness : MonoBehaviour
 
     private void LoadDialogueFiles()
     {
-        string dialogueDir = Path.Combine(Application.dataPath, "@Dialogue");
-
-        foreach (string path in Directory.GetFiles(dialogueDir, "*.yarn"))
+        foreach (string path in Directory.GetFiles(_dialogueFolder, "*.yarn", SearchOption.AllDirectories))
         {
             List<YarnNodeGroups> nodes = YarnCommandTextExtractor.ExtractNodes(
                 File.ReadAllText(path), Path.GetFileName(path), _extractWarnings);

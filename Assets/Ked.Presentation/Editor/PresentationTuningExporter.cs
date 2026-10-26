@@ -21,6 +21,8 @@ using Object = UnityEngine.Object;
 // - 리그 스키마는 빌더 로직을 베껴 적지 않는다 — 실제 빌더로 리그를 세우고
 //   실물 RectTransform에서 읽는다(사본 금지). 프리팹도 부트스트랩이 쓰는
 //   바로 그 프리팹을 씬에서 꺼내 쓴다.
+// - 씬에서는 본체 계약으로만 찾는다(IStageMaskProvider · IRigPrefabSource).
+//   이 도구는 본체 어셈블리(Ked.Presentation.Editor)라 예제 타입을 모른다.
 // - 내보낼 수 없는 항목은 건너뛰되 경고 목록에 남긴다. 조용히 빠뜨리지 않는다.
 //
 // 실행: 메뉴 Ked/U12/Export Presentation Tuning Dump
@@ -87,18 +89,21 @@ public static class PresentationTuningExporter
     // ── 기준 해상도 ──────────────────────────────────────────────────
     //
     // 무대 루트 공간의 크기이자 1u 환산의 입력이다. CanvasScaler에서 실측한다.
+    // 무대는 무대 마스크를 내주는 쪽(IStageMaskProvider)이다 — 예제에서는 PresentationUIRoot.
 
     private static BaseResolutionDto ExportBaseResolution(string outDir, List<string> warnings)
     {
         BaseResolutionDto dto = new();
 
-        PresentationUIRoot uiRoot = Object.FindFirstObjectByType<PresentationUIRoot>(FindObjectsInactive.Include);
-        CanvasScaler scaler = uiRoot != null ? uiRoot.GetComponentInParent<CanvasScaler>(true) : null;
+        IStageMaskProvider stage = FindInScene<IStageMaskProvider>();
+        CanvasScaler scaler = stage is Component stageComponent
+            ? stageComponent.GetComponentInParent<CanvasScaler>(true)
+            : null;
 
         if (scaler == null)
         {
             warnings.Add(
-                "PresentationUIRoot의 CanvasScaler를 찾지 못했다. 폴백 1920x1080을 썼다 — 확인 필요.");
+                "무대(IStageMaskProvider)의 CanvasScaler를 찾지 못했다. 폴백 1920x1080을 썼다 — 확인 필요.");
 
             dto.canvasName = "(not found — fallback)";
             dto.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize.ToString();
@@ -223,28 +228,40 @@ public static class PresentationTuningExporter
     }
 
     /// <summary>
-    /// 부트스트랩이 실제로 쓰는 프리팹을 그대로 꺼낸다(private 필드라 SerializedObject).
-    /// 못 찾으면 프리팹 없이 세우되 — 런타임과 다를 수 있으므로 경고한다.
+    /// 부트스트랩이 실제로 쓰는 프리팹을 그대로 꺼낸다 — 씬에서 IRigPrefabSource를 내주는 쪽을 찾는다
+    /// (예제에서는 SampleBootstrap). 못 찾으면 프리팹 없이 세우되 — 런타임과 다를 수 있으므로 경고한다.
     /// </summary>
     private static (RectTransform character, RectTransform background)
         ResolveRigPrefabs(List<string> warnings)
     {
-        SampleBootstrap bootstrap = Object.FindFirstObjectByType<SampleBootstrap>(FindObjectsInactive.Include);
+        IRigPrefabSource source = FindInScene<IRigPrefabSource>();
 
-        if (bootstrap == null)
+        if (source == null)
         {
             warnings.Add(
-                "SampleBootstrap을 씬에서 찾지 못했다. 리그를 프리팹 없이(스키마 베이크) 세웠다 — " +
-                "런타임과 다를 수 있다.");
+                "리그 프리팹을 내주는 컴포넌트(IRigPrefabSource)를 씬에서 찾지 못했다. " +
+                "리그를 프리팹 없이(스키마 베이크) 세웠다 — 런타임과 다를 수 있다.");
 
             return (null, null);
         }
 
-        SerializedObject so = new(bootstrap);
+        return (source.CharacterRigPrefab, source.BackgroundRigPrefab);
+    }
 
-        return (
-            so.FindProperty("rigPrefab")?.objectReferenceValue as RectTransform,
-            so.FindProperty("backgroundRigPrefab")?.objectReferenceValue as RectTransform);
+    /// <summary>열린 씬에서 본체 계약을 구현한 첫 컴포넌트를 찾는다. 비활성 오브젝트도 본다.</summary>
+    private static T FindInScene<T>() where T : class
+    {
+        MonoBehaviour[] behaviours = Object.FindObjectsByType<MonoBehaviour>(
+            FindObjectsInactive.Include,
+            FindObjectsSortMode.None);
+
+        foreach (MonoBehaviour behaviour in behaviours)
+        {
+            if (behaviour is T found)
+                return found;
+        }
+
+        return null;
     }
 
     private static RigDto CaptureRig(

@@ -20,9 +20,14 @@ using Yarn.Unity;
 /// 그 위에 고른 예제의 호스트와 저장을 얹는다.
 ///
 /// 스크립트 GUID는 예전 VNAppBootstrap 그대로다 — 씬에 직렬화된 값이 유지된다.
+///
+/// 리그 프리팹은 IRigPrefabSource로도 내준다 — 본체의 튜닝 덤프 도구가 이 계약으로 찾는다.
 /// </summary>
-public class SampleBootstrap : MonoBehaviour
+public class SampleBootstrap : MonoBehaviour, IRigPrefabSource
 {
+    RectTransform IRigPrefabSource.CharacterRigPrefab => rigPrefab;
+    RectTransform IRigPrefabSource.BackgroundRigPrefab => backgroundRigPrefab;
+
     public enum SampleExample
     {
         ProgressionAndSave = 0,
