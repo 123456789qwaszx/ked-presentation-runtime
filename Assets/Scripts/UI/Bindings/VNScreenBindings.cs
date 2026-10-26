@@ -12,7 +12,6 @@ public sealed partial class VNScreenBindings : IDisposable
     private ProgressionLauncher _progressionLauncher;
     private SaveSlotService _saveSlots;
 
-    private AlbumController _albumController;
     private ManualSaveFlow _manualSaveFlow;
 
     public VNScreenBindings(UIManager uiManager)
@@ -26,7 +25,6 @@ public sealed partial class VNScreenBindings : IDisposable
         DialogueAdvanceDispatcher dialogueAdvanceDispatcher,
         ProgressionLauncher progressionLauncher,
         SaveSlotService saveSlots,
-        AlbumController albumController,
         ManualSaveFlow manualSaveFlow)
     {
         _vnFeatures = vnFeatures;
@@ -35,7 +33,6 @@ public sealed partial class VNScreenBindings : IDisposable
         _progressionLauncher = progressionLauncher;
         _saveSlots = saveSlots;
 
-        _albumController = albumController;
         _manualSaveFlow = manualSaveFlow;
     }
     

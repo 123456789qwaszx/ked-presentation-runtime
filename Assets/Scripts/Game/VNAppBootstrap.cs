@@ -48,9 +48,6 @@ public class VNAppBootstrap : MonoBehaviour
     private TextAsset _chapterJson;
     private ScenarioDefinition _scenarioDef;
     
-    private AlbumUnlockService _albumUnlockService;
-    private AlbumController _albumController;
-
     [Header("UIManager")]
     [SerializeField] private UIManager uiManager;
 
@@ -100,9 +97,6 @@ public class VNAppBootstrap : MonoBehaviour
              "2 — Yarn 변수 층 제거(2026-09-17). 1로 저장된 회차는 대사가 $작가변수를 읽던 대본이라 재개할 수 없다.")]
     [SerializeField] private string saveContentVersion = "2";
 
-    [Header("Album")]
-    [SerializeField] private VNAlbumDatabaseSO albumDatabase;
-
     [Header("VNAdvanceGate")]
     [SerializeField] private VNAdvanceInputPoller vnAdvanceInputPoller;
 
@@ -143,8 +137,6 @@ public class VNAppBootstrap : MonoBehaviour
 
         BootstrapUIManager();
         
-        BootstrapAlbum();
-
         BootstrapPresentationRoots();
 
         BootstrapAudioSystem();
@@ -221,16 +213,6 @@ public class VNAppBootstrap : MonoBehaviour
         _screenBindings = new VNScreenBindings(uiManager);
     }
     
-    private void BootstrapAlbum()
-    {
-        string albumPath = Path.Combine(_saveRoot, "album.json");
-
-        IAlbumProgressStore albumStore = new LocalAlbumProgressStore(albumPath);
-
-        _albumUnlockService = new(albumDatabase, albumStore);
-        _albumController = new(albumDatabase, _albumUnlockService);
-    }
-
     private void BootstrapPresentationRoots()
     {
         _vnRuntimeStateProvider = new VNRuntimeStateProvider(_rollbackHistory, _choiceHistory);
@@ -559,7 +541,6 @@ public class VNAppBootstrap : MonoBehaviour
             _dialogueAdvanceDispatcher,
             _progressionLauncher,
             _saveSlotService,
-            _albumController,
             manualSaveFlow);
     }
     

@@ -27,14 +27,6 @@ public sealed partial class VNScreenBindings
             r => r.LoadClicked -= HandleLoadClicked);
 
         AddBinding(root,
-            r => r.AlbumClicked += HandleAlbumClicked,
-            r => r.AlbumClicked -= HandleAlbumClicked);
-
-        AddBinding(root,
-            r => r.SettingsClicked += HandleSettingsClicked,
-            r => r.SettingsClicked -= HandleSettingsClicked);
-
-        AddBinding(root,
             r => r.QuitClicked += HandleQuitClicked,
             r => r.QuitClicked -= HandleQuitClicked);
     }
@@ -54,16 +46,6 @@ public sealed partial class VNScreenBindings
     private void HandleLoadClicked()
     {
         OpenLoadMenu();
-    }
-
-    private void HandleAlbumClicked()
-    {
-        GoToAlbum();
-    }
-
-    private void HandleSettingsClicked()
-    {
-        Debug.Log("설정 화면.");
     }
 
     private void HandleQuitClicked()
