@@ -7,7 +7,8 @@ using UnityEngine;
 // 진행 시작 자리
 // - 새 게임 또는 복원 결정
 // - Driver 호출(Chapter 진입)
-public sealed class ProgressionLauncher
+// 진행·저장 예제의 재생 호스트이기도 하다 — 재생 단위는 챕터의 장면이다.
+public sealed class ProgressionLauncher : IPlaybackHost
 {
     private readonly ProgressionDriver _driver;
     private readonly ScenarioDefinition _scenarioDef;

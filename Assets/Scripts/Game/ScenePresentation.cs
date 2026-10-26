@@ -1,11 +1,11 @@
 using System.Threading.Tasks;
-using Ked.Progression;
 
-// 실제 게임에서 Scene 실행에 필요한 Yarn / Presentation 수명을 관리.
-public sealed class ScenePresentation : IScenePresentation
+// 재생 단위(노드 하나 / 챕터의 장면) 하나에 필요한 Yarn / Presentation 수명을 관리.
+// 두 호스트가 함께 쓴다 — 진행 층의 IScenePresentation은 ScenePresentationProgressionAdapter가 잇는다.
+public sealed class ScenePresentation
 {
     private readonly IEpisodeNodeRunner _nodeRunner;
-    private readonly VNScreenBindings _vnScreenBindings;
+    private readonly IPresentationView _presentationView;
     private readonly RollbackHistory _rollbackHistory;
     private readonly IVNLineAborter _linePresentationAborter;
     private readonly PresentationShotResponseSystem _shotResponseSystem;
@@ -16,7 +16,7 @@ public sealed class ScenePresentation : IScenePresentation
 
     public ScenePresentation(
         IEpisodeNodeRunner nodeRunner,
-        VNScreenBindings vnScreenBindings,
+        IPresentationView presentationView,
         RollbackHistory rollbackHistory,
         IVNLineAborter linePresentationAborter,
         PresentationShotResponseSystem shotResponseSystem,
@@ -26,7 +26,7 @@ public sealed class ScenePresentation : IScenePresentation
         EpisodeSkipController episodeSkipController)
     {
         _nodeRunner = nodeRunner;
-        _vnScreenBindings = vnScreenBindings;
+        _presentationView = presentationView;
         _rollbackHistory = rollbackHistory;
         _linePresentationAborter = linePresentationAborter;
         _shotResponseSystem = shotResponseSystem;
@@ -40,7 +40,7 @@ public sealed class ScenePresentation : IScenePresentation
     {
         _choiceHistory.ClearChoiceRecords();
 
-        _vnScreenBindings.GoToPresentationView();
+        _presentationView.GoToPresentationView();
         _presentationStage.Clear();
         _presentationScope.Start();
     }
@@ -61,7 +61,7 @@ public sealed class ScenePresentation : IScenePresentation
     
     public void PrepareReplay()
     {
-        _vnScreenBindings.GoToPresentationView();
+        _presentationView.GoToPresentationView();
         _presentationStage.Clear();
         _presentationScope.Start();
     }

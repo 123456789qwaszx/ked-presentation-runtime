@@ -24,8 +24,8 @@ public sealed partial class VNScreenBindings
 
     private bool CanActOn(DialogueLogEntry entry)
     {
-        // 실제 점프/replay를 수행하려면 launcher가 필요.
-        if (_progressionLauncher == null)
+        // 실제 점프/replay를 수행하려면 재생 호스트가 돌고 있어야 한다.
+        if (_playbackHost == null || !_playbackHost.IsRunning)
             return false;
 
         // 현재 Scene 내부 롤백.
@@ -39,7 +39,7 @@ public sealed partial class VNScreenBindings
 
     private async void HandleBacklogJump(DialogueLogEntry entry)
     {
-        if (_progressionLauncher == null)
+        if (_playbackHost == null || !_playbackHost.IsRunning)
             return;
 
         // 현재 Scene:
@@ -48,7 +48,7 @@ public sealed partial class VNScreenBindings
         {
             ClosePanel();
 
-            await _progressionLauncher.RequestReplayAsync();
+            await _playbackHost.RequestReplayAsync();
             return;
         }
 

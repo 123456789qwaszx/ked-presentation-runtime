@@ -6,6 +6,9 @@ public sealed partial class VNScreenBindings
             afterPatched: root =>
             {
                 BindView(root, ApplyBindings);
+
+                // 이 실행이 갖지 않은 기능의 메뉴는 숨긴다 — 눌러도 아무 일 없는 버튼을 두지 않는다.
+                root.SetProgressionMenusVisible(HasProgression);
             },
             afterClosed: Unbind);
     }
@@ -89,10 +92,13 @@ public sealed partial class VNScreenBindings
 
     private async void HandleRollbackClicked()
     {
+        if (!_playbackHost.IsRunning)
+            return;
+
         if (!_vnFeatures.RequestRollbackOneStep())
             return;
 
-        await _progressionLauncher.RequestReplayAsync();
+        await _playbackHost.RequestReplayAsync();
     }
     
     private void HandleSaveMenuClicked()

@@ -292,6 +292,15 @@ public partial class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
             PressGoToTitleButton);
     }
     
+    // 저장·불러오기·타이틀 복귀는 진행·저장 예제에만 있다.
+    // 버튼은 자체 포인터 이벤트로 묶여 있어 interactable로는 막히지 않으므로 숨긴다.
+    public void SetProgressionMenusVisible(bool visible)
+    {
+        View.Button(Refs.SaveMenu_Button).gameObject.SetActive(visible);
+        View.Button(Refs.LoadMenu_Button).gameObject.SetActive(visible);
+        View.Button(Refs.GoToTitleButton_Button).gameObject.SetActive(visible);
+    }
+
     #region Handlers
     
     private void PressStepNextButton(PointerEventData _)

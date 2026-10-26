@@ -77,7 +77,7 @@ public sealed partial class VNScreenBindings
     {
         CloseAllPanels();
 
-        await _progressionLauncher.ExitAsync();
+        await _playbackHost.ExitAsync();
 
         GoToTitle();
     }

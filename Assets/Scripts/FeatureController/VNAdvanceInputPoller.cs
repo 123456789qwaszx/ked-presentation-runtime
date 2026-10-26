@@ -7,7 +7,7 @@ public sealed class VNAdvanceInputPoller : MonoBehaviour
 
     private DialogueAdvanceDispatcher _dialogueAdvanceDispatcher;
     private VNFeatureController _featureController;
-    private ProgressionLauncher _progressionLauncher;
+    private IPlaybackHost _playbackHost;
 
     private bool _rapidSkipHeld;
     private bool _speedUpHeld;
@@ -15,11 +15,11 @@ public sealed class VNAdvanceInputPoller : MonoBehaviour
     public void Initialize(
         DialogueAdvanceDispatcher dialogueAdvanceDispatcher,
         VNFeatureController featureController,
-        ProgressionLauncher progressionLauncher)
+        IPlaybackHost playbackHost)
     {
         _dialogueAdvanceDispatcher = dialogueAdvanceDispatcher;
         _featureController = featureController;
-        _progressionLauncher = progressionLauncher;
+        _playbackHost = playbackHost;
     }
 
     private void Update()
@@ -75,12 +75,13 @@ public sealed class VNAdvanceInputPoller : MonoBehaviour
         if (!_bindings.IsRollbackPressed())
             return;
 
+        // 다시 돌릴 쪽이 없으면 표적도 정하지 않는다 — 시크만 걸려 남는 상태를 만들지 않는다.
+        if (!_playbackHost.IsRunning)
+            return;
+
         if (!_featureController.RequestRollbackOneStep())
             return;
 
-        if (!_progressionLauncher.IsRunning)
-            return;
-
-        await _progressionLauncher.RequestReplayAsync();
+        await _playbackHost.RequestReplayAsync();
     }
 }

@@ -433,7 +433,7 @@ public class VNAppBootstrap : MonoBehaviour
             _choiceHistory);
 
         SceneRunner sceneRunner = new SceneRunner(
-            _scenePlayback,
+            new ScenePresentationProgressionAdapter(_scenePlayback),
             _progressionOptions,
             replayState,
             _rollbackHistory,
@@ -536,9 +536,12 @@ public class VNAppBootstrap : MonoBehaviour
             _progressionLauncher,
             _vnFeatureController);
         
-        _screenBindings.Configure(
+        _screenBindings.ConfigurePlayback(
             _vnFeatureController,
             _dialogueAdvanceDispatcher,
+            _progressionLauncher);
+
+        _screenBindings.ConfigureProgression(
             _progressionLauncher,
             _saveSlotService,
             manualSaveFlow);

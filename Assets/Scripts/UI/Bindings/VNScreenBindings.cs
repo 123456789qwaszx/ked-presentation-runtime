@@ -1,18 +1,22 @@
 using System;
 using System.Collections.Generic;
 
-public sealed partial class VNScreenBindings : IDisposable
+public sealed partial class VNScreenBindings : IPresentationView, IDisposable
 {
     private readonly UIManager _ui;
     private UIManager UI => _ui;
     
+    // 재생 — 어떤 예제든 있다.
     private VNFeatureController _vnFeatures;
     private DialogueAdvanceDispatcher _dialogueAdvanceDispatcher;
+    private IPlaybackHost _playbackHost;
 
+    // 진행·저장 — 진행·저장 예제에만 있다. 없으면 타이틀·저장·불러오기·포크도 없다.
     private ProgressionLauncher _progressionLauncher;
     private SaveSlotService _saveSlots;
-
     private ManualSaveFlow _manualSaveFlow;
+
+    private bool HasProgression => _progressionLauncher != null;
 
     public VNScreenBindings(UIManager uiManager)
     {
@@ -20,19 +24,23 @@ public sealed partial class VNScreenBindings : IDisposable
     }
     
     
-    public void Configure(
+    public void ConfigurePlayback(
         VNFeatureController vnFeatures,
         DialogueAdvanceDispatcher dialogueAdvanceDispatcher,
+        IPlaybackHost playbackHost)
+    {
+        _vnFeatures = vnFeatures;
+        _dialogueAdvanceDispatcher = dialogueAdvanceDispatcher;
+        _playbackHost = playbackHost;
+    }
+
+    public void ConfigureProgression(
         ProgressionLauncher progressionLauncher,
         SaveSlotService saveSlots,
         ManualSaveFlow manualSaveFlow)
     {
-        _vnFeatures = vnFeatures;
-        _dialogueAdvanceDispatcher = dialogueAdvanceDispatcher;
-
         _progressionLauncher = progressionLauncher;
         _saveSlots = saveSlots;
-
         _manualSaveFlow = manualSaveFlow;
     }
     
