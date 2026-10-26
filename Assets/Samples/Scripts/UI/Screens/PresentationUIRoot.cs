@@ -301,6 +301,14 @@ public partial class PresentationUIRoot : UIRoot<PresentationUIRoot.Refs>
         View.Button(Refs.LoadMenu_Button).gameObject.SetActive(visible);
     }
 
+    // 새 예제 UI(KedUI)가 대사창·선택지·버튼을 맡을 때 이 화면의 그 층을 감춘다. 무대 층(배경·인물·화면 효과)은 그대로.
+    // 옛 UI를 걷는 단계(PLAN_uipf-ui U3)에서 이 화면이 무대만 남으면 함께 지운다.
+    public void SetLegacyHudVisible(bool visible)
+    {
+        View.Rect(Refs.DialogueUILayer).gameObject.SetActive(visible);
+        View.Rect(Refs.ButtonLayer).gameObject.SetActive(visible);
+    }
+
     #region Handlers
     
     private void PressStepNextButton(PointerEventData _)

@@ -56,7 +56,23 @@ public sealed class PresentationAssembler
         PresentationSceneRefs refs,
         IPresentationView presentationView)
     {
-        return new PresentationAssembler(refs, presentationView).Assemble();
+        return Build(refs, presentationView, out _);
+    }
+
+    /// <param name="internals">예제 UI가 읽는 조립 안쪽 상태(재생 모드·지금 장면). 연출 런타임은 내놓지 않는 것이라 여기서 건넨다.</param>
+    public static PresentationRuntime Build(
+        PresentationSceneRefs refs,
+        IPresentationView presentationView,
+        out PresentationInternals internals)
+    {
+        var assembler = new PresentationAssembler(refs, presentationView);
+        PresentationRuntime runtime = assembler.Assemble();
+
+        internals = new PresentationInternals(
+            assembler._playbackState,
+            assembler._vnRuntimeStateProvider);
+
+        return runtime;
     }
 
     private PresentationRuntime Assemble()
@@ -221,7 +237,9 @@ public sealed class PresentationAssembler
     {
         YarnPlaybackDriver yarnPlaybackDriver = new(_refs.CommandExecutor, _presentationScopeSession);
 
-        DialogueSurfaceBox dialogueSurfaceBox = _refs.UIManager.GetUI<DialogueSurfaceBox>();
+        // 대사창: 새 예제 UI가 넘긴 것이 있으면 그것, 없으면 옛 UI의 박스.
+        IPresentationDialogueBoxView dialogueSurfaceBox =
+            _refs.DialogueBoxView ?? _refs.UIManager.GetUI<DialogueSurfaceBox>();
 
         DialogueBoxCurrentState dialogueBoxState = new();
         DialogueSurfaceState dialogueSurfaceState = new();
@@ -270,9 +288,10 @@ public sealed class PresentationAssembler
             _choiceHistory,
             _rollbackHistory);
 
-        VNDefaultOptionsPanel vnDefaultOptionsPanel = _refs.UIManager.GetUI<VNDefaultOptionsPanel>();
+        IPresentationOptionsBoxView optionsBox =
+            _refs.OptionsBoxView ?? _refs.UIManager.GetUI<VNDefaultOptionsPanel>();
 
-        OptionsBoxPresentationController optionsBoxPresentation = new(vnDefaultOptionsPanel);
+        OptionsBoxPresentationController optionsBoxPresentation = new(optionsBox);
 
         VNOptionsPresentationFlow optionsPresentationFlow = new(
             optionsBoxPresentation,
@@ -355,5 +374,25 @@ public sealed class PresentationAssembler
             _presentationResponseRig,
             _dialogueAdvanceDispatcher,
             DialogueFolder);
+    }
+}
+
+/// <summary>
+/// 조립 안쪽에서 예제 UI(KedUI)가 읽는 것 둘.
+/// - PlaybackState: 자동·빨리 넘기기의 켜짐(퀵메뉴 표시)과 재생 설정(자동 대기·빠르게 재생 배속).
+/// - RuntimeState: 지금 줄의 장면(노드) 이름(대사창 위 꼬리표).
+/// 연출 런타임(PresentationRuntime)의 공개 면을 넓히지 않으려고 예제 조립이 예제 층 안에서만 건넨다.
+/// </summary>
+public sealed class PresentationInternals
+{
+    public VNPlaybackRuntimeState PlaybackState { get; }
+    public VNRuntimeStateProvider RuntimeState { get; }
+
+    public PresentationInternals(
+        VNPlaybackRuntimeState playbackState,
+        VNRuntimeStateProvider runtimeState)
+    {
+        PlaybackState = playbackState;
+        RuntimeState = runtimeState;
     }
 }

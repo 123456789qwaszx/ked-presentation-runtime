@@ -77,6 +77,33 @@ public sealed class NodePlaythrough : IPlaythroughEntry
         _ = PlayAsync();
     }
 
+    /// <summary>
+    /// 이어할 파일이 있고 이 노드·이 형식의 것인가. 타이틀이 이어하기 버튼을 막을지 정할 때 쓴다.
+    /// 읽기만 한다 — 연출 기억을 되돌리지 않는다. 있다고 해도 Resume에서 기억이 깨져 있으면 처음부터다.
+    /// </summary>
+    public bool HasResumePoint
+    {
+        get
+        {
+            try
+            {
+                if (!File.Exists(_path))
+                    return false;
+
+                ResumeFile file = JsonConvert.DeserializeObject<ResumeFile>(File.ReadAllText(_path, Encoding.UTF8));
+
+                return file != null &&
+                       file.Version == FormatVersion &&
+                       string.Equals(file.Node, _nodeName, StringComparison.Ordinal) &&
+                       !string.IsNullOrEmpty(file.ResumePoint);
+            }
+            catch (Exception error) when (error is IOException || error is UnauthorizedAccessException || error is JsonException)
+            {
+                return false;
+            }
+        }
+    }
+
     #endregion
 
     #region 저장

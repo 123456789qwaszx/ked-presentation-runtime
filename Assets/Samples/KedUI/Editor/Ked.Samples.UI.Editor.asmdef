@@ -1,0 +1,24 @@
+{
+    "name": "Ked.Samples.UI.Editor",
+    "rootNamespace": "Ked.Samples.UI.Editor",
+    "references": [
+        "Ked.Samples.UI",
+        "UIPresentationFlow.Runtime",
+        "Ked.Presentation.Core",
+        "Ked.Presentation.Runtime",
+        "Ked.Presentation.Playback",
+        "Unity.TextMeshPro",
+        "UnityEngine.UI"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

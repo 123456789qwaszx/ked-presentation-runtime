@@ -5,6 +5,7 @@ using Ked.Progression.Save;
 using UnityEngine;
 using UnityEngine.Serialization;
 using Yarn.Unity;
+using KedUI = Ked.Samples.UI;
 
 /// <summary>
 /// 예제 씬의 진입점. 연출 런타임을 세우고, 고른 예제에 맞는 재생 호스트를 하나 붙인다.
@@ -18,6 +19,12 @@ using Yarn.Unity;
 ///
 /// 연출 런타임의 조립은 PresentationAssembler가 한다. 여기는 씬 참조를 넘기고,
 /// 그 위에 고른 예제의 호스트와 저장을 얹는다.
+///
+/// 화면은 둘 중 하나다(인스펙터의 '예제 UI').
+/// - 새 예제 UI(KedUI, UIPresentationFlow 위): Resources/KedUI/KedUICanvas를 띄우고 호스트 계약(KedHostPorts)으로 잇는다.
+///   캔버스가 아직 없으면(빌더 실행 전) 옛 UI로 돌아간다.
+/// - 옛 UI(Samples/Scripts/UI): VNScreenBindings.
+/// 어느 쪽이든 연출 무대는 옛 캔버스의 PresentationUIRoot가 그린다(PLAN_uipf-ui U3에서 무대만 남긴다).
 ///
 /// 스크립트 GUID는 예전 VNAppBootstrap 그대로다 — 씬에 직렬화된 값이 유지된다.
 ///
@@ -36,6 +43,10 @@ public class SampleBootstrap : MonoBehaviour, IRigPrefabSource
 
     private VNScreenBindings _screenBindings;
     private PresentationRuntime _runtime;
+    private PresentationInternals _internals;
+
+    // 새 예제 UI. null이면 옛 UI.
+    private KedUI.KedUIHost _kedUI;
 
     // 연출 단독
     private NodePlaybackHost _nodePlaybackHost;
@@ -46,6 +57,7 @@ public class SampleBootstrap : MonoBehaviour, IRigPrefabSource
     private ProgressionDriver _progressionDriver;
     private ProgressionLauncher _progressionLauncher;
     private ActiveResumeSaveFlow _activeResumeSaveFlow;
+    private ManualSaveFlow _manualSaveFlow;
 
     private SaveCoordinator _saveCoordinator;
     private SaveSlotService _saveSlotService;
@@ -67,7 +79,14 @@ public class SampleBootstrap : MonoBehaviour, IRigPrefabSource
     [Tooltip("연출 단독 예제가 재생할 Yarn 노드 이름(title:). 기본은 연출 데모(Assets/Samples/Dialogue/Demo_Presentation.yarn).")]
     [SerializeField] private string presentationEntryNode = "Demo_Presentation";
 
+    [Header("예제 UI")]
+    [Tooltip("켜면 새 예제 UI(Assets/Samples/KedUI — UIPresentationFlow 위)를 쓴다. " +
+             "빌더(Tools/Ked UI/Build Sample UI)가 만든 Resources/KedUI/KedUICanvas가 없으면 옛 UI로 연다.\n" +
+             "끄면 옛 UI(Samples/Scripts/UI).")]
+    [SerializeField] private bool useKedUI = true;
+
     [Header("UIManager")]
+    [Tooltip("옛 UI의 관리자. 새 예제 UI에서도 연출 무대(PresentationUIRoot)와 ui_patch가 이것을 쓴다.")]
     [SerializeField] private UIManager uiManager;
 
     [Header("Sound")]
@@ -162,11 +181,24 @@ public class SampleBootstrap : MonoBehaviour, IRigPrefabSource
         if (!IsPresentationOnly && !TryBootstrapProgressionData())
             return;
 
-        _screenBindings = new VNScreenBindings(uiManager);
+        _kedUI = useKedUI ? CreateKedUI() : null;
+
+        IPresentationView presentationView;
+
+        if (_kedUI != null)
+        {
+            presentationView = _kedUI.PresentationView;
+        }
+        else
+        {
+            _screenBindings = new VNScreenBindings(uiManager);
+            presentationView = _screenBindings;
+        }
 
         _runtime = PresentationAssembler.Build(
             CreatePresentationSceneRefs(),
-            _screenBindings);
+            presentationView,
+            out _internals);
 
         IPlaybackHost host = IsPresentationOnly
             ? InstallPresentationOnly()
@@ -174,15 +206,112 @@ public class SampleBootstrap : MonoBehaviour, IRigPrefabSource
 
         _runtime.AttachHost(host);
 
+        if (!IsPresentationOnly)
+            InstallProgressionSaves();
+
+        if (_kedUI != null)
+            ConfigureKedUI(host);
+        else
+            ConfigureLegacyScreens(host);
+    }
+
+    #region 화면
+
+    // 새 예제 UI의 캔버스. 빌더가 만든 프리팹이 없거나 세우다 실패하면 null — 옛 UI로 연다.
+    private KedUI.KedUIHost CreateKedUI()
+    {
+        KedUI.KedUIHost prefab = Resources.Load<KedUI.KedUIHost>(KedUI.KedUIHost.ResourcePath);
+
+        if (prefab == null)
+        {
+            Debug.LogWarning(
+                "[예제 UI] Resources/KedUI/KedUICanvas가 없다 — 빌더(Tools/Ked UI/Build Sample UI)를 실행하기 전이라 옛 UI로 연다.");
+            return null;
+        }
+
+        KedUI.KedUIHost host = Instantiate(prefab);
+        host.name = prefab.name;
+
+        try
+        {
+            host.Prepare();
+            return host;
+        }
+        catch (Exception error)
+        {
+            Debug.LogException(error);
+            Debug.LogWarning("[예제 UI] 새 UI를 세우지 못해 옛 UI로 연다.");
+            Destroy(host.gameObject);
+            return null;
+        }
+    }
+
+    private void ConfigureKedUI(IPlaybackHost host)
+    {
+        LegacyStageForKedUI.HideLegacyScreens(uiManager);
+
+        var playback = new KedUI.KedPlaybackBindings
+        {
+            Features = _runtime.Features,
+            AdvanceDispatcher = _runtime.AdvanceDispatcher,
+            Host = host,
+            LineFlow = _runtime.LineFlow,
+            InputPoller = vnAdvanceInputPoller,
+            PlaybackState = _internals.PlaybackState,
+            Typewriter = ellipsisBreathTypewriter,
+            Audio = audioSystem,
+            DialogueRunner = dialogueRunner,
+            CurrentUnitLabel = () => _internals.RuntimeState?.CurrentChapterLabel,
+        };
+
+        SampleExample other = SampleExampleSwitch.Other(_example);
+
+        var title = new KedTitlePort(
+            IsPresentationOnly ? _nodePlaythrough : _progressionLauncher,
+            IsPresentationOnly ? () => _nodePlaythrough.HasResumePoint : HasProgressionResumePoint,
+            ExampleCard(_example),
+            () => SampleExampleSwitch.SwitchTo(other));
+
+        KedUI.IKedSaveSlotPort slots = IsPresentationOnly
+            ? null
+            : new KedSaveSlotPort(_manualSaveFlow, _saveSlotService);
+
+        _kedUI.Configure(playback, title, slots, new LegacyStageForKedUI(uiManager));
+    }
+
+    // 타이틀 오른쪽 카드. 글자는 UI 글자 표의 키, 그림은 그 예제 대본이 실제로 쓰는 배경.
+    private static KedUI.KedExampleCard ExampleCard(SampleExample example)
+    {
+        bool presentationOnly = example == SampleExample.PresentationOnly;
+        string prefix = presentationOnly ? "example.presentationOnly" : "example.progression";
+
+        return new KedUI.KedExampleCard
+        {
+            NameKey = prefix + ".name",
+            TitleKey = prefix + ".title",
+            SummaryKey = prefix + ".summary",
+            Preview = Resources.Load<Sprite>(presentationOnly
+                ? "Backgrounds/class_day"
+                : "Backgrounds/1_골동품상점_에피1용오픈"),
+        };
+    }
+
+    private void ConfigureLegacyScreens(IPlaybackHost host)
+    {
         _screenBindings.ConfigurePlayback(
             _runtime.Features,
             _runtime.AdvanceDispatcher,
             host);
 
         if (IsPresentationOnly)
+        {
             _screenBindings.ConfigureTitle(_nodePlaythrough);
+        }
         else
-            ConfigureProgressionScreens();
+        {
+            _screenBindings.ConfigureTitle(_progressionLauncher);
+            _screenBindings.ConfigureSaveSlots(_saveSlotService, _manualSaveFlow);
+        }
 
         SampleExample other = SampleExampleSwitch.Other(_example);
 
@@ -192,6 +321,15 @@ public class SampleBootstrap : MonoBehaviour, IRigPrefabSource
             () => SampleExampleSwitch.SwitchTo(other));
     }
 
+    // 새 예제 UI가 쓰는 것이 있으면 그것, 없으면 씬에 놓인 옛 것.
+    private VNOptionItem OptionItemPrefab =>
+        _kedUI != null && _kedUI.OptionItemPrefab != null ? _kedUI.OptionItemPrefab : optionItem;
+
+    private DialogueSurfaceLayoutPresetDBSO SurfaceLayoutDb =>
+        _kedUI != null && _kedUI.SurfaceLayoutDb != null ? _kedUI.SurfaceLayoutDb : surfaceLayoutPresetDb;
+
+    #endregion
+
     private PresentationSceneRefs CreatePresentationSceneRefs()
     {
         return new PresentationSceneRefs
@@ -199,7 +337,7 @@ public class SampleBootstrap : MonoBehaviour, IRigPrefabSource
             UIManager = uiManager,
             AudioSystem = audioSystem,
 
-            SurfaceLayoutPresetDb = surfaceLayoutPresetDb,
+            SurfaceLayoutPresetDb = SurfaceLayoutDb,
             SpeakerPolicyDb = speakerPolicyDb,
 
             RoleTuningDb = roleTuningDb,
@@ -215,9 +353,12 @@ public class SampleBootstrap : MonoBehaviour, IRigPrefabSource
             EllipsisBreathTypewriter = ellipsisBreathTypewriter,
             AutoAdvanceScheduler = autoAdvanceScheduler,
             OptionsPresenter = vnOptionsPresenter,
-            OptionItem = optionItem,
+            OptionItem = OptionItemPrefab,
 
             InputPoller = vnAdvanceInputPoller,
+
+            DialogueBoxView = _kedUI != null ? _kedUI.DialogueBox : null,
+            OptionsBoxView = _kedUI != null ? _kedUI.OptionsBox : null,
 
             CharacterRigPrefab = rigPrefab,
             BackgroundRigPrefab = backgroundRigPrefab,
@@ -305,8 +446,8 @@ public class SampleBootstrap : MonoBehaviour, IRigPrefabSource
     private IPlaybackHost InstallProgression()
     {
         _progressionOptions = new ChapterOptionsView(
-            uiManager.GetUI<VNDefaultOptionsPanel>(),
-            optionItem);
+            _kedUI != null ? _kedUI.OptionsBox : uiManager.GetUI<VNDefaultOptionsPanel>(),
+            OptionItemPrefab);
 
         CreateSaveServices();
 
@@ -371,7 +512,8 @@ public class SampleBootstrap : MonoBehaviour, IRigPrefabSource
         _saveMaintenance = new LocalSaveMaintenance(_localSaveStore, log);
     }
 
-    private void ConfigureProgressionScreens()
+    // 화면과 무관한 진행 저장: 줄마다 이어하기 지점을 쓰는 것과 수동 저장 유즈케이스. 어느 UI든 같다.
+    private void InstallProgressionSaves()
     {
         _activeResumeSaveFlow = new(
             _saveCoordinator,
@@ -380,25 +522,40 @@ public class SampleBootstrap : MonoBehaviour, IRigPrefabSource
 
         _runtime.LineFlow.LineDisplayed += _activeResumeSaveFlow.Update;
 
-        ManualSaveFlow manualSaveFlow = new(
+        _manualSaveFlow = new(
             _saveCoordinator,
             _saveSlotService,
             _playthroughForkService,
             _progressionLauncher,
             _runtime.Memory);
+    }
 
-        _screenBindings.ConfigureTitle(_progressionLauncher);
+    // 이어하기 버튼을 막을지: 지금 콘텐츠로 이어할 수 있는 회차 저장이 있는가. 읽기만 한다 —
+    // SaveCoordinator.LoadActiveResumePoint는 회차를 잇는 부수 효과가 있어 쓰지 않고, ProgressionLauncher의 판정을 그대로 옮겼다.
+    private bool HasProgressionResumePoint()
+    {
+        PlaythroughSave save = _localSaveStore.LoadActive();
 
-        _screenBindings.ConfigureSaveSlots(
-            _saveSlotService,
-            manualSaveFlow);
+        if (save == null || save.ChapterCompleted)
+            return false;
+
+        if (!string.IsNullOrEmpty(save.ContentVersion) &&
+            !string.Equals(save.ContentVersion, saveContentVersion, StringComparison.Ordinal))
+            return false;
+
+        return _scenarioDef.TryGetChapter(save.ChapterId, out ChapterDefinition chapter) &&
+               chapter.TryGetNode(save.CurrentEpisodeId, out _) &&
+               chapter.IsSceneRoot(save.CurrentEpisodeId);
     }
 
     #endregion
 
     private void Start()
     {
-        _screenBindings.OpenTitleMenu();
+        if (_kedUI != null)
+            _kedUI.OpenTitle();
+        else
+            _screenBindings?.OpenTitleMenu();
     }
 
     private void Update()
