@@ -4,11 +4,14 @@ on:
     branches: [dev, main]
   pull_request:
     paths:
-      - 'Assets/Scripts/Ked.Progression/**'
-      - 'Assets/Scripts/ProgressionHost/SceneRunner.cs'
-      - 'Assets/Scripts/Ked.Presentation.Playback/Host/**'
-      - 'Assets/Scripts/Ked.Presentation.Playback/FeatureController/RollbackHistory.cs'
-      - 'Assets/Scripts/Ked.Presentation.Playback/FeatureController/BacklogRecorder.cs'
+      - 'Assets/Ked.Progression/**'
+      - 'Assets/Samples/Scripts/ProgressionHost/SceneRunner.cs'
+      - 'Assets/Ked.Presentation/Playback/Host/**'
+      - 'Assets/Ked.Presentation/Playback/Memory/PresentationResumePoint.cs'
+      - 'Assets/Ked.Presentation/Playback/FeatureController/RollbackHistory.cs'
+      - 'Assets/Ked.Presentation/Playback/FeatureController/BacklogRecorder.cs'
+      - 'Assets/Ked.Presentation/Playback/DialoguePresenter/VNLinePresentationFlow/LineTarget.cs'
+      - 'Assets/Ked.Presentation/Playback/DialoguePresenter/VNOptionFlow/VNChoiceRecord.cs'
       - 'tests/ProgressionHost/**'
       - '.github/workflows/progression-host.yml'
   workflow_dispatch:
@@ -22,7 +25,9 @@ jobs:
       - uses: actions/checkout@v4
         with:
           sparse-checkout: |
-            Assets/Scripts
+            Assets/Ked.Progression
+            Assets/Ked.Presentation/Playback
+            Assets/Samples/Scripts/ProgressionHost
             tests/ProgressionHost
       - uses: actions/setup-dotnet@v4
         with:

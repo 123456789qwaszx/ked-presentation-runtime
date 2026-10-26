@@ -4,7 +4,7 @@ on:
     branches: [dev, main, saveCoordinator]
   pull_request:
     paths:
-      - 'Assets/Scripts/Ked.Progression/**'
+      - 'Assets/Ked.Progression/**'
       - 'tests/ProgressionCore/**'
       - '.github/workflows/progression-core.yml'
   workflow_dispatch:
@@ -18,7 +18,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           sparse-checkout: |
-            Assets/Scripts/Ked.Progression
+            Assets/Ked.Progression
             tests/ProgressionCore
       - uses: actions/setup-dotnet@v4
         with:
