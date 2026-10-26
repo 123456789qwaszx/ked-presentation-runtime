@@ -13,7 +13,6 @@ MonoBehaviour:
   m_Name: PortraitBuildSettings
   m_EditorClassIdentifier: Assembly-CSharp::PortraitBuildSettings
   scanFolders:
-  - Assets/Art/Portraits/dungeon
-  - Assets/Art/Portraits/fillintheblank
+  - Assets/Samples/Portraits
   generatedDbPath: Assets/Data/Generated/PortraitGeneratedDB.asset
   strictMode: 0
