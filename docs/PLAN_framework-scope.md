@@ -4,6 +4,9 @@
 작업: `refactor/framework-scope`
 기준 기록: [baseline-framework-scope.md](baseline-framework-scope.md)
 
+**현재 위치(2026-10-26):** 0–3단계 끝. 3단계 뒤에 저장 분할과 재생 단위 계획([PLAN_playback-unit.md](PLAN_playback-unit.md) P0–P4)을
+먼저 끝냈다 — 이 레포가 무엇을 소유하는지가 거기서 정해졌다. 다음은 4단계(샘플 설계).
+
 ## 목표 한 문장
 
 > Yarn 대본과 진행 데이터를 받아 연출을 실행하고, 재생 제어와 상태 복원을 제공하는 Unity 프레임워크.
@@ -45,14 +48,16 @@ SCOPE-BOUNDARY.md §1은 "여기 적힌 것은 전부 필요한 기능이고 주
 | Yarn 파싱·브리지 | `Scripts/Ked.Presentation.Playback/YarnBridge/` | 본체 | |
 | 라인 표시 트랜잭션 | `Scripts/Ked.Presentation.Playback/DialoguePresenter/` | 본체 | 대사창·선택지 뷰 베이스는 `UI/DialogueBox/`(예제)로 갈랐다 — `PLAN_playback-unit.md` P2 |
 | 전진·스킵·롤백·백로그 | `Scripts/Ked.Presentation.Playback/FeatureController/` | 본체 | 키 `2`~`7` 바인딩은 소비자 없음 — 3단계에서 처리 |
-| 진행 판정·실행 | `Scripts/Ked.Progression/` + `ProgressionHost/` | 본체 (독립 모듈) | 복사 반입본, 건드리지 않음 |
-| 저장 모델·조정자·포크 | `Scripts/Ked.Progression/Save/` (반입본, 원본은 ked-progression-runtime) | 본체 (독립 모듈) | append-only 타임라인·포크 |
-| 로컬 파일 저장 | `Scripts/Ked.Progression/Save/{Persistence,Slots,Maintenance}` + 연출 기억 `Ked.Presentation.Playback/Memory/PresentationMemory` | 본체 (기본 제공 구현) | D2 |
+| 재생 단위·연출 기억 | `Scripts/Ked.Presentation.Playback/{Host,Memory}/` | 본체 | 호스트가 보는 면은 `PlaybackUnit`·`PlaybackMemory` 둘 — `PLAN_playback-unit.md` |
+| 진행 판정·실행 | `Scripts/Ked.Progression/` | 꽂힌 모듈 (반입본) | 원본은 ked-progression-runtime. 고칠 일은 원본과 함께(vendoring) |
+| 저장 모델·조정자·포크 | `Scripts/Ked.Progression/Save/` | 꽂힌 모듈 (반입본) | 진행 겹. 과거 장면 루트 보관(E3)은 여기 몫 |
+| 로컬 파일 저장 | `Scripts/Ked.Progression/Save/{Persistence,Slots,Maintenance}` | 꽂힌 모듈 (기본 제공 구현) | D2. 연출 겹은 `PlaybackMemory`가 문자열로 싣는다 |
+| 진행 어댑터 | `Scripts/ProgressionHost/` | 샘플 (진행·저장 예제) | 진행 코어를 연출에 꽂는 얇은 어댑터. `Unit`·`Memory`만 쓴다 |
 | 등가성 하네스 | `Scripts/Game/StageEquivalenceHarness.cs` | 본체 (Diagnostics) | `Game/`에서 꺼낸다 |
 | 에디터 도구 | `Assets/Editor/` | 본체 (Editor) | |
 | 익스포트 산출물·하네스 | `ExportedTuning/`, `tests/` | 본체 | CI 게이트 3개 유지 (+ 원본의 ProgressionSave) |
-| 부트스트랩·세이브 플로우 | `Scripts/Game/` (하네스 제외) | 샘플 | 초기화 경계 분리 대상. 학습 토글은 통합 샘플에만(D1) |
-| UI 프레임·화면·바인딩 | `Scripts/UI/` | 샘플 | 타이틀은 예제 선택 화면으로 |
+| 부트스트랩·세이브 플로우 | `Scripts/Game/` (하네스 제외) | 샘플 | `SampleBootstrap`(예제 고르기) · `PresentationAssembler`(조립) · `NodePlaythrough`(연출 단독 이어하기) · 저장 흐름. 학습 토글은 통합 샘플에만(D1) |
+| UI 프레임·화면·바인딩 | `Scripts/UI/` | 샘플 | 두 예제가 타이틀([처음부터]·[이어하기])을 같이 쓴다. 예제 고르기는 아직 인스펙터 칸 |
 | 예제 대본·진행 JSON | `Assets/@Dialogue/` | 샘플 | 재캐스팅 대상 |
 | 앨범·CG 해금·앨범 저장 | `Scripts/Album/`, `UI/Screens/AlbumUIRoot.cs`, `UI/Bindings/VnScreenBindings.Album.cs`, `Data/Album/`, `VNAlbumSlotButton.prefab` | 게임 층 | 제거 |
 | Settings 버튼 | `TitleUIRoot`·`VNScreenBindings.Title` | 미구현 메뉴 | 제거 (D3) |
@@ -109,7 +114,13 @@ SCOPE-BOUNDARY.md §1은 "여기 적힌 것은 전부 필요한 기능이고 주
 - `6c17fec3` 초상화 DB·크기 덤프 재생성(비공개 경로 0).
 - 정적 검사: 씬이 닿는 에셋 중 레포 밖 242건 = 패키지 203 + **끊긴 UI 이미지 17(관찰 6)** + 미확정 22(설치 폴더 내장 에셋 추정, 실제 클린 클론으로 확인).
 
-### 3. 초기화 경계 분리 — 다음
+### 3. 초기화 경계 분리 ✅
+- `008552e2` 재생 계약(`IPlaybackHost`) · `8b03e041` 조립기 분리와 연출 단독 예제 · `466c0ba9`/`bc0d9861` 호스트 하네스와 CI.
+- 이어서 `d3d7ecfb` 저장 분할(진행 겹 → 원본 `Ked.Progression.Save`, 연출 겹 → `HostState` 문자열)과
+  [PLAN_playback-unit.md](PLAN_playback-unit.md) P0–P4(`379e28b3` `PlaybackUnit` · `bf1eb65a` Playback 어셈블리 · `1329af0f` `PlaybackMemory`와 연출 단독 이어하기).
+
+당시의 목표와 계획(기록):
+
 목표: **Yarn 노드 하나만 주고도 연출이 돈다.** 지금은 `Awake`가 챕터 JSON·저장 설정을 먼저 요구하고, 롤백·백로그 점프·타이틀 복귀가 `ProgressionLauncher`를 직접 부른다.
 - 재생을 쥐는 쪽을 계약 하나로 세운다(`IPlaybackHost`: 실행 중인가 / 처음부터 다시 / 끝내기). 입력·UI는 이 계약만 안다.
 - 연출 조립을 순수 C# 조립기로 뽑는다. 연출 단독은 노드 호스트, 통합은 기존 `ProgressionLauncher`가 그 계약을 구현한다.
@@ -119,6 +130,7 @@ SCOPE-BOUNDARY.md §1은 "여기 적힌 것은 전부 필요한 기능이고 주
 ### 4. 샘플 설계
 - 연출 데모 대본(Story_blank 대체): harin·sigure·kasmi, 배치·크기·표정·모션·포커스·화면 효과·BGM·트랜지션. 실제로 있는 음원 키만(관찰 4).
 - 타이틀을 **예제 선택 화면**으로: 연출 예제 / 진행+저장 예제. 저장 슬롯 화면 간소화.
+  (지금은 인스펙터의 예제 칸으로 고르고, 두 예제가 같은 타이틀의 [처음부터]·[이어하기]를 쓴다 — `IPlaythroughEntry`.)
 - 끊긴 UI 이미지 17개(관찰 6) 처리.
 - 소비자 없는 키 바인딩 `2`~`7` 정리.
 
@@ -134,9 +146,9 @@ SCOPE-BOUNDARY.md §1은 "여기 적힌 것은 전부 필요한 기능이고 주
 4. 면접 대응 문서는 이 레포 밖에 둔다.
 
 ### 7. 검증 후 완료
-- ProgressionCore `dotnet test`, SaveLifecycle `dotnet run`, ProgressionHost `dotnet run` — CI 3개 녹색
+- ProgressionCore `dotnet test`, SaveLifecycle `dotnet run`, ProgressionHost `dotnet run` — CI 3개 녹색, 원본의 ProgressionSave도
 - Unity 컴파일, 새 경고 0, 누락 스크립트·참조 0
-- 연출 예제: 재생·표정·포커스·롤백·백로그 점프·스킵
+- 연출 예제: 재생·표정·포커스·롤백·백로그 점프·스킵·이어하기
 - 통합 예제: 새 게임→장면 완료→종료→이어하기, 수동 슬롯, 백로그→롤백, 완료 장면 fork
 - 등가성 하네스: 예제 장면에서 불일치 0
 - **클린 클론에서 위 전부 재현**
@@ -144,9 +156,9 @@ SCOPE-BOUNDARY.md §1은 "여기 적힌 것은 전부 필요한 기능이고 주
 
 ## 하지 않는 것
 
-- Progression 반입본(`Ked.Progression/`) 수정
+- Progression 반입본(`Ked.Progression/`)만 고치기 — 고칠 일이 생기면 원본에도 같은 손을 댄다(2026-10-26 역반입·저장 분할이 그 경우, vendoring)
 - 커맨드 어휘·DSL 변경
-- 저장 포맷 변경
+- 저장 포맷 변경 — 저장 분할(`d3d7ecfb`)에서 한 번 바꿨다(회차 4·슬롯 2, 옛 저장은 거부). 그 밖에는 바꾸지 않는다
 - 학습 토글 기능 확대(D1)
 - 처음부터 패키지화
 - `Art/Portraits/` 비공개 아트 커밋

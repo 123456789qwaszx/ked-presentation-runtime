@@ -3,6 +3,8 @@
 2026-10-26. `PLAN_framework-scope.md` 3단계(재생 계약)와 저장 분할(`d3d7ecfb`) 뒤에 이어지는 계획.
 4단계(연출 데모 대본 등)보다 먼저 한다 — 이 레포가 무엇을 소유하는지가 여기서 정해진다.
 
+**상태: P0–P4 끝(2026-10-26).** 남은 것은 아래 "Unity 확인 목록"의 미확인 항목과 "넘긴 것"이다.
+
 ## 정한 것
 
 | | 결정 |
@@ -76,6 +78,50 @@
 ### P4. 문서와 검증
 
 README, SCOPE-BOUNDARY, vendoring, PLAN_framework-scope 갱신. 하네스 전부 통과. Unity 확인 목록 정리.
+
+**P4 결과.**
+- 문서: README·SCOPE-BOUNDARY §0의 한 문장을 이 레포의 시안 문장으로 바꿨다("저장은 밖이다"는 더 이상 사실이 아니다).
+  SCOPE-BOUNDARY §6 계약서 C절은 "보류"에서 "다시 유효"로 — 저장이 리플레이 방식으로 돌아와 `#line:` 태그에 다시 기댄다.
+  vendoring에 "원본이 지켜 주는 것(E3)" 절을 두었다. PLAN_framework-scope는 3단계 완료와 분류표(꽂힌 모듈 / 진행 어댑터)를 고쳤다.
+- 검증(Unity 없이):
+
+  | | 결과 |
+  |---|---|
+  | `tests/ProgressionCore` — 진행 코어 EditMode 테스트 | 28/28 |
+  | `tests/ProgressionHost` — 호스트 SceneRunner · PlaybackUnit · NodePlaybackHost | 25/25 |
+  | `tests/SaveLifecycle` — 연출 기억 입구 · 브리지 · 런처 · 연출 단독 회차 | 15/15 |
+  | 원본 `tests/ProgressionSave` — 저장 정책, 결정 E3 | 25/25 |
+  | 반입본 ↔ 원본 `diff -r`(`.cs`) | 0줄. `.meta` GUID 차이는 알려진 넷뿐 |
+  | Playback 어셈블리 → 예제 층(Game·UI·ProgressionHost)·진행 참조 | 0건(주석 제외). asmdef가 컴파일에서도 막는다 |
+
+  이 환경은 NuGet에 닿지 않아 ProgressionCore는 NUnit 최소 대역으로 돌렸다. CI는 진짜 NUnit으로 돈다.
+
+### Unity 확인 목록
+
+Unity에서만 볼 수 있는 것. ✓는 확인을 받은 것이다.
+
+| | 항목 | 단계 |
+|---|---|---|
+| ✓ | 원본 샘플: 저장·이어하기, 대사 기록 줄을 누르면 그 장면에서 갈라짐 | P0-3 |
+| ✓ | `PlaybackUnit` 도입 뒤 두 예제의 재생·롤백·리플레이 | P1 |
+| | 콘솔 오류 0, 새 경고 0 — `Ked.Presentation.Playback` asmdef 분리 뒤(파일 반영 뒤 `Library/ScriptAssemblies`에 DLL이 생긴 것까지는 봤다) | P2 |
+| | 씬에 Missing Script 0 — 옮긴 MonoBehaviour의 `.meta` GUID는 그대로다 | P2 |
+| | Unity Test Runner: `Ked.Presentation.Core.Tests` · `Ked.Progression.Tests.EditMode` 통과 | P2 |
+| | 연출 단독: 타이틀에 [이어하기]·[처음부터]·[종료]만, 버튼 배치가 어색하지 않다 | P3-2 |
+| | 연출 단독: 몇 줄 진행 → [타이틀로] → [이어하기] — 마지막으로 본 줄에서 다시 시작하고, 앞 줄이 백로그에 있다. 선택지를 지났다면 같은 선택으로 지나간다 | P3-2 |
+| | 연출 단독: 노드 끝까지 본 뒤 [이어하기]는 처음부터 | P3-2 |
+| | 연출 단독: 게임 메뉴에 저장·불러오기가 없고 [타이틀로]는 있다 | P3-2 |
+| | 진행·저장: [처음부터] → 장면 확정 → [타이틀로] → [이어하기]가 마지막 줄부터 | P3-1 |
+| | 진행·저장: 슬롯 저장·덮어쓰기·불러오기, 백로그에서 완료 장면 줄로 갈라지기, 롤백 뒤 다시 고르기 | P3-1 |
+
+### 넘긴 것
+
+| | 어디로 |
+|---|---|
+| 복원 경로가 `FromEpisodeId`를 대조하지 않는다(관찰 7) | 코어 변경이라 두 저장소를 함께 고친다 — 별도 작업 |
+| 코어 계약 `IScenePresentation`을 이 레포는 쓰지 않는다 | 어휘로 남겨 둔다(원본 README 호스트 표에 적었다) |
+| README 전면 개정, 낡은 `docs/` 정리(archive) | PLAN_framework-scope 6단계 |
+| 예제 선택 화면, 연출 데모 대본, 소비자 없는 키 `2`~`7` | PLAN_framework-scope 4단계 |
 
 ---
 

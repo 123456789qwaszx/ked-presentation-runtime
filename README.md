@@ -5,10 +5,15 @@ Yarn Spinner를 기반으로 제작한 **비주얼 노벨 화면 연출 런타�
 
 ## 이 저장소의 범위
 
-> **yarn 노드를 재생하고, 챕터 진행을 돌린다. 저작·저장은 밖이다.**
+> **Yarn 대본을 줄 단위로 연출하고, 지금 재생 중인 단위 하나 안에서 그 연출을 기억하고 되감는다.**
 
-저작은 외부 툴(VnTool)이 하고, 그 결과인 `.yarn` 텍스트와 챕터 JSON(`*.progression.json`)을
-이 런타임이 재생합니다.
+- **여기 있는 것** — 연출 명령의 실행과 수명, 한 줄의 표시, 전진·스킵·롤백·백로그·줄 시크, 재생 단위의 수명,
+  연출 기억(저장이 없어도 들고 있는 줄 위치·선택 기록·백로그), 정지 프레임 계산.
+- **꽂혀 있는 것** — 다음에 무엇을 재생할지(챕터 진행)와 확정·저장 정책은 형제 저장소 `ked-progression-runtime`의
+  순수 C# 코어가 맡습니다. 이 저장소에는 복사 반입돼 있고(`Assets/Scripts/Ked.Progression/`), 진행·저장 예제가 그것을 꽂아 씁니다.
+- **밖에 있는 것** — 저작. 외부 툴(VnTool)이 만든 `.yarn` 텍스트와 챕터 JSON(`*.progression.json`)을 이 런타임이 재생합니다.
+
+결정의 근거는 [docs/PLAN_playback-unit.md](docs/PLAN_playback-unit.md)(E1–E5)와 [SCOPE-BOUNDARY.md](SCOPE-BOUNDARY.md)에 있습니다.
 
 ## 사용법
 
@@ -84,7 +89,7 @@ Yarn Spinner를 기반으로 제작한 **비주얼 노벨 화면 연출 런타�
 ### 6. 진행 층
 
 * `Assets/Scripts/Ked.Progression/` — 판정 코어와 챕터 실행 경계(엔진 의존 0, 복사 반입)
-* `Assets/Scripts/ProgressionHost/` — Scene 실행, 로딩·프리플라이트와 호스트 접착
+* `Assets/Scripts/ProgressionHost/` — 진행 코어를 연출에 꽂는 얇은 어댑터. Scene 실행 순서, 로딩, 저장 브리지
 
 챕터 JSON을 실어 불변식을 검사하고, 대사 재생 뒤 한 번 판정해 선택지를 띄우고
 스탯 반영과 이동을 장면 경계에서 한 번에 커밋하는 루프는

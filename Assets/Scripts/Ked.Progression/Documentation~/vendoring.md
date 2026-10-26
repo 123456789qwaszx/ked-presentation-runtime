@@ -24,11 +24,23 @@
 | 맞춘 것 | `Runtime/` 전체(Spec · State · Transition · Vocabulary · Loading · Scene · Contracts · Response · `ProgressionDriver` · `ISceneRunner`) + `Save/`(`Ked.Progression.Save`) + EditMode 테스트 |
 | 코드 일치 | `.cs` 기준 `diff -r` 0건 (아래 "대조" 명령) |
 | 원본 쪽 정리 | 옛 `SceneRunner`·`SceneRunContext`·`ProgressionState`·디버그 호스트 삭제, `Assets/Progression/Samples/` 최소 샘플 추가, README 갱신 |
+| 그 뒤 원본에만 | 결정 E3 테스트(`tests/ProgressionSave`), 샘플의 저장·이어하기·대사 기록 갈라지기, README — **코드(`Runtime/`)는 그대로**라 사본에 가져올 것이 없다 |
 | 같은 날 두 번째 | 이 저장소의 `Assets/Scripts/Save/`에서 **진행 겹을 떼어** `Save/`로 반입본에 넣고 원본에 보냈다. 연출 겹(줄 좌표·Yarn 선택·백로그)은 연출 어셈블리 `Ked.Presentation.Playback`의 `PlaybackMemory`가 `HostState` 문자열로 꺼내고 되돌린다(진행을 모른다) |
 
 원본 브랜치 `sync/from-presentation`은 아직 원본 `dev`에 합치지 않았다. 합치면 이 표의 브랜치를 고친다.
 
 **갈리면 이 표를 고친다.** 표가 낡으면 사본이 어디서 왔는지 아무도 모른다.
+
+## 원본이 지켜 주는 것 — 결정 E3
+
+이 저장소는 재생 단위의 루트를 **하나만** 둔다. 이전 장면의 루트를 보관해 그 장면에서 다시 여는 일
+(백로그 줄에서 갈라지기)은 진행 저장의 몫이다 — `PlaythroughSaveSnapshot.FindSceneIndexBySerial`,
+`PlaythroughForkService.ForkFromScene`, 장면 기록의 `HostSerialStart/End`·`HostState`.
+
+원본만 보면 이것들은 "백로그도 없는데 왜 있지" 싶은 일반화로 읽힌다. 지워지면 이 저장소의 갈라지기가 사라진다.
+그래서 원본은 세 겹으로 지킨다 — 이름에 결정을 적은 테스트(`tests/ProgressionSave`), README §11의 결정 기록,
+그리고 그것을 실제로 쓰는 원본 샘플(대사 기록 줄을 누르면 그 장면에서 갈라진다).
+원본에서 이 셋을 건드리는 변경이 오면 이 저장소의 `ManualSaveFlow.ForkFromBacklogAsync`와 함께 본다.
 
 > ⚠ 이전 원본이던 `ked-progression`(순수 C# 저장소)은 **더 이상 쓰지 않는다.**
 > 그쪽으로 `diff`를 돌리면 `ChapterProgression` / `ChapterDefinition` 개명 때문에 전부 갈린 것처럼 보인다.
@@ -121,10 +133,10 @@ dotnet test tests/ProgressionCore/ProgressionCore.csproj
 
 `.github/workflows/progression-core.yml`이 이것을 CI 게이트로 세운다.
 
-저장 겹은 `tests/SaveLifecycle`(이 저장소, 연출 코덱·브리지·런처)과 원본의 `tests/ProgressionSave`(저장 정책)가 나눠 본다.
+저장 겹은 `tests/SaveLifecycle`(이 저장소 — 연출 기억의 입구·브리지·런처·연출 단독 회차)과 원본의 `tests/ProgressionSave`(저장 정책)가 나눠 본다.
 `Save/`를 고치면 둘 다 돌린다.
 
-코어를 바꾸면 호스트 쪽 Scene 실행 순서도 함께 돌려 본다. 진짜 `SceneRunner` · `RollbackHistory` · `BacklogRecorder`와
+코어를 바꾸면 호스트 쪽 Scene 실행 순서도 함께 돌려 본다. 진짜 `SceneRunner` · `PlaybackUnit` · `RollbackHistory` · `BacklogRecorder`와
 코어 전체를 컴파일하고, Unity·Yarn에 매인 것만 대역으로 둔다.
 
 ```bash
