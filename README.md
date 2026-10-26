@@ -92,6 +92,8 @@ Yarn Spinner를 기반으로 제작한 **비주얼 노벨 화면 연출 런타�
 재생·선택·저장처럼 비동기 또는 실패를 재현해야 하는 경계만 계약으로 두고, 고정된 게임 상태와
 서비스는 구체 타입으로 사용합니다. 코어는 유니티 없이 돕니다 —
 `dotnet test tests/ProgressionCore/ProgressionCore.csproj`.
+SceneRunner의 실행 순서와 리플레이·롤백·로드·정지 규칙도 유니티 없이 검증합니다 —
+`dotnet run --project tests/ProgressionHost/ProgressionHost.csproj`.
 
 ## 개발 환경
 

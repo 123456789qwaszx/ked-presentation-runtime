@@ -60,7 +60,7 @@ diff -r -q --strip-trailing-cr -x "*.meta" \
   Assets/Scripts/Ked.Progression/Tests/EditMode
 ```
 
-2026-10-26 기준 출력은 `Only in ...: SceneRunnerTests.cs` 한 줄이다. 아래 "테스트"를 본다.
+2026-10-26 기준 이 명령의 출력도 **0줄**이다.
 
 ## 반입 — 원본 → 사본
 
@@ -101,7 +101,10 @@ cp ../ked-presentation-runtime/Assets/Scripts/Ked.Progression/*.cs* Assets/Progr
 | `SceneProgressTests` | ✓ | ✓ | pending · 롤백 · 리플레이 · 경로 복원 · commit |
 | `ProgressionStateFoldTests` | ✓ | ✓ | 선택 적용 · 스탯 범위 |
 | `ScenePendingHistoryTests` | ✓ | ✓ | 양쪽 모두 주석 처리 상태 |
-| `SceneRunnerTests` | — | ✓ | **사본에만 있다.** 대상 `SceneRunner`가 코어가 아니라 이 저장소의 `ProgressionHost/`에 있다. 지금은 주석 처리 상태다 |
+
+호스트 `SceneRunner`의 테스트는 여기 없다. 대상이 코어가 아니라 이 저장소의 `ProgressionHost/`에 있기 때문이다.
+그 테스트는 `tests/ProgressionHost/`의 dotnet 하네스가 맡는다(아래 "자동 검증").
+예전 `SceneRunnerTests`(코어 안에 있던 옛 `SceneRunner` 대상, 주석 처리 상태)는 이 하네스로 옮기면서 지웠다.
 
 ## 자동 검증
 
@@ -113,6 +116,13 @@ dotnet test tests/ProgressionCore/ProgressionCore.csproj
 ```
 
 `.github/workflows/progression-core.yml`이 이것을 CI 게이트로 세운다.
+
+코어를 바꾸면 호스트 쪽 Scene 실행 순서도 함께 돌려 본다. 진짜 `SceneRunner` · `RollbackHistory` · `BacklogRecorder`와
+코어 전체를 컴파일하고, Unity·Yarn에 매인 것만 대역으로 둔다.
+
+```bash
+dotnet run --project tests/ProgressionHost/ProgressionHost.csproj
+```
 
 ## 안 가져온 것
 

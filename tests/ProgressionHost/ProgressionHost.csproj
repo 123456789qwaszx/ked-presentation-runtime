@@ -1,0 +1,34 @@
+<!--
+  호스트 SceneRunner 회귀 하네스.
+
+  ProgressionHost/SceneRunner는 진행 코어가 ISceneRunner로 받는 Scene 실행 순서다.
+  그 순서(재생 → 선택 → 기록 → 커서 이동 → 경계 판정 → commit)와
+  리플레이·롤백·로드 시크·정지·저장 실패의 규칙을 Unity 없이 검증한다.
+
+  진짜로 컴파일하는 것: 진행 코어 전체, SceneRunner, RollbackHistory, BacklogRecorder.
+  대역(Stubs.cs): UnityEngine.Debug, YarnLineMeta, ProgressionReplayState(라인 시크).
+  재생·선택 UI·저장은 계약(IScenePresentation 등)이라 Fakes.cs가 구현한다.
+
+  NuGet 패키지가 없다 - SDK만 있으면 오프라인으로도 돈다.
+-->
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <LangVersion>9.0</LangVersion>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../Assets/Scripts/Ked.Progression/**/*.cs"
+             Exclude="../../Assets/Scripts/Ked.Progression/Tests/**/*.cs" />
+    <Compile Include="../../Assets/Scripts/ProgressionHost/SceneRunner.cs" />
+    <Compile Include="../../Assets/Scripts/FeatureController/RollbackHistory.cs" />
+    <Compile Include="../../Assets/Scripts/FeatureController/BacklogRecorder.cs" />
+    <Compile Include="Stubs.cs" />
+    <Compile Include="Fakes.cs" />
+    <Compile Include="Program.cs" />
+  </ItemGroup>
+</Project>

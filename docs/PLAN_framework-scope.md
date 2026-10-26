@@ -50,7 +50,7 @@ SCOPE-BOUNDARY.md §1은 "여기 적힌 것은 전부 필요한 기능이고 주
 | 로컬 파일 저장 | `Scripts/Save/{Persistence,Slots,Maintenance}` | 본체 (기본 제공 구현) | D2 |
 | 등가성 하네스 | `Scripts/Game/StageEquivalenceHarness.cs` | 본체 (Diagnostics) | `Game/`에서 꺼낸다 |
 | 에디터 도구 | `Assets/Editor/` | 본체 (Editor) | |
-| 익스포트 산출물·하네스 | `ExportedTuning/`, `tests/` | 본체 | CI 게이트 2개 유지 |
+| 익스포트 산출물·하네스 | `ExportedTuning/`, `tests/` | 본체 | CI 게이트 3개 유지 |
 | 부트스트랩·세이브 플로우 | `Scripts/Game/` (하네스 제외) | 샘플 | 초기화 경계 분리 대상. 학습 토글은 통합 샘플에만(D1) |
 | UI 프레임·화면·바인딩 | `Scripts/UI/` | 샘플 | 타이틀은 예제 선택 화면으로 |
 | 예제 대본·진행 JSON | `Assets/@Dialogue/` | 샘플 | 재캐스팅 대상 |
@@ -134,7 +134,7 @@ SCOPE-BOUNDARY.md §1은 "여기 적힌 것은 전부 필요한 기능이고 주
 4. 면접 대응 문서는 이 레포 밖에 둔다.
 
 ### 7. 검증 후 완료
-- ProgressionCore `dotnet test`, SaveLifecycle `dotnet run` — CI 2개 녹색
+- ProgressionCore `dotnet test`, SaveLifecycle `dotnet run`, ProgressionHost `dotnet run` — CI 3개 녹색
 - Unity 컴파일, 새 경고 0, 누락 스크립트·참조 0
 - 연출 예제: 재생·표정·포커스·롤백·백로그 점프·스킵
 - 통합 예제: 새 게임→장면 완료→종료→이어하기, 수동 슬롯, 백로그→롤백, 완료 장면 fork
