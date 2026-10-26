@@ -1,4 +1,5 @@
 using System;
+using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -10,6 +11,7 @@ public sealed class TitleUIRoot : UIRoot<TitleUIRoot.Refs>
     public event Action StartClicked;
     public event Action LoadClicked;
     public event Action QuitClicked;
+    public event Action SwitchExampleClicked;
 
     #region Refs
 
@@ -22,6 +24,10 @@ public sealed class TitleUIRoot : UIRoot<TitleUIRoot.Refs>
         StartButton_Button,
         LoadButton_Button,
         QuitButton_Button,
+
+        // 예제 전환(framework-scope 4단계). 씬에 아직 없으면 경고만 하고 나머지 타이틀은 그대로 돈다.
+        ExampleLabel_Text,
+        SwitchExampleButton_Button,
     }
 
     private Image _titleBg;
@@ -31,6 +37,9 @@ public sealed class TitleUIRoot : UIRoot<TitleUIRoot.Refs>
     private Button _startButton;
     private Button _loadButton;
     private Button _quitButton;
+
+    private TMP_Text _exampleLabel;
+    private Button _switchExampleButton;
 
     #endregion
 
@@ -54,6 +63,9 @@ public sealed class TitleUIRoot : UIRoot<TitleUIRoot.Refs>
         _startButton    = View.Button(Refs.StartButton_Button);
         _loadButton     = View.Button(Refs.LoadButton_Button);
         _quitButton     = View.Button(Refs.QuitButton_Button);
+
+        _exampleLabel        = View.Text(Refs.ExampleLabel_Text);
+        _switchExampleButton = View.Button(Refs.SwitchExampleButton_Button);
     }
 
     private void BindHandlers()
@@ -62,12 +74,29 @@ public sealed class TitleUIRoot : UIRoot<TitleUIRoot.Refs>
         BindEvent(_startButton, PressStartButton);
         BindEvent(_loadButton, PressLoadButton);
         BindEvent(_quitButton, PressQuitButton);
+        BindEvent(_switchExampleButton, PressSwitchExampleButton);
     }
 
     // 저장 슬롯이 없는 예제(연출 단독)는 불러오기를 숨긴다.
     public void SetLoadVisible(bool visible)
     {
         View.Button(Refs.LoadButton_Button).gameObject.SetActive(visible);
+    }
+
+    // 지금 예제와, 전환 버튼이 데려갈 예제. 버튼의 글씨는 자식 TMP_Text가 있으면 고친다.
+    public void SetExample(string exampleName, string otherExampleName)
+    {
+        if (_exampleLabel)
+            _exampleLabel.text = string.IsNullOrEmpty(exampleName) ? "" : $"예제: {exampleName}";
+
+        if (!_switchExampleButton)
+            return;
+
+        _switchExampleButton.gameObject.SetActive(!string.IsNullOrEmpty(otherExampleName));
+
+        TMP_Text label = _switchExampleButton.GetComponentInChildren<TMP_Text>(true);
+        if (label && !string.IsNullOrEmpty(otherExampleName))
+            label.text = $"{otherExampleName} 예제로";
     }
 
     #region Handlers
@@ -92,6 +121,11 @@ public sealed class TitleUIRoot : UIRoot<TitleUIRoot.Refs>
         QuitClicked?.Invoke();
     }
 
+    private void PressSwitchExampleButton(PointerEventData _)
+    {
+        SwitchExampleClicked?.Invoke();
+    }
+
     #endregion
 
     private bool ValidateRefs()
@@ -105,6 +139,9 @@ public sealed class TitleUIRoot : UIRoot<TitleUIRoot.Refs>
         AppendMissing(ref missing, _startButton,    Refs.StartButton_Button);
         AppendMissing(ref missing, _loadButton,     Refs.LoadButton_Button);
         AppendMissing(ref missing, _quitButton,     Refs.QuitButton_Button);
+
+        AppendMissing(ref missing, _exampleLabel,        Refs.ExampleLabel_Text);
+        AppendMissing(ref missing, _switchExampleButton, Refs.SwitchExampleButton_Button);
 
         if (missing.Length > 0)
         {

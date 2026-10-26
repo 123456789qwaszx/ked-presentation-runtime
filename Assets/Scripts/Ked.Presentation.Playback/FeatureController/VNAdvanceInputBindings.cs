@@ -1,6 +1,5 @@
 using System;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 [Serializable]
 public sealed class VNAdvanceInputBindings
@@ -20,19 +19,8 @@ public sealed class VNAdvanceInputBindings
     public KeyCode autoToggle = KeyCode.A;
     public KeyCode rollback = KeyCode.R;
 
-    public KeyCode runYarn = KeyCode.Alpha2;
-
-    public KeyCode runEpisodeChain = KeyCode.Alpha3;
-
-    public KeyCode loadProgression = KeyCode.Alpha4;
-
-    public KeyCode newGame = KeyCode.Alpha5;
-
-    // 현재 라인 수동 저장 / 마지막 수동 저장 불러오기 — 디버그.
-    [FormerlySerializedAs("bookmark")]
-    public KeyCode saveSlot = KeyCode.Alpha6;
-    [FormerlySerializedAs("loadBookmark")]
-    public KeyCode loadSaveSlot = KeyCode.Alpha7;
+    // 예전의 키 2~7(노드 실행·에피소드 사슬·진행 시작·새 게임·슬롯 저장/불러오기)은 읽는 곳이 없어 걷었다.
+    // 그 일은 타이틀과 시스템 메뉴가 한다(framework-scope 4단계).
 
     public bool IsRapidSkipHeld() => IsHeld(rapidSkipLeft) || IsHeld(rapidSkipRight);
     public bool IsSpeedUpHeld() => IsHeld(speedUpHold);
@@ -40,12 +28,6 @@ public sealed class VNAdvanceInputBindings
     public bool IsAutoTogglePressed() => IsPressed(autoToggle);
     public bool IsRollbackPressed() => IsPressed(rollback);
     public bool IsAdvancePressed() => IsPressed(advance);
-    public bool IsRunYarnPressed() => IsPressed(runYarn);
-    public bool IsRunEpisodeChainPressed() => IsPressed(runEpisodeChain);
-    public bool IsLoadProgressionPressed() => IsPressed(loadProgression);
-    public bool IsNewGamePressed() => IsPressed(newGame);
-    public bool IsSaveSlotPressed() => IsPressed(saveSlot);
-    public bool IsLoadSaveSlotPressed() => IsPressed(loadSaveSlot);
 
 
     private static bool IsHeld(KeyCode key)

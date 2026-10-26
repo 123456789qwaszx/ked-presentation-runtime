@@ -15,6 +15,11 @@ public sealed partial class VNScreenBindings : IPresentationView, IDisposable
     // 타이틀 — 어떤 예제든 있다. 처음부터·이어하기를 예제의 호스트 쪽이 준다.
     private IPlaythroughEntry _playthroughEntry;
 
+    // 타이틀의 예제 전환 — 지금 예제 이름, 다른 예제 이름, 그 예제로 다시 열기.
+    private string _exampleName;
+    private string _otherExampleName;
+    private Action _switchExample;
+
     // 저장 슬롯 — 진행·저장 예제에만 있다. 없으면 저장·불러오기 메뉴와 백로그 갈라지기도 없다.
     private SaveSlotService _saveSlots;
     private ManualSaveFlow _manualSaveFlow;
@@ -40,6 +45,13 @@ public sealed partial class VNScreenBindings : IPresentationView, IDisposable
     public void ConfigureTitle(IPlaythroughEntry playthroughEntry)
     {
         _playthroughEntry = playthroughEntry;
+    }
+
+    public void ConfigureExampleSwitch(string exampleName, string otherExampleName, Action switchExample)
+    {
+        _exampleName = exampleName;
+        _otherExampleName = otherExampleName;
+        _switchExample = switchExample;
     }
 
     public void ConfigureSaveSlots(

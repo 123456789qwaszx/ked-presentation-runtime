@@ -8,7 +8,8 @@ using Yarn.Unity;
 
 /// <summary>
 /// 예제 씬의 진입점. 연출 런타임을 세우고, 고른 예제에 맞는 재생 호스트를 하나 붙인다.
-/// 두 예제 모두 타이틀([처음부터] [이어하기])에서 시작한다.
+/// 두 예제 모두 타이틀([처음부터] [이어하기])에서 시작한다. 예제는 인스펙터의 '예제' 칸이 기본이고,
+/// 타이틀의 [다른 예제로]를 누르면 그 예제로 씬을 다시 연다(SampleExampleSwitch).
 ///
 /// - 연출 단독: 진행 없이 Yarn 노드 하나(NodePlaybackHost). 이어하기는 연출 기억만으로 —
 ///   노드 이름과 PlaybackMemory의 문자열을 파일 하나에 둔다(NodePlaythrough).
@@ -58,8 +59,8 @@ public class SampleBootstrap : MonoBehaviour
              "둘 다 타이틀에서 시작한다.")]
     [SerializeField] private SampleExample example = SampleExample.ProgressionAndSave;
 
-    [Tooltip("연출 단독 예제가 재생할 Yarn 노드 이름(title:).")]
-    [SerializeField] private string presentationEntryNode = "SC_EP01";
+    [Tooltip("연출 단독 예제가 재생할 Yarn 노드 이름(title:). 기본은 연출 데모(Assets/@Dialogue/Demo_Presentation.yarn).")]
+    [SerializeField] private string presentationEntryNode = "Demo_Presentation";
 
     [Header("UIManager")]
     [SerializeField] private UIManager uiManager;
@@ -143,10 +144,15 @@ public class SampleBootstrap : MonoBehaviour
     [Header("NodeDebug")]
     [SerializeField] private CharacterFocusDebugView characterFocusDebugView;
 
-    private bool IsPresentationOnly => example == SampleExample.PresentationOnly;
+    // 이번 조립의 예제. 인스펙터 값 또는 타이틀에서 고른 것(SampleExampleSwitch).
+    private SampleExample _example;
+
+    private bool IsPresentationOnly => _example == SampleExample.PresentationOnly;
 
     private void Awake()
     {
+        _example = SampleExampleSwitch.Resolve(example);
+
         // 진행·저장 예제는 진행 데이터를 먼저 확인한다 — 없으면 아무것도 세우지 않는다.
         if (!IsPresentationOnly && !TryBootstrapProgressionData())
             return;
@@ -172,6 +178,13 @@ public class SampleBootstrap : MonoBehaviour
             _screenBindings.ConfigureTitle(_nodePlaythrough);
         else
             ConfigureProgressionScreens();
+
+        SampleExample other = SampleExampleSwitch.Other(_example);
+
+        _screenBindings.ConfigureExampleSwitch(
+            SampleExampleSwitch.DisplayName(_example),
+            SampleExampleSwitch.DisplayName(other),
+            () => SampleExampleSwitch.SwitchTo(other));
     }
 
     private PresentationSceneRefs CreatePresentationSceneRefs()

@@ -11,6 +11,7 @@ public sealed partial class VNScreenBindings
 
                 // 저장 슬롯이 없는 예제(연출 단독)는 불러오기 메뉴가 없다.
                 root.SetLoadVisible(HasSaveSlots);
+                root.SetExample(_exampleName, _otherExampleName);
             },
             afterClosed: Unbind);
     }
@@ -32,6 +33,10 @@ public sealed partial class VNScreenBindings
         AddBinding(root,
             r => r.QuitClicked += HandleQuitClicked,
             r => r.QuitClicked -= HandleQuitClicked);
+
+        AddBinding(root,
+            r => r.SwitchExampleClicked += HandleSwitchExampleClicked,
+            r => r.SwitchExampleClicked -= HandleSwitchExampleClicked);
     }
 
     #region Handlers
@@ -44,6 +49,11 @@ public sealed partial class VNScreenBindings
     private void HandleStartClicked()
     {
         _playthroughEntry.StartNew();
+    }
+
+    private void HandleSwitchExampleClicked()
+    {
+        _switchExample?.Invoke();
     }
 
     private void HandleLoadClicked()

@@ -17,10 +17,11 @@ Yarn Spinner를 기반으로 제작한 **비주얼 노벨 화면 연출 런타�
 
 ## 사용법
 
-`Assets/Scenes/PresentationSample.unity`를 열고 하이어라키의 `[VNAppBootstrap]`(`SampleBootstrap`)을 선택한다.
-**예제** 칸에서 하나를 고르고 재생한다. 두 예제 모두 타이틀의 **[처음부터] / [이어하기]**로 시작한다.
+`Assets/Scenes/PresentationSample.unity`를 열고 재생한다. 두 예제 모두 타이틀의 **[처음부터] / [이어하기]**로 시작한다.
+시작 예제는 하이어라키 `[VNAppBootstrap]`(`SampleBootstrap`)의 **예제** 칸이고, 실행 중에는 타이틀의
+**[다른 예제로]**로 바꾼다 — 한 실행에 재생 호스트는 하나라서 씬을 다시 연다.
 
-- **연출 단독** — 진행 없이 Yarn 노드 하나(**Presentation Entry Node**, `.yarn`의 `title:`)를 재생한다.
+- **연출 단독** — 진행 없이 Yarn 노드 하나(**Presentation Entry Node**, 기본 `Demo_Presentation`)를 재생한다.
   줄이 다 보일 때마다 이어하기 지점을 파일 하나(`persistentDataPath/presentation-only/resume.json`)에 쓰고,
   [이어하기]는 노드 처음부터 다시 달려 그 줄까지 보이지 않게 빨리 감는다. 노드 끝까지 보면 지운다.
 - **진행·저장** — **진행 층 › Progression Chapter Json**의 챕터(`Assets/@Dialogue/ChapterProgression/`)를 진행한다.
@@ -44,16 +45,21 @@ Yarn Spinner를 기반으로 제작한 **비주얼 노벨 화면 연출 런타�
 
 ### 2. 연출 스크립트 예제
 
-`Assets/@Dialogue/Story_blank_ch01_ep00.yarn`
+`Assets/@Dialogue/Demo_Presentation.yarn` — 연출 단독 예제가 재생하는 노드 하나
 
-대사와 함께 배경·캐릭터 배치, 페이드, 화면 효과와 같은 연출 명령을 작성한 예제입니다.
+짧은 장면 하나에서 배경·BGM·등장, 배치·크기, 표정·포즈·모션, 포커스·카메라, 화면 효과·효과음,
+트랜지션·선택지를 한 번씩 지나갑니다. 공개된 예제 초상화(harin·sigure·kasmi)와 저장소에 있는 배경·음원만 씁니다.
 
 ```yarn
 <<bg_sprite bg_main class_day>>
 <<bg_fade_in bg_main 24fr>>
-<<bgm bgm_school_morning 2s>>
-<<12fr>>
+<<bgm audio/bgm_idoberg-relaxing-guitar-loop-v5-245859 2s>>
+<<place_center s1 bust 0fr>>
+<<fade_in s1 18fr>>
+하린: 배경이 들어오고, 음악이 깔리고, 내가 걸어 들어왔어.
 ```
+
+진행·저장 예제의 대본은 `Assets/@Dialogue/test/qwer_scene.yarn`(챕터 JSON `ChapterProgression/qwer_scene.progression.json`)입니다.
 
 ### 3. 대사 실행 흐름
 
