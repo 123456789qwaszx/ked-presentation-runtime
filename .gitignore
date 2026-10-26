@@ -98,9 +98,9 @@ InitTestScene*.unity*
 # Auto-generated scenes by play mode tests
 /[Aa]ssets/[Ii]nit[Tt]est[Ss]cene*.unity*
 
-# Large local portrait art assets
-/[Aa]ssets/[Aa]rt/[Pp]ortraits/
-/[Aa]ssets/[Aa]rt/[Pp]ortraits.meta
+# 로컬 전용 비공개 아트(초상화 원본 등). 공개 예제 그림은 Assets/Samples/ 아래에 있다.
+/[Aa]ssets/[Aa]rt/
+/[Aa]ssets/[Aa]rt.meta
 # 등가성 하네스 재생 산출물 (커밋 대상 아님)
 EquivalenceReports/
 
