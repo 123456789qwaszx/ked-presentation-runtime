@@ -138,3 +138,5 @@ NUnit 패키지를 받을 수 없는 환경이라 실행하지 못했다. GitHub
    씬 값이 이를 덮고 있어, 지금 만들어지는 저장은 "1"로 찍힌다. 의도인지 확인이 필요하다.
 2. `SCOPE-BOUNDARY.md` §7이 경고하는 `VNRuntimeStateInspectorWindow`는 **코드에 존재하지 않는다.** 문서만 남았다(5단계에서 정리).
 3. README "사용법"의 키 `2`/`3`/`4`·"Yarn Entry Key" 필드는 현재 구현과 맞지 않는다(5단계에서 정리).
+4. **없는 음원 키가 조용히 무시된다.** 예제의 `<<bgm bgm_school_morning>>`·`<<sfx sfx_school_bell>>`은 `Resources/`에 해당 파일이 없다.
+   `ResourcesAudioClipResolver`가 null을 돌려주고 명령은 소리 없이 끝난다 — 경고도 없다. "실패는 묵묵히 흡수되지 않는다"는 규율과 어긋난다.

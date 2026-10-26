@@ -154,13 +154,13 @@ VnTool ↔ 런타임 계약서는 §3의 이동을 아직 반영하지 않았다
 |---|---|
 | Yarn 변수 층이 없다 | 2026-09-17에 `ProgressionYarnBridge` · `YarnVariableCheckpoint` · `YarnVariableSnapshot`을 통째로 걷었다. 어휘가 스탯 하나로 합쳐져 Yarn 변수가 **같은 것을 말하는 두 번째 방법**이 됐기 때문이다.<br>⚠ **되감기 주인이 바뀌었다.** 리플레이 결정성은 체크포인트 복원이 아니라 `SceneProgress.RewindAfter` + 기록된 선택 재소비가 준다. 요구가 사라진 게 아니라 주인이 옮겨간 것이다 |
 | `visited()`가 되감기지 않는다 | Yarn 내장 `visited()` / `visited_count()`는 변수 저장소에 기댄다. **지금 쓰는 대본이 0건**이라 영향이 없지만, 쓰기 시작하면 롤백에서 되돌아가지 않는다. 그때는 그 기억도 챕터 깃발(스탯 0/1)로 올리는 것이 맞다 |
-| 대본에 남은 `<<set>>` | 시험 대본(`Assets/@Dialogue/test/`)이 아직 `$__t1_*`를 쓴다. 이제 아무도 그 값을 초기화·저장·되감지 않는다 — **재출력 전까지 그 대본의 롤백은 믿을 수 없다** |
 | ~~시크 종류의 미사용~~ | **닫혔다.** `VNYarnLineBoundary`가 `SeekKind == VNSeekKind.Rollback`으로 실제로 분기한다 — 롤백 시크는 백로그를 다시 적지 않고 로드 시크는 다시 적는다. `VNSeekKind.Load`의 생산자도 `ProgressionReplayState.BeginLoadReplay()`로 돌아왔다 |
 
 ### 닫힌 것
 
 | | |
 |---|---|
+| 대본에 남은 `<<set>>` | **닫혔다.** `qwer_scene`의 조건을 `stat("키")` 읽기로 바꿨다 — 대사는 스탯을 읽기만 하고 바꾸는 곳은 간선뿐이다. 대사가 Yarn 변수를 **쓰던** `qwer` 시험 챕터(`qwer_EP*`·`qwer_장면_*`)는 비공개 캐릭터의 대사이기도 해서 걷었다(framework-scope 2단계) |
 | 보관 어셈블리 | `Ked.Presentation.Sync` — 소비자·테스트 0인 채 두지 않고 **트리에서 뺐다**(`d31e80c4`). git 역사가 보관처다 |
 | 씬 잔해 | 정리 완료 — `SampleScene` · `DungeonCafe` 삭제, `PresentationSample.unity` 하나만 남았다. `OneShot*` · `subPresentationRunner` 참조 0건, 러너는 하나다 |
 | 에디터 도구 | `VNRuntimeStateInspectorWindow`의 `[VNLoadSeekDriver]` 절 제거. 함께 죽어 있던 `_presentationSessionContext` 리플렉션 대상을 `_presentationScopeSession`으로 교정 |

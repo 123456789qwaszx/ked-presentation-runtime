@@ -111,16 +111,20 @@ SCOPE-BOUNDARY.md §1은 "여기 적힌 것은 전부 필요한 기능이고 주
 커밋: `refactor: 앨범·CG 해금·미구현 설정 제거 — 프레임워크 범위 밖` / `chore: URP 템플릿 잔해 제거` / `chore(scene): 앨범·설정 UI 오브젝트 제거`
 
 ### 2. 예제 콘텐츠 교체 — 클린 클론에서 돌아가게
-1. `Assets/Samples/Portraits/` 생성. `harin`·`sigure`·`kasmi`를 **.meta와 함께** 이동하고 추가 표정·모션을 같은 규약으로 넣는다.
-2. `PortraitBuildSettings.scanFolders`를 `Assets/Samples/Portraits`로 교체. DB 재생성. **DB 안 `Art/Portraits/` 경로 0건 확인.**
-3. 예제 대본 재작성: 3명 캐스팅. 배치·크기·표정 전환·포커스/디포커스·화면 효과·BGM·트랜지션. `@Dialogue/test/`의 `$__t1_*` 대본 정리(SCOPE-BOUNDARY §7 열린 항목).
-4. 진행 예제 JSON을 새 캐스팅에 맞춰 재출력 또는 최소 수정.
-5. `.gitignore`의 `Art/Portraits/` 규칙은 유지(비공개 아트는 계속 로컬).
-6. **다른 폴더에 클린 클론 → Unity로 열기 → 재생 → 3명의 표정 전환 확인.** 이 단계의 통과 기준이다.
+1. `Assets/Samples/Portraits/` 생성. `harin`·`sigure`·`kasmi`를 **.meta와 함께** 이동. ✅
+   - harin·sigure: `a/01~05`(표정), `b/01~05`(모션). 지금은 `a/01`의 복사본이며 **각자 고유 GUID**를 가진다 — PNG만 바꿔 끼우면 참조가 유지된다. kasmi는 `a/01`만.
+2. `PortraitBuildSettings.scanFolders`를 `Assets/Samples/Portraits`로 교체 ✅. Unity에서 DB 재생성 + 튜닝 덤프 재출력. **DB 안 `Art/Portraits/` 경로 0건 확인.**
+3. 진행 예제 `qwer_scene`: 라루→하린(harin), 베스티나→시구레(sigure). `$__t1_scene_열쇠` Yarn 변수를 `stat("int")`·`stat("power")` 읽기로 대체 — 간선 StatChanges가 같은 장면 다음 에피소드 대사에 보이는지를 검증한다. 표정(face)·모션(pose b) 전환을 몇 줄 더했다. ✅
+   - `stat`은 런타임 `AddFunction` 등록이라 컴파일 시점엔 미선언이다. Yarn 컴파일러는 미선언 함수를 암묵 선언·타입 추론으로 처리한다(오류 아님).
+4. `qwer` 시험 챕터(`qwer.progression.json`, `qwer_EP*`, `qwer_장면_*`) 제거 ✅ — 비공개 캐릭터의 대사이고, 대사가 Yarn 변수를 **쓰는** 구조라 현재 설계(스탯은 간선만 바꾼다)와 맞지 않는다. 기본 설정(`useLearningSaveData = true`)에서는 재생되지도 않았다. 부트스트랩 `progressionChapterJson`도 `qwer_scene`을 가리키게 했다 — 토글은 이제 저장 경로만 가른다(D1, 기능 확대 없음).
+5. **연출 데모 대본(Story_blank 대체)은 3단계로 옮긴다.** 지금은 타이틀에서 그 대본에 닿는 길이 없다(키 `2`가 죽어 있음). 연출 단독 진입점을 세우는 3단계에서 함께 써야 바로 돌려볼 수 있다.
+6. `.gitignore`의 `Art/Portraits/` 규칙은 유지(비공개 아트는 계속 로컬).
+7. **다른 폴더에 클린 클론 → Unity로 열기 → 타이틀 → Start → `qwer_scene` 끝까지 → 하린·시구레가 보이고 표정·모션이 바뀐다.** 이 단계의 통과 기준이다.
 
 커밋: `feat(samples): 공개 가능한 예제 초상화·대본으로 교체`
 
 ### 3. 초기화 경계 분리
+0. **연출 데모 대본**을 새로 쓴다(Story_blank 대체, 2단계에서 이월). harin·sigure·kasmi 캐스팅. 배치·크기·표정·모션·포커스/디포커스·화면 효과·BGM·트랜지션. 음원은 실제로 있는 키만 쓴다(baseline 관찰 4).
 1. `VNAppBootstrap`을 둘로 나눈다.
    - `PresentationSampleBootstrap`: UI 최소 + 연출 세션 + Yarn + 재생 제어 + 하네스. **진행·저장 없음.** 노드 이름 하나를 받아 재생한다 — 현재 없는 경로라 **새로 세운다.**
    - `ProgressionSampleBootstrap`: 위 + Progression + Save + 세이브/로드 UI + 학습 토글(D1, 확대 없음).
