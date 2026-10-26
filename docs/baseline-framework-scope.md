@@ -144,3 +144,6 @@ NUnit 패키지를 받을 수 없는 환경이라 실행하지 못했다. GitHub
    `overrideImage`·`image`(스프라이트 **참조**)가 더해져, 재출력하면 `surface-layout.json`에 `{"instanceID": 0}`이 들어가고
    익스포터가 경고한다. `schema.md`의 "현재 9개 파일 모두 `instanceID` 없음"도 그 순간 거짓이 된다.
    덤프만으로 해석할 수 없는 값이 코어 스키마로 흘러드는 문제라, 2단계에서는 `portrait-dimensions.json`만 반영했다.
+6. **씬이 지워진 UI 이미지 17개를 참조한다.** `75fdcbb`(2026-08-17, "사용되지 않는 리소스 제거")에서 `Resources/ui/test/`의
+   백로그·저장/불러오기·스킵·페이지 버튼 이미지 등을 지웠으나 씬의 `Image.m_Sprite`가 여전히 그 GUID를 가리킨다.
+   클린 클론 문제가 아니라 지금 PC에서도 끊겨 있다. 4단계에서 처리한다.

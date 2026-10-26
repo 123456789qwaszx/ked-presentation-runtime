@@ -92,67 +92,51 @@ SCOPE-BOUNDARY.md §1은 "여기 적힌 것은 전부 필요한 기능이고 주
 
 각 단계는 **하나의 커밋 묶음**으로 끝나며, 끝에 컴파일·회귀 하네스·샘플 재생을 통과해야 다음 단계로 간다.
 
-### 0. 기준 보존
-- `refactor/framework-scope` 브랜치 생성. ✅
-- 커밋·환경·실행 조건·콘텐츠 해시·SaveLifecycle 결과 기록. ✅ (baseline 문서)
-- 영상·하네스 보고서는 **생략하기로 결정**(2026-10-26). 하네스는 각 단계 뒤 "불일치 0" 확인으로 쓴다.
+> **순서 정정(2026-10-26).** 처음 계획은 "예제 콘텐츠 교체"를 초기화 경계보다 앞에 두었다. 그러나 샘플의 **설계**는
+> 3단계가 정할 구조(어떤 진입점이 있고 누가 재생을 쥐는가)에 달려 있다 — 연출 데모 대본을 쓰려다 그 대본에 닿을
+> 진입점이 없어 미룬 것이 증거다. 2단계는 "지금 유일한 실행 경로를 클린 클론에서 돌게 하기"로 좁혀 끝냈고,
+> 샘플 설계는 경계 분리 뒤(4단계)로 옮겼다.
 
-### 1. 게임 층 제거 — 앨범·Settings·템플릿 잔해
-순서: **코드 → 바인딩 → 부트스트랩 → 에셋 → 씬.**
-1. `TitleUIRoot`: `AlbumClicked`·`SettingsClicked`, `Refs` 두 항목, 필드, `CacheRefs`·`BindHandlers`·핸들러·`ValidateRefs` 항목 제거.
-2. `VNScreenBindings.Title`: 앨범·설정 바인딩과 핸들러 제거.
-3. `VNScreenBindings`: `_albumController` 필드와 `Configure` 인자 제거. `VnScreenBindings.Album.cs` 삭제.
-4. `VNAppBootstrap`: 앨범 필드 2개, `[Header("Album")] albumDatabase`, `BootstrapAlbum()` 호출·정의, `Configure` 인자 제거.
-5. `Scripts/Album/` 9개, `UI/Screens/AlbumUIRoot.cs`, `Data/Album/` SO 3개, `VNAlbumSlotButton.prefab`, `Assets/TutorialInfo/`, `Assets/Readme.asset` 삭제(각 `.meta` 포함). **`Art/Emoji/`는 남긴다.**
-6. 정적 확인: `Album`·`SettingsClicked`·`TutorialInfo` 참조 0건, SaveLifecycle 25/25.
-7. 사용자(Unity): 컴파일 확인 → 씬에서 `UIRoot_Album`·`AlbumButton_Button`·`SettingsButton_Button` 삭제 → 타이틀 버튼 간격 확인 → 누락 스크립트·누락 참조 0 → 씬 저장.
-8. SCOPE-BOUNDARY에 **"§8. 범위 밖으로 뺀 게임 층"** 추가: 앨범·CG 해금·앨범 저장·Settings, 사유, 커밋.
+### 0. 기준 보존 ✅
+- `refactor/framework-scope` 생성, 기준 기록(baseline 문서). 영상·하네스 보고서는 생략 결정(2026-10-26).
 
-커밋: `refactor: 앨범·CG 해금·미구현 설정 제거 — 프레임워크 범위 밖` / `chore: URP 템플릿 잔해 제거` / `chore(scene): 앨범·설정 UI 오브젝트 제거`
+### 1. 게임 층 제거 ✅
+- `01fbf779` 앨범·CG 해금·미구현 설정 · `bd75fe6b` URP 템플릿 잔해 · `9cf2dca4` 씬 오브젝트(삭제 136블록, 추가 0).
 
-### 2. 예제 콘텐츠 교체 — 클린 클론에서 돌아가게
-1. `Assets/Samples/Portraits/` 생성. `harin`·`sigure`·`kasmi`를 **.meta와 함께** 이동. ✅
-   - harin·sigure: `a/01~05`(표정), `b/01~05`(모션). 지금은 `a/01`의 복사본이며 **각자 고유 GUID**를 가진다 — PNG만 바꿔 끼우면 참조가 유지된다. kasmi는 `a/01`만.
-2. `PortraitBuildSettings.scanFolders`를 `Assets/Samples/Portraits`로 교체 ✅. Unity에서 DB 재생성 + 튜닝 덤프 재출력. **DB 안 `Art/Portraits/` 경로 0건 확인.**
-3. 진행 예제 `qwer_scene`: 라루→하린(harin), 베스티나→시구레(sigure). `$__t1_scene_열쇠` Yarn 변수를 `stat("int")`·`stat("power")` 읽기로 대체 — 간선 StatChanges가 같은 장면 다음 에피소드 대사에 보이는지를 검증한다. 표정(face)·모션(pose b) 전환을 몇 줄 더했다. ✅
-   - `stat`은 런타임 `AddFunction` 등록이라 컴파일 시점엔 미선언이다. Yarn 컴파일러는 미선언 함수를 암묵 선언·타입 추론으로 처리한다(오류 아님).
-4. `qwer` 시험 챕터(`qwer.progression.json`, `qwer_EP*`, `qwer_장면_*`) 제거 ✅ — 비공개 캐릭터의 대사이고, 대사가 Yarn 변수를 **쓰는** 구조라 현재 설계(스탯은 간선만 바꾼다)와 맞지 않는다. 기본 설정(`useLearningSaveData = true`)에서는 재생되지도 않았다. 부트스트랩 `progressionChapterJson`도 `qwer_scene`을 가리키게 했다 — 토글은 이제 저장 경로만 가른다(D1, 기능 확대 없음).
-5. **연출 데모 대본(Story_blank 대체)은 3단계로 옮긴다.** 지금은 타이틀에서 그 대본에 닿는 길이 없다(키 `2`가 죽어 있음). 연출 단독 진입점을 세우는 3단계에서 함께 써야 바로 돌려볼 수 있다.
-6. `.gitignore`의 `Art/Portraits/` 규칙은 유지(비공개 아트는 계속 로컬).
-7. **다른 폴더에 클린 클론 → Unity로 열기 → 타이틀 → Start → `qwer_scene` 끝까지 → 하린·시구레가 보이고 표정·모션이 바뀐다.** 이 단계의 통과 기준이다.
+### 2. 클린 클론 복구 ✅
+- `e95261cc` 공개 초상화(harin·sigure·kasmi)를 `Assets/Samples/Portraits/`로, harin·sigure `a/01~05`·`b/01~05` 더미(고유 GUID).
+- `fd70efc5` `qwer_scene` 재캐스팅·`stat()` 읽기, 비공개 `qwer` 시험 챕터 제거.
+- `6c17fec3` 초상화 DB·크기 덤프 재생성(비공개 경로 0).
+- 정적 검사: 씬이 닿는 에셋 중 레포 밖 242건 = 패키지 203 + **끊긴 UI 이미지 17(관찰 6)** + 미확정 22(설치 폴더 내장 에셋 추정, 실제 클린 클론으로 확인).
 
-커밋: `feat(samples): 공개 가능한 예제 초상화·대본으로 교체`
+### 3. 초기화 경계 분리 — 다음
+목표: **Yarn 노드 하나만 주고도 연출이 돈다.** 지금은 `Awake`가 챕터 JSON·저장 설정을 먼저 요구하고, 롤백·백로그 점프·타이틀 복귀가 `ProgressionLauncher`를 직접 부른다.
+- 재생을 쥐는 쪽을 계약 하나로 세운다(`IPlaybackHost`: 실행 중인가 / 처음부터 다시 / 끝내기). 입력·UI는 이 계약만 안다.
+- 연출 조립을 순수 C# 조립기로 뽑는다. 연출 단독은 노드 호스트, 통합은 기존 `ProgressionLauncher`가 그 계약을 구현한다.
+- 한 실행에 호스트는 하나 — 9/17에 걷은 디버그 러너처럼 두 주행자가 공존하지 않는다.
+- 세부 설계는 착수 전 확인을 받는다.
 
-### 3. 초기화 경계 분리
-0. **연출 데모 대본**을 새로 쓴다(Story_blank 대체, 2단계에서 이월). harin·sigure·kasmi 캐스팅. 배치·크기·표정·모션·포커스/디포커스·화면 효과·BGM·트랜지션. 음원은 실제로 있는 키만 쓴다(baseline 관찰 4).
-1. `VNAppBootstrap`을 둘로 나눈다.
-   - `PresentationSampleBootstrap`: UI 최소 + 연출 세션 + Yarn + 재생 제어 + 하네스. **진행·저장 없음.** 노드 이름 하나를 받아 재생한다 — 현재 없는 경로라 **새로 세운다.**
-   - `ProgressionSampleBootstrap`: 위 + Progression + Save + 세이브/로드 UI + 학습 토글(D1, 확대 없음).
-   - 공통 조립은 하나의 내부 조립기로 뽑는다. **실제로 독립 실행이 필요한 경계만** 가른다.
-2. 소비자 없는 키 바인딩 `2`~`7`: 샘플이 실제로 쓰는 것만 연결하고 나머지는 제거.
-3. 타이틀을 **예제 선택 화면**으로: 연출 예제 / 재생 제어 예제 / 진행+저장 예제. 저장 슬롯 화면은 간소화해 통합 예제 안에.
-4. 씬 둘: `PresentationSample.unity`(연출 단독), `ProgressionSample.unity`(통합).
-5. `StageEquivalenceHarness`를 `Scripts/Diagnostics/`로 이동.
+### 4. 샘플 설계
+- 연출 데모 대본(Story_blank 대체): harin·sigure·kasmi, 배치·크기·표정·모션·포커스·화면 효과·BGM·트랜지션. 실제로 있는 음원 키만(관찰 4).
+- 타이틀을 **예제 선택 화면**으로: 연출 예제 / 진행+저장 예제. 저장 슬롯 화면 간소화.
+- 끊긴 UI 이미지 17개(관찰 6) 처리.
+- 소비자 없는 키 바인딩 `2`~`7` 정리.
 
-커밋: `refactor: 연출 단독 부트스트랩과 진행·저장 통합 부트스트랩 분리`
+### 5. 폴더 경계 정리
+1. 샘플 코드를 `Assets/Samples/` 아래로: 부트스트랩·세이브 플로우·`UI/`·`@Dialogue/`·샘플 프리팹.
+2. 본체 코드를 한 뿌리 아래로. asmdef는 아직 만들지 않는다.
+3. 본체 → 샘플·진행·저장 방향 참조 0건을 grep으로 확인.
 
-### 4. 폴더 경계 정리
-1. 샘플 코드를 `Assets/Samples/` 아래로: `Game/`(하네스 제외), `UI/`, `@Dialogue/`, 샘플 프리팹.
-2. 본체 코드를 한 뿌리 아래로 모은다. asmdef는 아직 만들지 않는다.
-3. 본체 → 샘플 방향 참조 0건을 grep으로 확인.
-
-커밋: `refactor: 본체와 Samples 폴더 경계 확정`
-
-### 5. 문서
-1. `README.md`: 목표 한 문장, 클론 후 실행법, 예제 세 가지, DSL 입구, 리그 생성 입구, 확장 방법(커맨드 추가 시 바꾸는 파일과 검증 항목), 지원 범위와 제한. 죽은 키 안내 제거.
-2. `SCOPE-BOUNDARY.md`: §0 갱신(저장이 돌아왔음), §3.2 "돌아왔다" 서술, §6 계약서 표, §7의 인스펙터 경고 정리, §8 게임 층.
+### 6. 문서
+1. `README.md`: 목표 한 문장, 클론 후 실행법, 예제, DSL 입구, 리그 생성 입구, 확장 방법, 지원 범위와 제한. 죽은 키 안내 제거.
+2. `SCOPE-BOUNDARY.md`: §0 갱신(저장이 돌아왔음), §3.2, §6 계약서 표, §7 인스펙터 경고 정리, §8.
 3. `docs/`: 읽을 문서는 남기고 handoff·PLAN·learning·m8b 계열은 `docs/archive/`로. 이 문서와 baseline도 완료 후 archive로.
-4. 면접 대응 문서는 이 레포 밖(포트폴리오 문서)에 둔다.
+4. 면접 대응 문서는 이 레포 밖에 둔다.
 
-### 6. 검증 후 완료
+### 7. 검증 후 완료
 - ProgressionCore `dotnet test`, SaveLifecycle `dotnet run` — CI 2개 녹색
 - Unity 컴파일, 새 경고 0, 누락 스크립트·참조 0
-- 연출 예제: 재생·표정·포커스·롤백·스킵
+- 연출 예제: 재생·표정·포커스·롤백·백로그 점프·스킵
 - 통합 예제: 새 게임→장면 완료→종료→이어하기, 수동 슬롯, 백로그→롤백, 완료 장면 fork
 - 등가성 하네스: 예제 장면에서 불일치 0
 - **클린 클론에서 위 전부 재현**
