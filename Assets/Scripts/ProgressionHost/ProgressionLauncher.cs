@@ -138,14 +138,14 @@ public sealed class ProgressionLauncher : IPlaybackHost
 
         // 저장된 연출 상태를 되읽는다. 깨져 있으면 저장 파일 손상과 같은 뜻이다 — 새로 시작한다.
         List<DialogueLogEntry> backlog;
-        PresentationLoadPlan loadPlan;
+        PresentationResumePoint loadPlan;
 
         try
         {
-            backlog = PresentationSaveState.ReadPlaythrough(resume.HostState);
+            backlog = PresentationMemory.ReadBacklog(resume.HostState);
             loadPlan = resume.LoadPlan == null
                 ? null
-                : PresentationSaveState.ReadLoad(resume.LoadPlan.HostState);
+                : PresentationMemory.ReadResumePoint(resume.LoadPlan.HostState);
         }
         catch (InvalidDataException error)
         {

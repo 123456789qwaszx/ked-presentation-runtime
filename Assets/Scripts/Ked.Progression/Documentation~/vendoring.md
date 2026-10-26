@@ -24,7 +24,7 @@
 | 맞춘 것 | `Runtime/` 전체(Spec · State · Transition · Vocabulary · Loading · Scene · Contracts · Response · `ProgressionDriver` · `ISceneRunner`) + `Save/`(`Ked.Progression.Save`) + EditMode 테스트 |
 | 코드 일치 | `.cs` 기준 `diff -r` 0건 (아래 "대조" 명령) |
 | 원본 쪽 정리 | 옛 `SceneRunner`·`SceneRunContext`·`ProgressionState`·디버그 호스트 삭제, `Assets/Progression/Samples/` 최소 샘플 추가, README 갱신 |
-| 같은 날 두 번째 | 이 저장소의 `Assets/Scripts/Save/`에서 **진행 겹을 떼어** `Save/`로 반입본에 넣고 원본에 보냈다. 연출 겹(줄 좌표·Yarn 선택·백로그)은 `ProgressionHost/PresentationSaveState`가 `HostState` 문자열로 싣는다 |
+| 같은 날 두 번째 | 이 저장소의 `Assets/Scripts/Save/`에서 **진행 겹을 떼어** `Save/`로 반입본에 넣고 원본에 보냈다. 연출 겹(줄 좌표·Yarn 선택·백로그)은 연출 어셈블리 `Ked.Presentation.Playback`의 `PresentationMemory`가 `HostState` 문자열로 만든다(진행을 모른다) |
 
 원본 브랜치 `sync/from-presentation`은 아직 원본 `dev`에 합치지 않았다. 합치면 이 표의 브랜치를 고친다.
 

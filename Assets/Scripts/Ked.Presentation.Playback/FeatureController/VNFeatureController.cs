@@ -109,7 +109,7 @@ public sealed class VNFeatureController
     }
 
     // 즐겨찾기 재료 — 지금 라인의 좌표와 미리보기, 이 장면의 Yarn 선택 기록. 시크 중이거나 라인이 없으면 false.
-    public bool TryGetCurrentLine(out SaveLineTarget target, out string preview)
+    public bool TryGetCurrentLine(out LineTarget target, out string preview)
     {
         target = null;
         preview = null;
@@ -119,7 +119,7 @@ public sealed class VNFeatureController
 
         RollbackPoint point = _rollbackController.Points[^1];
 
-        target = new SaveLineTarget { NodeName = point.nodeName, LineId = point.lineId, Occurrence = point.occurrence };
+        target = new LineTarget { NodeName = point.nodeName, LineId = point.lineId, Occurrence = point.occurrence };
         preview = point.rawText;
         return true;
     }

@@ -5,7 +5,7 @@ public sealed class ProgressionReplayState
     private readonly VNLinePresentationState _lineState;
     private readonly ChoiceHistory _choiceHistory;
 
-    private PresentationLoadPlan _stagedPlan;
+    private PresentationResumePoint _stagedPlan;
 
     public ProgressionReplayState(
         VNLinePresentationState lineState,
@@ -15,7 +15,7 @@ public sealed class ProgressionReplayState
         _choiceHistory = choiceHistory;
     }
 
-    public void PrepareLoad(PresentationLoadPlan plan)
+    public void PrepareLoad(PresentationResumePoint plan)
     {
         _stagedPlan = plan;
     }
@@ -26,7 +26,7 @@ public sealed class ProgressionReplayState
     {
         _choiceHistory.RestoreChoices(_stagedPlan.YarnChoices);
 
-        SaveLineTarget target = _stagedPlan.Target;
+        LineTarget target = _stagedPlan.Target;
 
         _lineState.BeginLoadSeek(
             target.NodeName,

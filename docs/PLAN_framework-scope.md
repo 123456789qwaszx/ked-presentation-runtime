@@ -42,12 +42,12 @@ SCOPE-BOUNDARY.md §1은 "여기 적힌 것은 전부 필요한 기능이고 주
 |---|---|---|---|
 | 순수 코어 (폴드·등가성) | `Scripts/Ked.Presentation.Core/` | 본체 | |
 | 커맨드·리그·실행 수명 | `Scripts/Ked.Presentation.Runtime/` | 본체 | |
-| Yarn 파싱·브리지 | `Scripts/YarnBridge/` | 본체 | |
-| 라인 표시 트랜잭션 | `Scripts/DialoguePresenter/` | 본체 | 대사창·선택지 기본 구현은 샘플 UI와의 경계 확인 |
-| 전진·스킵·롤백·백로그 | `Scripts/FeatureController/` | 본체 | 키 `2`~`7` 바인딩은 소비자 없음 — 3단계에서 처리 |
+| Yarn 파싱·브리지 | `Scripts/Ked.Presentation.Playback/YarnBridge/` | 본체 | |
+| 라인 표시 트랜잭션 | `Scripts/Ked.Presentation.Playback/DialoguePresenter/` | 본체 | 대사창·선택지 뷰 베이스는 `UI/DialogueBox/`(예제)로 갈랐다 — `PLAN_playback-unit.md` P2 |
+| 전진·스킵·롤백·백로그 | `Scripts/Ked.Presentation.Playback/FeatureController/` | 본체 | 키 `2`~`7` 바인딩은 소비자 없음 — 3단계에서 처리 |
 | 진행 판정·실행 | `Scripts/Ked.Progression/` + `ProgressionHost/` | 본체 (독립 모듈) | 복사 반입본, 건드리지 않음 |
 | 저장 모델·조정자·포크 | `Scripts/Ked.Progression/Save/` (반입본, 원본은 ked-progression-runtime) | 본체 (독립 모듈) | append-only 타임라인·포크 |
-| 로컬 파일 저장 | `Scripts/Ked.Progression/Save/{Persistence,Slots,Maintenance}` + 연출 코덱 `ProgressionHost/PresentationSaveState` | 본체 (기본 제공 구현) | D2 |
+| 로컬 파일 저장 | `Scripts/Ked.Progression/Save/{Persistence,Slots,Maintenance}` + 연출 기억 `Ked.Presentation.Playback/Memory/PresentationMemory` | 본체 (기본 제공 구현) | D2 |
 | 등가성 하네스 | `Scripts/Game/StageEquivalenceHarness.cs` | 본체 (Diagnostics) | `Game/`에서 꺼낸다 |
 | 에디터 도구 | `Assets/Editor/` | 본체 (Editor) | |
 | 익스포트 산출물·하네스 | `ExportedTuning/`, `tests/` | 본체 | CI 게이트 3개 유지 (+ 원본의 ProgressionSave) |

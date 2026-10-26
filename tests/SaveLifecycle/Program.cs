@@ -43,7 +43,7 @@ internal static class Program
         lineId = lineId, nodeName = node, lineSequence = sequence, rawText = lineId + sequence,
     };
 
-    private static SaveLineTarget Target(string lineId = "line", int occurrence = 1) =>
+    private static LineTarget Target(string lineId = "line", int occurrence = 1) =>
         new() { NodeName = "node", LineId = lineId, Occurrence = occurrence };
 
     private static ChapterState State(string episode = "scene1") =>
@@ -71,27 +71,27 @@ internal static class Program
             await Test("코덱: 장면·회차·재생 계획이 왕복한다", () => Run(() =>
             {
                 var choices = new[] { new VNChoiceRecord(0, 0, 1, "choice-line") };
-                List<VNChoiceRecord> scene = PresentationSaveState.ReadScene(PresentationSaveState.Scene(choices));
+                List<VNChoiceRecord> scene = PresentationMemory.ReadUnitChoices(PresentationMemory.UnitChoices(choices));
                 Check(scene.Single().selectedOptionLineId == "choice-line", "장면 Yarn 선택이 왕복하지 않았다");
 
                 var backlog = new[] { Line(0), Line(1, "other") };
-                List<DialogueLogEntry> read = PresentationSaveState.ReadPlaythrough(PresentationSaveState.Playthrough(backlog));
+                List<DialogueLogEntry> read = PresentationMemory.ReadBacklog(PresentationMemory.Backlog(backlog));
                 Check(read.Count == 2 && read[1].lineId == "other" && read[1].lineSequence == 1, "백로그가 왕복하지 않았다");
 
-                PresentationLoadPlan plan = PresentationSaveState.ReadLoad(PresentationSaveState.Load(Target("L", 2), choices));
+                PresentationResumePoint plan = PresentationMemory.ReadResumePoint(PresentationMemory.ResumePoint(Target("L", 2), choices));
                 Check(plan.Target.LineId == "L" && plan.Target.Occurrence == 2 && plan.YarnChoices.Single().selectedOptionIndex == 1, "재생 계획이 왕복하지 않았다");
 
-                Check(PresentationSaveState.ReadScene("").Count == 0 && PresentationSaveState.ReadPlaythrough("").Count == 0, "빈 문자열은 빈 기록이어야 한다");
+                Check(PresentationMemory.ReadUnitChoices("").Count == 0 && PresentationMemory.ReadBacklog("").Count == 0, "빈 문자열은 빈 기록이어야 한다");
             }));
 
             await Test("코덱: 깨진 문자열과 잘못된 백로그 순번은 거부된다", () => Run(() =>
             {
-                Throws<InvalidDataException>(() => PresentationSaveState.ReadLoad(""));
-                Throws<InvalidDataException>(() => PresentationSaveState.ReadLoad("{not json"));
-                Throws<InvalidDataException>(() => PresentationSaveState.ReadLoad("{\"target\":{\"nodeName\":\"n\",\"lineId\":\"\",\"occurrence\":1}}"));
-                Throws<InvalidDataException>(() => PresentationSaveState.ReadLoad("{\"target\":{\"nodeName\":\"n\",\"lineId\":\"l\",\"occurrence\":0}}"));
-                Throws<InvalidDataException>(() => PresentationSaveState.ReadPlaythrough(PresentationSaveState.Playthrough(new[] { Line(1), Line(1) })));
-                Throws<InvalidDataException>(() => PresentationSaveState.ReadPlaythrough(PresentationSaveState.Playthrough(new[] { Line(2), Line(1) })));
+                Throws<InvalidDataException>(() => PresentationMemory.ReadResumePoint(""));
+                Throws<InvalidDataException>(() => PresentationMemory.ReadResumePoint("{not json"));
+                Throws<InvalidDataException>(() => PresentationMemory.ReadResumePoint("{\"target\":{\"nodeName\":\"n\",\"lineId\":\"\",\"occurrence\":1}}"));
+                Throws<InvalidDataException>(() => PresentationMemory.ReadResumePoint("{\"target\":{\"nodeName\":\"n\",\"lineId\":\"l\",\"occurrence\":0}}"));
+                Throws<InvalidDataException>(() => PresentationMemory.ReadBacklog(PresentationMemory.Backlog(new[] { Line(1), Line(1) })));
+                Throws<InvalidDataException>(() => PresentationMemory.ReadBacklog(PresentationMemory.Backlog(new[] { Line(2), Line(1) })));
             }));
 
             #endregion
@@ -120,8 +120,8 @@ internal static class Program
 
                 Check(scene.Checkpoint.HostSerialStart == 1, "진입 경계가 백로그 순번으로 실리지 않았다");
                 Check(scene.HostSerialEnd == 2, "확정 경계가 백로그 순번으로 실리지 않았다");
-                Check(PresentationSaveState.ReadScene(scene.HostState).Single().selectedOptionLineId == "picked", "장면의 Yarn 선택이 실리지 않았다");
-                List<DialogueLogEntry> saved = PresentationSaveState.ReadPlaythrough(snapshot.HostState);
+                Check(PresentationMemory.ReadUnitChoices(scene.HostState).Single().selectedOptionLineId == "picked", "장면의 Yarn 선택이 실리지 않았다");
+                List<DialogueLogEntry> saved = PresentationMemory.ReadBacklog(snapshot.HostState);
                 Check(saved.Count == 2 && saved[0].lineId == "old-line" && saved[1].lineId == "new-line", "회차 백로그가 실리지 않았다");
             }));
 
@@ -133,7 +133,7 @@ internal static class Program
             {
                 var store = new LocalFileSaveStore(Dir());
                 PlaythroughSave file = Save("A");
-                file.HostState = PresentationSaveState.Playthrough(new[] { Line(0, "old") });
+                file.HostState = PresentationMemory.Backlog(new[] { Line(0, "old") });
                 store.Create(file);
                 store.SetActive("A");
 
@@ -151,7 +151,7 @@ internal static class Program
             {
                 var store = new LocalFileSaveStore(Dir());
                 PlaythroughSave file = Save("A");
-                file.PendingLoad = new SavedLoadPlan { HostState = PresentationSaveState.Load(Target("line", 2), Array.Empty<VNChoiceRecord>()) };
+                file.PendingLoad = new SavedLoadPlan { HostState = PresentationMemory.ResumePoint(Target("line", 2), Array.Empty<VNChoiceRecord>()) };
                 store.Create(file);
                 store.SetActive("A");
 
@@ -170,7 +170,7 @@ internal static class Program
                 file.PendingLoad = new SavedLoadPlan
                 {
                     Path = new List<SavedChoice> { new() { FromEpisodeId = "scene1", OptionIndex = 3 } },
-                    HostState = PresentationSaveState.Load(Target(), Array.Empty<VNChoiceRecord>()),
+                    HostState = PresentationMemory.ResumePoint(Target(), Array.Empty<VNChoiceRecord>()),
                 };
                 store.Create(file);
                 store.SetActive("A");
@@ -220,7 +220,7 @@ internal static class Program
                 var backlog = new List<DialogueLogEntry> { Line(0, "a"), Line(1, "b"), Line(2, "line"), Line(3, "line"), Line(4, "line", "other") };
                 int sceneStart = 2;
 
-                Check(BacklogForkPoints.TryMakeLineTarget(backlog, backlog[3], sceneStart, out SaveLineTarget target), "줄 좌표를 만들지 못했다");
+                Check(BacklogForkPoints.TryMakeLineTarget(backlog, backlog[3], sceneStart, out LineTarget target), "줄 좌표를 만들지 못했다");
                 Check(target.LineId == "line" && target.Occurrence == 2, "같은 줄의 두 번째 등장을 1로 셌다");
 
                 Check(BacklogForkPoints.TryMakeLineTarget(backlog, backlog[2], sceneStart, out target) && target.Occurrence == 1, "첫 등장이 1이 아니다");
@@ -258,13 +258,13 @@ internal static class Program
                 Check(sceneIndex == 0 && playthrough.FindSceneIndexBySerial(current.lineSequence) == -1, "장면 찾기가 틀렸다");
 
                 int sceneStart = playthrough.Scenes[sceneIndex].Checkpoint.HostSerialStart;
-                Check(BacklogForkPoints.TryMakeLineTarget(backlog.Entries, second, sceneStart, out SaveLineTarget target) && target.Occurrence == 2, "줄 좌표가 틀렸다");
+                Check(BacklogForkPoints.TryMakeLineTarget(backlog.Entries, second, sceneStart, out LineTarget target) && target.Occurrence == 2, "줄 좌표가 틀렸다");
 
                 new PlaythroughForkService(store, ContentVersion).ForkFromScene(
                     playthrough,
                     sceneIndex,
-                    PresentationSaveState.Playthrough(BacklogForkPoints.Before(backlog.Entries, sceneStart)),
-                    PresentationSaveState.Load(target, PresentationSaveState.ReadScene(playthrough.Scenes[sceneIndex].HostState)));
+                    PresentationMemory.Backlog(BacklogForkPoints.Before(backlog.Entries, sceneStart)),
+                    PresentationMemory.ResumePoint(target, PresentationMemory.ReadUnitChoices(playthrough.Scenes[sceneIndex].HostState)));
 
                 var driver = new ProgressionDriver();
                 var replay = new ProgressionReplayState();

@@ -25,7 +25,7 @@ public static class BacklogForkPoints
         IReadOnlyList<DialogueLogEntry> backlog,
         in DialogueLogEntry entry,
         int sceneStartSerial,
-        out SaveLineTarget target)
+        out LineTarget target)
     {
         target = null;
         int occurrence = 0;
@@ -49,7 +49,7 @@ public static class BacklogForkPoints
         if (occurrence == 0)
             return false;
 
-        target = new SaveLineTarget
+        target = new LineTarget
         {
             NodeName = entry.nodeName,
             LineId = entry.lineId,

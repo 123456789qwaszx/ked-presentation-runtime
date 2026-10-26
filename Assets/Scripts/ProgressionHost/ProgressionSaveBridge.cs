@@ -40,8 +40,8 @@ public sealed class ProgressionSaveBridge : IScenePersistence
         _saveCoordinator.CommitScene(
             chapterId,
             result,
-            sceneHostState: PresentationSaveState.Scene(_choiceHistory.CreateChoiceSnapshot()),
-            playthroughHostState: PresentationSaveState.Playthrough(_backlog.Entries),
+            sceneHostState: PresentationMemory.UnitChoices(_choiceHistory.CreateChoiceSnapshot()),
+            playthroughHostState: PresentationMemory.Backlog(_backlog.Entries),
             hostSerialEnd: _backlog.NextLineSequence,
             outcome);
     }

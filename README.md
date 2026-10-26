@@ -53,9 +53,12 @@ Yarn Spinner를 기반으로 제작한 **비주얼 노벨 화면 연출 런타�
 
 ### 3. 대사 실행 흐름
 
-`Assets/Scripts/DialoguePresenter/VNLinePresentationFlow/`
+`Assets/Scripts/Ked.Presentation.Playback/DialoguePresenter/VNLinePresentationFlow/`
 
 한 줄의 대사가 들어온 뒤 연출 실행, 텍스트 출력, 입력 대기, 스킵 및 상태 복원으로 이어지는 흐름을 담당합니다.
+이 폴더는 이름 있는 어셈블리 `Ked.Presentation.Playback`의 일부입니다. 롤백 기록·백로그·줄 시크·선택 기록과
+재생 단위(`Host/PlaybackUnit.cs`)까지 — 저장이 없어도 연출이 스스로 기억하는 것을 같은 어셈블리가 소유합니다
+([ASSEMBLY-BOUNDARY.md](Assets/Scripts/Ked.Presentation.Runtime/ASSEMBLY-BOUNDARY.md)).
 
 주요 파일:
 
@@ -96,8 +99,8 @@ SceneRunner의 실행 순서와 리플레이·롤백·로드·정지 규칙도 �
 `dotnet run --project tests/ProgressionHost/ProgressionHost.csproj`.
 
 저장도 같은 경계로 나뉩니다. 챕터·장면·경로·스탯과 슬롯·갈라지기는 반입본의 `Ked.Progression.Save`가,
-줄 위치·Yarn 선택·백로그는 연출이 들고 있다가 문자열 한 칸(`HostState`)으로 실립니다 —
-[PresentationSaveState.cs](Assets/Scripts/ProgressionHost/PresentationSaveState.cs).
+줄 위치·Yarn 선택·백로그는 저장이 없어도 연출이 늘 들고 있는 기억이고, 진행 저장에는 문자열 한 칸(`HostState`)으로 실립니다 —
+[PresentationMemory.cs](Assets/Scripts/Ked.Presentation.Playback/Memory/PresentationMemory.cs).
 `dotnet run --project tests/SaveLifecycle/SaveLifecycle.csproj`.
 
 ## 개발 환경

@@ -10,7 +10,7 @@ using UnityEngine;
 // 화면은 슬롯이나 백로그 한 줄만 전달하고,
 // 실제 저장 데이터 캡처와 회차 전환은 여기서 조립한다.
 //
-// 진행 저장은 연출 상태를 문자열로만 받는다. 그 문자열을 만드는 일(PresentationSaveState)과
+// 진행 저장은 연출 상태를 문자열로만 받는다. 그 문자열을 만드는 일(PresentationMemory)과
 // 백로그 한 줄을 장면 안의 줄 좌표로 바꾸는 일은 여기 — 연출 쪽 — 의 몫이다.
 public sealed class ManualSaveFlow
 {
@@ -122,19 +122,19 @@ public sealed class ManualSaveFlow
 
         // 그 장면이 시작되기 전까지의 백로그만 새 회차가 물려받는다.
         string inheritedHostState =
-            PresentationSaveState.Playthrough(BacklogForkPoints.Before(_backlog.Entries, sceneStart));
+            PresentationMemory.Backlog(BacklogForkPoints.Before(_backlog.Entries, sceneStart));
 
         // 그 줄이 장면 안에서 몇 번째 등장인지 세어 줄 좌표를 만든다.
         // 셀 수 없으면(기록이 잘려 나갔으면) 장면 루트부터 일반 플레이.
         string loadHostState = null;
 
-        if (BacklogForkPoints.TryMakeLineTarget(_backlog.Entries, entry, sceneStart, out SaveLineTarget target))
+        if (BacklogForkPoints.TryMakeLineTarget(_backlog.Entries, entry, sceneStart, out LineTarget target))
         {
             IReadOnlyList<VNChoiceRecord> yarnChoices;
 
             try
             {
-                yarnChoices = PresentationSaveState.ReadScene(origin.HostState);
+                yarnChoices = PresentationMemory.ReadUnitChoices(origin.HostState);
             }
             catch (InvalidDataException error)
             {
@@ -143,7 +143,7 @@ public sealed class ManualSaveFlow
             }
 
             if (yarnChoices != null)
-                loadHostState = PresentationSaveState.Load(target, yarnChoices);
+                loadHostState = PresentationMemory.ResumePoint(target, yarnChoices);
         }
 
         onTransitionStarted?.Invoke();
@@ -162,7 +162,7 @@ public sealed class ManualSaveFlow
             return false;
 
         if (!_vnFeatures.TryGetCurrentLine(
-                out SaveLineTarget target,
+                out LineTarget target,
                 out string preview))
         {
             Debug.Log("[수동 저장] 지금은 저장할 수 있는 대사 위치가 아니다.");
@@ -171,7 +171,7 @@ public sealed class ManualSaveFlow
 
         save = new ManualSaveData(
             _progressionLauncher.PendingPath,
-            PresentationSaveState.Load(target, _vnFeatures.CreateYarnChoiceSnapshot()),
+            PresentationMemory.ResumePoint(target, _vnFeatures.CreateYarnChoiceSnapshot()),
             preview);
 
         return true;

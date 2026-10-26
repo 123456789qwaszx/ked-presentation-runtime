@@ -39,9 +39,9 @@ public sealed class ProgressionDriver
 public sealed class ProgressionReplayState
 {
     public int PreparedLoads;
-    public PresentationLoadPlan StagedPlan;
+    public PresentationResumePoint StagedPlan;
 
-    public void PrepareLoad(PresentationLoadPlan plan)
+    public void PrepareLoad(PresentationResumePoint plan)
     {
         PreparedLoads++;
         StagedPlan = plan;

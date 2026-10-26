@@ -1,0 +1,21 @@
+{
+    "name": "Ked.Presentation.Playback",
+    "rootNamespace": "",
+    "references": [
+        "Ked.Presentation.Core",
+        "Ked.Presentation.Runtime",
+        "YarnSpinner.Unity",
+        "Unity.TextMeshPro",
+        "UnityEngine.UI",
+        "DOTween.Modules"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

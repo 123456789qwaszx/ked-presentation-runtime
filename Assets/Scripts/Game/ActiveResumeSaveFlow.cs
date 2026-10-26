@@ -23,11 +23,11 @@ public sealed class ActiveResumeSaveFlow
         if (!_progressionLauncher.IsRunning)
             return;
 
-        if (!_vnFeatures.TryGetCurrentLine(out SaveLineTarget target, out _))
+        if (!_vnFeatures.TryGetCurrentLine(out LineTarget target, out _))
             return;
 
         _saveCoordinator.UpdateResumePoint(
             _progressionLauncher.PendingPath,
-            PresentationSaveState.Load(target, _vnFeatures.CreateYarnChoiceSnapshot()));
+            PresentationMemory.ResumePoint(target, _vnFeatures.CreateYarnChoiceSnapshot()));
     }
 }
