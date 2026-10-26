@@ -12,12 +12,14 @@ public sealed partial class VNScreenBindings : IPresentationView, IDisposable
     private DialogueAdvanceDispatcher _dialogueAdvanceDispatcher;
     private IPlaybackHost _playbackHost;
 
-    // 진행·저장 — 진행·저장 예제에만 있다. 없으면 타이틀·저장·불러오기·포크도 없다.
-    private ProgressionLauncher _progressionLauncher;
+    // 타이틀 — 어떤 예제든 있다. 처음부터·이어하기를 예제의 호스트 쪽이 준다.
+    private IPlaythroughEntry _playthroughEntry;
+
+    // 저장 슬롯 — 진행·저장 예제에만 있다. 없으면 저장·불러오기 메뉴와 백로그 갈라지기도 없다.
     private SaveSlotService _saveSlots;
     private ManualSaveFlow _manualSaveFlow;
 
-    private bool HasProgression => _progressionLauncher != null;
+    private bool HasSaveSlots => _manualSaveFlow != null;
 
     public VNScreenBindings(UIManager uiManager)
     {
@@ -35,12 +37,15 @@ public sealed partial class VNScreenBindings : IPresentationView, IDisposable
         _playbackHost = playbackHost;
     }
 
-    public void ConfigureProgression(
-        ProgressionLauncher progressionLauncher,
+    public void ConfigureTitle(IPlaythroughEntry playthroughEntry)
+    {
+        _playthroughEntry = playthroughEntry;
+    }
+
+    public void ConfigureSaveSlots(
         SaveSlotService saveSlots,
         ManualSaveFlow manualSaveFlow)
     {
-        _progressionLauncher = progressionLauncher;
         _saveSlots = saveSlots;
         _manualSaveFlow = manualSaveFlow;
     }
@@ -118,4 +123,4 @@ public sealed partial class VNScreenBindings : IPresentationView, IDisposable
     }
     
     #endregion
-}
+}

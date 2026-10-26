@@ -12,23 +12,22 @@ Yarn Spinner를 기반으로 제작한 **비주얼 노벨 화면 연출 런타�
 
 ## 사용법
 
-`Assets/Scenes/PresentationSample.unity`를 열고 하이어라키의 `[VNAppBootstrap]`을 선택한다.
+`Assets/Scenes/PresentationSample.unity`를 열고 하이어라키의 `[VNAppBootstrap]`(`SampleBootstrap`)을 선택한다.
+**예제** 칸에서 하나를 고르고 재생한다. 두 예제 모두 타이틀의 **[처음부터] / [이어하기]**로 시작한다.
 
-- **노드 하나 재생**: `Assets/@Dialogue/`의 `.yarn`에서 노드 이름(`title:`)을 복사해
-  **Entry Keys › Yarn Entry Key**에 넣고, 재생 후 `2`.
-- **챕터 진행 재생**: **진행 층 › Progression Chapter Json**에
-  `Assets/@Dialogue/ChapterProgression/`의 `.json`을 물리고, 재생 후 `4`.
+- **연출 단독** — 진행 없이 Yarn 노드 하나(**Presentation Entry Node**, `.yarn`의 `title:`)를 재생한다.
+  줄이 다 보일 때마다 이어하기 지점을 파일 하나(`persistentDataPath/presentation-only/resume.json`)에 쓰고,
+  [이어하기]는 노드 처음부터 다시 달려 그 줄까지 보이지 않게 빨리 감는다. 노드 끝까지 보면 지운다.
+- **진행·저장** — **진행 층 › Progression Chapter Json**의 챕터(`Assets/@Dialogue/ChapterProgression/`)를 진행한다.
+  장면 경계마다 확정해 저장하고, 슬롯 저장·불러오기와 백로그 줄에서 갈라지기가 있다.
 
 | 키 | 동작 |
 |---|---|
-| `2` | 노드 하나 실행 (Yarn Entry Key) |
-| `3` | 디버그 에피소드 사슬 실행 |
-| `4` | 챕터 진행 시작 (Progression Chapter Json) |
-| `Space` | RequestNextLine |
-| `좌/우 Ctrl` | FastForward |
-| `R` | Rollback |
-| `A` | Auto 모드 토글 |
-| `S` | SpeedUp 모드 토글 |
+| `Space` | 다음 대사 |
+| `좌/우 Ctrl` (누르는 동안) | 빨리 넘기기 |
+| `R` | 한 줄 되감기 |
+| `A` | 자동 진행 토글 |
+| `S` | 빠르게 토글 |
 
 ## 둘러볼 곳
 
@@ -59,6 +58,7 @@ Yarn Spinner를 기반으로 제작한 **비주얼 노벨 화면 연출 런타�
 이 폴더는 이름 있는 어셈블리 `Ked.Presentation.Playback`의 일부입니다. 롤백 기록·백로그·줄 시크·선택 기록과
 재생 단위(`Host/PlaybackUnit.cs`)까지 — 저장이 없어도 연출이 스스로 기억하는 것을 같은 어셈블리가 소유합니다
 ([ASSEMBLY-BOUNDARY.md](Assets/Scripts/Ked.Presentation.Runtime/ASSEMBLY-BOUNDARY.md)).
+호스트(예제)가 만지는 것은 재생 단위와 연출 기억의 입구(`Memory/PlaybackMemory.cs`) 둘뿐입니다.
 
 주요 파일:
 
@@ -100,7 +100,8 @@ SceneRunner의 실행 순서와 리플레이·롤백·로드·정지 규칙도 �
 
 저장도 같은 경계로 나뉩니다. 챕터·장면·경로·스탯과 슬롯·갈라지기는 반입본의 `Ked.Progression.Save`가,
 줄 위치·Yarn 선택·백로그는 저장이 없어도 연출이 늘 들고 있는 기억이고, 진행 저장에는 문자열 한 칸(`HostState`)으로 실립니다 —
-[PresentationMemory.cs](Assets/Scripts/Ked.Presentation.Playback/Memory/PresentationMemory.cs).
+[PlaybackMemory.cs](Assets/Scripts/Ked.Presentation.Playback/Memory/PlaybackMemory.cs)가 꺼내고 되돌립니다.
+연출 단독 예제는 같은 문자열을 노드 이름과 함께 파일 하나에 둡니다 — [NodePlaythrough.cs](Assets/Scripts/Game/NodePlaythrough.cs).
 `dotnet run --project tests/SaveLifecycle/SaveLifecycle.csproj`.
 
 ## 개발 환경

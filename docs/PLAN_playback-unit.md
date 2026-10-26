@@ -63,6 +63,16 @@
 | P3-1 | ProgressionHost를 "진행 런타임을 꽂는 어댑터"로: SceneRunner·Launcher·SaveBridge가 스냅샷 API만 쓴다 | `tests/SaveLifecycle`·`tests/ProgressionHost` 통과 |
 | P3-2 | 연출 단독 예제에 저장·불러오기 하나: 같은 스냅샷 + 노드 이름 | 사용자 Unity 확인 |
 
+**P3 결과.** 연출 기억의 입구 `Memory/PlaybackMemory`(꺼내기 · 되돌리기 · 과거 단위 읽기)를 두고, 문자열 형식·재개 지점·줄 좌표·
+과거 단위 셈법·무대 계약은 `internal`로 닫았다. `ProgressionReplayState`는 없어졌다 — 재개 예약은 `PlaybackUnit`이 갖고,
+단위를 열 때 `ScenePresentation`이 선택 복원과 줄 시크를 건다. 그래서 `SceneRunner`는 "시크 중인가"만 묻고,
+런처·브리지·저장 흐름은 문자열만 나른다. 단위를 열 때 앞 단위가 남긴 시크는 버린다(시크 도중 타이틀로 나간 경우).
+
+연출 단독 예제는 안 A(타이틀 재사용)로 했다. 타이틀의 처음부터·이어하기는 `IPlaythroughEntry`로 풀어
+`ProgressionLauncher`와 `NodePlaythrough`가 각각 구현한다. `NodePlaythrough`는 줄마다 `{노드, 단위 앞 백로그, 재개 지점}`을
+파일 하나에 쓰고, 노드 끝까지 보면 지운다. 저장 슬롯이 없는 예제에서는 불러오기·저장 메뉴만 숨기고 타이틀로 가기는 둔다.
+검증: `tests/ProgressionHost` 25건, `tests/SaveLifecycle` 15건(연출 기억 3건, 연출 단독 회차 2건 추가).
+
 ### P4. 문서와 검증
 
 README, SCOPE-BOUNDARY, vendoring, PLAN_framework-scope 갱신. 하네스 전부 통과. Unity 확인 목록 정리.

@@ -8,6 +8,9 @@ public sealed partial class VNScreenBindings
             afterPatched: root =>
             {
                 BindView(root, ApplyBindings);
+
+                // 저장 슬롯이 없는 예제(연출 단독)는 불러오기 메뉴가 없다.
+                root.SetLoadVisible(HasSaveSlots);
             },
             afterClosed: Unbind);
     }
@@ -35,12 +38,12 @@ public sealed partial class VNScreenBindings
 
     private void HandleContinueClicked()
     {
-        _progressionLauncher.Resume();
+        _playthroughEntry.Resume();
     }
 
     private void HandleStartClicked()
     {
-        _progressionLauncher.StartNewGame();
+        _playthroughEntry.StartNew();
     }
 
     private void HandleLoadClicked()

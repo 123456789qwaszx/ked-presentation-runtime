@@ -36,4 +36,4 @@ public sealed class VNSaveSlotMeta
             IsNewSlot = true,
         };
     }
-}
+}

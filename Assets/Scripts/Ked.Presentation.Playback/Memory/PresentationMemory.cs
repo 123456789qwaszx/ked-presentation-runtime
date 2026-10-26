@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
 /// <summary>
-/// 연출 기억을 문자열로 싣고 되읽는 법.
+/// 연출 기억의 문자열 형식 — 싣고 되읽는 법.
 ///
 /// 연출은 저장이 없어도 세 가지를 늘 들고 있다(PLAN_playback-unit E1).
 ///
@@ -17,9 +17,11 @@ using Newtonsoft.Json.Serialization;
 /// 호스트 상태를 문자열 한 칸으로 받으므로, 진행 호스트는 이 세 문자열을 그 칸들에 넣는다.
 /// 연출 단독 호스트도 같은 문자열로 저장한다. 이 타입은 진행을 모른다.
 ///
+/// 호스트는 이 형식을 직접 부르지 않는다 — 입구는 PlaybackMemory다(그래서 internal).
+///
 /// 형식: camelCase JSON. 바꾸면 이미 저장된 기억을 못 읽는다.
 /// </summary>
-public static class PresentationMemory
+internal static class PresentationMemory
 {
     private static readonly JsonSerializerSettings Settings = new()
     {
@@ -143,18 +145,5 @@ public static class PresentationMemory
         }
 
         return dto ?? throw new InvalidDataException($"저장된 {what}이(가) 비어 있다.");
-    }
-}
-
-/// <summary>재개 지점 — 단위 루트에서 이 줄까지 달리기 위해 연출이 필요로 하는 것.</summary>
-public sealed class PresentationResumePoint
-{
-    public LineTarget Target { get; }
-    public IReadOnlyList<VNChoiceRecord> YarnChoices { get; }
-
-    public PresentationResumePoint(LineTarget target, IReadOnlyList<VNChoiceRecord> yarnChoices)
-    {
-        Target = target;
-        YarnChoices = yarnChoices;
     }
 }

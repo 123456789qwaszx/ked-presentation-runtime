@@ -6,23 +6,24 @@ using UnityEngine;
 ///
 /// 무대·명령·Yarn·대사 표시·재생 제어(전진·스킵·오토·롤백 표적)를 갖는다.
 /// 진행·저장을 모른다. 그 위에 무엇을 얹을지(노드 하나 / 챕터 진행)는 호스트가 정한다.
+///
+/// 호스트가 만지는 것은 둘이다 — 재생 단위의 수명(Unit)과 연출 기억의 입구(Memory).
+/// 백로그·선택 기록·롤백 기록·줄 시크 같은 안쪽 부품은 내놓지 않는다.
 /// </summary>
 public sealed class PresentationRuntime
 {
     private readonly VNAdvanceInputPoller _inputPoller;
 
-    /// <summary>재생 단위의 수명. 호스트는 이것만 부른다.</summary>
+    /// <summary>재생 단위의 수명. 호스트는 이것으로 열고, 재생하고, 멈추고, 루트부터 다시 달린다.</summary>
     public PlaybackUnit Unit { get; }
+
+    /// <summary>연출 기억의 입구. 호스트는 이것으로 기억을 문자열로 꺼내고 되돌린다.</summary>
+    public PlaybackMemory Memory { get; }
 
     public VNFeatureController Features { get; }
     public DialogueAdvanceDispatcher AdvanceDispatcher { get; }
 
     public VNLinePresentationFlow LineFlow { get; }
-    public VNLinePresentationState LineState { get; }
-
-    public RollbackHistory RollbackHistory { get; }
-    public ChoiceHistory ChoiceHistory { get; }
-    public BacklogRecorder Backlog { get; }
 
     public IPlaybackHost Host { get; private set; }
 
@@ -31,20 +32,16 @@ public sealed class PresentationRuntime
         VNFeatureController features,
         DialogueAdvanceDispatcher advanceDispatcher,
         VNLinePresentationFlow lineFlow,
-        VNLinePresentationState lineState,
         RollbackHistory rollbackHistory,
         ChoiceHistory choiceHistory,
         BacklogRecorder backlog,
         VNAdvanceInputPoller inputPoller)
     {
         Unit = new PlaybackUnit(scenePresentation, backlog, rollbackHistory);
+        Memory = new PlaybackMemory(Unit, backlog, choiceHistory, rollbackHistory);
         Features = features;
         AdvanceDispatcher = advanceDispatcher;
         LineFlow = lineFlow;
-        LineState = lineState;
-        RollbackHistory = rollbackHistory;
-        ChoiceHistory = choiceHistory;
-        Backlog = backlog;
         _inputPoller = inputPoller;
     }
 

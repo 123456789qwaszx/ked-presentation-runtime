@@ -13,9 +13,12 @@ using System.Threading.Tasks;
 /// - 되감을 때 자기 기록을 어디까지 자를지 — RestartFromRootAsync가 돌려주는 롤백 표적 색인
 ///
 /// 순서:
-///   열기     정지(이전 단위 정리) → BeginScene → 백로그 장면 경계
+///   열기     정지(이전 단위 정리) → BeginScene → 백로그 장면 경계 → (재개 예약이 있으면) 재개 시크
 ///   다시     정지 완료 대기 → PrepareReplay → 롤백 표적 소비
 ///   정지     재생 구간(열기 또는 다시부터)마다 한 번. 진행 중인 정지가 있으면 그것을 돌려준다.
+///
+/// 재개 예약은 PlaybackMemory.Restore가 건다. 다음에 열리는 단위 하나가 그것을 가져간다 —
+/// 호스트는 "기억을 되돌린 뒤 평소처럼 연다"만 하면 된다.
 ///
 /// 정지를 한 구간에 한 번으로 묶는 이유: ScenePresentation.StopAsync는 스코프를 끝낸다.
 /// 리플레이 요청과 끝내기 요청이 겹치면 두 번 끝나 버린다.
@@ -30,7 +33,9 @@ public sealed class PlaybackUnit
     private Task _stopTask = Task.CompletedTask;
     private bool _stopIssued;
 
-    public PlaybackUnit(
+    private PresentationResumePoint _pendingResume;
+
+    internal PlaybackUnit(
         IPlaybackStage stage,
         BacklogRecorder backlog,
         RollbackHistory rollbackHistory)
@@ -46,19 +51,40 @@ public sealed class PlaybackUnit
     /// </summary>
     public int LastHistoryIndex => _rollbackHistory.LastHistoryIndex;
 
+    /// <summary>
+    /// 지금 줄 시크(되감기 또는 재개) 중인가. 시크 중에는 화면에 보이는 것이 없다 —
+    /// 호스트는 이때 자기 기록(진행 선택 등)으로 자동 응답한다.
+    /// </summary>
+    public bool IsSeeking => _stage.IsSeeking;
+
+    /// <summary>
+    /// 시크를 버리고 일반 재생으로 돌아간다.
+    /// 호스트의 기록이 바닥났는데 표적 줄에 아직 닿지 못했을 때 쓴다(대본이 바뀐 경우).
+    /// </summary>
+    public void AbandonSeek() => _stage.AbandonSeek();
+
+    /// <summary>다음에 열리는 단위가 이 재개 지점까지 시크한다. null이면 예약을 지운다.</summary>
+    internal void StageResume(PresentationResumePoint resume) => _pendingResume = resume;
+
     /// <summary>새 단위를 연다. 이전 단위가 남긴 무대를 먼저 정리한다.</summary>
     public async Task OpenAsync(CancellationToken cancellationToken = default)
     {
         _stopIssued = false;
         await StopAsync();
 
-        // 정리하는 사이 끝내기 요청이 왔다면 열지 않는다.
+        // 정리하는 사이 끝내기 요청이 왔다면 열지 않는다. 재개 예약은 다음 열기로 남는다.
         cancellationToken.ThrowIfCancellationRequested();
 
         _stopIssued = false;
 
         _stage.BeginScene();
         _backlog.MarkSceneBoundary();
+
+        PresentationResumePoint resume = _pendingResume;
+        _pendingResume = null;
+
+        if (resume != null)
+            _stage.BeginResume(resume);
     }
 
     /// <summary>이 단위에서 노드 하나를 재생한다. 정지되면 끝난다.</summary>

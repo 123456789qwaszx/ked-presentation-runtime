@@ -2,6 +2,7 @@ using System.Threading.Tasks;
 
 // 재생 단위(노드 하나 / 챕터의 장면) 하나에 필요한 Yarn / Presentation 동작.
 // 부르는 순서는 PlaybackUnit이 소유한다 — 두 호스트(노드 재생 / 진행)는 이 타입을 직접 부르지 않는다.
+// 줄 시크(재개 지점까지 빨리 감기)도 여기서 건다. 언제 거는지는 PlaybackUnit이 정한다.
 public sealed class ScenePresentation : IPlaybackStage
 {
     private readonly IEpisodeNodeRunner _nodeRunner;
@@ -13,6 +14,7 @@ public sealed class ScenePresentation : IPlaybackStage
     private readonly PresentationScopeSession _presentationScope;
     private readonly ChoiceHistory _choiceHistory;
     private readonly EpisodeSkipController _episodeSkipController;
+    private readonly VNLinePresentationState _lineState;
 
     public ScenePresentation(
         IEpisodeNodeRunner nodeRunner,
@@ -23,7 +25,8 @@ public sealed class ScenePresentation : IPlaybackStage
         PresentationStage presentationStage,
         PresentationScopeSession presentationScope,
         ChoiceHistory choiceHistory,
-        EpisodeSkipController episodeSkipController)
+        EpisodeSkipController episodeSkipController,
+        VNLinePresentationState lineState)
     {
         _nodeRunner = nodeRunner;
         _presentationView = presentationView;
@@ -34,11 +37,15 @@ public sealed class ScenePresentation : IPlaybackStage
         _presentationScope = presentationScope;
         _choiceHistory = choiceHistory;
         _episodeSkipController = episodeSkipController;
+        _lineState = lineState;
     }
 
     public void BeginScene()
     {
         _choiceHistory.ClearChoiceRecords();
+
+        // 앞 단위가 시크 도중에 끝났다면 그 표적은 이 단위의 것이 아니다.
+        _lineState.ClearSeek();
 
         _presentationView.GoToPresentationView();
         _presentationStage.Clear();
@@ -59,6 +66,23 @@ public sealed class ScenePresentation : IPlaybackStage
         }
     }
     
+    // 단위의 Yarn 선택 기록을 되돌리고 표적 줄까지 시크한다. 로드 시크는 백로그를 다시 적는다(VNYarnLineBoundary).
+    void IPlaybackStage.BeginResume(PresentationResumePoint resume)
+    {
+        _choiceHistory.RestoreChoices(resume.YarnChoices);
+
+        LineTarget target = resume.Target;
+
+        _lineState.BeginLoadSeek(
+            target.NodeName,
+            target.LineId,
+            target.Occurrence);
+    }
+
+    bool IPlaybackStage.IsSeeking => _lineState.IsSeekingActive;
+
+    void IPlaybackStage.AbandonSeek() => _lineState.ClearSeek();
+
     public void PrepareReplay()
     {
         _presentationView.GoToPresentationView();

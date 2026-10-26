@@ -64,6 +64,12 @@ public sealed class TitleUIRoot : UIRoot<TitleUIRoot.Refs>
         BindEvent(_quitButton, PressQuitButton);
     }
 
+    // 저장 슬롯이 없는 예제(연출 단독)는 불러오기를 숨긴다.
+    public void SetLoadVisible(bool visible)
+    {
+        View.Button(Refs.LoadButton_Button).gameObject.SetActive(visible);
+    }
+
     #region Handlers
 
     private void PressContinueButton(PointerEventData _)

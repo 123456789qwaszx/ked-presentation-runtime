@@ -10,15 +10,17 @@ using UnityEngine;
 // - 새 게임 또는 복원 결정
 // - Driver 호출(Chapter 진입)
 // 진행·저장 예제의 재생 호스트이기도 하다 — 재생 단위는 챕터의 장면이다.
-public sealed class ProgressionLauncher : IPlaybackHost
+//
+// 연출 기억은 문자열로만 다룬다. 저장에서 꺼낸 두 문자열(회차 백로그, 재개 지점)을
+// PlaybackMemory.Restore에 넘기면 복원 장면을 열 때 연출이 알아서 그 줄까지 달린다.
+public sealed class ProgressionLauncher : IPlaybackHost, IPlaythroughEntry
 {
     private readonly ProgressionDriver _driver;
     private readonly ScenarioDefinition _scenarioDef;
 
     private readonly SaveCoordinator _saveCoordinator;
 
-    private readonly BacklogRecorder _backlog;
-    private readonly ProgressionReplayState _replayState;
+    private readonly PlaybackMemory _memory;
 
     private bool _isTransitioning;
 
@@ -26,21 +28,19 @@ public sealed class ProgressionLauncher : IPlaybackHost
         ProgressionDriver driver,
         ScenarioDefinition scenarioDef,
         SaveCoordinator saveCoordinator,
-        BacklogRecorder backlog,
-        ProgressionReplayState replayState)
+        PlaybackMemory memory)
     {
         _driver = driver;
         _scenarioDef = scenarioDef;
         _saveCoordinator = saveCoordinator;
-        _backlog = backlog;
-        _replayState = replayState;
+        _memory = memory;
     }
 
     public bool IsRunning => _driver.IsRunning;
 
     public IReadOnlyList<CommittedChoice> PendingPath => _driver.PendingPath;
     
-    public void StartNewGame()
+    public void StartNew()
     {
         if (_isTransitioning)
             return;
@@ -115,8 +115,7 @@ public sealed class ProgressionLauncher : IPlaybackHost
         ChapterState chapterState =
             chapterDef.CreateEntryState();
 
-        _backlog.Restore(null);
-        _replayState.PrepareLoad(null);
+        _memory.Forget();
 
         _driver.Start(
             chapterDef,
@@ -136,16 +135,15 @@ public sealed class ProgressionLauncher : IPlaybackHost
         ChapterState chapterState =
             ChapterState.Restore(chapterDef, resume.EpisodeId, resume.Stats);
 
-        // 저장된 연출 상태를 되읽는다. 깨져 있으면 저장 파일 손상과 같은 뜻이다 — 새로 시작한다.
-        List<DialogueLogEntry> backlog;
-        PresentationResumePoint loadPlan;
+        // 저장된 연출 기억으로 되돌린다. 깨져 있으면 저장 파일 손상과 같은 뜻이다 — 새로 시작한다.
+        // 재생 계획이 없으면(장면 루트 이어하기) 재개 지점도 없다. 계획이 있는데 비어 있으면 깨진 것이다.
+        string resumePoint = resume.LoadPlan == null
+            ? null
+            : resume.LoadPlan.HostState ?? "";
 
         try
         {
-            backlog = PresentationMemory.ReadBacklog(resume.HostState);
-            loadPlan = resume.LoadPlan == null
-                ? null
-                : PresentationMemory.ReadResumePoint(resume.LoadPlan.HostState);
+            _memory.Restore(resume.HostState, resumePoint);
         }
         catch (InvalidDataException error)
         {
@@ -154,9 +152,6 @@ public sealed class ProgressionLauncher : IPlaybackHost
             LaunchNewGame();
             return;
         }
-
-        _backlog.Restore(backlog);
-        _replayState.PrepareLoad(loadPlan);
 
         _driver.Start(
             chapterDef,

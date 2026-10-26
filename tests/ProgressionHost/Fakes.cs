@@ -24,12 +24,14 @@ internal sealed class EventLog
 // 노드 하나를 재생하면 줄 LinesPerNode개를 지나간다고 본다.
 // 진짜 호스트처럼 줄마다 백로그와 롤백 기록에 적고(VNYarnLineBoundary),
 // 정지하면 롤백 기록을 비운다(ScenePresentation.StopAsync).
+//
+// 줄 시크 자체는 이 하네스의 관심사가 아니다. 진짜는 표적 줄에 닿으면 시크가 끝난다.
+// 여기서는 "표적이 든 노드를 재생하면 끝난다"로 줄인다 — 재개 지점의 노드 이름이 그 표적이다.
 internal sealed class FakePresentation : IPlaybackStage
 {
     private readonly EventLog _log;
     private readonly RollbackHistory _rollback;
     private readonly BacklogRecorder _backlog;
-    private readonly ProgressionReplayState _replay;
 
     private readonly List<string> _played = new();
     private TaskCompletionSource<bool> _playing;
@@ -41,12 +43,17 @@ internal sealed class FakePresentation : IPlaybackStage
     public int PrepareReplayCount;
     public int StopCount;
 
-    public FakePresentation(EventLog log, RollbackHistory rollback, BacklogRecorder backlog, ProgressionReplayState replay)
+    public int ResumeCount;
+    public int AbandonSeekCount;
+    public PresentationResumePoint LastResume;
+    public bool IsSeeking { get; private set; }
+    public string SeekUntilNode;
+
+    public FakePresentation(EventLog log, RollbackHistory rollback, BacklogRecorder backlog)
     {
         _log = log;
         _rollback = rollback;
         _backlog = backlog;
-        _replay = replay;
     }
 
     public string[] Played
@@ -58,6 +65,34 @@ internal sealed class FakePresentation : IPlaybackStage
     {
         BeginCount++;
         _log.Add("begin");
+
+        // 진짜처럼 앞 단위가 남긴 시크는 버린다.
+        IsSeeking = false;
+        SeekUntilNode = null;
+    }
+
+    public void BeginResume(PresentationResumePoint resume)
+    {
+        ResumeCount++;
+        LastResume = resume;
+        _log.Add("resume:" + resume.Target.NodeName);
+
+        IsSeeking = true;
+        SeekUntilNode = resume.Target.NodeName;
+    }
+
+    public void AbandonSeek()
+    {
+        AbandonSeekCount++;
+        IsSeeking = false;
+        SeekUntilNode = null;
+    }
+
+    // 롤백 시크. 진짜로는 VNFeatureController가 VNLinePresentationState에 건다.
+    public void BeginRollbackSeek(string untilNode)
+    {
+        IsSeeking = true;
+        SeekUntilNode = untilNode;
     }
 
     public Task PlayEpisodeAsync(string nodeName)
@@ -72,7 +107,11 @@ internal sealed class FakePresentation : IPlaybackStage
             _rollback.AddRollbackPoint(meta);
         }
 
-        _replay.ReachNode(nodeName);
+        if (IsSeeking && nodeName == SeekUntilNode)
+        {
+            IsSeeking = false;
+            SeekUntilNode = null;
+        }
 
         if (!BlockPlays)
             return Task.CompletedTask;
@@ -233,7 +272,6 @@ internal sealed class Rig
     public readonly EventLog Log = new();
     public readonly RollbackHistory Rollback = new();
     public readonly BacklogRecorder Backlog = new();
-    public readonly ProgressionReplayState Replay = new();
     public readonly FakeLog DriverLog = new();
 
     public readonly FakePresentation Presentation;
@@ -246,12 +284,12 @@ internal sealed class Rig
 
     public Rig()
     {
-        Presentation = new FakePresentation(Log, Rollback, Backlog, Replay);
+        Presentation = new FakePresentation(Log, Rollback, Backlog);
         Options = new FakeOptions(Log);
         Persistence = new FakePersistence(Log);
 
         Unit = new PlaybackUnit(Presentation, Backlog, Rollback);
-        Runner = new SceneRunner(Unit, Options, Replay, Persistence);
+        Runner = new SceneRunner(Unit, Options, Persistence);
         Driver = new ProgressionDriver(Runner, DriverLog);
     }
 
@@ -263,7 +301,15 @@ internal sealed class Rig
 
         Rollback.MarkRollbackTarget(target);
         Rollback.ClearRollbackPoints();
-        Replay.BeginRollbackSeek(untilNode);
+        Presentation.BeginRollbackSeek(untilNode);
+    }
+
+    // 진짜로는 PlaybackMemory.Restore가 저장된 문자열을 되읽어 건다. 여기서는 표적 노드만 정한다.
+    public void StageResume(string untilNode)
+    {
+        Unit.StageResume(new PresentationResumePoint(
+            new LineTarget { NodeName = untilNode, LineId = untilNode + "#0", Occurrence = 1 },
+            Array.Empty<VNChoiceRecord>()));
     }
 }
 

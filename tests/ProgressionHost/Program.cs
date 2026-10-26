@@ -183,12 +183,16 @@ internal static class Program
         {
             var rig = new Rig();
             ChapterDefinition chapter = WithinSceneChoice();
-            rig.Replay.SeekUntilNode = "N_ep-1b"; // 저장한 줄이 ep-1b 안에 있다
+            rig.StageResume("N_ep-1b"); // 저장한 줄이 ep-1b 안에 있다
 
             rig.Driver.Start(chapter, chapter.CreateEntryState(), new[] { new ScenePathStep("ep-1", 1) });
             await Until(() => !rig.Driver.IsRunning, "챕터 끝");
 
-            Check(rig.Replay.BeginLoadReplayCount == 1, "로드 시크가 한 번 열려야 한다");
+            Check(rig.Presentation.ResumeCount == 1, "로드 시크가 한 번 열려야 한다");
+            string[] log = rig.Log.Snapshot();
+            Check(Array.IndexOf(log, "begin") < Array.IndexOf(log, "resume:N_ep-1b")
+                  && Array.IndexOf(log, "resume:N_ep-1b") < Array.IndexOf(log, "enter:ep-1"),
+                "재개 시크는 단위를 연 직후, 진입 기록 전에 열려야 한다: " + string.Join(", ", log));
             Check(rig.Options.Asks.Length == 1 && rig.Options.Asks[0].Labels.Single() == "out",
                 "기록된 선택(ep-1)을 다시 물었거나, 기록 뒤 선택(ep-1b)을 묻지 않았다");
             Check(Choices(rig.Persistence.Commits[0].Result) == "ep-1:1 ep-1b:0", "첫 장면 확정에 복원 선택이 빠졌다");
@@ -200,26 +204,27 @@ internal static class Program
         {
             var rig = new Rig();
             ChapterDefinition chapter = TwoScenes();
+            rig.StageResume("N_ep-1");
 
             rig.Driver.Start(chapter, chapter.CreateEntryState(), new[] { new ScenePathStep("ep-1", 5) });
             await Until(() => !rig.Driver.IsRunning, "실행 종료");
 
             Check(rig.DriverLog.Has("E", "FAULTED"), "실패가 기록되지 않았다");
             Check(rig.Presentation.BeginCount == 0 && rig.Persistence.Entered.Count == 0, "부분 복원한 채로 장면을 열었다");
-            Check(rig.Replay.BeginLoadReplayCount == 0, "로드 시크가 열렸다");
+            Check(rig.Presentation.ResumeCount == 0, "로드 시크가 열렸다");
         });
 
         await Test("기록이 바닥난 시크는 오류를 남기고 일반 진행으로 돌아간다", async () =>
         {
             var rig = new Rig();
             ChapterDefinition chapter = TwoScenes();
-            rig.Replay.SeekUntilNode = null; // 저장한 줄에 끝내 닿지 못한다
+            rig.StageResume("N_nowhere"); // 저장한 줄에 끝내 닿지 못한다
 
             rig.Driver.Start(chapter, chapter.CreateEntryState(), Array.Empty<ScenePathStep>());
             await Until(() => !rig.Driver.IsRunning, "챕터 끝");
 
-            Check(rig.Replay.BeginLoadReplayCount == 1, "빈 경로도 복원 시작이다");
-            Check(rig.Replay.ClearSeekCount == 1 && !rig.Replay.IsSeekingActive, "시크가 꺼지지 않았다");
+            Check(rig.Presentation.ResumeCount == 1, "빈 경로도 복원 시작이다");
+            Check(rig.Presentation.AbandonSeekCount == 1 && !rig.Presentation.IsSeeking, "시크가 꺼지지 않았다");
             Check(UnityEngine.Debug.Errors.Any(e => e.Contains("Seeking")), "오류가 남지 않았다");
             Check(rig.Options.Asks.Length == 1 && rig.Persistence.Commits.Count == 2, "일반 진행으로 이어지지 않았다");
         });
@@ -228,7 +233,7 @@ internal static class Program
         {
             var rig = new Rig();
             ChapterDefinition chapter = WithinSceneChoice();
-            rig.Replay.SeekUntilNode = "N_ep-1"; // 저장한 줄이 기록된 선택보다 앞에 있다(대본이 바뀐 경우)
+            rig.StageResume("N_ep-1"); // 저장한 줄이 기록된 선택보다 앞에 있다(대본이 바뀐 경우)
 
             rig.Driver.Start(chapter, chapter.CreateEntryState(), new[] { new ScenePathStep("ep-1", 1) });
             await Until(() => !rig.Driver.IsRunning, "챕터 끝");
@@ -451,9 +456,10 @@ internal static class Program
             rig.Backlog.Record(new YarnLineMeta("old", "old#0", "", "이전 단위의 줄"));
             var host = new NodePlaybackHost(rig.Unit);
 
-            await host.PlayAsync("N_solo");
+            bool completed = await host.PlayAsync("N_solo");
 
             Same(rig.Log.Snapshot(), new[] { "stop", "begin", "play:N_solo" }, "노드 하나의 순서가 다르다");
+            Check(completed, "끝까지 간 노드가 완료로 보고되지 않았다");
             Check(!host.IsRunning, "끝난 뒤에도 실행 중이다");
             Check(!rig.Backlog.IsInCurrentScene(rig.Backlog.Entries[0]), "단위를 열 때 백로그 경계가 서지 않았다");
             Check(rig.Rollback.Points.Count == 2 && rig.Rollback.Points[0].nodeName == "N_solo", "롤백 기록이 이 단위의 것이 아니다");
@@ -484,6 +490,26 @@ internal static class Program
 
             Check(!host.IsRunning, "끝내기 뒤에도 실행 중이다");
             Check(rig.Presentation.StopCount == 3, "끝내기가 멈추지 않았다");
+        });
+
+        await Test("노드 재생: 재개 예약은 다음에 여는 단위 하나만 가져가고, 끝내기로 끊기면 완료가 아니다", async () =>
+        {
+            var rig = new Rig();
+            rig.Presentation.BlockPlays = true;
+            var host = new NodePlaybackHost(rig.Unit);
+
+            rig.StageResume("N_solo");
+            Task<bool> first = host.PlayAsync("N_solo");
+            await Until(() => rig.Presentation.Played.Length == 1, "첫 재생");
+
+            Same(rig.Log.Snapshot(), new[] { "stop", "begin", "resume:N_solo", "play:N_solo" }, "재개 시크가 단위를 연 직후에 열리지 않았다");
+
+            await host.ExitAsync();
+            Check(!await first, "끝내기로 끊긴 재생을 완료로 보고했다");
+
+            rig.Presentation.BlockPlays = false;
+            Check(await host.PlayAsync("N_solo"), "두 번째 재생이 완료되지 않았다");
+            Check(rig.Presentation.ResumeCount == 1, "재개 예약이 두 번째 단위에도 걸렸다");
         });
 
         await Test("노드 재생: 리플레이 요청과 끝내기가 겹쳐도 한 구간에 한 번만 멈춘다", async () =>

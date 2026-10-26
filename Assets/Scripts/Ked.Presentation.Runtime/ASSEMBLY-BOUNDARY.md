@@ -16,7 +16,7 @@
 |---|---|---|
 | `Ked.Presentation.Core` | `Assets/Scripts/Ked.Presentation.Core/` | 순수 상태 계산 — 정지 프레임 리듀스·이징·튜닝 (**엔진 의존 0**, 참조 0) |
 | `Ked.Presentation.Runtime` | `Assets/Scripts/Ked.Presentation.Runtime/` | 연출 실행 계층 — PresentationCore · Commands · CharacterRig · ShotResponse · BackgroundRig · ScreenEffect · StageMask · Audio (참조: Core · TextMeshPro · DOTween.Modules) |
-| `Ked.Presentation.Playback` | `Assets/Scripts/Ked.Presentation.Playback/` | 대사 재생 루프와 연출 기억 — 줄 진행·선택지(DialoguePresenter) · 재생 제어·롤백 기록·백로그(FeatureController) · Yarn 커맨드 번역(YarnBridge) · 재생 호스트 계약·재생 단위(Host) · 연출 기억 스냅샷(Memory) (참조: Core · Runtime · YarnSpinner.Unity · TextMeshPro · UnityEngine.UI · DOTween.Modules) |
+| `Ked.Presentation.Playback` | `Assets/Scripts/Ked.Presentation.Playback/` | 대사 재생 루프와 연출 기억 — 줄 진행·선택지(DialoguePresenter) · 재생 제어·롤백 기록·백로그(FeatureController) · Yarn 커맨드 번역(YarnBridge) · 재생 호스트 계약·재생 단위(Host) · 연출 기억과 그 입구 `PlaybackMemory`(Memory) (참조: Core · Runtime · YarnSpinner.Unity · TextMeshPro · UnityEngine.UI · DOTween.Modules) |
 | `Ked.Progression` · `Ked.Progression.Save` | `Assets/Scripts/Ked.Progression/` | 진행 판정 코어와 진행 저장 (**엔진 의존 0**. 원본은 형제 저장소 `ked-progression-runtime`, [vendoring.md](../Ked.Progression/Documentation~/vendoring.md)) |
 | `Assembly-CSharp` (기본) | `Assets/Scripts/` 나머지 | **예제 층** — Game(부트스트랩·조립·저장 흐름) · UI · ProgressionHost(진행 런타임을 꽂는 어댑터) |
 | `Assembly-CSharp-Editor` (기본) | `Assets/Editor/` | 에디터 도구 — 초상 DB 빌더 · 튜닝 덤프 익스포터 · 폰트 교체 |
@@ -68,6 +68,19 @@ Assembly-CSharp (예제) ──> Ked.Presentation.Playback ──> Ked.Presentat
 - **예제 조립부**(`PresentationAssembler`, `PresentationSceneRefs`)는 UI 매니저·패치 서비스를 세운다. `Game/`으로 옮겼다.
 - **연출 기억 코덱**(`PresentationMemory`, 예전 `ProgressionHost/PresentationSaveState`)은 진행 저장의 JSON 설정을 빌려 쓰고 있었다.
   자기 설정을 갖게 해 진행 참조를 끊었다. 형식(camelCase)은 그대로다.
+
+### 호스트가 보는 면 (P3)
+
+예제 층(호스트)이 Playback에서 만지는 것은 `PresentationRuntime`의 둘뿐이다.
+
+| | 무엇 | 호스트가 하는 말 |
+|---|---|---|
+| `Unit` (`PlaybackUnit`) | 재생 단위의 수명 | 열어라 · 이 노드를 재생해라 · 멈춰라 · 루트부터 다시(표적 색인을 돌려받는다) · 시크 중인가 |
+| `Memory` (`PlaybackMemory`) | 연출 기억의 입구 | 꺼내라(백로그 · 단위 선택 · 재개 지점) · 되돌려라 · 과거 단위의 이 줄을 읽어라 |
+
+문자열 형식(`PresentationMemory`), 재개 지점(`PresentationResumePoint`), 줄 좌표(`LineTarget`), 과거 단위 셈법(`BacklogForkPoints`),
+무대 계약(`IPlaybackStage`)은 `internal`이다 — 호스트가 백로그·선택 기록·줄 좌표의 생김새를 집으면 **컴파일러가 막는다**.
+이어하기도 따로 부르지 않는다. `Memory.Restore`가 재개 지점을 예약하면 다음에 열리는 단위가 그 줄까지 시크한다.
 
 ## 4. `YarnBridge`는 Runtime이 아니라 Playback에 있다
 

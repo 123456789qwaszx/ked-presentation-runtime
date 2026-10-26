@@ -7,6 +7,9 @@ using UnityEngine;
 // 게임에서 Scene 실행 순서를 소유하는 유일한 runner.
 // 진행 상태 계산은 SceneProgress에 위임하고, 재생 단위의 수명(열기·정지·루트부터 다시)은 PlaybackUnit에 맡긴다.
 // 여기 남는 것은 진행의 판단이다 — 무엇을 재생할지, 선택을 어떻게 정할지, 장면 경계와 확정, 되감을 때 진행 기록을 어디까지 자를지.
+//
+// 이어하기의 줄 시크는 여기서 열지 않는다. 런처가 연출 기억을 되돌려 두면(PlaybackMemory.Restore)
+// 복원 장면을 열 때 PlaybackUnit이 연다. 여기는 "시크 중인가"만 물어 진행 선택을 기록으로 자동 응답한다.
 public sealed class SceneRunner : ISceneRunner
 {
     private enum SceneStepKind
@@ -19,18 +22,15 @@ public sealed class SceneRunner : ISceneRunner
 
     private readonly PlaybackUnit _unit;
     private readonly IChapterOptionsView _options;
-    private readonly ProgressionReplayState _replayState;
     private readonly IScenePersistence _persistence;
 
     public SceneRunner(
         PlaybackUnit unit,
         IChapterOptionsView options,
-        ProgressionReplayState replayState,
         IScenePersistence persistence)
     {
         _unit = unit;
         _options = options;
-        _replayState = replayState;
         _persistence = persistence;
     }
 
@@ -45,9 +45,6 @@ public sealed class SceneRunner : ISceneRunner
         SceneProgress progress = session.Progress;
 
         await EnterSceneAsync(progress, cancellationToken);
-
-        if (session.StartsFromRestore)
-            _replayState.BeginLoadReplay();
 
         while (true)
         {
@@ -188,7 +185,7 @@ public sealed class SceneRunner : ISceneRunner
 
         // Seeking 중이고 기존 선택 기록이 있다면
         // 새 선택을 결정하지 않고 기록된 선택을 그대로 소비한다.
-        if (_replayState.IsSeekingActive && progress.HasRecordedChoice)
+        if (_unit.IsSeeking && progress.HasRecordedChoice)
         {
             SceneChoice recorded =
                 progress.TakeRecordedChoice(_unit.LastHistoryIndex);
@@ -201,13 +198,13 @@ public sealed class SceneRunner : ISceneRunner
         if (progress.HasRecordedChoice)
             progress.DiscardUnconsumedChoices();
 
-        if (_replayState.IsSeekingActive)
+        if (_unit.IsSeeking)
         {
             Debug.LogError(
                 "[장면] Seeking 중 선택지에 닿았으나, 기록된 선택이 없다" +
                 " - 시크를 끄고 일반 재생으로 전환.");
 
-            _replayState.ClearSeek();
+            _unit.AbandonSeek();
         }
 
         return await ResolveNextChoiceAsync(session, cancellationToken);

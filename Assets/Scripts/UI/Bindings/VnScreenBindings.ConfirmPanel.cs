@@ -66,8 +66,7 @@ public sealed partial class VNScreenBindings
             panel.Present(
                 title: "타이틀 화면으로 돌아갈까요?",
                 body:
-                "현재 장면에서 아직 확정되지 않은 진행은 이어하기에 반영되지 않습니다.\n" +
-                "마지막으로 저장된 장면 지점에서 다시 이어할 수 있습니다.",
+                "이어하기를 누르면 마지막으로 본 대사부터 다시 이어집니다.",
                 confirmLabel: "타이틀로",
                 cancelLabel: "취소");
         });

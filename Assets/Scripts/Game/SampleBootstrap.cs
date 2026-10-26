@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Threading.Tasks;
 using Ked.Progression;
 using Ked.Progression.Save;
 using UnityEngine;
@@ -9,12 +8,15 @@ using Yarn.Unity;
 
 /// <summary>
 /// 예제 씬의 진입점. 연출 런타임을 세우고, 고른 예제에 맞는 재생 호스트를 하나 붙인다.
+/// 두 예제 모두 타이틀([처음부터] [이어하기])에서 시작한다.
 ///
-/// - 연출 단독: 진행·저장 없이 Yarn 노드 하나를 바로 재생한다(NodePlaybackHost).
-/// - 진행·저장: 타이틀 → 챕터 진행 → 장면 경계 저장(ProgressionLauncher).
+/// - 연출 단독: 진행 없이 Yarn 노드 하나(NodePlaybackHost). 이어하기는 연출 기억만으로 —
+///   노드 이름과 PlaybackMemory의 문자열을 파일 하나에 둔다(NodePlaythrough).
+/// - 진행·저장: 챕터 진행 → 장면 경계 저장 → 슬롯·갈라지기(ProgressionLauncher).
+///   같은 연출 기억 문자열을 진행 저장의 HostState 칸에 둔다.
 ///
 /// 연출 런타임의 조립은 PresentationAssembler가 한다. 여기는 씬 참조를 넘기고,
-/// 진행·저장 예제일 때만 그 위에 진행·저장을 얹는다.
+/// 그 위에 고른 예제의 호스트와 저장을 얹는다.
 ///
 /// 스크립트 GUID는 예전 VNAppBootstrap 그대로다 — 씬에 직렬화된 값이 유지된다.
 /// </summary>
@@ -31,6 +33,7 @@ public class SampleBootstrap : MonoBehaviour
 
     // 연출 단독
     private NodePlaybackHost _nodePlaybackHost;
+    private NodePlaythrough _nodePlaythrough;
 
     // 진행·저장
     private IChapterOptionsView _progressionOptions;
@@ -50,8 +53,9 @@ public class SampleBootstrap : MonoBehaviour
     private ScenarioDefinition _scenarioDef;
 
     [Header("예제")]
-    [Tooltip("연출 단독: 진행·저장 없이 아래 노드 하나를 바로 재생한다.\n" +
-             "진행·저장: 타이틀 → 챕터 진행 → 장면 경계 저장.")]
+    [Tooltip("연출 단독: 진행 없이 아래 노드 하나를 재생한다. 이어하기는 연출 기억만으로.\n" +
+             "진행·저장: 챕터 진행 → 장면 경계 저장 → 슬롯·갈라지기.\n" +
+             "둘 다 타이틀에서 시작한다.")]
     [SerializeField] private SampleExample example = SampleExample.ProgressionAndSave;
 
     [Tooltip("연출 단독 예제가 재생할 Yarn 노드 이름(title:).")]
@@ -154,7 +158,7 @@ public class SampleBootstrap : MonoBehaviour
             _screenBindings);
 
         IPlaybackHost host = IsPresentationOnly
-            ? CreateNodePlaybackHost()
+            ? InstallPresentationOnly()
             : InstallProgression();
 
         _runtime.AttachHost(host);
@@ -164,7 +168,9 @@ public class SampleBootstrap : MonoBehaviour
             _runtime.AdvanceDispatcher,
             host);
 
-        if (!IsPresentationOnly)
+        if (IsPresentationOnly)
+            _screenBindings.ConfigureTitle(_nodePlaythrough);
+        else
             ConfigureProgressionScreens();
     }
 
@@ -213,23 +219,20 @@ public class SampleBootstrap : MonoBehaviour
 
     #region 연출 단독
 
-    private IPlaybackHost CreateNodePlaybackHost()
+    // 진행도 진행 저장도 없다. 이어하기 파일은 예제가 직접 쓴다 — 저장 위치는 런타임이 정하지 않는다.
+    private IPlaybackHost InstallPresentationOnly()
     {
         _nodePlaybackHost = new NodePlaybackHost(_runtime.Unit);
 
-        return _nodePlaybackHost;
-    }
+        _nodePlaythrough = new NodePlaythrough(
+            _nodePlaybackHost,
+            _runtime.Memory,
+            presentationEntryNode,
+            Path.Combine(Application.persistentDataPath, "presentation-only", "resume.json"));
 
-    private async Task PlayEntryNodeAsync()
-    {
-        try
-        {
-            await _nodePlaybackHost.PlayAsync(presentationEntryNode);
-        }
-        catch (Exception error)
-        {
-            Debug.LogException(error, this);
-        }
+        _runtime.LineFlow.LineDisplayed += _nodePlaythrough.SaveCurrentLine;
+
+        return _nodePlaybackHost;
     }
 
     #endregion
@@ -289,23 +292,16 @@ public class SampleBootstrap : MonoBehaviour
 
         CreateSaveServices();
 
-        // 진행 런타임은 아래 계약만 안다.
-        // Stage / Save로 잇는 일은 전부 이 자리에서 끝난다.
-        ProgressionReplayState replayState = new(
-            _runtime.LineState,
-            _runtime.ChoiceHistory);
-
+        // 진행 런타임은 아래 계약만 안다. 연출 쪽에서 쓰는 것은 재생 단위(Unit)와 연출 기억(Memory) 둘이다.
         // Progression은 IScenePersistence까지만 안다.
-        // Bridge가 Host 상태를 캡처하고 SaveCoordinator는 저장 정책만 수행한다.
+        // Bridge가 연출 기억을 문자열로 꺼내 싣고 SaveCoordinator는 저장 정책만 수행한다.
         ProgressionSaveBridge savePersistence = new(
             _saveCoordinator,
-            _runtime.Backlog,
-            _runtime.ChoiceHistory);
+            _runtime.Memory);
 
         SceneRunner sceneRunner = new SceneRunner(
             _runtime.Unit,
             _progressionOptions,
-            replayState,
             savePersistence);
 
         _progressionDriver = new ProgressionDriver(sceneRunner);
@@ -314,8 +310,7 @@ public class SampleBootstrap : MonoBehaviour
             _progressionDriver,
             _scenarioDef,
             _saveCoordinator,
-            _runtime.Backlog,
-            replayState);
+            _runtime.Memory);
 
         // 대사가 스탯을 읽는 길. 드라이버가 선 뒤에 등록해야 람다가 null을 잡지 않는다.
         new ProgressionStatFunction(() => _progressionDriver.CurrentState)
@@ -363,7 +358,7 @@ public class SampleBootstrap : MonoBehaviour
         _activeResumeSaveFlow = new(
             _saveCoordinator,
             _progressionLauncher,
-            _runtime.Features);
+            _runtime.Memory);
 
         _runtime.LineFlow.LineDisplayed += _activeResumeSaveFlow.Update;
 
@@ -372,11 +367,11 @@ public class SampleBootstrap : MonoBehaviour
             _saveSlotService,
             _playthroughForkService,
             _progressionLauncher,
-            _runtime.Features,
-            _runtime.Backlog);
+            _runtime.Memory);
 
-        _screenBindings.ConfigureProgression(
-            _progressionLauncher,
+        _screenBindings.ConfigureTitle(_progressionLauncher);
+
+        _screenBindings.ConfigureSaveSlots(
             _saveSlotService,
             manualSaveFlow);
     }
@@ -385,12 +380,6 @@ public class SampleBootstrap : MonoBehaviour
 
     private void Start()
     {
-        if (IsPresentationOnly)
-        {
-            _ = PlayEntryNodeAsync();
-            return;
-        }
-
         _screenBindings.OpenTitleMenu();
     }
 

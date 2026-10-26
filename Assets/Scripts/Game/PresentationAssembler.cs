@@ -78,7 +78,6 @@ public sealed class PresentationAssembler
             _vnFeatureController,
             _dialogueAdvanceDispatcher,
             _linePresentationFlow,
-            _linePresentationAdvanceState,
             _rollbackHistory,
             _choiceHistory,
             _backlogRecorder,
@@ -296,7 +295,8 @@ public sealed class PresentationAssembler
             _presentationStage,
             _presentationScopeSession,
             _choiceHistory,
-            _episodeSkipController);
+            _episodeSkipController,
+            _linePresentationAdvanceState);
     }
 
     // 입력 폴러의 연결은 여기서 하지 않는다 — 재생 호스트가 정해진 뒤 PresentationRuntime.AttachHost가 한다.

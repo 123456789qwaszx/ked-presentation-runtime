@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Threading.Tasks;
 using Ked.Progression;
 using Ked.Progression.Save;
@@ -10,16 +9,16 @@ using UnityEngine;
 // 화면은 슬롯이나 백로그 한 줄만 전달하고,
 // 실제 저장 데이터 캡처와 회차 전환은 여기서 조립한다.
 //
-// 진행 저장은 연출 상태를 문자열로만 받는다. 그 문자열을 만드는 일(PresentationMemory)과
-// 백로그 한 줄을 장면 안의 줄 좌표로 바꾸는 일은 여기 — 연출 쪽 — 의 몫이다.
+// 진행 저장은 연출 상태를 문자열로만 받는다. 그 문자열을 꺼내는 일과
+// 백로그 한 줄을 과거 장면 안의 줄 좌표로 읽는 일은 연출의 입구(PlaybackMemory)가 한다.
+// 여기는 진행 저장(어느 장면인가, 그 장면이 몇 번 순번에서 시작했나)과 그 문자열을 잇는다.
 public sealed class ManualSaveFlow
 {
     private readonly SaveCoordinator _saveCoordinator;
     private readonly SaveSlotService _saveSlots;
     private readonly PlaythroughForkService _fork;
     private readonly ProgressionLauncher _progressionLauncher;
-    private readonly VNFeatureController _vnFeatures;
-    private readonly BacklogRecorder _backlog;
+    private readonly PlaybackMemory _memory;
 
     public bool CanSave => _progressionLauncher.IsRunning;
 
@@ -28,15 +27,13 @@ public sealed class ManualSaveFlow
         SaveSlotService saveSlots,
         PlaythroughForkService fork,
         ProgressionLauncher progressionLauncher,
-        VNFeatureController vnFeatures,
-        BacklogRecorder backlog)
+        PlaybackMemory memory)
     {
         _saveCoordinator = saveCoordinator;
         _saveSlots = saveSlots;
         _fork = fork;
         _progressionLauncher = progressionLauncher;
-        _vnFeatures = vnFeatures;
-        _backlog = backlog;
+        _memory = memory;
     }
 
     #region 수동 슬롯
@@ -118,33 +115,15 @@ public sealed class ManualSaveFlow
             return;
 
         SceneRecord origin = playthrough.Scenes[sceneIndex];
-        int sceneStart = origin.Checkpoint.HostSerialStart;
 
-        // 그 장면이 시작되기 전까지의 백로그만 새 회차가 물려받는다.
-        string inheritedHostState =
-            PresentationMemory.Backlog(BacklogForkPoints.Before(_backlog.Entries, sceneStart));
-
-        // 그 줄이 장면 안에서 몇 번째 등장인지 세어 줄 좌표를 만든다.
-        // 셀 수 없으면(기록이 잘려 나갔으면) 장면 루트부터 일반 플레이.
-        string loadHostState = null;
-
-        if (BacklogForkPoints.TryMakeLineTarget(_backlog.Entries, entry, sceneStart, out LineTarget target))
-        {
-            IReadOnlyList<VNChoiceRecord> yarnChoices;
-
-            try
-            {
-                yarnChoices = PresentationMemory.ReadUnitChoices(origin.HostState);
-            }
-            catch (InvalidDataException error)
-            {
-                Debug.LogWarning($"[저장] 장면 {sceneIndex}의 연출 기록을 읽지 못해 장면 루트에서 시작한다. — {error.Message}");
-                yarnChoices = null;
-            }
-
-            if (yarnChoices != null)
-                loadHostState = PresentationMemory.ResumePoint(target, yarnChoices);
-        }
+        // 새 회차는 그 장면이 시작되기 전까지의 백로그를 물려받고, 그 줄까지 달린다.
+        // 줄을 셀 수 없으면(기록이 잘려 나갔으면) 재개 지점이 없다 — 장면 루트부터 일반 플레이.
+        _memory.ReadPastUnit(
+            entry,
+            origin.Checkpoint.HostSerialStart,
+            origin.HostState,
+            out string inheritedHostState,
+            out string loadHostState);
 
         onTransitionStarted?.Invoke();
 
@@ -161,8 +140,8 @@ public sealed class ManualSaveFlow
         if (!_progressionLauncher.IsRunning)
             return false;
 
-        if (!_vnFeatures.TryGetCurrentLine(
-                out LineTarget target,
+        if (!_memory.TryCaptureResumePoint(
+                out string resumePoint,
                 out string preview))
         {
             Debug.Log("[수동 저장] 지금은 저장할 수 있는 대사 위치가 아니다.");
@@ -171,7 +150,7 @@ public sealed class ManualSaveFlow
 
         save = new ManualSaveData(
             _progressionLauncher.PendingPath,
-            PresentationMemory.ResumePoint(target, _vnFeatures.CreateYarnChoiceSnapshot()),
+            resumePoint,
             preview);
 
         return true;

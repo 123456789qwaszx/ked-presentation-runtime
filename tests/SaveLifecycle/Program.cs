@@ -7,6 +7,7 @@ using Ked.Progression;
 using Ked.Progression.Save;
 
 // 저장의 호스트(연출) 겹 회귀 하네스. 저장 정책 자체는 원본 저장소의 tests/ProgressionSave가 본다.
+// 연출 기억의 입구(PlaybackMemory)와 그것을 쓰는 두 예제 — 진행 어댑터, 연출 단독 회차 — 를 본다.
 internal static class Program
 {
     private const string ContentVersion = "test-v1";
@@ -20,6 +21,19 @@ internal static class Program
     private static void Throws<T>(Action action) where T : Exception
     { try { action(); } catch (T) { return; } throw new Exception("Expected " + typeof(T).Name); }
     private static Task Run(Action action) { action(); return Task.CompletedTask; }
+
+    private static async Task Until(Func<bool> condition, string what)
+    {
+        var clock = System.Diagnostics.Stopwatch.StartNew();
+        while (!condition())
+        {
+            if (clock.ElapsedMilliseconds > 3000) throw new Exception("시간 초과: " + what);
+            await Task.Delay(2);
+        }
+    }
+
+    private static PresentationResumePoint SomeResume() =>
+        new(new LineTarget { NodeName = "stale", LineId = "stale", Occurrence = 1 }, Array.Empty<VNChoiceRecord>());
 
     private static async Task Test(string name, Func<Task> body)
     {
@@ -59,8 +73,8 @@ internal static class Program
 
     private static SceneCommitResult Completion() => new(State("scene2"), Array.Empty<CommittedChoice>(), Array.Empty<string>());
 
-    private static ProgressionLauncher Launcher(ILocalSaveStore store, ProgressionDriver driver, ProgressionReplayState replay, BacklogRecorder backlog = null) =>
-        new(driver, Scenario(), Coordinator(store), backlog ?? new BacklogRecorder(), replay);
+    private static ProgressionLauncher Launcher(ILocalSaveStore store, ProgressionDriver driver, PresentationRig presentation) =>
+        new(driver, Scenario(), Coordinator(store), presentation.Memory);
 
     public static async Task<int> Main()
     {
@@ -101,18 +115,17 @@ internal static class Program
             await Test("브리지: 장면 경계에서 호스트 상태를 싣는다", () => Run(() =>
             {
                 var store = new LocalFileSaveStore(Dir());
-                var backlog = new BacklogRecorder();
-                var choiceHistory = new ChoiceHistory();
+                var presentation = new PresentationRig();
                 var save = Coordinator(store);
-                var bridge = new ProgressionSaveBridge(save, backlog, choiceHistory);
+                var bridge = new ProgressionSaveBridge(save, presentation.Memory);
 
-                backlog.Record(new YarnLineMeta { lineId = "old-line", nodeName = "old-node", rawText = "old" });
-                backlog.MarkSceneBoundary();
-                choiceHistory.RestoreChoices(new[] { new VNChoiceRecord(0, 0, 2, "picked") });
+                presentation.Show("old-line", "old-node");
+                presentation.OpenAndTakeResume();
+                presentation.Choices.RestoreChoices(new[] { new VNChoiceRecord(0, 0, 2, "picked") });
 
                 save.BeginNewPlaythrough();
                 bridge.EnterScene("chapter", State());
-                backlog.Record(new YarnLineMeta { lineId = "new-line", nodeName = "node", rawText = "new" });
+                presentation.Show("new-line");
                 bridge.CommitScene("chapter", Completion(), SceneRunOutcome.SceneEnded);
 
                 PlaythroughSave snapshot = store.LoadActive();
@@ -138,13 +151,13 @@ internal static class Program
                 store.SetActive("A");
 
                 var driver = new ProgressionDriver();
-                var replay = new ProgressionReplayState();
-                var backlog = new BacklogRecorder();
-                Launcher(store, driver, replay, backlog).Resume();
+                var presentation = new PresentationRig();
+                presentation.Unit.StageResume(SomeResume()); // 앞 실행이 남긴 예약
+                Launcher(store, driver, presentation).Resume();
 
                 Check(driver.Starts == 1 && driver.LastRestorePath == null, "루트 이어하기를 장면 중간 복원으로 다뤘다");
-                Check(replay.PreparedLoads == 1 && replay.StagedPlan == null, "옛 재생 계획이 지워지지 않았다");
-                Check(backlog.Entries.Single().lineId == "old" && backlog.NextLineSequence == 1, "백로그가 복원되지 않았다");
+                Check(presentation.Backlog.Entries.Single().lineId == "old" && presentation.Backlog.NextLineSequence == 1, "백로그가 복원되지 않았다");
+                Check(presentation.OpenAndTakeResume() == null, "옛 재생 계획이 지워지지 않았다");
             }));
 
             await Test("런처: 빈 경로라도 재생 계획이 있으면 줄 시크를 연다", () => Run(() =>
@@ -156,11 +169,11 @@ internal static class Program
                 store.SetActive("A");
 
                 var driver = new ProgressionDriver();
-                var replay = new ProgressionReplayState();
-                Launcher(store, driver, replay).Resume();
+                var presentation = new PresentationRig();
+                Launcher(store, driver, presentation).Resume();
 
                 Check(driver.LastRestorePath != null && driver.LastRestorePath.Count == 0, "빈 경로가 루트 이어하기로 뭉개졌다");
-                Check(replay.StagedPlan?.Target.Occurrence == 2, "줄 좌표가 올라가지 않았다");
+                Check(presentation.OpenAndTakeResume()?.Target.Occurrence == 2, "줄 좌표가 올라가지 않았다");
             }));
 
             await Test("런처: 저장 경로는 진행 좌표로 잘려 들어간다", () => Run(() =>
@@ -176,7 +189,7 @@ internal static class Program
                 store.SetActive("A");
 
                 var driver = new ProgressionDriver();
-                Launcher(store, driver, new ProgressionReplayState()).Resume();
+                Launcher(store, driver, new PresentationRig()).Resume();
 
                 Check(driver.LastRestorePath.Single().FromEpisodeId == "scene1" && driver.LastRestorePath.Single().OptionIndex == 3, "경로가 잘못 옮겨졌다");
             }));
@@ -190,20 +203,20 @@ internal static class Program
                 store.SetActive("A");
 
                 var driver = new ProgressionDriver();
-                var replay = new ProgressionReplayState();
-                var launcher = Launcher(store, driver, replay);
+                var presentation = new PresentationRig();
+                var launcher = Launcher(store, driver, presentation);
                 launcher.Resume();
 
                 Check(driver.Starts == 1 && driver.LastRestorePath == null, "새 게임으로 가지 않았다");
                 Check(UnityEngine.Debug.Warnings.Any(w => w.Contains("연출 상태")), "경고가 없다");
-                Check(replay.StagedPlan == null, "깨진 계획이 올라갔다");
+                Check(presentation.OpenAndTakeResume() == null, "깨진 계획이 올라갔다");
             }));
 
             await Test("런처: 겹친 전환은 무시되고 이어하기는 로컬에서 시작한다", async () =>
             {
                 var driver = new ProgressionDriver { IsRunning = true };
                 var stopped = new TaskCompletionSource<bool>(); driver.OnStop = () => stopped.Task;
-                var launcher = Launcher(new LocalFileSaveStore(Dir()), driver, new ProgressionReplayState());
+                var launcher = Launcher(new LocalFileSaveStore(Dir()), driver, new PresentationRig());
                 int prepares = 0; Task first = launcher.TransitionAndResumeAsync(() => prepares++);
                 await launcher.TransitionAndResumeAsync(() => prepares++);
                 stopped.SetResult(true); await first;
@@ -236,45 +249,174 @@ internal static class Program
             await Test("갈라지기: 완료 장면의 줄에서 새 회차를 열면 런처가 그 줄까지 달린다", () => Run(() =>
             {
                 var store = new LocalFileSaveStore(Dir());
-                var backlog = new BacklogRecorder();
+                var presentation = new PresentationRig();
                 var save = Coordinator(store);
-                var bridge = new ProgressionSaveBridge(save, backlog, new ChoiceHistory());
+                var bridge = new ProgressionSaveBridge(save, presentation.Memory);
 
                 // 장면 1: 줄 0,1 — 장면 2: 줄 2
                 save.BeginNewPlaythrough();
+                presentation.OpenAndTakeResume();
                 bridge.EnterScene("chapter", State());
-                backlog.Record(new YarnLineMeta { lineId = "line", nodeName = "node", rawText = "a" });
-                backlog.Record(new YarnLineMeta { lineId = "line", nodeName = "node", rawText = "b" });
+                presentation.Show("line");
+                presentation.Show("line");
                 bridge.CommitScene("chapter", Completion(), SceneRunOutcome.SceneEnded);
-                backlog.MarkSceneBoundary();
+                presentation.OpenAndTakeResume();
                 bridge.EnterScene("chapter", State("scene2"));
-                backlog.Record(new YarnLineMeta { lineId = "line", nodeName = "node", rawText = "c" });
+                presentation.Show("line");
 
                 PlaythroughSaveSnapshot playthrough = save.Capture();
-                DialogueLogEntry second = backlog.Entries[1];
-                DialogueLogEntry current = backlog.Entries[2];
+                DialogueLogEntry second = presentation.Backlog.Entries[1];
+                DialogueLogEntry current = presentation.Backlog.Entries[2];
 
                 int sceneIndex = playthrough.FindSceneIndexBySerial(second.lineSequence);
                 Check(sceneIndex == 0 && playthrough.FindSceneIndexBySerial(current.lineSequence) == -1, "장면 찾기가 틀렸다");
 
-                int sceneStart = playthrough.Scenes[sceneIndex].Checkpoint.HostSerialStart;
-                Check(BacklogForkPoints.TryMakeLineTarget(backlog.Entries, second, sceneStart, out LineTarget target) && target.Occurrence == 2, "줄 좌표가 틀렸다");
+                // ManualSaveFlow.ForkFromBacklogAsync가 하는 일 — 줄 세기는 연출 기억의 몫이다.
+                SceneRecord origin = playthrough.Scenes[sceneIndex];
+                presentation.Memory.ReadPastUnit(second, origin.Checkpoint.HostSerialStart, origin.HostState,
+                    out string inherited, out string resumePoint);
+                Check(resumePoint != null, "줄 좌표를 만들지 못했다");
 
-                new PlaythroughForkService(store, ContentVersion).ForkFromScene(
-                    playthrough,
-                    sceneIndex,
-                    PresentationMemory.Backlog(BacklogForkPoints.Before(backlog.Entries, sceneStart)),
-                    PresentationMemory.ResumePoint(target, PresentationMemory.ReadUnitChoices(playthrough.Scenes[sceneIndex].HostState)));
+                new PlaythroughForkService(store, ContentVersion).ForkFromScene(playthrough, sceneIndex, inherited, resumePoint);
 
                 var driver = new ProgressionDriver();
-                var replay = new ProgressionReplayState();
-                var restored = new BacklogRecorder();
-                Launcher(store, driver, replay, restored).Resume();
+                var restored = new PresentationRig();
+                Launcher(store, driver, restored).Resume();
 
                 Check(driver.LastRestorePath != null && driver.LastRestorePath.Count == 0, "갈라진 회차가 경로 복원으로 열리지 않았다");
-                Check(replay.StagedPlan?.Target.Occurrence == 2, "줄 좌표가 전달되지 않았다");
-                Check(restored.Entries.Count == 0 && restored.NextLineSequence == 0, "장면 앞 백로그만 물려받아야 한다(여기선 없음)");
+                Check(restored.Backlog.Entries.Count == 0 && restored.Backlog.NextLineSequence == 0, "장면 앞 백로그만 물려받아야 한다(여기선 없음)");
+                PresentationResumePoint resume = restored.OpenAndTakeResume();
+                Check(resume?.Target.Occurrence == 2 && resume.Target.LineId == "line", "줄 좌표가 전달되지 않았다");
             }));
+
+            #endregion
+
+            #region 연출 기억의 입구
+
+            await Test("연출 기억: 지금 줄까지 꺼내 되돌리면 다음 단위가 그 줄까지 시크한다", () => Run(() =>
+            {
+                var before = new PresentationRig();
+                before.Show("prev");
+                before.OpenAndTakeResume();                       // 단위 경계 — prev는 단위 앞 줄
+                before.Show("a");
+                before.Show("b");
+                before.Show("a");
+                before.Choices.RestoreChoices(new[] { new VNChoiceRecord(1, 0, 1, "picked") });
+
+                before.Stage.IsSeeking = true;
+                Check(!before.Memory.TryCaptureResumePoint(out _, out _), "시크 중에 재개 지점을 꺼냈다");
+                before.Stage.IsSeeking = false;
+
+                Check(before.Memory.TryCaptureResumePoint(out string resumePoint, out string preview), "재개 지점을 꺼내지 못했다");
+                Check(preview == "a 대사", "미리보기가 지금 줄이 아니다");
+                string backlog = before.Memory.CaptureBacklogBeforeUnit();
+                Check(PresentationMemory.ReadBacklog(before.Memory.CaptureBacklog()).Count == 4, "백로그 전부가 아니다");
+
+                var after = new PresentationRig();
+                after.Memory.Restore(backlog, resumePoint);
+
+                Check(after.Backlog.Entries.Single().lineId == "prev", "단위 앞 백로그만 되돌아와야 한다");
+                PresentationResumePoint resume = after.OpenAndTakeResume();
+                Check(resume != null && resume.Target.LineId == "a" && resume.Target.Occurrence == 2, "줄 좌표(두 번째 a)가 아니다");
+                Check(resume.YarnChoices.Single().selectedOptionLineId == "picked", "선택 기록이 실리지 않았다");
+                Check(after.OpenAndTakeResume() == null, "재개 예약이 두 번째 단위에도 걸렸다");
+            }));
+
+            await Test("연출 기억: 하나라도 깨져 있으면 아무것도 바꾸지 않는다", () => Run(() =>
+            {
+                var presentation = new PresentationRig();
+                presentation.Show("kept");
+
+                Throws<InvalidDataException>(() => presentation.Memory.Restore(PresentationMemory.Backlog(Array.Empty<DialogueLogEntry>()), "{garbage"));
+                Throws<InvalidDataException>(() => presentation.Memory.Restore("{garbage", null));
+
+                Check(presentation.Backlog.Entries.Single().lineId == "kept", "깨진 기억으로 백로그를 바꿨다");
+                Check(presentation.OpenAndTakeResume() == null, "깨진 기억으로 재개를 걸었다");
+
+                presentation.Memory.Restore("", null);
+                Check(presentation.Backlog.Entries.Count == 0, "빈 백로그 문자열은 빈 백로그다");
+            }));
+
+            await Test("연출 기억: 과거 단위의 선택 기록이 깨졌으면 그 단위의 루트에서 시작한다", () => Run(() =>
+            {
+                var presentation = new PresentationRig();
+                presentation.Show("before");
+                presentation.Show("line");
+
+                presentation.Memory.ReadPastUnit(presentation.Backlog.Entries[1], 1, "{garbage",
+                    out string inherited, out string resumePoint);
+
+                Check(resumePoint == null, "깨진 선택 기록으로 재개 지점을 만들었다");
+                Check(PresentationMemory.ReadBacklog(inherited).Single().lineId == "before", "물려받는 백로그가 단위 앞까지가 아니다");
+                Check(UnityEngine.Debug.Warnings.Any(w => w.Contains("선택 기록")), "경고가 없다");
+            }));
+
+            #endregion
+
+            #region 연출 단독 회차 — 진행 없이 같은 기억으로
+
+            await Test("연출 단독: 줄마다 쓰고, 타이틀로 나가도 남고, 이어하기는 그 줄까지 시크한다", async () =>
+            {
+                string path = Path.Combine(Dir(), "resume.json");
+
+                var first = new PresentationRig();
+                first.Stage.BlockPlays = true;
+                var host = new NodePlaybackHost(first.Unit);
+                var playthrough = new NodePlaythrough(host, first.Memory, "node", path);
+
+                playthrough.StartNew();
+                await Until(() => first.Stage.Plays == 1, "첫 재생");
+
+                first.Show("a");
+                playthrough.SaveCurrentLine();
+                first.Show("b");
+                playthrough.SaveCurrentLine();
+                Check(File.Exists(path), "이어하기 파일을 쓰지 않았다");
+
+                await host.ExitAsync();                           // 타이틀로
+                await Until(() => !host.IsRunning, "끝내기");
+                Check(File.Exists(path), "끝내기로 끊긴 회차의 파일을 지웠다");
+
+                var second = new PresentationRig();               // 다시 켠 것과 같다
+                var host2 = new NodePlaybackHost(second.Unit);
+                var resumed = new NodePlaythrough(host2, second.Memory, "node", path);
+
+                resumed.Resume();
+                await Until(() => second.Stage.Resumes == 1, "재개 시크");
+
+                Check(second.Stage.Resumed.Target.LineId == "b" && second.Stage.Resumed.Target.NodeName == "node", "마지막으로 본 줄이 아니다");
+                await Until(() => !host2.IsRunning, "노드 끝");
+                Check(!File.Exists(path), "끝까지 본 노드의 파일이 남았다");
+            });
+
+            await Test("연출 단독: 다른 노드나 깨진 파일이면 처음부터 시작한다", async () =>
+            {
+                string path = Path.Combine(Dir(), "resume.json");
+                Directory.CreateDirectory(Path.GetDirectoryName(path));
+
+                File.WriteAllText(path, "{garbage");
+                var broken = new PresentationRig();
+                var brokenHost = new NodePlaybackHost(broken.Unit);
+                new NodePlaythrough(brokenHost, broken.Memory, "node", path).Resume();
+                await Until(() => broken.Stage.Plays == 1 && !brokenHost.IsRunning, "처음부터 재생");
+                Check(broken.Stage.Resumes == 0, "깨진 파일로 재개를 걸었다");
+
+                var source = new PresentationRig();
+                source.Stage.BlockPlays = true;
+                var sourceHost = new NodePlaybackHost(source.Unit);
+                var sourcePlaythrough = new NodePlaythrough(sourceHost, source.Memory, "other-node", path);
+                sourcePlaythrough.StartNew();
+                await Until(() => source.Stage.Plays == 1, "다른 노드 재생");
+                source.Show("x", "other-node");
+                sourcePlaythrough.SaveCurrentLine();
+                await sourceHost.ExitAsync();
+
+                var mismatch = new PresentationRig();
+                var mismatchHost = new NodePlaybackHost(mismatch.Unit);
+                new NodePlaythrough(mismatchHost, mismatch.Memory, "node", path).Resume();
+                await Until(() => mismatch.Stage.Plays == 1 && !mismatchHost.IsRunning, "처음부터 재생");
+                Check(mismatch.Stage.Resumes == 0, "다른 노드의 기억으로 재개를 걸었다");
+            });
 
             #endregion
 

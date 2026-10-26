@@ -8,7 +8,7 @@ public sealed partial class VNScreenBindings
                 BindView(root, ApplyBindings);
 
                 // 이 실행이 갖지 않은 기능의 메뉴는 숨긴다 — 눌러도 아무 일 없는 버튼을 두지 않는다.
-                root.SetProgressionMenusVisible(HasProgression);
+                root.SetSaveSlotMenusVisible(HasSaveSlots);
             },
             afterClosed: Unbind);
     }

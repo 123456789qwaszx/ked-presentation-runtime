@@ -13,6 +13,9 @@ using UnityEngine;
 /// 단위의 수명(열기·정지·다시 달리기)은 PlaybackUnit이 갖는다. 이 호스트가 정하는 것은
 /// "무엇을 재생할지(노드 이름)"와 "끝까지 간 노드는 마지막 화면을 남긴다"는 것뿐이다.
 ///
+/// 이어하기도 따로 모른다. 연출 기억을 되돌려 두면(PlaybackMemory.Restore) 단위가 열릴 때
+/// 재개 시크가 걸린다 — 이 호스트는 평소처럼 노드를 재생할 뿐이다.
+///
 /// 한 실행에 호스트는 하나다(PresentationRuntime.AttachHost).
 /// </summary>
 public sealed class NodePlaybackHost : IPlaybackHost
@@ -31,18 +34,21 @@ public sealed class NodePlaybackHost : IPlaybackHost
 
     private bool ExitRequested => _exit != null && _exit.IsCancellationRequested;
 
-    public async Task PlayAsync(string nodeName)
+    /// <summary>
+    /// 노드 하나를 재생한다. 노드 끝까지 갔으면 true, 끝내기 요청으로 끊겼거나 시작하지 못했으면 false.
+    /// </summary>
+    public async Task<bool> PlayAsync(string nodeName)
     {
         if (string.IsNullOrWhiteSpace(nodeName))
         {
             Debug.LogError("[노드 재생] 재생할 노드 이름이 비어 있다.");
-            return;
+            return false;
         }
 
         if (IsRunning)
         {
             Debug.LogWarning($"[노드 재생] 이미 재생 중이라 '{nodeName}' 요청을 거부한다.");
-            return;
+            return false;
         }
 
         IsRunning = true;
@@ -50,6 +56,7 @@ public sealed class NodePlaybackHost : IPlaybackHost
         _exit = new CancellationTokenSource();
 
         bool finished = false;
+        bool completed = false;
 
         try
         {
@@ -70,8 +77,9 @@ public sealed class NodePlaybackHost : IPlaybackHost
             }
 
             finished = true;
+            completed = !ExitRequested;
 
-            if (!ExitRequested)
+            if (completed)
                 Debug.Log($"[노드 재생] '{nodeName}' 끝.");
         }
         catch (OperationCanceledException) when (ExitRequested)
@@ -89,6 +97,8 @@ public sealed class NodePlaybackHost : IPlaybackHost
             _exit = null;
             IsRunning = false;
         }
+
+        return completed;
     }
 
     public Task RequestReplayAsync()

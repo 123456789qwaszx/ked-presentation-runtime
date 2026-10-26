@@ -5,7 +5,7 @@ using System.Collections.Generic;
 //
 // 어느 장면인지는 진행 저장이 호스트 순번으로 답한다(PlaythroughSaveSnapshot.FindSceneIndexBySerial).
 // 그 장면 안 어디인지는 줄을 아는 연출만 셀 수 있다 — 여기다.
-public static class BacklogForkPoints
+internal static class BacklogForkPoints
 {
     // 장면이 시작되기 전까지의 줄. 갈라진 새 회차가 물려받는 백로그다.
     public static List<DialogueLogEntry> Before(IReadOnlyList<DialogueLogEntry> backlog, int sceneStartSerial)

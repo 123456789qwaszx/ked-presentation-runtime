@@ -5,9 +5,10 @@
   그 순서(재생 → 선택 → 기록 → 커서 이동 → 경계 판정 → commit)와
   리플레이·롤백·로드 시크·정지·저장 실패의 규칙을 Unity 없이 검증한다.
 
-  진짜로 컴파일하는 것: 진행 코어 전체, SceneRunner, PlaybackUnit, NodePlaybackHost, RollbackHistory, BacklogRecorder.
-  대역(Stubs.cs): UnityEngine.Debug, YarnLineMeta, ProgressionReplayState(라인 시크).
-  무대(IPlaybackStage)·선택 UI·저장은 계약이라 Fakes.cs가 구현한다.
+  진짜로 컴파일하는 것: 진행 코어 전체, SceneRunner, PlaybackUnit, NodePlaybackHost, RollbackHistory, BacklogRecorder,
+  재개 지점(PresentationResumePoint · LineTarget · VNChoiceRecord).
+  대역(Stubs.cs): UnityEngine.Debug, YarnLineMeta.
+  무대(IPlaybackStage — 줄 시크 포함)·선택 UI·저장은 계약이라 Fakes.cs가 구현한다.
 
   NuGet 패키지가 없다 - SDK만 있으면 오프라인으로도 돈다.
 -->
@@ -31,6 +32,9 @@
     <Compile Include="../../Assets/Scripts/Ked.Presentation.Playback/Host/NodePlaybackHost.cs" />
     <Compile Include="../../Assets/Scripts/Ked.Presentation.Playback/FeatureController/RollbackHistory.cs" />
     <Compile Include="../../Assets/Scripts/Ked.Presentation.Playback/FeatureController/BacklogRecorder.cs" />
+    <Compile Include="../../Assets/Scripts/Ked.Presentation.Playback/Memory/PresentationResumePoint.cs" />
+    <Compile Include="../../Assets/Scripts/Ked.Presentation.Playback/DialoguePresenter/VNLinePresentationFlow/LineTarget.cs" />
+    <Compile Include="../../Assets/Scripts/Ked.Presentation.Playback/DialoguePresenter/VNOptionFlow/VNChoiceRecord.cs" />
     <Compile Include="Stubs.cs" />
     <Compile Include="Fakes.cs" />
     <Compile Include="Program.cs" />
