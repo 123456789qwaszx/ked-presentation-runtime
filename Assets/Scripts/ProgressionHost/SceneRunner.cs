@@ -5,7 +5,8 @@ using Ked.Progression;
 using UnityEngine;
 
 // 게임에서 Scene 실행 순서를 소유하는 유일한 runner.
-// 진행 상태 계산은 SceneProgress에 위임하고 playback/replay/lifecycle 순서만 조립한다.
+// 진행 상태 계산은 SceneProgress에 위임하고, 재생 단위의 수명(열기·정지·루트부터 다시)은 PlaybackUnit에 맡긴다.
+// 여기 남는 것은 진행의 판단이다 — 무엇을 재생할지, 선택을 어떻게 정할지, 장면 경계와 확정, 되감을 때 진행 기록을 어디까지 자를지.
 public sealed class SceneRunner : ISceneRunner
 {
     private enum SceneStepKind
@@ -16,30 +17,21 @@ public sealed class SceneRunner : ISceneRunner
         ChapterEnded,
     }
 
-    private readonly IScenePresentation _presentation;
+    private readonly PlaybackUnit _unit;
     private readonly IChapterOptionsView _options;
     private readonly ProgressionReplayState _replayState;
-    private readonly RollbackHistory _rollbackHistory;
     private readonly IScenePersistence _persistence;
-    private readonly BacklogRecorder _backlog;
-
-    // Replay 요청과 실행 루프가 같은 Stop 완료를 기다린다.
-    private Task _stopPlaybackTask = Task.CompletedTask;
 
     public SceneRunner(
-        IScenePresentation presentation,
+        PlaybackUnit unit,
         IChapterOptionsView options,
         ProgressionReplayState replayState,
-        RollbackHistory rollbackHistory,
-        IScenePersistence persistence,
-        BacklogRecorder backlog)
+        IScenePersistence persistence)
     {
-        _presentation = presentation;
+        _unit = unit;
         _options = options;
         _replayState = replayState;
-        _rollbackHistory = rollbackHistory;
         _persistence = persistence;
-        _backlog = backlog;
     }
 
     #region Runner Control
@@ -88,7 +80,7 @@ public sealed class SceneRunner : ISceneRunner
         if (!scene.TryRequestReplay())
             return;
 
-        Task stopTask = StopPlaybackAsync();
+        Task stopTask = _unit.StopAsync();
 
         _options.Cancel();
 
@@ -98,7 +90,7 @@ public sealed class SceneRunner : ISceneRunner
     public async Task StopAsync()
     {
         _options.Cancel();
-        await StopPlaybackAsync();
+        await _unit.StopAsync();
     }
     
     #endregion
@@ -109,13 +101,7 @@ public sealed class SceneRunner : ISceneRunner
         SceneProgress progress,
         CancellationToken cancellationToken)
     {
-        await StopPlaybackAsync();
-
-        cancellationToken.ThrowIfCancellationRequested();
-
-        _presentation.BeginScene();
-
-        _backlog.MarkSceneBoundary();
+        await _unit.OpenAsync(cancellationToken);
 
         _persistence.EnterScene(
             progress.Definition.ChapterId,
@@ -150,7 +136,7 @@ public sealed class SceneRunner : ISceneRunner
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        await _presentation.PlayEpisodeAsync(progress.CurrentEpisode.DialogueEntryId);
+        await _unit.PlayAsync(progress.CurrentEpisode.DialogueEntryId);
 
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -159,7 +145,7 @@ public sealed class SceneRunner : ISceneRunner
             return SceneStepKind.Replay;
         }
 
-        progress.NoteCurrentEpisodeWatched(_rollbackHistory.LastHistoryIndex);
+        progress.NoteCurrentEpisodeWatched(_unit.LastHistoryIndex);
 
         SceneChoiceResult choiceResult =
             await ResolveSceneChoiceAsync(session, cancellationToken);
@@ -180,7 +166,7 @@ public sealed class SceneRunner : ISceneRunner
         // 새로 결정된 선택만 기록
         // (만약 Recorded라면 Load나 Replay 중 기존 선택 기록을 다시 소비한 것임)
         if (choice.Source != SceneChoiceSource.Recorded)
-            progress.RecordChoice(choice, _rollbackHistory.LastHistoryIndex);
+            progress.RecordChoice(choice, _unit.LastHistoryIndex);
 
         // 선택 기록과 별개로 실제 진행 위치를 이동한다.
         progress.AdvanceTo(choice.Option.TargetEpisodeId);
@@ -205,7 +191,7 @@ public sealed class SceneRunner : ISceneRunner
         if (_replayState.IsSeekingActive && progress.HasRecordedChoice)
         {
             SceneChoice recorded =
-                progress.TakeRecordedChoice(_rollbackHistory.LastHistoryIndex);
+                progress.TakeRecordedChoice(_unit.LastHistoryIndex);
 
             return SceneChoiceResult.FromChoice(recorded);
         }
@@ -329,31 +315,15 @@ public sealed class SceneRunner : ISceneRunner
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        // RequestReplayAsync가 시작한 Stop이 끝날 때까지 기다린다.
-        await _stopPlaybackTask;
+        // 재생 단위가 정지 완료를 기다리고 무대를 루트로 되돌린다. 롤백 표적이 있으면 그 색인을 준다.
+        int? rollbackTarget = await _unit.RestartFromRootAsync(cancellationToken);
 
-        cancellationToken.ThrowIfCancellationRequested();
-
-        _presentation.PrepareReplay();
-
-        if (_rollbackHistory.TakeRollbackTarget(out RollbackPoint target))
-            session.Progress.RollbackTo(target.historyIndex);
+        // 진행의 몫 — 표적 뒤의 진행 선택·시청 기록을 자르고 커서를 장면 루트로.
+        if (rollbackTarget.HasValue)
+            session.Progress.RollbackTo(rollbackTarget.Value);
 
         session.Progress.ResetForReplay();
         session.CompleteReplayRequest();
-    }
-    
-    #endregion
-    
-    #region Helpers
-    
-    private Task StopPlaybackAsync()
-    {
-        if (!_stopPlaybackTask.IsCompleted)
-            return _stopPlaybackTask;
-
-        _stopPlaybackTask = _presentation.StopAsync();
-        return _stopPlaybackTask;
     }
     
     #endregion

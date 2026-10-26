@@ -443,6 +443,87 @@ internal static class Program
 
         #endregion
 
+        #region 노드 재생 호스트 — 같은 재생 단위 수명(PlaybackUnit)을 쓰는 두 번째 호스트
+
+        await Test("노드 재생: 열기 순서, 끝까지 간 노드는 마지막 화면을 남긴다", async () =>
+        {
+            var rig = new Rig();
+            rig.Backlog.Record(new YarnLineMeta("old", "old#0", "", "이전 단위의 줄"));
+            var host = new NodePlaybackHost(rig.Unit);
+
+            await host.PlayAsync("N_solo");
+
+            Same(rig.Log.Snapshot(), new[] { "stop", "begin", "play:N_solo" }, "노드 하나의 순서가 다르다");
+            Check(!host.IsRunning, "끝난 뒤에도 실행 중이다");
+            Check(!rig.Backlog.IsInCurrentScene(rig.Backlog.Entries[0]), "단위를 열 때 백로그 경계가 서지 않았다");
+            Check(rig.Rollback.Points.Count == 2 && rig.Rollback.Points[0].nodeName == "N_solo", "롤백 기록이 이 단위의 것이 아니다");
+        });
+
+        await Test("노드 재생: 리플레이는 단위를 다시 열지 않고 루트부터 다시 돈다, 롤백 표적은 소비된다", async () =>
+        {
+            var rig = new Rig();
+            rig.Presentation.BlockPlays = true;
+            var host = new NodePlaybackHost(rig.Unit);
+
+            Task run = host.PlayAsync("N_solo");
+            await Until(() => rig.Presentation.Played.Length == 1, "첫 재생");
+
+            rig.MarkRollback(historyIndex: 0, untilNode: "N_solo");
+            Task first = host.RequestReplayAsync();
+            Task second = host.RequestReplayAsync();
+            await Task.WhenAll(first, second);
+            await Until(() => rig.Presentation.Played.Length == 2, "리플레이 재생");
+
+            Check(rig.Presentation.BeginCount == 1, "리플레이가 단위를 다시 열었다");
+            Check(rig.Presentation.PrepareReplayCount == 1, "리플레이 준비가 한 번이 아니다");
+            Check(rig.Presentation.StopCount == 2, $"정지 횟수가 다르다(열기 + 리플레이): {rig.Presentation.StopCount}");
+            Check(!rig.Rollback.TakeRollbackTarget(out _), "롤백 표적이 소비되지 않았다");
+
+            await host.ExitAsync();
+            await run;
+
+            Check(!host.IsRunning, "끝내기 뒤에도 실행 중이다");
+            Check(rig.Presentation.StopCount == 3, "끝내기가 멈추지 않았다");
+        });
+
+        await Test("노드 재생: 리플레이 요청과 끝내기가 겹쳐도 한 구간에 한 번만 멈춘다", async () =>
+        {
+            var rig = new Rig();
+            rig.Presentation.BlockPlays = true;
+            var host = new NodePlaybackHost(rig.Unit);
+
+            Task run = host.PlayAsync("N_solo");
+            await Until(() => rig.Presentation.Played.Length == 1, "첫 재생");
+
+            rig.Presentation.HoldStop = true;
+            Task replay = host.RequestReplayAsync();
+            Task exit = host.ExitAsync();
+            rig.Presentation.ReleaseStop();
+            await Task.WhenAll(replay, exit, run);
+
+            Check(rig.Presentation.StopCount == 2, $"스코프가 두 번 끝났다: 정지 {rig.Presentation.StopCount}회");
+            Check(rig.Presentation.PrepareReplayCount == 0, "끝내기 뒤에 리플레이를 시작했다");
+            Check(!host.IsRunning, "끝난 뒤에도 실행 중이다");
+        });
+
+        await Test("노드 재생: 여는 중 끝내기가 오면 열지 않는다", async () =>
+        {
+            var rig = new Rig();
+            rig.Presentation.HoldStop = true;
+            var host = new NodePlaybackHost(rig.Unit);
+
+            Task run = host.PlayAsync("N_solo");
+            Task exit = host.ExitAsync();
+            rig.Presentation.ReleaseStop();
+            await Task.WhenAll(exit, run);
+
+            Check(rig.Presentation.BeginCount == 0 && rig.Presentation.Played.Length == 0, "끝내기 뒤에 단위를 열었다");
+            Check(rig.Presentation.StopCount == 1, $"정지 횟수가 다르다: {rig.Presentation.StopCount}");
+            Check(!host.IsRunning, "끝난 뒤에도 실행 중이다");
+        });
+
+        #endregion
+
         #region 실패
 
         await Test("확정 저장이 실패하면 다음 장면으로 가지 않는다", async () =>

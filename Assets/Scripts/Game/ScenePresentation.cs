@@ -1,8 +1,8 @@
 using System.Threading.Tasks;
 
-// 재생 단위(노드 하나 / 챕터의 장면) 하나에 필요한 Yarn / Presentation 수명을 관리.
-// 두 호스트가 함께 쓴다 — 진행 층의 IScenePresentation은 ScenePresentationProgressionAdapter가 잇는다.
-public sealed class ScenePresentation
+// 재생 단위(노드 하나 / 챕터의 장면) 하나에 필요한 Yarn / Presentation 동작.
+// 부르는 순서는 PlaybackUnit이 소유한다 — 두 호스트(노드 재생 / 진행)는 이 타입을 직접 부르지 않는다.
+public sealed class ScenePresentation : IPlaybackStage
 {
     private readonly IEpisodeNodeRunner _nodeRunner;
     private readonly IPresentationView _presentationView;

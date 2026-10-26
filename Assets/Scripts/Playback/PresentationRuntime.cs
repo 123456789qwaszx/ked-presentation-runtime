@@ -11,7 +11,9 @@ public sealed class PresentationRuntime
 {
     private readonly VNAdvanceInputPoller _inputPoller;
 
-    public ScenePresentation ScenePresentation { get; }
+    /// <summary>재생 단위의 수명. 호스트는 이것만 부른다.</summary>
+    public PlaybackUnit Unit { get; }
+
     public VNFeatureController Features { get; }
     public DialogueAdvanceDispatcher AdvanceDispatcher { get; }
 
@@ -35,7 +37,7 @@ public sealed class PresentationRuntime
         BacklogRecorder backlog,
         VNAdvanceInputPoller inputPoller)
     {
-        ScenePresentation = scenePresentation;
+        Unit = new PlaybackUnit(scenePresentation, backlog, rollbackHistory);
         Features = features;
         AdvanceDispatcher = advanceDispatcher;
         LineFlow = lineFlow;

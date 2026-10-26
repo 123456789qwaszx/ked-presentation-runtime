@@ -215,10 +215,7 @@ public class SampleBootstrap : MonoBehaviour
 
     private IPlaybackHost CreateNodePlaybackHost()
     {
-        _nodePlaybackHost = new NodePlaybackHost(
-            _runtime.ScenePresentation,
-            _runtime.Backlog,
-            _runtime.RollbackHistory);
+        _nodePlaybackHost = new NodePlaybackHost(_runtime.Unit);
 
         return _nodePlaybackHost;
     }
@@ -306,12 +303,10 @@ public class SampleBootstrap : MonoBehaviour
             _runtime.ChoiceHistory);
 
         SceneRunner sceneRunner = new SceneRunner(
-            new ScenePresentationProgressionAdapter(_runtime.ScenePresentation),
+            _runtime.Unit,
             _progressionOptions,
             replayState,
-            _runtime.RollbackHistory,
-            savePersistence,
-            _runtime.Backlog);
+            savePersistence);
 
         _progressionDriver = new ProgressionDriver(sceneRunner);
 

@@ -24,7 +24,7 @@ internal sealed class EventLog
 // 노드 하나를 재생하면 줄 LinesPerNode개를 지나간다고 본다.
 // 진짜 호스트처럼 줄마다 백로그와 롤백 기록에 적고(VNYarnLineBoundary),
 // 정지하면 롤백 기록을 비운다(ScenePresentation.StopAsync).
-internal sealed class FakePresentation : IScenePresentation
+internal sealed class FakePresentation : IPlaybackStage
 {
     private readonly EventLog _log;
     private readonly RollbackHistory _rollback;
@@ -240,6 +240,7 @@ internal sealed class Rig
     public readonly FakeOptions Options;
     public readonly FakePersistence Persistence;
 
+    public readonly PlaybackUnit Unit;
     public readonly SceneRunner Runner;
     public readonly ProgressionDriver Driver;
 
@@ -249,7 +250,8 @@ internal sealed class Rig
         Options = new FakeOptions(Log);
         Persistence = new FakePersistence(Log);
 
-        Runner = new SceneRunner(Presentation, Options, Replay, Rollback, Persistence, Backlog);
+        Unit = new PlaybackUnit(Presentation, Backlog, Rollback);
+        Runner = new SceneRunner(Unit, Options, Replay, Persistence);
         Driver = new ProgressionDriver(Runner, DriverLog);
     }
 
