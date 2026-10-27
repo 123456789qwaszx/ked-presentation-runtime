@@ -18,62 +18,57 @@
 | 원본 | `UIPresentationFlow` · `dev` @ `cf3fa98` (2026-10-26). 코드는 `main` @ `ff3f281`과 같고, `dev`에는 README와 GIF만 더해졌다 |
 | 반입 | 2026-10-27 · 원본 → 사본 |
 | 원본 Unity | 6000.6.2f1 (ugui 2.6.0). 이 저장소는 6000.3.16f1 (ugui 2.0.0)이다. 코드만 들이고 에셋은 이 저장소에서 새로 만든다 |
-| GUID | 원본 `.meta`를 그대로 가져왔다(106개). 이 저장소 전체 `.meta` 888개와 겹치는 GUID는 0개다 |
+| GUID | 원본 `.meta`를 그대로 가져왔다(106개, 같은 날 구조를 원본대로 되돌리며 `Scripts.meta`를 더해 107개). 반입 때 이 저장소 전체 `.meta` 888개와 겹치는 GUID는 0개였고, `Scripts.meta`의 GUID도 겹치지 않는다. 사본 폴더 자신의 `Assets/UIPresentationFlow.meta`만 이 저장소에서 만든 것이다 |
 
 **원본과 갈리면 이 표를 고친다.** 표가 낡으면 사본이 어디서 왔는지 아무도 모르게 된다.
 
 ## 무엇을 가져왔나
 
-원본 README "요구 사항"의 복사 목록 그대로다. 원본의 `Scripts/` 한 층을 걷고 이 폴더 바로 아래에 놓았다. 그래서 런타임 asmdef가 이 폴더의 뿌리에 온다.
+원본 README "요구 사항"의 복사 목록 그대로다. 폴더 구조도 원본과 같다 — 원본의 `Assets/` 아래 자리를 이 폴더 아래에 그대로 둔다.
 
 | 원본 | 사본 |
 |---|---|
-| `Assets/Scripts/{UI,Presentation,Display,Localization}/` | `Assets/UIPresentationFlow/{UI,Presentation,Display,Localization}/` |
-| `Assets/Scripts/UIPresentationFlow.Runtime.asmdef` | `Assets/UIPresentationFlow/UIPresentationFlow.Runtime.asmdef` |
+| `Assets/Scripts/{UI,Presentation,Display,Localization}/` + `UIPresentationFlow.Runtime.asmdef` | `Assets/UIPresentationFlow/Scripts/` 같은 자리 |
 | `Assets/Editor/UI/` | `Assets/UIPresentationFlow/Editor/UI/` |
 | `Assets/Shaders/` | `Assets/UIPresentationFlow/Shaders/` |
+| 폴더 `.meta` `Scripts` · `Editor` · `Shaders` | 같은 GUID 그대로 |
+
+에디터 코드(`Editor/UI`)는 원본처럼 런타임 asmdef 밖에 있어서, Unity의 `Editor` 특수 폴더로 `Assembly-CSharp-Editor`에 든다. 에디터용 asmdef는 따로 두지 않는다.
 
 가져오지 않은 것은 다음과 같다.
 - `Assets/Scripts/Demo/`: Adaptive UI 데모 코드
 - `Assets/Demo/`: 데모 에셋, 블랙홀 데모
 - `Assets/UI/`: 데모의 바인딩·테마 에셋
 
-## 사본에만 있는 것 — 갈림 한 가지
+## 사본에만 있는 것 — 없다
 
-| 갈림 | 이유 | 언제까지 |
+가져온 파일은 모두 원본 blob과 바이트 단위로 같다(LF, `.meta` 포함). 폴더 구조도 같다.
+
+반입 때(2026-10-27)는 갈림이 셋 있었고, 같은 날 모두 없앴다.
+
+| 반입 때의 갈림 | 왜 있었나 | 어떻게 없앴나 |
 |---|---|---|
-| `Editor/UIPresentationFlow.Editor.asmdef` (+`.meta`) 추가 | 원본의 `Editor/UI`에는 asmdef가 없다. 원본에서는 `Assets/Editor/`가 런타임 asmdef(`Assets/Scripts/`) 밖이라 Unity의 `Editor` 특수 폴더로 `Assembly-CSharp-Editor`에 든다. 사본은 `Scripts/` 한 층을 걷어 런타임 asmdef가 이 폴더 뿌리에 있으므로 `Editor/UI`가 그 아래에 든다. Unity는 asmdef 아래의 `Editor` 폴더를 에디터 전용으로 보지 않는다. 이 asmdef가 없으면 에디터 코드(가드 없이 `UnityEditor` 사용)가 런타임 어셈블리에 섞여 플레이어 빌드가 깨진다. (반입 때 처음 드러난 증상은 옛 예제 UI와 겹친 이름의 CS0433이었다 — 그 원인은 U3에서 없어졌다) | 사본 폴더 구조가 원본과 다른 동안. 사본도 `Scripts/`와 `Editor/`를 형제로 두면(원본 구조) 필요 없다 |
+| 원본의 `Scripts/` 한 층을 걷어 네 폴더와 런타임 asmdef를 이 폴더 뿌리에 둠 | 경로를 짧게 하려고 | 원본 구조로 되돌렸다(`Scripts/` 아래로 옮김, `.meta`째) |
+| `Editor/UIPresentationFlow.Editor.asmdef` 추가 | 위 구조 때문에 `Editor/UI`가 런타임 asmdef 아래에 들었다. Unity는 asmdef 아래의 `Editor` 폴더를 에디터 전용으로 보지 않아서, 이것이 없으면 에디터 코드가 런타임 어셈블리에 섞인다. 반입 때 먼저 드러난 증상은 옛 예제 UI와 이름이 겹친 CS0433이었다 | 구조를 되돌려 필요 없어졌다. 지웠다 |
+| 런타임 asmdef `autoReferenced: true → false` | 옛 예제 UI(기본 어셈블리)가 UIPF와 같은 전역 타입 이름 20개를 써서, 자동 참조면 CS0436 경고가 사용처마다 났다 | PLAN U3에서 옛 UI를 걷고 원본 값 `true`로 |
 
-`UIPresentationFlow.Runtime.asmdef`의 `autoReferenced`는 반입 때 `false`로 바꿨다가(옛 예제 UI와 이름 20개가 겹쳐 CS0436 경고) PLAN U3에서 옛 UI를 걷으며 원본 값 `true`로 되돌렸다. 지금은 원본과 같다.
-
-그 밖의 파일은 원본 blob과 바이트 단위로 같다(LF).
+다시 갈림이 생기면 이 절에 이유와 "언제까지"를 적는다.
 
 ## 대조
 
-원본과 갈렸는지 확인한다. 형제 폴더에 원본이 있다고 가정한다.
+원본과 갈렸는지 확인한다. 원본 커밋의 blob을 풀어 비교한다(원본 작업 트리에는 커밋하지 않은 변경이 섞일 수 있다).
 
 ```bash
-diff -r -q --strip-trailing-cr \
-  ../UIPresentationFlow/Assets/Scripts/UI            Assets/UIPresentationFlow/UI
-diff -r -q --strip-trailing-cr \
-  ../UIPresentationFlow/Assets/Scripts/Presentation  Assets/UIPresentationFlow/Presentation
-diff -r -q --strip-trailing-cr \
-  ../UIPresentationFlow/Assets/Scripts/Display       Assets/UIPresentationFlow/Display
-diff -r -q --strip-trailing-cr \
-  ../UIPresentationFlow/Assets/Scripts/Localization  Assets/UIPresentationFlow/Localization
-diff -r -q --strip-trailing-cr \
-  ../UIPresentationFlow/Assets/Editor/UI             Assets/UIPresentationFlow/Editor/UI
-diff -r -q --strip-trailing-cr \
-  ../UIPresentationFlow/Assets/Shaders               Assets/UIPresentationFlow/Shaders
-diff --strip-trailing-cr \
-  ../UIPresentationFlow/Assets/Scripts/UIPresentationFlow.Runtime.asmdef \
-  Assets/UIPresentationFlow/UIPresentationFlow.Runtime.asmdef
+mkdir -p /tmp/uipf && git -C ../UIPresentationFlow archive --format=tar <커밋> \
+  Assets/Scripts Assets/Scripts.meta Assets/Editor Assets/Editor.meta Assets/Shaders Assets/Shaders.meta \
+  | tar -x -C /tmp/uipf
+diff -r -q --strip-trailing-cr -x Demo -x Demo.meta /tmp/uipf/Assets/Scripts  Assets/UIPresentationFlow/Scripts
+diff -r -q --strip-trailing-cr                     /tmp/uipf/Assets/Editor   Assets/UIPresentationFlow/Editor
+diff -r -q --strip-trailing-cr                     /tmp/uipf/Assets/Shaders  Assets/UIPresentationFlow/Shaders
+for m in Scripts Editor Shaders; do diff --strip-trailing-cr /tmp/uipf/Assets/$m.meta Assets/UIPresentationFlow/$m.meta; done
 ```
 
-2026-10-27 기준 결과는 다음과 같다.
-- 앞의 여섯 줄은 출력이 **0줄**이다(`.meta` 포함).
-- 마지막 줄(런타임 asmdef)도 출력이 0줄이다. 반입 때는 `autoReferenced` 한 줄이 달랐다 — 같은 날 U3에서 원본 값으로 돌렸다.
-- `Editor/UIPresentationFlow.Editor.asmdef`는 비교 범위 밖이다(`Editor/UI`의 형제).
+결과가 0줄이면 같다. 결과(2026-10-27, `cf3fa98`)는 PLAN_uipf-ui의 U3 기록에 있다.
 
 ## 반입 — 원본 → 사본
 
@@ -84,7 +79,7 @@ diff --strip-trailing-cr \
      Assets/Scripts Assets/Editor Assets/Shaders | tar -x -C /tmp/uipf
    ```
 3. 위 표의 자리에 `.meta`째 덮어쓴다. `Demo`는 빼고 가져온다.
-4. 위 "갈림"을 다시 적용한다. 원본에 이미 들어간 갈림은 건너뛴다.
+4. 갈림이 있으면(위 절) 다시 적용한다. 지금은 없다.
 5. 위 "대조"를 돌리고, 스냅샷 표를 고친다.
 
 ## 왜 UPM 패키지가 아닌가
