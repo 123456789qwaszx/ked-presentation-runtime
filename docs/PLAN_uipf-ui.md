@@ -197,7 +197,7 @@ UIPF 위에 만든 화면을 "화면 하나 = 묶음 하나"(코드 · 프리팹
 Samples/KedUI/
 ├─ Ked.Samples.UI.asmdef   런타임 asmdef를 뿌리로(Common/ · Screens/ · Runtime/을 덮는다)
 ├─ Common/
-│   ├─ Scripts/            부품 키트 8 (옛 Runtime/Kit)
+│   ├─ Scripts/            부품 키트 7 (옛 Runtime/Kit. 끌기 넘기기 KedDragToScroll은 UIPF로 옮겨 지웠다 — 아래 "UIPF로 되돌림")
 │   ├─ Editor/             키트로 짓는 도구(KedUIKit) · 묶음 규칙(KedUIUnits) · 글꼴 · 그림 임포트 · 검사(KedUIValidate) + 에디터 asmdef
 │   ├─ Sprites/            키트가 쓰는 15장 + 여러 화면이 쓰는 3장(background_title · icon_close · icon_rollback)
 │   └─ Fonts/              Noto Sans KR TTF 2 · OFL · SDF 2 · UIPF 글꼴 묶음(KedUIFontSet)
@@ -250,11 +250,26 @@ AI가 프리팹(Unity 직렬화 데이터)을 직접 쓰지 않는다. AI는 화
 - **배포(반입) 두 방식.** 묶음은 원본과 산출물(`.meta` 포함)을 함께 담는다.
   - 받는 쪽 Unity 버전 · 패키지가 같다 → 산출물째 들인다(검수한 그대로, GUID 그대로).
   - 다르다 → 원본과 산출물의 `.meta`를 들이고 그 자리 위에 다시 빌드한다(직렬화 형식 문제를 피하고 GUID는 지킨다). 파일 안쪽 fileID가 버전을 넘어 그대로인지는 확인하지 않았다.
-- **재생성.** 같은 명세로 다시 빌드하면 산출물이 같다 — 10-27 여러 번 빌드한 뒤 프리팹 14 · 캔버스의 git 변경 0(Unity가 같은 내용이라 다시 쓰지도 않았다).
+- **재생성.** 같은 명세로 다시 빌드하면 산출물이 같다 — 10-27 여러 번 빌드한 뒤 묶음의 프리팹 13(화면 12 · 선택지 항목 1) · 캔버스의 git 변경 0(Unity가 같은 내용이라 다시 쓰지도 않았다).
 - **사람의 역할.** 요구와 품질 기준을 정하고, AI의 설계 판단(명세를 어디까지 넓힐지, 공용으로 올릴지)을 정하고, Unity에서 눈으로 검수 · 승인한다. 문제를 찾으면 프리팹이 아니라 원본을 고쳐 다시 빌드한다.
 - **배치 모드.** `-executeMethod Ked.Samples.UI.Editor.KedUIBuild.BuildBatch` · `…KedUIValidate.ValidateBatch`(문제가 있으면 종료 코드 1). Unity가 이 프로젝트를 열고 있으면 배치 모드는 프로젝트를 열지 못한다. 클라우드 세션에서는 PC의 Unity를 돌릴 수 없다 — PC에서 돌린다.
 
 빌더 자리(10-27): 화면을 모르는 도구(`KedUIKit` · `KedUIUnits` · `KedUIFonts` · `KedUIArtImporter` · `KedUIValidate`, 에디터 asmdef)는 `Common/Editor`, 화면 목록과 캔버스를 아는 앱 빌드(`KedUIBuild` · `KedUIAssets`)는 `KedUI/Editor`(+`.asmref`). 실행 쪽과 짝이 맞는다 — 공용 `Common/Scripts` ↔ `Common/Editor`, 앱 `Runtime/` ↔ `Editor/`, 화면 `Screens/X/Scripts` ↔ `Screens/X/Editor`.
+
+### UIPF로 되돌림 (2026-10-27, 아미야 결정 "C, A까지만 먼저")
+여기서 쓰다 드러난 것을 UIPF 원본으로 되돌렸다. 원본에서 먼저 고치고(`feat/from-ked` @ `3a26d8b`, `dev` 머지 전), 다시 반입하고, 이쪽의 임시 해결책을 지웠다. 범위와 다음 일(B — 빌더 가운데 어느 게임에도 쓸 부분을 원본 도구로)은 원본 `docs/PLAN_from-ked.md`.
+
+| | 원본에서 | 이쪽에서 지운 것 |
+|---|---|---|
+| A-1 끌기 | `UI_EventHandler`가 끌기를 받는 쪽이 없으면 가장 가까운 부모의 끌기 처리기(ScrollRect)로 넘긴다. 같은 오브젝트에 끌기를 받는 다른 컴포넌트(Slider 등)가 있으면 넘기지 않는다 | `Common/Scripts/KedDragToScroll.cs`(+ `.meta`)와 `BacklogSpec`의 붙이는 줄 |
+| A-2 Root 막기 | Panel이 하나라도 있으면 지금 Root의 `CanvasGroup.interactable`을 끈다. 기본 켬(`BlockRootUnderPanels`), `blocksRaycasts`는 그대로 | 흐름의 Root 막기는 `_exiting` 몫만 남았다(값은 UIPF와 같아 겹쳐도 무해) |
+| A-3 포커스 | Panel을 쌓을 때의 선택을 기억했다가 꺼낼 때 되돌린다. 전부 꺼내면 맨 처음 선택으로 | 흐름의 `_focusBeforePanel` 스택. 되돌리지 못했을 때 고르는 `EnsureFocus`만 남았다 |
+
+- 원본 문서도 이번에 더했다: `docs/AUTHORING.md`(위 "제작 원칙"을 게임에 매이지 않게 다시 쓴 것), README의 복사 안내(이 저장소에서 겪은 폴더 층 · `.meta` · asmdef · 에셋 내리지 않기)와 실사용 절.
+- 반입 대조(`vendoring.md`의 명령, `3a26d8b`): 0줄. UIPF `.meta` 108개(+ `UIManager.PanelInput.cs.meta`, GUID 겹침 0).
+- 오프라인 컴파일(6000.3 참조 어셈블리): 14개 어셈블리 오류 0 · 경고 0. `UIPresentationFlow.Runtime` 79파일, `Ked.Samples.UI` 36파일.
+- `BacklogPanel.prefab`에는 지운 컴포넌트가 빈 스크립트로 남는다 — 산출물이라 손으로 고치지 않고, Unity에서 `Build Sample UI`로 다시 짓는다.
+- Unity 확인: 남음 — 백로그 목록을 이동 버튼 위에서 끌기, 메뉴를 연 채 방향키 · Enter가 재생 화면에 닿지 않음, 메뉴 · 설정을 닫으면 연 버튼으로 포커스, `Validate Sample UI` 문제 0. 원본 블랙홀 데모도 따로(원본 PLAN의 "확인").
 
 ### U5. 문서
 - SCOPE-BOUNDARY에 "꽂힌 모듈 둘"(진행 · UI), ASSEMBLY-BOUNDARY의 어셈블리 표, `PLAN_framework-scope` 분류표.
@@ -338,8 +353,8 @@ AI가 프리팹(Unity 직렬화 데이터)을 직접 쓰지 않는다. AI는 화
 
 `VNAdvanceInputPoller`(재생 입력의 유일한 구동자)를 재생 화면에서 Panel 없이 대사를 볼 때만 켠다. 타이틀 · Panel이 열림 · UI 숨김에서는 끈다 — 같은 Space·Enter가 메뉴와 대사를 함께 넘기지 않고, 메뉴가 열린 동안 자동·빨리 넘기기가 멈춘다. 돌려줄 때는 프레임 끝(LateUpdate)에 켜서 창을 닫은 그 키를 폴러가 다시 읽지 않는다. 재생 단위·기억은 건드리지 않는다.
 Esc는 맨 위 한 층만: 확인 → 취소, 안내 → 확인, 그 밖의 Panel → 뒤로, UI 숨김 → 다시 보임.
-Panel이 열린 동안 Root(타이틀·재생 화면)의 CanvasGroup도 막는다 — UIPF는 가려진 Panel만 막고 Root는 두므로, 그러지 않으면 방향키·Enter가 아래 Root 버튼·선택지에 닿는다. 타이틀로 나가는 동안(`ExitAsync`)도 막는다.
-키보드 포커스: Panel을 열 때의 포커스를 쌓았다가 닫을 때 되돌린다(없으면 남은 Panel의 첫 버튼, 재생 화면이면 떠 있는 선택지). UI 숨김도 같다.
+Panel이 열린 동안 Root(타이틀·재생 화면)의 CanvasGroup도 막는다 — 그러지 않으면 방향키·Enter가 아래 Root 버튼·선택지에 닿는다. 처음에는 흐름이 막았고, 10-27부터 UIPF가 막는다(`BlockRootUnderPanels`, 아래 "UIPF로 되돌림"). 타이틀로 나가는 동안(`ExitAsync`)은 Panel이 없어도 흐름이 막는다.
+키보드 포커스: Panel을 닫으면 연 순간의 포커스로 돌아간다. 처음에는 흐름이 쌓아 두었고, 10-27부터 UIPF가 되돌린다. 되돌리지 못하면(연 버튼이 사라졌거나 막혔으면) 흐름이 고른다 — 남은 Panel의 첫 버튼, 재생 화면이면 떠 있는 선택지. UI 숨김은 재생 화면이 따로 기억한다.
 빨리 넘기기는 버튼으로 켜면 스스로 꺼지지 않으므로 타이틀 복귀·불러오기·갈라지기 때 끈다.
 
 ### 4. 기능 연결 표

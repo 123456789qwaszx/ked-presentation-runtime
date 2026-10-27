@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace Ked.Samples.UI
@@ -193,44 +192,33 @@ namespace Ked.Samples.UI
 
         private UIPresentationSpec Presentation<T>() => _presentationOf(typeof(T));
 
-        // Panel을 열 때 그 순간의 키보드 포커스를 쌓아 두고, 닫을 때 되돌린다(연 버튼으로 돌아간다).
-        // 닫히면서 포커스가 빈 채로 남으면 마우스를 쓰기 전까지 Enter·방향키가 먹지 않는다.
-        private readonly Stack<GameObject> _focusBeforePanel = new();
-
         private T PushPanel<T>(Action<T> afterPresented) where T : UIBase, IUIPanel
         {
-            _focusBeforePanel.Push(KedUIUtil.CurrentFocus());
-
             T panel = _ui.PushPanel(Presentation<T>(), afterPresented);
             SyncInput();
             return panel;
         }
 
+        // 포커스는 UIPF가 되돌린다 — 닫으면 그 Panel을 연 순간의 포커스로, 전부 닫으면 맨 처음 Panel 전의 포커스로.
         private void ClosePanel()
         {
             _ui.PopPanel();
             SyncInput();
-
-            GameObject previous = _focusBeforePanel.Count > 0 ? _focusBeforePanel.Pop() : null;
-            RestoreFocus(previous);
+            EnsureFocus();
         }
 
         private void CloseAllPanels()
         {
             _ui.PopAllPanels();
             SyncInput();
-
-            // 맨 처음 Panel을 열기 전의 포커스로.
-            GameObject first = null;
-            while (_focusBeforePanel.Count > 0)
-                first = _focusBeforePanel.Pop();
-
-            RestoreFocus(first);
+            EnsureFocus();
         }
 
-        private void RestoreFocus(GameObject previous)
+        // UIPF가 되돌리지 못했을 때(연 버튼이 사라졌거나 막혔거나, 포인터로 열어 포커스가 없었을 때)만 대신 고른다.
+        // 포커스가 빈 채로 남으면 마우스를 쓰기 전까지 Enter·방향키가 먹지 않는다.
+        private void EnsureFocus()
         {
-            if (KedUIUtil.TryFocus(previous))
+            if (KedUIUtil.TryFocus(KedUIUtil.CurrentFocus()))
                 return;
 
             UIBase top = _ui.TopPanel;
@@ -247,8 +235,8 @@ namespace Ked.Samples.UI
         // 재생을 끝내는 중이면 UI가 갖는다. 재생 입력은 재생 화면에서 Panel 없이 대사를 보고 있을 때만 돈다.
         // 타이틀에서 Space로 버튼을 눌러 시작해도 그 Space가 첫 대사를 넘기지 않는다(돌려주는 것은 프레임 끝).
         //
-        // Root도 함께 막는다: UIPF는 가려진 Panel만 막고 Root는 건드리지 않는다. 딤은 포인터만 막으므로,
-        // Panel이 열린 동안 Root의 CanvasGroup을 막지 않으면 방향키·Enter가 아래 Root 버튼(타이틀·퀵메뉴·선택지)에 닿는다.
+        // Root 막기: Panel이 열린 동안은 UIPF가 막는다(BlockRootUnderPanels). 여기서는 재생을 끝내는 중(_exiting)에도
+        // 막는다 — Panel이 없어도 되감기·퀵메뉴가 정지와 겹치지 않게. UIPF가 쌓기·꺼내기 때마다 다시 맞추므로 그 뒤에 부른다.
         private void SyncInput()
         {
             UIBase root = _ui.CurrentRoot;
