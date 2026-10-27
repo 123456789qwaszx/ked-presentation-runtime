@@ -1,0 +1,183 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 41cb88f2462723045b22e81a2f30452b, type: 3}
+  m_Name: KedSurfaceLayoutPresetDB
+  m_EditorClassIdentifier: Ked.Presentation.Playback::DialogueSurfaceLayoutPresetDBSO
+  entries:
+  - key: bottom
+    overrideImage: 0
+    image: {fileID: 0}
+    kind: 5
+    lineAnchorMin: {x: 0.0975, y: 0.112222224}
+    lineAnchorMax: {x: 0.86625, y: 0.23}
+    linePivot: {x: 0.5, y: 0.5}
+    lineAnchoredPosition: {x: 0, y: 0}
+    lineSizeDelta: {x: 0, y: 0}
+    lineAlignment: 257
+    lineFontSize: 27
+    lineSpacing: 18
+    paragraphSpacing: 0
+    lineMargin: {x: 0, y: 0, z: 0, w: 0}
+    lineOverflowMode: 0
+    lineTextWrappingMode: 1
+    useName: 1
+    clearNameWhenHidden: 1
+    nameAnchorMin: {x: 0.0975, y: 0.2777778}
+    nameAnchorMax: {x: 0.25375, y: 0.32222223}
+    namePivot: {x: 0.5, y: 0.5}
+    nameAnchoredPosition: {x: 0, y: 0}
+    nameSizeDelta: {x: 0, y: 0}
+    nameAlignment: 514
+    nameFontSize: 26
+    nameMargin: {x: 0, y: 0, z: 0, w: 0}
+    nameOverflowMode: 0
+    nameTextWrappingMode: 0
+  - key: speaker_bottom
+    overrideImage: 0
+    image: {fileID: 0}
+    kind: 1
+    lineAnchorMin: {x: 0.0975, y: 0.112222224}
+    lineAnchorMax: {x: 0.86625, y: 0.23}
+    linePivot: {x: 0.5, y: 0.5}
+    lineAnchoredPosition: {x: 0, y: 0}
+    lineSizeDelta: {x: 0, y: 0}
+    lineAlignment: 257
+    lineFontSize: 27
+    lineSpacing: 18
+    paragraphSpacing: 0
+    lineMargin: {x: 0, y: 0, z: 0, w: 0}
+    lineOverflowMode: 0
+    lineTextWrappingMode: 1
+    useName: 1
+    clearNameWhenHidden: 1
+    nameAnchorMin: {x: 0.0975, y: 0.2777778}
+    nameAnchorMax: {x: 0.25375, y: 0.32222223}
+    namePivot: {x: 0.5, y: 0.5}
+    nameAnchoredPosition: {x: 0, y: 0}
+    nameSizeDelta: {x: 0, y: 0}
+    nameAlignment: 514
+    nameFontSize: 26
+    nameMargin: {x: 0, y: 0, z: 0, w: 0}
+    nameOverflowMode: 0
+    nameTextWrappingMode: 0
+  - key: portrait_narrow
+    overrideImage: 0
+    image: {fileID: 0}
+    kind: 0
+    lineAnchorMin: {x: 0.32, y: 0.112222224}
+    lineAnchorMax: {x: 0.86625, y: 0.23}
+    linePivot: {x: 0.5, y: 0.5}
+    lineAnchoredPosition: {x: 0, y: 0}
+    lineSizeDelta: {x: 0, y: 0}
+    lineAlignment: 257
+    lineFontSize: 26
+    lineSpacing: 18
+    paragraphSpacing: 0
+    lineMargin: {x: 0, y: 0, z: 0, w: 0}
+    lineOverflowMode: 0
+    lineTextWrappingMode: 1
+    useName: 0
+    clearNameWhenHidden: 1
+    nameAnchorMin: {x: 0.32, y: 0.2777778}
+    nameAnchorMax: {x: 0.47625, y: 0.32222223}
+    namePivot: {x: 0.5, y: 0.5}
+    nameAnchoredPosition: {x: 0, y: 0}
+    nameSizeDelta: {x: 0, y: 0}
+    nameAlignment: 514
+    nameFontSize: 24
+    nameMargin: {x: 0, y: 0, z: 0, w: 0}
+    nameOverflowMode: 0
+    nameTextWrappingMode: 0
+  - key: letterbox_bottom
+    overrideImage: 0
+    image: {fileID: 0}
+    kind: 2
+    lineAnchorMin: {x: 0.0975, y: 0.112222224}
+    lineAnchorMax: {x: 0.86625, y: 0.23}
+    linePivot: {x: 0.5, y: 0.5}
+    lineAnchoredPosition: {x: 0, y: 0}
+    lineSizeDelta: {x: 0, y: 0}
+    lineAlignment: 513
+    lineFontSize: 24
+    lineSpacing: 18
+    paragraphSpacing: 0
+    lineMargin: {x: 0, y: 0, z: 0, w: 0}
+    lineOverflowMode: 0
+    lineTextWrappingMode: 1
+    useName: 0
+    clearNameWhenHidden: 1
+    nameAnchorMin: {x: 0.0975, y: 0.2777778}
+    nameAnchorMax: {x: 0.25375, y: 0.32222223}
+    namePivot: {x: 0.5, y: 0.5}
+    nameAnchoredPosition: {x: 0, y: 0}
+    nameSizeDelta: {x: 0, y: 0}
+    nameAlignment: 514
+    nameFontSize: 24
+    nameMargin: {x: 0, y: 0, z: 0, w: 0}
+    nameOverflowMode: 0
+    nameTextWrappingMode: 0
+  - key: full_top_left
+    overrideImage: 0
+    image: {fileID: 0}
+    kind: 3
+    lineAnchorMin: {x: 0.08, y: 0.1}
+    lineAnchorMax: {x: 0.92, y: 0.9}
+    linePivot: {x: 0, y: 1}
+    lineAnchoredPosition: {x: 0, y: 0}
+    lineSizeDelta: {x: 0, y: 0}
+    lineAlignment: 257
+    lineFontSize: 24
+    lineSpacing: 8
+    paragraphSpacing: 16
+    lineMargin: {x: 0, y: 0, z: 0, w: 0}
+    lineOverflowMode: 0
+    lineTextWrappingMode: 1
+    useName: 0
+    clearNameWhenHidden: 1
+    nameAnchorMin: {x: 0.08, y: 0.91}
+    nameAnchorMax: {x: 0.32, y: 0.96}
+    namePivot: {x: 0, y: 0.5}
+    nameAnchoredPosition: {x: 0, y: 0}
+    nameSizeDelta: {x: 0, y: 0}
+    nameAlignment: 513
+    nameFontSize: 24
+    nameMargin: {x: 0, y: 0, z: 0, w: 0}
+    nameOverflowMode: 0
+    nameTextWrappingMode: 0
+  - key: blackbook_page
+    overrideImage: 0
+    image: {fileID: 0}
+    kind: 4
+    lineAnchorMin: {x: 0.22, y: 0.18}
+    lineAnchorMax: {x: 0.78, y: 0.82}
+    linePivot: {x: 0.5, y: 0.5}
+    lineAnchoredPosition: {x: 0, y: 0}
+    lineSizeDelta: {x: 0, y: 0}
+    lineAlignment: 257
+    lineFontSize: 26
+    lineSpacing: 12
+    paragraphSpacing: 18
+    lineMargin: {x: 8, y: 8, z: 8, w: 8}
+    lineOverflowMode: 0
+    lineTextWrappingMode: 1
+    useName: 0
+    clearNameWhenHidden: 1
+    nameAnchorMin: {x: 0.22, y: 0.83}
+    nameAnchorMax: {x: 0.45, y: 0.89}
+    namePivot: {x: 0, y: 0.5}
+    nameAnchoredPosition: {x: 0, y: 0}
+    nameSizeDelta: {x: 0, y: 0}
+    nameAlignment: 513
+    nameFontSize: 24
+    nameMargin: {x: 0, y: 0, z: 0, w: 0}
+    nameOverflowMode: 0
+    nameTextWrappingMode: 0
