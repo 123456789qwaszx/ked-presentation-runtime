@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using UnityEditor;
 using UnityEngine;
@@ -9,21 +10,30 @@ using Object = UnityEngine.Object;
 namespace Ked.Samples.UI.Editor
 {
     /// <summary>
-    /// Tools/Ked UI/Build Sample UI — 화면 빌드 명세(Specs/*)에서 UIPF 화면 프리팹을 만든다.
+    /// Tools/Ked UI/Build Sample UI — 화면 빌드 명세(Screens/*/Editor/*Spec)에서 UIPF 화면 프리팹을 만든다.
+    ///
+    /// 원본과 산출물(docs/PLAN_uipf-ui.md "제작 원칙"):
+    ///   원본     화면 스크립트(Screens/*/Scripts) · 빌드 명세(Screens/*/Editor) · 그림 · 부품 키트(Common)
+    ///   산출물   화면 프리팹(Screens/*/Prefabs) · 캔버스(Resources/KedUI) · 글꼴 SDF — 빌드마다 덮어쓴다.
+    ///            손으로 고치지 않는다(다음 빌드에서 사라진다). 고칠 것은 명세 · 키트에서 고친다.
+    ///   처음 한 번 만드는 데이터   Presentation · 대사창 배치 DB — 있으면 빌드가 건드리지 않는다(에셋에서 고쳐도 된다).
+    ///            글꼴 묶음은 글꼴 칸만 빌드마다 다시 건다.
+    ///   산출물도 커밋한다 — 빌드하지 않고 클론만 해도 실행되게.
     ///
     ///   1. 그림 임포트 설정(KedUIArtImporter, 패키지의 도구 — 그림 자리를 이름으로 찾게만 고쳤다)
     ///   2. TMP 글꼴(Noto Sans KR Medium · Bold, 동적 SDF)
     ///   3. 화면 프리팹 12개(Root 2 · Panel 6 · Page 4) — 자식 이름 = 화면의 Refs
     ///   4. 선택지 항목 프리팹 · 연출 프리셋 DB · UIPF 글꼴 묶음 · 화면별 Presentation
     ///   5. 캔버스 프리팹(Resources/KedUI/KedUICanvas) — 층 셋에 화면을 중첩 프리팹으로 놓고 KedUIHost에 잇는다
-    ///   6. Refs 감사 — 화면 타입의 Refs마다 자식이 정확히 하나 있는지
-    ///   7. 묶음 감사 — 화면 묶음(Screens/*)이 제 묶음 · Common · UIPF · 패키지만 가리키는지(KedUIUnits)
+    ///   6. 검사(KedUIValidate — Refs · Presentation 이름 · 묶음). 메뉴 Validate Sample UI로 빌드 없이 따로도 돈다.
     ///
-    /// 화면 스크립트가 묶음(Screens/{묶음}/Scripts/)에 있으면 그 화면의 프리팹 · Presentation은 묶음 안에,
-    /// 아니면 Generated/에 만든다.
-    ///
-    /// 다시 실행하면 프리팹은 같은 경로에 덮어쓴다(GUID 유지). 데이터 자산은 이미 있으면 그대로 둔다.
+    /// 생성물 자리는 묶음 규칙(KedUIUnits): 화면 스크립트가 Screens/{묶음}/Scripts/에 있으면 그 묶음 안,
+    /// 아니면 Generated/(지금은 그런 화면이 없다).
+    /// 다시 실행하면 프리팹은 같은 경로에 덮어쓴다(GUID 유지). 같은 명세면 결과도 같다(10-27, git 변경 0).
     /// 씬은 건드리지 않는다 — SampleBootstrap이 Resources에서 캔버스를 읽는다.
+    ///
+    /// 배치 모드: -executeMethod Ked.Samples.UI.Editor.KedUIBuild.BuildBatch (문제가 있으면 종료 코드 1).
+    /// Unity가 이 프로젝트를 열고 있으면 배치 모드는 프로젝트를 열지 못한다.
     /// </summary>
     public static class KedUIBuild
     {
@@ -73,13 +83,13 @@ namespace Ked.Samples.UI.Editor
 
                 var kit = new KedUIKit(font);
 
-                EnsureFolder(CanvasDir);
+                KedUIUnits.EnsureFolder(CanvasDir);
 
                 EditorUtility.DisplayProgressBar("Ked UI", "화면", 0.3f);
 
                 // 선택지 항목은 재생 화면의 선택지 상자가 쓴다 — 재생 묶음에 둔다.
                 string optionItemPath = KedUIUnits.PrefabPath(typeof(PlayScreen), OptionItemName, ScreensDir);
-                EnsureFolder(optionItemPath.Substring(0, optionItemPath.LastIndexOf('/')));
+                KedUIUnits.EnsureFolder(optionItemPath.Substring(0, optionItemPath.LastIndexOf('/')));
                 GameObject optionItem = Save(OptionItemSpec.Build(kit), optionItemPath, built);
 
                 GameObject[] pages =
@@ -120,22 +130,17 @@ namespace Ked.Samples.UI.Editor
                 GameObject canvas = BuildCanvas(roots, panels, fontSet, texts, presentations, optionItem, surfaceDb);
                 Save(canvas, CanvasPath, built);
 
-                EditorUtility.DisplayProgressBar("Ked UI", "Refs 감사", 0.95f);
-                foreach (GameObject prefab in roots) Audit(prefab, problems);
-                foreach (GameObject prefab in panels) Audit(prefab, problems);
-                foreach (GameObject prefab in pages) Audit(prefab, problems);
-
-                EditorUtility.DisplayProgressBar("Ked UI", "묶음 감사", 0.97f);
-                int units = KedUIUnits.Audit(problems);
-                built.Add($"(묶음 감사: 화면 묶음 {units}개)");
-
                 problems.AddRange(kit.Problems);
 
                 // 화면을 세우며 채운 글자를 비운 채로 저장한다 — 커밋되는 글꼴 자산을 작게 둔다.
-                EditorUtility.DisplayProgressBar("Ked UI", "글꼴 아틀라스 비우기", 0.98f);
+                EditorUtility.DisplayProgressBar("Ked UI", "글꼴 아틀라스 비우기", 0.9f);
                 KedUIFonts.ClearDynamicData(problems);
 
                 AssetDatabase.SaveAssets();
+
+                // 저장한 결과를 검사한다 — 메뉴 Validate Sample UI와 같은 검사.
+                EditorUtility.DisplayProgressBar("Ked UI", "검사", 0.95f);
+                built.Add($"({KedUIValidate.Run(problems)})");
             }
             catch (Exception error)
             {
@@ -145,6 +150,9 @@ namespace Ked.Samples.UI.Editor
             {
                 EditorUtility.ClearProgressBar();
             }
+
+            // 그림 이름 겹침은 키트와 검사가 같은 것을 두 번 올릴 수 있다.
+            problems = problems.Distinct().ToList();
 
             var sb = new StringBuilder();
             sb.AppendLine(problems.Count == 0 ? "[Ked UI] 샘플 UI 빌드 완료" : $"[Ked UI] 샘플 UI 빌드 — 문제 {problems.Count}개");
@@ -248,13 +256,13 @@ namespace Ked.Samples.UI.Editor
 
         #endregion
 
-        #region 저장 · 감사
+        #region 저장
 
         private static GameObject SaveScreen(GameObject go, List<string> built)
         {
             UIBase view = go.GetComponent<UIBase>();
             string path = KedUIUnits.PrefabPath(view != null ? view.GetType() : null, go.name, ScreensDir);
-            EnsureFolder(path.Substring(0, path.LastIndexOf('/')));
+            KedUIUnits.EnsureFolder(path.Substring(0, path.LastIndexOf('/')));
             return Save(go, path, built);
         }
 
@@ -268,47 +276,6 @@ namespace Ked.Samples.UI.Editor
 
             built.Add(path);
             return prefab;
-        }
-
-        // 화면·위젯(UIBase<TRefs>)마다: Refs의 이름이 제 아래에 정확히 하나 있는가(UIBase는 이름으로 첫 번째를 잡는다).
-        private static void Audit(GameObject prefab, List<string> problems)
-        {
-            if (prefab == null)
-                return;
-
-            foreach (UIBase view in prefab.GetComponentsInChildren<UIBase>(true))
-            {
-                Type refs = UIRefCheck.RefsTypeOf(view.GetType());
-                if (refs == null)
-                    continue;
-
-                var counts = new Dictionary<string, int>(StringComparer.Ordinal);
-                foreach (Transform t in view.GetComponentsInChildren<Transform>(true))
-                    counts[t.name] = counts.TryGetValue(t.name, out int n) ? n + 1 : 1;
-
-                foreach (string name in Enum.GetNames(refs))
-                {
-                    counts.TryGetValue(name, out int count);
-
-                    if (count == 0)
-                        problems.Add($"{prefab.name}/{view.GetType().Name}: Ref '{name}' 자식이 없다");
-                    else if (count > 1)
-                        problems.Add($"{prefab.name}/{view.GetType().Name}: Ref '{name}' 자식이 {count}개다(첫 번째만 잡힌다)");
-                }
-            }
-        }
-
-        public static void EnsureFolder(string path)
-        {
-            if (AssetDatabase.IsValidFolder(path))
-                return;
-
-            int slash = path.LastIndexOf('/');
-            string parent = path.Substring(0, slash);
-            string leaf = path.Substring(slash + 1);
-
-            EnsureFolder(parent);
-            AssetDatabase.CreateFolder(parent, leaf);
         }
 
         #endregion

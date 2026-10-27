@@ -23,7 +23,7 @@ namespace Ked.Samples.UI.Editor
 
         public static TMP_FontAsset Ensure(List<string> problems)
         {
-            KedUIBuild.EnsureFolder(OutputDir);
+            KedUIUnits.EnsureFolder(OutputDir);
 
             TMP_FontAsset bold = EnsureAsset(FontDir + "/NotoSansKR-Bold.ttf", BoldAssetPath, problems);
             TMP_FontAsset medium = EnsureAsset(FontDir + "/NotoSansKR-Medium.ttf", MediumAssetPath, problems);

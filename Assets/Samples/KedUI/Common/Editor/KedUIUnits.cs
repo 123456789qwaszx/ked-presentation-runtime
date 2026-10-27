@@ -118,6 +118,24 @@ namespace Ked.Samples.UI.Editor
 
         #endregion
 
+        #region 폴더
+
+        /// <summary>폴더가 없으면 부모부터 만든다.</summary>
+        public static void EnsureFolder(string path)
+        {
+            if (AssetDatabase.IsValidFolder(path))
+                return;
+
+            int slash = path.LastIndexOf('/');
+            string parent = path.Substring(0, slash);
+            string leaf = path.Substring(slash + 1);
+
+            EnsureFolder(parent);
+            AssetDatabase.CreateFolder(parent, leaf);
+        }
+
+        #endregion
+
         #region 묶음 감사
 
         /// <summary>

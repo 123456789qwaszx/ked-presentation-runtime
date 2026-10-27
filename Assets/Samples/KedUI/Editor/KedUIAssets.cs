@@ -68,7 +68,7 @@ namespace Ked.Samples.UI.Editor
                 string key = UIViewKey.Of(type);
                 // 화면이 묶음에 있으면 Screens/{묶음}/Presentation/{key}Presentation.asset, 아니면 Generated/Presentations/{key}.asset.
                 string path = KedUIUnits.PresentationPath(type, key, PresentationDir);
-                KedUIBuild.EnsureFolder(path.Substring(0, path.LastIndexOf('/')));
+                KedUIUnits.EnsureFolder(path.Substring(0, path.LastIndexOf('/')));
 
                 // 오브젝트 이름은 파일 이름과 같아야 한다(Unity 경고). UIPF는 이름이 아니라 presentationId로 찾는다.
                 string fileName = System.IO.Path.GetFileNameWithoutExtension(path);
@@ -145,7 +145,7 @@ namespace Ked.Samples.UI.Editor
                 field.SetValue(db, entries);
             }
 
-            KedUIBuild.EnsureFolder(path.Substring(0, path.LastIndexOf('/')));
+            KedUIUnits.EnsureFolder(path.Substring(0, path.LastIndexOf('/')));
             AssetDatabase.CreateAsset(db, path);
             EditorUtility.SetDirty(db);
             return db;

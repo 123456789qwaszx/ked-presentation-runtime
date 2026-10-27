@@ -41,11 +41,11 @@ Assets/
 └─ Samples/
     ├─ KedUI/              새 예제 UI — 화면 하나 = 묶음 하나(아래 "화면 묶음")
     │   ├─ Ked.Samples.UI.asmdef   런타임 asmdef(뿌리 — Common · Screens · Runtime을 덮는다)
-    │   ├─ Common/         여러 화면이 같이 쓰는 것 — Scripts(부품 키트) · Sprites · Fonts(TTF · SDF · UIPF 글꼴 묶음)
+    │   ├─ Common/         여러 화면이 같이 쓰는 것 — Scripts(부품 키트) · Editor(키트로 짓는 도구 · 검사 · 에디터 asmdef) · Sprites · Fonts
     │   ├─ Screens/        화면 묶음 7 — Title · Play · Menu · SaveLoad · Backlog · Settings · Modal
     │   │                  각 묶음: Scripts · Prefabs · Presentation · Sprites · Editor(+.asmref) (Play만 Data)
     │   ├─ Runtime/        앱 쪽 — 흐름(Flow) · 설정 값(Settings/KedSettings) · KedUIHost
-    │   ├─ Editor/         asmdef Ked.Samples.UI.Editor — 빌더(Build/)와 패키지의 KedUIArtImporter
+    │   ├─ Editor/         앱 빌드 — 화면 목록 · 캔버스(KedUIBuild · KedUIAssets), .asmref로 에디터 어셈블리
     │   ├─ Art/            받았지만 어느 화면도 쓰지 않는 그림 14장(시안 배경 포함)
     │   ├─ Texts/          UI 글자 표 KedUITexts.csv(ko-KR · en-US)
     │   └─ Resources/KedUI/KedUICanvas.prefab   빌더가 만든다 — SampleBootstrap이 읽는다
@@ -198,6 +198,7 @@ Samples/KedUI/
 ├─ Ked.Samples.UI.asmdef   런타임 asmdef를 뿌리로(Common/ · Screens/ · Runtime/을 덮는다)
 ├─ Common/
 │   ├─ Scripts/            부품 키트 8 (옛 Runtime/Kit)
+│   ├─ Editor/             키트로 짓는 도구(KedUIKit) · 묶음 규칙(KedUIUnits) · 글꼴 · 그림 임포트 · 검사(KedUIValidate) + 에디터 asmdef
 │   ├─ Sprites/            키트가 쓰는 15장 + 여러 화면이 쓰는 3장(background_title · icon_close · icon_rollback)
 │   └─ Fonts/              Noto Sans KR TTF 2 · OFL · SDF 2 · UIPF 글꼴 묶음(KedUIFontSet)
 ├─ Screens/
@@ -211,13 +212,13 @@ Samples/KedUI/
 │      각 묶음: Scripts/ · Prefabs/ · Presentation/({화면}Presentation.asset) · Sprites/(그 화면만 쓰는 그림, 없으면 폴더 없음)
 │               · Editor/(빌드 명세 + Ked.Samples.UI.Editor.asmref)
 ├─ Runtime/                앱 쪽 — Flow · Settings/KedSettings · KedUIHost
-├─ Editor/                 빌더(Build/) · 임포트 도구
+├─ Editor/                 앱 빌드(KedUIBuild · KedUIAssets) + .asmref
 ├─ Art/                    아무 화면도 쓰지 않는 그림 14장
 └─ Texts/ · Resources/ · asset-manifest.json
 ```
 
 - 묶음에 넣지 않는 것: 화면 흐름(`KedUIFlow.*`) · 설정 값(`KedSettings`) · 캔버스와 호스트 · 글자 표(CSV 하나). 화면을 쓰는 앱 쪽이다.
-- 빌더 규칙(`Editor/Build/KedUIUnits.cs`):
+- 빌더 규칙(`Common/Editor/KedUIUnits.cs`):
   - 그림은 이름으로 찾는다(KedUI 아래 어디든, 같은 이름 둘이면 문제). 패키지 임포트 도구도 같은 규칙. `asset-manifest.json`은 받은 그대로.
   - 화면 스크립트가 `Screens/{묶음}/Scripts/`에 있으면 프리팹 · Presentation · Data는 그 묶음에. 아니면 `Generated/`(지금은 그런 화면이 없어 폴더도 없다).
   - 묶음 감사: 묶음 안 에셋이 직접 가리키는 것이 제 묶음 · Common · UIPF · 본체(게임 쪽 프레임워크 — 선택지 항목 `VNOptionItem`, 대사창 배치 DB 형식) · 패키지뿐인지. 빌드 보고에 나온다.
@@ -234,6 +235,26 @@ Samples/KedUI/
 | 2. 빌더가 그대로 돈다 — 생성물이 묶음에 갱신되고 `Generated/`에 같은 이름이 새로 생기지 않는다, 보고 문제 0 | 시험 두 묶음 · 전체 적용 모두 Unity 확인(10-27, 아미야 "잘 동작함") |
 | 3. 묶음 안 에디터 코드가 `.asmref`로 에디터 어셈블리에 붙는다 | 오프라인 컴파일: 명세 여덟이 모두 `Ked.Samples.UI.Editor`로(런타임 37파일 그대로), 14개 어셈블리 오류 0 · 경고 0. Unity 확인(10-27) |
 | 4. 화면 하나를 빼고 다시 넣어도 이어진다 | 1이 성립하면 GUID로 이어진다 — 필요하면 Unity에서 따로 시험 |
+
+### 제작 원칙 — 명세가 원본, 프리팹은 산출물 (2026-10-27, 아미야 결정)
+AI가 프리팹(Unity 직렬화 데이터)을 직접 쓰지 않는다. AI는 화면 스크립트와 빌드 명세를 쓰고, 프레임워크 쪽 빌더가 그 프로젝트의 Unity로 프리팹을 만들고, 사람은 Unity에서 결과를 보고 판정한다.
+
+| 구분 | 무엇 | 규칙 |
+|---|---|---|
+| 원본 | 화면 스크립트(`Screens/*/Scripts`) · 빌드 명세(`Screens/*/Editor`) · 그림 · 부품 키트(`Common`) | 고칠 것은 여기서 고친다 |
+| 산출물 | 화면 프리팹(`Screens/*/Prefabs`) · 캔버스(`Resources/KedUI`) · 글꼴 SDF | 빌드마다 덮어쓴다. **손으로 고치지 않는다** — 다음 빌드에서 사라진다. 클론만으로 실행되게 **커밋한다** |
+| 처음 한 번 만드는 데이터 | Presentation(`Screens/*/Presentation`) · 대사창 배치 DB(`Play/Data`) | 없을 때만 빌드가 만든다. 그 뒤로는 에셋에서 고친다(빌드가 덮지 않는다). 글꼴 묶음은 글꼴 칸만 빌드마다 다시 건다 |
+
+- **특수 화면.** 명세로 나타내기 어려운 화면(비정형 배치 · 복잡한 연출)은 프리팹을 손이나 에디터 스크립트로 직접 만들어도 된다. 조건은 셋이다. 같은 `UIBase<TRefs>`를 쓴다, 묶음 규칙(`Screens/{묶음}/…`)을 따른다, 검사(`Validate Sample UI`)를 지난다. 명세를 넓혀 모든 화면을 덮으려 하지 않는다 — 넓힐지는 사람이 정한다. 아직 빌더는 손으로 만든 화면을 캔버스에 걸지 못한다. 필요해지면 그때 넓힌다.
+- **검사는 빌드와 따로.** `Tools/Ked UI/Validate Sample UI`(`Common/Editor/KedUIValidate`)는 빌드하지 않고 묶음 아래 모든 프리팹 · Presentation을 본다: 그림 이름 겹침 · Refs(이름이 정확히 하나) · Presentation 이름과 `presentationId` · 묶음 감사. 빌드도 저장한 뒤 같은 검사를 돈다.
+- **배포(반입) 두 방식.** 묶음은 원본과 산출물(`.meta` 포함)을 함께 담는다.
+  - 받는 쪽 Unity 버전 · 패키지가 같다 → 산출물째 들인다(검수한 그대로, GUID 그대로).
+  - 다르다 → 원본과 산출물의 `.meta`를 들이고 그 자리 위에 다시 빌드한다(직렬화 형식 문제를 피하고 GUID는 지킨다). 파일 안쪽 fileID가 버전을 넘어 그대로인지는 확인하지 않았다.
+- **재생성.** 같은 명세로 다시 빌드하면 산출물이 같다 — 10-27 여러 번 빌드한 뒤 프리팹 14 · 캔버스의 git 변경 0(Unity가 같은 내용이라 다시 쓰지도 않았다).
+- **사람의 역할.** 요구와 품질 기준을 정하고, AI의 설계 판단(명세를 어디까지 넓힐지, 공용으로 올릴지)을 정하고, Unity에서 눈으로 검수 · 승인한다. 문제를 찾으면 프리팹이 아니라 원본을 고쳐 다시 빌드한다.
+- **배치 모드.** `-executeMethod Ked.Samples.UI.Editor.KedUIBuild.BuildBatch` · `…KedUIValidate.ValidateBatch`(문제가 있으면 종료 코드 1). Unity가 이 프로젝트를 열고 있으면 배치 모드는 프로젝트를 열지 못한다. 클라우드 세션에서는 PC의 Unity를 돌릴 수 없다 — PC에서 돌린다.
+
+빌더 자리(10-27): 화면을 모르는 도구(`KedUIKit` · `KedUIUnits` · `KedUIFonts` · `KedUIArtImporter` · `KedUIValidate`, 에디터 asmdef)는 `Common/Editor`, 화면 목록과 캔버스를 아는 앱 빌드(`KedUIBuild` · `KedUIAssets`)는 `KedUI/Editor`(+`.asmref`). 실행 쪽과 짝이 맞는다 — 공용 `Common/Scripts` ↔ `Common/Editor`, 앱 `Runtime/` ↔ `Editor/`, 화면 `Screens/X/Scripts` ↔ `Screens/X/Editor`.
 
 ### U5. 문서
 - SCOPE-BOUNDARY에 "꽂힌 모듈 둘"(진행 · UI), ASSEMBLY-BOUNDARY의 어셈블리 표, `PLAN_framework-scope` 분류표.
@@ -254,7 +275,7 @@ Samples/KedUI/
 
 ## 착수 전에 정할 것 → 정한 것 (2026-10-27)
 
-1. **화면 정의의 형식 → (가) C# 빌드 명세.** `Editor/Build/Specs/*Spec.cs`. 노드 이름은 `nameof(화면.Refs.X)`라 명세와 Refs가 컴파일로 묶이고, 빌더가 만든 뒤 Refs 감사(이름이 정확히 하나)를 한다. 좌표는 `Design/layouts.json`의 숫자 그대로.
+1. **화면 정의의 형식 → (가) C# 빌드 명세.** `Editor/Build/Specs/*Spec.cs`(화면 묶음 뒤로는 `Screens/*/Editor/*Spec.cs`). 노드 이름은 `nameof(화면.Refs.X)`라 명세와 Refs가 컴파일로 묶이고, 빌더가 만든 뒤 Refs 감사(이름이 정확히 하나)를 한다. 좌표는 `Design/layouts.json`의 숫자 그대로.
 2. **교체 시점 → 공존 스위치.** `SampleBootstrap › 예제 UI › useKedUI`(기본 켬). 캔버스 프리팹이 없거나 세우다 실패하면 옛 UI로 연다. 두 UI가 같이 도는 일은 없다 — 새 UI가 켜지면 옛 화면(타이틀·백로그·확인·메뉴·대사창·선택지·버튼)은 시작할 때 감추고, 옛 캔버스에는 연출 무대만 남는다. 옛 코드 삭제는 U3. → U3에서 스위치째 걷었다. 새 UI 캔버스가 없으면 예제를 세우지 않는다.
 3. **슬롯 카드의 그림 창 → (패키지 지시) 알려진 자리 그림 + 실제 메타데이터.** save_slot 그림의 밝은 칸을 그대로 두고 장면 ID · 플레이 시간 · 저장 시각 · 저장 이름을 적는다. 화면 캡처는 별도 작업.
 
