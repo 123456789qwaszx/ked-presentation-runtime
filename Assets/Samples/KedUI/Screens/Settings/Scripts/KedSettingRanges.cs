@@ -9,7 +9,8 @@ namespace Ked.Samples.UI
         public const float MaxTextScale = 1.3f;
         public const float MinTypeSpeed = 10f;
         public const float MaxTypeSpeed = 90f;
-        public const float MinBoxOpacity = 0.3f;
+        // 0이면 대사창 · 이름표 그림이 다 사라진다. 글자는 그림과 따로라 늘 보인다(PlayDialogueBox.SetOpacity).
+        public const float MinBoxOpacity = 0f;
         public const float MinAutoDelay = 0.5f;
         public const float MaxAutoDelay = 5f;
     }

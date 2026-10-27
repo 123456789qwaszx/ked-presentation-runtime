@@ -24,7 +24,7 @@ namespace Ked.Samples.UI.Editor
     ///
     ///   1. 그림 임포트 설정(KedUIArtImporter, 패키지의 도구 — 그림 자리를 이름으로 찾게만 고쳤다)
     ///   2. TMP 글꼴(Noto Sans KR Medium · Bold, 동적 SDF)
-    ///   3. 화면 프리팹 12개(Root 2 · Panel 6 · Page 4) — 자식 이름 = 화면의 Refs
+    ///   3. 화면 프리팹 13개(Root 2 · Panel 7 · Page 4) — 자식 이름 = 화면의 Refs
     ///   4. 선택지 항목 프리팹 · 연출 프리셋 DB · UIPF 글꼴 묶음 · 화면별 Presentation
     ///   5. 캔버스 프리팹(App/Resources/KedUI/KedUICanvas) — 층 셋에 화면을 중첩 프리팹으로 놓고 KedUIHost에 잇는다
     ///   6. 검사(KedUIValidate — Refs · Presentation 이름 · 묶음). 메뉴 Validate Sample UI로 빌드 없이 따로도 돈다.
@@ -125,6 +125,7 @@ namespace Ked.Samples.UI.Editor
                     SaveScreen(SettingsSpec.Build(kit, pages), built),
                     SaveScreen(ModalSpec.Confirm(kit), built),
                     SaveScreen(ModalSpec.Notice(kit), built),
+                    SaveScreen(EpisodeEndSpec.Build(kit), built),
                 };
 
                 EditorUtility.DisplayProgressBar("Ked UI", "데이터 자산", 0.75f);

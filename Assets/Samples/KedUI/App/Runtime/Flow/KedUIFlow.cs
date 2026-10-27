@@ -12,6 +12,7 @@ namespace Ked.Samples.UI
     ///   Panel   메뉴 · 저장/불러오기 · 백로그 · 설정  UIManager.PushPanel / PopPanel / PopAllPanels
     ///   Page    설정의 탭 넷                          UIManager.SwitchPage(SettingsPanel, …)
     ///   모달    확인 · 안내                           Panel(맨 위만 입력을 받는 Panel 스택 규칙). Overlay는 아래를 막지 않아 쓰지 않는다.
+    ///   끝 카드 회차 끝                               Panel. 호스트가 끝을 알릴 때만 연다(ShowPlaythroughEnd).
     ///
     /// 화면 사건은 만들 때 한 번만 구독한다(화면과 흐름의 수명이 같다). 열 때마다 묶지 않으니 다시 열어도 리스너가 늘지 않는다.
     /// </summary>
@@ -33,6 +34,7 @@ namespace Ked.Samples.UI
         private readonly DisplaySettingsPage _displayPage;
         private readonly ConfirmPanel _confirm;
         private readonly NoticePanel _notice;
+        private readonly EpisodeEndPanel _end;
 
         private KedPlaybackBindings _playback;
         private IKedTitlePort _titlePort;
@@ -63,6 +65,7 @@ namespace Ked.Samples.UI
             _displayPage = Require<DisplaySettingsPage>();
             _confirm = Require<ConfirmPanel>();
             _notice = Require<NoticePanel>();
+            _end = Require<EpisodeEndPanel>();
 
             SubscribeTitle();
             SubscribePlay();
@@ -71,6 +74,7 @@ namespace Ked.Samples.UI
             SubscribeBacklog();
             SubscribeSettings();
             SubscribeModals();
+            SubscribeEnd();
         }
 
         /// <summary>재생 본체 쪽 대사창 계약의 구현. 조립(PresentationAssembler)에 넘긴다.</summary>
@@ -149,6 +153,7 @@ namespace Ked.Samples.UI
         #region Esc — 맨 위 한 층만
 
         // Esc 한 번에 한 층만 닫는다: 확인 → 취소, 안내 → 확인, 그 밖의 Panel → 뒤로. Panel이 없고 UI를 숨겼으면 다시 보인다.
+        // 끝 카드는 닫지 않는다 — 닫으면 끝난 재생 화면에 남는다(갈 곳은 타이틀 하나).
         private void HandleCancel()
         {
             UIBase top = _ui.TopPanel;
@@ -160,6 +165,9 @@ namespace Ked.Samples.UI
 
                 return;
             }
+
+            if (top == _end)
+                return;
 
             if (top == _confirm)
                 _confirm.Cancel();

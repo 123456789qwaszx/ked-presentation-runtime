@@ -62,8 +62,16 @@ public sealed class VNLinePresentationFlow
             return;
         }
 
+        // #auto — 다 보이면 입력 없이 넘긴다(VNLineAdvanceTag). 되감기로 닿은 줄은 다시 보려고 온 것이라 넘기지 않는다.
+        // 시크 종류는 ClearSeek 전에 읽는다.
+        bool rollbackTarget =
+            ctx.IsTargetLineReached && _advanceState.SeekKind == VNSeekKind.Rollback;
+
         if (ctx.IsTargetLineReached)
             _advanceState.ClearSeek();
+
+        _advanceState.SetLineAutoAdvance(
+            !rollbackTarget && VNLineAdvanceTag.IsAuto(ctx.Line.Metadata));
 
         // Phase: VisualRunStarted
         ctx.Run = beginRun();

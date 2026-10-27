@@ -43,7 +43,7 @@ Assets/
     │   │                  재생 런타임(본체)을 모르고, UIPF 저장소의 비주얼 노벨 데모로 그대로 복사된다(아래 "VN UI를 UIPF 샘플로")
     │   ├─ Ked.Samples.UI.asmdef   런타임 asmdef(뿌리 — Common · Screens). 참조는 UIPF · TMP · UGUI뿐
     │   ├─ Common/         여러 화면이 같이 쓰는 것 — Scripts(부품 키트) · Editor(키트로 짓는 도구 · 검사 · 에디터 asmdef) · Sprites · Fonts
-    │   ├─ Screens/        화면 묶음 7 — Title · Play · Menu · SaveLoad · Backlog · Settings · Modal
+    │   ├─ Screens/        화면 묶음 8 — Title · Play · Menu · SaveLoad · Backlog · Settings · Modal · EpisodeEnd(끝 카드, 10-27 더함)
     │   │                  각 묶음: Scripts · Prefabs · Presentation · Sprites · Editor(+.asmref)
     │   ├─ App/            ked 앱 쪽 — 재생 런타임에 잇는 것. asmdef 둘(Ked.Samples.UI.App · .App.Editor)
     │   │   ├─ Runtime/    흐름(Flow) · 설정 값(Settings/KedSettings) · KedUIHost · 대사창 · 선택지 상자 어댑터(Play/)
@@ -355,6 +355,29 @@ UIPF 저장소의 Adaptive UI 데모를 걷고, 그 자리에 이 VN UI를 샘�
 - 둘 다 KedUI 묶음의 `NotoSansKR-Medium SDF`(동적, OFL)로 바꿨다. 그래서 TMP 기본 글꼴이 예제 묶음 안을 가리킨다. 동적 글꼴이라 플레이 뒤 바뀌는 글꼴 자산은 지금처럼 되돌린다.
 - `.gitignore`의 `/[Aa]ssets/[Aa]rt/`는 둔다 — 비공개 아트가 다시 들어오지 않게.
 - `PortraitBuildSettings.cs`의 기본 `scanFolders`(설정 에셋이 없을 때 새로 만드는 에셋의 값)가 `Assets/Art/Portraits/Playable` · `NPC`를 가리켰다. 출력 경로 기본값(`Assets/Data/Generated/…`)처럼 특정 자리를 가리키지 않는 `Assets/Portraits`로 바꿨다. 예제의 설정 에셋(`Samples/Data/PortraitBuildSettings`)은 `Assets/Samples/Portraits`를 적고 있어 그대로다.
+
+### 끝 카드 · `#auto` (10-27, 아미야 결정)
+에피소드를 끝까지 보면 재생 화면이 마지막 장면에서 굳어 있었다. 끝을 알리고 타이틀로 보내는 화면을 더했다.
+
+- **화면.** 묶음 `Screens/EpisodeEnd` — `Ked.EpisodeEndPanel`(Panel, 번호 14 — 11–13은 설정 탭). 머리글 · 이름 · 한 줄 · 결과(없으면 감춘다) · 버튼 "타이틀로" 하나(다음 회차 데이터가 없다).
+  - Esc로 닫지 않는다. 닫으면 끝난 재생 화면에 남는다.
+  - 그림은 Common 것만 쓴다 — 묶음에 `Sprites/`가 없다.
+  - 묶음은 재생 런타임을 모른다. 내용은 앱이 채운다(`KedUIFlow.End`).
+- **끝은 호스트가 정한다.** 대본 명령(`<<endEpisode>>` 같은)으로 정하지 않는다. 같은 대본이 연출 단독에서는 회차의 끝이고, 진행 예제에서는 에피소드 하나일 뿐이다.
+  - 연출 단독: `NodePlaythrough.Completed` — 노드를 끝까지 봤을 때, 이어하기 파일을 지운 뒤. 이름은 예제 제목이다.
+  - 진행: `SceneRunner.ChapterEnded` — 마지막 장면을 확정(저장)한 뒤. 챕터 이름 · 마지막 에피소드 · 스탯을 싣는다.
+    진행 런타임(`ProgressionDriver`)은 끝을 알리지 않는다. 그래서 예제 층의 장면 실행에서 낸다 — `Ked.Progression` 사본은 그대로다.
+  - 둘 다 `KedUIHost.ShowPlaythroughEnd(KedPlaythroughEnd)`로 간다. 흐름이 Panel을 쌓고, 타이틀로는 메뉴의 길(`ReturnToTitle`)과 같다.
+- **줄 태그 `#auto`(본체, `VNLineAdvanceTag`).** 줄이 다 보이고 그 줄 앞머리의 연출 명령이 끝나면 입력 없이 넘긴다.
+  - 자동 진행의 켜짐 · 대기와 무관하다. 넘기는 길은 재생 입력의 프레임(`VNFeatureController.Tick`)이다.
+  - 재생 입력이 멈춘 동안(메뉴 · 팝업 · UI 숨김)은 기다린다.
+  - 되감기로 닿은 줄에서는 넘기지 않는다 — 다시 보려고 돌아온 것이다.
+  - 박스 태그와 달리 `box` 접두사가 없다(대사창이 아니라 넘김의 일이다). 정규화는 박스 태그와 같다.
+  - 데모 마지막 줄: `캐릭터 퇴장 #boxhide #auto` — 퇴장 연출이 끝나면 클릭 없이 끝 카드가 뜬다.
+- **대사창 불투명도** 하한을 30% → 0%로. 0이면 대사창 · 이름표 그림이 다 사라진다. 글자는 그림과 따로라 그대로 보인다.
+- 빌드 산출물: 끝 카드 프리팹 · Presentation · 캔버스(Panel 하나 · Presentation 하나). 저장/불러오기 패널은 fileID만 바뀌어(정렬해 비교하면 0줄) 되돌렸다.
+- 10-27 Unity 확인(아미야 "잘되네").
+- UIPF 사본에는 아직 없다 — 다음에 다시 복사한다.
 
 ### U5. 문서
 - SCOPE-BOUNDARY에 "꽂힌 모듈 둘"(진행 · UI), ASSEMBLY-BOUNDARY의 어셈블리 표, `PLAN_framework-scope` 분류표.

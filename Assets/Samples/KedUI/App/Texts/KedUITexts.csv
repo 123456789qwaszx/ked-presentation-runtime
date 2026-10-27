@@ -67,6 +67,8 @@ DisplaySettingsPage.Shortcut_2,자동 진행 켜고 끄기,Toggle auto mode
 DisplaySettingsPage.Shortcut_3,빠르게 재생 켜고 끄기,Toggle fast playback
 DisplaySettingsPage.Shortcut_4,한 줄 되감기,Rewind one line
 DisplaySettingsPage.Shortcut_5,현재 창 닫기 · 숨긴 UI 다시 보기,Close the current window / show hidden UI
+EpisodeEndPanel.EndResultHeading,결과,Result
+EpisodeEndPanel.EndTitleReturnLabel,타이틀로,Return to title
 # 코드가 쓰는 글자 — 소문자로 시작. {0}은 값,,
 common.ok,확인,OK
 common.cancel,취소,Cancel
@@ -78,6 +80,12 @@ example.progression.name,진행·저장,Progression & saves
 example.progression.title,챕터 진행,Chapter progression
 example.progression.summary,장면 저장 · 수동 슬롯 · 지난 장면에서 갈라지기,Scene saves · Manual slots · Branch from a past scene
 play.chapterTag,{0} · {1},{0} · {1}
+end.episode.kicker,에피소드 끝,END OF EPISODE
+end.chapter.kicker,챕터 끝,END OF CHAPTER
+end.episode.body,끝까지 보았습니다. 타이틀에서 처음부터 다시 볼 수 있습니다.,You reached the end. Start again from the title.
+end.chapter.body,챕터를 끝까지 진행했습니다.,You finished the chapter.
+end.lastEpisode,마지막 에피소드  /  {0},Last episode  /  {0}
+end.stat,{0} {1},{0} {1}
 confirm.skip.title,에피소드 건너뛰기,Skip episode
 confirm.skip.body,"현재 에피소드의 남은 대사를 빠르게 진행합니다.
 선택지가 나오면 선택을 기다립니다.","The rest of this episode plays quickly.

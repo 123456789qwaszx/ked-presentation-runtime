@@ -63,6 +63,45 @@ namespace Ked.Samples.UI
         void ShowStage();
     }
 
+    /// <summary>
+    /// 회차가 끝까지 갔다는 알림의 내용(끝 카드). 끝을 정하는 것은 호스트다 — 연출 단독은 노드가 끝났을 때(NodePlaythrough),
+    /// 진행 예제는 챕터가 끝났을 때(SceneRunner). 글자는 이미 사람이 읽을 것이다(콘텐츠의 이름) — UI 글자 표의 키가 아니다.
+    /// </summary>
+    public sealed class KedPlaythroughEnd
+    {
+        public enum Unit
+        {
+            /// <summary>에피소드(연출 단독의 노드 하나).</summary>
+            Episode,
+
+            /// <summary>챕터(진행 예제).</summary>
+            Chapter,
+        }
+
+        public readonly struct Stat
+        {
+            public readonly string Name;
+            public readonly int Value;
+
+            public Stat(string name, int value)
+            {
+                Name = name;
+                Value = value;
+            }
+        }
+
+        public Unit Kind;
+
+        /// <summary>끝난 것의 이름. 비면 지금 예제의 제목(KedExampleCard.TitleKey).</summary>
+        public string Title;
+
+        /// <summary>마지막으로 본 에피소드의 제목. 없으면 null.</summary>
+        public string LastEpisode;
+
+        /// <summary>끝난 때의 스탯(정의 순서). 없으면 비어 있다.</summary>
+        public IReadOnlyList<Stat> Stats = Array.Empty<Stat>();
+    }
+
     /// <summary>재생 쪽에서 UI가 직접 쓰는 것. 조립(PresentationAssembler)이 만든 것을 호스트가 모아 넘긴다.</summary>
     public sealed class KedPlaybackBindings
     {

@@ -9,10 +9,11 @@ namespace Ked.Samples.UI
     /// UIPF를 세우는 일 — 층 셋(Root · Panel · Overlay), UIResolver(문맥·글꼴), UIManager, 화면 등록,
     /// UI 글자 표(Localizer · ViewTexts) — 과 흐름(KedUIFlow)의 수명을 갖는다.
     ///
-    /// 호스트(SampleBootstrap)가 쓰는 길은 셋뿐이다 — UIPF 타입을 바깥에 내놓지 않는다(기본 어셈블리는 UIPF를 모른다).
-    ///   Prepare()    조립 전: 화면을 세우고 대사창·선택지 상자 계약을 내준다.
-    ///   Configure()  조립 후: 재생과 호스트 계약을 잇는다.
-    ///   OpenTitle()  시작.
+    /// 호스트(SampleBootstrap)가 쓰는 길은 넷뿐이다 — UIPF 타입을 바깥에 내놓지 않는다(기본 어셈블리는 UIPF를 모른다).
+    ///   Prepare()              조립 전: 화면을 세우고 대사창·선택지 상자 계약을 내준다.
+    ///   Configure()            조립 후: 재생과 호스트 계약을 잇는다.
+    ///   OpenTitle()            시작.
+    ///   ShowPlaythroughEnd()   회차가 끝까지 갔을 때: 끝 카드(끝을 정하는 것은 호스트다).
     /// </summary>
     [DisallowMultipleComponent]
     public sealed class KedUIHost : MonoBehaviour
@@ -105,6 +106,12 @@ namespace Ked.Samples.UI
         public void OpenTitle()
         {
             RequireFlow().GoToTitle();
+        }
+
+        /// <summary>회차가 끝까지 갔다 — 재생 화면 위에 끝 카드를 연다. 갈 곳은 타이틀 하나다.</summary>
+        public void ShowPlaythroughEnd(KedPlaythroughEnd end)
+        {
+            RequireFlow().ShowPlaythroughEnd(end);
         }
 
         private void Update()

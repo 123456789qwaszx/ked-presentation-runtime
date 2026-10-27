@@ -12,6 +12,13 @@ using UnityEngine;
 // 복원 장면을 열 때 PlaybackUnit이 연다. 여기는 "시크 중인가"만 물어 진행 선택을 기록으로 자동 응답한다.
 public sealed class SceneRunner : ISceneRunner
 {
+    /// <summary>
+    /// 챕터가 끝났다 — 마지막 장면을 확정(저장)한 뒤, 진행 런타임에 돌려주기 전에 부른다. 끝 카드를 띄우는 자리다.
+    /// 진행 런타임(ProgressionDriver)은 끝을 알리지 않는다 — 판단이 여기(장면 실행)서 나므로 여기서 알린다.
+    /// 받는 것: 챕터 정의 · 마지막으로 본 에피소드 · 끝난 상태(확정된 스탯).
+    /// </summary>
+    public event Action<ChapterDefinition, EpisodeNode, ChapterState> ChapterEnded;
+
     private enum SceneStepKind
     {
         Continue,
@@ -64,7 +71,11 @@ public sealed class SceneRunner : ISceneRunner
                     return CommitScene(progress, SceneRunOutcome.SceneEnded);
 
                 case SceneStepKind.ChapterEnded:
-                    return CommitScene(progress, SceneRunOutcome.ChapterEnded);
+                {
+                    SceneRunResult result = CommitScene(progress, SceneRunOutcome.ChapterEnded);
+                    ChapterEnded?.Invoke(progress.Definition, progress.CurrentEpisode, result.ExitState);
+                    return result;
+                }
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(step), step, null);

@@ -55,8 +55,16 @@ public sealed class VNFeatureController
 
     public void Tick()
     {
-        if (IsAuto && LineFullyShown)
+        // #auto 줄은 자동 진행보다 먼저 — 켜져 있지 않아도, 대기 없이 넘긴다. 막히면(연출 명령 · 시크) 다음 프레임에 다시.
+        if (LineFullyShown && _linePresentationAdvanceState.IsLineAutoAdvancePending)
+        {
+            if (_autoAdvanceScheduler.TryDispatchLineAutoAdvance())
+                _linePresentationAdvanceState.ConsumeLineAutoAdvance();
+        }
+        else if (IsAuto && LineFullyShown)
+        {
             _autoAdvanceScheduler.Tick();
+        }
 
         if (_vnPlaybackSettings.IsSpeedUpMode &&
             LineFullyShown)

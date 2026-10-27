@@ -11,7 +11,7 @@ namespace Ked.Samples.UI
     /// | 음량 | 배경음 · 효과음 · 음성 | 본체 AudioVolumeSettings — 저장도 그쪽(PlayerPrefs Volume_*). 여기 두지 않는다 |
     /// | 대사 | 글자 크기 | UIPF UIContext.TextScale → 대사·선택지·백로그·팝업 본문 |
     /// | 대사 | 글자 출력 속도 | EllipsisBreathTypewriter.unitsPerSecond |
-    /// | 대사 | 대사창 불투명도 | 대사창·이름표 그림의 투명도 |
+    /// | 대사 | 대사창 불투명도 | 대사창·이름표 그림의 투명도(0–100%, 0이면 그림 없이 글자만). 글자는 그대로 |
     /// | 재생 | 자동 진행 대기 | VNPlaybackSettings.autoModeDelaySeconds |
     /// | 재생 | 빠르게 재생 배속 | VNPlaybackSettings.speedupModeMultiplier (본체 하한 2배) |
     /// | 화면 | 창 모드 · 전체 화면 | Screen.fullScreenMode — 엔진이 스스로 기억한다. 에디터에서는 바뀌지 않는다 |
