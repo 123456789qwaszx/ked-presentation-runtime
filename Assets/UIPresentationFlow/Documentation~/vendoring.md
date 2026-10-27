@@ -15,7 +15,7 @@
 
 | | |
 |---|---|
-| 원본 | `UIPresentationFlow` · `feat/authoring-tools` @ `6fe89e7` (2026-10-27, `dev` 머지 전). `dev` @ `4a4af6f` 위에 화면 짓기 도구(`Editor/UI/Authoring`)와 에디터 asmdef를 더했다(`f912e99`, `c22bb76`은 그 주석 · 문서 고침과 블랙홀 일시 정지 창 산출물, `6fe89e7`은 레이아웃 Variant를 처음 한 번만 더하는 도구). `4a4af6f`는 `cf3fa98` 위에 이 저장소에서 드러난 빈틈 셋(끌기 넘기기 · Panel 아래 Root 막기 · 포커스 되돌리기)을 더한 것 — 원본 `docs/PLAN_from-ked.md` |
+| 원본 | `UIPresentationFlow` · `feat/authoring-tools` @ `6fe89e7` (2026-10-27, `dev` 머지 전). `dev` @ `4a4af6f` 위에 화면 짓기 도구(`Editor/UI/Authoring`)와 에디터 asmdef를 더했다(`f912e99`, `c22bb76`은 그 주석 · 문서 고침과 블랙홀 일시 정지 창 산출물, `6fe89e7`은 레이아웃 Variant를 처음 한 번만 더하는 도구). `4a4af6f`는 `cf3fa98` 위에 이 저장소에서 드러난 빈틈 셋(끌기 넘기기 · Panel 아래 Root 막기 · 포커스 되돌리기)을 더한 것 — 원본 `docs/PLAN_from-ked.md`. 원본의 그 뒤 `feat/vn-sample` 커밋 `752d168`(Adaptive UI 데모 걷음) · `a5bcb2b`(비주얼 노벨 샘플)은 데모 · 문서만 바꿨다 — 사본 대상은 같다(아래 "대조" 0줄, 10-27) |
 | 반입 | 2026-10-27 · 원본 → 사본. 처음은 `cf3fa98`, 같은 날 `3a26d8b`(= `dev` `4a4af6f`)로 다시(`Scripts/UI`의 셋을 고치고 `UIManager.PanelInput.cs` 하나를 더함), 그다음 `f912e99`로 다시(`Editor/UI`에 asmdef와 `Authoring/` 여덟 파일), `c22bb76`으로 다시(`UIPrefabs.cs` 주석), `6fe89e7`로 다시(`UIPresentationAssets.cs` — `EnsureLayoutVariant` · `MoveWidget`) |
 | 원본 Unity | 6000.6.2f1 (ugui 2.6.0). 이 저장소는 6000.3.16f1 (ugui 2.0.0)이다. 코드만 들이고 에셋은 이 저장소에서 새로 만든다 |
 | GUID | 원본 `.meta`를 그대로 가져왔다(106개, 같은 날 구조를 원본대로 되돌리며 `Scripts.meta`를 더해 107개, `3a26d8b`에서 `UIManager.PanelInput.cs.meta`를 더해 108개, `f912e99`에서 asmdef · `Authoring` 폴더 · 스크립트 여덟의 `.meta`를 더해 118개). 반입 때 이 저장소 전체 `.meta` 888개와 겹치는 GUID는 0개였고, 뒤에 더한 것들의 GUID도 겹치지 않는다. 사본 폴더 자신의 `Assets/UIPresentationFlow.meta`만 이 저장소에서 만든 것이다 |
@@ -36,9 +36,8 @@
 에디터 코드(`Editor/UI`)는 원본의 에디터 asmdef `Editor/UI/UIPresentationFlow.Editor.asmdef`(`f912e99`부터)에 든다. 예제 UI의 에디터 asmdef(`Ked.Samples.UI.Editor`)가 이것을 참조해 화면 짓기 도구를 쓴다 — asmdef 어셈블리는 `Assembly-CSharp-Editor`를 참조할 수 없다.
 
 가져오지 않은 것은 다음과 같다.
-- `Assets/Scripts/Demo/`: Adaptive UI 데모 코드
-- `Assets/Demo/`: 데모 에셋, 블랙홀 데모
-- `Assets/UI/`: 데모의 바인딩·테마 에셋
+- `Assets/Demo/`: 블랙홀 데모, 비주얼 노벨 샘플(이 저장소 VN UI 묶음의 복사본 + 데모 앱 — 이 저장소가 묶음의 원본이다)
+- `Assets/Scripts/Demo/` · `Assets/UI/`: Adaptive UI 데모의 코드와 바인딩 · 테마 에셋. 원본에서 `752d168`로 걷었다
 
 ## 사본에만 있는 것 — 없다
 
@@ -84,4 +83,4 @@ for m in Scripts Editor Shaders; do diff --strip-trailing-cr /tmp/uipf/Assets/$m
 
 ## 왜 UPM 패키지가 아닌가
 
-원본은 아직 UPM 패키지가 아니다. `package.json`이 없고, 네임스페이스가 없으며, 데모가 런타임 asmdef 안에 있다. 패키지로 만드는 일은 원본에서 따로 한다. 그 전까지는 진행 코어와 같은 복사 반입을 쓴다.
+원본은 아직 UPM 패키지가 아니다. `package.json`이 없고, 네임스페이스가 없다(런타임 asmdef 안에 있던 Adaptive UI 데모는 `752d168`에서 걷었다). 패키지로 만드는 일은 원본에서 따로 한다. 그 전까지는 진행 코어와 같은 복사 반입을 쓴다.

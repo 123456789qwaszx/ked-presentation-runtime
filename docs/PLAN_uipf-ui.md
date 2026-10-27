@@ -335,12 +335,13 @@ UIPF 저장소의 Adaptive UI 데모를 걷고, 그 자리에 이 VN UI를 샘�
   - 도구는 UIPF에 더한 `UIPresentationAssets.EnsureLayoutVariant` · `MoveWidget`(UIPF `feat/authoring-tools`).
   - 레이아웃 패치는 `Screens/Play/Presentation/PlayScreenPresentation.UltraWide_HudInBoard.asset`.
 - 오프라인 컴파일(6000.3): 17개 어셈블리 오류 0 · 경고 0.
-- Unity 확인: 남음
-  - Unity를 닫고 이동을 반영한다.
-  - `Build Sample UI`(편집 모드) → 문제 0.
-  - 재생 · 메뉴 · 선택지 · 백로그 · 설정이 전과 같은지.
-  - Game 뷰 21:9에서 꼬리표 · 퀵메뉴가 판 안쪽으로 오는지, 16:9로 돌리면 제자리로 가는지.
-  - `Validate Sample UI` 문제 0.
+- Unity 확인 (10-27, 아미야 "문제없음"):
+  - `Build Sample UI`(편집 모드) 문제 0, `Validate Sample UI` 문제 0.
+  - 재생 · 메뉴 · 선택지 · 백로그 · 설정이 전과 같다.
+  - Game 뷰 21:9에서 꼬리표 · 퀵메뉴가 판 안쪽으로 오고, 16:9로 돌리면 제자리로 간다.
+  - 산출물(`82ac9340`): 레이아웃 패치 에셋 하나, 그것을 건 재생 화면 Presentation, 캔버스의 `KedUIHost` 어셈블리 이름(App으로 옮겨서). 저장/불러오기 패널은 fileID만 바뀌어(정렬해 비교하면 0줄) 되돌렸다.
+- **UIPF로 복사**(UIPF `feat/vn-sample`): `752d168` Adaptive UI 데모 걷음, `a5bcb2b` 비주얼 노벨 샘플 — `82ac9340`의 KedUI에서 `App/` · `Art/`를 뺀 것을 `Assets/Demo/VisualNovel/KedUI/`에. 트리 해시가 이 저장소의 것과 같다. 데모 앱(흐름 · 가짜 재생 · 메모리 저장 · 선택지 항목 · 글자 표 · 빌드 메뉴 `UI Demo/Build Visual Novel Demo`)은 UIPF가 원본이다. UIPF Unity(6000.6) 확인은 남음 — 원본 `docs/PLAN_vn-sample.md`.
+- UIPF 쪽 프레임워크 코드는 바뀌지 않았다. 사본은 `6fe89e7` 그대로 맞다(`vendoring.md` "대조" 0줄).
 
 ### U5. 문서
 - SCOPE-BOUNDARY에 "꽂힌 모듈 둘"(진행 · UI), ASSEMBLY-BOUNDARY의 어셈블리 표, `PLAN_framework-scope` 분류표.
