@@ -5,11 +5,12 @@ using UnityEngine;
 public sealed class PortraitBuildSettings : ScriptableObject
 {
     [Header("Scan Folders")]
+    // 설정 에셋이 하나도 없을 때 빌더(PortraitDbBuilder)가 새로 만드는 에셋의 기본값이다.
+    // 아래 출력 경로처럼 특정 프로젝트 · 예제의 자리를 가리키지 않는다(예제는 자기 설정 에셋에 Assets/Samples/Portraits를 적는다).
     [Tooltip("Portrait 스프라이트를 스캔할 폴더들")]
     public List<string> scanFolders = new List<string>
     {
-        "Assets/Art/Portraits/Playable",
-        "Assets/Art/Portraits/NPC",
+        "Assets/Portraits",
     };
 
     [Header("Output")]

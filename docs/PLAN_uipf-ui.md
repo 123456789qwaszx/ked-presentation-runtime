@@ -165,7 +165,7 @@ Unity를 닫고 했다.
   - `Resources/`의 낱장 UI 그림 7개
 - **남긴 것**:
   - `Samples/Data/DialogueSurfaceLayoutPresetDB`(옛 대사창 배치): 본체 도구 `PresentationTuningExporter`가 경로로 읽는다. 본체 diff 0이라 그대로 둔다.
-  - `Assets/Fonts/NEXON Maplestory`: 옛 UI만 썼지만 예제 밖 폴더라 두었다.
+  - `Assets/Fonts/NEXON Maplestory`: 옛 UI만 썼지만 예제 밖 폴더라 두었다. → 10-27 `Assets/Fonts`째 지웠다(아래 "Art · Fonts 정리").
   - `Samples/Art/Emoji`: 연출용이다(`PLAN_framework-scope`).
 - **오프라인 컴파일**: 15개 어셈블리 오류 0 · 경고 0. `Assembly-CSharp`는 68파일에서 24파일로 줄었다.
 - **독립 리뷰**: 두 건을 고쳤다(위 CanvasScaler, 입력 폴러). 씬 YAML 정합 · 지운 에셋의 참조 · 무대 표시와 CanvasGroup · 정렬 · 초기화 순서는 회귀 없음.
@@ -348,6 +348,13 @@ UIPF 저장소의 Adaptive UI 데모를 걷고, 그 자리에 이 VN UI를 샘�
   - 글자 표 키는 그대로다 — `ViewTexts`는 화면 키가 아니라 타입 이름을 쓴다(`{타입}.{Ref}`).
   - `Validate Sample UI`에 4번 검사를 더했다: 묶음의 화면 · 위젯 키가 `Ked.`로 시작하는가, 등록하는 화면의 Presentation이 있고 `presentationId`가 키와 같은가. id가 어긋나면 호스트가 빈 Presentation으로 열어 Variant가 조용히 사라지기 때문이다.
 - 같은 때 UIPF의 6000.6 분석기가 경고 하나(UAC1001)를 냈는데, 실제 버그였다. Variant 조건의 실험 칸 둘이 에셋에 저장되지 않았다. 원본 `7da70e6`에서 고치고 사본을 다시 들였다(`vendoring.md`). 이 저장소의 에셋은 그 칸을 쓰지 않는다.
+
+### Art · Fonts 정리 (10-27, 아미야 결정)
+- `Assets/Art/`(비공개 초상화 45장, git 무시)와 `Assets/Fonts/`(7종 25개, 약 210MB)를 지웠다. 이력은 다시 쓰지 않았다 — 글꼴은 `bfe6852f` · `72a1ae69`의 이력에 남는다.
+- 지우기 전 참조: Art의 GUID를 가리키는 추적 파일 0(초상화 DB는 `Samples/Portraits`만 훑는다). Fonts는 Dovemayo SDF 하나만 두 곳이 가리켰다 — TMP Settings의 기본 글꼴과 `PresentationSample`의 `DebugView/AccumulatedStatusCanvas/AccumulatedStatusText`.
+- 둘 다 KedUI 묶음의 `NotoSansKR-Medium SDF`(동적, OFL)로 바꿨다. 그래서 TMP 기본 글꼴이 예제 묶음 안을 가리킨다. 동적 글꼴이라 플레이 뒤 바뀌는 글꼴 자산은 지금처럼 되돌린다.
+- `.gitignore`의 `/[Aa]ssets/[Aa]rt/`는 둔다 — 비공개 아트가 다시 들어오지 않게.
+- `PortraitBuildSettings.cs`의 기본 `scanFolders`(설정 에셋이 없을 때 새로 만드는 에셋의 값)가 `Assets/Art/Portraits/Playable` · `NPC`를 가리켰다. 출력 경로 기본값(`Assets/Data/Generated/…`)처럼 특정 자리를 가리키지 않는 `Assets/Portraits`로 바꿨다. 예제의 설정 에셋(`Samples/Data/PortraitBuildSettings`)은 `Assets/Samples/Portraits`를 적고 있어 그대로다.
 
 ### U5. 문서
 - SCOPE-BOUNDARY에 "꽂힌 모듈 둘"(진행 · UI), ASSEMBLY-BOUNDARY의 어셈블리 표, `PLAN_framework-scope` 분류표.

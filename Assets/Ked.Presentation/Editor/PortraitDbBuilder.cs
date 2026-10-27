@@ -197,11 +197,11 @@ public static class PortraitDbBuilder
 
     // 초상 에셋 규약: <스캔 뿌리>/<캐릭터>/<변형>/<표정>.png
     //
-    //   Assets/Art/Portraits/fillintheblank/yoonsaea/b/03.png
-    //                        └ 뿌리        └ 캐릭터  └변형 └표정
+    //   Assets/Samples/Portraits/harin/b/03.png
+    //   뿌리 = Assets/Samples/Portraits, 캐릭터 = harin, 변형 = b, 표정 = 03
     //
     // 변형이 폴더로 서면서 파일 이름에서 캐릭터·변형이 빠졌다. 그래서 variantKey는
-    // 종전의 'yoonsaea_b'가 아니라 폴더 이름 그대로인 'b'다 —
+    // 종전의 'harin_b'가 아니라 폴더 이름 그대로인 'b'다 —
     // 조회 쪽(PortraitResolver·코어 PortraitKeyNormalizer)도 변형 키를 문자열 전체로 보므로
     // 여기서 내는 값이 곧 대본이 쓰는 변형 이름이다. 'school'·'casual'처럼 여러 글자도 된다.
     private static bool TryParse(

@@ -172,7 +172,7 @@ SCOPE-BOUNDARY.md §1은 "여기 적힌 것은 전부 필요한 기능이고 주
 
 **결과.**
 - `259ee8d3` 이동만 — 1245개 이름 바꾸기, 내용 변경 0. 새 폴더 `.meta` 10개, 빈 `Material/` 제거.
-  `Assets/Art/`에는 비공개 아트만 남아 추적을 끊고 통째로 무시한다(`.gitignore`).
+  `Assets/Art/`에는 비공개 아트만 남아 추적을 끊고 통째로 무시한다(`.gitignore`). 10-27 로컬 사본도 지웠다 — 무시 규칙은 비공개 아트가 다시 들어오지 않게 둔다.
 - `9b5939b8` 본체 도구가 예제 타입을 모르게 — `Ked.Presentation.Editor` asmdef, 리그 프리팹 계약 `IRigPrefabSource`(SampleBootstrap이 구현),
   튜닝 덤프는 기준 해상도를 `IStageMaskProvider` 무대에서 읽음, 초상 DB 빌더는 설정을 타입으로 찾음,
   등가성 하네스는 대본 폴더를 호스트에게 받고 하위 폴더까지 읽음(전에는 `test/`의 `qwer_scene`을 못 찾았다).
