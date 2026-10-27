@@ -3,7 +3,7 @@
 // 한 장면 안에서 연출 범주를 한 번씩 지나간다.
 //   S1 배경·BGM·등장     bg_spawn · bg_sprite · bg_fade_in · bgm · fade_in · place_center
 //   S2 배치·크기         slide_in · place_left / place_right · size · sibling_front
-//   S3 표정·포즈·모션    face · face_swap · pose · gesture
+//   S3 표정·포즈·모션    face · face_swap · pose · gesture · motion
 //   S4 포커스·카메라     char_visual_focus / dim / clear · screen_blur · shot_focus_to · shot_reset
 //   S5 화면 효과·효과음  screen_vignette · screen_noise · screen_flash · sfx
 //   S6 트랜지션          tx_daze_in / out · 배경 교체 · 세 번째 인물 · 선택지
@@ -71,6 +71,8 @@ title: Demo_Presentation
 <<pose s2 b>>
 <<gesture s2 0u 0.3u 12fr>>
 시구레: 자세를 바꾸고, 가볍게 몸짓도.
+<<motion s1 nod>>
+하린: 만들어 둔 모션(motions.json의 nod)은 이름만 불러.
 
 // ═════ S4. 포커스·카메라 ═════
 <<char_visual_focus s1 1 14fr>>
