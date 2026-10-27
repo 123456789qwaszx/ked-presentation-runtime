@@ -18,4 +18,20 @@ MonoBehaviour:
   baseImageTheme: {fileID: 0}
   imageThemes: []
   textBindings: {fileID: 0}
-  variants: []
+  variants:
+  - variantId: UltraWide_HudInBoard
+    priority: 10
+    condition:
+      themeId: 
+      localeId: 
+      usePlatform: 0
+      platform: 1
+      useLayoutClass: 1
+      layoutClass: 3
+      useAspectRatio: 0
+      aspectRule: 0
+      aspectMin: 1.5
+      aspectMax: 2.5
+    overrideTheme: {fileID: 0}
+    overrideLayout: {fileID: 11400000, guid: a6de7c86feaa4a549838494a84a99cca, type: 2}
+    overrideImageTheme: {fileID: 0}

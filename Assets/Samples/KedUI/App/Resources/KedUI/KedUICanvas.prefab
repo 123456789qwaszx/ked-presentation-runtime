@@ -230,7 +230,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2837d83de56e4300a982befd3ab391f8, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Ked.Samples.UI::Ked.Samples.UI.KedUIHost
+  m_EditorClassIdentifier: Ked.Samples.UI.App::Ked.Samples.UI.KedUIHost
   rootLayer: {fileID: 7156945588304030118}
   panelLayer: {fileID: 640762513995289695}
   overlayLayer: {fileID: 24342727392919659}
