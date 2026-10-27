@@ -116,7 +116,15 @@ VN 쪽은 `PresentationSessionContext`(Playback/Host)가 재생 상태를 그 �
 
 테스트: 코어 17 · 로더 5 · 리듀서 3 · 파서 1 · Unity 대조 4(`AnimationClip.SampleAnimation` ↔ `MotionMath.Compose`).
 
-남은 것: 씬에서 TextAsset 두 개를 꽂기(한 번) · VnTool이 `motions.json`의 이름·길이 목록을 읽어 `<<motion>>` 자동완성 · 2단계(카메라·의도 채널).
+리뷰(2026-10-27) 뒤 다듬은 것: `offset` → `relative`(배율은 곱셈) · `end: restore|commit`(모션 단위, 필수) · 제작 원본은 `MotionDefinition` ·
+내보내기는 `rig-schemas.json`으로 노드와 **계층 전체**를 대조(Core + 데이터 의존) · 제작 리그는 `Ked/Motion/Create Authoring Rig`가 스키마로 세운다 ·
+relative의 전 구간 중립값 성분은 싣지 않는다. 규약은 무대 저장소 `docs/motion-contract.md`.
+
+**확인(2026-10-28, Unity).** 견본 둘 — `nod`(restore, Track_Move_Y 0→-18→0, 0.6s) · `bow`(commit·absolute, SwayPivot z 0→8, 0.4s).
+연출 데모 S3에서 `<<motion s1 nod>>` · `<<motion s1 bow>>` → `place_center`(숙인 채로 이동, 장부) → `char_rotate_to 0`(같은 노드를 다른 명령이 이어받음) → `place_right`.
+재생·스킵·롤백 모두 기대대로. 씬의 `SampleBootstrap › 작가 자산`에 `curves.json`·`motions.json`이 꽂혀 있다.
+
+남은 것: VnTool이 `motions.json`의 이름·길이·`end`를 읽어 `<<motion>>` 자동완성 · 2단계(카메라·의도 채널) · 전용 모션 툴 여부(`PLAN_motion-tool.md`, 무대 저장소).
 
 ## 6. 검증
 
