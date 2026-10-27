@@ -137,6 +137,12 @@ public class SampleBootstrap : MonoBehaviour, IRigPrefabSource
     [SerializeField] private RectTransform rigPrefab;
     [SerializeField] private RectTransform backgroundRigPrefab;
 
+    [Header("작가 자산")]
+    [Tooltip("대본 번들 곁의 curves.json. 비우면 에디터에서만 Assets/Samples/Dialogue/curves.json을 읽는다 — 빌드에서는 읽지 않는다.")]
+    [SerializeField] private TextAsset easeCurvesJson;
+    [Tooltip("대본 번들 곁의 motions.json(Ked/Motion/Export motions.json으로 낸 것). 비우면 curves.json과 같은 규칙.")]
+    [SerializeField] private TextAsset motionsJson;
+
     [Header("등가성 하네스")]
     [Tooltip("켜면 재생 중 라인마다 (코어 리듀서로 접은 상태) vs (실제 무대)를 비교하고 " +
              "종료 시 EquivalenceReports/*.json을 남긴다. 판정 전용 — 재생에 영향 없음.")]
@@ -315,6 +321,9 @@ public class SampleBootstrap : MonoBehaviour, IRigPrefabSource
 
             CharacterRigPrefab = rigPrefab,
             BackgroundRigPrefab = backgroundRigPrefab,
+
+            EaseCurvesJson = easeCurvesJson,
+            MotionsJson = motionsJson,
 
             ScreenNoisePresetDb = screenNoisePresetDb,
             ScreenVignettePresetDb = screenVignettePresetDb,

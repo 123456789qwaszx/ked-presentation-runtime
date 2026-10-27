@@ -102,7 +102,21 @@ VN 쪽은 `PresentationSessionContext`(Playback/Host)가 재생 상태를 그 �
 - 값은 리그 로컬 px·도·배율. 원근(`DepthScale`)·시차(층 프레이밍)·카메라는 위에서 곱해지므로 모션은 셋을 모른다.
 - `curves.json`은 이동 명령의 이징(모양)으로 그대로 남는다. 모션은 내용이다.
 
-그 전에 남은 것: `curves.json`을 `Application.dataPath`로 읽어 빌드에서 안 읽힌다(TextAsset으로, [PLAN_framework-scope.md](PLAN_framework-scope.md) §5).
+### 한 것 (2026-10-27, ked-stage-runtime `dev`)
+
+모션 툴은 **Unity Animation 창**이다(A안). 리그 프리팹의 노드는 트랜스폼 계층이라 그대로 키잉되고, 키는 Hermite라 `CurveKey`와 1:1이다.
+그래서 툴은 내보내기 하나다 — 런타임은 `AnimationClip`을 모른다. VnTool은 모션 **이름**만 쓴다(`<<motion c1 nod>>`).
+
+| 단계 | 무엇 | 어디 |
+|---|---|---|
+| 1 Core | `MotionClip`(채널 = 노드·종류·mode·X/Y/Z 키, 초 단위) · `MotionMath`(Sample · Compose · EndValue · ClaimFor) · `MotionRules`(이름·길이·키·Track_Focus 금지·offset 첫값 0·스키마 노드) | `Core/Motion/` |
+| 2 Runtime | `MotionLibrary`(motions/1 로더, 호스트가 본문을 준다) · `MotionCommandCharR`(노드마다 트윈 하나, 마지막 키 = 클레임, 장부 게시) · 리듀서 `motion`(샘플링 없이 마지막 키) · 파서 표 `motion` | `Runtime/Commands/` |
+| 3 Editor | `MotionExportSettings`(클립 → 채널별 mode, 기본값 없음) · `MotionClipExporter`(Animation 창의 anchoredPosition·localScale·localEulerAnglesRaw만, 거부 사유 전부 모음, 되읽기 대조, 메뉴 Ked/Motion) | `Editor/` |
+| 호스트 | `SampleBootstrap`의 '작가 자산' TextAsset(curves.json · motions.json) — 빌드에서도 읽힌다. 안 꽂으면 에디터에서만 옛 경로를 읽고 소리 낸다. 하네스 튜닝에 `Motions` | 이 저장소 |
+
+테스트: 코어 17 · 로더 5 · 리듀서 3 · 파서 1 · Unity 대조 4(`AnimationClip.SampleAnimation` ↔ `MotionMath.Compose`).
+
+남은 것: 씬에서 TextAsset 두 개를 꽂기(한 번) · VnTool이 `motions.json`의 이름·길이 목록을 읽어 `<<motion>>` 자동완성 · 2단계(카메라·의도 채널).
 
 ## 6. 검증
 

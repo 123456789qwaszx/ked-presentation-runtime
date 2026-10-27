@@ -52,6 +52,7 @@ public sealed class StageEquivalenceHarness : MonoBehaviour
     private VNRuntimeStateProvider _provider;
     private PresentationScopeSession _session;
     private PresentationStage _stage;
+    private MotionLibrary _motions = MotionLibrary.Empty;
     private PresentationShotResponseSystem _shotSystem;
     private DialogueAdvanceDispatcher _dispatcher;
 
@@ -106,8 +107,10 @@ public sealed class StageEquivalenceHarness : MonoBehaviour
         PresentationStage stage,
         PresentationShotResponseSystem shotSystem,
         DialogueAdvanceDispatcher dispatcher,
+        MotionLibrary motions,
         string dialogueFolder)
     {
+        _motions = motions ?? MotionLibrary.Empty;
         _provider = provider;
         _session = session;
         _stage = stage;
@@ -177,6 +180,9 @@ public sealed class StageEquivalenceHarness : MonoBehaviour
             DepthLevel = depthTuning?.MonoBehaviour?.level,
             FocusTuning = focusTuning?.MonoBehaviour,
             PortraitDimensions = LoadPortraitDimensions(tuningDir),
+
+            // 재생이 읽은 것과 같은 클립 — 폴드가 다른 파일을 보면 대조가 거짓이다.
+            Motions = _motions.Clips,
         };
     }
 

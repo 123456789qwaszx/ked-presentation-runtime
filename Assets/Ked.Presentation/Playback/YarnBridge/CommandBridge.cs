@@ -126,6 +126,10 @@ public sealed partial class YarnCommandBridge
         // 제자리 몸짓 — 순변위 0. 이동 계열과 다른 노드라 같은 라인에 겹칠 수 있다.
         runner.AddCommandHandler<string, string, string, string, string, string>(
             "gesture", EnqueueGestureSpec);
+
+        // 모션 — motions.json의 클립(Animation 창에서 만들어 내보낸 것). 길이는 클립이 안다.
+        runner.AddCommandHandler<string, string>(
+            "motion", EnqueueMotionSpec);
         
         runner.AddCommandHandler<string>(
             "sibling_front", EnqueueCharacterSiblingFrontSpec);

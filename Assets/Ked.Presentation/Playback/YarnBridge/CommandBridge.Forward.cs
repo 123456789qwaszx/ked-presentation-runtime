@@ -56,6 +56,9 @@ public sealed partial class YarnCommandBridge
     private void EnqueueSizeResetSpec(string roleKey = null, string durationToken = null, string easeToken = null)
         => Forward("scale_reset", roleKey, durationToken, easeToken);
 
+    private void EnqueueMotionSpec(string roleKey = null, string motionName = null)
+        => Forward("motion", roleKey, motionName);
+
     private void EnqueueGestureSpec(string roleKey = null, string xAmpToken = null, string yAmpToken = null, string durationToken = null, string xEaseToken = null, string yEaseToken = null)
         => Forward("gesture", roleKey, xAmpToken, yAmpToken, durationToken, xEaseToken, yEaseToken);
 

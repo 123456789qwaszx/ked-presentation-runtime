@@ -13,9 +13,11 @@ using UnityEngine;
 /// </summary>
 public sealed class PresentationAssembler
 {
-    /// <summary>예제 대본 번들 폴더(Assets/Samples/Dialogue). 커브(curves.json)도 대본 곁에 산다.</summary>
+    /// <summary>예제 대본 번들 폴더(Assets/Samples/Dialogue). 커브(curves.json)·모션(motions.json)도 대본 곁에 산다.</summary>
     private static string DialogueFolder =>
         System.IO.Path.Combine(Application.dataPath, "Samples", "Dialogue");
+
+    private MotionLibrary _motions = MotionLibrary.Empty;
 
     private readonly PresentationSceneRefs _refs;
     private readonly IPresentationView _presentationView;
@@ -248,13 +250,14 @@ public sealed class PresentationAssembler
             _refs.SurfaceLayoutPresetDb,
             _refs.SpeakerPolicyDb);
 
-        EaseCurveLibrary easeCurves = EaseCurveLibrary.LoadFrom(
-            System.IO.Path.Combine(DialogueFolder, EaseCurveLibrary.BundleFileName));
+        EaseCurveLibrary easeCurves = LoadEaseCurves();
+        _motions = LoadMotions();
 
         StageCommandParser stageCommandParser = new(
             _refs.CharacterRigPrefab,
             _refs.BackgroundRigPrefab,
-            easeCurves);
+            easeCurves,
+            _motions);
 
         _ = new YarnCommandBridge(
             _refs.DialogueRunner,
@@ -375,7 +378,53 @@ public sealed class PresentationAssembler
             _presentationStage,
             _presentationResponseRig,
             _dialogueAdvanceDispatcher,
+            _motions,
             DialogueFolder);
+    }
+
+    // ── 작가 자산 — TextAsset이 정본이다(빌드에서도 읽힌다). 안 꽂혀 있으면 에디터에서만 옛 경로의 파일을 읽는다 ──
+
+    private EaseCurveLibrary LoadEaseCurves()
+    {
+        if (_refs.EaseCurvesJson != null)
+            return EaseCurveLibrary.Parse(_refs.EaseCurvesJson.text, _refs.EaseCurvesJson.name);
+
+        string json = ReadBundleFileEditorOnly(EaseCurveLibrary.BundleFileName);
+        return json == null ? EaseCurveLibrary.Empty : EaseCurveLibrary.Parse(json, EaseCurveLibrary.BundleFileName);
+    }
+
+    private MotionLibrary LoadMotions()
+    {
+        string[] nodeIds = CharacterRigSchema.NodeIds();
+
+        if (_refs.MotionsJson != null)
+            return MotionLibrary.Parse(_refs.MotionsJson.text, _refs.MotionsJson.name, nodeIds);
+
+        string json = ReadBundleFileEditorOnly(MotionLibrary.BundleFileName);
+        return json == null ? MotionLibrary.Empty : MotionLibrary.Parse(json, MotionLibrary.BundleFileName, nodeIds);
+    }
+
+    /// <summary>
+    /// 인스펙터에 TextAsset이 없을 때의 길. 에디터에서는 대본 폴더의 파일을 읽어 주되 소리 낸다 —
+    /// 같은 코드가 빌드에서는 파일을 못 보므로(Application.dataPath는 빌드에 없다) 거기서는 0개다.
+    /// 파일이 없으면 조용히 null — 자산을 안 쓰는 프로젝트가 정상 경로다.
+    /// </summary>
+    private static string ReadBundleFileEditorOnly(string fileName)
+    {
+#if UNITY_EDITOR
+        string path = System.IO.Path.Combine(DialogueFolder, fileName);
+
+        if (!System.IO.File.Exists(path))
+            return null;
+
+        Debug.LogWarning(
+            $"[연출 조립] {fileName}을 파일 경로로 읽었다 — 빌드에서는 읽히지 않는다. " +
+            "SampleBootstrap의 '작가 자산'에 TextAsset을 꽂을 것.");
+
+        return System.IO.File.ReadAllText(path);
+#else
+        return null;
+#endif
     }
 }
 
