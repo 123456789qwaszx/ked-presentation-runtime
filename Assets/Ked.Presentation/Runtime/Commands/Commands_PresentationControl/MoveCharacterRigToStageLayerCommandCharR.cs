@@ -63,7 +63,7 @@ public sealed class MoveCharacterRigToStageLayerCommandCharR : CommandBase
     {
         _resolveAttempted = true;
 
-        _rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
+        _rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope.Stage, _spec.slotKey);
         _slotResolver.TryResolve(_spec.stage, _spec.layer, out RectTransform parent);
         _parent = parent;
     }

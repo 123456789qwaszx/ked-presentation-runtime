@@ -88,7 +88,7 @@ public sealed class StageLayerBlurCommand : ClaimTweenCommandBase
             return;
 
         _charScratch.Clear();
-        scope.CharacterRigs.CollectAliveRigs(_charScratch);
+        scope.Stage.characterRigs.CollectAliveRigs(_charScratch);
 
         for (int i = 0; i < _charScratch.Count; i++)
         {
@@ -104,7 +104,7 @@ public sealed class StageLayerBlurCommand : ClaimTweenCommandBase
         }
 
         _bgScratch.Clear();
-        scope.BackgroundRigs.CollectAliveRigs(_bgScratch);
+        scope.Stage.backgroundRigs.CollectAliveRigs(_bgScratch);
 
         for (int i = 0; i < _bgScratch.Count; i++)
         {

@@ -53,7 +53,7 @@ public sealed class SetSpriteCommandCharR : CommandBase
     {
         _resolveAttempted = true;
 
-        CharacterRigRefs rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
+        CharacterRigRefs rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope.Stage, _spec.slotKey);
         _image = rig.GetImage(_spec.target);
     }
 

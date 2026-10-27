@@ -14,7 +14,7 @@ public struct CharacterFocusPointResult
 public static class CharacterFocusPointResolver
 {
     public static void TryResolve(
-        CommandRunScope scope,
+        PresentationStage stage,
         IShotResponseStageProvider stageProvider,
         string roleKey,
         CharacterFocusPreset preset,
@@ -25,11 +25,11 @@ public static class CharacterFocusPointResolver
     {
         result = default;
 
-        string resolvedRigKey = CharacterRigTargetResolver.ResolveRigKeyByPolicy(scope, roleKey);
-        scope.CharacterRigs.TryGetRig(resolvedRigKey, out CharacterRigRefs rigRefs);
-        string tuningKey = CharacterRigTargetResolver.ResolveCharacterKeyFromTargetKey(scope, roleKey);
+        string resolvedRigKey = CharacterRigTargetResolver.ResolveRigKeyByPolicy(stage, roleKey);
+        stage.characterRigs.TryGetRig(resolvedRigKey, out CharacterRigRefs rigRefs);
+        string tuningKey = CharacterRigTargetResolver.ResolveCharacterKeyFromTargetKey(stage, roleKey);
 
-        CharacterFacing facing = ResolveFacing(scope, roleKey);
+        CharacterFacing facing = ResolveFacing(stage, roleKey);
 
         TryResolveFromRigRefs(
             rigRefs,
@@ -171,11 +171,11 @@ public static class CharacterFocusPointResolver
         return true;
     }
 
-    public static CharacterFacing ResolveFacing(CommandRunScope scope, string roleKey)
+    public static CharacterFacing ResolveFacing(PresentationStage stage, string roleKey)
     {
-        if (scope != null &&
-            scope.CastRegistry != null &&
-            scope.CastRegistry.TryGetFacing(roleKey, out CharacterFacing facing))
+        if (stage != null &&
+            stage.castRegistry != null &&
+            stage.castRegistry.TryGetFacing(roleKey, out CharacterFacing facing))
         {
             return facing;
         }

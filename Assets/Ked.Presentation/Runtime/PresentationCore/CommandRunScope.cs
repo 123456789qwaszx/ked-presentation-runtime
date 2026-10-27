@@ -9,11 +9,8 @@ public sealed class CommandRunScope
 
     public CancellationToken Token { get; set; }
 
-    public CharacterRigRegistry CharacterRigs => _stage.characterRigs;
-    public BackgroundRigRegistry BackgroundRigs => _stage.backgroundRigs;
-    public CastRegistry CastRegistry => _stage.castRegistry;
-
-    public CharacterRigTargetAliasRegistry CharacterTargetAliases => _stage.characterTargetAliases;
+    // 무대(리그·배경·cast 레지스트리)는 실행 수명과 다른 것이다 — 리졸버는 Stage만 받는다.
+    public PresentationStage Stage => _stage;
     
     private LifetimeScope StepLifetime { get; } = new();
     private LifetimeScope RunLifetime { get; } = new();

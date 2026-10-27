@@ -14,7 +14,7 @@ public static class CharacterFocusPlacementSolver
     private static readonly List<RectTransform> ChainRects = new(48);
 
     public static bool TryCalculateFocusPlacement(
-        CommandRunScope scope,
+        PresentationStage stage,
         IShotResponseStageProvider stageProvider,
         string roleKey,
         RectTransform moveRect,
@@ -35,11 +35,11 @@ public static class CharacterFocusPlacementSolver
         if (rigSpaceRoot == null)
             return false;
 
-        string resolvedRigKey = CharacterRigTargetResolver.ResolveRigKeyByPolicy(scope, roleKey);
-        scope.CharacterRigs.TryGetRig(resolvedRigKey, out CharacterRigRefs rigRefs);
+        string resolvedRigKey = CharacterRigTargetResolver.ResolveRigKeyByPolicy(stage, roleKey);
+        stage.characterRigs.TryGetRig(resolvedRigKey, out CharacterRigRefs rigRefs);
 
-        string tuningKey = CharacterRigTargetResolver.ResolveCharacterKeyFromTargetKey(scope, roleKey);
-        CharacterFacing facing = CharacterFocusPointResolver.ResolveFacing(scope, roleKey);
+        string tuningKey = CharacterRigTargetResolver.ResolveCharacterKeyFromTargetKey(stage, roleKey);
+        CharacterFacing facing = CharacterFocusPointResolver.ResolveFacing(stage, roleKey);
 
         if (!CharacterFocusPointResolver.TryResolveFocusMeasureInputs(
                 rigRefs,

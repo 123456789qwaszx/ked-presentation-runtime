@@ -45,7 +45,7 @@ public sealed class CharVisualFocusCommandCharR : ClaimTweenCommandBase
     protected override void ResolveTargets(CommandRunScope scope)
     {
         CharacterRigRefs rigRefs =
-            CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
+            CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope.Stage, _spec.slotKey);
 
         _controller = rigRefs?.VisualEffect;
 

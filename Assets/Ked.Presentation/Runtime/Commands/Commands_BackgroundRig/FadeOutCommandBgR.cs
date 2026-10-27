@@ -32,7 +32,7 @@ public sealed class FadeOutCommandBgR : CanvasFadeCommandBase
 
     protected override RectTransform ResolveFadeRect(CommandRunScope scope)
     {
-        scope.BackgroundRigs.TryGetRig(_spec.rigKey, out BackgroundRigRefs rig);
+        scope.Stage.backgroundRigs.TryGetRig(_spec.rigKey, out BackgroundRigRefs rig);
         return rig?.GetRect(_spec.target);
     }
 }

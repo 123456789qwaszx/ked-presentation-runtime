@@ -34,12 +34,12 @@ public sealed class SetPortraitPoseCommandCharR : CommandBase
     private void Apply(CommandRunScope scope)
     {
         string resolvedSlotKey =
-            CharacterRigTargetResolver.ResolveRigKeyByPolicy(scope, _spec.slotKey);
+            CharacterRigTargetResolver.ResolveRigKeyByPolicy(scope.Stage, _spec.slotKey);
 
         string variantKey = string.IsNullOrWhiteSpace(_spec.variantKey)
             ? PortraitResolver.DefaultVariant
             : _spec.variantKey;
 
-        scope.CastRegistry.SetVariant(resolvedSlotKey, variantKey);
+        scope.Stage.castRegistry.SetVariant(resolvedSlotKey, variantKey);
     }
 }

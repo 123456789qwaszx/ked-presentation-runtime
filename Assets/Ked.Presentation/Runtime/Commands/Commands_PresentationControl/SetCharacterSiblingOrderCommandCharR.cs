@@ -54,7 +54,7 @@ public sealed class SetCharacterSiblingOrderCommandCharR : CommandBase
 
         CharacterRigRefs rigRefs =
             CharacterRigTargetResolver.ResolveCharRigFromTargetKey(
-                scope,
+                scope.Stage,
                 _spec.slotKey);
 
         _rigRoot = rigRefs.RigRoot;

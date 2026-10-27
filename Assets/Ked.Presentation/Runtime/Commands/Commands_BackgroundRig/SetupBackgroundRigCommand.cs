@@ -83,7 +83,7 @@ public sealed class SetupBackgroundRigCommand : CommandBase
             refs.BackgroundSprite_Image,
             sourceMaterial);
 
-        scope.BackgroundRigs.Register(rigKey, refs);
+        scope.Stage.backgroundRigs.Register(rigKey, refs);
 
         // Optional bake helper:
         // Enable after refs registration when saving the generated rig as a reusable prefab.

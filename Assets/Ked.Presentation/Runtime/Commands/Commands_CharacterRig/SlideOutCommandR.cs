@@ -45,7 +45,7 @@ public sealed class SlideOutCommandCharR : SlideCommandBase
 
     protected override RectTransform ResolveSlideRect(CommandRunScope scope)
     {
-        CharacterRigRefs rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
+        CharacterRigRefs rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope.Stage, _spec.slotKey);
 
         return rig?.GetRect(_spec.target);
     }

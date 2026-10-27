@@ -48,7 +48,7 @@ public sealed class RotateToCommandCharR : ClaimTweenCommandBase
 
     protected override void ResolveTargets(CommandRunScope scope)
     {
-        CharacterRigRefs rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
+        CharacterRigRefs rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope.Stage, _spec.slotKey);
         _rect = rig?.GetRect(_spec.target);
     }
 

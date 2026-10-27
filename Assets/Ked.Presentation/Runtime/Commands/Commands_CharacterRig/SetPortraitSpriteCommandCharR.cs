@@ -51,7 +51,7 @@ public sealed class SetPortraitSpriteCommandCharR : CommandBase
 
     private void Apply(CommandRunScope scope)
     {
-        Sprite sprite = _resolver.Resolve(scope, _spec.slotKey, _spec.portrait, nameof(SetPortraitSpriteCommandCharR));
+        Sprite sprite = _resolver.Resolve(scope.Stage, _spec.slotKey, _spec.portrait, nameof(SetPortraitSpriteCommandCharR));
         _image.sprite = sprite;
         CharRigImageSizingPolicy.Apply(_image, sprite, _spec.sizingMode, _spec.horizontalAlign);
     }
@@ -60,7 +60,7 @@ public sealed class SetPortraitSpriteCommandCharR : CommandBase
     {
         _resolveAttempted = true;
 
-        CharacterRigRefs rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
+        CharacterRigRefs rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope.Stage, _spec.slotKey);
         _image = rigRefs.GetImage(_spec.target);
     }
 }

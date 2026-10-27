@@ -83,7 +83,7 @@ public sealed class SetupCharRigCommand : CommandBase
             sourceMaterial,
             refs.CharacterPortraitSpriteOverlay_Image);
 
-        scope.CharacterRigs.Register(rigKey, refs);
+        scope.Stage.characterRigs.Register(rigKey, refs);
 
         //StripRolePrefixForBake(rigRoot, rolePrefix, spec.rigRootName);
         yield break;

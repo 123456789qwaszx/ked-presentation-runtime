@@ -2,11 +2,11 @@ using UnityEngine;
 
 public static class CharacterRigTargetResolver
 {
-    public static CharacterRigRefs ResolveCharRigFromTargetKey(CommandRunScope scope, string targetKey)
+    public static CharacterRigRefs ResolveCharRigFromTargetKey(PresentationStage stage, string targetKey)
     {
-        string resolvedRigKey = ResolveRigKeyByPolicy(scope, targetKey);
+        string resolvedRigKey = ResolveRigKeyByPolicy(stage, targetKey);
         
-        if (!scope.CharacterRigs.TryGetRig(resolvedRigKey, out CharacterRigRefs rig))
+        if (!stage.characterRigs.TryGetRig(resolvedRigKey, out CharacterRigRefs rig))
         {
             Debug.LogWarning(
                 $"[CharacterRigTargetResolver] Failed to resolve CharacterRigRefs. " +
@@ -16,22 +16,22 @@ public static class CharacterRigTargetResolver
         return rig;
     }
     
-    public static string ResolveRigKeyByPolicy(CommandRunScope scope, string targetKey)
+    public static string ResolveRigKeyByPolicy(PresentationStage stage, string targetKey)
     {
-        string resolvedTargetKey = scope.CharacterTargetAliases.Resolve(targetKey);
+        string resolvedTargetKey = stage.characterTargetAliases.Resolve(targetKey);
 
-        if (scope.CastRegistry.TryGetSlotKey(resolvedTargetKey, out string characterSlotKey))
+        if (stage.castRegistry.TryGetSlotKey(resolvedTargetKey, out string characterSlotKey))
             return characterSlotKey;
 
         return resolvedTargetKey;
     }
     
-    public static string ResolveCharacterKeyFromTargetKey(CommandRunScope scope, string targetKey)
+    public static string ResolveCharacterKeyFromTargetKey(PresentationStage stage, string targetKey)
     {
-        string resolvedTargetKey = scope.CharacterTargetAliases.Resolve(targetKey);
-        string resolvedRigKey = ResolveRigKeyByPolicy(scope, resolvedTargetKey);
+        string resolvedTargetKey = stage.characterTargetAliases.Resolve(targetKey);
+        string resolvedRigKey = ResolveRigKeyByPolicy(stage, resolvedTargetKey);
 
-        if (!scope.CastRegistry.TryGetCharacter(resolvedRigKey, out string characterKey))
+        if (!stage.castRegistry.TryGetCharacter(resolvedRigKey, out string characterKey))
         {
             Debug.LogWarning(
                 $"[CharacterRigTargetResolver] Failed to get characterKey. return resolved targetKey as fallback. " +

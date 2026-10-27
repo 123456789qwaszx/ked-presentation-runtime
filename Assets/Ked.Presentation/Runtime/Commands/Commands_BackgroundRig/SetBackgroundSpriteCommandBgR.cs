@@ -65,7 +65,7 @@ public sealed class SetBackgroundSpriteCommandBgR : CommandBase
     {
         _resolveAttempted = true;
         
-        scope.BackgroundRigs.TryGetRig(_spec.rigKey, out BackgroundRigRefs rig);
+        scope.Stage.backgroundRigs.TryGetRig(_spec.rigKey, out BackgroundRigRefs rig);
         _image = rig.GetRect(_spec.target).GetComponent<Image>();
     }
 }

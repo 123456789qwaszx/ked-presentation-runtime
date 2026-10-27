@@ -337,7 +337,7 @@ public sealed class StageEquivalenceHarness : MonoBehaviour
                 return;
 
             StageState captured = StageStateCapture.Capture(
-                scope.CharacterRigs, _shotSystem, _tuning.BaseResolution);
+                scope.Stage.characterRigs, _shotSystem, _tuning.BaseResolution);
 
             StageStateComparer.Result result = StageStateComparer.Compare(folded, captured);
 

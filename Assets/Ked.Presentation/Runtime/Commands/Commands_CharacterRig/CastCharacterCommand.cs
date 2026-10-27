@@ -25,7 +25,7 @@ public sealed class CastCharacterCommand : CommandBase
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
-        scope.CastRegistry.CastCharRig(_spec.slotKey, _spec.characterKey);
+        scope.Stage.castRegistry.CastCharRig(_spec.slotKey, _spec.characterKey);
         yield break;
     }
 }

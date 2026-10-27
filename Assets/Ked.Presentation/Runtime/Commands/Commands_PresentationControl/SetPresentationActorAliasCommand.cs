@@ -26,7 +26,7 @@ public sealed class SetPresentationActorAliasCommand : CommandBase
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
-        scope.CharacterTargetAliases.Register(
+        scope.Stage.characterTargetAliases.Register(
             _spec.aliasSymbol,
             _spec.targetKey);
         

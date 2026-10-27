@@ -80,7 +80,7 @@ public sealed class DepthFocusCommandCharR : ClaimTweenCommandBase
         if (_spec.clear)
             return;
 
-        _focusRig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
+        _focusRig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope.Stage, _spec.slotKey);
 
         if (_focusRig == null)
             Debug.LogWarning(
@@ -90,7 +90,7 @@ public sealed class DepthFocusCommandCharR : ClaimTweenCommandBase
 
     protected override void ClaimTarget(CommandRunScope scope)
     {
-        _tweenScope = scope.CharacterRigs;
+        _tweenScope = scope.Stage.characterRigs;
         DOTween.Kill(_tweenScope, false);
 
         _bindings.Clear();
@@ -101,7 +101,7 @@ public sealed class DepthFocusCommandCharR : ClaimTweenCommandBase
         float focusScale = _focusRig != null ? _focusRig.SettledDepthScale : 0f;
 
         _scratch.Clear();
-        scope.CharacterRigs.CollectAliveRigs(_scratch);
+        scope.Stage.characterRigs.CollectAliveRigs(_scratch);
 
         for (int i = 0; i < _scratch.Count; i++)
         {

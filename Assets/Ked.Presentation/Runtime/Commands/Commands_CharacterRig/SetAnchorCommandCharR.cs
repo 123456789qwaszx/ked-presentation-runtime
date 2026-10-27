@@ -67,7 +67,7 @@ public sealed class SetAnchorCommandCharR : CommandBase
         _resolveAttempted = true;
 
         _rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(
-            scope,
+            scope.Stage,
             _spec.slotKey);
 
         if (_rigRefs == null)
@@ -87,7 +87,7 @@ public sealed class SetAnchorCommandCharR : CommandBase
         CollectResetTargets();
 
         string tuningKey =
-            CharacterRigTargetResolver.ResolveCharacterKeyFromTargetKey(scope, _spec.slotKey);
+            CharacterRigTargetResolver.ResolveCharacterKeyFromTargetKey(scope.Stage, _spec.slotKey);
 
         // ── 코어: 스펙 + 튜닝 → 목표 상태 ──
         StageNodeClaim[] claims = SetAnchorReduction.Reduce(

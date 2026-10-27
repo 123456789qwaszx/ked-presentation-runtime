@@ -129,7 +129,7 @@ public sealed class SetEmotionPortraitWipeCommandCharR : CommandBase
     {
         _resolveAttempted = true;
 
-        CharacterRigRefs rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
+        CharacterRigRefs rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope.Stage, _spec.slotKey);
 
         _portraitRoot = rigRefs.CharacterPortraitSprite_Root;
         _overlayRoot = rigRefs.CharacterPortraitSpriteOverlay_Root;
@@ -153,7 +153,7 @@ public sealed class SetEmotionPortraitWipeCommandCharR : CommandBase
             return;
 
         _targetSprite = _resolver.Resolve(
-            scope,
+            scope.Stage,
             _spec.slotKey,
             _spec.portrait,
             nameof(SetEmotionPortraitWipeCommandCharR));

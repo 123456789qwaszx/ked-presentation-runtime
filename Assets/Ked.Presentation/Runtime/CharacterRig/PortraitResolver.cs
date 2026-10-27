@@ -29,9 +29,9 @@ public sealed class PortraitResolver
         }
     }
 
-    public Sprite Resolve(CommandRunScope scope, string targetKey, PortraitIdentity portrait, string debugName)
+    public Sprite Resolve(PresentationStage stage, string targetKey, PortraitIdentity portrait, string debugName)
     {
-        string roleKey = CharacterRigTargetResolver.ResolveRigKeyByPolicy(scope, targetKey);
+        string roleKey = CharacterRigTargetResolver.ResolveRigKeyByPolicy(stage, targetKey);
 
         string character = portrait.character;
         string variant = portrait.variant;
@@ -39,13 +39,13 @@ public sealed class PortraitResolver
     
         if (string.IsNullOrEmpty(character))
         {
-            if (scope.CastRegistry.TryGetCharacter(roleKey, out string characterKey))
+            if (stage.castRegistry.TryGetCharacter(roleKey, out string characterKey))
                 character = characterKey;
         }
 
         if (string.IsNullOrEmpty(variant))
         {
-            if (scope.CastRegistry.TryGetVariant(roleKey, out string variantKey))
+            if (stage.castRegistry.TryGetVariant(roleKey, out string variantKey))
                 variant = variantKey;
         }
     

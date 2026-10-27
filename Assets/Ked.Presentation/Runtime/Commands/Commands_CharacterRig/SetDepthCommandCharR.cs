@@ -65,7 +65,7 @@ public sealed class SetDepthCommandCharR : ClaimTweenCommandBase
 
     protected override void ResolveTargets(CommandRunScope scope)
     {
-        _rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
+        _rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope.Stage, _spec.slotKey);
 
         _depthYRect = _rigRefs?.GetRect(_spec.depthYTarget);
         _depthScaleRect = _rigRefs?.GetRect(_spec.depthScaleTarget);
@@ -96,7 +96,7 @@ public sealed class SetDepthCommandCharR : ClaimTweenCommandBase
             _rigRefs.SettledDepthScale = _destDepthScale.x;
         
         CharacterDepthResolver.CalculateDepthYThatPreservesCurrentFocus(
-            scope,
+            scope.Stage,
             _stageProvider,
             _spec.slotKey,
             _depthYRect,

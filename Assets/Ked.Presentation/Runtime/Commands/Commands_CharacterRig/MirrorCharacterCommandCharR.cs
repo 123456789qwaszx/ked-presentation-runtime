@@ -50,16 +50,16 @@ public sealed class MirrorCharacterCommandCharR : ClaimTweenCommandBase
     protected override void ResolveTargets(CommandRunScope scope)
     {
         string resolvedRigKey =
-            CharacterRigTargetResolver.ResolveRigKeyByPolicy(scope, _spec.slotKey);
+            CharacterRigTargetResolver.ResolveRigKeyByPolicy(scope.Stage, _spec.slotKey);
 
         CharacterRigRefs rigRefs =
-            CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope, _spec.slotKey);
+            CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope.Stage, _spec.slotKey);
 
         _rect = rigRefs?.GetRect(_spec.target);
 
         CharacterFacing facing = ResolveTargetFacing(scope, resolvedRigKey);
 
-        scope.CastRegistry.SetFacing(resolvedRigKey, facing);
+        scope.Stage.castRegistry.SetFacing(resolvedRigKey, facing);
 
         Vector3 baseScale = _rect.localScale;
 
@@ -82,7 +82,7 @@ public sealed class MirrorCharacterCommandCharR : ClaimTweenCommandBase
             case CharacterMirrorMode.Toggle:
             default:
             {
-                if (scope.CastRegistry.TryGetFacing(resolvedRigKey, out CharacterFacing current))
+                if (scope.Stage.castRegistry.TryGetFacing(resolvedRigKey, out CharacterFacing current))
                     return current.Opposite();
 
                 return CharacterFacing.Left;
