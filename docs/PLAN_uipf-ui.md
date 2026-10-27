@@ -112,7 +112,7 @@ UIPF에서 그림이 화면에 들어가는 길은 둘이다.
 
 각 단계는 커밋 묶음 하나로 끝나고, 끝에 Unity 확인을 받는다.
 
-### U0. 반입 ✅ (2026-10-27, Unity 확인 남음)
+### U0. 반입 ✅ (2026-10-27, Unity 확인 10-27)
 - UIPF `dev` @ `cf3fa98`의 blob을 `git archive`로 꺼내 복사했다(`.meta`째, 원본 GUID 106개 유지 — 이 저장소 `.meta` 888개와 겹침 0). 새 폴더 `.meta` 1개.
 - 사본에만 있는 갈림 둘(`Assets/UIPresentationFlow/Documentation~/vendoring.md`):
   - **Editor asmdef 추가** — 원본의 `Editor/UI`에는 asmdef가 없어 그대로 두면 `Assembly-CSharp-Editor`로 컴파일되고, 그 어셈블리가 옛 UI(`Assembly-CSharp`)와 UIPF를 함께 참조해 `UIBase` 같은 이름이 CS0433 오류가 된다. **원본에도 같은 파일을 넣어야 한다.**
@@ -127,7 +127,7 @@ UIPF에서 그림이 화면에 들어가는 길은 둘이다.
 - 미리보기 장면 `Samples/UI/UIPreview.unity`(빌더가 만든다): 캔버스 · 층(Root · Panel · Overlay) · 부트스트랩(`UIManager` · `UIResolver` · `UIContext`)과 가짜 데이터로 화면을 띄워 보는 갤러리.
 - 테마 둘(Light · Dark): `UIPalette` · `UIFontSet`(NEXON 글꼴) · 빈 `UISpriteSet`. 자리 그림(placeholder).
 
-### U2. 화면 — 2026-10-27 빌드 명세 10화면 작성(Unity 빌드·확인 남음). 순서는 패키지 지시(메뉴 → 저장/불러오기 → 백로그 → 대화·선택지·퀵메뉴 → 설정 → 타이틀)
+### U2. 화면 — 2026-10-27 빌드 명세 10화면 작성, Unity 빌드·동작 확인(10-27). 순서는 패키지 지시(메뉴 → 저장/불러오기 → 백로그 → 대화·선택지·퀵메뉴 → 설정 → 타이틀)
 ① `PlayScreen`(대화 · 퀵메뉴 · 선택지) ② 백로그 ③ 시스템 메뉴 ④ 세이브 ⑤ 로드 ⑥ 설정 ⑦ 확인 · 알림 ⑧ 타이틀.
 화면마다: 빌드 명세 → 빌더 → 미리보기 장면에서 확인. 본체 계약 구현은 가짜 데이터로 먼저 돌린다.
 
@@ -258,10 +258,14 @@ Panel이 열린 동안 Root(타이틀·재생 화면)의 CanvasGroup도 막는�
 
 1. Unity를 연다 — 새 PNG · TTF의 `.meta`를 Unity가 만든다(이 커밋에는 없다).
 2. `Tools/Ked UI/Build Sample UI` — 그림 임포트 설정(패키지 도구) → TMP 글꼴 → 화면 프리팹 12 → 데이터 자산 → `Resources/KedUI/KedUICanvas` → Refs 감사. 콘솔 보고에 "문제"가 없어야 한다.
-3. 만들어진 `.meta` · `Generated/` · `Resources/KedUI/`를 커밋한다.
+3. 만들어진 `.meta` · `Generated/` · `Resources/KedUI/`를 커밋한다(10-27 커밋함).
+   - 빌더는 끝에 두 TMP 글꼴의 동적 데이터를 비우고 저장한다(`TMP_FontAsset.ClearFontAssetData(true)` — 아틀라스 1×1, 자산 몇 KB). 비우지 않으면 글자 몇 개만 들어가도 2048² 아틀라스가 자산에 통째로 저장되어 8MB가 넘는다.
+   - 플레이하거나 프리팹을 열면 쓴 글자가 다시 채워져 `Generated/Fonts/*.asset`이 바뀐다. **그 변경은 커밋하지 않는다** — `git restore`로 되돌리거나, 빌더를 다시 돌리거나, 글꼴 자산 톱니 메뉴 `Clear Dynamic Data`로 비운다. 플레이어 빌드에는 `Clear Dynamic Data On Build`(켜 둠)가 같은 일을 한다.
 4. 플레이 — 두 예제(인스펙터 '예제')에서 아래 확인 목록.
 
 ### 7. 확인 목록 (패키지 IMPLEMENTATION §9)
+
+2026-10-27 Unity 확인(사용자): 빌드 뒤 플레이에서 동작 확인, 해상도별 확인, 시안 비교 — 의도대로 나왔다. 아래는 항목별로 확인한다고 들은 것만 체크했다.
 
 - [ ] 컴파일 오류·새 경고 0, 빌드 보고 문제 0, 플레이 중 Missing 참조·Refs 경고 0
 - [ ] 확인 팝업: 수락 · 취소 · × · Esc · 다시 열기 · 두 번 누르기(콜백 한 번) · 아래 대사가 넘어가지 않음
@@ -269,4 +273,4 @@ Panel이 열린 동안 Root(타이틀·재생 화면)의 CanvasGroup도 막는�
 - [ ] 저장 → 불러오기가 기존 호스트로 이어짐, 목록은 기존 서비스의 것
 - [ ] 진행·자동·빨리 넘기기·되감기·선택지·백로그 이동이 그대로, 같은 입력이 두 번 먹지 않음
 - [ ] 긴 한국어·영어(KedUIHost › localeId = en-US) · 두 줄 확인 문구 · 긴 저장 이름 · 글자 크기 130%
-- [ ] 1600×900 화면을 Design/*.png와 비교 캡처, 1920×1080 · 1920×1200 · 2560×1080 잘림·입력
+- [x] 1600×900 화면을 Design/*.png와 비교 캡처, 1920×1080 · 1920×1200 · 2560×1080 잘림·입력 (10-27)

@@ -120,6 +120,11 @@ namespace Ked.Samples.UI.Editor
                 foreach (GameObject prefab in pages) Audit(prefab, problems);
 
                 problems.AddRange(kit.Problems);
+
+                // 화면을 세우며 채운 글자를 비운 채로 저장한다 — 커밋되는 글꼴 자산을 작게 둔다.
+                EditorUtility.DisplayProgressBar("Ked UI", "글꼴 아틀라스 비우기", 0.98f);
+                KedUIFonts.ClearDynamicData(problems);
+
                 AssetDatabase.SaveAssets();
             }
             catch (Exception error)

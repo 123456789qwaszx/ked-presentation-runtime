@@ -17,18 +17,56 @@ namespace Ked.Samples.UI.Editor
     {
         public const string FontDir = KedUIKit.Root + "/Fonts";
         public const string OutputDir = KedUIKit.Root + "/Generated/Fonts";
+        public const string MediumAssetPath = OutputDir + "/NotoSansKR-Medium SDF.asset";
+        public const string BoldAssetPath = OutputDir + "/NotoSansKR-Bold SDF.asset";
 
         public static TMP_FontAsset Ensure(List<string> problems)
         {
             KedUIBuild.EnsureFolder(OutputDir);
 
-            TMP_FontAsset bold = EnsureAsset(FontDir + "/NotoSansKR-Bold.ttf", OutputDir + "/NotoSansKR-Bold SDF.asset", problems);
-            TMP_FontAsset medium = EnsureAsset(FontDir + "/NotoSansKR-Medium.ttf", OutputDir + "/NotoSansKR-Medium SDF.asset", problems);
+            TMP_FontAsset bold = EnsureAsset(FontDir + "/NotoSansKR-Bold.ttf", BoldAssetPath, problems);
+            TMP_FontAsset medium = EnsureAsset(FontDir + "/NotoSansKR-Medium.ttf", MediumAssetPath, problems);
 
             if (medium != null && bold != null)
                 LinkBold(medium, bold, problems);
 
             return medium;
+        }
+
+        /// <summary>
+        /// 빌드 끝에 두 동적 글꼴이 그동안 채운 글자와 아틀라스를 비운다(TMP 톱니 메뉴 Clear Dynamic Data와 같은 공개 API).
+        /// 비우지 않으면 글자 몇 개만 들어가도 2048² 아틀라스가 자산에 통째로 저장되어 8MB가 넘는다. 비우면 아틀라스가 1×1로 줄어 몇 KB.
+        /// 굵기 표(Bold 연결) · 원본 TTF 연결 · Clear Dynamic Data On Build는 그대로이고, 실행 중 쓰는 글자는 다시 채워진다.
+        /// </summary>
+        public static void ClearDynamicData(List<string> problems)
+        {
+            ClearDynamicData(MediumAssetPath, problems);
+            ClearDynamicData(BoldAssetPath, problems);
+        }
+
+        private static void ClearDynamicData(string assetPath, List<string> problems)
+        {
+            TMP_FontAsset asset = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(assetPath);
+            if (asset == null)
+            {
+                problems.Add($"비울 TMP 글꼴 자산이 없다: {assetPath}");
+                return;
+            }
+
+            if (asset.atlasPopulationMode == AtlasPopulationMode.Static)
+                return;
+
+            asset.ClearFontAssetData(true);
+
+            EditorUtility.SetDirty(asset);
+            if (asset.atlasTextures != null)
+            {
+                foreach (Texture2D atlas in asset.atlasTextures)
+                {
+                    if (atlas != null)
+                        EditorUtility.SetDirty(atlas);
+                }
+            }
         }
 
         private static TMP_FontAsset EnsureAsset(string fontPath, string assetPath, List<string> problems)
