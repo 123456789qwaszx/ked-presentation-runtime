@@ -8,7 +8,7 @@
 > ked의 예제 UI 전체를 UIPresentationFlow(UIPF) 위에서 코드 빌더로 다시 세운다. 화면은 UIPF의 구조(Refs · Presentation · 바인딩)로 만들어지고, 그림은 이름 규칙대로 폴더에 넣으면 채워진다. 본체(`Assets/Ked.Presentation/`) diff 0.
 
 보여 줄 것 — **AI가 UIPF 구조로 화면을 만들어 낸다.**
-화면 정의(빌드 명세) → 빌더가 프리팹·Refs 계약·바인딩을 만든다 → 그림을 넣으면 테마가 선다 → 대본 한 줄(`<<ui_patch dark>>`)로 테마가 바뀐다.
+화면 정의(빌드 명세) → 빌더가 프리팹·Refs 계약·바인딩을 만든다 → 그림을 넣으면 테마가 선다. (테마 전환 시연은 하지 않는다 — 10-27 아미야, 테마는 하나)
 
 ## 정한 것
 
@@ -151,7 +151,7 @@ Unity를 닫고 했다.
     - 새 UI 캔버스가 없으면 예제를 세우지 않고 오류로 알린다. 돌아갈 옛 UI가 없다. 입력 폴러도 함께 멈춘다(연결 전이라 매 프레임 null).
   - `PresentationAssembler`: 옛 관리자 · 그림 패치 설치를 지웠다. 대사창 · 선택지 상자는 화면 쪽이 넘긴 것만 쓴다(없으면 조립 오류).
   - `StageForKedUI`(옛 `LegacyStageForKedUI`): 무대가 꺼져 있으면 켜기만 한다.
-  - `<<ui_patch>>`: 옛 그림 패치와 함께 걷었다. 지금은 `UIThemePatchNotConnected`가 받아 경고만 남기고 화면은 그대로 둔다. U4에서 UIPF `SetContext`로 잇는다. 지금 예제 대본에는 ui_patch가 없다.
+  - `<<ui_patch>>`: 옛 그림 패치와 함께 걷었다. 지금은 `UIThemePatchNotConnected`가 받아 경고만 남기고 화면은 그대로 둔다. 테마를 하나만 쓰므로 잇지 않는다(U4 뺌). 지금 예제 대본에는 ui_patch가 없다.
   - UIPF 런타임 asmdef의 `autoReferenced`를 원본 값 `true`로 되돌렸다. 사본 갈림은 Editor asmdef 하나로 줄었다(`vendoring.md`). 남은 하나는 사본의 폴더 구조 때문이었다 — 구조를 원본대로 되돌려 없앴다(아래).
 - **에셋 삭제**: 옛 UI만 쓰던 것이다. 다른 에셋 · 코드 · 대본에서 GUID나 경로로 참조하는 곳이 없음을 확인했다.
   - `Samples/Prefabs/`: 백로그 줄 · 저장 슬롯 · 선택지 항목 프리팹
@@ -183,17 +183,18 @@ Unity를 닫고 했다. 사본에 남은 갈림(Editor asmdef)의 원인이 사�
 - 대조(`vendoring.md`의 명령, 원본 `cf3fa98` blob, PC에서): `Scripts`(Demo 제외) · `Editor` · `Shaders` · 폴더 `.meta` 셋 모두 출력 0줄. 파일 수 197 = 197.
 - Unity 확인(10-27, 아미야 "잘 된다"): [x] 컴파일 오류 · 새 경고 0 · [x] `Tools/UI Presentation/…` 메뉴 · [x] `Tools/Ked UI/Build Sample UI` 보고 문제 0
 
-### U4. 시연
-- `<<ui_patch dark>>` — `IUIThemePatchPort` → `UIManager.SetContext`. 데모 대본에 한 장면. 지금 그 자리는 `UIThemePatchNotConnected`(경고만)다.
-- 설정 화면의 테마 · 글자 크기가 열린 화면에 바로 반영.
-- README에 "AI가 UIPF 구조로 화면을 만든다" 절: 빌드 명세 하나 → 프리팹 · 바인딩 → 그림 넣기 → 테마 전환.
+### U4. 시연 — 하지 않는다 (2026-10-27, 아미야)
+테마는 하나(Light)만 쓴다. 그래서 테마 전환 시연(`<<ui_patch dark>>` → `SetContext`)과 다크 그림은 만들지 않는다.
+- `<<ui_patch>>`는 `UIThemePatchNotConnected`가 받아 경고만 남기고 화면은 그대로 둔다.
+- 원래 U4에 있던 README 절("AI가 UIPF 구조로 화면을 만든다")은 테마 전환을 빼고 U5로 옮겼다.
 
 ### U5. 문서
 - SCOPE-BOUNDARY에 "꽂힌 모듈 둘"(진행 · UI), ASSEMBLY-BOUNDARY의 어셈블리 표, `PLAN_framework-scope` 분류표.
 - U3로 낡은 곳(본체 문서라 U3에서는 고치지 않았다):
   - ASSEMBLY-BOUNDARY §5 — `Samples/Scripts/UI/Providers/` → `Samples/Scripts/Stage/Providers/`.
-  - ASSEMBLY-BOUNDARY §6 — `IUIThemePatchPort`의 구현은 `UI/Core/Patcher/UIThemePatchAdapter.cs`가 아니라 `PresentationAssembler`의 `UIThemePatchNotConnected`(U4 전까지).
+  - ASSEMBLY-BOUNDARY §6 — `IUIThemePatchPort`의 구현은 `UI/Core/Patcher/UIThemePatchAdapter.cs`가 아니라 `PresentationAssembler`의 `UIThemePatchNotConnected`(테마 하나라 잇지 않는다).
   - `PLAN_framework-scope` 분류표 — "UI 프레임·화면·바인딩 `Samples/Scripts/UI/`", "대사창·선택지 뷰 베이스는 `Samples/Scripts/UI/DialogueBox/`", 예제 에셋 줄의 프리팹 · UI 이미지.
+- README에 "AI가 UIPF 구조로 화면을 만든다" 절: 빌드 명세 하나 → 프리팹 · Refs 계약 · 바인딩 → 그림 넣기(U4에서 옮김, 테마 전환은 뺌).
 - 그다음 `PLAN_framework-scope` 6·7단계로 돌아간다.
 
 ## 그림 (2026-10-26 받은 것)
@@ -299,7 +300,7 @@ Panel이 열린 동안 Root(타이틀·재생 화면)의 CanvasGroup도 막는�
 - **슬롯 삭제 · 이름 바꾸기** — 서비스에는 있지만 시안에 없어 화면을 만들지 않았다.
 - **잠금 아이콘 · 최근 저장 배지** — 그림이 없다.
 - **빠르게 재생 버튼** — 시안 퀵메뉴에 없다(S 키 그대로).
-- **`ui_patch` → UIPF 테마** — 옛 그림 패치는 U3에서 걷었다. 대본의 `<<ui_patch>>`는 지금 경고만 남긴다(U4).
+- **`ui_patch` → UIPF 테마** — 옛 그림 패치는 U3에서 걷었다. 대본의 `<<ui_patch>>`는 경고만 남긴다. 테마를 하나만 쓰므로 잇지 않는다(U4 뺌).
 - 키 안내는 입력 바인딩의 **기본 키**를 적은 것이다. 인스펙터에서 키를 바꾸면 안내도 고쳐야 한다.
 - 백로그 화자는 대본의 이름이다. 화자 정책 DB의 표시 이름(`fallbackDisplayName`)과 다를 수 있다.
 - 시안의 가변 글꼴 `NotoSansKR.ttf`는 들이지 않았다 — 기본 인스턴스가 Thin이라 TMP가 가는 글자로 그린다. 같은 글꼴에서 정적 Medium · Bold를 뽑아 썼다(OFL, 예약 이름은 'Source'뿐).

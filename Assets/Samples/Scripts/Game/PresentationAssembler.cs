@@ -371,16 +371,16 @@ public sealed class PresentationAssembler
 }
 
 /// <summary>
-/// 대본의 <c>&lt;&lt;ui_patch 테마 언어&gt;&gt;</c>를 받는 자리. 옛 UI의 그림 패치(UIPatchService)는 옛 화면과 함께 걷었고,
-/// 새 예제 UI(UIPresentationFlow의 SetContext)로 잇는 일은 PLAN_uipf-ui U4다. 그때까지는 아무것도 바꾸지 않고 알린다 —
-/// 바꾼 척하지 않는다. 지금 예제 대본에는 ui_patch가 없다.
+/// 대본의 <c>&lt;&lt;ui_patch 테마 언어&gt;&gt;</c>를 받는 자리. 옛 UI의 그림 패치(UIPatchService)는 옛 화면과 함께 걷었다.
+/// 새 예제 UI는 테마를 하나만 쓰므로 잇지 않는다(PLAN_uipf-ui U4 뺌). 아무것도 바꾸지 않고 알린다 — 바꾼 척하지 않는다.
+/// 지금 예제 대본에는 ui_patch가 없다.
 /// </summary>
 internal sealed class UIThemePatchNotConnected : IUIThemePatchPort
 {
     public IEnumerator PatchCurrentScreen(string themeId, string localeId)
     {
         Debug.LogWarning(
-            $"[예제 UI] <<ui_patch {themeId} {localeId}>> — 새 예제 UI에는 아직 테마 패치가 이어지지 않았다(PLAN_uipf-ui U4). 화면은 그대로다.");
+            $"[예제 UI] <<ui_patch {themeId} {localeId}>> — 새 예제 UI는 테마를 하나만 써서 테마 패치를 받지 않는다. 화면은 그대로다.");
 
         yield break;
     }
