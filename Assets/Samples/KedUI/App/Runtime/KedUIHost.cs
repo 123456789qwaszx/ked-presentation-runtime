@@ -32,7 +32,7 @@ namespace Ked.Samples.UI
         [Tooltip("UI 글자 표의 언어 열(ko-KR · en-US). 긴 영어 글자 확인용으로 바꿔 볼 수 있다.")]
         [SerializeField] private string localeId = "ko-KR";
         [SerializeField] private TextAsset texts;
-        [Tooltip("화면별 Presentation. presentationId = 화면 타입 이름. 없는 화면은 빈 Presentation으로 연다.")]
+        [Tooltip("화면별 Presentation. presentationId = 화면 키(UIViewKey — 묶음은 Ked.{타입}). 없는 화면은 빈 Presentation으로 연다.")]
         [SerializeField] private UIPresentationSpec[] presentations = Array.Empty<UIPresentationSpec>();
 
         [Header("재생 쪽에 넘기는 것")]

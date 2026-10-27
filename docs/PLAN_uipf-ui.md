@@ -333,7 +333,7 @@ UIPF 저장소의 Adaptive UI 데모를 걷고, 그 자리에 이 VN UI를 샘�
 - **화면비 Variant**: 재생 화면 Presentation에 `UltraWide_HudInBoard`(UltraWide = 21:9 이상, 우선순위 10)를 더한다. 꼬리표와 퀵메뉴를 화면 끝이 아니라 가운데 1600 판의 양 끝에 둔다 — 기본이면 21:9에서 퀵메뉴가 대사창 오른쪽 끝보다 300쯤 밖으로 나간다.
   - 처음 한 번 만드는 데이터라, 앱 빌드가 Presentation을 만든 뒤 `PlaySpec.EnsureVariants`를 부른다. 이미 있으면 건드리지 않는다.
   - 도구는 UIPF에 더한 `UIPresentationAssets.EnsureLayoutVariant` · `MoveWidget`(UIPF `feat/authoring-tools`).
-  - 레이아웃 패치는 `Screens/Play/Presentation/PlayScreenPresentation.UltraWide_HudInBoard.asset`.
+  - 레이아웃 패치는 `Screens/Play/Presentation/Ked.PlayScreenPresentation.UltraWide_HudInBoard.asset`(아래 "화면 키"로 이름이 바뀌었다).
 - 오프라인 컴파일(6000.3): 17개 어셈블리 오류 0 · 경고 0.
 - Unity 확인 (10-27, 아미야 "문제없음"):
   - `Build Sample UI`(편집 모드) 문제 0, `Validate Sample UI` 문제 0.
@@ -342,6 +342,12 @@ UIPF 저장소의 Adaptive UI 데모를 걷고, 그 자리에 이 VN UI를 샘�
   - 산출물(`82ac9340`): 레이아웃 패치 에셋 하나, 그것을 건 재생 화면 Presentation, 캔버스의 `KedUIHost` 어셈블리 이름(App으로 옮겨서). 저장/불러오기 패널은 fileID만 바뀌어(정렬해 비교하면 0줄) 되돌렸다.
 - **UIPF로 복사**(UIPF `feat/vn-sample`): `752d168` Adaptive UI 데모 걷음, `a5bcb2b` 비주얼 노벨 샘플 — `82ac9340`의 KedUI에서 `App/` · `Art/`를 뺀 것을 `Assets/Demo/VisualNovel/KedUI/`에. 트리 해시가 이 저장소의 것과 같다. 데모 앱(흐름 · 가짜 재생 · 메모리 저장 · 선택지 항목 · 글자 표 · 빌드 메뉴 `UI Demo/Build Visual Novel Demo`)은 UIPF가 원본이다. UIPF Unity(6000.6) 확인은 남음 — 원본 `docs/PLAN_vn-sample.md`.
 - UIPF 쪽 프레임워크 코드는 바뀌지 않았다. 사본은 `6fe89e7` 그대로 맞다(`vendoring.md` "대조" 0줄).
+- **화면 키를 `Ked.`로 고정했다**(10-27, 아미야 결정). UIPF에서 Unity를 열자 키 경고가 셋 났다 — `TitleScreen` · `ConfirmPanel` · `SettingsPanel`이 블랙홀 데모에도 있다. UIPF 규칙은 "데이터 키는 프로젝트에서 하나"다. 실행에는 지장이 없었다(데모마다 제 화면만 등록한다).
+  - 블랙홀 쪽은 게임 파일 그대로라는 전제가 있어서 이쪽을 바꿨다. 이 묶음은 다른 프로젝트로 옮겨 다니고, 흔한 이름은 어디서든 부딪힌다.
+  - 화면 12 · 위젯 2에 `[UIViewKey("Ked.{타입}")]`. Presentation 12개는 UIPF 규칙(`{키}Presentation.asset`)대로 파일 이름 · 오브젝트 이름 · `presentationId`를 옮겼다(`.meta`째 — GUID 그대로라 캔버스의 참조는 이어진다). 21:9 레이아웃 패치도 이름을 맞췄다.
+  - 글자 표 키는 그대로다 — `ViewTexts`는 화면 키가 아니라 타입 이름을 쓴다(`{타입}.{Ref}`).
+  - `Validate Sample UI`에 4번 검사를 더했다: 묶음의 화면 · 위젯 키가 `Ked.`로 시작하는가, 등록하는 화면의 Presentation이 있고 `presentationId`가 키와 같은가. id가 어긋나면 호스트가 빈 Presentation으로 열어 Variant가 조용히 사라지기 때문이다.
+- 같은 때 UIPF의 6000.6 분석기가 경고 하나(UAC1001)를 냈는데, 실제 버그였다. Variant 조건의 실험 칸 둘이 에셋에 저장되지 않았다. 원본 `7da70e6`에서 고치고 사본을 다시 들였다(`vendoring.md`). 이 저장소의 에셋은 그 칸을 쓰지 않는다.
 
 ### U5. 문서
 - SCOPE-BOUNDARY에 "꽂힌 모듈 둘"(진행 · UI), ASSEMBLY-BOUNDARY의 어셈블리 표, `PLAN_framework-scope` 분류표.
