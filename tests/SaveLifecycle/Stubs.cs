@@ -84,6 +84,14 @@ internal sealed class FakeStage : IPlaybackStage
     }
 }
 
+// 연출 단독 회차의 끝 화면. 부른 횟수만 센다.
+internal sealed class FakeEndView : IEpisodeEndView
+{
+    public int Shown;
+
+    public void Show() => Shown++;
+}
+
 // 연출 기억과 그 뒤의 진짜 부품들. 단위를 열어 보면 재개 예약이 무엇이었는지 알 수 있다.
 internal sealed class PresentationRig
 {

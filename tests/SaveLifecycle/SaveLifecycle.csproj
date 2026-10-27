@@ -26,6 +26,7 @@
     <Compile Include="../../Assets/Samples/Scripts/ProgressionHost/ProgressionSaveBridge.cs" />
     <Compile Include="../../Assets/Samples/Scripts/Game/IPlaythroughEntry.cs" />
     <Compile Include="../../Assets/Samples/Scripts/Game/NodePlaythrough.cs" />
+    <Compile Include="../../Assets/Samples/Scripts/Game/IEpisodeEndView.cs" />
     <Compile Include="../../Assets/Ked.Presentation/Playback/Host/IPlaybackHost.cs" />
     <Compile Include="../../Assets/Ked.Presentation/Playback/Host/IPlaybackStage.cs" />
     <Compile Include="../../Assets/Ked.Presentation/Playback/Host/PlaybackUnit.cs" />

@@ -362,7 +362,7 @@ internal static class Program
                 var first = new PresentationRig();
                 first.Stage.BlockPlays = true;
                 var host = new NodePlaybackHost(first.Unit);
-                var playthrough = new NodePlaythrough(host, first.Memory, "node", path);
+                var playthrough = new NodePlaythrough(host, first.Memory, "node", path, new FakeEndView());
 
                 playthrough.StartNew();
                 await Until(() => first.Stage.Plays == 1, "첫 재생");
@@ -379,7 +379,7 @@ internal static class Program
 
                 var second = new PresentationRig();               // 다시 켠 것과 같다
                 var host2 = new NodePlaybackHost(second.Unit);
-                var resumed = new NodePlaythrough(host2, second.Memory, "node", path);
+                var resumed = new NodePlaythrough(host2, second.Memory, "node", path, new FakeEndView());
 
                 resumed.Resume();
                 await Until(() => second.Stage.Resumes == 1, "재개 시크");
@@ -397,14 +397,14 @@ internal static class Program
                 File.WriteAllText(path, "{garbage");
                 var broken = new PresentationRig();
                 var brokenHost = new NodePlaybackHost(broken.Unit);
-                new NodePlaythrough(brokenHost, broken.Memory, "node", path).Resume();
+                new NodePlaythrough(brokenHost, broken.Memory, "node", path, new FakeEndView()).Resume();
                 await Until(() => broken.Stage.Plays == 1 && !brokenHost.IsRunning, "처음부터 재생");
                 Check(broken.Stage.Resumes == 0, "깨진 파일로 재개를 걸었다");
 
                 var source = new PresentationRig();
                 source.Stage.BlockPlays = true;
                 var sourceHost = new NodePlaybackHost(source.Unit);
-                var sourcePlaythrough = new NodePlaythrough(sourceHost, source.Memory, "other-node", path);
+                var sourcePlaythrough = new NodePlaythrough(sourceHost, source.Memory, "other-node", path, new FakeEndView());
                 sourcePlaythrough.StartNew();
                 await Until(() => source.Stage.Plays == 1, "다른 노드 재생");
                 source.Show("x", "other-node");
@@ -413,7 +413,7 @@ internal static class Program
 
                 var mismatch = new PresentationRig();
                 var mismatchHost = new NodePlaybackHost(mismatch.Unit);
-                new NodePlaythrough(mismatchHost, mismatch.Memory, "node", path).Resume();
+                new NodePlaythrough(mismatchHost, mismatch.Memory, "node", path, new FakeEndView()).Resume();
                 await Until(() => mismatch.Stage.Plays == 1 && !mismatchHost.IsRunning, "처음부터 재생");
                 Check(mismatch.Stage.Resumes == 0, "다른 노드의 기억으로 재개를 걸었다");
             });

@@ -266,6 +266,14 @@ internal sealed class FakeLog : IProgressionLog
     }
 }
 
+// 챕터 끝 화면. 부른 횟수만 센다.
+internal sealed class FakeEndView : IChapterEndView
+{
+    public int Shown;
+
+    public void Show(ChapterDefinition chapter, EpisodeNode lastEpisode, ChapterState state) => Shown++;
+}
+
 // SceneRunner 하나와 그 협력자 전부. 드라이버도 같은 runner로 세운다.
 internal sealed class Rig
 {
@@ -277,6 +285,7 @@ internal sealed class Rig
     public readonly FakePresentation Presentation;
     public readonly FakeOptions Options;
     public readonly FakePersistence Persistence;
+    public readonly FakeEndView EndView = new();
 
     public readonly PlaybackUnit Unit;
     public readonly SceneRunner Runner;
@@ -289,7 +298,7 @@ internal sealed class Rig
         Persistence = new FakePersistence(Log);
 
         Unit = new PlaybackUnit(Presentation, Backlog, Rollback);
-        Runner = new SceneRunner(Unit, Options, Persistence);
+        Runner = new SceneRunner(Unit, Options, Persistence, EndView);
         Driver = new ProgressionDriver(Runner, DriverLog);
     }
 

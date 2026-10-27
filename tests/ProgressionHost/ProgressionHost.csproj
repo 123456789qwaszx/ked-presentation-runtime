@@ -8,7 +8,7 @@
   진짜로 컴파일하는 것: 진행 코어 전체, SceneRunner, PlaybackUnit, NodePlaybackHost, RollbackHistory, BacklogRecorder,
   재개 지점(PresentationResumePoint · LineTarget · VNChoiceRecord).
   대역(Stubs.cs): UnityEngine.Debug, YarnLineMeta.
-  무대(IPlaybackStage — 줄 시크 포함)·선택 UI·저장은 계약이라 Fakes.cs가 구현한다.
+  무대(IPlaybackStage — 줄 시크 포함)·선택 UI·저장·챕터 끝 화면은 계약이라 Fakes.cs가 구현한다.
 
   NuGet 패키지가 없다 - SDK만 있으면 오프라인으로도 돈다.
 -->
@@ -26,6 +26,7 @@
     <Compile Include="../../Assets/Ked.Progression/**/*.cs"
              Exclude="../../Assets/Ked.Progression/Tests/**/*.cs;../../Assets/Ked.Progression/Save/**/*.cs" />
     <Compile Include="../../Assets/Samples/Scripts/ProgressionHost/SceneRunner.cs" />
+    <Compile Include="../../Assets/Samples/Scripts/ProgressionHost/IChapterEndView.cs" />
     <Compile Include="../../Assets/Ked.Presentation/Playback/Host/IPlaybackStage.cs" />
     <Compile Include="../../Assets/Ked.Presentation/Playback/Host/PlaybackUnit.cs" />
     <Compile Include="../../Assets/Ked.Presentation/Playback/Host/IPlaybackHost.cs" />
