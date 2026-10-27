@@ -180,6 +180,7 @@ Unity를 닫고 했다. 사본에 남은 갈림(Editor asmdef)의 원인이 사�
 - 우리가 더했던 `Editor/UIPresentationFlow.Editor.asmdef`(+`.meta`)를 지웠다. 에디터 코드 10파일은 원본처럼 `Assembly-CSharp-Editor`에 든다(런타임 asmdef 밖의 `Editor` 폴더).
 - 어셈블리: 15 → 14개. `UIPresentationFlow.Runtime` 78파일 그대로, `Assembly-CSharp-Editor` 1 → 11파일. 오프라인 컴파일 오류 0 · 경고 0.
 - `vendoring.md`: 대응표 · 대조 명령을 새 구조로, "사본에만 있는 것"은 없음.
+- 대조(`vendoring.md`의 명령, 원본 `cf3fa98` blob, PC에서): `Scripts`(Demo 제외) · `Editor` · `Shaders` · 폴더 `.meta` 셋 모두 출력 0줄. 파일 수 197 = 197.
 - Unity 확인: [ ] 컴파일 오류 · 새 경고 0 · [ ] `Tools/UI Presentation/…` 메뉴 · [ ] `Tools/Ked UI/Build Sample UI` 보고 문제 0
 
 ### U4. 시연
