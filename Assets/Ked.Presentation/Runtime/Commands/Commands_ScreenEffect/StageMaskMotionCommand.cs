@@ -58,7 +58,7 @@ public sealed class StageMaskMotionCommand : CommandBase
 
         ClaimTarget();
 
-        if (scope.IsSeekPassThrough || _duration <= 0f)
+        if (scope.ShouldCompressCommandExecution || _duration <= 0f)
         {
             CommitFinalState();
             yield break;

@@ -7,8 +7,7 @@ public interface ICommandRunScopeProvider
 // "CommandRunScope를 만들고(Start), 멈추고 정리하는(End)" 생애주기뿐이다.
 public sealed class PresentationScopeSession : ICommandRunScopeProvider
 {
-    private readonly PresentationSessionContext _context;
-    private readonly ISeekStateQuery _linePresentationAdvanceState;
+    private readonly ICommandPacePolicy _pace;
     private readonly PresentationStage _stage;
 
     private readonly CommandExecutor _executor;
@@ -20,24 +19,17 @@ public sealed class PresentationScopeSession : ICommandRunScopeProvider
 
     public PresentationScopeSession(
         CommandExecutor executor,
-        PresentationSessionContext presentationSessionContext,
-        ISeekStateQuery linePresentationAdvanceState,
+        ICommandPacePolicy pace,
         PresentationStage presentationStage)
     {
         _executor = executor;
-        _context = presentationSessionContext;
-        _linePresentationAdvanceState = linePresentationAdvanceState;
+        _pace = pace;
         _stage = presentationStage;
     }
 
     public void Start()
     {
-        _sessionScope = new CommandRunScope(
-            _context,
-            _linePresentationAdvanceState,
-            _stage);
-
-        _context.ResetSessionFlagsForStart();
+        _sessionScope = new CommandRunScope(_pace, _stage);
     }
 
     public void End()

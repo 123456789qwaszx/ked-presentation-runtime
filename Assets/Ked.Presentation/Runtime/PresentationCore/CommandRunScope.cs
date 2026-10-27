@@ -3,8 +3,7 @@ using System.Threading;
 
 public sealed class CommandRunScope
 {
-    private readonly PresentationSessionContext _context;
-    private readonly ISeekStateQuery _linePresentationAdvanceState;
+    private readonly ICommandPacePolicy _pace;
     private readonly PresentationStage _stage;
 
     public CancellationToken Token { get; set; }
@@ -17,13 +16,9 @@ public sealed class CommandRunScope
     
     private bool _isCancelled;
 
-    public CommandRunScope(
-        PresentationSessionContext context,
-        ISeekStateQuery linePresentationAdvanceState,
-        PresentationStage stage)
+    public CommandRunScope(ICommandPacePolicy pace, PresentationStage stage)
     {
-        _context = context;
-        _linePresentationAdvanceState = linePresentationAdvanceState;
+        _pace = pace;
         _stage = stage;
         Token = CancellationToken.None;
     }
@@ -31,25 +26,15 @@ public sealed class CommandRunScope
     public bool IsCancelled => _isCancelled;
     public void MarkCancelled() => _isCancelled = true;
 
-    public bool IsSpeedUpMode => _context.IsSpeedUpMode;
-    public bool IsRapidSkipMode => _context.IsRapidSkipMode;
-    public bool IsAutoMode => _context.IsAutoMode;
-
-    public float TimeScale => _context.TimeScale;
+    public float TimeScale => _pace.TimeScale;
     
     public bool CommandIsPlaying { get; set; }
 
-    public bool IsSeekPassThrough => _linePresentationAdvanceState.IsSeekingActive;
-
-    public bool ShouldCompressCommandExecution =>
-        IsRapidSkipMode || IsSeekPassThrough;
+    public bool ShouldCompressCommandExecution => _pace.CompressExecution;
 
     public float ScalePresentationDuration(float duration)
     {
         if (duration <= 0f)
-            return duration;
-
-        if (!IsSpeedUpMode)
             return duration;
 
         return duration / Math.Max(1f, TimeScale);

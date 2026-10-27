@@ -47,3 +47,16 @@ public interface IUIThemePatchPort
 {
     IEnumerator PatchCurrentScreen(string themeId, string localeId);
 }
+
+/// <summary>
+/// 실행기가 재생 정책에서 받는 둘 — 실행을 압축할지(트윈을 즉시 확정), 시간 배율.
+/// VN의 자동·속도·빨리 넘기기·시크 깃발은 여기로 오지 않는다: 재생 쪽이 그 둘로 접어서 준다.
+/// 커맨드가 실제로 묻는 것이 이 둘뿐이라, 실행기는 VN을 모른 채 돈다.
+/// </summary>
+public interface ICommandPacePolicy
+{
+    bool CompressExecution { get; }
+
+    /// <summary>1이 보통. 1보다 크면 연출 길이를 그만큼 줄인다(ScalePresentationDuration).</summary>
+    float TimeScale { get; }
+}

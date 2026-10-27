@@ -218,12 +218,11 @@ public sealed class PresentationAssembler
 
         _refs.CommandExecutor.Initialize(factory);
 
-        PresentationSessionContext presentationSessionContext = new(_playbackState);
+        PresentationSessionContext pacePolicy = new(_playbackState, _linePresentationAdvanceState);
 
         _presentationScopeSession = new(
             _refs.CommandExecutor,
-            presentationSessionContext,
-            _linePresentationAdvanceState,
+            pacePolicy,
             _presentationStage);
     }
 
