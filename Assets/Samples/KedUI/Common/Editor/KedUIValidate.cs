@@ -12,7 +12,7 @@ namespace Ked.Samples.UI.Editor
     ///   1. 그림 이름 — KedUI 아래 같은 이름의 PNG가 둘 이상인가(그림은 이름으로 찾는다)
     ///   2. Refs · Presentation — UIPF 검사(UIScreenValidation)를 엄하게: 위젯도 Refs가 모두 있어야 하고,
     ///      presentationId가 비면 안 된다(KedUI는 화면 키를 id로 쓴다)
-    ///   3. 묶음 — 묶음 안 에셋이 제 묶음 · Common · UIPF · 본체 · 패키지만 가리키는가(UIScreenUnits.Audit)
+    ///   3. 묶음 — 묶음 안 에셋이 제 묶음 · Common · UIPF 런타임 코드 · Unity 패키지만 가리키는가(UIScreenUnits.Audit)
     ///
     /// 빌드(KedUIBuild)도 저장한 뒤 이것을 돌린다.
     /// 배치 모드: -executeMethod Ked.Samples.UI.Editor.KedUIValidate.ValidateBatch (문제가 있으면 종료 코드 1).

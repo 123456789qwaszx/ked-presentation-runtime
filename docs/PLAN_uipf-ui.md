@@ -329,6 +329,7 @@ UIPF 저장소의 Adaptive UI 데모를 걷고, 그 자리에 이 VN UI를 샘�
   - KedUIHost(캔버스의 MonoBehaviour)는 GUID가 그대로라 어셈블리가 바뀌어도 이어진다.
 - 묶음은 자리를 고정하지 않는다. 뿌리는 `Ked.Samples.UI.asmdef`가 있는 폴더, UIPF 코드 자리는 `UIPresentationFlow.Runtime.asmdef`로 찾는다(`KedUIUnits`). 앱 빌드가 부르도록 명세 · 키트 · 글꼴 · 묶음 설정을 public으로 했다.
 - 묶음 감사의 "허용할 곳"에서 본체를 뺐다. 정적 검사: 묶음이 묶음 밖(제 묶음 · Common · UIPF 코드 말고)을 가리키는 곳 0, 묶음 → App 0.
+- 그림 임포트 설정(`KedUIArtImporter`, 메뉴 `Apply Art Import Settings`)은 manifest 줄 중 PNG가 없는 것을 건너뛰고 로그로 알린다(전에는 멈췄다). 복사본에는 `Art/`가 없어서다. 화면이 쓰는 그림이 없으면 빌드의 키트가 문제로 올린다.
 - **화면비 Variant**: 재생 화면 Presentation에 `UltraWide_HudInBoard`(UltraWide = 21:9 이상, 우선순위 10)를 더한다. 꼬리표와 퀵메뉴를 화면 끝이 아니라 가운데 1600 판의 양 끝에 둔다 — 기본이면 21:9에서 퀵메뉴가 대사창 오른쪽 끝보다 300쯤 밖으로 나간다.
   - 처음 한 번 만드는 데이터라, 앱 빌드가 Presentation을 만든 뒤 `PlaySpec.EnsureVariants`를 부른다. 이미 있으면 건드리지 않는다.
   - 도구는 UIPF에 더한 `UIPresentationAssets.EnsureLayoutVariant` · `MoveWidget`(UIPF `feat/authoring-tools`).
