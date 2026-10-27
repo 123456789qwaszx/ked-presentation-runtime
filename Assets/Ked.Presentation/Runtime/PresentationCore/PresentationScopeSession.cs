@@ -3,7 +3,7 @@ public interface ICommandRunScopeProvider
     CommandRunScope CurrentScope { get; }
 }
 
-// Yarn 메인 흐름이 연출 세션으로부터 빌려 쓰는 것은
+// 재생 흐름(Playback)이 연출 세션으로부터 빌려 쓰는 것은
 // "CommandRunScope를 만들고(Start), 멈추고 정리하는(End)" 생애주기뿐이다.
 public sealed class PresentationScopeSession : ICommandRunScopeProvider
 {
