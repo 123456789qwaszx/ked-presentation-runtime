@@ -69,7 +69,7 @@ namespace Ked.Samples.UI
     /// </summary>
     public sealed class KedPlaythroughEnd
     {
-        public enum Unit
+        public enum EndKind
         {
             /// <summary>에피소드(연출 단독의 노드 하나).</summary>
             Episode,
@@ -90,7 +90,7 @@ namespace Ked.Samples.UI
             }
         }
 
-        public Unit Kind;
+        public EndKind Kind;
 
         /// <summary>끝난 것의 이름. 비면 지금 예제의 제목(KedExampleCard.TitleKey).</summary>
         public string Title;

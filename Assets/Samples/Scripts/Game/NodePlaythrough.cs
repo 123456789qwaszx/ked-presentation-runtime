@@ -12,7 +12,7 @@ using UnityEngine;
 /// 진행·저장 예제가 같은 문자열을 진행 저장의 HostState 칸에 넣는다 — 다른 것은 저장소뿐이다.
 ///
 ///   저장       줄이 다 보일 때마다(LineDisplayed) 재개 지점을 쓴다. 노드 끝까지 가면 지운다.
-///   끝         노드 끝까지 가면 Completed를 알린다(끝 카드). 타이틀로 나가서 끊긴 것은 끝이 아니다.
+///   끝         노드 끝까지 가면 끝 화면을 부른다(IEpisodeEndView — 끝 카드). 타이틀로 나가서 끊긴 것은 끝이 아니다.
 ///   이어하기   같은 노드를 루트(노드 시작)부터 다시 달린다. 기록된 Yarn 선택은 자동 응답하고,
 ///              그 줄까지는 보이지 않게 빨리 감은 뒤 거기서 플레이어에게 넘긴다.
 ///
@@ -34,24 +34,24 @@ public sealed class NodePlaythrough : IPlaythroughEntry
         public string ResumePoint;
     }
 
-    /// <summary>노드를 끝까지 봤다 — 이어하기 파일을 지운 뒤. 끝내기 요청으로 끊긴 경우에는 오지 않는다.</summary>
-    public event Action Completed;
-
     private readonly NodePlaybackHost _host;
     private readonly PlaybackMemory _memory;
     private readonly string _nodeName;
     private readonly string _path;
+    private readonly IEpisodeEndView _endView;
 
     public NodePlaythrough(
         NodePlaybackHost host,
         PlaybackMemory memory,
         string nodeName,
-        string path)
+        string path,
+        IEpisodeEndView endView)
     {
         _host = host;
         _memory = memory;
         _nodeName = nodeName;
         _path = path;
+        _endView = endView;
     }
 
     #region 타이틀
@@ -151,7 +151,7 @@ public sealed class NodePlaythrough : IPlaythroughEntry
             if (completed)
             {
                 Delete();
-                Completed?.Invoke();
+                _endView.Show();
             }
         }
         catch (Exception error)

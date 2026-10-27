@@ -364,10 +364,12 @@ UIPF 저장소의 Adaptive UI 데모를 걷고, 그 자리에 이 VN UI를 샘�
   - 그림은 Common 것만 쓴다 — 묶음에 `Sprites/`가 없다.
   - 묶음은 재생 런타임을 모른다. 내용은 앱이 채운다(`KedUIFlow.End`).
 - **끝은 호스트가 정한다.** 대본 명령(`<<endEpisode>>` 같은)으로 정하지 않는다. 같은 대본이 연출 단독에서는 회차의 끝이고, 진행 예제에서는 에피소드 하나일 뿐이다.
-  - 연출 단독: `NodePlaythrough.Completed` — 노드를 끝까지 봤을 때, 이어하기 파일을 지운 뒤. 이름은 예제 제목이다.
-  - 진행: `SceneRunner.ChapterEnded` — 마지막 장면을 확정(저장)한 뒤. 챕터 이름 · 마지막 에피소드 · 스탯을 싣는다.
-    진행 런타임(`ProgressionDriver`)은 끝을 알리지 않는다. 그래서 예제 층의 장면 실행에서 낸다 — `Ked.Progression` 사본은 그대로다.
-  - 둘 다 `KedUIHost.ShowPlaythroughEnd(KedPlaythroughEnd)`로 간다. 흐름이 Panel을 쌓고, 타이틀로는 메뉴의 길(`ReturnToTitle`)과 같다.
+  - 끝을 판정한 자리가 끝 화면을 직접 부른다 — 생성자로 받은 포트다(선택지 화면 `IChapterOptionsView`와 같은 방식). 이벤트로 알리지 않는다.
+  - 연출 단독: `NodePlaythrough` → `IEpisodeEndView` — 노드를 끝까지 봤을 때, 이어하기 파일을 지운 뒤. 이름은 예제 제목이다.
+  - 진행: `SceneRunner` → `IChapterEndView` — 마지막 장면을 확정(저장)한 뒤. 챕터 이름 · 마지막 에피소드 · 스탯을 싣는다.
+    진행 런타임(`ProgressionDriver`)은 끝을 알리지 않는다. 그래서 예제 층의 장면 실행에서 부른다 — `Ked.Progression` 사본은 그대로다.
+  - 두 포트의 구현은 호스트 어댑터 하나(`KedHostPorts`의 `KedPlaythroughEndView`)다. 진행 타입을 UI의 끝 내용(`KedPlaythroughEnd`)으로 옮겨
+    `KedUIHost.ShowPlaythroughEnd`에 넘긴다. 흐름이 Panel을 쌓고, 타이틀로는 메뉴의 길(`ReturnToTitle`)과 같다.
 - **줄 태그 `#auto`(본체, `VNLineAdvanceTag`).** 줄이 다 보이고 그 줄 앞머리의 연출 명령이 끝나면 입력 없이 넘긴다.
   - 자동 진행의 켜짐 · 대기와 무관하다. 넘기는 길은 재생 입력의 프레임(`VNFeatureController.Tick`)이다.
   - 재생 입력이 멈춘 동안(메뉴 · 팝업 · UI 숨김)은 기다린다.

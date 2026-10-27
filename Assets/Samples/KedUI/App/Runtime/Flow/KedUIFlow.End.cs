@@ -5,8 +5,8 @@ using UnityEngine;
 namespace Ked.Samples.UI
 {
     // 14 끝 카드 — 회차가 끝까지 갔을 때. 끝을 정하는 것은 호스트다(KedUIHost.ShowPlaythroughEnd):
-    //   연출 단독   노드가 끝까지 갔다(NodePlaythrough.Completed).
-    //   진행 예제   챕터가 끝났다(SceneRunner.ChapterEnded) — 마지막 장면을 확정(저장)한 뒤.
+    //   연출 단독   노드가 끝까지 갔다(NodePlaythrough → IEpisodeEndView).
+    //   진행 예제   챕터가 끝났다(SceneRunner → IChapterEndView) — 마지막 장면을 확정(저장)한 뒤.
     // 재생 화면(마지막 장면)을 딤 아래 두고 Panel을 쌓는다 — Panel이 있으니 재생 입력은 UI가 쥔다(SyncInput).
     // 갈 곳은 타이틀 하나다. 길은 메뉴의 "타이틀로"와 같다(ReturnToTitle) — 끊을 것이 없으니 확인은 묻지 않는다.
     public sealed partial class KedUIFlow
@@ -47,7 +47,7 @@ namespace Ked.Samples.UI
 
         private EpisodeEndPanel.Model EndModel(KedPlaythroughEnd end)
         {
-            bool chapter = end.Kind == KedPlaythroughEnd.Unit.Chapter;
+            bool chapter = end.Kind == KedPlaythroughEnd.EndKind.Chapter;
 
             string title = string.IsNullOrWhiteSpace(end.Title)
                 ? Text(_titlePort?.Example?.TitleKey)

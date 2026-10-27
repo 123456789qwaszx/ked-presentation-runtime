@@ -6,19 +6,13 @@ using UnityEngine;
 
 // 게임에서 Scene 실행 순서를 소유하는 유일한 runner.
 // 진행 상태 계산은 SceneProgress에 위임하고, 재생 단위의 수명(열기·정지·루트부터 다시)은 PlaybackUnit에 맡긴다.
-// 여기 남는 것은 진행의 판단이다 — 무엇을 재생할지, 선택을 어떻게 정할지, 장면 경계와 확정, 되감을 때 진행 기록을 어디까지 자를지.
+// 여기 남는 것은 진행의 판단이다 — 무엇을 재생할지, 선택을 어떻게 정할지, 장면 경계와 확정, 되감을 때 진행 기록을 어디까지 자를지,
+// 챕터가 끝났을 때 끝 화면을 부르는 것(IChapterEndView).
 //
 // 이어하기의 줄 시크는 여기서 열지 않는다. 런처가 연출 기억을 되돌려 두면(PlaybackMemory.Restore)
 // 복원 장면을 열 때 PlaybackUnit이 연다. 여기는 "시크 중인가"만 물어 진행 선택을 기록으로 자동 응답한다.
 public sealed class SceneRunner : ISceneRunner
 {
-    /// <summary>
-    /// 챕터가 끝났다 — 마지막 장면을 확정(저장)한 뒤, 진행 런타임에 돌려주기 전에 부른다. 끝 카드를 띄우는 자리다.
-    /// 진행 런타임(ProgressionDriver)은 끝을 알리지 않는다 — 판단이 여기(장면 실행)서 나므로 여기서 알린다.
-    /// 받는 것: 챕터 정의 · 마지막으로 본 에피소드 · 끝난 상태(확정된 스탯).
-    /// </summary>
-    public event Action<ChapterDefinition, EpisodeNode, ChapterState> ChapterEnded;
-
     private enum SceneStepKind
     {
         Continue,
@@ -30,15 +24,18 @@ public sealed class SceneRunner : ISceneRunner
     private readonly PlaybackUnit _unit;
     private readonly IChapterOptionsView _options;
     private readonly IScenePersistence _persistence;
+    private readonly IChapterEndView _endView;
 
     public SceneRunner(
         PlaybackUnit unit,
         IChapterOptionsView options,
-        IScenePersistence persistence)
+        IScenePersistence persistence,
+        IChapterEndView endView)
     {
         _unit = unit;
         _options = options;
         _persistence = persistence;
+        _endView = endView;
     }
 
     #region Runner Control
@@ -71,11 +68,7 @@ public sealed class SceneRunner : ISceneRunner
                     return CommitScene(progress, SceneRunOutcome.SceneEnded);
 
                 case SceneStepKind.ChapterEnded:
-                {
-                    SceneRunResult result = CommitScene(progress, SceneRunOutcome.ChapterEnded);
-                    ChapterEnded?.Invoke(progress.Definition, progress.CurrentEpisode, result.ExitState);
-                    return result;
-                }
+                    return EndChapter(progress);
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(step), step, null);
@@ -130,6 +123,16 @@ public sealed class SceneRunner : ISceneRunner
         return new SceneRunResult(
             outcome,
             commit.State);
+    }
+
+    // 챕터 끝 — 마지막 장면을 확정(저장)한 뒤 끝 화면을 부르고 진행 런타임에 돌려준다.
+    private SceneRunResult EndChapter(SceneProgress progress)
+    {
+        SceneRunResult result = CommitScene(progress, SceneRunOutcome.ChapterEnded);
+
+        _endView.Show(progress.Definition, progress.CurrentEpisode, result.ExitState);
+
+        return result;
     }
     
     #endregion

@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using Ked.Progression;
 using Ked.Progression.Save;
@@ -25,9 +24,8 @@ using KedUI = Ked.Samples.UI;
 /// 캔버스가 없으면(빌더 Tools/Ked UI/Build Sample UI 실행 전) 아무것도 세우지 않고 알린다.
 /// 연출 무대(배경·인물·화면 효과)는 씬의 무대 캔버스에 놓인 PresentationUIRoot가 그리고, 새 UI는 그 위 캔버스에 얹힌다.
 ///
-/// 회차의 끝도 여기서 정한다 — 연출 단독은 노드를 끝까지 봤을 때(NodePlaythrough.Completed), 진행·저장은 챕터가 끝났을 때
-/// (SceneRunner.ChapterEnded). 끝나면 UI에 끝 카드를 띄우게 한다(KedUIHost.ShowPlaythroughEnd). 대본 명령으로 정하지 않는다 —
-/// 같은 대본이 연출 단독에서는 회차의 끝이고 진행 예제에서는 에피소드 하나일 뿐이다.
+/// 회차의 끝은 회차를 연 쪽이 정하고 끝 화면을 직접 부른다 — 연출 단독은 NodePlaythrough(IEpisodeEndView),
+/// 진행·저장은 SceneRunner(IChapterEndView). 둘 다 KedPlaythroughEndView가 UI의 끝 카드로 잇는다.
 ///
 /// 스크립트 GUID는 예전 VNAppBootstrap 그대로다 — 씬에 직렬화된 값이 유지된다.
 ///
@@ -283,46 +281,6 @@ public class SampleBootstrap : MonoBehaviour, IRigPrefabSource
         };
     }
 
-    // 연출 단독 — 노드 하나가 회차다. 이름은 예제 카드의 제목(UI가 채운다).
-    private void ShowEpisodeEnd()
-    {
-        _kedUI.ShowPlaythroughEnd(new KedUI.KedPlaythroughEnd
-        {
-            Kind = KedUI.KedPlaythroughEnd.Unit.Episode,
-        });
-    }
-
-    // 진행·저장 — 챕터 끝. 장면 실행(SceneRunner) 안에서 불리므로 여기서 던지지 않는다 — 진행 실행이 실패로 끝나지 않게.
-    private void ShowChapterEnd(ChapterDefinition chapter, EpisodeNode lastEpisode, ChapterState state)
-    {
-        try
-        {
-            var stats = new List<KedUI.KedPlaythroughEnd.Stat>(chapter.Stats.Count);
-
-            foreach (StatDefinition stat in chapter.Stats)
-            {
-                if (state == null || !state.Stats.TryGetValue(stat.Key, out int value))
-                    continue;
-
-                stats.Add(new KedUI.KedPlaythroughEnd.Stat(
-                    string.IsNullOrWhiteSpace(stat.DisplayName) ? stat.Key : stat.DisplayName,
-                    value));
-            }
-
-            _kedUI.ShowPlaythroughEnd(new KedUI.KedPlaythroughEnd
-            {
-                Kind = KedUI.KedPlaythroughEnd.Unit.Chapter,
-                Title = string.IsNullOrWhiteSpace(chapter.DisplayName) ? chapter.ChapterId : chapter.DisplayName,
-                LastEpisode = lastEpisode?.Title,
-                Stats = stats,
-            });
-        }
-        catch (Exception error)
-        {
-            Debug.LogException(error);
-        }
-    }
-
     #endregion
 
     private PresentationSceneRefs CreatePresentationSceneRefs()
@@ -382,10 +340,10 @@ public class SampleBootstrap : MonoBehaviour, IRigPrefabSource
             _nodePlaybackHost,
             _runtime.Memory,
             presentationEntryNode,
-            Path.Combine(Application.persistentDataPath, "presentation-only", "resume.json"));
+            Path.Combine(Application.persistentDataPath, "presentation-only", "resume.json"),
+            new KedPlaythroughEndView(_kedUI));
 
         _runtime.LineFlow.LineDisplayed += _nodePlaythrough.SaveCurrentLine;
-        _nodePlaythrough.Completed += ShowEpisodeEnd;
 
         return _nodePlaybackHost;
     }
@@ -457,9 +415,8 @@ public class SampleBootstrap : MonoBehaviour, IRigPrefabSource
         SceneRunner sceneRunner = new SceneRunner(
             _runtime.Unit,
             _progressionOptions,
-            savePersistence);
-
-        sceneRunner.ChapterEnded += ShowChapterEnd;
+            savePersistence,
+            new KedPlaythroughEndView(_kedUI));
 
         _progressionDriver = new ProgressionDriver(sceneRunner);
 

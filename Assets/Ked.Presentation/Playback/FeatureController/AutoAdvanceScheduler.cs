@@ -65,10 +65,7 @@ public sealed class AutoAdvanceScheduler : ActionMarkupHandler
         ArmAutoAdvance();
     }
 
-    /// <summary>
-    /// #auto 줄 — 기다리지 않고 넘긴다(자동 진행의 대기 · 켜짐과 무관). 다음 줄을 요청했으면 true.
-    /// 막혔으면 false — VNFeatureController.Tick이 다음 프레임에 다시 부른다.
-    /// </summary>
+    // #auto 줄 — 자동 진행의 켜짐 · 대기와 무관하게 바로 넘긴다. 막혔으면 false(Tick이 다음 프레임에 다시).
     public bool TryDispatchLineAutoAdvance()
     {
         return _dialogueAdvanceDispatcher != null &&
