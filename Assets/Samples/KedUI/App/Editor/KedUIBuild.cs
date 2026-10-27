@@ -11,9 +11,12 @@ namespace Ked.Samples.UI.Editor
     /// <summary>
     /// Tools/Ked UI/Build Sample UI — 화면 빌드 명세(Screens/*/Editor/*Spec)에서 UIPF 화면 프리팹을 만든다.
     ///
+    /// 이것은 앱 빌드다(KedUI/App) — 화면 목록과 순서, 재생 런타임에 매인 것(선택지 항목 · 대사창 배치 DB), 캔버스를 안다.
+    /// 화면 묶음(KedUI의 Common · Screens)은 재생 런타임을 모르고, 그 명세는 묶음의 Editor에 있다.
+    ///
     /// 원본과 산출물(docs/PLAN_uipf-ui.md "제작 원칙"):
     ///   원본     화면 스크립트(Screens/*/Scripts) · 빌드 명세(Screens/*/Editor) · 그림 · 부품 키트(Common)
-    ///   산출물   화면 프리팹(Screens/*/Prefabs) · 캔버스(Resources/KedUI) · 글꼴 SDF — 빌드마다 덮어쓴다.
+    ///   산출물   화면 프리팹(Screens/*/Prefabs) · 선택지 항목(App/Prefabs) · 캔버스(App/Resources/KedUI) · 글꼴 SDF — 빌드마다 덮어쓴다.
     ///            손으로 고치지 않는다(다음 빌드에서 사라진다). 고칠 것은 명세 · 키트에서 고친다.
     ///   처음 한 번 만드는 데이터   Presentation · 대사창 배치 DB — 있으면 빌드가 건드리지 않는다(에셋에서 고쳐도 된다).
     ///            글꼴 묶음은 글꼴 칸만 빌드마다 다시 건다.
@@ -23,7 +26,7 @@ namespace Ked.Samples.UI.Editor
     ///   2. TMP 글꼴(Noto Sans KR Medium · Bold, 동적 SDF)
     ///   3. 화면 프리팹 12개(Root 2 · Panel 6 · Page 4) — 자식 이름 = 화면의 Refs
     ///   4. 선택지 항목 프리팹 · 연출 프리셋 DB · UIPF 글꼴 묶음 · 화면별 Presentation
-    ///   5. 캔버스 프리팹(Resources/KedUI/KedUICanvas) — 층 셋에 화면을 중첩 프리팹으로 놓고 KedUIHost에 잇는다
+    ///   5. 캔버스 프리팹(App/Resources/KedUI/KedUICanvas) — 층 셋에 화면을 중첩 프리팹으로 놓고 KedUIHost에 잇는다
     ///   6. 검사(KedUIValidate — Refs · Presentation 이름 · 묶음). 메뉴 Validate Sample UI로 빌드 없이 따로도 돈다.
     ///
     /// 생성물 자리는 묶음 규칙(KedUIUnits): 화면 스크립트가 Screens/{묶음}/Scripts/에 있으면 그 묶음 안,
@@ -39,10 +42,13 @@ namespace Ked.Samples.UI.Editor
     /// </summary>
     public static class KedUIBuild
     {
-        public const string ScreensDir = KedUIKit.Root + "/Generated/Screens";
-        public const string CanvasDir = KedUIKit.Root + "/Resources/KedUI";
-        public const string CanvasPath = CanvasDir + "/KedUICanvas.prefab";
-        public const string OptionItemName = "KedOptionItem";
+        public static string AppDir => KedUIUnits.Root + "/App";
+        public static string ScreensDir => KedUIUnits.Root + "/Generated/Screens";
+        public static string CanvasDir => AppDir + "/Resources/KedUI";
+        public static string CanvasPath => CanvasDir + "/KedUICanvas.prefab";
+
+        // 선택지 항목은 본체의 VNOptionItem이라 앱 쪽에 둔다(재생 쪽 선택지 표시자가 이 프리팹으로 항목을 만든다).
+        public static string OptionItemPath => AppDir + "/Prefabs/KedOptionItem.prefab";
 
         [MenuItem("Tools/Ked UI/Build Sample UI")]
         public static void BuildFromMenu()
@@ -95,9 +101,7 @@ namespace Ked.Samples.UI.Editor
 
                 EditorUtility.DisplayProgressBar("Ked UI", "화면", 0.3f);
 
-                // 선택지 항목은 재생 화면의 선택지 상자가 쓴다 — 재생 묶음에 둔다.
-                string optionItemPath = KedUIUnits.Rules.PrefabPath(typeof(PlayScreen), OptionItemName, ScreensDir);
-                GameObject optionItem = Save(OptionItemSpec.Build(kit), optionItemPath, built);
+                GameObject optionItem = Save(OptionItemSpec.Build(kit), OptionItemPath, built);
 
                 GameObject[] pages =
                 {

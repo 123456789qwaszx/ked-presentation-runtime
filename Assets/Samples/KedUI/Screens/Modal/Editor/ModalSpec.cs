@@ -6,7 +6,7 @@ using N = Ked.Samples.UI.NoticePanel.Refs;
 namespace Ked.Samples.UI.Editor
 {
     /// <summary>09 확인 · 10 안내 — Design/09_confirm.png · 10_notice.png. 딤이 화면 전체의 포인터를 막는다.</summary>
-    internal static class ModalSpec
+    public static class ModalSpec
     {
         public static GameObject Confirm(KedUIKit kit)
         {

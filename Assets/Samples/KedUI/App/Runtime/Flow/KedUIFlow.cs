@@ -74,10 +74,14 @@ namespace Ked.Samples.UI
         }
 
         /// <summary>재생 본체 쪽 대사창 계약의 구현. 조립(PresentationAssembler)에 넘긴다.</summary>
-        public IPresentationDialogueBoxView DialogueBox => _play.DialogueBox;
+        public IPresentationDialogueBoxView DialogueBox => _dialogueBoxView ??= new KedDialogueBoxView(_play.Dialogue);
 
         /// <summary>재생 본체 쪽 선택지 상자 계약의 구현. 조립과 진행 예제의 선택지 화면에 넘긴다.</summary>
-        public IPresentationOptionsBoxView OptionsBox => _play.OptionsBox;
+        public IPresentationOptionsBoxView OptionsBox => _optionsBoxView ??= new KedOptionsBoxView(_play.Options);
+
+        // 화면 묶음은 재생 런타임을 모른다 — 본체 계약에 잇는 어댑터는 여기(앱)서 만든다.
+        private KedDialogueBoxView _dialogueBoxView;
+        private KedOptionsBoxView _optionsBoxView;
 
         /// <summary>
         /// 재생과 호스트를 잇는다. 조립이 끝난 뒤(재생 호스트가 정해진 뒤) 한 번.

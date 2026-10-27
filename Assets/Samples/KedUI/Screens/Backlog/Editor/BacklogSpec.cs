@@ -10,7 +10,7 @@ namespace Ked.Samples.UI.Editor
     /// 08 백로그 — Design/08_backlog.png. 줄은 ScrollRect 안의 VerticalLayoutGroup에 쌓인다(줄 높이는 글자에 맞춰 자란다).
     /// 줄 견본(LogRowTemplate)은 숨겨 두고 화면이 복제한다.
     /// </summary>
-    internal static class BacklogSpec
+    public static class BacklogSpec
     {
         public static GameObject Build(KedUIKit kit)
         {

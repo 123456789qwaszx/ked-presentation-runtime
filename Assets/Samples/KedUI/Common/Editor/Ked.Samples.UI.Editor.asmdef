@@ -5,9 +5,6 @@
         "Ked.Samples.UI",
         "UIPresentationFlow.Runtime",
         "UIPresentationFlow.Editor",
-        "Ked.Presentation.Core",
-        "Ked.Presentation.Runtime",
-        "Ked.Presentation.Playback",
         "Unity.TextMeshPro",
         "UnityEngine.UI"
     ],

@@ -52,7 +52,7 @@ namespace Ked.Samples.UI
             _autoDelay = new KedSliderField(
                 View.Component<Slider>(Refs.AutoDelaySlider),
                 View.Text(Refs.AutoDelayValue),
-                KedSettings.MinAutoDelay * 10f, KedSettings.MaxAutoDelay * 10f, wholeNumbers: true,
+                KedSettingRanges.MinAutoDelay * 10f, KedSettingRanges.MaxAutoDelay * 10f, wholeNumbers: true,
                 format: v => _formatSeconds(v / 10f),
                 changed: v => AutoDelayChanged?.Invoke(v / 10f));
 

@@ -3,12 +3,6 @@
     "rootNamespace": "Ked.Samples.UI",
     "references": [
         "UIPresentationFlow.Runtime",
-        "Ked.Presentation.Core",
-        "Ked.Presentation.Runtime",
-        "Ked.Presentation.Playback",
-        "Ked.Progression",
-        "Ked.Progression.Save",
-        "YarnSpinner.Unity",
         "Unity.TextMeshPro",
         "UnityEngine.UI"
     ],

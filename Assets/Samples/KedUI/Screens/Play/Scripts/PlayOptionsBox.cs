@@ -1,15 +1,13 @@
-using System.Threading;
 using UnityEngine;
-using Yarn.Unity;
 
 namespace Ked.Samples.UI
 {
     /// <summary>
-    /// 본체의 선택지 상자 계약(IPresentationOptionsBoxView)을 PlayScreen의 Refs 위에 구현한다.
-    /// 항목은 재생 쪽(VNOptionsPresenter · 진행 예제의 ChapterOptionsView)이 ItemContainer에 만든다 —
-    /// 선택 가능·불가 조건도 그쪽이 정한다. 여기는 딤과 상자의 보이기·입력만 맡는다(시안 03).
+    /// 재생 화면의 선택지 상자 — 딤과 상자의 보이기 · 입력만 맡는다(시안 03). 항목은 앱이 ItemContainer에 만든다
+    /// (선택 가능 · 불가 조건도 그쪽이 정한다). 재생 런타임은 모른다.
+    /// 재생 쪽 계약(ked 본체의 선택지 상자 — 페이드)은 앱이 이것 위에 구현한다(ked: App/Runtime/Play/KedOptionsBoxView).
     /// </summary>
-    internal sealed class PlayOptionsBox : IPresentationOptionsBoxView
+    public sealed class PlayOptionsBox
     {
         private readonly RectTransform _root;
         private readonly CanvasGroup _group;
@@ -22,9 +20,13 @@ namespace Ked.Samples.UI
             _itemContainer = itemContainer;
         }
 
+        public RectTransform Root => _root;
+        public CanvasGroup Group => _group;
         public RectTransform ItemContainer => _itemContainer;
 
-        public void ResetPresentationTransform()
+        public bool IsShowing => _group != null && _group.alpha > 0f;
+
+        public void ResetTransform()
         {
             if (_root == null)
                 return;
@@ -36,7 +38,7 @@ namespace Ked.Samples.UI
         public void SetVisibleImmediate(bool visible)
         {
             KedUIUtil.SetActive(_root, true);
-            SetCanvasVisible(visible);
+            SetShown(visible);
         }
 
         public void SetInputEnabled(bool enabled)
@@ -51,33 +53,11 @@ namespace Ked.Samples.UI
         public void PrepareHidden()
         {
             KedUIUtil.SetActive(_root, true);
-            SetCanvasVisible(false);
+            SetShown(false);
         }
 
-        public async YarnTask FadeInAsync(float duration, CancellationToken token)
-        {
-            SetVisibleImmediate(true);
-            SetInputEnabled(false);
-
-            if (_group == null)
-                return;
-
-            _group.alpha = 0f;
-
-            await Effects
-                .FadeAlphaAsync(_group, 0f, 1f, duration, token)
-                .SuppressCancellationThrow();
-
-            if (token.IsCancellationRequested)
-                return;
-
-            SetCanvasVisible(true);
-            SetInputEnabled(false);
-        }
-
-        public bool IsShowing => _group != null && _group.alpha > 0f;
-
-        private void SetCanvasVisible(bool visible)
+        /// <summary>보이기와 입력을 함께 바꾼다.</summary>
+        public void SetShown(bool visible)
         {
             if (_group == null)
                 return;

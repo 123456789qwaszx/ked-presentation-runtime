@@ -22,13 +22,14 @@ namespace Ked.Samples.UI
     {
         private const string Prefix = "KedUI.";
 
-        public const float MinTextScale = 0.8f;
-        public const float MaxTextScale = 1.3f;
-        public const float MinTypeSpeed = 10f;
-        public const float MaxTypeSpeed = 90f;
-        public const float MinBoxOpacity = 0.3f;
-        public const float MinAutoDelay = 0.5f;
-        public const float MaxAutoDelay = 5f;
+        // 범위는 설정 Page와 같이 쓴다(화면 묶음의 KedSettingRanges).
+        public const float MinTextScale = KedSettingRanges.MinTextScale;
+        public const float MaxTextScale = KedSettingRanges.MaxTextScale;
+        public const float MinTypeSpeed = KedSettingRanges.MinTypeSpeed;
+        public const float MaxTypeSpeed = KedSettingRanges.MaxTypeSpeed;
+        public const float MinBoxOpacity = KedSettingRanges.MinBoxOpacity;
+        public const float MinAutoDelay = KedSettingRanges.MinAutoDelay;
+        public const float MaxAutoDelay = KedSettingRanges.MaxAutoDelay;
 
         public float MasterVolume = 1f;
         public bool Muted;

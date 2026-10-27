@@ -6,7 +6,7 @@ using R = Ked.Samples.UI.TitleScreen.Refs;
 namespace Ked.Samples.UI.Editor
 {
     /// <summary>01 타이틀 — Design/01_title.png · layouts.json "title".</summary>
-    internal static class TitleSpec
+    public static class TitleSpec
     {
         public static GameObject Build(KedUIKit kit)
         {

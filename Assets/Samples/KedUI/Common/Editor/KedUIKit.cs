@@ -8,7 +8,7 @@ using UnityEngine.UI;
 
 namespace Ked.Samples.UI.Editor
 {
-    internal enum KedButtonStyle
+    public enum KedButtonStyle
     {
         Primary,
         Secondary,
@@ -22,9 +22,9 @@ namespace Ked.Samples.UI.Editor
     /// 노드 자리(시안 좌표 → 앵커) · 그림 찾기 · 직렬화 칸 쓰기는 UIPF(Editor/UI/Authoring)의 것을 쓴다 — UINodes · UISpriteIndex · UISerialized.
     /// 시안 판은 1600×900.
     /// </summary>
-    internal sealed class KedUIKit
+    public sealed class KedUIKit
     {
-        public const string Root = "Assets/Samples/KedUI";
+        public static string Root => KedUIUnits.Root;
         public static readonly Rect Screen = new(0f, 0f, 1600f, 900f);
 
         [Serializable]

@@ -10,13 +10,13 @@ namespace Ked.Samples.UI.Editor
     /// 글자 스타일 Bold가 가짜 굵게가 아니라 Bold 글꼴로 그려지게 한다.
     /// 만들기 · 비우기 · 굵기 표는 UIPF의 UIFontAssets(Editor/UI/Authoring)가 하고, 여기는 KedUI의 글꼴과 자리만 둔다.
     /// </summary>
-    internal static class KedUIFonts
+    public static class KedUIFonts
     {
         // 원본 TTF와 그것으로 만든 SDF 자산을 한 폴더에 둔다 — 여러 화면이 같이 쓰는 Common의 몫.
-        public const string FontDir = KedUIUnits.CommonDir + "/Fonts";
-        public const string OutputDir = FontDir;
-        public const string MediumAssetPath = OutputDir + "/NotoSansKR-Medium SDF.asset";
-        public const string BoldAssetPath = OutputDir + "/NotoSansKR-Bold SDF.asset";
+        public static string FontDir => KedUIUnits.CommonDir + "/Fonts";
+        public static string OutputDir => FontDir;
+        public static string MediumAssetPath => OutputDir + "/NotoSansKR-Medium SDF.asset";
+        public static string BoldAssetPath => OutputDir + "/NotoSansKR-Bold SDF.asset";
 
         public static TMP_FontAsset Ensure(List<string> problems)
         {

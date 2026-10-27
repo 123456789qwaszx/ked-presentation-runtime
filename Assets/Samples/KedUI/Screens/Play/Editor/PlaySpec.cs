@@ -10,9 +10,12 @@ namespace Ked.Samples.UI.Editor
     /// 이 화면은 투명하고, 무대는 기존 연출 무대가 그린다.
     ///
     /// 화면비: 꼬리표는 왼쪽 위, 퀵메뉴는 오른쪽 위, 대사창은 아래 가운데에 붙는다(Expand 캔버스에서 남는 폭·높이는 가장자리로).
+    /// 21:9 이상은 Presentation의 Variant가 꼬리표와 퀵메뉴를 가운데 판의 양 끝으로 옮긴다(EnsureVariants).
     /// </summary>
-    internal static class PlaySpec
+    public static class PlaySpec
     {
+        public const string UltraWideVariant = "UltraWide_HudInBoard";
+
         private static readonly (string key, string label)[] Quick =
         {
             ("auto", "자동"),
@@ -45,6 +48,38 @@ namespace Ked.Samples.UI.Editor
             BuildRestore(kit, view);
 
             return view.Go;
+        }
+
+        /// <summary>
+        /// 재생 화면 Presentation의 화면비 Variant — 처음 한 번 만드는 데이터(UIPF UIPresentationAssets.EnsureLayoutVariant).
+        /// 앱 빌드가 Presentation을 만든 뒤 부른다. 이미 있으면 건드리지 않는다(에셋에서 고친 값이 남는다).
+        ///
+        /// UltraWide(21:9 이상): 꼬리표와 퀵메뉴를 화면 끝이 아니라 가운데 1600 판의 양 끝에 둔다 — 대사창(1400, 가운데)과
+        /// 같은 판에 서게. 기본(화면 끝)은 21:9에서 퀵메뉴가 대사창 오른쪽 끝보다 250 넘게 밖으로 나간다.
+        /// </summary>
+        public static bool EnsureVariants(UIPresentationSpec spec)
+        {
+            float half = KedUIKit.Screen.width * 0.5f;
+
+            return UIPresentationAssets.EnsureLayoutVariant(
+                spec,
+                UltraWideVariant,
+                priority: 10,
+                new VariantCondition { useLayoutClass = true, layoutClass = DisplayLayoutClass.UltraWide },
+                patch =>
+                {
+                    // 꼬리표: 화면 왼쪽 끝에서 64 → 판 왼쪽 끝에서 64(기준점은 왼쪽 위 그대로).
+                    patch.widgets.Add(UIPresentationAssets.MoveWidget(
+                        nameof(R.ChapterTag),
+                        anchorMin: UIAnchor.TopCenter,
+                        anchoredPosition: new Vector2(-half + 64f, -40f)));
+
+                    // 퀵메뉴: 화면 오른쪽 끝에서 52 → 판 오른쪽 끝에서 52(기준점은 오른쪽 위 그대로).
+                    patch.widgets.Add(UIPresentationAssets.MoveWidget(
+                        nameof(R.QuickMenu),
+                        anchorMin: UIAnchor.TopCenter,
+                        anchoredPosition: new Vector2(half - 52f, -26f)));
+                });
         }
 
         private static void BuildTopBar(KedUIKit kit, UINode hud)

@@ -14,7 +14,8 @@ namespace Ked.Samples.UI
     ///   HudRoot       — 숨기기로 통째로 감추는 층. 꼬리표·퀵메뉴·대사창·선택지.
     ///   RestoreArea   — 숨긴 동안만 켜진다. 누르면 다시 보인다(진행하지 않는다).
     ///
-    /// 대사창과 선택지 상자는 본체 계약의 구현(PlayDialogueBox · PlayOptionsBox)으로 내준다. 재생 쪽은 화면을 모른다.
+    /// 대사창과 선택지 상자는 UI 쪽 부품(PlayDialogueBox · PlayOptionsBox)으로 내준다. 이 화면은 재생 런타임을 모르고,
+    /// 재생 쪽 계약은 앱이 그 부품 위에 구현한다(ked: App/Runtime/Play). 재생 쪽도 화면을 모른다.
     /// </summary>
     public sealed class PlayScreen : UIRoot<PlayScreen.Refs>, ILocalizedView
     {
@@ -88,7 +89,7 @@ namespace Ked.Samples.UI
         private string _chapterLabel;
         private Localizer _texts;
 
-        public IPresentationDialogueBoxView DialogueBox
+        public PlayDialogueBox Dialogue
         {
             get
             {
@@ -97,7 +98,7 @@ namespace Ked.Samples.UI
             }
         }
 
-        public IPresentationOptionsBoxView OptionsBox
+        public PlayOptionsBox Options
         {
             get
             {
@@ -136,12 +137,12 @@ namespace Ked.Samples.UI
             BindQuick(Refs.Quick_menu, () => MenuClicked?.Invoke());
             KedUIUtil.OnClick(View.Button(Refs.RestoreArea), () => RestoreClicked?.Invoke());
 
-            // 선택지 항목은 재생 쪽이 만든다. 붙는 대로 글자를 테마(사용자 글자 크기)에 등록한다.
+            // 선택지 항목은 앱(재생 쪽)이 만든다. 붙는 대로 글자를 테마(사용자 글자 크기)에 등록한다.
             KedChildWatcher watcher = View.Component<KedChildWatcher>(Refs.OptionsContainer);
             if (watcher != null)
                 watcher.ChildrenChanged += RegisterOptionTexts;
 
-            // 처음에는 대사창·선택지 모두 감춘 상태 — 재생 쪽이 보인다.
+            // 처음에는 대사창·선택지 모두 감춘 상태 — 앱(재생 쪽)이 보인다.
             _dialogueBox.SetVisibleImmediate(false);
             _dialogueBox.SetNextMarkerVisible(false);
             _optionsBox.SetVisibleImmediate(false);
@@ -152,7 +153,7 @@ namespace Ked.Samples.UI
 
         protected override void OnPresented(in UIAppliedTheme theme)
         {
-            // 대사·이름 크기는 연출 프리셋 × 사용자 글자 크기. 프리셋을 따르는 글자라 Styled에 넣지 않고 여기서 곱한다.
+            // 대사·이름 크기는 레이아웃(연출 프리셋) × 사용자 글자 크기. 레이아웃을 따르는 글자라 Styled에 넣지 않고 여기서 곱한다.
             _dialogueBox?.SetTextScale(theme.TextScale);
         }
 

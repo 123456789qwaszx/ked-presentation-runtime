@@ -9,7 +9,6 @@ namespace Ked.Samples.UI.Editor
     // Optional, manual-only tool. It does not create scenes or touch runtime code.
     public static class KedUIArtImporter
     {
-        private const string DefaultRoot = "Assets/Samples/KedUI";
         [Serializable] private sealed class Manifest { public Entry[] assets; }
         [Serializable] private sealed class Entry
         {
@@ -24,14 +23,14 @@ namespace Ked.Samples.UI.Editor
         [MenuItem("Tools/Ked UI/Apply Art Import Settings")]
         public static void Apply()
         {
-            ApplyAt(DefaultRoot);
+            ApplyAt(KedUIUnits.Root);
         }
 
         public static void ApplyAt(string root)
         {
             string manifestPath = root.TrimEnd('/') + "/asset-manifest.json";
             if (!File.Exists(manifestPath))
-                throw new FileNotFoundException("Ked UI manifest not found. Keep the package under Assets/Samples/KedUI, or call ApplyAt with the new root.", manifestPath);
+                throw new FileNotFoundException("Ked UI manifest not found at the KedUI root (the folder of Ked.Samples.UI.asmdef), or call ApplyAt with the root.", manifestPath);
             Manifest manifest = JsonUtility.FromJson<Manifest>(File.ReadAllText(manifestPath));
             if (manifest == null || manifest.assets == null)
                 throw new InvalidDataException("Ked UI manifest has no assets.");

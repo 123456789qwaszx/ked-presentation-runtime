@@ -31,18 +31,6 @@ namespace Ked.Samples.UI
     }
 
     /// <summary>
-    /// 타이틀 오른쪽 카드에 보일 예제 소개. 글자는 UI 글자 표(Texts/KedUITexts.csv)의 키다.
-    /// 그림은 실제 예제 대본이 쓰는 배경이다(시안 샘플 그림이 아니다). 없으면 중립 바탕.
-    /// </summary>
-    public sealed class KedExampleCard
-    {
-        public string NameKey;
-        public string TitleKey;
-        public string SummaryKey;
-        public Sprite Preview;
-    }
-
-    /// <summary>
     /// 수동 저장 슬롯. 진행·저장 예제에만 있다 — 없으면(null) 메뉴의 저장·불러오기와 백로그의 갈라지기가 없다.
     /// 기존 저장 유즈케이스(ManualSaveFlow · SaveSlotService)를 그대로 감싼다. 저장 포맷은 바꾸지 않는다.
     /// </summary>

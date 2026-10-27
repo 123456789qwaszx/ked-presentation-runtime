@@ -39,16 +39,19 @@ Assets/
 ├─ UIPresentationFlow/     UIPF 사본 — 원본과 같은 구조(Scripts/ · Editor/UI · Shaders), asmdef는 런타임 하나
 │   └─ Documentation~/vendoring.md
 └─ Samples/
-    ├─ KedUI/              새 예제 UI — 화면 하나 = 묶음 하나(아래 "화면 묶음")
-    │   ├─ Ked.Samples.UI.asmdef   런타임 asmdef(뿌리 — Common · Screens · Runtime을 덮는다)
+    ├─ KedUI/              새 예제 UI — 화면 하나 = 묶음 하나(아래 "화면 묶음"). App/과 Art/를 뺀 것이 "VN UI 묶음"이다 —
+    │   │                  재생 런타임(본체)을 모르고, UIPF 저장소의 비주얼 노벨 데모로 그대로 복사된다(아래 "VN UI를 UIPF 샘플로")
+    │   ├─ Ked.Samples.UI.asmdef   런타임 asmdef(뿌리 — Common · Screens). 참조는 UIPF · TMP · UGUI뿐
     │   ├─ Common/         여러 화면이 같이 쓰는 것 — Scripts(부품 키트) · Editor(키트로 짓는 도구 · 검사 · 에디터 asmdef) · Sprites · Fonts
     │   ├─ Screens/        화면 묶음 7 — Title · Play · Menu · SaveLoad · Backlog · Settings · Modal
-    │   │                  각 묶음: Scripts · Prefabs · Presentation · Sprites · Editor(+.asmref) (Play만 Data)
-    │   ├─ Runtime/        앱 쪽 — 흐름(Flow) · 설정 값(Settings/KedSettings) · KedUIHost
-    │   ├─ Editor/         앱 빌드 — 화면 목록 · 캔버스(KedUIBuild · KedUIAssets), .asmref로 에디터 어셈블리
-    │   ├─ Art/            받았지만 어느 화면도 쓰지 않는 그림 14장(시안 배경 포함)
-    │   ├─ Texts/          UI 글자 표 KedUITexts.csv(ko-KR · en-US)
-    │   └─ Resources/KedUI/KedUICanvas.prefab   빌더가 만든다 — SampleBootstrap이 읽는다
+    │   │                  각 묶음: Scripts · Prefabs · Presentation · Sprites · Editor(+.asmref)
+    │   ├─ App/            ked 앱 쪽 — 재생 런타임에 잇는 것. asmdef 둘(Ked.Samples.UI.App · .App.Editor)
+    │   │   ├─ Runtime/    흐름(Flow) · 설정 값(Settings/KedSettings) · KedUIHost · 대사창 · 선택지 상자 어댑터(Play/)
+    │   │   ├─ Editor/     앱 빌드 — 화면 목록 · 캔버스 · 선택지 항목(KedUIBuild · KedUIAssets · OptionItemSpec)
+    │   │   ├─ Prefabs/    선택지 항목 KedOptionItem(본체 VNOptionItem) · Data/ 대사창 배치 DB(본체 형식)
+    │   │   ├─ Texts/      UI 글자 표 KedUITexts.csv(ko-KR · en-US)
+    │   │   └─ Resources/KedUI/KedUICanvas.prefab   빌더가 만든다 — SampleBootstrap이 읽는다
+    │   └─ Art/            받았지만 어느 화면도 쓰지 않는 그림 14장(시안 배경 포함)
     └─ Scripts/
         ├─ Game/KedUI/     호스트 어댑터(기본 어셈블리) — KedHostPorts · StageForKedUI
         └─ Stage/          연출 무대 PresentationUIRoot(+ Providers/) — 옛 UI/는 U3에서 걷었다
@@ -193,6 +196,8 @@ Unity를 닫고 했다. 사본에 남은 갈림(Editor asmdef)의 원인이 사�
 ### 화면 묶음 (2026-10-27, 아미야 제안 → 두 화면으로 시험 → 전체 적용)
 UIPF 위에 만든 화면을 "화면 하나 = 묶음 하나"(코드 · 프리팹 · 그림 · Presentation)로 두고 `.meta`째 반입하는 구성. UIPF 원본도 아직 이 구조가 아니어서 여기서 먼저 써 봤다. 바꾼 곳은 `Samples/KedUI`뿐이고 UIPF 사본은 건드리지 않았다.
 
+(10-27 뒤 — Runtime · Editor · 글자 표 · 캔버스 · 선택지 항목 · 대사창 배치 DB는 `App/`으로 옮겼다. 위 "코드 위치"가 지금 모양이다.)
+
 ```
 Samples/KedUI/
 ├─ Ked.Samples.UI.asmdef   런타임 asmdef를 뿌리로(Common/ · Screens/ · Runtime/을 덮는다)
@@ -292,6 +297,49 @@ UIPF `feat/authoring-tools` @ `f912e99`(`dev` 머지 전)에 `Editor/UI/Authorin
 - 자리 계산은 옮기기 전과 같은 식이다 — 다시 지으면 슬롯 카드 프리팹(fileID만) 말고 git 변경 0이어야 한다. 보고의 검사 줄은 "검사: 화면 묶음 7 · 프리팹 13(화면 · 위젯 N) · Presentation 12"로 바뀐다.
 - Unity 확인(10-27, 아미야 "문제 없는 것을 확인함"): `Build Sample UI`(편집 모드) 뒤 git 변경은 `SaveLoadPanel.prefab`의 fileID뿐, `Validate Sample UI` 문제 0. UIPF 블랙홀 일시 정지 창도 명세로 다시 지어 같은 화면임을 확인했다(UIPF `c22bb76`).
 - 다시 반입: UIPF `c22bb76`(`UIPrefabs.cs` 주석 — fileID 설명을 관찰한 것만으로 고침). 대조 0줄.
+
+### VN UI를 UIPF 샘플로 — 묶음과 App 나누기 · 화면비 Variant (10-27, 아미야 결정)
+UIPF 저장소의 Adaptive UI 데모를 걷고, 그 자리에 이 VN UI를 샘플로 들인다. Page · 위젯 · 스크롤 목록 · 모달 · 포커스처럼 블랙홀 데모가 보여 주지 못한 것을 다 갖고 있어서다(아미야).
+
+정한 것(넷 모두 추천안):
+- **ked가 원본이고 UIPF는 복사본이다.** 블랙홀과 같은 방식이다. UIPF 쪽의 데모 흐름(가짜 데이터)만 UIPF가 원본이다.
+- **재생 런타임에 묶인 것은 `KedUI/App/`으로 뺀다.** 복사 규칙은 "KedUI에서 `App/`과 `Art/`를 뺀 것"이다.
+- **UIPF의 Adaptive UI 데모는 전부 걷는다.** `Scripts/Demo`, `Demo/AdaptiveUI`, `Assets/UI`, 씬을 걷는다.
+- **화면비 Variant를 ked 원본에 하나 더한다.** 지금은 레이아웃 Variant 시연이 Adaptive에만 있다.
+
+이 저장소에서 한 것:
+- 그대로는 복사할 수 없었다. 재생 화면이 본체 계약에 묶여 있었다 — 대사창 · 선택지 상자(`IPresentationDialogueBoxView` · `IPresentationOptionsBoxView`, Yarn), 선택지 항목(`VNOptionItem`), 대사창 배치 DB, 설정 범위(`KedSettings`).
+- 어댑터는 보통 클래스였다(MonoBehaviour가 아니다). 그래서 둘로 갈랐다.
+  - 묶음 쪽 `PlayDialogueBox` · `PlayOptionsBox`는 UI 일만 한다: 글자 · 자리 · 배율 · 불투명도 · 보이기.
+  - App 쪽 `KedDialogueBoxView` · `KedOptionsBoxView`가 본체 계약을 그 위에 구현한다: 연출 프리셋 → `PlayDialogueLayout`, Yarn 페이드.
+  - `PlayScreen`은 `Dialogue` · `Options`(묶음 타입)를 내준다.
+- 그 밖에 옮긴 것:
+  - 타이틀 카드 모델 `KedExampleCard`는 Title 묶음으로.
+  - 설정 범위는 Settings 묶음의 `KedSettingRanges`로(`KedSettings`가 같은 값을 쓴다).
+  - `KedUIUtil`은 public으로.
+- 옮긴 곳(모두 `.meta`째, GUID 그대로):
+  - `Runtime/` · `Editor/` · `Texts/` · `Resources/` → `App/`
+  - `Screens/Play/Data/KedSurfaceLayoutPresetDB` → `App/Data/`
+  - `Screens/Play/Prefabs/KedOptionItem` · `Screens/Play/Editor/OptionItemSpec` → `App/Prefabs/` · `App/Editor/`
+  - 옛 `Editor/Ked.Samples.UI.Editor.asmref` → `App/Editor`의 asmdef(`Ked.Samples.UI.App.Editor`)
+- asmdef:
+  - `Ked.Samples.UI`는 UIPF · TMP · UGUI만 참조한다(본체 · 진행 · Yarn 참조를 걷었다).
+  - `Ked.Samples.UI.Editor`는 본체 참조를 걷었다.
+  - App 런타임(`Ked.Samples.UI.App`)은 본체 · 진행 · Yarn을 참조한다. 기본 어셈블리가 쓰도록 autoReferenced다.
+  - KedUIHost(캔버스의 MonoBehaviour)는 GUID가 그대로라 어셈블리가 바뀌어도 이어진다.
+- 묶음은 자리를 고정하지 않는다. 뿌리는 `Ked.Samples.UI.asmdef`가 있는 폴더, UIPF 코드 자리는 `UIPresentationFlow.Runtime.asmdef`로 찾는다(`KedUIUnits`). 앱 빌드가 부르도록 명세 · 키트 · 글꼴 · 묶음 설정을 public으로 했다.
+- 묶음 감사의 "허용할 곳"에서 본체를 뺐다. 정적 검사: 묶음이 묶음 밖(제 묶음 · Common · UIPF 코드 말고)을 가리키는 곳 0, 묶음 → App 0.
+- **화면비 Variant**: 재생 화면 Presentation에 `UltraWide_HudInBoard`(UltraWide = 21:9 이상, 우선순위 10)를 더한다. 꼬리표와 퀵메뉴를 화면 끝이 아니라 가운데 1600 판의 양 끝에 둔다 — 기본이면 21:9에서 퀵메뉴가 대사창 오른쪽 끝보다 300쯤 밖으로 나간다.
+  - 처음 한 번 만드는 데이터라, 앱 빌드가 Presentation을 만든 뒤 `PlaySpec.EnsureVariants`를 부른다. 이미 있으면 건드리지 않는다.
+  - 도구는 UIPF에 더한 `UIPresentationAssets.EnsureLayoutVariant` · `MoveWidget`(UIPF `feat/authoring-tools`).
+  - 레이아웃 패치는 `Screens/Play/Presentation/PlayScreenPresentation.UltraWide_HudInBoard.asset`.
+- 오프라인 컴파일(6000.3): 17개 어셈블리 오류 0 · 경고 0.
+- Unity 확인: 남음
+  - Unity를 닫고 이동을 반영한다.
+  - `Build Sample UI`(편집 모드) → 문제 0.
+  - 재생 · 메뉴 · 선택지 · 백로그 · 설정이 전과 같은지.
+  - Game 뷰 21:9에서 꼬리표 · 퀵메뉴가 판 안쪽으로 오는지, 16:9로 돌리면 제자리로 가는지.
+  - `Validate Sample UI` 문제 0.
 
 ### U5. 문서
 - SCOPE-BOUNDARY에 "꽂힌 모듈 둘"(진행 · UI), ASSEMBLY-BOUNDARY의 어셈블리 표, `PLAN_framework-scope` 분류표.

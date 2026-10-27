@@ -10,7 +10,7 @@ namespace Ked.Samples.UI.Editor
     /// 05 저장 · 06 불러오기 — Design/05_save.png · 06_load.png. 한 프리팹, 두 모드(글자만 다르다).
     /// 슬롯 카드 여섯은 GridLayoutGroup(3열, 440×190, 간격 40×48)에 놓인 같은 카드(SaveSlotCard)다.
     /// </summary>
-    internal static class SaveLoadSpec
+    public static class SaveLoadSpec
     {
         public static GameObject Build(KedUIKit kit)
         {

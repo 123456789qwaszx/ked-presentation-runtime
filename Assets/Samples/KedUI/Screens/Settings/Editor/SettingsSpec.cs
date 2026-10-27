@@ -11,7 +11,7 @@ namespace Ked.Samples.UI.Editor
     /// 07 설정 + 11 · 12 · 13 — Design/07_settings.png 외 셋. 바깥(Panel)과 탭 안(Page 넷)을 따로 만든다.
     /// Page 프리팹은 Panel 프리팹의 PageRoot 아래에 중첩 프리팹으로 들어간다(UIPF: Page는 Owner의 PageRoot 자식이어야 한다).
     /// </summary>
-    internal static class SettingsSpec
+    public static class SettingsSpec
     {
         // 탭 안 영역(PageRoot)의 시안 사각형. Page의 좌표는 모두 이 안의 절대 좌표로 적는다.
         public static readonly Rect PageArea = new(430, 150, 1060, 600);

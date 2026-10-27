@@ -1,0 +1,25 @@
+{
+    "name": "Ked.Samples.UI.App",
+    "rootNamespace": "Ked.Samples.UI",
+    "references": [
+        "Ked.Samples.UI",
+        "UIPresentationFlow.Runtime",
+        "Ked.Presentation.Core",
+        "Ked.Presentation.Runtime",
+        "Ked.Presentation.Playback",
+        "Ked.Progression",
+        "Ked.Progression.Save",
+        "YarnSpinner.Unity",
+        "Unity.TextMeshPro",
+        "UnityEngine.UI"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

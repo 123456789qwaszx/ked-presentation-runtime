@@ -6,7 +6,7 @@ using R = Ked.Samples.UI.SystemMenuPanel.Refs;
 namespace Ked.Samples.UI.Editor
 {
     /// <summary>04 시스템 메뉴 — Design/04_menu.png. 버튼 열은 세로 레이아웃(예제에 따라 저장·불러오기가 빠진다).</summary>
-    internal static class MenuSpec
+    public static class MenuSpec
     {
         public static GameObject Build(KedUIKit kit)
         {

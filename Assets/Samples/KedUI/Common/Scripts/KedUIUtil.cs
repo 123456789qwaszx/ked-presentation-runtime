@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 namespace Ked.Samples.UI
 {
-    internal static class KedUIUtil
+    public static class KedUIUtil
     {
         // 클릭(포인터·키보드 Submit 모두)을 한 번 묶는다. 화면의 OnInitialize에서만 부른다 — 열 때마다 묶지 않는다.
         public static void OnClick(Button button, Action action)

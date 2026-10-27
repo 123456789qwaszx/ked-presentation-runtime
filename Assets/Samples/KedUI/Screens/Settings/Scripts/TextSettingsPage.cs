@@ -55,14 +55,14 @@ namespace Ked.Samples.UI
             _scale = new KedSliderField(
                 View.Component<Slider>(Refs.TextSlider_0),
                 View.Text(Refs.TextValue_0),
-                KedSettings.MinTextScale * 100f, KedSettings.MaxTextScale * 100f, wholeNumbers: true,
+                KedSettingRanges.MinTextScale * 100f, KedSettingRanges.MaxTextScale * 100f, wholeNumbers: true,
                 format: v => v.ToString("0") + "%",
                 changed: v => TextScaleChanged?.Invoke(v / 100f));
 
             _speed = new KedSliderField(
                 View.Component<Slider>(Refs.TextSlider_1),
                 View.Text(Refs.TextValue_1),
-                KedSettings.MinTypeSpeed, KedSettings.MaxTypeSpeed, wholeNumbers: true,
+                KedSettingRanges.MinTypeSpeed, KedSettingRanges.MaxTypeSpeed, wholeNumbers: true,
                 format: v => v.ToString("0"),
                 changed: v =>
                 {
@@ -74,7 +74,7 @@ namespace Ked.Samples.UI
             _opacity = new KedSliderField(
                 View.Component<Slider>(Refs.TextSlider_2),
                 View.Text(Refs.TextValue_2),
-                KedSettings.MinBoxOpacity * 100f, 100f, wholeNumbers: true,
+                KedSettingRanges.MinBoxOpacity * 100f, 100f, wholeNumbers: true,
                 format: v => v.ToString("0") + "%",
                 changed: v =>
                 {
