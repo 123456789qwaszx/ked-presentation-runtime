@@ -1,3 +1,5 @@
+using System;
+using System.Collections;
 using UnityEngine;
 
 /// <summary>
@@ -77,7 +79,7 @@ public sealed class PresentationAssembler
 
     private PresentationRuntime Assemble()
     {
-        BootstrapUIManager();
+        _uiThemePatch = new UIThemePatchNotConnected();
 
         BootstrapPresentationRoots();
 
@@ -104,24 +106,15 @@ public sealed class PresentationAssembler
             _refs.InputPoller);
     }
 
-    private void BootstrapUIManager()
-    {
-        SpritePortAssignmentBuilder spritePortAssignmentBuilder = new();
-        ResourcesUISpriteLoader resourcesUISpriteLoader = new();
-        UISpritePatcher uiSpritePatcher = new(resourcesUISpriteLoader);
-        UIPatchService uiPatchService = new(spritePortAssignmentBuilder, uiSpritePatcher);
-
-        _refs.UIManager.Init();
-        _refs.UIManager.AttachUIPatchService(uiPatchService);
-
-        _uiThemePatch = new UIThemePatchAdapter(_refs.UIManager, uiPatchService);
-    }
-
     private void BootstrapPresentationRoots()
     {
         _vnRuntimeStateProvider = new VNRuntimeStateProvider(_rollbackHistory, _choiceHistory);
 
-        _presentationUIRoot = _refs.UIManager.GetUI<PresentationUIRoot>();
+        _presentationUIRoot = _refs.Stage
+            ? _refs.Stage
+            : throw new InvalidOperationException("[연출 조립] 무대(PresentationUIRoot)가 없다 — 부트스트랩의 '무대' 칸을 채운다.");
+
+        _presentationUIRoot.Initialize();
 
         IShotResponseStageProvider shotResponseStageProvider = _presentationUIRoot;
 
@@ -237,9 +230,9 @@ public sealed class PresentationAssembler
     {
         YarnPlaybackDriver yarnPlaybackDriver = new(_refs.CommandExecutor, _presentationScopeSession);
 
-        // 대사창: 새 예제 UI가 넘긴 것이 있으면 그것, 없으면 옛 UI의 박스.
-        IPresentationDialogueBoxView dialogueSurfaceBox =
-            _refs.DialogueBoxView ?? _refs.UIManager.GetUI<DialogueSurfaceBox>();
+        // 대사창 · 선택지 상자는 화면 쪽(새 예제 UI)이 넘긴다.
+        IPresentationDialogueBoxView dialogueSurfaceBox = _refs.DialogueBoxView
+            ?? throw new InvalidOperationException("[연출 조립] 대사창(DialogueBoxView)이 없다.");
 
         DialogueBoxCurrentState dialogueBoxState = new();
         DialogueSurfaceState dialogueSurfaceState = new();
@@ -288,8 +281,8 @@ public sealed class PresentationAssembler
             _choiceHistory,
             _rollbackHistory);
 
-        IPresentationOptionsBoxView optionsBox =
-            _refs.OptionsBoxView ?? _refs.UIManager.GetUI<VNDefaultOptionsPanel>();
+        IPresentationOptionsBoxView optionsBox = _refs.OptionsBoxView
+            ?? throw new InvalidOperationException("[연출 조립] 선택지 상자(OptionsBoxView)가 없다.");
 
         OptionsBoxPresentationController optionsBoxPresentation = new(optionsBox);
 
@@ -374,6 +367,22 @@ public sealed class PresentationAssembler
             _presentationResponseRig,
             _dialogueAdvanceDispatcher,
             DialogueFolder);
+    }
+}
+
+/// <summary>
+/// 대본의 <c>&lt;&lt;ui_patch 테마 언어&gt;&gt;</c>를 받는 자리. 옛 UI의 그림 패치(UIPatchService)는 옛 화면과 함께 걷었고,
+/// 새 예제 UI(UIPresentationFlow의 SetContext)로 잇는 일은 PLAN_uipf-ui U4다. 그때까지는 아무것도 바꾸지 않고 알린다 —
+/// 바꾼 척하지 않는다. 지금 예제 대본에는 ui_patch가 없다.
+/// </summary>
+internal sealed class UIThemePatchNotConnected : IUIThemePatchPort
+{
+    public IEnumerator PatchCurrentScreen(string themeId, string localeId)
+    {
+        Debug.LogWarning(
+            $"[예제 UI] <<ui_patch {themeId} {localeId}>> — 새 예제 UI에는 아직 테마 패치가 이어지지 않았다(PLAN_uipf-ui U4). 화면은 그대로다.");
+
+        yield break;
     }
 }
 

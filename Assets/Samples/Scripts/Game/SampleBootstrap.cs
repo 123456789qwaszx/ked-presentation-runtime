@@ -20,11 +20,9 @@ using KedUI = Ked.Samples.UI;
 /// 연출 런타임의 조립은 PresentationAssembler가 한다. 여기는 씬 참조를 넘기고,
 /// 그 위에 고른 예제의 호스트와 저장을 얹는다.
 ///
-/// 화면은 둘 중 하나다(인스펙터의 '예제 UI').
-/// - 새 예제 UI(KedUI, UIPresentationFlow 위): Resources/KedUI/KedUICanvas를 띄우고 호스트 계약(KedHostPorts)으로 잇는다.
-///   캔버스가 아직 없으면(빌더 실행 전) 옛 UI로 돌아간다.
-/// - 옛 UI(Samples/Scripts/UI): VNScreenBindings.
-/// 어느 쪽이든 연출 무대는 옛 캔버스의 PresentationUIRoot가 그린다(PLAN_uipf-ui U3에서 무대만 남긴다).
+/// 화면은 새 예제 UI(Samples/KedUI, UIPresentationFlow 위)다. Resources/KedUI/KedUICanvas를 띄우고 호스트 계약(KedHostPorts)으로 잇는다.
+/// 캔버스가 없으면(빌더 Tools/Ked UI/Build Sample UI 실행 전) 아무것도 세우지 않고 알린다.
+/// 연출 무대(배경·인물·화면 효과)는 씬의 무대 캔버스에 놓인 PresentationUIRoot가 그리고, 새 UI는 그 위 캔버스에 얹힌다.
 ///
 /// 스크립트 GUID는 예전 VNAppBootstrap 그대로다 — 씬에 직렬화된 값이 유지된다.
 ///
@@ -41,11 +39,10 @@ public class SampleBootstrap : MonoBehaviour, IRigPrefabSource
         PresentationOnly = 1,
     }
 
-    private VNScreenBindings _screenBindings;
     private PresentationRuntime _runtime;
     private PresentationInternals _internals;
 
-    // 새 예제 UI. null이면 옛 UI.
+    // 새 예제 UI(화면 전부).
     private KedUI.KedUIHost _kedUI;
 
     // 연출 단독
@@ -79,22 +76,15 @@ public class SampleBootstrap : MonoBehaviour, IRigPrefabSource
     [Tooltip("연출 단독 예제가 재생할 Yarn 노드 이름(title:). 기본은 연출 데모(Assets/Samples/Dialogue/Demo_Presentation.yarn).")]
     [SerializeField] private string presentationEntryNode = "Demo_Presentation";
 
-    [Header("예제 UI")]
-    [Tooltip("켜면 새 예제 UI(Assets/Samples/KedUI — UIPresentationFlow 위)를 쓴다. " +
-             "빌더(Tools/Ked UI/Build Sample UI)가 만든 Resources/KedUI/KedUICanvas가 없으면 옛 UI로 연다.\n" +
-             "끄면 옛 UI(Samples/Scripts/UI).")]
-    [SerializeField] private bool useKedUI = true;
-
-    [Header("UIManager")]
-    [Tooltip("옛 UI의 관리자. 새 예제 UI에서도 연출 무대(PresentationUIRoot)와 ui_patch가 이것을 쓴다.")]
-    [SerializeField] private UIManager uiManager;
+    [Header("무대")]
+    [Tooltip("연출 무대(배경·인물·화면 효과). 씬의 무대 캔버스에 놓인 PresentationUIRoot. " +
+             "화면(타이틀·대사창·선택지·메뉴)은 새 예제 UI가 그 위 캔버스에 띄운다.")]
+    [SerializeField] private PresentationUIRoot stage;
 
     [Header("Sound")]
     [SerializeField] private AudioSystem audioSystem;
 
     [Header("DialogueBox")]
-    [FormerlySerializedAs("surfaceLayoutPresetDbSo")]
-    [SerializeField] private DialogueSurfaceLayoutPresetDBSO surfaceLayoutPresetDb;
     [FormerlySerializedAs("_dialogueSpeakerPresentationPolicyDbSo")]
     [SerializeField] private DialogueSpeakerPresentationPolicyDBSO speakerPolicyDb;
 
@@ -119,7 +109,6 @@ public class SampleBootstrap : MonoBehaviour, IRigPrefabSource
     [SerializeField] private AutoAdvanceScheduler autoAdvanceScheduler;
 
     [SerializeField] private VNOptionsPresenter vnOptionsPresenter;
-    [SerializeField] private VNOptionItem optionItem;
 
     [Header("진행 층")]
     [Tooltip("툴이 낸 챕터 JSON. Assets/Samples/Dialogue/ChapterProgression/ 아래의 .json 을 넣는다. " +
@@ -181,23 +170,21 @@ public class SampleBootstrap : MonoBehaviour, IRigPrefabSource
         if (!IsPresentationOnly && !TryBootstrapProgressionData())
             return;
 
-        _kedUI = useKedUI ? CreateKedUI() : null;
+        _kedUI = CreateKedUI();
 
-        IPresentationView presentationView;
+        if (_kedUI == null)
+        {
+            // 입력 폴러는 조립이 연결해 주기 전에는 돌 수 없다(매 프레임 null) — 함께 멈춘다.
+            if (vnAdvanceInputPoller != null)
+                vnAdvanceInputPoller.enabled = false;
 
-        if (_kedUI != null)
-        {
-            presentationView = _kedUI.PresentationView;
-        }
-        else
-        {
-            _screenBindings = new VNScreenBindings(uiManager);
-            presentationView = _screenBindings;
+            enabled = false;
+            return;
         }
 
         _runtime = PresentationAssembler.Build(
             CreatePresentationSceneRefs(),
-            presentationView,
+            _kedUI.PresentationView,
             out _internals);
 
         IPlaybackHost host = IsPresentationOnly
@@ -209,23 +196,20 @@ public class SampleBootstrap : MonoBehaviour, IRigPrefabSource
         if (!IsPresentationOnly)
             InstallProgressionSaves();
 
-        if (_kedUI != null)
-            ConfigureKedUI(host);
-        else
-            ConfigureLegacyScreens(host);
+        ConfigureKedUI(host);
     }
 
     #region 화면
 
-    // 새 예제 UI의 캔버스. 빌더가 만든 프리팹이 없거나 세우다 실패하면 null — 옛 UI로 연다.
+    // 새 예제 UI의 캔버스. 빌더가 만든 프리팹이 없거나 세우다 실패하면 null — 예제를 세우지 않는다.
     private KedUI.KedUIHost CreateKedUI()
     {
         KedUI.KedUIHost prefab = Resources.Load<KedUI.KedUIHost>(KedUI.KedUIHost.ResourcePath);
 
         if (prefab == null)
         {
-            Debug.LogWarning(
-                "[예제 UI] Resources/KedUI/KedUICanvas가 없다 — 빌더(Tools/Ked UI/Build Sample UI)를 실행하기 전이라 옛 UI로 연다.");
+            Debug.LogError(
+                "[예제 UI] Resources/KedUI/KedUICanvas가 없다 — 빌더(Tools/Ked UI/Build Sample UI)를 먼저 실행한다.");
             return null;
         }
 
@@ -240,7 +224,7 @@ public class SampleBootstrap : MonoBehaviour, IRigPrefabSource
         catch (Exception error)
         {
             Debug.LogException(error);
-            Debug.LogWarning("[예제 UI] 새 UI를 세우지 못해 옛 UI로 연다.");
+            Debug.LogError("[예제 UI] 새 UI를 세우지 못했다 — 예제를 세우지 않는다.");
             Destroy(host.gameObject);
             return null;
         }
@@ -248,8 +232,6 @@ public class SampleBootstrap : MonoBehaviour, IRigPrefabSource
 
     private void ConfigureKedUI(IPlaybackHost host)
     {
-        LegacyStageForKedUI.HideLegacyScreens(uiManager);
-
         var playback = new KedUI.KedPlaybackBindings
         {
             Features = _runtime.Features,
@@ -276,7 +258,7 @@ public class SampleBootstrap : MonoBehaviour, IRigPrefabSource
             ? null
             : new KedSaveSlotPort(_manualSaveFlow, _saveSlotService);
 
-        _kedUI.Configure(playback, title, slots, new LegacyStageForKedUI(uiManager));
+        _kedUI.Configure(playback, title, slots, new StageForKedUI(stage));
     }
 
     // 타이틀 오른쪽 카드. 글자는 UI 글자 표의 키, 그림은 그 예제 대본이 실제로 쓰는 배경.
@@ -296,48 +278,16 @@ public class SampleBootstrap : MonoBehaviour, IRigPrefabSource
         };
     }
 
-    private void ConfigureLegacyScreens(IPlaybackHost host)
-    {
-        _screenBindings.ConfigurePlayback(
-            _runtime.Features,
-            _runtime.AdvanceDispatcher,
-            host);
-
-        if (IsPresentationOnly)
-        {
-            _screenBindings.ConfigureTitle(_nodePlaythrough);
-        }
-        else
-        {
-            _screenBindings.ConfigureTitle(_progressionLauncher);
-            _screenBindings.ConfigureSaveSlots(_saveSlotService, _manualSaveFlow);
-        }
-
-        SampleExample other = SampleExampleSwitch.Other(_example);
-
-        _screenBindings.ConfigureExampleSwitch(
-            SampleExampleSwitch.DisplayName(_example),
-            SampleExampleSwitch.DisplayName(other),
-            () => SampleExampleSwitch.SwitchTo(other));
-    }
-
-    // 새 예제 UI가 쓰는 것이 있으면 그것, 없으면 씬에 놓인 옛 것.
-    private VNOptionItem OptionItemPrefab =>
-        _kedUI != null && _kedUI.OptionItemPrefab != null ? _kedUI.OptionItemPrefab : optionItem;
-
-    private DialogueSurfaceLayoutPresetDBSO SurfaceLayoutDb =>
-        _kedUI != null && _kedUI.SurfaceLayoutDb != null ? _kedUI.SurfaceLayoutDb : surfaceLayoutPresetDb;
-
     #endregion
 
     private PresentationSceneRefs CreatePresentationSceneRefs()
     {
         return new PresentationSceneRefs
         {
-            UIManager = uiManager,
+            Stage = stage,
             AudioSystem = audioSystem,
 
-            SurfaceLayoutPresetDb = SurfaceLayoutDb,
+            SurfaceLayoutPresetDb = _kedUI.SurfaceLayoutDb,
             SpeakerPolicyDb = speakerPolicyDb,
 
             RoleTuningDb = roleTuningDb,
@@ -353,12 +303,12 @@ public class SampleBootstrap : MonoBehaviour, IRigPrefabSource
             EllipsisBreathTypewriter = ellipsisBreathTypewriter,
             AutoAdvanceScheduler = autoAdvanceScheduler,
             OptionsPresenter = vnOptionsPresenter,
-            OptionItem = OptionItemPrefab,
+            OptionItem = _kedUI.OptionItemPrefab,
 
             InputPoller = vnAdvanceInputPoller,
 
-            DialogueBoxView = _kedUI != null ? _kedUI.DialogueBox : null,
-            OptionsBoxView = _kedUI != null ? _kedUI.OptionsBox : null,
+            DialogueBoxView = _kedUI.DialogueBox,
+            OptionsBoxView = _kedUI.OptionsBox,
 
             CharacterRigPrefab = rigPrefab,
             BackgroundRigPrefab = backgroundRigPrefab,
@@ -446,8 +396,8 @@ public class SampleBootstrap : MonoBehaviour, IRigPrefabSource
     private IPlaybackHost InstallProgression()
     {
         _progressionOptions = new ChapterOptionsView(
-            _kedUI != null ? _kedUI.OptionsBox : uiManager.GetUI<VNDefaultOptionsPanel>(),
-            OptionItemPrefab);
+            _kedUI.OptionsBox,
+            _kedUI.OptionItemPrefab);
 
         CreateSaveServices();
 
@@ -554,8 +504,6 @@ public class SampleBootstrap : MonoBehaviour, IRigPrefabSource
     {
         if (_kedUI != null)
             _kedUI.OpenTitle();
-        else
-            _screenBindings?.OpenTitleMenu();
     }
 
     private void Update()

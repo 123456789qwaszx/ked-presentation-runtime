@@ -1,15 +1,7 @@
-using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
-using static UIRefValidation;
 
 public partial class PresentationUIRoot
 {
-    private bool _stageViewportRefsValid;
-    private bool _screenEffectRefsValid;
-    private bool _dialogueUIRefsValid;
-    private bool _buttonLayerRefsValid;
-
     #region StageViewport Layer Cache
 
     private RectTransform _stageViewportLayer;
@@ -107,100 +99,6 @@ public partial class PresentationUIRoot
     #region ScreenEffect Layer Cache
 
     private RectTransform _screenEffectLayer;
-    private RectTransform _verticalStripWipe;
-    private RectTransform _focusBlurCurtain;
-
-    #endregion
-
-    #region DialogueUI Layer Cache
-
-    private RectTransform _dialogueUILayer;
-    private RectTransform _dialogueBoxRoot;
-    private RectTransform _optionsBoxRoot;
-
-    #endregion
-
-    #region Button Layer Cache
-
-    private RectTransform _buttonLayer;
-
-    private Button _stepNextButton;
-
-    private CanvasGroup _buttonsBottomRightGroup;
-
-    private RectTransform _stepNextRoot;
-    private TMP_Text _stepNextText;
-    private RectTransform _stepNextHotKeyRoot;
-    private Image _stepNextHotKeyImage;
-    private TMP_Text _stepNextHotKeyText;
-
-    private CanvasGroup _buttonsTopRightGroup;
-
-    private RectTransform _quickMenuToggleRoot;
-    private Image _quickMenuToggleImage;
-    private TMP_Text _quickMenuToggleKeyText;
-    private Button _quickMenuToggleButton;
-
-    private CanvasGroup _quickMenuRootGroup;
-    private Image _quickMenuBgImage;
-
-    private RectTransform _expandToggleRoot;
-    private Image _expandToggleImage;
-    private TMP_Text _expandToggleText;
-    private TMP_Text _expandToggleHotkeyText;
-    private Button _expandButton;
-
-    private RectTransform _backLogRoot;
-    private Image _backLogImage;
-    private TMP_Text _backLogText;
-    private TMP_Text _backLogHotkeyText;
-    private Button _backLogButton;
-
-    private RectTransform _playbackSpeedToggleRoot;
-    private Image _playbackSpeedToggleImage;
-    private TMP_Text _playbackSpeedToggleText;
-    private TMP_Text _playbackSpeedToggleDegreeText;
-    private TMP_Text _playbackSpeedToggleHotKeyText;
-    private Button _playbackSpeedButton;
-
-    private RectTransform _autoToggleRoot;
-    private Image _autoToggleIconImage;
-    private RectTransform _autoToggleHotKeyRoot;
-    private Image _autoToggleHotKeyImage;
-    private TMP_Text _autoToggleHotKeyText;
-    private Button _autoButton;
-
-    private RectTransform _rapidSkipRoot;
-    private Image _rapidSkipIconImage;
-    private TMP_Text _rapidSkipIconText;
-    private RectTransform _rapidSkipHotKeyRoot;
-    private Image _rapidSkipHotKeyImage;
-    private TMP_Text _rapidSkipHotKeyText;
-    private Button _rapidSkipButton;
-
-    private RectTransform _rollbackRoot;
-    private Image _rollbackIconImage;
-    private TMP_Text _rollbackIconText;
-    private RectTransform _rollbackHotKeyRoot;
-    private Image _rollbackHotKeyBg;
-    private TMP_Text _rollbackHotKeyText;
-    private Button _rollbackButton;
-
-    private CanvasGroup _buttonsTopLeftGroup;
-
-    private RectTransform _openSkipPanelRoot;
-    private TMP_Text _openSkipPanelText;
-    private RectTransform _openSkipPanelIconRoot;
-    private Image _openSkipPanelIconImage;
-    private RectTransform _openSkipPanelHotKeyRoot;
-    private TMP_Text _openSkipPanelHotKeyText;
-    private Button _openSkipPanelButton;
-
-    private TMP_Text _saveMenuText;
-    private Button _saveMenuButton;
-
-    private TMP_Text _loadMenuText;
-    private Button _loadMenuButton;
 
     #endregion
 
@@ -208,22 +106,14 @@ public partial class PresentationUIRoot
     {
         CacheStageViewportRefs();
         CacheScreenEffectRefs();
-        CacheDialogueUIRefs();
-        CacheButtonLayerRefs();
     }
 
+    // 빠진 칸은 경고로 알린다(에디터·개발 빌드).
     private void ValidateRefs()
     {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-        _stageViewportRefsValid = ValidateStageViewportRefs();
-        _screenEffectRefsValid = ValidateScreenEffectRefs();
-        _dialogueUIRefsValid = ValidateDialogueUIRefs();
-        _buttonLayerRefsValid = ValidateButtonLayerRefs();
-#else
-        _stageViewportRefsValid = true;
-        _screenEffectRefsValid = true;
-        _dialogueUIRefsValid = true;
-        _buttonLayerRefsValid = true;
+        ValidateStageViewportRefs();
+        ValidateScreenEffectRefs();
 #endif
     }
 
@@ -436,201 +326,16 @@ public partial class PresentationUIRoot
 
     #endregion
 
-    #region DialogueUI Layer
-
-    private void CacheDialogueUIRefs()
+    private static void AppendMissing(ref string acc, Object obj, Refs key)
     {
-        _dialogueUILayer = View.Rect(Refs.DialogueUILayer);
-        _dialogueBoxRoot = View.Rect(Refs.DialogueBox_Root);
-        _optionsBoxRoot = View.Rect(Refs.OptionsBox_Root);
+        if (obj)
+            return;
+
+        if (acc.Length > 0)
+            acc += "\n";
+
+        acc += $"- {key}";
     }
-
-    private bool ValidateDialogueUIRefs()
-    {
-        string missing = "";
-
-        AppendMissing(ref missing, _dialogueUILayer, Refs.DialogueUILayer);
-        AppendMissing(ref missing, _dialogueBoxRoot, Refs.DialogueBox_Root);
-        AppendMissing(ref missing, _optionsBoxRoot, Refs.OptionsBox_Root);
-
-        return LogMissingRefs("DialogueUI Layer", missing);
-    }
-
-    #endregion
-
-    #region Button Layer
-
-    private void CacheButtonLayerRefs()
-    {
-        _buttonLayer = View.Rect(Refs.ButtonLayer);
-
-        _stepNextButton = View.Button(Refs.StepNext_Button);
-
-        _buttonsBottomRightGroup = View.CanvasGroup(Refs.Buttons_BottomRight);
-
-        _stepNextRoot = View.Rect(Refs.StepNext_Root);
-        _stepNextText = View.Text(Refs.StepNext_Text);
-        _stepNextHotKeyRoot = View.Rect(Refs.StepNextHotKey_Root);
-        _stepNextHotKeyImage = View.Image(Refs.StepNextHotKey_Image);
-        _stepNextHotKeyText = View.Text(Refs.StepNextHotKey_Text);
-
-        _buttonsTopRightGroup = View.CanvasGroup(Refs.Buttons_TopRight);
-
-        _quickMenuToggleRoot = View.Rect(Refs.QuickMenuToggle_Root);
-        _quickMenuToggleImage = View.Image(Refs.QuickMenuToggle_Image);
-        _quickMenuToggleKeyText = View.Text(Refs.QuickMenuToggleKey_Text);
-        _quickMenuToggleButton = View.Button(Refs.QuickMenuToggle_Button);
-
-        _quickMenuRootGroup = View.CanvasGroup(Refs.QuickMenu_Root);
-        _quickMenuBgImage = View.Image(Refs.QuickMenuBG_Image);
-
-        _expandToggleRoot = View.Rect(Refs.ExpandToggle_Root);
-        _expandToggleImage = View.Image(Refs.ExpandToggle_Image);
-        _expandToggleText = View.Text(Refs.ExpandToggle_Text);
-        _expandToggleHotkeyText = View.Text(Refs.ExpandToggleHotkey_Text);
-        _expandButton = View.Button(Refs.ExpandToggle_Button);
-
-        _backLogRoot = View.Rect(Refs.BackLog_Root);
-        _backLogImage = View.Image(Refs.BackLog_Image);
-        _backLogText = View.Text(Refs.BackLog_Text);
-        _backLogHotkeyText = View.Text(Refs.BackLogHotkey_Text);
-        _backLogButton = View.Button(Refs.BackLog_Button);
-
-        _playbackSpeedToggleRoot = View.Rect(Refs.PlaybackSpeedToggle_Root);
-        _playbackSpeedToggleImage = View.Image(Refs.PlaybackSpeedToggle_Image);
-        _playbackSpeedToggleText = View.Text(Refs.PlaybackSpeedToggle_Text);
-        _playbackSpeedToggleDegreeText = View.Text(Refs.PlaybackSpeedToggleDegree_Text);
-        _playbackSpeedToggleHotKeyText = View.Text(Refs.PlaybackSpeedToggleHotKey_Text);
-        _playbackSpeedButton = View.Button(Refs.PlaybackSpeedToggle_Button);
-
-        _autoToggleRoot = View.Rect(Refs.AutoToggle_Root);
-        _autoToggleIconImage = View.Image(Refs.AutoToggleIcon_Image);
-        _autoToggleHotKeyRoot = View.Rect(Refs.AutoToggleHotKey_Root);
-        _autoToggleHotKeyImage = View.Image(Refs.AutoToggleHotKey_Image);
-        _autoToggleHotKeyText = View.Text(Refs.AutoToggleHotKey_Text);
-        _autoButton = View.Button(Refs.AutoToggle_Button);
-
-        _rapidSkipRoot = View.Rect(Refs.RapidSkip_Root);
-        _rapidSkipIconImage = View.Image(Refs.RapidSkipIcon_Image);
-        _rapidSkipIconText = View.Text(Refs.RapidSkipIcon_Text);
-        _rapidSkipHotKeyRoot = View.Rect(Refs.RapidSkipHotKey_Root);
-        _rapidSkipHotKeyImage = View.Image(Refs.RapidSkipHotKey_Image);
-        _rapidSkipHotKeyText = View.Text(Refs.RapidSkipHotKey_Text);
-        _rapidSkipButton = View.Button(Refs.RapidSkip_Button);
-
-        _rollbackRoot = View.Rect(Refs.Rollback_Root);
-        _rollbackIconImage = View.Image(Refs.RollbackIcon_Image);
-        _rollbackIconText = View.Text(Refs.RollbackIcon_Text);
-        _rollbackHotKeyRoot = View.Rect(Refs.RollbackHotKey_Root);
-        _rollbackHotKeyBg = View.Image(Refs.RollbackHotKeyBG);
-        _rollbackHotKeyText = View.Text(Refs.RollbackHotKey_Text);
-        _rollbackButton = View.Button(Refs.Rollback_Button);
-
-        _buttonsTopLeftGroup = View.CanvasGroup(Refs.Buttons_TopLeft);
-
-        _openSkipPanelRoot = View.Rect(Refs.OpenSkipPanel_Root);
-        _openSkipPanelText = View.Text(Refs.OpenSkipPanel_Text);
-        _openSkipPanelIconRoot = View.Rect(Refs.OpenSkipPanelIcon_Root);
-        _openSkipPanelIconImage = View.Image(Refs.OpenSkipPanelIcon_Image);
-        _openSkipPanelHotKeyRoot = View.Rect(Refs.OpenSkipPanelHotKey_Root);
-        _openSkipPanelHotKeyText = View.Text(Refs.OpenSkipPanelHotKey_Text);
-        _openSkipPanelButton = View.Button(Refs.OpenSkipPanel_Button);
-
-        _saveMenuText = View.Text(Refs.SaveMenu_Text);
-        _saveMenuButton = View.Button(Refs.SaveMenu_Button);
-
-        _loadMenuText = View.Text(Refs.LoadMenu_Text);
-        _loadMenuButton = View.Button(Refs.LoadMenu_Button);
-    }
-
-    private bool ValidateButtonLayerRefs()
-    {
-        string missing = "";
-
-        AppendMissing(ref missing, _buttonLayer, Refs.ButtonLayer);
-
-        AppendMissing(ref missing, _stepNextButton, Refs.StepNext_Button);
-
-        AppendMissing(ref missing, _buttonsBottomRightGroup, Refs.Buttons_BottomRight);
-
-        AppendMissing(ref missing, _stepNextRoot, Refs.StepNext_Root);
-        AppendMissing(ref missing, _stepNextText, Refs.StepNext_Text);
-        AppendMissing(ref missing, _stepNextHotKeyRoot, Refs.StepNextHotKey_Root);
-        AppendMissing(ref missing, _stepNextHotKeyImage, Refs.StepNextHotKey_Image);
-        AppendMissing(ref missing, _stepNextHotKeyText, Refs.StepNextHotKey_Text);
-
-        AppendMissing(ref missing, _buttonsTopRightGroup, Refs.Buttons_TopRight);
-
-        AppendMissing(ref missing, _quickMenuToggleRoot, Refs.QuickMenuToggle_Root);
-        AppendMissing(ref missing, _quickMenuToggleImage, Refs.QuickMenuToggle_Image);
-        AppendMissing(ref missing, _quickMenuToggleKeyText, Refs.QuickMenuToggleKey_Text);
-        AppendMissing(ref missing, _quickMenuToggleButton, Refs.QuickMenuToggle_Button);
-
-        AppendMissing(ref missing, _quickMenuRootGroup, Refs.QuickMenu_Root);
-        AppendMissing(ref missing, _quickMenuBgImage, Refs.QuickMenuBG_Image);
-
-        AppendMissing(ref missing, _expandToggleRoot, Refs.ExpandToggle_Root);
-        AppendMissing(ref missing, _expandToggleImage, Refs.ExpandToggle_Image);
-        AppendMissing(ref missing, _expandToggleText, Refs.ExpandToggle_Text);
-        AppendMissing(ref missing, _expandToggleHotkeyText, Refs.ExpandToggleHotkey_Text);
-        AppendMissing(ref missing, _expandButton, Refs.ExpandToggle_Button);
-
-        AppendMissing(ref missing, _backLogRoot, Refs.BackLog_Root);
-        AppendMissing(ref missing, _backLogImage, Refs.BackLog_Image);
-        AppendMissing(ref missing, _backLogText, Refs.BackLog_Text);
-        AppendMissing(ref missing, _backLogHotkeyText, Refs.BackLogHotkey_Text);
-        AppendMissing(ref missing, _backLogButton, Refs.BackLog_Button);
-
-        AppendMissing(ref missing, _playbackSpeedToggleRoot, Refs.PlaybackSpeedToggle_Root);
-        AppendMissing(ref missing, _playbackSpeedToggleImage, Refs.PlaybackSpeedToggle_Image);
-        AppendMissing(ref missing, _playbackSpeedToggleText, Refs.PlaybackSpeedToggle_Text);
-        AppendMissing(ref missing, _playbackSpeedToggleDegreeText, Refs.PlaybackSpeedToggleDegree_Text);
-        AppendMissing(ref missing, _playbackSpeedToggleHotKeyText, Refs.PlaybackSpeedToggleHotKey_Text);
-        AppendMissing(ref missing, _playbackSpeedButton, Refs.PlaybackSpeedToggle_Button);
-
-        AppendMissing(ref missing, _autoToggleRoot, Refs.AutoToggle_Root);
-        AppendMissing(ref missing, _autoToggleIconImage, Refs.AutoToggleIcon_Image);
-        AppendMissing(ref missing, _autoToggleHotKeyRoot, Refs.AutoToggleHotKey_Root);
-        AppendMissing(ref missing, _autoToggleHotKeyImage, Refs.AutoToggleHotKey_Image);
-        AppendMissing(ref missing, _autoToggleHotKeyText, Refs.AutoToggleHotKey_Text);
-        AppendMissing(ref missing, _autoButton, Refs.AutoToggle_Button);
-
-        AppendMissing(ref missing, _rapidSkipRoot, Refs.RapidSkip_Root);
-        AppendMissing(ref missing, _rapidSkipIconImage, Refs.RapidSkipIcon_Image);
-        AppendMissing(ref missing, _rapidSkipIconText, Refs.RapidSkipIcon_Text);
-        AppendMissing(ref missing, _rapidSkipHotKeyRoot, Refs.RapidSkipHotKey_Root);
-        AppendMissing(ref missing, _rapidSkipHotKeyImage, Refs.RapidSkipHotKey_Image);
-        AppendMissing(ref missing, _rapidSkipHotKeyText, Refs.RapidSkipHotKey_Text);
-        AppendMissing(ref missing, _rapidSkipButton, Refs.RapidSkip_Button);
-
-        AppendMissing(ref missing, _rollbackRoot, Refs.Rollback_Root);
-        AppendMissing(ref missing, _rollbackIconImage, Refs.RollbackIcon_Image);
-        AppendMissing(ref missing, _rollbackIconText, Refs.RollbackIcon_Text);
-        AppendMissing(ref missing, _rollbackHotKeyRoot, Refs.RollbackHotKey_Root);
-        AppendMissing(ref missing, _rollbackHotKeyBg, Refs.RollbackHotKeyBG);
-        AppendMissing(ref missing, _rollbackHotKeyText, Refs.RollbackHotKey_Text);
-        AppendMissing(ref missing, _rollbackButton, Refs.Rollback_Button);
-
-        AppendMissing(ref missing, _buttonsTopLeftGroup, Refs.Buttons_TopLeft);
-
-        AppendMissing(ref missing, _openSkipPanelRoot, Refs.OpenSkipPanel_Root);
-        AppendMissing(ref missing, _openSkipPanelText, Refs.OpenSkipPanel_Text);
-        AppendMissing(ref missing, _openSkipPanelIconRoot, Refs.OpenSkipPanelIcon_Root);
-        AppendMissing(ref missing, _openSkipPanelIconImage, Refs.OpenSkipPanelIcon_Image);
-        AppendMissing(ref missing, _openSkipPanelHotKeyRoot, Refs.OpenSkipPanelHotKey_Root);
-        AppendMissing(ref missing, _openSkipPanelHotKeyText, Refs.OpenSkipPanelHotKey_Text);
-        AppendMissing(ref missing, _openSkipPanelButton, Refs.OpenSkipPanel_Button);
-
-        AppendMissing(ref missing, _saveMenuText, Refs.SaveMenu_Text);
-        AppendMissing(ref missing, _saveMenuButton, Refs.SaveMenu_Button);
-
-        AppendMissing(ref missing, _loadMenuText, Refs.LoadMenu_Text);
-        AppendMissing(ref missing, _loadMenuButton, Refs.LoadMenu_Button);
-
-        return LogMissingRefs("Button Layer", missing);
-    }
-
-    #endregion
 
     private bool LogMissingRefs(string regionName, string missing)
     {

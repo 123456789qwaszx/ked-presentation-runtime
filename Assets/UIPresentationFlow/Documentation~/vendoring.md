@@ -38,12 +38,13 @@
 - `Assets/Demo/`: 데모 에셋, 블랙홀 데모
 - `Assets/UI/`: 데모의 바인딩·테마 에셋
 
-## 사본에만 있는 것 — 갈림 두 가지
+## 사본에만 있는 것 — 갈림 한 가지
 
 | 갈림 | 이유 | 언제까지 |
 |---|---|---|
-| `Editor/UIPresentationFlow.Editor.asmdef` (+`.meta`) 추가 | 원본의 `Editor/UI`에는 asmdef가 없다. 그대로 두면 `Assembly-CSharp-Editor`로 컴파일되는데, 그 어셈블리는 옛 예제 UI가 든 `Assembly-CSharp`도 함께 참조한다. 그러면 두 어셈블리가 같은 전역 이름(`UIBase` 등)을 들고 있어 CS0433 오류가 난다. 이 asmdef는 런타임 asmdef만 참조하도록 감싼다 | **원본에 같은 파일을 넣어야 한다.** 원본에 들어가면 이 줄을 지운다 |
-| `UIPresentationFlow.Runtime.asmdef`의 `autoReferenced: true → false` | 옛 예제 UI(`Assets/Samples/Scripts/UI`, 기본 어셈블리)는 UIPF와 같은 전역 타입 이름 20개를 쓴다. 자동 참조로 두면 기본 어셈블리에 CS0436 경고가 사용처마다 난다. 끄면 UIPF는 이름으로 참조한 어셈블리(새 예제 UI의 asmdef)에만 보인다 | 이 저장소만의 설정이다. 원본에서는 데모(asmdef 없음)가 자동 참조에 기댄다. 옛 UI를 걷는 PLAN U3에서 다시 정한다 |
+| `Editor/UIPresentationFlow.Editor.asmdef` (+`.meta`) 추가 | 원본의 `Editor/UI`에는 asmdef가 없다. 반입할 때는 옛 예제 UI가 기본 어셈블리(`Assembly-CSharp`)에 같은 전역 이름(`UIBase` 등)을 들고 있어서, 에디터 코드가 `Assembly-CSharp-Editor`로 컴파일되면 CS0433 오류가 났다. 이 asmdef는 에디터 코드를 런타임 asmdef만 참조하도록 감싼다. 옛 UI를 걷은 뒤(PLAN U3)로는 이 오류의 원인이 없다 — asmdef 없이도 컴파일된다 | 원본에 넣을지, 사본에서 뺄지 정한다. 원본에 넣거나 사본에서 빼면 이 줄을 지운다 |
+
+`UIPresentationFlow.Runtime.asmdef`의 `autoReferenced`는 반입 때 `false`로 바꿨다가(옛 예제 UI와 이름 20개가 겹쳐 CS0436 경고) PLAN U3에서 옛 UI를 걷으며 원본 값 `true`로 되돌렸다. 지금은 원본과 같다.
 
 그 밖의 파일은 원본 blob과 바이트 단위로 같다(LF).
 
@@ -71,7 +72,7 @@ diff --strip-trailing-cr \
 
 2026-10-27 기준 결과는 다음과 같다.
 - 앞의 여섯 줄은 출력이 **0줄**이다(`.meta` 포함).
-- 마지막 줄은 `autoReferenced` 한 줄만 다르다(위 "갈림").
+- 마지막 줄(런타임 asmdef)도 출력이 0줄이다. 반입 때는 `autoReferenced` 한 줄이 달랐다 — 같은 날 U3에서 원본 값으로 돌렸다.
 - `Editor/UIPresentationFlow.Editor.asmdef`는 비교 범위 밖이다(`Editor/UI`의 형제).
 
 ## 반입 — 원본 → 사본
@@ -83,7 +84,7 @@ diff --strip-trailing-cr \
      Assets/Scripts Assets/Editor Assets/Shaders | tar -x -C /tmp/uipf
    ```
 3. 위 표의 자리에 `.meta`째 덮어쓴다. `Demo`는 빼고 가져온다.
-4. "갈림" 두 가지를 다시 적용한다. 원본에 이미 들어간 갈림은 건너뛴다.
+4. 위 "갈림"을 다시 적용한다. 원본에 이미 들어간 갈림은 건너뛴다.
 5. 위 "대조"를 돌리고, 스냅샷 표를 고친다.
 
 ## 왜 UPM 패키지가 아닌가

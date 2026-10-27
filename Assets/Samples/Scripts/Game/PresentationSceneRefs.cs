@@ -9,8 +9,8 @@ using Yarn.Unity;
 /// </summary>
 public sealed class PresentationSceneRefs
 {
-    // UI · 사운드
-    public UIManager UIManager;
+    // 무대 · 사운드
+    public PresentationUIRoot Stage;
     public AudioSystem AudioSystem;
 
     // 대사창
@@ -38,8 +38,7 @@ public sealed class PresentationSceneRefs
     // 입력
     public VNAdvanceInputPoller InputPoller;
 
-    // 대사창 · 선택지 상자. 비우면 옛 UI(UIManager의 DialogueSurfaceBox · VNDefaultOptionsPanel)를 쓴다.
-    // 새 예제 UI(KedUI)는 제 화면의 구현을 여기 넣는다 — 연출 런타임은 계약만 안다.
+    // 대사창 · 선택지 상자 — 화면 쪽(새 예제 UI, KedUI)의 구현. 연출 런타임은 계약만 안다.
     public IPresentationDialogueBoxView DialogueBoxView;
     public IPresentationOptionsBoxView OptionsBoxView;
 

@@ -68,8 +68,7 @@ namespace Ked.Samples.UI
     }
 
     /// <summary>
-    /// 연출 무대(옛 UI의 PresentationUIRoot)를 앞으로 가져오는 자리. 새 UI는 무대 위에 투명한 층으로 얹힌다.
-    /// 무대는 U3까지 옛 캔버스에 남는다.
+    /// 재생을 시작할 때 연출 무대(호스트의 PresentationUIRoot)를 보이게 하는 자리. 새 UI는 무대 위 캔버스에 투명한 층으로 얹힌다.
     /// </summary>
     public interface IKedStagePort
     {

@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Ked.Samples.UI
 {
     /// <summary>
-    /// 새 예제 UI의 화면 흐름 — 옛 VNScreenBindings의 몫. 어떤 화면을 언제 열고 닫는지, 화면의 사건을 재생·저장 쪽의
+    /// 새 예제 UI의 화면 흐름. 어떤 화면을 언제 열고 닫는지, 화면의 사건을 재생·저장 쪽의
     /// 어느 기능에 잇는지를 여기서 정한다. 화면(View)은 그리기와 사건 전달만, 기능은 재생(본체)과 호스트 계약이 갖는다.
     ///
     /// UIPF 매핑(시안 IMPLEMENTATION §6의 역할 → 실제 API):

@@ -48,11 +48,11 @@ Assets/
     │   ├─ Generated/      빌더가 만든다 — Screens/*.prefab · KedOptionItem · 글꼴 SDF · Presentations · 프리셋 DB
     │   └─ Resources/KedUI/KedUICanvas.prefab   빌더가 만든다 — SampleBootstrap이 읽는다
     └─ Scripts/
-        ├─ Game/KedUI/     호스트 어댑터(기본 어셈블리) — KedHostPorts · LegacyStageForKedUI
-        └─ UI/             옛 UI — U3에서 지운다
+        ├─ Game/KedUI/     호스트 어댑터(기본 어셈블리) — KedHostPorts · StageForKedUI
+        └─ Stage/          연출 무대 PresentationUIRoot(+ Providers/) — 옛 UI/는 U3에서 걷었다
 ```
 
-새 UI를 별도 asmdef에 두는 이유: 옛 UI와 UIPF는 같은 전역 타입 이름 20개를 쓴다(`UIBase` · `UIManager` · `UIRoot` …). 새 코드가 UIPF만 보는 어셈블리에 있으면 교체 전까지 둘이 섞이지 않는다.
+새 UI를 별도 asmdef에 두는 이유: 옛 UI와 UIPF는 같은 전역 타입 이름 20개를 쓴다(`UIBase` · `UIManager` · `UIRoot` …). 새 코드가 UIPF만 보는 어셈블리에 있으면 교체 전까지 둘이 섞이지 않는다. U3에서 옛 UI를 걷어 이제 겹치는 이름은 없다.
 
 바인딩 에셋은 UIPF 위저드의 고정 경로(`Assets/UI/ImageBindings`)를 쓰지 않고 빌더가 `Samples/UI/ImageBindings/` 아래에 직접 만든다. 폴더 동기화(`Sync Selected Theme Folder`)는 바인딩 에셋이 있는 폴더를 보므로 경로에 묶이지 않는다 — UIPF 원본을 고칠 필요가 없다.
 
@@ -115,8 +115,8 @@ UIPF에서 그림이 화면에 들어가는 길은 둘이다.
 ### U0. 반입 ✅ (2026-10-27, Unity 확인 10-27)
 - UIPF `dev` @ `cf3fa98`의 blob을 `git archive`로 꺼내 복사했다(`.meta`째, 원본 GUID 106개 유지 — 이 저장소 `.meta` 888개와 겹침 0). 새 폴더 `.meta` 1개.
 - 사본에만 있는 갈림 둘(`Assets/UIPresentationFlow/Documentation~/vendoring.md`):
-  - **Editor asmdef 추가** — 원본의 `Editor/UI`에는 asmdef가 없어 그대로 두면 `Assembly-CSharp-Editor`로 컴파일되고, 그 어셈블리가 옛 UI(`Assembly-CSharp`)와 UIPF를 함께 참조해 `UIBase` 같은 이름이 CS0433 오류가 된다. **원본에도 같은 파일을 넣어야 한다.**
-  - **런타임 asmdef `autoReferenced: false`** — 처음 계획은 "U0–U3 동안 CS0436 경고 감수"였다. 경고가 사용처마다 나서 "새 경고 0" 기준과 맞지 않으므로, UIPF를 이름으로 참조하는 어셈블리(새 예제 UI)에만 보이게 했다. U3에서 다시 정한다.
+  - **Editor asmdef 추가** — 원본의 `Editor/UI`에는 asmdef가 없어 그대로 두면 `Assembly-CSharp-Editor`로 컴파일되고, 그 어셈블리가 옛 UI(`Assembly-CSharp`)와 UIPF를 함께 참조해 `UIBase` 같은 이름이 CS0433 오류가 된다. **원본에도 같은 파일을 넣어야 한다.** — U3에서 옛 UI를 걷어 이 오류의 원인은 없어졌다. 원본에 넣을지, 사본에서 뺄지 정한다.
+  - **런타임 asmdef `autoReferenced: false`** — 처음 계획은 "U0–U3 동안 CS0436 경고 감수"였다. 경고가 사용처마다 나서 "새 경고 0" 기준과 맞지 않으므로, UIPF를 이름으로 참조하는 어셈블리(새 예제 UI)에만 보이게 했다. → U3에서 원본 값 `true`로 되돌렸다.
 - 그래서 옛 UI·본체·진행은 UIPF를 전혀 보지 않는다. 바뀐 것은 UIPF 어셈블리 둘이 새로 생긴 것뿐이다.
 - Unity 확인: 컴파일 오류·새 경고 0, 메뉴 `Tools/UI Presentation/…`이 보인다, 두 예제 동작이 그대로.
 
@@ -131,19 +131,58 @@ UIPF에서 그림이 화면에 들어가는 길은 둘이다.
 ① `PlayScreen`(대화 · 퀵메뉴 · 선택지) ② 백로그 ③ 시스템 메뉴 ④ 세이브 ⑤ 로드 ⑥ 설정 ⑦ 확인 · 알림 ⑧ 타이틀.
 화면마다: 빌드 명세 → 빌더 → 미리보기 장면에서 확인. 본체 계약 구현은 가짜 데이터로 먼저 돌린다.
 
-### U3. 교체 — 연결은 끝났다(공존 스위치). 남은 것: 옛 UI 계층·`Samples/Scripts/UI` 삭제, `PresentationUIRoot`를 무대로 좁히기
-- **Unity를 닫고** 진행한다.
-- 씬 `PresentationSample`의 옛 UI 계층(타이틀 · 백로그 · 확인 · 시스템 메뉴 · HUD)을 걷고 새 화면을 놓는다. `PresentationUIRoot`를 무대로 좁힌다.
-- `Samples/Scripts/UI/` 삭제, `SampleBootstrap` · `PresentationAssembler` · 흐름을 새 화면으로.
-- Unity 확인: 경고 0, 두 예제의 전 기능(재생 · 롤백 · 백로그 점프 · 스킵 · 이어하기 · 슬롯 · 갈라지기).
+### U3. 교체 ✅ (2026-10-27, Unity 확인 남음)
+Unity를 닫고 했다.
+
+- **씬 `PresentationSample`** (YAML 문서 1,090 → 291):
+  - 무대 `PresentationUIRoot`를 옛 관리자가 실행 중에 붙이던 자리 `[UIRoot]/Root`에 미리 놓았다. `[UIRoot]`는 `[StageCanvas]`로 이름을 바꿨다. 위치는 옛 관리자가 붙일 때처럼 0, 앵커는 그대로다. 캔버스 설정(1920×1080 · Match 0.5 · Overlay · 정렬 0)도 실행 때와 같다.
+  - 걷은 것:
+    - `[UIManager]`: 옛 관리자 · 타이틀 · 백로그 · 확인 · 시스템 메뉴, 아무도 쓰지 않던 `Prefabs_Bg`
+    - 무대 안의 `DialogueUILayer`(옛 대사창·선택지)와 `ButtonLayer`(옛 퀵메뉴·버튼)
+    - 빈 층 캔버스 `Panels` · `Overlay` · `Top`
+  - `Root`에 붙어 있던 CanvasScaler(800×600)를 지웠다. 중첩 캔버스라 실행에서는 원래 무시되던 것이다. 그런데 본체 튜닝 덤프 도구(`PresentationTuningExporter`)는 무대 부모 쪽의 첫 CanvasScaler를 기준 해상도로 읽는다. 지우면 `[StageCanvas]`의 값(1920×1080 · 0.5)을 읽는다. 옮기기 전의 `[UIManager]`와 같은 값이다.
+  - 남은 오브젝트가 걷은 것을 가리키는 참조 0, 끊긴 fileID 0. 바뀐 문서는 일곱뿐이다(무대 · Root 둘 · `[StageCanvas]` 둘 · 부트스트랩 · 씬 루트 목록).
+- **코드**:
+  - `Samples/Scripts/UI/`를 지웠다(52파일, 약 5,600줄). 무대만 `Samples/Scripts/Stage/`로 `.meta`째 옮겼다. 옮긴 것은 `PresentationUIRoot` · `RefCache` · `Providers/` 넷 · 디버그 `ScreenFocusGridOverlay`다. 스크립트 GUID가 그대로라 씬 컴포넌트가 이어진다.
+  - `PresentationUIRoot`는 옛 UI 프레임(`UIRoot`) 대신 `MonoBehaviour`다. 칸 찾기 규칙은 옛것과 같다(자식 이름, 깊이 우선 첫 것). 화면 층 · 버튼 · 이벤트는 뺐다. 조립이 `Initialize()`로 칸을 먼저 찾는다(여러 번 불러도 한 번).
+  - `SampleBootstrap`:
+    - 공존 스위치(`useKedUI`) · 옛 UI 갈래(`VNScreenBindings`) · `uiManager` · `optionItem` · `surfaceLayoutPresetDb` 칸을 지웠다.
+    - `무대` 칸을 더했다.
+    - 새 UI 캔버스가 없으면 예제를 세우지 않고 오류로 알린다. 돌아갈 옛 UI가 없다. 입력 폴러도 함께 멈춘다(연결 전이라 매 프레임 null).
+  - `PresentationAssembler`: 옛 관리자 · 그림 패치 설치를 지웠다. 대사창 · 선택지 상자는 화면 쪽이 넘긴 것만 쓴다(없으면 조립 오류).
+  - `StageForKedUI`(옛 `LegacyStageForKedUI`): 무대가 꺼져 있으면 켜기만 한다.
+  - `<<ui_patch>>`: 옛 그림 패치와 함께 걷었다. 지금은 `UIThemePatchNotConnected`가 받아 경고만 남기고 화면은 그대로 둔다. U4에서 UIPF `SetContext`로 잇는다. 지금 예제 대본에는 ui_patch가 없다.
+  - UIPF 런타임 asmdef의 `autoReferenced`를 원본 값 `true`로 되돌렸다. 사본 갈림은 Editor asmdef 하나로 줄었다(`vendoring.md`).
+- **에셋 삭제**: 옛 UI만 쓰던 것이다. 다른 에셋 · 코드 · 대본에서 GUID나 경로로 참조하는 곳이 없음을 확인했다.
+  - `Samples/Prefabs/`: 백로그 줄 · 저장 슬롯 · 선택지 항목 프리팹
+  - `Samples/Resources/ui/test/`: 옛 그림 패치 테마
+  - `Resources/legacy/background_02`
+  - `Resources/`의 낱장 UI 그림 7개
+- **남긴 것**:
+  - `Samples/Data/DialogueSurfaceLayoutPresetDB`(옛 대사창 배치): 본체 도구 `PresentationTuningExporter`가 경로로 읽는다. 본체 diff 0이라 그대로 둔다.
+  - `Assets/Fonts/NEXON Maplestory`: 옛 UI만 썼지만 예제 밖 폴더라 두었다.
+  - `Samples/Art/Emoji`: 연출용이다(`PLAN_framework-scope`).
+- **오프라인 컴파일**: 15개 어셈블리 오류 0 · 경고 0. `Assembly-CSharp`는 68파일에서 24파일로 줄었다.
+- **독립 리뷰**: 두 건을 고쳤다(위 CanvasScaler, 입력 폴러). 씬 YAML 정합 · 지운 에셋의 참조 · 무대 표시와 CanvasGroup · 정렬 · 초기화 순서는 회귀 없음.
+- **Unity 확인**: 아래 "U3 확인"과 7절.
+
+#### U3 확인
+- [ ] 컴파일 오류 · 새 경고 0, 씬을 열어 Missing Script 0(`[StageCanvas]/Root/PresentataionUIRoot`)
+- [ ] 무대 — 배경 · 인물 · 화면 효과 · 무대 마스크 · 샷(팬 · 줌)이 전과 같다
+- [ ] 두 예제의 전 기능 — 재생 · 되감기 · 백로그 이동 · 빨리 넘기기 · 이어하기 · 슬롯 · 갈라지기
+- [ ] 디버그 — `DebugView`의 `ScreenFocusGridOverlay` · `CharacterFocusDebugView`
 
 ### U4. 시연
-- `<<ui_patch dark>>` — `IUIThemePatchPort` → `UIManager.SetContext`. 데모 대본에 한 장면.
+- `<<ui_patch dark>>` — `IUIThemePatchPort` → `UIManager.SetContext`. 데모 대본에 한 장면. 지금 그 자리는 `UIThemePatchNotConnected`(경고만)다.
 - 설정 화면의 테마 · 글자 크기가 열린 화면에 바로 반영.
 - README에 "AI가 UIPF 구조로 화면을 만든다" 절: 빌드 명세 하나 → 프리팹 · 바인딩 → 그림 넣기 → 테마 전환.
 
 ### U5. 문서
 - SCOPE-BOUNDARY에 "꽂힌 모듈 둘"(진행 · UI), ASSEMBLY-BOUNDARY의 어셈블리 표, `PLAN_framework-scope` 분류표.
+- U3로 낡은 곳(본체 문서라 U3에서는 고치지 않았다):
+  - ASSEMBLY-BOUNDARY §5 — `Samples/Scripts/UI/Providers/` → `Samples/Scripts/Stage/Providers/`.
+  - ASSEMBLY-BOUNDARY §6 — `IUIThemePatchPort`의 구현은 `UI/Core/Patcher/UIThemePatchAdapter.cs`가 아니라 `PresentationAssembler`의 `UIThemePatchNotConnected`(U4 전까지).
+  - `PLAN_framework-scope` 분류표 — "UI 프레임·화면·바인딩 `Samples/Scripts/UI/`", "대사창·선택지 뷰 베이스는 `Samples/Scripts/UI/DialogueBox/`", 예제 에셋 줄의 프리팹 · UI 이미지.
 - 그다음 `PLAN_framework-scope` 6·7단계로 돌아간다.
 
 ## 그림 (2026-10-26 받은 것)
@@ -157,7 +196,7 @@ UIPF에서 그림이 화면에 들어가는 길은 둘이다.
 ## 착수 전에 정할 것 → 정한 것 (2026-10-27)
 
 1. **화면 정의의 형식 → (가) C# 빌드 명세.** `Editor/Build/Specs/*Spec.cs`. 노드 이름은 `nameof(화면.Refs.X)`라 명세와 Refs가 컴파일로 묶이고, 빌더가 만든 뒤 Refs 감사(이름이 정확히 하나)를 한다. 좌표는 `Design/layouts.json`의 숫자 그대로.
-2. **교체 시점 → 공존 스위치.** `SampleBootstrap › 예제 UI › useKedUI`(기본 켬). 캔버스 프리팹이 없거나 세우다 실패하면 옛 UI로 연다. 두 UI가 같이 도는 일은 없다 — 새 UI가 켜지면 옛 화면(타이틀·백로그·확인·메뉴·대사창·선택지·버튼)은 시작할 때 감추고, 옛 캔버스에는 연출 무대만 남는다. 옛 코드 삭제는 U3.
+2. **교체 시점 → 공존 스위치.** `SampleBootstrap › 예제 UI › useKedUI`(기본 켬). 캔버스 프리팹이 없거나 세우다 실패하면 옛 UI로 연다. 두 UI가 같이 도는 일은 없다 — 새 UI가 켜지면 옛 화면(타이틀·백로그·확인·메뉴·대사창·선택지·버튼)은 시작할 때 감추고, 옛 캔버스에는 연출 무대만 남는다. 옛 코드 삭제는 U3. → U3에서 스위치째 걷었다. 새 UI 캔버스가 없으면 예제를 세우지 않는다.
 3. **슬롯 카드의 그림 창 → (패키지 지시) 알려진 자리 그림 + 실제 메타데이터.** save_slot 그림의 밝은 칸을 그대로 두고 장면 ID · 플레이 시간 · 저장 시각 · 저장 이름을 적는다. 화면 캡처는 별도 작업.
 
 ## 하지 않는 것
@@ -212,6 +251,7 @@ UIPF에서 그림이 화면에 들어가는 길은 둘이다.
   - `SampleBootstrap` — `useKedUI` 스위치, 화면과 무관한 진행 저장 설치를 화면 설정에서 떼어 냄(`InstallProgressionSaves`), 이어하기 가능 여부(`HasProgressionResumePoint` — 부수 효과 없는 읽기).
   - `NodePlaythrough.HasResumePoint` — 읽기만 하는 확인.
   - `PresentationUIRoot.SetLegacyHudVisible` — 옛 HUD 층만 감춘다(무대 층은 그대로).
+  - U3 뒤: `useKedUI`와 `SetLegacyHudVisible`은 없어졌다. `PresentationSceneRefs`의 `UIManager` 칸은 `Stage`로, 대사창 · 선택지 상자 칸은 필수로 바뀌었다(위 U3).
 - 저장 포맷 · 챕터 진행 규칙 · 리플레이 알고리즘은 그대로다. 저장·불러오기·갈라지기는 `ManualSaveFlow`/`SaveSlotService`를 그대로 부른다.
 
 ### 3. 입력 소유권
@@ -248,11 +288,11 @@ Panel이 열린 동안 Root(타이틀·재생 화면)의 CanvasGroup도 막는�
 - **슬롯 삭제 · 이름 바꾸기** — 서비스에는 있지만 시안에 없어 화면을 만들지 않았다.
 - **잠금 아이콘 · 최근 저장 배지** — 그림이 없다.
 - **빠르게 재생 버튼** — 시안 퀵메뉴에 없다(S 키 그대로).
-- **`ui_patch` → UIPF 테마** — 대본의 `<<ui_patch>>`는 아직 옛 UI에 걸려 있다(U4).
+- **`ui_patch` → UIPF 테마** — 옛 그림 패치는 U3에서 걷었다. 대본의 `<<ui_patch>>`는 지금 경고만 남긴다(U4).
 - 키 안내는 입력 바인딩의 **기본 키**를 적은 것이다. 인스펙터에서 키를 바꾸면 안내도 고쳐야 한다.
 - 백로그 화자는 대본의 이름이다. 화자 정책 DB의 표시 이름(`fallbackDisplayName`)과 다를 수 있다.
 - 시안의 가변 글꼴 `NotoSansKR.ttf`는 들이지 않았다 — 기본 인스턴스가 Thin이라 TMP가 가는 글자로 그린다. 같은 글꼴에서 정적 Medium · Bold를 뽑아 썼다(OFL, 예약 이름은 'Source'뿐).
-- 캔버스 비율 맞춤은 **Expand**(시안 권장 Match 0.5 아님) — 0.5면 2560×1080에서 1600×900 판의 위아래 60씩이 잘린다. 옛 UI 캔버스(1920×1080)는 그대로다.
+- 캔버스 비율 맞춤은 **Expand**(시안 권장 Match 0.5 아님) — 0.5면 2560×1080에서 1600×900 판의 위아래 60씩이 잘린다. 무대 캔버스 `[StageCanvas]`(1920×1080 · Match 0.5)는 그대로다.
 
 ### 6. Unity에서 할 일
 
