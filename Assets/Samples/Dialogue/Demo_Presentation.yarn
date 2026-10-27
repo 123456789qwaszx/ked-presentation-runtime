@@ -20,6 +20,11 @@
 title: Demo_Presentation
 ---
 // ─── 준비: 배경 리그와 캐릭터 슬롯 ───
+<<shot_reset 0fr>>
+<<screen_vignette_clear 0fr>>
+
+<<screen_noise_clear 0fr>>
+
 <<bg_spawn bg_main class_day>>
 <<bg_size bg_main 1>>
 <<slot s1 stage00 mid>>
@@ -114,4 +119,5 @@ title: Demo_Presentation
 <<stop_bgm 2s>>
 <<bg_fade_out bg_main 20fr>>
 <<24fr>>
+캐릭터 퇴장 #boxhide
 ===

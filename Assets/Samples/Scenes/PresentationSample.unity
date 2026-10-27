@@ -1406,6 +1406,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 355984e90625bb24fbaa9aa39f39f63f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::VnAppBootstrap
+  example: 0
+  presentationEntryNode: Demo_Presentation
   stage: {fileID: 1739354825}
   audioSystem: {fileID: 32255926}
   speakerPolicyDb: {fileID: 11400000, guid: b3c354f8ae9671f47880c5bb9b74e4f9, type: 2}
@@ -5723,8 +5725,8 @@ MonoBehaviour:
   lineProvider: {fileID: 0}
   saliencyStrategy: 0
   dialoguePresenters:
-  - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 1180068359}
+  - {fileID: 2009713540}
   verboseLogging: 0
   autoStart: 0
   startNode: NewYarnScript

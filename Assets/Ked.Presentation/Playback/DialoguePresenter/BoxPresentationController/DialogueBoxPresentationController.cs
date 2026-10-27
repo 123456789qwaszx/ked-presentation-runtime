@@ -189,19 +189,24 @@ public partial class DialogueBoxPresentationController
 
             // 감추는 것이 목적이지만 내용은 얹는다 —
             // 타이프라이터가 이 박스의 TMP_Text에 계속 쓰기 때문이다.
+            // 보이는 중이면 FadeOutIn과 같은 까닭으로 사라진 뒤에 얹는다 —
+            // 먼저 얹으면 앞 줄 글자가 툭 지워지고 이름표·레이아웃이 바뀐 채 페이드아웃된다.
+            // 타이프라이터는 ShowLineAsync가 끝난 뒤에 글자 칸을 받으므로 늦지 않다.
             case DialogueBoxTransitionKind.Hide:
-                ApplyContent(nextBoxKind, displayCharacterName, ctx);
-
-                if (immediate)
+                if (immediate || !_boxState.IsVisible)
                 {
+                    ApplyContent(nextBoxKind, displayCharacterName, ctx);
                     _box.SetVisibleImmediate(false);
                     break;
                 }
 
                 await _box.FadeOutAsync(FadeDownDuration, run);
 
-                if (run.IsValid)
-                    _box.SetVisibleImmediate(false);
+                if (!run.IsValid)
+                    break;
+
+                _box.SetVisibleImmediate(false);
+                ApplyContent(nextBoxKind, displayCharacterName, ctx);
 
                 break;
         }
