@@ -3,7 +3,7 @@
 기준: `dev` @ `f79f13d` (fix(tests): 하네스 둘이 끝 화면을 받는 생성자로 다시 빌드된다)
 작업: `refactor/stage-seam`
 
-**현재 위치(2026-10-27):** ①②③④ 끝(Unity 확인 남음). 다음은 리포지토리 분리(§4), 그 뒤 모션(§5).
+**현재 위치(2026-10-27):** ①②③④ 끝, 세 저장소로 갈랐다(§4 — Unity 확인은 셋 다 남음). 다음은 모션(§5)을 무대 저장소에서.
 
 ## 0. 왜
 
@@ -59,7 +59,7 @@ VN 쪽은 `PresentationSessionContext`(Playback/Host)가 재생 상태를 그 �
 
 세 계통은 서로의 상태를 **쓰지** 않는다. `shot_focus_to`가 열차의 정착 체인을 **읽는** 것은 허용이다.
 
-## 4. 리포지토리 분리 (다음)
+## 4. 리포지토리 분리 — 끝 (2026-10-27)
 
 패키지(UPM)는 만들지 않는다. `Ked.Progression`과 같은 **복사 반입**이다([vendoring.md](../Assets/Ked.Progression/Documentation~/vendoring.md)).
 
@@ -80,6 +80,13 @@ VN 쪽은 `PresentationSessionContext`(Playback/Host)가 재생 상태를 그 �
 가를 때 폴더째 든다.
 
 `partial class`는 어셈블리를 못 넘는다(§5, ASSEMBLY-BOUNDARY). 철도 계약은 무대에, `PresentationUIRoot`의 partial 구현은 재생에 남는다.
+
+### 한 것
+
+- [ked-command-executor](https://github.com/123456789qwaszx/ked-command-executor) `main` @ `0ad0b3f` — `Runtime/PresentationCore/` → `Assets/Ked.CommandExecutor/`(어셈블리 `Ked.CommandExecutor`, 참조 DOTween.Modules). 뼈대는 이 저장소의 ProjectSettings·Packages(Yarn 제외)·DOTween·URP 설정.
+- [ked-stage-runtime](https://github.com/123456789qwaszx/ked-stage-runtime) `main` @ `b7c712f` — `Assets/Ked.Presentation/`(Playback 제외) + `ExportedTuning/` + 실행기 반입본. asmdef: Runtime·Editor·Core.Tests가 `Ked.CommandExecutor`를 참조, 쓰지 않던 `Unity.TextMeshPro` 참조는 걷음. 무대 에셋이 재생 저장소 파일을 가리키는 GUID 0건.
+- 이 저장소: `PresentationCore/`를 `Assets/Ked.CommandExecutor/`로 옮기고(GUID 그대로), Playback asmdef가 실행기를 참조. 공유 파일(asmdef 셋·ASSEMBLY-BOUNDARY.md)은 무대 원본의 것. `diff -r` 0건 — 각 `Documentation~/vendoring.md`의 대조 명령.
+- 세 저장소 모두 `main`·`dev`. 어셈블리·네임스페이스 이름(`Ked.Presentation.*`)은 그대로다 — VnTool 반입과 스크립트 GUID가 매달려 있어서, 바꿀 날이 오면 셋을 한 번에.
 
 ## 5. 모션 (가른 뒤, 무대 저장소에서)
 

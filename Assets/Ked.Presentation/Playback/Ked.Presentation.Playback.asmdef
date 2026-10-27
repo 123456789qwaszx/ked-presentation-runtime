@@ -4,6 +4,7 @@
     "references": [
         "Ked.Presentation.Core",
         "Ked.Presentation.Runtime",
+        "Ked.CommandExecutor",
         "YarnSpinner.Unity",
         "Unity.TextMeshPro",
         "UnityEngine.UI",

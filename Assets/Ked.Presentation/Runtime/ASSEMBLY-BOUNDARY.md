@@ -1,4 +1,9 @@
-# 어셈블리 경계 (U13-a, 2026-10-26 Playback 분리)
+# 어셈블리 경계 (U13-a, 2026-10-26 Playback 분리 · 2026-10-27 세 저장소)
+
+> **세 저장소.** 이 폴더(`Assets/Ked.Presentation/`)의 원본은 [ked-stage-runtime](https://github.com/123456789qwaszx/ked-stage-runtime)이고,
+> 실행기(`Assets/Ked.CommandExecutor/`)의 원본은 [ked-command-executor](https://github.com/123456789qwaszx/ked-command-executor)다.
+> `Ked.Presentation.Playback`과 예제는 재생 저장소([ked-presentation-runtime](https://github.com/123456789qwaszx/ked-presentation-runtime))에만 있다.
+> 이 문서는 세 조각이 한 프로젝트에 모였을 때의 경계를 적는다 — 어느 저장소에서 읽든 같은 문서다(복사 반입, 각 폴더의 `Documentation~/vendoring.md`).
 
 이 폴더(`Assets/Ked.Presentation/Runtime/`)는 **하나의 어셈블리**다. 왜 이렇게 생겼는지를 여기 남긴다.
 경계는 코드 어디에도 안 보이고 `.asmdef` 파일 안에만 있어서, 근거가 없으면 다음 사람이
@@ -14,11 +19,12 @@
 
 | 어셈블리 | 위치 | 내용 |
 |---|---|---|
+| `Ked.CommandExecutor` | `Assets/Ked.CommandExecutor/` | **실행기** — 커맨드 수명(`CommandBase` · `ClaimTweenCommandBase`) · `CommandRunScope` · `CommandExecutor` · `SequencePlayer` · 포트 (참조: DOTween.Modules. **무대·재생·Yarn을 모른다**) |
 | `Ked.Presentation.Core` | `Assets/Ked.Presentation/Core/` | 순수 상태 계산 — 정지 프레임 리듀스·이징·튜닝 (**엔진 의존 0**, 참조 0) |
-| `Ked.Presentation.Runtime` | `Assets/Ked.Presentation/Runtime/` | 연출 실행 계층 — PresentationCore(**실행기만**: 커맨드 수명·스코프·포트) · Stage(무대 상태·무대 키·깊이 칸 계약) · Commands(커맨드 · 팩토리 · 토큰 파서 · **StageCommandParser**) · CharacterRig · ShotResponse · BackgroundRig · ScreenEffect · StageMask · Audio (참조: Core · TextMeshPro · DOTween.Modules) |
-| `Ked.Presentation.Playback` | `Assets/Ked.Presentation/Playback/` | 대사 재생 루프와 연출 기억 — 줄 진행·선택지(DialoguePresenter) · 재생 제어·롤백 기록·백로그·VN 재생 상태(FeatureController) · Yarn 등록·전달(YarnBridge) · 재생 호스트 계약·재생 단위(Host) · 연출 기억과 그 입구 `PlaybackMemory`(Memory) · 등가성 하네스(Diagnostics) (참조: Core · Runtime · YarnSpinner.Unity · TextMeshPro · UnityEngine.UI · DOTween.Modules) |
+| `Ked.Presentation.Runtime` | `Assets/Ked.Presentation/Runtime/` | **무대** 실행 계층 — Stage(무대 상태·무대 키·깊이 칸 계약) · Commands(커맨드 · 팩토리 · 토큰 파서 · **StageCommandParser**) · CharacterRig · ShotResponse · BackgroundRig · ScreenEffect · StageMask · Audio (참조: Core · CommandExecutor · DOTween.Modules) |
+| `Ked.Presentation.Playback` | `Assets/Ked.Presentation/Playback/` | 대사 재생 루프와 연출 기억 — 줄 진행·선택지(DialoguePresenter) · 재생 제어·롤백 기록·백로그·VN 재생 상태(FeatureController) · Yarn 등록·전달(YarnBridge) · 재생 호스트 계약·재생 단위(Host) · 연출 기억과 그 입구 `PlaybackMemory`(Memory) · 등가성 하네스(Diagnostics) (참조: Core · Runtime · CommandExecutor · YarnSpinner.Unity · TextMeshPro · UnityEngine.UI · DOTween.Modules) |
 | `Ked.Progression` · `Ked.Progression.Save` | `Assets/Ked.Progression/` | 진행 판정 코어와 진행 저장 (**엔진 의존 0**. 원본은 형제 저장소 `ked-progression-runtime`, [vendoring.md](../../Ked.Progression/Documentation~/vendoring.md)) |
-| `Ked.Presentation.Editor` (에디터 전용) | `Assets/Ked.Presentation/Editor/` | 본체 에디터 도구 — 초상 DB 빌더 · 튜닝 덤프 익스포터 · 이징 골든 (참조: Core · Runtime · TextMeshPro · UnityEngine.UI · DOTween.Modules) |
+| `Ked.Presentation.Editor` (에디터 전용) | `Assets/Ked.Presentation/Editor/` | 무대 에디터 도구 — 초상 DB 빌더 · 튜닝 덤프 익스포터 · 이징 골든 (참조: Core · Runtime · CommandExecutor · UnityEngine.UI · DOTween.Modules) |
 | `Assembly-CSharp` (기본) | `Assets/Samples/Scripts/` | **예제 층** — Game(부트스트랩·조립·저장 흐름) · UI · ProgressionHost(진행 런타임을 꽂는 어댑터) |
 | `Assembly-CSharp-Editor` (기본) | `Assets/Samples/Editor/` | 예제 쪽 도구 — 폰트 교체 |
 | `Ked.Presentation.Core.Tests` | `Assets/Ked.Presentation/Core/Tests/EditMode/` | EditMode 테스트 (참조: Core · Runtime) |
@@ -33,6 +39,8 @@
 
 ```
 Assembly-CSharp (예제) ──> Ked.Presentation.Playback ──> Ked.Presentation.Runtime ──> Ked.Presentation.Core
+                                   │                              │
+                                   └──────────────────────────────┴──> Ked.CommandExecutor (실행기 — 밖으로 나가는 참조 0)
 Ked.Presentation.Editor (에디터 전용) ────────────────────> Ked.Presentation.Runtime
         └────────────────> Ked.Progression.Save ──> Ked.Progression
         ✗ 역방향 불가 (컴파일러가 막는다)
@@ -199,4 +207,5 @@ Playback이 예제에게 요구할 때도 같다. 계약은 Playback에, 구현�
 - 무대가 필요한 커맨드는 생성자로 받고, 팩토리가 들고 넘긴다(④). `PresentationCore/`에는 실행기만 남았다 —
   무대 상태(`PresentationStage`·`PresentationStageKey`·`IStageDepthContentSlotProvider`)는 `Stage/`로, 토큰 파서는 `Commands/Parser/`로.
 
-아직 한 어셈블리 안에 있는 것은 폴더 경계뿐이다. `PresentationCore/`에서 밖으로 나가는 참조가 0이면 실행기는 그대로 저장소가 된다.
+실행기는 그대로 저장소가 됐다 — `Assets/Ked.CommandExecutor/`(어셈블리 `Ked.CommandExecutor`, 원본 ked-command-executor).
+`Ked.Presentation.Runtime`은 `PresentationCore/`가 빠지고 실행기를 참조한다. 무대(`Core` · `Runtime` · `Editor` · 데이터·프리팹·셰이더)의 원본은 ked-stage-runtime이다.

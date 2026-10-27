@@ -9,8 +9,9 @@
 ```
 
 `Assets/Ked.Presentation/Core`가 저작 도구(VnTool)에 `src/Ked.Presentation.Core`로
-복사 반입돼 있는 것과 같은 방식이다. **다만 방향이 반대다** — 연출 코어는 여기가 원본이고,
-진행 코어는 여기가 사본이다.
+복사 반입돼 있는 것과 같은 방식이다. 2026-10-27부터는 실행기(`Assets/Ked.CommandExecutor/`)와
+무대(`Assets/Ked.Presentation/`의 Playback을 뺀 전부)도 같은 방식의 사본이다 — 각 폴더의 `Documentation~/vendoring.md`.
+이 저장소가 원본인 것은 재생(`Playback/`)과 예제뿐이다.
 
 사본에서 먼저 고치는 일은 생긴다. 그때는 **원본에도 같은 손을 대서** 두 벌을 다시 맞춘다.
 2026-10-26의 동기화가 그 경우다.

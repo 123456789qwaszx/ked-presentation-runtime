@@ -4,7 +4,7 @@
     "references": [
         "Ked.Presentation.Core",
         "Ked.Presentation.Runtime",
-        "Unity.TextMeshPro",
+        "Ked.CommandExecutor",
         "UnityEngine.UI",
         "DOTween.Modules"
     ],
