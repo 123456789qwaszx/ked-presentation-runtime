@@ -56,7 +56,6 @@ namespace Ked.Samples.UI.Editor
     internal sealed class KedUIKit
     {
         public const string Root = "Assets/Samples/KedUI";
-        public const string ArtDir = Root + "/Art";
         public static readonly Rect Screen = new(0f, 0f, 1600f, 900f);
 
         [Serializable]
@@ -77,6 +76,7 @@ namespace Ked.Samples.UI.Editor
 
         private readonly Dictionary<string, Sprite> _sprites = new(StringComparer.Ordinal);
         private readonly Dictionary<string, ManifestEntry> _manifest = new(StringComparer.Ordinal);
+        private readonly Dictionary<string, string> _art;
 
         public TMP_FontAsset Font { get; }
         public List<string> Problems { get; } = new();
@@ -84,6 +84,9 @@ namespace Ked.Samples.UI.Editor
         public KedUIKit(TMP_FontAsset font)
         {
             Font = font;
+
+            // 그림은 이름으로 찾는다 — Art/ · Common/Sprites/ · 묶음의 Sprites/ 어디에 있어도 된다(KedUIUnits).
+            _art = KedUIUnits.ArtIndex(Problems);
 
             string manifestPath = Root + "/asset-manifest.json";
             if (!File.Exists(manifestPath))
@@ -110,9 +113,14 @@ namespace Ked.Samples.UI.Editor
             if (_sprites.TryGetValue(name, out Sprite cached))
                 return cached;
 
-            Sprite sprite = AssetDatabase.LoadAssetAtPath<Sprite>($"{ArtDir}/{name}.png");
+            Sprite sprite = _art.TryGetValue(name, out string path)
+                ? AssetDatabase.LoadAssetAtPath<Sprite>(path)
+                : null;
+
             if (sprite == null)
-                Problems.Add($"스프라이트 없음(임포트 설정 전?): {ArtDir}/{name}.png");
+                Problems.Add(path == null
+                    ? $"그림 없음: {name}.png (KedUI 아래 어디에도 없다)"
+                    : $"스프라이트 없음(임포트 설정 전?): {path}");
 
             _sprites[name] = sprite;
             return sprite;

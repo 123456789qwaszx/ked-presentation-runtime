@@ -15,8 +15,9 @@ namespace Ked.Samples.UI.Editor
     /// </summary>
     internal static class KedUIFonts
     {
-        public const string FontDir = KedUIKit.Root + "/Fonts";
-        public const string OutputDir = KedUIKit.Root + "/Generated/Fonts";
+        // 원본 TTF와 그것으로 만든 SDF 자산을 한 폴더에 둔다 — 여러 화면이 같이 쓰는 Common의 몫.
+        public const string FontDir = KedUIUnits.CommonDir + "/Fonts";
+        public const string OutputDir = FontDir;
         public const string MediumAssetPath = OutputDir + "/NotoSansKR-Medium SDF.asset";
         public const string BoldAssetPath = OutputDir + "/NotoSansKR-Bold SDF.asset";
 

@@ -11,12 +11,16 @@ namespace Ked.Samples.UI.Editor
     /// <summary>
     /// Tools/Ked UI/Build Sample UI — 화면 빌드 명세(Specs/*)에서 UIPF 화면 프리팹을 만든다.
     ///
-    ///   1. 그림 임포트 설정(KedUIArtImporter, 패키지의 도구 그대로)
+    ///   1. 그림 임포트 설정(KedUIArtImporter, 패키지의 도구 — 그림 자리를 이름으로 찾게만 고쳤다)
     ///   2. TMP 글꼴(Noto Sans KR Medium · Bold, 동적 SDF)
     ///   3. 화면 프리팹 12개(Root 2 · Panel 6 · Page 4) — 자식 이름 = 화면의 Refs
     ///   4. 선택지 항목 프리팹 · 연출 프리셋 DB · UIPF 글꼴 묶음 · 화면별 Presentation
     ///   5. 캔버스 프리팹(Resources/KedUI/KedUICanvas) — 층 셋에 화면을 중첩 프리팹으로 놓고 KedUIHost에 잇는다
     ///   6. Refs 감사 — 화면 타입의 Refs마다 자식이 정확히 하나 있는지
+    ///   7. 묶음 감사 — 화면 묶음(Screens/*)이 제 묶음 · Common · UIPF · 패키지만 가리키는지(KedUIUnits)
+    ///
+    /// 화면 스크립트가 묶음(Screens/{묶음}/Scripts/)에 있으면 그 화면의 프리팹 · Presentation은 묶음 안에,
+    /// 아니면 Generated/에 만든다.
     ///
     /// 다시 실행하면 프리팹은 같은 경로에 덮어쓴다(GUID 유지). 데이터 자산은 이미 있으면 그대로 둔다.
     /// 씬은 건드리지 않는다 — SampleBootstrap이 Resources에서 캔버스를 읽는다.
@@ -118,6 +122,10 @@ namespace Ked.Samples.UI.Editor
                 foreach (GameObject prefab in roots) Audit(prefab, problems);
                 foreach (GameObject prefab in panels) Audit(prefab, problems);
                 foreach (GameObject prefab in pages) Audit(prefab, problems);
+
+                EditorUtility.DisplayProgressBar("Ked UI", "묶음 감사", 0.97f);
+                int units = KedUIUnits.Audit(problems);
+                built.Add($"(묶음 감사: 화면 묶음 {units}개)");
 
                 problems.AddRange(kit.Problems);
 
@@ -242,7 +250,10 @@ namespace Ked.Samples.UI.Editor
 
         private static GameObject SaveScreen(GameObject go, List<string> built)
         {
-            return Save(go, $"{ScreensDir}/{go.name}.prefab", built);
+            UIBase view = go.GetComponent<UIBase>();
+            string path = KedUIUnits.PrefabPath(view != null ? view.GetType() : null, go.name, ScreensDir);
+            EnsureFolder(path.Substring(0, path.LastIndexOf('/')));
+            return Save(go, path, built);
         }
 
         private static GameObject Save(GameObject go, string path, List<string> built)

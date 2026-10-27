@@ -65,7 +65,9 @@ namespace Ked.Samples.UI.Editor
             foreach (Type type in ViewTypes)
             {
                 string key = UIViewKey.Of(type);
-                string path = $"{PresentationDir}/{key}.asset";
+                // 화면이 묶음에 있으면 Screens/{묶음}/Presentation/{key}Presentation.asset, 아니면 Generated/Presentations/{key}.asset.
+                string path = KedUIUnits.PresentationPath(type, key, PresentationDir);
+                KedUIBuild.EnsureFolder(path.Substring(0, path.LastIndexOf('/')));
 
                 UIPresentationSpec spec = AssetDatabase.LoadAssetAtPath<UIPresentationSpec>(path);
                 if (spec == null)
