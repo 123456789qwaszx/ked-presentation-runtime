@@ -16,3 +16,4 @@ MonoBehaviour:
   outputPath: Assets/Samples/Dialogue/motions.json
   motions:
   - {fileID: 11400000, guid: b5f78170aa19c0c4aa1554a535ff36de, type: 2}
+  - {fileID: 11400000, guid: 4a4f532674acd6141a91925acef612c1, type: 2}
