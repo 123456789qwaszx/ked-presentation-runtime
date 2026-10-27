@@ -1429,6 +1429,8 @@ MonoBehaviour:
   vnAdvanceInputPoller: {fileID: 1315566987}
   rigPrefab: {fileID: 2306115306432438348, guid: c7b3ab204cabea145aff7affa87d3d9d, type: 3}
   backgroundRigPrefab: {fileID: 6323253774795375343, guid: 18f0ce8dac4b54f44a88bdcceac48012, type: 3}
+  easeCurvesJson: {fileID: 4900000, guid: bcc8c6406551a2145bd79365c17af88b, type: 3}
+  motionsJson: {fileID: 0}
   enableEquivalenceHarness: 0
   screenNoisePresetDb: {fileID: 11400000, guid: afb4892f90a1eff46b623bfa3c11a55d, type: 2}
   screenVignettePresetDb: {fileID: 11400000, guid: 53356775219299c42981714a7e8b025e, type: 2}
