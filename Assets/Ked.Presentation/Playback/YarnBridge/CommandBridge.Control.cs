@@ -3,7 +3,7 @@ using Yarn.Unity;
 
 public sealed partial class YarnCommandBridge
 {
-    private const int FramePauseAliasMaxFrame = 48;
+    private const int FramePauseAliasMaxFrame = StageCommandParser.FramePauseAliasMaxFrame;
     
     // Animator-style frame wait aliases.
     // 24fps basis: <<24fr>> = 1 second.
@@ -14,31 +14,15 @@ public sealed partial class YarnCommandBridge
         for (int i = 1; i <= FramePauseAliasMaxFrame; i++)
         {
             int frame = i;
-            float seconds = YarnDurationParser.FramesToSeconds(frame);
 
-            runner.AddCommandHandler(
-                $"{frame}fr",
-                () => EnqueueWaitSpec(seconds));
+            string alias = $"{frame}fr";
+
+            runner.AddCommandHandler(alias, () => Forward(alias));
         }
     }
     
-    private void EnqueueWaitSpec(float duration = 0.18f)
-        => Collect(new WaitCommandSpec() { duration = duration });
-
-    private void EnqueueUIPatchSpec(string themeId = "default")
-        => Collect(new UIPatchCommandSpec { themeId = themeId });
-    
     private void LogImmediate(string message) 
         => Debug.Log($"[YarnCommandBridge] {message}");
-    
-    private void EnqueuePresentationActorAliasSpec(
-        string aliasSymbol,
-        string targetKey)
-        => Collect(new SetPresentationActorAliasCommandSpec()
-        {
-            aliasSymbol = aliasSymbol,
-            targetKey = targetKey
-        });
     
     private YarnTask HideDialogueBox() 
         => _dialogueBoxPresentation.HideCurrentAsync();

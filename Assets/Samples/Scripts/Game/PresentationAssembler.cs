@@ -248,13 +248,16 @@ public sealed class PresentationAssembler
         EaseCurveLibrary easeCurves = EaseCurveLibrary.LoadFrom(
             System.IO.Path.Combine(DialogueFolder, EaseCurveLibrary.BundleFileName));
 
+        StageCommandParser stageCommandParser = new(
+            _refs.CharacterRigPrefab,
+            _refs.BackgroundRigPrefab,
+            easeCurves);
+
         _ = new YarnCommandBridge(
             _refs.DialogueRunner,
             yarnPlaybackDriver,
-            _refs.CharacterRigPrefab,
-            _refs.BackgroundRigPrefab,
-            dialogueBoxPresentationController,
-            easeCurves);
+            stageCommandParser,
+            dialogueBoxPresentationController);
 
         VNYarnLineBoundary vnYarnLineBoundary = new(
             _backlogRecorder,

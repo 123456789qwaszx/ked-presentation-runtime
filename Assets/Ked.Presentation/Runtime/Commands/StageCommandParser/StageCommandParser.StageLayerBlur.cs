@@ -1,8 +1,9 @@
+using Ked.Presentation.Core;
 using UnityEngine;
 
 // 옛 경로로 되돌리려면 CommandBridge.cs의 BindStageDepthDefocus가
 // Enqueue*DepthBlurSpec(= CommandBridge.StageDepthDefocus.cs)을 부르게 하면 된다.
-public sealed partial class YarnCommandBridge
+public sealed partial class StageCommandParser
 {
     private static readonly PresentationStageKey[] BlurStages =
     {
@@ -20,13 +21,13 @@ public sealed partial class YarnCommandBridge
         PresentationDepthLayerKey.Close,
     };
 
-    private void EnqueueStage00LayerBlurSpec(string layerKey = "mid", float amount = 1f)
+    private void EnqueueStage00LayerBlurSpec(string layerKey, float amount)
         => EnqueueLayerBlurSpec(PresentationStageKey.Stage00, layerKey, amount);
 
-    private void EnqueueStage01LayerBlurSpec(string layerKey = "mid", float amount = 1f)
+    private void EnqueueStage01LayerBlurSpec(string layerKey, float amount)
         => EnqueueLayerBlurSpec(PresentationStageKey.Stage01, layerKey, amount);
 
-    private void EnqueueStage02LayerBlurSpec(string layerKey = "mid", float amount = 1f)
+    private void EnqueueStage02LayerBlurSpec(string layerKey, float amount)
         => EnqueueLayerBlurSpec(PresentationStageKey.Stage02, layerKey, amount);
 
     private void EnqueueLayerBlurSpec(
@@ -39,7 +40,7 @@ public sealed partial class YarnCommandBridge
                 out PresentationDepthLayerKey layer))
             return;
 
-        Collect(new StageLayerBlurCommandSpec
+        Emit(new StageLayerBlurCommandSpec
         {
             stage = stage,
             layer = layer,
@@ -54,7 +55,7 @@ public sealed partial class YarnCommandBridge
         for (int s = 0; s < BlurStages.Length; s++)
         for (int l = 0; l < BlurLayers.Length; l++)
         {
-            Collect(new StageLayerBlurCommandSpec
+            Emit(new StageLayerBlurCommandSpec
             {
                 stage = BlurStages[s],
                 layer = BlurLayers[l],

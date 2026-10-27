@@ -1,18 +1,19 @@
+using Ked.Presentation.Core;
 using DG.Tweening;
 using UnityEngine;
 
-public sealed partial class YarnCommandBridge
+public sealed partial class StageCommandParser
 {
-    private void EnqueueSpawnBackgroundRigSpec(
-        string rigKey, 
-        string spriteKey)
+    private const string DefaultBackgroundSpriteLayerToken = "back";
+
+    private void EnqueueSpawnBackgroundRigSpec(string rigKey, string spriteKey)
     {
         EnqueueSetupBackgroundRigSpec(rigKey);
-        EnqueueSetBackgroundSpriteSpec(rigKey, spriteKey);
+        EnqueueSetBackgroundSpriteSpec(rigKey, spriteKey, DefaultBackgroundSpriteLayerToken);
     }
 
     private void EnqueueSetupBackgroundRigSpec(string rigKey)
-        => Collect(new SetupBackgroundRigCommandSpec
+        => Emit(new SetupBackgroundRigCommandSpec
         {
             rigKey = rigKey,
             rigPrefab = _backgroundRigPrefab,
@@ -20,22 +21,13 @@ public sealed partial class YarnCommandBridge
             stage = PresentationStageKey.Stage00,
             layer = PresentationDepthLayerKey.Far,
         });
-    private void EnqueueSpawnBackgroundRigStage00Spec(
-        string rigKey,
-        string spriteKey,
-        string layerKey = "far")
+    private void EnqueueSpawnBackgroundRigStage00Spec(string rigKey, string spriteKey, string layerKey)
         => EnqueueSpawnBackgroundRigAtDepthSpec(rigKey, spriteKey, PresentationStageKey.Stage00, layerKey);
 
-    private void EnqueueSpawnBackgroundRigStage01Spec(
-        string rigKey,
-        string spriteKey,
-        string layerKey = "far")
+    private void EnqueueSpawnBackgroundRigStage01Spec(string rigKey, string spriteKey, string layerKey)
         => EnqueueSpawnBackgroundRigAtDepthSpec(rigKey, spriteKey, PresentationStageKey.Stage01, layerKey);
 
-    private void EnqueueSpawnBackgroundRigStage02Spec(
-        string rigKey,
-        string spriteKey,
-        string layerKey = "far")
+    private void EnqueueSpawnBackgroundRigStage02Spec(string rigKey, string spriteKey, string layerKey)
         => EnqueueSpawnBackgroundRigAtDepthSpec(rigKey, spriteKey, PresentationStageKey.Stage02, layerKey);
 
     private void EnqueueSpawnBackgroundRigAtDepthSpec(
@@ -49,14 +41,14 @@ public sealed partial class YarnCommandBridge
             stage,
             PresentationDepthLayerKeyParser.Parse(layerKey));
 
-        EnqueueSetBackgroundSpriteSpec(rigKey, spriteKey);
+        EnqueueSetBackgroundSpriteSpec(rigKey, spriteKey, DefaultBackgroundSpriteLayerToken);
     }
 
     private void EnqueueSetupBackgroundRigAtDepthSpec(
         string rigKey,
         PresentationStageKey stage,
         PresentationDepthLayerKey layer)
-        => Collect(new SetupBackgroundRigCommandSpec
+        => Emit(new SetupBackgroundRigCommandSpec
         {
             rigKey = rigKey,
             rigPrefab = _backgroundRigPrefab,
@@ -65,14 +57,14 @@ public sealed partial class YarnCommandBridge
             layer = layer
         });
 
-    private void EnqueueSetBackgroundSpriteSpec(string rigKey, string spriteKey = "", string layerKey = "back")
-        => Collect(new SetBackgroundSpriteCommandSpecBgR
+    private void EnqueueSetBackgroundSpriteSpec(string rigKey, string spriteKey, string layerKey)
+        => Emit(new SetBackgroundSpriteCommandSpecBgR
         {
             rigKey = rigKey,
             spriteKey = spriteKey,
         });
 
-    private void EnqueueSetBackgroundOriginSizeSpec(string rigKey, string scaleArg = "1")
+    private void EnqueueSetBackgroundOriginSizeSpec(string rigKey, string scaleArg)
     {
         if (!YarnNumberParser.TryParseFloat(scaleArg, out float absoluteScale))
             absoluteScale = 1f;
@@ -86,15 +78,11 @@ public sealed partial class YarnCommandBridge
             scaleOverride = new Vector3(absoluteScale, absoluteScale, absoluteScale)
         };
 
-        Collect(spec);
+        Emit(spec);
     }
 
-    private void EnqueueSetBackgroundAnchorDslSpec(
-        string rigKey,
-        string xToken = "0u",
-        string yToken = "0u",
-        float rotationZ = 0f)
-        => Collect(new SetAnchorCommandSpecBgR
+    private void EnqueueSetBackgroundAnchorDslSpec(string rigKey, string xToken, string yToken, float rotationZ)
+        => Emit(new SetAnchorCommandSpecBgR
         {
             rigKey = rigKey,
             target = BackgroundRigTarget.Background_Anchor,
@@ -102,32 +90,24 @@ public sealed partial class YarnCommandBridge
             rotationZ = rotationZ
         });
 
-    private void EnqueueFadeInBackgroundDslSpec(
-        string rigKey,
-        string durationToken = "10fr")
-        => Collect(new FadeInCommandSpecBgR
+    private void EnqueueFadeInBackgroundDslSpec(string rigKey, string durationToken)
+        => Emit(new FadeInCommandSpecBgR
         {
             rigKey = rigKey,
             target = BackgroundRigTarget.Background_Root,
             duration = YarnDurationParser.Parse(durationToken, 0.4f),
         });
 
-    private void EnqueueFadeOutBackgroundDslSpec(
-        string rigKey,
-        string durationToken = "10fr")
-        => Collect(new FadeOutCommandSpecBgR
+    private void EnqueueFadeOutBackgroundDslSpec(string rigKey, string durationToken)
+        => Emit(new FadeOutCommandSpecBgR
         {
             rigKey = rigKey,
             target = BackgroundRigTarget.Background_Root,
             duration = YarnDurationParser.Parse(durationToken, 0.4f),
         });
     
-    private void EnqueueMoveBackgroundDslSpec(
-        string rigKey,
-        string xToken,
-        string yToken,
-        string durationToken = "10fr")
-        => Collect(new MoveByCommandSpecBgR
+    private void EnqueueMoveBackgroundDslSpec(string rigKey, string xToken, string yToken, string durationToken)
+        => Emit(new MoveByCommandSpecBgR
         {
             rigKey = rigKey,
             target = BackgroundRigTarget.Background_Track_Move,
@@ -136,11 +116,8 @@ public sealed partial class YarnCommandBridge
             ease = Ease.OutCubic
         });
 
-    private void EnqueueScaleBackgroundDslSpec(
-        string rigKey,
-        float scale,
-        string durationToken = "10fr")
-        => Collect(new ScaleToCommandSpecBgR
+    private void EnqueueScaleBackgroundDslSpec(string rigKey, float scale, string durationToken)
+        => Emit(new ScaleToCommandSpecBgR
         {
             rigKey = rigKey,
             target = BackgroundRigTarget.Background_Scale,

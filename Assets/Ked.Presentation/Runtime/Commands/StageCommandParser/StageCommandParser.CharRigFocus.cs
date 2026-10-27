@@ -1,6 +1,7 @@
+using Ked.Presentation.Core;
 using UnityEngine;
 
-public sealed partial class YarnCommandBridge
+public sealed partial class StageCommandParser
 {
     private const string DefaultFocusPlacementFocusToken = "face";
     private const string DefaultFocusPlacementDurationToken = "0fr";
@@ -9,95 +10,43 @@ public sealed partial class YarnCommandBridge
     private const string DefaultFocusDepthDurationToken = "10fr";
     
     #region CharFocusPlacement
-    private void EnqueueFocusToLeftSpec(
-        string roleKey,
-        string focus = DefaultFocusPlacementFocusToken,
-        string durationToken = DefaultFocusPlacementDurationToken,
-        string easeToken = "")
+    private void EnqueueFocusToLeftSpec(string roleKey, string focus, string durationToken, string easeToken)
         => EnqueuePlaceCharacterFocusToSpec(roleKey, focus, ScreenFocusPoint.Left, durationToken, easeToken);
 
-    private void EnqueueFocusToCenterSpec(
-        string roleKey,
-        string focus = DefaultFocusPlacementFocusToken,
-        string durationToken = DefaultFocusPlacementDurationToken,
-        string easeToken = "")
+    private void EnqueueFocusToCenterSpec(string roleKey, string focus, string durationToken, string easeToken)
         => EnqueuePlaceCharacterFocusToSpec(roleKey, focus, ScreenFocusPoint.Center, durationToken, easeToken);
 
-    private void EnqueueFocusToRightSpec(
-        string roleKey,
-        string focus = DefaultFocusPlacementFocusToken,
-        string durationToken = DefaultFocusPlacementDurationToken,
-        string easeToken = "")
+    private void EnqueueFocusToRightSpec(string roleKey, string focus, string durationToken, string easeToken)
         => EnqueuePlaceCharacterFocusToSpec(roleKey, focus, ScreenFocusPoint.Right, durationToken, easeToken);
 
-    private void EnqueueFocusToTopLeftSpec(
-        string roleKey,
-        string focus = DefaultFocusPlacementFocusToken,
-        string durationToken = DefaultFocusPlacementDurationToken,
-        string easeToken = "")
+    private void EnqueueFocusToTopLeftSpec(string roleKey, string focus, string durationToken, string easeToken)
         => EnqueuePlaceCharacterFocusToSpec(roleKey, focus, ScreenFocusPoint.TopLeft, durationToken, easeToken);
 
-    private void EnqueueFocusToTopSpec(
-        string roleKey,
-        string focus = DefaultFocusPlacementFocusToken,
-        string durationToken = DefaultFocusPlacementDurationToken,
-        string easeToken = "")
+    private void EnqueueFocusToTopSpec(string roleKey, string focus, string durationToken, string easeToken)
         => EnqueuePlaceCharacterFocusToSpec(roleKey, focus, ScreenFocusPoint.Top, durationToken, easeToken);
 
-    private void EnqueueFocusToTopRightSpec(
-        string roleKey,
-        string focus = DefaultFocusPlacementFocusToken,
-        string durationToken = DefaultFocusPlacementDurationToken,
-        string easeToken = "")
+    private void EnqueueFocusToTopRightSpec(string roleKey, string focus, string durationToken, string easeToken)
         => EnqueuePlaceCharacterFocusToSpec(roleKey, focus, ScreenFocusPoint.TopRight, durationToken, easeToken);
 
-    private void EnqueueFocusToBottomLeftSpec(
-        string roleKey,
-        string focus = DefaultFocusPlacementFocusToken,
-        string durationToken = DefaultFocusPlacementDurationToken,
-        string easeToken = "")
+    private void EnqueueFocusToBottomLeftSpec(string roleKey, string focus, string durationToken, string easeToken)
         => EnqueuePlaceCharacterFocusToSpec(roleKey, focus, ScreenFocusPoint.BottomLeft, durationToken, easeToken);
 
-    private void EnqueueFocusToBottomSpec(
-        string roleKey,
-        string focus = DefaultFocusPlacementFocusToken,
-        string durationToken = DefaultFocusPlacementDurationToken,
-        string easeToken = "")
+    private void EnqueueFocusToBottomSpec(string roleKey, string focus, string durationToken, string easeToken)
         => EnqueuePlaceCharacterFocusToSpec(roleKey, focus, ScreenFocusPoint.Bottom, durationToken, easeToken);
 
-    private void EnqueueFocusToBottomRightSpec(
-        string roleKey,
-        string focus = DefaultFocusPlacementFocusToken,
-        string durationToken = DefaultFocusPlacementDurationToken,
-        string easeToken = "")
+    private void EnqueueFocusToBottomRightSpec(string roleKey, string focus, string durationToken, string easeToken)
         => EnqueuePlaceCharacterFocusToSpec(roleKey, focus, ScreenFocusPoint.BottomRight, durationToken, easeToken);
 
-    private void EnqueueFocusToInnerTopLeftSpec(
-        string roleKey,
-        string focus = DefaultFocusPlacementFocusToken,
-        string durationToken = DefaultFocusPlacementDurationToken,
-        string easeToken = "")
+    private void EnqueueFocusToInnerTopLeftSpec(string roleKey, string focus, string durationToken, string easeToken)
         => EnqueuePlaceCharacterFocusToSpec(roleKey, focus, ScreenFocusPoint.ThirdsUpperLeft, durationToken, easeToken);
 
-    private void EnqueueFocusToInnerTopRightSpec(
-        string roleKey,
-        string focus = DefaultFocusPlacementFocusToken,
-        string durationToken = DefaultFocusPlacementDurationToken,
-        string easeToken = "")
+    private void EnqueueFocusToInnerTopRightSpec(string roleKey, string focus, string durationToken, string easeToken)
         => EnqueuePlaceCharacterFocusToSpec(roleKey, focus, ScreenFocusPoint.ThirdsUpperRight, durationToken, easeToken);
 
-    private void EnqueueFocusToInnerBottomLeftSpec(
-        string roleKey,
-        string focus = DefaultFocusPlacementFocusToken,
-        string durationToken = DefaultFocusPlacementDurationToken,
-        string easeToken = "")
+    private void EnqueueFocusToInnerBottomLeftSpec(string roleKey, string focus, string durationToken, string easeToken)
         => EnqueuePlaceCharacterFocusToSpec(roleKey, focus, ScreenFocusPoint.ThirdsLowerLeft, durationToken, easeToken);
 
-    private void EnqueueFocusToInnerBottomRightSpec(
-        string roleKey,
-        string focus = DefaultFocusPlacementFocusToken,
-        string durationToken = DefaultFocusPlacementDurationToken,
-        string easeToken = "")
+    private void EnqueueFocusToInnerBottomRightSpec(string roleKey, string focus, string durationToken, string easeToken)
         => EnqueuePlaceCharacterFocusToSpec(roleKey, focus, ScreenFocusPoint.ThirdsLowerRight, durationToken, easeToken);
 
     private void EnqueuePlaceCharacterFocusToSpec(
@@ -109,7 +58,7 @@ public sealed partial class YarnCommandBridge
     {
         EaseSelection ease = ResolveEase(easeToken);
 
-        Collect(new PlaceCharacterFocusCommandSpecCharR
+        Emit(new PlaceCharacterFocusCommandSpecCharR
         {
             slotKey = roleKey,
             focusPreset = CharacterFocusPresetParser.Parse(focus),
@@ -121,16 +70,11 @@ public sealed partial class YarnCommandBridge
         });
     }
 
-    private void EnqueuePlaceCharacterFocusSpec(
-        string roleKey,
-        string focus = "bust",
-        string screenPoint = "center",
-        string durationToken = "0fr",
-        string easeToken = "")
+    private void EnqueuePlaceCharacterFocusSpec(string roleKey, string focus, string screenPoint, string durationToken, string easeToken)
     {
         EaseSelection ease = ResolveEase(easeToken);
 
-        Collect(new PlaceCharacterFocusCommandSpecCharR
+        Emit(new PlaceCharacterFocusCommandSpecCharR
         {
             slotKey = roleKey,
             focusPreset = CharacterFocusPresetParser.Parse(focus),
@@ -146,12 +90,7 @@ public sealed partial class YarnCommandBridge
     #endregion
     
     #region CharFocusDepth
-    private void EnqueueDepthAtPresetSpec(
-        string roleKey,
-        string depthArg,
-        string preserveFocusArg = DefaultFocusDepthPresetToken,
-        string durationToken = DefaultFocusDepthDurationToken,
-        string easeToken = "")
+    private void EnqueueDepthAtPresetSpec(string roleKey, string depthArg, string preserveFocusArg, string durationToken, string easeToken)
     {
         var spec = new SetDepthCommandSpecCharR
         {
@@ -171,7 +110,7 @@ public sealed partial class YarnCommandBridge
             if (!CharacterDepthPresetParser.TryParse(depthArg, out CharacterDepthKey preset))
             {
                 Debug.LogWarning(
-                    $"[YarnCommandBridge] Unknown depth preset '{depthArg}'. " +
+                    $"[StageCommandParser] Unknown depth preset '{depthArg}'. " +
                     $"Fallback to '{CharacterDepthKey.Mid}'.");
 
                 preset = CharacterDepthKey.Mid;
@@ -183,7 +122,7 @@ public sealed partial class YarnCommandBridge
         if (!CharacterFocusPresetParser.TryParse(preserveFocusArg, out CharacterFocusPreset focusPreset))
         {
             Debug.LogWarning(
-                $"[YarnCommandBridge] Unknown preserve focus preset '{preserveFocusArg}'. " +
+                $"[StageCommandParser] Unknown preserve focus preset '{preserveFocusArg}'. " +
                 $"Fallback to '{CharacterFocusPreset.Bust}'.");
 
             focusPreset = CharacterFocusPreset.Bust;
@@ -195,49 +134,29 @@ public sealed partial class YarnCommandBridge
         spec.ease = ease.Ease;
         spec.customCurveKeys = ease.CurveKeys;
 
-        Collect(spec);
+        Emit(spec);
     }
 
-    private void EnqueueDepthAtCloseSpec(
-        string roleKey,
-        string preserveFocusArg = DefaultFocusDepthPresetToken,
-        string durationToken = DefaultFocusDepthDurationToken,
-        string easeToken = "")
+    private void EnqueueDepthAtCloseSpec(string roleKey, string preserveFocusArg, string durationToken, string easeToken)
         => EnqueueDepthAtPresetSpec(roleKey, "close", preserveFocusArg, durationToken, easeToken);
 
-    private void EnqueueDepthAtFrontSpec(
-        string roleKey,
-        string preserveFocusArg = DefaultFocusDepthPresetToken,
-        string durationToken = DefaultFocusDepthDurationToken,
-        string easeToken = "")
+    private void EnqueueDepthAtFrontSpec(string roleKey, string preserveFocusArg, string durationToken, string easeToken)
         => EnqueueDepthAtPresetSpec(roleKey, "front", preserveFocusArg, durationToken, easeToken);
 
-    private void EnqueueDepthAtMidSpec(
-        string roleKey,
-        string preserveFocusArg = DefaultFocusDepthPresetToken,
-        string durationToken = DefaultFocusDepthDurationToken,
-        string easeToken = "")
+    private void EnqueueDepthAtMidSpec(string roleKey, string preserveFocusArg, string durationToken, string easeToken)
         => EnqueueDepthAtPresetSpec(roleKey, "mid", preserveFocusArg, durationToken, easeToken);
 
-    private void EnqueueDepthAtBackSpec(
-        string roleKey,
-        string preserveFocusArg = DefaultFocusDepthPresetToken,
-        string durationToken = DefaultFocusDepthDurationToken,
-        string easeToken = "")
+    private void EnqueueDepthAtBackSpec(string roleKey, string preserveFocusArg, string durationToken, string easeToken)
         => EnqueueDepthAtPresetSpec(roleKey, "back", preserveFocusArg, durationToken, easeToken);
 
-    private void EnqueueDepthAtFarSpec(
-        string roleKey,
-        string preserveFocusArg = DefaultFocusDepthPresetToken,
-        string durationToken = DefaultFocusDepthDurationToken,
-        string easeToken = "")
+    private void EnqueueDepthAtFarSpec(string roleKey, string preserveFocusArg, string durationToken, string easeToken)
         => EnqueueDepthAtPresetSpec(roleKey, "far", preserveFocusArg, durationToken, easeToken);
     
-    private void EnqueueDepthResetSpec(string roleKey, float duration, string easeToken = "")
+    private void EnqueueDepthResetSpec(string roleKey, float duration, string easeToken)
     {
         EaseSelection ease = ResolveEase(easeToken);
 
-        Collect(new SetDepthCommandSpecCharR
+        Emit(new SetDepthCommandSpecCharR
         {
             slotKey = roleKey,
             preset = CharacterDepthKey.Mid,

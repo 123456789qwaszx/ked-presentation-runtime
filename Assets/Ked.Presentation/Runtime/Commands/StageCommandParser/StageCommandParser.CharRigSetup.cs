@@ -3,13 +3,10 @@ using DG.Tweening;
 using Ked.Presentation.Core;
 using UnityEngine;
 
-public sealed partial class YarnCommandBridge
+public sealed partial class StageCommandParser
 {
-    private void EnqueueSetupCharRigSpec(
-        string slotKey,
-        string stageKey = "stage00",
-        string layerKey = "mid")
-        => Collect(new SetupCharRigCommandSpec
+    private void EnqueueSetupCharRigSpec(string slotKey, string stageKey, string layerKey)
+        => Emit(new SetupCharRigCommandSpec
         {
             roleKey = slotKey,
             rigPrefab = _charRigPrefab,
@@ -18,20 +15,20 @@ public sealed partial class YarnCommandBridge
             layer = PresentationDepthLayerKeyParser.Parse(layerKey)
         });
 
-    private void EnqueueSetupCharRigStage00Spec(string slotKey, string layerKey = "mid")
+    private void EnqueueSetupCharRigStage00Spec(string slotKey, string layerKey)
         => EnqueueSetupCharRigAtDepthSpec(slotKey, PresentationStageKey.Stage00, layerKey);
 
-    private void EnqueueSetupCharRigStage01Spec(string slotKey, string layerKey = "mid")
+    private void EnqueueSetupCharRigStage01Spec(string slotKey, string layerKey)
         => EnqueueSetupCharRigAtDepthSpec(slotKey, PresentationStageKey.Stage01, layerKey);
 
-    private void EnqueueSetupCharRigStage02Spec(string slotKey, string layerKey = "mid")
+    private void EnqueueSetupCharRigStage02Spec(string slotKey, string layerKey)
         => EnqueueSetupCharRigAtDepthSpec(slotKey, PresentationStageKey.Stage02, layerKey);
 
     private void EnqueueSetupCharRigAtDepthSpec(
         string slotKey,
         PresentationStageKey stage,
         string layerKey)
-        => Collect(new SetupCharRigCommandSpec
+        => Emit(new SetupCharRigCommandSpec
         {
             roleKey = slotKey,
             rigPrefab = _charRigPrefab,
@@ -40,11 +37,7 @@ public sealed partial class YarnCommandBridge
             layer = PresentationDepthLayerKeyParser.Parse(layerKey)
         });
 
-    private void EnqueueCastCharacterSpec(
-        string slotKey,
-        string characterKey,
-        string variantKey = "a",
-        string emotionKey = "1")
+    private void EnqueueCastCharacterSpec(string slotKey, string characterKey, string variantKey, string emotionKey)
     {
         var castSpec = new CastCharacterCommandSpec
         {
@@ -52,7 +45,7 @@ public sealed partial class YarnCommandBridge
             characterKey = characterKey
         };
 
-        Collect(castSpec);
+        Emit(castSpec);
 
         EnqueueSetPortraitPoseSpec(slotKey, variantKey);
         EnqueueSetPortraitFaceSpec(slotKey, emotionKey);
@@ -61,7 +54,7 @@ public sealed partial class YarnCommandBridge
 
     private void EnqueueSetAnchorSpecs(string slotKey, bool resetSlotPos = true,
         bool resetCharPos = true)
-        => Collect(new SetAnchorCommandSpecCharR
+        => Emit(new SetAnchorCommandSpecCharR
         {
             slotKey = slotKey,
             target = CharacterRigTarget.CharacterPortrait_VisualOffset,
@@ -69,10 +62,8 @@ public sealed partial class YarnCommandBridge
             resetCharacterPos = resetCharPos
         });
 
-    private void EnqueueMirrorSetSpec(
-        string roleKey,
-        string directionToken = "")
-        => Collect(new MirrorCharacterCommandSpecCharR
+    private void EnqueueMirrorSetSpec(string roleKey, string directionToken)
+        => Emit(new MirrorCharacterCommandSpecCharR
         {
             slotKey = roleKey,
             mode = CharacterMirrorModeParser.Parse(directionToken),
@@ -81,14 +72,14 @@ public sealed partial class YarnCommandBridge
         });
 
     private void EnqueueSetPortraitPoseSpec(string slotKey, string variantKey)
-        => Collect(new SetPortraitPoseCommandSpecCharR
+        => Emit(new SetPortraitPoseCommandSpecCharR
         {
             slotKey = slotKey,
             variantKey = variantKey,
         });
 
     private void EnqueueSetPortraitFaceSpec(string slotKey, string emotionKey)
-        => Collect(new SetPortraitSpriteCommandSpecCharR
+        => Emit(new SetPortraitSpriteCommandSpecCharR
         {
             slotKey = slotKey,
             portrait = new PortraitIdentity
@@ -99,16 +90,11 @@ public sealed partial class YarnCommandBridge
             }
         });
 
-    private void EnqueueSetAnchorOffsetSpecs(
-        string slotKey,
-        string xToken = "0u",
-        string yToken = "0u",
-        string durationToken = "0.4s",
-        string easeToken = "")
+    private void EnqueueSetAnchorOffsetSpecs(string slotKey, string xToken, string yToken, string durationToken, string easeToken)
     {
         EaseSelection ease = ResolveEase(easeToken);
 
-        Collect(new MoveByCommandSpecCharR
+        Emit(new MoveByCommandSpecCharR
         {
             slotKey = slotKey,
             target = CharacterRigTarget.CharSlot_Track,
@@ -139,9 +125,9 @@ public sealed partial class YarnCommandBridge
             // 침묵 금지 — 1차 방어는 VnTool 저작 검증이고, 여기서는 소리 내고 굴러간다.
             Debug.LogError(
                 wrongKind
-                    ? $"[YarnCommandBridge] Ease curve '{easeToken}' is an oscillation curve " +
+                    ? $"[StageCommandParser] Ease curve '{easeToken}' is an oscillation curve " +
                       $"(gesture 전용 — 끝값이 0이다). 이동 커맨드에는 쓸 수 없다. Fallback to {fallback}."
-                    : $"[YarnCommandBridge] Unknown ease curve '{easeToken}' — " +
+                    : $"[StageCommandParser] Unknown ease curve '{easeToken}' — " +
                       $"{EaseCurveLibrary.BundleFileName}에 없다. Fallback to {fallback}.");
 
             return new EaseSelection(fallback);
@@ -173,9 +159,9 @@ public sealed partial class YarnCommandBridge
 
             Debug.LogError(
                 wrongKind
-                    ? $"[YarnCommandBridge] Gesture curve '{token}' is a motion curve " +
+                    ? $"[StageCommandParser] Gesture curve '{token}' is a motion curve " +
                       $"(끝값이 1이라 제자리로 안 돌아온다). 기본 혹으로 재생한다."
-                    : $"[YarnCommandBridge] Unknown gesture curve '{token}' — " +
+                    : $"[StageCommandParser] Unknown gesture curve '{token}' — " +
                       $"{EaseCurveLibrary.BundleFileName}에 없다. 기본 혹으로 재생한다.");
 
             return OscillationSource.Default;
@@ -189,7 +175,7 @@ public sealed partial class YarnCommandBridge
             return OscillationSource.FromEase(kind);
 
         Debug.LogWarning(
-            $"[YarnCommandBridge] Invalid gesture ease token '{token}'. " +
+            $"[StageCommandParser] Invalid gesture ease token '{token}'. " +
             "진동 곡선(@이름)이나 표준 이징 이름(OutBack 등)을 써라. 기본 혹으로 재생한다.");
 
         return OscillationSource.Default;
@@ -200,14 +186,8 @@ public sealed partial class YarnCommandBridge
     // 순변위 0이 정체다. 표적(CharacterPortrait_Shake)이 이동 계열과 다른 노드라
     // 같은 라인에서 move_by와 나란히 놀 수 있다 — "총총 뛰며 이동"이 그 조합이다.
 
-    private void EnqueueGestureSpec(
-        string roleKey,
-        string xAmpToken = "0u",
-        string yAmpToken = "0u",
-        string durationToken = "12fr",
-        string xEaseToken = "",
-        string yEaseToken = "")
-        => Collect(new GestureCommandSpecCharR
+    private void EnqueueGestureSpec(string roleKey, string xAmpToken, string yAmpToken, string durationToken, string xEaseToken, string yEaseToken)
+        => Emit(new GestureCommandSpecCharR
         {
             slotKey = roleKey,
             target = CharacterRigTarget.CharacterPortrait_Shake,
@@ -223,15 +203,11 @@ public sealed partial class YarnCommandBridge
     // 표적은 CharSlot_SwayPivot이다 — 코어 리듀서(ApplyRotateBy/ApplyRotateReset)가
     // 접는 노드와 같아야 "재생 = 정지 프레임"이 유지된다.
 
-    private void EnqueueRotateBySpec(
-        string roleKey,
-        float degree,
-        string durationToken = "0.4s",
-        string easeToken = "")
+    private void EnqueueRotateBySpec(string roleKey, float degree, string durationToken, string easeToken)
     {
         EaseSelection ease = ResolveEase(easeToken);
 
-        Collect(new RotateToCommandSpecCharR
+        Emit(new RotateToCommandSpecCharR
         {
             slotKey = roleKey,
             target = CharacterRigTarget.CharSlot_SwayPivot,
@@ -245,14 +221,11 @@ public sealed partial class YarnCommandBridge
         });
     }
 
-    private void EnqueueRotateResetSpec(
-        string roleKey,
-        string durationToken = "0.4s",
-        string easeToken = "")
+    private void EnqueueRotateResetSpec(string roleKey, string durationToken, string easeToken)
     {
         EaseSelection ease = ResolveEase(easeToken);
 
-        Collect(new RotateToCommandSpecCharR
+        Emit(new RotateToCommandSpecCharR
         {
             slotKey = roleKey,
             target = CharacterRigTarget.CharSlot_SwayPivot,
@@ -267,15 +240,11 @@ public sealed partial class YarnCommandBridge
 
     // 초상 축의 절대 회전. 종전 char_rotate_to는 다단 연출(PivotRotateTo)이었고
     // 그 커맨드는 되살리지 않았다 — 여기서는 RotateTo의 절대 모드로 선다.
-    private void EnqueuePortraitRotateToSpec(
-        string roleKey,
-        float degree,
-        string durationToken = "10fr",
-        string easeToken = "")
+    private void EnqueuePortraitRotateToSpec(string roleKey, float degree, string durationToken, string easeToken)
     {
         EaseSelection ease = ResolveEase(easeToken);
 
-        Collect(new RotateToCommandSpecCharR
+        Emit(new RotateToCommandSpecCharR
         {
             slotKey = roleKey,
             target = CharacterRigTarget.CharacterPortrait_SwayPivot,
@@ -289,15 +258,11 @@ public sealed partial class YarnCommandBridge
         });
     }
 
-    private void EnqueueSizeBySpec(
-        string roleKey,
-        float multiplier,
-        string durationToken = "0.4s",
-        string easeToken = "")
+    private void EnqueueSizeBySpec(string roleKey, float multiplier, string durationToken, string easeToken)
     {
         EaseSelection ease = ResolveEase(easeToken);
 
-        Collect(new ScaleToCommandSpecCharR
+        Emit(new ScaleToCommandSpecCharR
         {
             slotKey = roleKey,
             target = CharacterRigTarget.CharSlot_Scale,
@@ -311,7 +276,7 @@ public sealed partial class YarnCommandBridge
         });
     }
 
-    private void EnqueueSetPlaceResetSpecs(string slotKey, string durationToken = "0.4s")
+    private void EnqueueSetPlaceResetSpecs(string slotKey, string durationToken)
     {
         float duration = YarnDurationParser.Parse(durationToken);
 
@@ -333,18 +298,15 @@ public sealed partial class YarnCommandBridge
             duration = duration
         };
 
-        Collect(slotOffsetSpec);
-        Collect(spec2);
+        Emit(slotOffsetSpec);
+        Emit(spec2);
     }
 
-    private void EnqueueSizeResetSpec(
-        string roleKey,
-        string durationToken = "0.4s",
-        string easeToken = "")
+    private void EnqueueSizeResetSpec(string roleKey, string durationToken, string easeToken)
     {
         EaseSelection ease = ResolveEase(easeToken);
 
-        Collect(new ScaleToCommandSpecCharR
+        Emit(new ScaleToCommandSpecCharR
         {
             slotKey = roleKey,
             target = CharacterRigTarget.CharSlot_Scale,
@@ -358,24 +320,21 @@ public sealed partial class YarnCommandBridge
     }
 
     private void EnqueueCharacterSiblingFrontSpec(string roleKey)
-        => Collect(new SetCharacterSiblingOrderCommandSpecCharR
+        => Emit(new SetCharacterSiblingOrderCommandSpecCharR
         {
             slotKey = roleKey,
             mode = CharacterRigSiblingOrderMode.Front
         });
 
     private void EnqueueCharacterSiblingBackSpec(string roleKey)
-        => Collect(new SetCharacterSiblingOrderCommandSpecCharR
+        => Emit(new SetCharacterSiblingOrderCommandSpecCharR
         {
             slotKey = roleKey,
             mode = CharacterRigSiblingOrderMode.Back
         });
 
-    private void EnqueueMoveCharacterRigToStageLayerSpec(
-        string roleKey,
-        string stageKey = "stage00",
-        string layerKey = "mid")
-        => Collect(new MoveCharacterRigToStageLayerCommandSpecCharR
+    private void EnqueueMoveCharacterRigToStageLayerSpec(string roleKey, string stageKey, string layerKey)
+        => Emit(new MoveCharacterRigToStageLayerCommandSpecCharR
         {
             slotKey = roleKey,
 
@@ -385,12 +344,12 @@ public sealed partial class YarnCommandBridge
             siblingMode = CharacterRigReparentSiblingMode.Front
         });
 
-    private void EnqueueMoveCharacterRigToStage00LayerSpec(string roleKey, string layerKey = "mid")
+    private void EnqueueMoveCharacterRigToStage00LayerSpec(string roleKey, string layerKey)
         => EnqueueMoveCharacterRigToStageLayerSpec(roleKey, "stage00", layerKey);
 
-    private void EnqueueMoveCharacterRigToStage01LayerSpec(string roleKey, string layerKey = "mid")
+    private void EnqueueMoveCharacterRigToStage01LayerSpec(string roleKey, string layerKey)
         => EnqueueMoveCharacterRigToStageLayerSpec(roleKey, "stage01", layerKey);
 
-    private void EnqueueMoveCharacterRigToStage02LayerSpec(string roleKey, string layerKey = "mid")
+    private void EnqueueMoveCharacterRigToStage02LayerSpec(string roleKey, string layerKey)
         => EnqueueMoveCharacterRigToStageLayerSpec(roleKey, "stage02", layerKey);
 }

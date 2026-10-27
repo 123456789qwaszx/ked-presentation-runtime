@@ -1,7 +1,8 @@
+using Ked.Presentation.Core;
 using DG.Tweening;
 using UnityEngine;
 
-public sealed partial class YarnCommandBridge
+public sealed partial class StageCommandParser
 {
     private const string DefaultShowFaceToken = "e1";
     private const string DefaultShowDurationToken = "14fr";
@@ -9,10 +10,7 @@ public sealed partial class YarnCommandBridge
     private const string DefaultNudgeDurationToken = "8fr";
     
     #region Show
-    private void EnqueueShowAtSpec(
-        string roleKey,
-        string faceToken = DefaultShowFaceToken,
-        string durationToken = DefaultShowDurationToken)
+    private void EnqueueShowAtSpec(string roleKey, string faceToken, string durationToken)
     {
         var spec0SetAnchor = new SetAnchorCommandSpecCharR
         {
@@ -43,10 +41,10 @@ public sealed partial class YarnCommandBridge
             duration = YarnDurationParser.Parse(durationToken)
         };
 
-        Collect(spec0SetAnchor);
-        Collect(spec1SetPortraitSprite);
-        Collect(spec2FadeInCharRigRoot);
-        Collect(spec3FadeInPortraitSprite);
+        Emit(spec0SetAnchor);
+        Emit(spec1SetPortraitSprite);
+        Emit(spec2FadeInCharRigRoot);
+        Emit(spec3FadeInPortraitSprite);
     }
     #endregion
     
@@ -66,7 +64,7 @@ public sealed partial class YarnCommandBridge
         // 미지정이면 종전 하드코딩 값과 같은 OutCubic이다 — 기존 대본 불변.
         EaseSelection ease = ResolveEase(easeToken);
 
-        Collect(new MoveByCommandSpecCharR
+        Emit(new MoveByCommandSpecCharR
         {
             slotKey = roleKey,
             target = target,
@@ -79,35 +77,19 @@ public sealed partial class YarnCommandBridge
     }
     
     
-    private void EnqueueNudgeLeftSpec(
-        string roleKey,
-        string unitToken,
-        string durationToken = DefaultNudgeDurationToken,
-        string easeToken = "")
+    private void EnqueueNudgeLeftSpec(string roleKey, string unitToken, string durationToken, string easeToken)
         => EnqueueDirectionalNudgeSpec(roleKey, -1f, 0f, unitToken, durationToken, easeToken, CharacterRigTarget.CharSlot_Track_X);
 
     
-    private void EnqueueNudgeRightSpec(
-        string roleKey,
-        string unitToken,
-        string durationToken = DefaultNudgeDurationToken,
-        string easeToken = "")
+    private void EnqueueNudgeRightSpec(string roleKey, string unitToken, string durationToken, string easeToken)
         => EnqueueDirectionalNudgeSpec(roleKey, 1f, 0f, unitToken, durationToken, easeToken, CharacterRigTarget.CharSlot_Track_X);
 
     
-    private void EnqueueNudgeUpSpec(
-        string roleKey,
-        string unitToken,
-        string durationToken = DefaultNudgeDurationToken,
-        string easeToken = "")
+    private void EnqueueNudgeUpSpec(string roleKey, string unitToken, string durationToken, string easeToken)
         => EnqueueDirectionalNudgeSpec(roleKey, 0f, 1f, unitToken, durationToken, easeToken, CharacterRigTarget.CharSlot_Track_Y);
 
     
-    private void EnqueueNudgeDownSpec(
-        string roleKey,
-        string unitToken,
-        string durationToken = DefaultNudgeDurationToken,
-        string easeToken = "")
+    private void EnqueueNudgeDownSpec(string roleKey, string unitToken, string durationToken, string easeToken)
         => EnqueueDirectionalNudgeSpec(roleKey, 0f, -1f, unitToken, durationToken, easeToken, CharacterRigTarget.CharSlot_Track_Y);
     #endregion
 }
