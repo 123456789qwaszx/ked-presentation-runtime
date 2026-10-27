@@ -70,12 +70,20 @@ namespace Ked.Samples.UI.Editor
                 string path = KedUIUnits.PresentationPath(type, key, PresentationDir);
                 KedUIBuild.EnsureFolder(path.Substring(0, path.LastIndexOf('/')));
 
+                // 오브젝트 이름은 파일 이름과 같아야 한다(Unity 경고). UIPF는 이름이 아니라 presentationId로 찾는다.
+                string fileName = System.IO.Path.GetFileNameWithoutExtension(path);
                 UIPresentationSpec spec = AssetDatabase.LoadAssetAtPath<UIPresentationSpec>(path);
                 if (spec == null)
                 {
                     spec = ScriptableObject.CreateInstance<UIPresentationSpec>();
+                    spec.name = fileName;
                     spec.presentationId = key;
                     AssetDatabase.CreateAsset(spec, path);
+                }
+                else if (spec.name != fileName)
+                {
+                    spec.name = fileName;
+                    EditorUtility.SetDirty(spec);
                 }
 
                 specs.Add(spec);
