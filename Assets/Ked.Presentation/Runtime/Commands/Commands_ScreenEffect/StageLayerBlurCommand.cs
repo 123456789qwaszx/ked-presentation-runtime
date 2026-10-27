@@ -60,10 +60,14 @@ public sealed class StageLayerBlurCommand : ClaimTweenCommandBase
     // 화면의 큰 면적이 한꺼번에 초점을 되찾으면 눈에 띄게 튄다 — 훨씬 완만하게 붙인다.
     protected override float StepFinishSpeedUpMultiplier => 1.5f;
 
+    private readonly PresentationStage _stage;
+
     public StageLayerBlurCommand(
+        PresentationStage stage,
         StageLayerBlurCommandSpec spec,
         IStageDepthContentSlotProvider slots)
     {
+        _stage = stage;
         _spec = spec;
         _slots = slots;
     }
@@ -88,7 +92,7 @@ public sealed class StageLayerBlurCommand : ClaimTweenCommandBase
             return;
 
         _charScratch.Clear();
-        scope.Stage.characterRigs.CollectAliveRigs(_charScratch);
+        _stage.characterRigs.CollectAliveRigs(_charScratch);
 
         for (int i = 0; i < _charScratch.Count; i++)
         {
@@ -104,7 +108,7 @@ public sealed class StageLayerBlurCommand : ClaimTweenCommandBase
         }
 
         _bgScratch.Clear();
-        scope.Stage.backgroundRigs.CollectAliveRigs(_bgScratch);
+        _stage.backgroundRigs.CollectAliveRigs(_bgScratch);
 
         for (int i = 0; i < _bgScratch.Count; i++)
         {

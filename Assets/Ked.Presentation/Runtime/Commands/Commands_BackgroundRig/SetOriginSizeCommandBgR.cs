@@ -38,8 +38,11 @@ public sealed class SetOriginSizeCommandBgR : CommandBase
     private RectTransform _rect;
     private bool _resolveAttempted;
 
-    public SetOriginSizeCommandBgR(SetOriginSizeCommandSpecBgR spec)
+    private readonly PresentationStage _stage;
+
+    public SetOriginSizeCommandBgR(PresentationStage stage, SetOriginSizeCommandSpecBgR spec)
     {
+        _stage = stage;
         _spec = spec;
     }
 
@@ -88,7 +91,7 @@ public sealed class SetOriginSizeCommandBgR : CommandBase
     {
         _resolveAttempted = true;
         
-        scope.Stage.backgroundRigs.TryGetRig(_spec.rigKey, out BackgroundRigRefs rig);
+        _stage.backgroundRigs.TryGetRig(_spec.rigKey, out BackgroundRigRefs rig);
         _rect = rig.GetRect(_spec.target);
     }
 }

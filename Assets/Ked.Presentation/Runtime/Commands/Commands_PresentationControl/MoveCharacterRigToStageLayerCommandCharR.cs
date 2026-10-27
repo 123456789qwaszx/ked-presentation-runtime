@@ -33,10 +33,14 @@ public sealed class MoveCharacterRigToStageLayerCommandCharR : CommandBase
 
     protected override SkipPolicy SkipPolicy => SkipPolicy.ExecuteEvenIfSkipping;
 
+    private readonly PresentationStage _stage;
+
     public MoveCharacterRigToStageLayerCommandCharR(
+        PresentationStage stage,
         MoveCharacterRigToStageLayerCommandSpecCharR spec,
         CharRigSlotResolver slotResolver)
     {
+        _stage = stage;
         _spec = spec;
         _slotResolver = slotResolver;
     }
@@ -63,7 +67,7 @@ public sealed class MoveCharacterRigToStageLayerCommandCharR : CommandBase
     {
         _resolveAttempted = true;
 
-        _rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope.Stage, _spec.slotKey);
+        _rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(_stage, _spec.slotKey);
         _slotResolver.TryResolve(_spec.stage, _spec.layer, out RectTransform parent);
         _parent = parent;
     }

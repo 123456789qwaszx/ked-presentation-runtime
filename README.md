@@ -82,8 +82,9 @@ Yarn Spinner를 기반으로 제작한 **비주얼 노벨 화면 연출 런타�
 
 ### 4. 연출 명령과 실행 구조
 
-* `Assets/Ked.Presentation/Runtime/PresentationCore/`
-* `Assets/Ked.Presentation/Runtime/Commands/`
+* `Assets/Ked.Presentation/Runtime/PresentationCore/` — 실행기(커맨드 수명 · 스텝/런 스코프 · 포트)
+* `Assets/Ked.Presentation/Runtime/Commands/` — 커맨드 · 팩토리 · 대본 커맨드 파서(`StageCommandParser/`)
+* `Assets/Ked.Presentation/Runtime/Stage/` — 무대 상태(리그·배경·cast 레지스트리)와 무대 키
 
 연출 명령의 생성과 실행, 실행 수명 관리(스텝/런 스코프) 구조를 확인할 수 있습니다.
 

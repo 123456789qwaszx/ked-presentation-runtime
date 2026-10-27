@@ -41,14 +41,17 @@ public sealed class RotateToCommandCharR : ClaimTweenCommandBase
 
     protected override float TweenDuration => _spec.duration;
 
-    public RotateToCommandCharR(RotateToCommandSpecCharR spec)
+    private readonly PresentationStage _stage;
+
+    public RotateToCommandCharR(PresentationStage stage, RotateToCommandSpecCharR spec)
     {
+        _stage = stage;
         _spec = spec;
     }
 
     protected override void ResolveTargets(CommandRunScope scope)
     {
-        CharacterRigRefs rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope.Stage, _spec.slotKey);
+        CharacterRigRefs rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(_stage, _spec.slotKey);
         _rect = rig?.GetRect(_spec.target);
     }
 

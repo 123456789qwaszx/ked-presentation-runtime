@@ -70,8 +70,11 @@ public sealed class DepthFocusCommandCharR : ClaimTweenCommandBase
     // 화면 전체의 초점이 한꺼번에 옮겨가면 눈에 띄게 튄다 — 훨씬 완만하게 붙인다.
     protected override float StepFinishSpeedUpMultiplier => 1.5f;
 
-    public DepthFocusCommandCharR(DepthFocusCommandSpecCharR spec)
+    private readonly PresentationStage _stage;
+
+    public DepthFocusCommandCharR(PresentationStage stage, DepthFocusCommandSpecCharR spec)
     {
+        _stage = stage;
         _spec = spec;
     }
 
@@ -80,7 +83,7 @@ public sealed class DepthFocusCommandCharR : ClaimTweenCommandBase
         if (_spec.clear)
             return;
 
-        _focusRig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope.Stage, _spec.slotKey);
+        _focusRig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(_stage, _spec.slotKey);
 
         if (_focusRig == null)
             Debug.LogWarning(
@@ -90,7 +93,7 @@ public sealed class DepthFocusCommandCharR : ClaimTweenCommandBase
 
     protected override void ClaimTarget(CommandRunScope scope)
     {
-        _tweenScope = scope.Stage.characterRigs;
+        _tweenScope = _stage.characterRigs;
         DOTween.Kill(_tweenScope, false);
 
         _bindings.Clear();
@@ -101,7 +104,7 @@ public sealed class DepthFocusCommandCharR : ClaimTweenCommandBase
         float focusScale = _focusRig != null ? _focusRig.SettledDepthScale : 0f;
 
         _scratch.Clear();
-        scope.Stage.characterRigs.CollectAliveRigs(_scratch);
+        _stage.characterRigs.CollectAliveRigs(_scratch);
 
         for (int i = 0; i < _scratch.Count; i++)
         {

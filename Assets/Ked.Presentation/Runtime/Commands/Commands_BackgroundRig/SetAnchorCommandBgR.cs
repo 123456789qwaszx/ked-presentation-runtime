@@ -30,8 +30,11 @@ public sealed class SetAnchorCommandBgR : CommandBase
     private RectTransform _rect;
     private bool _resolveAttempted;
 
-    public SetAnchorCommandBgR(SetAnchorCommandSpecBgR spec)
+    private readonly PresentationStage _stage;
+
+    public SetAnchorCommandBgR(PresentationStage stage, SetAnchorCommandSpecBgR spec)
     {
+        _stage = stage;
         _spec = spec;
     }
 
@@ -97,7 +100,7 @@ public sealed class SetAnchorCommandBgR : CommandBase
     {
         _resolveAttempted = true;
         
-        scope.Stage.backgroundRigs.TryGetRig(_spec.rigKey, out BackgroundRigRefs rig);
+        _stage.backgroundRigs.TryGetRig(_spec.rigKey, out BackgroundRigRefs rig);
         _rect = _rigRefs.GetRect(_spec.target);
     }
 }

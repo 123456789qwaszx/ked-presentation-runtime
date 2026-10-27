@@ -51,6 +51,7 @@ public sealed class StageEquivalenceHarness : MonoBehaviour
 {
     private VNRuntimeStateProvider _provider;
     private PresentationScopeSession _session;
+    private PresentationStage _stage;
     private PresentationShotResponseSystem _shotSystem;
     private DialogueAdvanceDispatcher _dispatcher;
 
@@ -102,12 +103,14 @@ public sealed class StageEquivalenceHarness : MonoBehaviour
     public void Initialize(
         VNRuntimeStateProvider provider,
         PresentationScopeSession session,
+        PresentationStage stage,
         PresentationShotResponseSystem shotSystem,
         DialogueAdvanceDispatcher dispatcher,
         string dialogueFolder)
     {
         _provider = provider;
         _session = session;
+        _stage = stage;
         _shotSystem = shotSystem;
         _dispatcher = dispatcher;
         _dialogueFolder = dialogueFolder;
@@ -337,7 +340,7 @@ public sealed class StageEquivalenceHarness : MonoBehaviour
                 return;
 
             StageState captured = StageStateCapture.Capture(
-                scope.Stage.characterRigs, _shotSystem, _tuning.BaseResolution);
+                _stage.characterRigs, _shotSystem, _tuning.BaseResolution);
 
             StageStateComparer.Result result = StageStateComparer.Compare(folded, captured);
 

@@ -18,8 +18,11 @@ public sealed class SetPortraitPoseCommandCharR : CommandBase
 {
     private readonly SetPortraitPoseCommandSpecCharR _spec;
 
-    public SetPortraitPoseCommandCharR(SetPortraitPoseCommandSpecCharR spec)
+    private readonly PresentationStage _stage;
+
+    public SetPortraitPoseCommandCharR(PresentationStage stage, SetPortraitPoseCommandSpecCharR spec)
     {
+        _stage = stage;
         _spec = spec;
     }
 
@@ -34,12 +37,12 @@ public sealed class SetPortraitPoseCommandCharR : CommandBase
     private void Apply(CommandRunScope scope)
     {
         string resolvedSlotKey =
-            CharacterRigTargetResolver.ResolveRigKeyByPolicy(scope.Stage, _spec.slotKey);
+            CharacterRigTargetResolver.ResolveRigKeyByPolicy(_stage, _spec.slotKey);
 
         string variantKey = string.IsNullOrWhiteSpace(_spec.variantKey)
             ? PortraitResolver.DefaultVariant
             : _spec.variantKey;
 
-        scope.Stage.castRegistry.SetVariant(resolvedSlotKey, variantKey);
+        _stage.castRegistry.SetVariant(resolvedSlotKey, variantKey);
     }
 }

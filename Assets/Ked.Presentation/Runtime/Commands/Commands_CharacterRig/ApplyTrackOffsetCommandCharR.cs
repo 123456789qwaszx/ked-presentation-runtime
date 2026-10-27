@@ -41,8 +41,11 @@ public sealed class ApplyTrackOffsetCommandCharR : CommandBase
 
     private bool _resolveAttempted;
 
-    public ApplyTrackOffsetCommandCharR(ApplyTrackOffsetCommandSpecCharR spec)
+    private readonly PresentationStage _stage;
+
+    public ApplyTrackOffsetCommandCharR(PresentationStage stage, ApplyTrackOffsetCommandSpecCharR spec)
     {
+        _stage = stage;
         _spec = spec;
     }
 
@@ -67,7 +70,7 @@ public sealed class ApplyTrackOffsetCommandCharR : CommandBase
     {
         _resolveAttempted = true;
         
-        _rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope.Stage, _spec.slotKey);
+        _rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(_stage, _spec.slotKey);
         _rect = _rigRefs.GetRect(_spec.target);
     }
 

@@ -51,10 +51,14 @@ public sealed class SetEmotionPortraitWipeCommandCharR : CommandBase
 
     public override bool WaitForCompletion => _spec.wait;
 
+    private readonly PresentationStage _stage;
+
     public SetEmotionPortraitWipeCommandCharR(
+        PresentationStage stage,
         SetEmotionPortraitWipeCommandSpecCharR spec,
         PortraitResolver resolver)
     {
+        _stage = stage;
         _spec = spec;
         _resolver = resolver;
     }
@@ -129,7 +133,7 @@ public sealed class SetEmotionPortraitWipeCommandCharR : CommandBase
     {
         _resolveAttempted = true;
 
-        CharacterRigRefs rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope.Stage, _spec.slotKey);
+        CharacterRigRefs rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(_stage, _spec.slotKey);
 
         _portraitRoot = rigRefs.CharacterPortraitSprite_Root;
         _overlayRoot = rigRefs.CharacterPortraitSpriteOverlay_Root;
@@ -153,7 +157,7 @@ public sealed class SetEmotionPortraitWipeCommandCharR : CommandBase
             return;
 
         _targetSprite = _resolver.Resolve(
-            scope.Stage,
+            _stage,
             _spec.slotKey,
             _spec.portrait,
             nameof(SetEmotionPortraitWipeCommandCharR));

@@ -18,8 +18,11 @@ public sealed class FadeOutCommandBgR : CanvasFadeCommandBase
 {
     private readonly FadeOutCommandSpecBgR _spec;
 
-    public FadeOutCommandBgR(FadeOutCommandSpecBgR spec)
+    private readonly PresentationStage _stage;
+
+    public FadeOutCommandBgR(PresentationStage stage, FadeOutCommandSpecBgR spec)
     {
+        _stage = stage;
         _spec = spec;
     }
 
@@ -32,7 +35,7 @@ public sealed class FadeOutCommandBgR : CanvasFadeCommandBase
 
     protected override RectTransform ResolveFadeRect(CommandRunScope scope)
     {
-        scope.Stage.backgroundRigs.TryGetRig(_spec.rigKey, out BackgroundRigRefs rig);
+        _stage.backgroundRigs.TryGetRig(_spec.rigKey, out BackgroundRigRefs rig);
         return rig?.GetRect(_spec.target);
     }
 }

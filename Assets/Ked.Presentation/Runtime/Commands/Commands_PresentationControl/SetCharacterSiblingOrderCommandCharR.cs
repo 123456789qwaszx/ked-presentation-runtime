@@ -24,9 +24,13 @@ public sealed class SetCharacterSiblingOrderCommandCharR : CommandBase
 
     protected override SkipPolicy SkipPolicy => SkipPolicy.ExecuteEvenIfSkipping;
 
+    private readonly PresentationStage _stage;
+
     public SetCharacterSiblingOrderCommandCharR(
+        PresentationStage stage,
         SetCharacterSiblingOrderCommandSpecCharR spec)
     {
+        _stage = stage;
         _spec = spec;
     }
 
@@ -54,7 +58,7 @@ public sealed class SetCharacterSiblingOrderCommandCharR : CommandBase
 
         CharacterRigRefs rigRefs =
             CharacterRigTargetResolver.ResolveCharRigFromTargetKey(
-                scope.Stage,
+                _stage,
                 _spec.slotKey);
 
         _rigRoot = rigRefs.RigRoot;

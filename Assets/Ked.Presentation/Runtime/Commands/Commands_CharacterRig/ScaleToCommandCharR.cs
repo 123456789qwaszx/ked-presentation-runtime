@@ -45,14 +45,17 @@ public sealed class ScaleToCommandCharR : ClaimTweenCommandBase
 
     protected override float TweenDuration => _spec.duration;
 
-    public ScaleToCommandCharR(ScaleToCommandSpecCharR spec)
+    private readonly PresentationStage _stage;
+
+    public ScaleToCommandCharR(PresentationStage stage, ScaleToCommandSpecCharR spec)
     {
+        _stage = stage;
         _spec = spec;
     }
 
     protected override void ResolveTargets(CommandRunScope scope)
     {
-        _rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope.Stage, _spec.slotKey);
+        _rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(_stage, _spec.slotKey);
         _rect = _rigRefs?.GetRect(_spec.target);
     }
 

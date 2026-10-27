@@ -45,11 +45,15 @@ public sealed class PlaceCharacterFocusCommandCharR : ClaimTweenCommandBase
 
     protected override float TweenDuration => _spec.duration;
 
+    private readonly PresentationStage _stage;
+
     public PlaceCharacterFocusCommandCharR(
+        PresentationStage stage,
         PlaceCharacterFocusCommandSpecCharR spec,
         CharacterFocusTuningDBSO focusTuningDb,
         IShotResponseStageProvider stageProvider)
     {
+        _stage = stage;
         _spec = spec;
         _focusTuningDb = focusTuningDb;
         _stageProvider = stageProvider;
@@ -57,7 +61,7 @@ public sealed class PlaceCharacterFocusCommandCharR : ClaimTweenCommandBase
 
     protected override void ResolveTargets(CommandRunScope scope)
     {
-        _rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope.Stage, _spec.slotKey);
+        _rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(_stage, _spec.slotKey);
         _moveRect = _rigRefs?.GetRect(_spec.moveTarget);
     }
 
@@ -68,7 +72,7 @@ public sealed class PlaceCharacterFocusCommandCharR : ClaimTweenCommandBase
         _startPosition = _moveRect.anchoredPosition;
 
         CharacterFocusPlacementSolver.TryCalculateFocusPlacement(
-            scope.Stage,
+            _stage,
             _stageProvider,
             _spec.slotKey,
             _moveRect,

@@ -26,9 +26,13 @@ public sealed class SetBackgroundSpriteCommandBgR : CommandBase
     private Image _image;
     private bool _resolveAttempted;
 
+    private readonly PresentationStage _stage;
+
     public SetBackgroundSpriteCommandBgR(
+        PresentationStage stage,
         SetBackgroundSpriteCommandSpecBgR spec)
     {
+        _stage = stage;
         _spec = spec;
     }
 
@@ -65,7 +69,7 @@ public sealed class SetBackgroundSpriteCommandBgR : CommandBase
     {
         _resolveAttempted = true;
         
-        scope.Stage.backgroundRigs.TryGetRig(_spec.rigKey, out BackgroundRigRefs rig);
+        _stage.backgroundRigs.TryGetRig(_spec.rigKey, out BackgroundRigRefs rig);
         _image = rig.GetRect(_spec.target).GetComponent<Image>();
     }
 }

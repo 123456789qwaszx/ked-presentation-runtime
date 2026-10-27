@@ -45,11 +45,15 @@ public sealed class SetupCharRigCommand : CommandBase
 
     protected override SkipPolicy SkipPolicy => SkipPolicy.ExecuteEvenIfSkipping;
 
+    private readonly PresentationStage _stage;
+
     public SetupCharRigCommand(
+        PresentationStage stage,
         CharRigSlotResolver slotResolver,
         CharacterRigBuilder rigBuilder,
         SetupCharRigCommandSpec spec)
     {
+        _stage = stage;
         _slotResolver = slotResolver;
         _rigBuilder = rigBuilder;
         _spec = spec;
@@ -83,7 +87,7 @@ public sealed class SetupCharRigCommand : CommandBase
             sourceMaterial,
             refs.CharacterPortraitSpriteOverlay_Image);
 
-        scope.Stage.characterRigs.Register(rigKey, refs);
+        _stage.characterRigs.Register(rigKey, refs);
 
         //StripRolePrefixForBake(rigRoot, rolePrefix, spec.rigRootName);
         yield break;

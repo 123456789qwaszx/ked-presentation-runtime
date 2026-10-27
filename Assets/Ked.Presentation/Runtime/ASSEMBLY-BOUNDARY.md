@@ -15,7 +15,7 @@
 | 어셈블리 | 위치 | 내용 |
 |---|---|---|
 | `Ked.Presentation.Core` | `Assets/Ked.Presentation/Core/` | 순수 상태 계산 — 정지 프레임 리듀스·이징·튜닝 (**엔진 의존 0**, 참조 0) |
-| `Ked.Presentation.Runtime` | `Assets/Ked.Presentation/Runtime/` | 연출 실행 계층 — PresentationCore(실행기·스코프·포트) · Commands(커맨드 · 팩토리 · **StageCommandParser**) · CharacterRig · ShotResponse · BackgroundRig · ScreenEffect · StageMask · Audio (참조: Core · TextMeshPro · DOTween.Modules) |
+| `Ked.Presentation.Runtime` | `Assets/Ked.Presentation/Runtime/` | 연출 실행 계층 — PresentationCore(**실행기만**: 커맨드 수명·스코프·포트) · Stage(무대 상태·무대 키·깊이 칸 계약) · Commands(커맨드 · 팩토리 · 토큰 파서 · **StageCommandParser**) · CharacterRig · ShotResponse · BackgroundRig · ScreenEffect · StageMask · Audio (참조: Core · TextMeshPro · DOTween.Modules) |
 | `Ked.Presentation.Playback` | `Assets/Ked.Presentation/Playback/` | 대사 재생 루프와 연출 기억 — 줄 진행·선택지(DialoguePresenter) · 재생 제어·롤백 기록·백로그·VN 재생 상태(FeatureController) · Yarn 등록·전달(YarnBridge) · 재생 호스트 계약·재생 단위(Host) · 연출 기억과 그 입구 `PlaybackMemory`(Memory) · 등가성 하네스(Diagnostics) (참조: Core · Runtime · YarnSpinner.Unity · TextMeshPro · UnityEngine.UI · DOTween.Modules) |
 | `Ked.Progression` · `Ked.Progression.Save` | `Assets/Ked.Progression/` | 진행 판정 코어와 진행 저장 (**엔진 의존 0**. 원본은 형제 저장소 `ked-progression-runtime`, [vendoring.md](../../Ked.Progression/Documentation~/vendoring.md)) |
 | `Ked.Presentation.Editor` (에디터 전용) | `Assets/Ked.Presentation/Editor/` | 본체 에디터 도구 — 초상 DB 빌더 · 튜닝 덤프 익스포터 · 이징 골든 (참조: Core · Runtime · TextMeshPro · UnityEngine.UI · DOTween.Modules) |
@@ -118,9 +118,9 @@ UI 타입이 기능 폴더의 계약을 구현하는 partial을 전부 여기 �
 | UI/Providers/ | 구현하는 계약 | 계약의 위치 |
 |---|---|---|
 | `PresentationUIRoot.ShotResponseStage.cs` | `IShotResponseStageProvider` | `Runtime/ShotResponse/` |
-| `PresentationUIRoot.StageDepthContentSlot.cs` | `IStageDepthContentSlotProvider` | `Runtime/PresentationCore/` |
+| `PresentationUIRoot.StageDepthContentSlot.cs` | `IStageDepthContentSlotProvider` | `Runtime/Stage/` |
 | `PresentationUIRoot.StageMask.cs` | `IStageMaskProvider` | `Runtime/StageMask/` |
-| `PresentationUIRoot.StageCounts.cs` | (계약 아님 — enum을 세는 private const) | enum은 `Runtime/PresentationCore/` |
+| `PresentationUIRoot.StageCounts.cs` | (계약 아님 — enum을 세는 private const) | enum은 `Runtime/Stage/` |
 
 > **새 provider를 만들 때**: 계약(interface)은 그것을 필요로 하는 기능 폴더에,
 > 구현 partial은 `UI/Providers/`에. **한 파일에 같이 두지 말 것.**
@@ -194,9 +194,9 @@ Playback이 예제에게 요구할 때도 같다. 계약은 Playback에, 구현�
 ```
 
 - 리졸버는 `CommandRunScope`가 아니라 `PresentationStage`를 받는다 — 무대가 실행기를 모른다(①).
-- 스코프는 `ICommandPacePolicy` + `PresentationStage`뿐이다 — 실행기가 VN을 모른다(②).
+- 스코프는 `ICommandPacePolicy`뿐이다 — 실행기가 VN도 무대도 모른다(②·④).
 - 대본 커맨드의 뜻은 `StageCommandParser`가 갖는다 — 재생은 `StageCommand`만 만든다(③).
+- 무대가 필요한 커맨드는 생성자로 받고, 팩토리가 들고 넘긴다(④). `PresentationCore/`에는 실행기만 남았다 —
+  무대 상태(`PresentationStage`·`PresentationStageKey`·`IStageDepthContentSlotProvider`)는 `Stage/`로, 토큰 파서는 `Commands/Parser/`로.
 
-아직 한 어셈블리 안에 있는 것: 실행기(`PresentationCore/{Base, Execution, CommandRunScope, LifetimeScope, Signal*}`)와
-무대. 스코프가 `PresentationStage`를 들고 있어서 실행기 → 무대 참조가 하나 남아 있다 — 리포지토리를 가를 때
-스코프의 무대를 팩토리 주입으로 바꾸면 끊긴다(계획 §4).
+아직 한 어셈블리 안에 있는 것은 폴더 경계뿐이다. `PresentationCore/`에서 밖으로 나가는 참조가 0이면 실행기는 그대로 저장소가 된다.

@@ -34,10 +34,14 @@ public sealed class CharVisualFocusCommandCharR : ClaimTweenCommandBase
     // 캐릭터 전체의 밝기, 림이 한꺼번에 끊기면 튐. 완만하게 조정
     protected override float StepFinishSpeedUpMultiplier => 1.5f;
 
+    private readonly PresentationStage _stage;
+
     public CharVisualFocusCommandCharR(
+        PresentationStage stage,
         CharVisualFocusCommandSpecCharR spec,
         CharacterVisualFocusPresetDBSO presetDb)
     {
+        _stage = stage;
         _spec = spec;
         _presetDb = presetDb;
     }
@@ -45,7 +49,7 @@ public sealed class CharVisualFocusCommandCharR : ClaimTweenCommandBase
     protected override void ResolveTargets(CommandRunScope scope)
     {
         CharacterRigRefs rigRefs =
-            CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope.Stage, _spec.slotKey);
+            CharacterRigTargetResolver.ResolveCharRigFromTargetKey(_stage, _spec.slotKey);
 
         _controller = rigRefs?.VisualEffect;
 

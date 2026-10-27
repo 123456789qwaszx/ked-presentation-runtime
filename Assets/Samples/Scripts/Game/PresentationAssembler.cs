@@ -167,6 +167,7 @@ public sealed class PresentationAssembler
         PortraitResolver portraitResolver = new(_refs.PortraitGeneratedDb);
 
         CharacterRigCommandFactory charRigFactory = new(
+            _presentationStage,
             charRigSlotResolver,
             characterRigBuilder,
             portraitResolver,
@@ -181,16 +182,18 @@ public sealed class PresentationAssembler
         BackgroundRigSlotResolver backgroundRigSlotResolver = new(_presentationUIRoot);
 
         BackgroundRigCommandFactory backgroundRigFactory = new(
+            _presentationStage,
             backgroundRigBuilder,
             backgroundRigSlotResolver);
 
         ShotResponseCommandFactory presentationShotFactory = new(
-            _presentationResponseRig, _refs.CharacterFocusTuningDb, _presentationUIRoot);
+            _presentationStage, _presentationResponseRig, _refs.CharacterFocusTuningDb, _presentationUIRoot);
 
         // Presentation Control
         UnityTimeSource unityTimeSource = new();
 
         PresentationControlCommandFactory presentationControlFactory = new(
+            _presentationStage,
             _uiThemePatch,
             unityTimeSource,
             unitySignalBus,
@@ -200,6 +203,7 @@ public sealed class PresentationAssembler
         AudioCommandFactory audioFactory = new(_refs.AudioSystem);
 
         ScreenEffectCommandFactory screenEffectFactory = new(
+            _presentationStage,
             _screenEffectRig,
             _refs.ScreenFlashPresetDb,
             _refs.ScreenNoisePresetDb,
@@ -222,8 +226,7 @@ public sealed class PresentationAssembler
 
         _presentationScopeSession = new(
             _refs.CommandExecutor,
-            pacePolicy,
-            _presentationStage);
+            pacePolicy);
     }
 
     private void BootstrapYarn()
@@ -369,6 +372,7 @@ public sealed class PresentationAssembler
         harness.Initialize(
             _vnRuntimeStateProvider,
             _presentationScopeSession,
+            _presentationStage,
             _presentationResponseRig,
             _dialogueAdvanceDispatcher,
             DialogueFolder);

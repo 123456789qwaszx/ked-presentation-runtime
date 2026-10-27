@@ -18,8 +18,11 @@ public sealed class FadeOutCommandCharR : CanvasFadeCommandBase
 {
     private readonly FadeOutCommandSpecCharR _spec;
 
-    public FadeOutCommandCharR(FadeOutCommandSpecCharR spec)
+    private readonly PresentationStage _stage;
+
+    public FadeOutCommandCharR(PresentationStage stage, FadeOutCommandSpecCharR spec)
     {
+        _stage = stage;
         _spec = spec;
     }
 
@@ -34,5 +37,5 @@ public sealed class FadeOutCommandCharR : CanvasFadeCommandBase
     protected override bool InteractableAfterCommit => false;
 
     protected override RectTransform ResolveFadeRect(CommandRunScope scope)
-        => CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope.Stage, _spec.slotKey)?.GetRect(_spec.target);
+        => CharacterRigTargetResolver.ResolveCharRigFromTargetKey(_stage, _spec.slotKey)?.GetRect(_spec.target);
 }

@@ -43,11 +43,15 @@ public sealed class SetupBackgroundRigCommand : CommandBase
     private readonly BackgroundRigSlotResolver _slotResolver;
     private readonly SetupBackgroundRigCommandSpec _spec;
 
+    private readonly PresentationStage _stage;
+
     public SetupBackgroundRigCommand(
+        PresentationStage stage,
     SetupBackgroundRigCommandSpec spec,
         BackgroundRigBuilder rigBuilder,
         BackgroundRigSlotResolver slotResolver)
     {
+        _stage = stage;
         _spec = spec;
         _rigBuilder = rigBuilder;
         _slotResolver = slotResolver;
@@ -83,7 +87,7 @@ public sealed class SetupBackgroundRigCommand : CommandBase
             refs.BackgroundSprite_Image,
             sourceMaterial);
 
-        scope.Stage.backgroundRigs.Register(rigKey, refs);
+        _stage.backgroundRigs.Register(rigKey, refs);
 
         // Optional bake helper:
         // Enable after refs registration when saving the generated rig as a reusable prefab.

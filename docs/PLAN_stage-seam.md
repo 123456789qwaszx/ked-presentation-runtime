@@ -3,7 +3,7 @@
 기준: `dev` @ `f79f13d` (fix(tests): 하네스 둘이 끝 화면을 받는 생성자로 다시 빌드된다)
 작업: `refactor/stage-seam`
 
-**현재 위치(2026-10-27):** ①②③ 끝(Unity 확인 남음). 다음은 리포지토리 분리(§4), 그 뒤 모션(§5).
+**현재 위치(2026-10-27):** ①②③④ 끝(Unity 확인 남음). 다음은 리포지토리 분리(§4), 그 뒤 모션(§5).
 
 ## 0. 왜
 
@@ -11,8 +11,8 @@
 
 | 조각 | 무엇 | 지금 자리 |
 |---|---|---|
-| **실행기** | 커맨드 하나의 수명 — `CommandBase` · `ClaimTweenCommandBase` · `CommandRunScope` · `LifetimeScope` · 포트(입력·시간·신호·정책) | `Runtime/PresentationCore/{Base, Execution, CommandRunScope, LifetimeScope, Signal*, Unity*}` |
-| **무대** | 리그 계층 · 철도(shot·depth 층) · 커맨드(스펙·실행 어댑터) · 대본 문법의 뜻(파서) · 정지 프레임(리듀서·장부·클레임) · 이징·커브 | `Core/` 전부 + `Runtime/{Commands, CharacterRig, ShotResponse, BackgroundRig, ScreenEffect, StageMask, Audio, CoreBridge, Equivalence}` + `PresentationCore/PresentationStage*` |
+| **실행기** | 커맨드 하나의 수명 — `CommandBase` · `ClaimTweenCommandBase` · `CommandRunScope` · `LifetimeScope` · 포트(입력·시간·신호·정책) | `Runtime/PresentationCore/` 전부 (④ 뒤로 실행기만 남았다) |
+| **무대** | 리그 계층 · 철도(shot·depth 층) · 커맨드(스펙·실행 어댑터) · 대본 문법의 뜻(파서) · 정지 프레임(리듀서·장부·클레임) · 이징·커브 | `Core/` 전부 + `Runtime/{Commands, CharacterRig, ShotResponse, BackgroundRig, ScreenEffect, StageMask, Audio, CoreBridge, Equivalence}` + `Runtime/Stage/` |
 | **재생** | 대사 재생 루프 · 롤백·백로그·시크 · 연출 기억 · Yarn 등록·전달 · 대사창·선택지·UI | `Playback/` · `Samples/` |
 
 캐릭터 리그 쪽을 **별도 저장소에서 키우려면** 실행기와 재생이 리그를 몰라야 하고, 리그가 실행기와 재생을 몰라야 한다.
@@ -69,8 +69,15 @@ VN 쪽은 `PresentationSessionContext`(Playback/Host)가 재생 상태를 그 �
 | `ked-stage-runtime` | 무대 — `Core/` 전부 · 리그·철도·커맨드·파서 · 무대 계약(`IShotResponseStageProvider` 등) · 등가성 캡처 | 원본. 재생이 반입 |
 | `ked-presentation-runtime` | 재생 — 지금 저장소. Playback · 예제 · 철도 구현(`PresentationUIRoot`) | 실행기·무대·진행을 반입 |
 
-가르기 전에 이 저장소에서 하나 더 긋는다: **스코프에서 `PresentationStage`를 뺀다.** 커맨드 팩토리(`CharacterRigCommandFactory` 등)가 무대를 들고
-커맨드 생성자에 넣으면, 스코프는 실행 수명만 남고 실행기 → 무대 참조가 0이 된다. 그러면 `PresentationCore/`가 실행기와 무대로 깨끗이 나뉜다.
+### ④ 스코프에서 무대를 뺀다 — 끝
+
+무대가 필요한 커맨드 35개가 `PresentationStage`를 **생성자 첫 인자**로 받고, 팩토리 다섯(`CharacterRigCommandFactory` ·
+`BackgroundRigCommandFactory` · `ShotResponseCommandFactory` · `PresentationControlCommandFactory` · `ScreenEffectCommandFactory`)이
+무대를 들고 넘긴다. `CommandRunScope`는 `ICommandPacePolicy` 하나만 받는다. 등가성 하네스는 무대를 `Initialize`로 받는다.
+
+같이 옮긴 것: `PresentationStage` · `PresentationStageKey` · `IStageDepthContentSlotProvider` → `Runtime/Stage/`,
+토큰 파서(`Parser/`) → `Runtime/Commands/Parser/`. 이제 `Runtime/PresentationCore/`는 실행기뿐이고 밖(무대·재생)으로 나가는 참조가 0이다 —
+가를 때 폴더째 든다.
 
 `partial class`는 어셈블리를 못 넘는다(§5, ASSEMBLY-BOUNDARY). 철도 계약은 무대에, `PresentationUIRoot`의 partial 구현은 재생에 남는다.
 

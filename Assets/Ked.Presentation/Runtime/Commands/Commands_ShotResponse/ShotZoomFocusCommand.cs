@@ -27,16 +27,19 @@ public sealed class ShotZoomFocusCommandSpec : ShotIntentCommandSpecBase
 
 public sealed class ShotZoomFocusCommand : ShotIntentCommandBase<ShotZoomFocusCommandSpec>
 {
+    private readonly PresentationStage _stage;
     CharacterFocusTuningDBSO _focusTuningDB;
     private readonly IShotResponseStageProvider _stageProvider;
     
     public ShotZoomFocusCommand(
+        PresentationStage stage,
         PresentationShotResponseSystem rig, 
         ShotZoomFocusCommandSpec spec, 
         CharacterFocusTuningDBSO focusTuningDB,
         IShotResponseStageProvider stageProvider)
         : base(rig, spec)
     {
+        _stage = stage;
         _focusTuningDB = focusTuningDB;
         _stageProvider = stageProvider;
     }
@@ -48,7 +51,7 @@ public sealed class ShotZoomFocusCommand : ShotIntentCommandBase<ShotZoomFocusCo
         // 입력 수집
         // 정착 focus 측정("현재 카메라가 적용된 채로 보이는 위치")과 화면 지점 해석.
         CharacterFocusPointResolver.TryResolve(
-            scope.Stage,
+            _stage,
             _stageProvider,
             spec.focusRoleKey,
             spec.focusPreset,

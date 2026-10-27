@@ -8,7 +8,6 @@ public interface ICommandRunScopeProvider
 public sealed class PresentationScopeSession : ICommandRunScopeProvider
 {
     private readonly ICommandPacePolicy _pace;
-    private readonly PresentationStage _stage;
 
     private readonly CommandExecutor _executor;
 
@@ -19,17 +18,15 @@ public sealed class PresentationScopeSession : ICommandRunScopeProvider
 
     public PresentationScopeSession(
         CommandExecutor executor,
-        ICommandPacePolicy pace,
-        PresentationStage presentationStage)
+        ICommandPacePolicy pace)
     {
         _executor = executor;
         _pace = pace;
-        _stage = presentationStage;
     }
 
     public void Start()
     {
-        _sessionScope = new CommandRunScope(_pace, _stage);
+        _sessionScope = new CommandRunScope(_pace);
     }
 
     public void End()

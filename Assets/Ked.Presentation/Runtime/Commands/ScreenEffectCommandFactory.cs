@@ -1,5 +1,6 @@
 public sealed class ScreenEffectCommandFactory : INodeCommandFactory
 {
+    private readonly PresentationStage _stage;
     private readonly ScreenEffectRig _screenEffects;
     private readonly ScreenFlashPresetDBSO _flashPresetDb;
     private readonly ScreenNoisePresetDBSO _noisePresetDb;
@@ -10,6 +11,7 @@ public sealed class ScreenEffectCommandFactory : INodeCommandFactory
     private readonly IStageDepthContentSlotProvider _stageDepthContentSlots;
 
     public ScreenEffectCommandFactory(
+        PresentationStage stage,
         ScreenEffectRig screenEffects,
         ScreenFlashPresetDBSO flashPresetDb,
         ScreenNoisePresetDBSO noisePresetDb,
@@ -18,6 +20,7 @@ public sealed class ScreenEffectCommandFactory : INodeCommandFactory
         IStageMaskProvider stageMaskProvider,
         IStageDepthContentSlotProvider stageDepthContentSlots)
     {
+        _stage = stage;
         _screenEffects = screenEffects;
         _flashPresetDb = flashPresetDb;
         _noisePresetDb = noisePresetDb;
@@ -35,7 +38,7 @@ public sealed class ScreenEffectCommandFactory : INodeCommandFactory
             ScreenNoiseCommandSpec s    => new ScreenNoiseCommand(s, _screenEffects, _noisePresetDb),
             ScreenVignetteCommandSpec s => new ScreenVignetteCommand(s, _screenEffects, _vignettePresetDb),
             
-            StageLayerBlurCommandSpec s => new StageLayerBlurCommand(s, _stageDepthContentSlots),
+            StageLayerBlurCommandSpec s => new StageLayerBlurCommand(_stage, s, _stageDepthContentSlots),
             
             // Stage-local Mask
             StageMaskMotionCommandSpec s => new StageMaskMotionCommand(s, _stageMaskMotionPresetDb, _stageMaskProvider),

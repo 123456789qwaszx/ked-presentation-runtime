@@ -18,15 +18,19 @@ public sealed class SetPresentationActorAliasCommand : CommandBase
 
     protected override SkipPolicy SkipPolicy => SkipPolicy.ExecuteEvenIfSkipping;
 
+    private readonly PresentationStage _stage;
+
     public SetPresentationActorAliasCommand(
+        PresentationStage stage,
         SetPresentationActorAliasCommandSpec spec)
     {
+        _stage = stage;
         _spec = spec;
     }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
-        scope.Stage.characterTargetAliases.Register(
+        _stage.characterTargetAliases.Register(
             _spec.aliasSymbol,
             _spec.targetKey);
         

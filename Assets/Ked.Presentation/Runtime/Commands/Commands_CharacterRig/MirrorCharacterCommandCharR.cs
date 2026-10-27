@@ -38,8 +38,11 @@ public sealed class MirrorCharacterCommandCharR : ClaimTweenCommandBase
     // 스텝 경계에서는 가속할 것 없이 곧장 확정한다.
     protected override bool AccelerateOnStepFinish => false;
 
-    public MirrorCharacterCommandCharR(MirrorCharacterCommandSpecCharR spec)
+    private readonly PresentationStage _stage;
+
+    public MirrorCharacterCommandCharR(PresentationStage stage, MirrorCharacterCommandSpecCharR spec)
     {
+        _stage = stage;
         _spec = spec;
     }
 
@@ -50,16 +53,16 @@ public sealed class MirrorCharacterCommandCharR : ClaimTweenCommandBase
     protected override void ResolveTargets(CommandRunScope scope)
     {
         string resolvedRigKey =
-            CharacterRigTargetResolver.ResolveRigKeyByPolicy(scope.Stage, _spec.slotKey);
+            CharacterRigTargetResolver.ResolveRigKeyByPolicy(_stage, _spec.slotKey);
 
         CharacterRigRefs rigRefs =
-            CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope.Stage, _spec.slotKey);
+            CharacterRigTargetResolver.ResolveCharRigFromTargetKey(_stage, _spec.slotKey);
 
         _rect = rigRefs?.GetRect(_spec.target);
 
         CharacterFacing facing = ResolveTargetFacing(scope, resolvedRigKey);
 
-        scope.Stage.castRegistry.SetFacing(resolvedRigKey, facing);
+        _stage.castRegistry.SetFacing(resolvedRigKey, facing);
 
         Vector3 baseScale = _rect.localScale;
 
@@ -82,7 +85,7 @@ public sealed class MirrorCharacterCommandCharR : ClaimTweenCommandBase
             case CharacterMirrorMode.Toggle:
             default:
             {
-                if (scope.Stage.castRegistry.TryGetFacing(resolvedRigKey, out CharacterFacing current))
+                if (_stage.castRegistry.TryGetFacing(resolvedRigKey, out CharacterFacing current))
                     return current.Opposite();
 
                 return CharacterFacing.Left;

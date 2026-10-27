@@ -18,14 +18,17 @@ public sealed class CastCharacterCommand : CommandBase
     private readonly CastCharacterCommandSpec _spec;
     protected override SkipPolicy SkipPolicy => SkipPolicy.ExecuteEvenIfSkipping;
 
-    public CastCharacterCommand(CastCharacterCommandSpec spec)
+    private readonly PresentationStage _stage;
+
+    public CastCharacterCommand(PresentationStage stage, CastCharacterCommandSpec spec)
     {
+        _stage = stage;
         _spec = spec;
     }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
-        scope.Stage.castRegistry.CastCharRig(_spec.slotKey, _spec.characterKey);
+        _stage.castRegistry.CastCharRig(_spec.slotKey, _spec.characterKey);
         yield break;
     }
 }

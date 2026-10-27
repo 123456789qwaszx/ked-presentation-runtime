@@ -57,14 +57,17 @@ public sealed class GestureCommandCharR : ClaimTweenCommandBase
     // 게다가 도착이 곧 출발 자리(0,0)라 가속할 거리 자체가 없다 — 즉시 확정이 맞다.
     protected override bool AccelerateOnStepFinish => false;
 
-    public GestureCommandCharR(GestureCommandSpecCharR spec)
+    private readonly PresentationStage _stage;
+
+    public GestureCommandCharR(PresentationStage stage, GestureCommandSpecCharR spec)
     {
+        _stage = stage;
         _spec = spec;
     }
 
     protected override void ResolveTargets(CommandRunScope scope)
     {
-        CharacterRigRefs rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope.Stage, _spec.slotKey);
+        CharacterRigRefs rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(_stage, _spec.slotKey);
         _rect = rigRefs?.GetRect(_spec.target);
     }
 

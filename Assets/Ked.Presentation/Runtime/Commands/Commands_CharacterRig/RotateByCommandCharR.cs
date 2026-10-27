@@ -37,14 +37,17 @@ public sealed class RotateByCommandCharR : ClaimTweenCommandBase
     // 스텝 경계에서는 종전대로 즉시 확정한다.
     protected override bool AccelerateOnStepFinish => false;
 
-    public RotateByCommandCharR(RotateByCommandSpecCharR spec)
+    private readonly PresentationStage _stage;
+
+    public RotateByCommandCharR(PresentationStage stage, RotateByCommandSpecCharR spec)
     {
+        _stage = stage;
         _spec = spec;
     }
 
     protected override void ResolveTargets(CommandRunScope scope)
     {
-        CharacterRigRefs rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope.Stage, _spec.slotKey);
+        CharacterRigRefs rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(_stage, _spec.slotKey);
         _rect = rigRefs?.GetRect(_spec.target);
     }
 

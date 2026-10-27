@@ -4,22 +4,17 @@ using System.Threading;
 public sealed class CommandRunScope
 {
     private readonly ICommandPacePolicy _pace;
-    private readonly PresentationStage _stage;
 
     public CancellationToken Token { get; set; }
 
-    // 무대(리그·배경·cast 레지스트리)는 실행 수명과 다른 것이다 — 리졸버는 Stage만 받는다.
-    public PresentationStage Stage => _stage;
-    
     private LifetimeScope StepLifetime { get; } = new();
     private LifetimeScope RunLifetime { get; } = new();
     
     private bool _isCancelled;
 
-    public CommandRunScope(ICommandPacePolicy pace, PresentationStage stage)
+    public CommandRunScope(ICommandPacePolicy pace)
     {
         _pace = pace;
-        _stage = stage;
         Token = CancellationToken.None;
     }
 

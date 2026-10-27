@@ -27,8 +27,11 @@ public sealed class SetSpriteCommandCharR : CommandBase
     private Image _image;
     private bool _resolveAttempted;
 
-    public SetSpriteCommandCharR(SetSpriteCommandSpecCharR spec)
+    private readonly PresentationStage _stage;
+
+    public SetSpriteCommandCharR(PresentationStage stage, SetSpriteCommandSpecCharR spec)
     {
+        _stage = stage;
         _spec = spec;
     }
 
@@ -53,7 +56,7 @@ public sealed class SetSpriteCommandCharR : CommandBase
     {
         _resolveAttempted = true;
 
-        CharacterRigRefs rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(scope.Stage, _spec.slotKey);
+        CharacterRigRefs rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(_stage, _spec.slotKey);
         _image = rig.GetImage(_spec.target);
     }
 

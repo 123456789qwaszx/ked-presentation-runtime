@@ -34,10 +34,14 @@ public sealed class SetAnchorCommandCharR : CommandBase
     private readonly List<RectTransform> _resetEulerRects = new(8);
     private readonly List<RectTransform> _resetScaleRects = new(8);
 
+    private readonly PresentationStage _stage;
+
     public SetAnchorCommandCharR(
+        PresentationStage stage,
         SetAnchorCommandSpecCharR spec,
         RoleAnchorTuningDBSO roleTuningDb)
     {
+        _stage = stage;
         _spec = spec;
         _roleTuningDb = roleTuningDb;
     }
@@ -67,7 +71,7 @@ public sealed class SetAnchorCommandCharR : CommandBase
         _resolveAttempted = true;
 
         _rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(
-            scope.Stage,
+            _stage,
             _spec.slotKey);
 
         if (_rigRefs == null)
@@ -87,7 +91,7 @@ public sealed class SetAnchorCommandCharR : CommandBase
         CollectResetTargets();
 
         string tuningKey =
-            CharacterRigTargetResolver.ResolveCharacterKeyFromTargetKey(scope.Stage, _spec.slotKey);
+            CharacterRigTargetResolver.ResolveCharacterKeyFromTargetKey(_stage, _spec.slotKey);
 
         // ── 코어: 스펙 + 튜닝 → 목표 상태 ──
         StageNodeClaim[] claims = SetAnchorReduction.Reduce(

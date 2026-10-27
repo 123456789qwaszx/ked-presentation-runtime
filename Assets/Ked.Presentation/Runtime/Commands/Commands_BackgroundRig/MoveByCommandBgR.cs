@@ -31,14 +31,17 @@ public sealed class MoveByCommandBgR : ClaimTweenCommandBase
 
     protected override float TweenDuration => _spec.duration;
 
-    public MoveByCommandBgR(MoveByCommandSpecBgR spec)
+    private readonly PresentationStage _stage;
+
+    public MoveByCommandBgR(PresentationStage stage, MoveByCommandSpecBgR spec)
     {
+        _stage = stage;
         _spec = spec;
     }
 
     protected override void ResolveTargets(CommandRunScope scope)
     {
-        scope.Stage.backgroundRigs.TryGetRig(_spec.rigKey, out BackgroundRigRefs rig);
+        _stage.backgroundRigs.TryGetRig(_spec.rigKey, out BackgroundRigRefs rig);
         _rect = rig?.GetRect(_spec.target);
     }
 
