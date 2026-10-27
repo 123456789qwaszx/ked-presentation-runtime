@@ -15,8 +15,8 @@
 | 어셈블리 | 위치 | 내용 |
 |---|---|---|
 | `Ked.Presentation.Core` | `Assets/Ked.Presentation/Core/` | 순수 상태 계산 — 정지 프레임 리듀스·이징·튜닝 (**엔진 의존 0**, 참조 0) |
-| `Ked.Presentation.Runtime` | `Assets/Ked.Presentation/Runtime/` | 연출 실행 계층 — PresentationCore · Commands · CharacterRig · ShotResponse · BackgroundRig · ScreenEffect · StageMask · Audio (참조: Core · TextMeshPro · DOTween.Modules) |
-| `Ked.Presentation.Playback` | `Assets/Ked.Presentation/Playback/` | 대사 재생 루프와 연출 기억 — 줄 진행·선택지(DialoguePresenter) · 재생 제어·롤백 기록·백로그(FeatureController) · Yarn 커맨드 번역(YarnBridge) · 재생 호스트 계약·재생 단위(Host) · 연출 기억과 그 입구 `PlaybackMemory`(Memory) · 등가성 하네스(Diagnostics) (참조: Core · Runtime · YarnSpinner.Unity · TextMeshPro · UnityEngine.UI · DOTween.Modules) |
+| `Ked.Presentation.Runtime` | `Assets/Ked.Presentation/Runtime/` | 연출 실행 계층 — PresentationCore(실행기·스코프·포트) · Commands(커맨드 · 팩토리 · **StageCommandParser**) · CharacterRig · ShotResponse · BackgroundRig · ScreenEffect · StageMask · Audio (참조: Core · TextMeshPro · DOTween.Modules) |
+| `Ked.Presentation.Playback` | `Assets/Ked.Presentation/Playback/` | 대사 재생 루프와 연출 기억 — 줄 진행·선택지(DialoguePresenter) · 재생 제어·롤백 기록·백로그·VN 재생 상태(FeatureController) · Yarn 등록·전달(YarnBridge) · 재생 호스트 계약·재생 단위(Host) · 연출 기억과 그 입구 `PlaybackMemory`(Memory) · 등가성 하네스(Diagnostics) (참조: Core · Runtime · YarnSpinner.Unity · TextMeshPro · UnityEngine.UI · DOTween.Modules) |
 | `Ked.Progression` · `Ked.Progression.Save` | `Assets/Ked.Progression/` | 진행 판정 코어와 진행 저장 (**엔진 의존 0**. 원본은 형제 저장소 `ked-progression-runtime`, [vendoring.md](../../Ked.Progression/Documentation~/vendoring.md)) |
 | `Ked.Presentation.Editor` (에디터 전용) | `Assets/Ked.Presentation/Editor/` | 본체 에디터 도구 — 초상 DB 빌더 · 튜닝 덤프 익스포터 · 이징 골든 (참조: Core · Runtime · TextMeshPro · UnityEngine.UI · DOTween.Modules) |
 | `Assembly-CSharp` (기본) | `Assets/Samples/Scripts/` | **예제 층** — Game(부트스트랩·조립·저장 흐름) · UI · ProgressionHost(진행 런타임을 꽂는 어댑터) |
@@ -48,11 +48,16 @@ Ked.Presentation.Editor (에디터 전용) ────────────�
 두 사실이 겹친 결과다.
 
 1. **`.asmdef`는 자기 폴더 트리를 덮지, 형제 폴더를 묶지 못한다.**
-2. **코어 폴더들은 서로 순환한다** — `Commands ↔ CharacterRig`, `CharacterRig ↔ ShotResponse`,
-   `ScreenEffect ↔ CharacterRig`, `ScreenEffect ↔ BackgroundRig` …
+2. **코어 폴더들은 서로 순환한다** — `CharacterRig ↔ ShotResponse`(depth가 리그 값이면서 철도 층을 고르고,
+   focus가 리그 체인·ScreenPoint·shot을 함께 본다), `Commands → CharacterRig · ShotResponse · …`,
+   `CharacterRig → PresentationCore`(`PresentationStage`의 레지스트리).
    어셈블리 그래프는 비순환이어야 하므로 이들은 **한 어셈블리일 수밖에 없다.**
 
 그래서 `Runtime/` 부모 폴더를 만들어 모았다. 폴더를 나누고 싶으면 먼저 폴더 간 순환을 없애야 한다.
+
+> 2026-10-27 대조: 한때 적혀 있던 `ScreenEffect ↔ CharacterRig`·`ScreenEffect ↔ BackgroundRig` 순환은 지금 **0건**이다.
+> `CharacterRig ↔ ShotResponse`는 자연스러운 순환이라 끊지 않는다 — 억지로 끊으면 depth가 두 곳에 생긴다
+> ([PLAN_stage-seam.md](../../../docs/PLAN_stage-seam.md) §3).
 
 ## 3. 대사 재생 루프는 왜 이름 있는 어셈블리가 됐나 (2026-10-26)
 
@@ -86,12 +91,18 @@ Ked.Presentation.Editor (에디터 전용) ────────────�
 무대 계약(`IPlaybackStage`)은 `internal`이다 — 호스트가 백로그·선택 기록·줄 좌표의 생김새를 집으면 **컴파일러가 막는다**.
 이어하기도 따로 부르지 않는다. `Memory.Restore`가 재개 지점을 예약하면 다음에 열리는 단위가 그 줄까지 시크한다.
 
-## 4. `YarnBridge`는 Runtime이 아니라 Playback에 있다
+## 4. `YarnBridge`는 Runtime이 아니라 Playback에 있다 — 그리고 뜻은 갖지 않는다 (2026-10-27)
 
-`YarnCommandBridge`는 Yarn 텍스트를 `CommandSpec`으로 옮기는 **번역층**이지 커맨드 실행이 아니다.
-실행은 `Runtime/Commands/Commands/`와 `Runtime/Commands/CommandFactory/`가 한다.
-브리지를 Runtime 밖으로 보내면서 Runtime의 `Yarn.Unity` 참조가 **0**이 됐다 — 코어가 Yarn을 모르는 상태가
-U13-b(순수 코어 추출)의 전제다. Yarn을 아는 것은 Playback부터다.
+`YarnCommandBridge`는 Yarn 등록(이름·인자 수)과 **전달**뿐이다. Yarn이 나눠 준 토큰을 코어의
+`StageCommand`(이름 + 문자열 인자)로 묶어 `Runtime/Commands/StageCommandParser/`에 넘기고, 파서가 인자 자리·생략값·
+단위·커브를 풀어 `CommandSpec`을 낸다. 실행은 `Runtime/Commands/`의 커맨드와 팩토리가 한다.
+
+대본 문법의 **뜻이 사는 곳은 파서 한 곳**이다. 등가성 하네스의 폴드(`StageReducer`)도 같은 `StageCommand`를 받으므로,
+같은 줄을 읽는 파서가 둘이던 때(브리지의 스펙 파싱 · 코어의 폴드 파싱)보다 하네스가 대조할 것이 줄었다.
+생략값은 `StageCommandParser.Table.cs`에만 있다 — 브리지의 전달 메서드는 전부 `= null`이다(두 곳이 되지 않게).
+
+Runtime의 `Yarn.Unity` 참조는 여전히 **0**이다 — 코어가 Yarn을 모르는 상태가 U13-b(순수 코어 추출)의 전제다.
+Yarn을 아는 것은 Playback부터다. 대사창·표면 레이아웃(`box_*`·`surface_*`)과 `debug_log`는 재생 쪽이라 브리지에 남는다.
 
 ## 5. ⚠ `partial class`는 어셈블리를 넘을 수 없다
 
@@ -122,8 +133,9 @@ UI 타입이 기능 폴더의 계약을 구현하는 partial을 전부 여기 �
 - `IInputSource` · `ITimeSource` · `ISignalBus` · `ISignalLatch`
 - `IUIThemePatchPort` — `ui_patch` 커맨드용. 구현은 `UI/Core/Patcher/UIThemePatchAdapter.cs`
   ("현재 화면"은 `UIManager`만 알고 "패치 방법"은 `UIPatchService`만 알아서, 둘을 아는 어댑터가 필요했다)
-- `ISeekStateQuery` (`PresentationCore/ISeekStateQuery.cs`) — 코어가 `VNLinePresentationState`(Playback)에서
-  실제로 쓰는 것은 `IsSeekingActive` 하나뿐이라 그것만 잘라 냈다
+- `ICommandPacePolicy` — 실행기가 재생 정책에서 받는 둘: 실행을 압축할지(빨리 넘기기·시크), 시간 배율.
+  구현은 Playback의 `PresentationSessionContext`가 VN 재생 상태를 접어서 준다. `CommandRunScope`는 이 정책과
+  무대(`PresentationStage`)만 받는다 — VN의 자동·속도·스킵·시크 깃발은 스코프에 없다(2026-10-27)
 
 Playback이 예제에게 요구할 때도 같다. 계약은 Playback에, 구현은 예제에 —
 대사창 뷰(`IPresentationDialogueBoxView`)와 화면 전환(`IPresentationView`)이 그렇다.
@@ -167,3 +179,24 @@ Playback이 예제에게 요구할 때도 같다. 계약은 Playback에, 구현�
   → 정지 프레임(2b)에 필요한 것은 앞쪽뿐이고, DOTween 의존은 뒤쪽에 몰려 있다
 - `ShotResponse/CharacterPlacementTargetLedger.cs`가 "트윈이 끝났다면 어디 있을 것인가"를
   이미 별도 딕셔너리로 들고 있다 → `StageState`의 원형이다
+
+---
+
+## 10. 세 조각 — 실행기 · 무대 · 재생 (2026-10-27)
+
+이 저장소의 관심사는 둘이 아니라 셋이다. 리포지토리를 가르기 전에 이 안에서 먼저 선을 그었다
+(①②③, [PLAN_stage-seam.md](../../../docs/PLAN_stage-seam.md)).
+
+```
+재생 (Playback · 예제)  ──▶  무대 (Core · Runtime의 리그·shot·커맨드·파서)
+         │                              ▲
+         └──────▶  실행기 (PresentationCore의 CommandBase · ClaimTweenCommandBase · CommandRunScope · LifetimeScope · 포트)
+```
+
+- 리졸버는 `CommandRunScope`가 아니라 `PresentationStage`를 받는다 — 무대가 실행기를 모른다(①).
+- 스코프는 `ICommandPacePolicy` + `PresentationStage`뿐이다 — 실행기가 VN을 모른다(②).
+- 대본 커맨드의 뜻은 `StageCommandParser`가 갖는다 — 재생은 `StageCommand`만 만든다(③).
+
+아직 한 어셈블리 안에 있는 것: 실행기(`PresentationCore/{Base, Execution, CommandRunScope, LifetimeScope, Signal*}`)와
+무대. 스코프가 `PresentationStage`를 들고 있어서 실행기 → 무대 참조가 하나 남아 있다 — 리포지토리를 가를 때
+스코프의 무대를 팩토리 주입으로 바꾸면 끊긴다(계획 §4).
