@@ -181,7 +181,7 @@ Unity를 닫고 했다. 사본에 남은 갈림(Editor asmdef)의 원인이 사�
 - 어셈블리: 15 → 14개. `UIPresentationFlow.Runtime` 78파일 그대로, `Assembly-CSharp-Editor` 1 → 11파일. 오프라인 컴파일 오류 0 · 경고 0.
 - `vendoring.md`: 대응표 · 대조 명령을 새 구조로, "사본에만 있는 것"은 없음.
 - 대조(`vendoring.md`의 명령, 원본 `cf3fa98` blob, PC에서): `Scripts`(Demo 제외) · `Editor` · `Shaders` · 폴더 `.meta` 셋 모두 출력 0줄. 파일 수 197 = 197.
-- Unity 확인: [ ] 컴파일 오류 · 새 경고 0 · [ ] `Tools/UI Presentation/…` 메뉴 · [ ] `Tools/Ked UI/Build Sample UI` 보고 문제 0
+- Unity 확인(10-27, 아미야 "잘 된다"): [x] 컴파일 오류 · 새 경고 0 · [x] `Tools/UI Presentation/…` 메뉴 · [x] `Tools/Ked UI/Build Sample UI` 보고 문제 0
 
 ### U4. 시연
 - `<<ui_patch dark>>` — `IUIThemePatchPort` → `UIManager.SetContext`. 데모 대본에 한 장면. 지금 그 자리는 `UIThemePatchNotConnected`(경고만)다.
