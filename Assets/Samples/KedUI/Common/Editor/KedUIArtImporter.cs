@@ -39,7 +39,7 @@ namespace Ked.Samples.UI.Editor
             // ked: 그림을 화면 묶음으로 나눠 두므로(Common/Sprites · Screens/*/Sprites) 자리는 manifest의 경로가 아니라
             // 파일 이름으로 찾는다. manifest는 받은 그대로("Art/…") 두고, 같은 이름이 둘이면 멈춘다.
             var problems = new System.Collections.Generic.List<string>();
-            var index = KedUIUnits.ArtIndex(problems);
+            UISpriteIndex index = KedUIUnits.Art(problems);
             if (problems.Count > 0)
                 throw new InvalidDataException(string.Join("\n", problems));
             int applied = 0;
@@ -48,7 +48,7 @@ namespace Ked.Samples.UI.Editor
                 string relative = entry.file.Replace('\\', '/');
                 if (!relative.StartsWith("Art/", StringComparison.Ordinal) || relative.Contains("..") || !relative.EndsWith(".png", StringComparison.OrdinalIgnoreCase))
                     throw new InvalidDataException("Unexpected asset path: " + relative);
-                if (!index.TryGetValue(Path.GetFileNameWithoutExtension(relative), out string path))
+                if (!index.TryGetPath(Path.GetFileNameWithoutExtension(relative), out string path))
                     throw new FileNotFoundException("PNG not found under " + root + ": " + relative);
                 TextureImporter importer = AssetImporter.GetAtPath(path) as TextureImporter;
                 if (importer == null) throw new FileNotFoundException("PNG was not imported: " + path);

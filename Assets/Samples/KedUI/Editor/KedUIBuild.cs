@@ -5,7 +5,6 @@ using System.Text;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
-using Object = UnityEngine.Object;
 
 namespace Ked.Samples.UI.Editor
 {
@@ -29,8 +28,11 @@ namespace Ked.Samples.UI.Editor
     ///
     /// 생성물 자리는 묶음 규칙(KedUIUnits): 화면 스크립트가 Screens/{묶음}/Scripts/에 있으면 그 묶음 안,
     /// 아니면 Generated/(지금은 그런 화면이 없다).
-    /// 다시 실행하면 프리팹은 같은 경로에 덮어쓴다(GUID 유지). 같은 명세면 결과도 같다(10-27, git 변경 0).
+    /// 다시 실행하면 프리팹은 같은 경로에 덮어쓴다(GUID 유지). 같은 명세면 내용도 같다 — 다만 이름이 겹치는 자식
+    /// (저장/불러오기의 슬롯 카드 여섯 장)이 있는 프리팹은 파일 안 fileID가 빌드마다 바뀐다(UIPF UIPrefabs).
+    /// 플레이 중에는 빌드하지 않는다 — 실행 중에만 붙는 컴포넌트가 섞여 저장된다.
     /// 씬은 건드리지 않는다 — SampleBootstrap이 Resources에서 캔버스를 읽는다.
+    /// 자리 계산 · 저장 · Presentation · 글꼴 · 검사의 도구는 UIPF(Editor/UI/Authoring)의 것이다.
     ///
     /// 배치 모드: -executeMethod Ked.Samples.UI.Editor.KedUIBuild.BuildBatch (문제가 있으면 종료 코드 1).
     /// Unity가 이 프로젝트를 열고 있으면 배치 모드는 프로젝트를 열지 못한다.
@@ -73,6 +75,12 @@ namespace Ked.Samples.UI.Editor
             var problems = new List<string>();
             var built = new List<string>();
 
+            if (!UIPrefabs.CanBuild(out string reason))
+            {
+                report = "[Ked UI] 샘플 UI를 빌드하지 않았다 — " + reason;
+                return false;
+            }
+
             try
             {
                 EditorUtility.DisplayProgressBar("Ked UI", "그림 임포트 설정", 0.05f);
@@ -83,13 +91,12 @@ namespace Ked.Samples.UI.Editor
 
                 var kit = new KedUIKit(font);
 
-                KedUIUnits.EnsureFolder(CanvasDir);
+                UIPrefabs.EnsureFolder(CanvasDir);
 
                 EditorUtility.DisplayProgressBar("Ked UI", "화면", 0.3f);
 
                 // 선택지 항목은 재생 화면의 선택지 상자가 쓴다 — 재생 묶음에 둔다.
-                string optionItemPath = KedUIUnits.PrefabPath(typeof(PlayScreen), OptionItemName, ScreensDir);
-                KedUIUnits.EnsureFolder(optionItemPath.Substring(0, optionItemPath.LastIndexOf('/')));
+                string optionItemPath = KedUIUnits.Rules.PrefabPath(typeof(PlayScreen), OptionItemName, ScreensDir);
                 GameObject optionItem = Save(OptionItemSpec.Build(kit), optionItemPath, built);
 
                 GameObject[] pages =
@@ -140,7 +147,7 @@ namespace Ked.Samples.UI.Editor
 
                 // 저장한 결과를 검사한다 — 메뉴 Validate Sample UI와 같은 검사.
                 EditorUtility.DisplayProgressBar("Ked UI", "검사", 0.95f);
-                built.Add($"({KedUIValidate.Run(problems)})");
+                built.Add($"(검사: {KedUIValidate.Run(problems)})");
             }
             catch (Exception error)
             {
@@ -261,19 +268,13 @@ namespace Ked.Samples.UI.Editor
         private static GameObject SaveScreen(GameObject go, List<string> built)
         {
             UIBase view = go.GetComponent<UIBase>();
-            string path = KedUIUnits.PrefabPath(view != null ? view.GetType() : null, go.name, ScreensDir);
-            KedUIUnits.EnsureFolder(path.Substring(0, path.LastIndexOf('/')));
+            string path = KedUIUnits.Rules.PrefabPath(view != null ? view.GetType() : null, go.name, ScreensDir);
             return Save(go, path, built);
         }
 
         private static GameObject Save(GameObject go, string path, List<string> built)
         {
-            GameObject prefab = PrefabUtility.SaveAsPrefabAsset(go, path, out bool success);
-            Object.DestroyImmediate(go);
-
-            if (!success || prefab == null)
-                throw new InvalidOperationException("프리팹을 저장하지 못했다: " + path);
-
+            GameObject prefab = UIPrefabs.Save(go, path);
             built.Add(path);
             return prefab;
         }

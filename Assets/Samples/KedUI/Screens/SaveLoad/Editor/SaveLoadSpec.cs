@@ -14,18 +14,18 @@ namespace Ked.Samples.UI.Editor
     {
         public static GameObject Build(KedUIKit kit)
         {
-            KedNode view = kit.NewView<SaveLoadPanel>(nameof(SaveLoadPanel));
+            UINode view = kit.NewView<SaveLoadPanel>(nameof(SaveLoadPanel));
             kit.Backdrop(view, nameof(R.Background), "background_title");
 
-            KedNode safe = kit.Fill(view, nameof(R.SafeAreaRoot));
-            KedNode frame = kit.Frame(safe, nameof(R.Frame));
+            UINode safe = kit.Fill(view, nameof(R.SafeAreaRoot));
+            UINode frame = kit.Frame(safe, nameof(R.Frame));
 
             kit.IconButton(frame, nameof(R.Back), "back", new Rect(64, 38, 58, 58), padding: 15f);
             kit.Label(frame, nameof(R.PageTitle), "저장", 144, 37, 700, 56, 36, KedColors.Navy, bold: true);
             kit.Label(frame, nameof(R.PageSubtitle), "현재 장면의 기록을 관리합니다.", 146, 96, 1100, 32, 17, KedColors.Muted);
             kit.IconButton(frame, nameof(R.Close), "close", new Rect(1478, 38, 58, 58), padding: 16f);
 
-            KedNode tab = kit.Node(frame, nameof(R.ManualTab), 100, 149, 250, 54);
+            UINode tab = kit.Node(frame, nameof(R.ManualTab), 100, 149, 250, 54);
             kit.Image(tab, "tab_selected");
             kit.Label(frame, nameof(R.ManualLabel), "수동 저장", 115, 157, 210, 35, 21, KedColors.White,
                 TextAlignmentOptions.Center, bold: true);
@@ -33,7 +33,7 @@ namespace Ked.Samples.UI.Editor
             kit.Label(frame, nameof(R.PageInfo), "PAGE  01 / 01", 1160, 161, 340, 34, 18, KedColors.Muted,
                 TextAlignmentOptions.Right);
 
-            KedNode grid = kit.Node(frame, nameof(R.SlotGrid), 100, 248, 1400, 428);
+            UINode grid = kit.Node(frame, nameof(R.SlotGrid), 100, 248, 1400, 428);
             GridLayoutGroup layout = grid.Go.AddComponent<GridLayoutGroup>();
             layout.cellSize = new Vector2(440, 190);
             layout.spacing = new Vector2(40, 48);
@@ -64,22 +64,22 @@ namespace Ked.Samples.UI.Editor
         }
 
         // 카드 하나. 안의 이름은 카드(SaveSlotCard)가 제 안에서만 찾는다.
-        private static void BuildCard(KedUIKit kit, KedNode grid, string name, Rect d)
+        private static void BuildCard(KedUIKit kit, UINode grid, string name, Rect d)
         {
-            KedNode card = kit.Node(grid, name, d);
+            UINode card = kit.Node(grid, name, d);
             card.Go.AddComponent<SaveSlotCard>();
 
             float x = d.x;
             float y = d.y;
 
             // 카드 전체가 버튼 — save_slot 그림 그대로(밝은 자리 = 그림 창의 알려진 자리 그림).
-            KedNode surface = kit.ImageButton(card, nameof(C.CardButton), "save_slot");
+            UINode surface = kit.ImageButton(card, nameof(C.CardButton), "save_slot");
 
-            KedNode thumb = kit.Node(surface, nameof(C.CardThumbnail), x + 13, y + 12, 414, 100);
+            UINode thumb = kit.Node(surface, nameof(C.CardThumbnail), x + 13, y + 12, 414, 100);
 
-            KedNode number = kit.Node(thumb, nameof(C.CardNumber), x + 26, y + 21, 64, 28);
+            UINode number = kit.Node(thumb, nameof(C.CardNumber), x + 26, y + 21, 64, 28);
             kit.Surface(number, KedColors.Navy, radius: 14f);
-            KedNode numberText = kit.Fill(number, nameof(C.CardNumberText));
+            UINode numberText = kit.Fill(number, nameof(C.CardNumberText));
             kit.Text(numberText, "01", 14, KedColors.White, TextAlignmentOptions.Center, bold: true);
 
             kit.Label(thumb, nameof(C.CardChapter), "", x + 102, y + 22, 310, 26, 15, KedColors.Navy, bold: true,
@@ -95,7 +95,7 @@ namespace Ked.Samples.UI.Editor
             kit.Label(surface, nameof(C.CardEmptyHint), "", x + 24, y + 145, 380, 25, 15, KedColors.Muted,
                 TextAlignmentOptions.Center);
 
-            KedNode selected = kit.Fill(surface, nameof(C.CardSelected), -2f, -2f, -2f, -2f);
+            UINode selected = kit.Fill(surface, nameof(C.CardSelected), -2f, -2f, -2f, -2f);
             kit.Outline(selected, KedColors.Turquoise, 3f);
             selected.Go.SetActive(false);
         }

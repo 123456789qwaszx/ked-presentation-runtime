@@ -14,21 +14,21 @@ namespace Ked.Samples.UI.Editor
     {
         public static GameObject Build(KedUIKit kit)
         {
-            KedNode view = kit.NewView<BacklogPanel>(nameof(BacklogPanel));
+            UINode view = kit.NewView<BacklogPanel>(nameof(BacklogPanel));
 
-            KedNode dim = kit.Fill(view, nameof(R.LogDim));
+            UINode dim = kit.Fill(view, nameof(R.LogDim));
             kit.Solid(dim, KedColors.Dim, raycast: true);
 
-            KedNode safe = kit.Fill(view, nameof(R.SafeAreaRoot));
-            KedNode frame = kit.Frame(safe, "LogFrame");
+            UINode safe = kit.Fill(view, nameof(R.SafeAreaRoot));
+            UINode frame = kit.Frame(safe, "LogFrame");
 
-            KedNode panel = kit.Node(frame, nameof(R.LogPanel), 80, 58, 1440, 790);
+            UINode panel = kit.Node(frame, nameof(R.LogPanel), 80, 58, 1440, 790);
             kit.Image(panel, "panel_backlog", raycast: true);
 
             kit.Label(frame, nameof(R.BacklogTitle), "대화 기록", 118, 77, 900, 46, 30, KedColors.White, bold: true);
             kit.IconButton(frame, nameof(R.BacklogClose), "close", new Rect(1430, 76, 44, 44), padding: 11f);
 
-            KedNode scroll = kit.Node(frame, nameof(R.LogScroll), 110, 150, 1340, 605);
+            UINode scroll = kit.Node(frame, nameof(R.LogScroll), 110, 150, 1340, 605);
             kit.Clear(scroll);
             ScrollRect scrollRect = scroll.Go.AddComponent<ScrollRect>();
             scrollRect.horizontal = false;
@@ -37,10 +37,10 @@ namespace Ked.Samples.UI.Editor
             scrollRect.scrollSensitivity = 40f;
             scrollRect.inertia = true;
 
-            KedNode viewport = kit.Fill(scroll, nameof(R.LogViewport));
+            UINode viewport = kit.Fill(scroll, nameof(R.LogViewport));
             viewport.Go.AddComponent<RectMask2D>();
 
-            KedNode content = kit.Node(viewport, nameof(R.LogContent), new Rect(110, 150, 1340, 0), KedAnchor.TopLeft);
+            UINode content = kit.Node(viewport, nameof(R.LogContent), new Rect(110, 150, 1340, 0), UIAnchor.TopLeft);
             content.Rect.anchorMin = new Vector2(0f, 1f);
             content.Rect.anchorMax = new Vector2(1f, 1f);
             content.Rect.pivot = new Vector2(0.5f, 1f);
@@ -71,10 +71,10 @@ namespace Ked.Samples.UI.Editor
         }
 
         // 줄: [화자 180 · 대사 985 · 이동 46], 지금 줄은 옅은 청록 바탕, 아래는 구분선.
-        private static void BuildRow(KedUIKit kit, KedNode content)
+        private static void BuildRow(KedUIKit kit, UINode content)
         {
             Rect d = new(120, 165, 1320, 98);
-            KedNode row = kit.Node(content, nameof(R.LogRowTemplate), d);
+            UINode row = kit.Node(content, nameof(R.LogRowTemplate), d);
             row.Go.AddComponent<BacklogRow>();
 
             HorizontalLayoutGroup layout = row.Go.AddComponent<HorizontalLayoutGroup>();
@@ -88,17 +88,17 @@ namespace Ked.Samples.UI.Editor
             LayoutElement rowElement = row.Go.AddComponent<LayoutElement>();
             rowElement.minHeight = 86f;
 
-            KedNode highlight = kit.Fill(row, nameof(W.RowHighlight));
+            UINode highlight = kit.Fill(row, nameof(W.RowHighlight));
             kit.Surface(highlight, KedColors.CurrentRow, radius: 9f);
             highlight.Go.AddComponent<LayoutElement>().ignoreLayout = true;
             highlight.Go.SetActive(false);
 
-            KedNode speaker = kit.Node(row, nameof(W.RowSpeaker), 145, 172, 180, 38);
+            UINode speaker = kit.Node(row, nameof(W.RowSpeaker), 145, 172, 180, 38);
             kit.Text(speaker, "", 21, KedColors.SpeakerTeal, TextAlignmentOptions.TopLeft, bold: true,
                 overflow: TextOverflowModes.Ellipsis);
             Fixed(speaker.Go, 180f, null);
 
-            KedNode text = kit.Node(row, nameof(W.RowText), 345, 172, 985, 66);
+            UINode text = kit.Node(row, nameof(W.RowText), 345, 172, 985, 66);
             kit.Text(text, "", 23, KedColors.Navy, TextAlignmentOptions.TopLeft, wrap: true, lineSpacing: 6f);
             Fixed(text.Go, 985f, null);
 
@@ -106,7 +106,7 @@ namespace Ked.Samples.UI.Editor
             Fixed(jump.gameObject, 46f, 46f);
             // 이동 버튼 위에서 시작한 끌기도 목록을 끈다 — UIPF UI_EventHandler가 끌기를 부모 ScrollRect에 넘긴다.
 
-            KedNode divider = kit.StretchX(row, nameof(W.RowDivider), new Rect(145, 258, 1230, 1), 0f);
+            UINode divider = kit.StretchX(row, nameof(W.RowDivider), new Rect(145, 258, 1230, 1), 0f);
             divider.Rect.anchoredPosition = new Vector2(divider.Rect.anchoredPosition.x, 1f);
             kit.Solid(divider, KedColors.Divider);
             divider.Go.AddComponent<LayoutElement>().ignoreLayout = true;

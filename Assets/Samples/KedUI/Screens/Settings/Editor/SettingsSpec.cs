@@ -20,19 +20,19 @@ namespace Ked.Samples.UI.Editor
 
         public static GameObject Build(KedUIKit kit, IReadOnlyList<GameObject> pagePrefabs)
         {
-            KedNode view = kit.NewView<SettingsPanel>(nameof(SettingsPanel));
+            UINode view = kit.NewView<SettingsPanel>(nameof(SettingsPanel));
             kit.Backdrop(view, nameof(R.Background), "background_title");
 
-            KedNode safe = kit.Fill(view, nameof(R.SafeAreaRoot));
-            KedNode frame = kit.Frame(safe, nameof(R.Frame));
+            UINode safe = kit.Fill(view, nameof(R.SafeAreaRoot));
+            UINode frame = kit.Frame(safe, nameof(R.Frame));
 
-            KedNode surface = kit.Node(frame, nameof(R.SettingsSurface), 80, 60, 1440, 790);
+            UINode surface = kit.Node(frame, nameof(R.SettingsSurface), 80, 60, 1440, 790);
             kit.Image(surface, "panel_settings", raycast: true);
 
             kit.Label(frame, nameof(R.SettingsTitle), "설정", 115, 78, 800, 45, 30, KedColors.White, bold: true);
             kit.IconButton(frame, nameof(R.SettingsClose), "close", new Rect(1430, 72, 44, 44), padding: 11f);
 
-            KedNode tabs = kit.Node(frame, nameof(R.SettingsTabs), 114, 181, 256, 305);
+            UINode tabs = kit.Node(frame, nameof(R.SettingsTabs), 114, 181, 256, 305);
             for (int i = 0; i < TabLabels.Length; i++)
             {
                 kit.Tab(tabs, "SettingsTab_" + i, "SettingsTabText_" + i, TabLabels[i],
@@ -40,7 +40,7 @@ namespace Ked.Samples.UI.Editor
                     new Rect(130, 190 + i * 83, 210, 38));
             }
 
-            KedNode pageRoot = kit.Node(frame, nameof(R.PageRoot), PageArea, KedAnchor.TopLeft);
+            UINode pageRoot = kit.Node(frame, nameof(R.PageRoot), PageArea, UIAnchor.TopLeft);
 
             foreach (GameObject prefab in pagePrefabs)
             {
@@ -63,7 +63,7 @@ namespace Ked.Samples.UI.Editor
 
         public static GameObject AudioPage(KedUIKit kit)
         {
-            KedNode page = kit.NewView<AudioSettingsPage>(nameof(AudioSettingsPage), PageArea);
+            UINode page = kit.NewView<AudioSettingsPage>(nameof(AudioSettingsPage), PageArea);
             Heading(kit, page, "AudioHeading", "음량", "AudioDescription", "이야기에 집중할 수 있도록 소리를 조절하세요.");
 
             string[] labels = { "전체 음량", "배경음", "효과음", "음성" };
@@ -83,7 +83,7 @@ namespace Ked.Samples.UI.Editor
 
         public static GameObject TextPage(KedUIKit kit)
         {
-            KedNode page = kit.NewView<TextSettingsPage>(nameof(TextSettingsPage), PageArea);
+            UINode page = kit.NewView<TextSettingsPage>(nameof(TextSettingsPage), PageArea);
             Heading(kit, page, "TextHeading", "대사 표시", "TextDescription", "편안하게 읽을 수 있는 크기와 속도를 선택하세요.");
 
             string[] labels = { "글자 크기", "글자 출력 속도", "대사창 불투명도" };
@@ -97,12 +97,12 @@ namespace Ked.Samples.UI.Editor
 
             kit.Label(page, "TextPreviewCaption", "미리보기", 448, 568, 500, 32, 18, KedColors.Muted);
 
-            KedNode surface = kit.Node(page, "TextPreviewSurface", 447, 613, 970, 105);
+            UINode surface = kit.Node(page, "TextPreviewSurface", 447, 613, 970, 105);
             kit.Surface(surface, KedColors.Ivory, radius: 14f);
-            KedNode line = kit.Fill(surface, "TextPreviewLine");
+            UINode line = kit.Fill(surface, "TextPreviewLine");
             kit.Outline(line, KedColors.SurfaceLine, 1f);
 
-            KedNode text = kit.Node(surface, "TextPreviewText", 478, 630, 908, 75);
+            UINode text = kit.Node(surface, "TextPreviewText", 478, 630, 908, 75);
             kit.Text(text, "이야기가 화면이 되는 순간. 함께 시작해 볼까요?", 25, KedColors.Navy, TextAlignmentOptions.Left, wrap: true);
 
             return page.Go;
@@ -110,7 +110,7 @@ namespace Ked.Samples.UI.Editor
 
         public static GameObject PlaybackPage(KedUIKit kit)
         {
-            KedNode page = kit.NewView<PlaybackSettingsPage>(nameof(PlaybackSettingsPage), PageArea);
+            UINode page = kit.NewView<PlaybackSettingsPage>(nameof(PlaybackSettingsPage), PageArea);
             Heading(kit, page, "PlaybackHeading", "재생", "PlaybackDescription", "자동 진행과 빠르게 재생할 때의 동작을 설정합니다.");
 
             kit.Label(page, "AutoDelayLabel", "자동 진행 대기", 448, 298, 300, 42, 23, KedColors.Navy, bold: true);
@@ -134,7 +134,7 @@ namespace Ked.Samples.UI.Editor
 
         public static GameObject DisplayPage(KedUIKit kit)
         {
-            KedNode page = kit.NewView<DisplaySettingsPage>(nameof(DisplaySettingsPage), PageArea);
+            UINode page = kit.NewView<DisplaySettingsPage>(nameof(DisplaySettingsPage), PageArea);
             Heading(kit, page, "DisplayHeading", "화면 · 조작", "DisplayDescription", "실행 환경에 맞는 화면 모드와 조작 방법을 확인합니다.");
 
             kit.Label(page, "WindowModeLabel", "화면 모드", 448, 300, 280, 42, 23, KedColors.Navy, bold: true);
@@ -156,16 +156,16 @@ namespace Ked.Samples.UI.Editor
                 ("Esc", "현재 창 닫기 · 숨긴 UI 다시 보기"),
             };
 
-            KedNode list = kit.Node(page, "ShortcutList", 448, 458, 960, 284);
+            UINode list = kit.Node(page, "ShortcutList", 448, 458, 960, 284);
             for (int i = 0; i < shortcuts.Length; i++)
             {
                 float y = 460 + i * 47;
 
-                KedNode cap = kit.Node(list, "Keycap_" + i, 451, y, 110, 36);
+                UINode cap = kit.Node(list, "Keycap_" + i, 451, y, 110, 36);
                 kit.Surface(cap, KedColors.Ivory, radius: 10f);
-                KedNode capLine = kit.Fill(cap, "KeycapLine_" + i);
+                UINode capLine = kit.Fill(cap, "KeycapLine_" + i);
                 kit.Outline(capLine, KedColors.SurfaceLine, 1f);
-                KedNode capText = kit.Fill(cap, "KeycapText_" + i);
+                UINode capText = kit.Fill(cap, "KeycapText_" + i);
                 kit.Text(capText, shortcuts[i].key, 17, KedColors.Navy, TextAlignmentOptions.Center, bold: true);
 
                 kit.Label(list, "Shortcut_" + i, shortcuts[i].action, 590, y - 1, 800, 38, 21, KedColors.Navy);
@@ -174,7 +174,7 @@ namespace Ked.Samples.UI.Editor
             return page.Go;
         }
 
-        private static void Heading(KedUIKit kit, KedNode page, string headingName, string heading, string descriptionName, string description)
+        private static void Heading(KedUIKit kit, UINode page, string headingName, string heading, string descriptionName, string description)
         {
             kit.Label(page, headingName, heading, 445, 168, 900, 44, 30, KedColors.Navy, bold: true);
             kit.Label(page, descriptionName, description, 446, 220, 960, 35, 18, KedColors.Muted);

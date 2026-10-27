@@ -10,21 +10,21 @@ namespace Ked.Samples.UI.Editor
     {
         public static GameObject Build(KedUIKit kit)
         {
-            KedNode view = kit.NewView<SystemMenuPanel>(nameof(SystemMenuPanel));
+            UINode view = kit.NewView<SystemMenuPanel>(nameof(SystemMenuPanel));
 
-            KedNode dim = kit.Fill(view, nameof(R.Dim));
+            UINode dim = kit.Fill(view, nameof(R.Dim));
             kit.Solid(dim, KedColors.Dim, raycast: true);
 
-            KedNode safe = kit.Fill(view, nameof(R.SafeAreaRoot));
-            KedNode frame = kit.Frame(safe, "MenuFrame");
+            UINode safe = kit.Fill(view, nameof(R.SafeAreaRoot));
+            UINode frame = kit.Frame(safe, "MenuFrame");
 
-            KedNode panel = kit.Node(frame, nameof(R.MenuPanel), 560, 68, 480, 766);
+            UINode panel = kit.Node(frame, nameof(R.MenuPanel), 560, 68, 480, 766);
             kit.Image(panel, "panel_menu", raycast: true);
 
             kit.Label(frame, nameof(R.MenuTitle), "메뉴", 602, 116, 320, 44, 28, KedColors.Navy, bold: true);
             kit.IconButton(frame, nameof(R.CloseMenu), "close", new Rect(964, 85, 46, 46), padding: 12f);
 
-            KedNode actions = kit.Node(frame, nameof(R.MenuActions), 616, 170, 368, 600);
+            UINode actions = kit.Node(frame, nameof(R.MenuActions), 616, 170, 368, 600);
             VerticalLayoutGroup layout = actions.Go.AddComponent<VerticalLayoutGroup>();
             layout.spacing = 26f;
             layout.childAlignment = TextAnchor.MiddleCenter;

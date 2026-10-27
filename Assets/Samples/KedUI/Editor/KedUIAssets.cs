@@ -10,7 +10,7 @@ namespace Ked.Samples.UI.Editor
     /// <summary>
     /// 화면 밖의 UIPF·연출 데이터 자산. 한 번 만들면 다시 만들지 않는다(사람이 고친 값을 빌드가 덮지 않게) —
     /// 글꼴 묶음만 매번 글꼴을 다시 건다.
-    /// 자리: 글꼴 묶음은 Common/Fonts, Presentation과 대사창 배치 DB는 그 화면의 묶음(KedUIUnits).
+    /// 자리: 글꼴 묶음은 Common/Fonts, Presentation과 대사창 배치 DB는 그 화면의 묶음(KedUIUnits.Rules).
     /// Generated/는 묶음에 들지 않은 화면이 있을 때만 쓴다(지금은 없다).
     /// </summary>
     internal static class KedUIAssets
@@ -67,26 +67,9 @@ namespace Ked.Samples.UI.Editor
             {
                 string key = UIViewKey.Of(type);
                 // 화면이 묶음에 있으면 Screens/{묶음}/Presentation/{key}Presentation.asset, 아니면 Generated/Presentations/{key}.asset.
-                string path = KedUIUnits.PresentationPath(type, key, PresentationDir);
-                KedUIUnits.EnsureFolder(path.Substring(0, path.LastIndexOf('/')));
-
-                // 오브젝트 이름은 파일 이름과 같아야 한다(Unity 경고). UIPF는 이름이 아니라 presentationId로 찾는다.
-                string fileName = System.IO.Path.GetFileNameWithoutExtension(path);
-                UIPresentationSpec spec = AssetDatabase.LoadAssetAtPath<UIPresentationSpec>(path);
-                if (spec == null)
-                {
-                    spec = ScriptableObject.CreateInstance<UIPresentationSpec>();
-                    spec.name = fileName;
-                    spec.presentationId = key;
-                    AssetDatabase.CreateAsset(spec, path);
-                }
-                else if (spec.name != fileName)
-                {
-                    spec.name = fileName;
-                    EditorUtility.SetDirty(spec);
-                }
-
-                specs.Add(spec);
+                // 없을 때만 만든다(presentationId = 화면 키, 오브젝트 이름 = 파일 이름) — UIPF UIPresentationAssets.
+                string path = KedUIUnits.Rules.PresentationPath(type, key, PresentationDir);
+                specs.Add(UIPresentationAssets.Ensure(type, path));
             }
 
             return specs.ToArray();
@@ -99,7 +82,7 @@ namespace Ked.Samples.UI.Editor
         public static DialogueSurfaceLayoutPresetDBSO SurfaceLayoutDb(List<string> problems)
         {
             // 재생 화면의 대사창에 맞춘 데이터라 재생 묶음에 둔다(Screens/Play/Data).
-            string path = KedUIUnits.DataPath(typeof(PlayScreen), "KedSurfaceLayoutPresetDB.asset", OutputDir);
+            string path = KedUIUnits.Rules.DataPath(typeof(PlayScreen), "KedSurfaceLayoutPresetDB.asset", OutputDir);
             var db = AssetDatabase.LoadAssetAtPath<DialogueSurfaceLayoutPresetDBSO>(path);
             if (db != null)
                 return db;
@@ -145,7 +128,7 @@ namespace Ked.Samples.UI.Editor
                 field.SetValue(db, entries);
             }
 
-            KedUIUnits.EnsureFolder(path.Substring(0, path.LastIndexOf('/')));
+            UIPrefabs.EnsureFolder(UIPrefabs.DirectoryOf(path));
             AssetDatabase.CreateAsset(db, path);
             EditorUtility.SetDirty(db);
             return db;

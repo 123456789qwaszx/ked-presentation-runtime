@@ -22,7 +22,7 @@ namespace Ked.Samples.UI.Editor
             rect.pivot = new Vector2(0.5f, 0.5f);
             rect.sizeDelta = new Vector2(760f, 74f);
 
-            var root = new KedNode(rect, new Rect(420, 310, 760, 74));
+            var root = new UINode(rect, new Rect(420, 310, 760, 74));
 
             Image background = kit.Image(root, "choice_normal", raycast: true);
             CanvasGroup group = go.AddComponent<CanvasGroup>();
@@ -31,14 +31,14 @@ namespace Ked.Samples.UI.Editor
             element.preferredWidth = 760f;
             element.preferredHeight = 74f;
 
-            KedNode label = kit.Fill(root, "Label", 40f, 6f, 50f, 8f);
+            UINode label = kit.Fill(root, "Label", 40f, 6f, 50f, 8f);
             TextMeshProUGUI labelText = kit.Text(label, "", 25, KedColors.Navy, TextAlignmentOptions.Center, bold: true,
                 overflow: TextOverflowModes.Ellipsis);
 
-            KedNode effect = kit.Node(root, "EffectText", 940, 360, 225, 20);
+            UINode effect = kit.Node(root, "EffectText", 940, 360, 225, 20);
             TextMeshProUGUI effectText = kit.Text(effect, "", 13, KedColors.Muted, TextAlignmentOptions.Right);
 
-            KedNode indicator = kit.Fill(root, "SelectionIndicator", -4f, -4f, -4f, -4f);
+            UINode indicator = kit.Fill(root, "SelectionIndicator", -4f, -4f, -4f, -4f);
             kit.Outline(indicator, KedColors.Turquoise, 3f);
             indicator.Go.SetActive(false);
 

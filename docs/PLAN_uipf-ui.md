@@ -198,7 +198,7 @@ Samples/KedUI/
 ├─ Ked.Samples.UI.asmdef   런타임 asmdef를 뿌리로(Common/ · Screens/ · Runtime/을 덮는다)
 ├─ Common/
 │   ├─ Scripts/            부품 키트 7 (옛 Runtime/Kit. 끌기 넘기기 KedDragToScroll은 UIPF로 옮겨 지웠다 — 아래 "UIPF로 되돌림")
-│   ├─ Editor/             키트로 짓는 도구(KedUIKit) · 묶음 규칙(KedUIUnits) · 글꼴 · 그림 임포트 · 검사(KedUIValidate) + 에디터 asmdef
+│   ├─ Editor/             부품 키트(KedUIKit) · 묶음 설정(KedUIUnits) · 글꼴 · 그림 임포트 · 검사(KedUIValidate) + 에디터 asmdef. 규칙과 도구는 10-27부터 UIPF Editor/UI/Authoring(아래 "UIPF로 되돌림")
 │   ├─ Sprites/            키트가 쓰는 15장 + 여러 화면이 쓰는 3장(background_title · icon_close · icon_rollback)
 │   └─ Fonts/              Noto Sans KR TTF 2 · OFL · SDF 2 · UIPF 글꼴 묶음(KedUIFontSet)
 ├─ Screens/
@@ -254,7 +254,7 @@ AI가 프리팹(Unity 직렬화 데이터)을 직접 쓰지 않는다. AI는 화
 - **사람의 역할.** 요구와 품질 기준을 정하고, AI의 설계 판단(명세를 어디까지 넓힐지, 공용으로 올릴지)을 정하고, Unity에서 눈으로 검수 · 승인한다. 문제를 찾으면 프리팹이 아니라 원본을 고쳐 다시 빌드한다.
 - **배치 모드.** `-executeMethod Ked.Samples.UI.Editor.KedUIBuild.BuildBatch` · `…KedUIValidate.ValidateBatch`(문제가 있으면 종료 코드 1). Unity가 이 프로젝트를 열고 있으면 배치 모드는 프로젝트를 열지 못한다. 클라우드 세션에서는 PC의 Unity를 돌릴 수 없다 — PC에서 돌린다.
 
-빌더 자리(10-27): 화면을 모르는 도구(`KedUIKit` · `KedUIUnits` · `KedUIFonts` · `KedUIArtImporter` · `KedUIValidate`, 에디터 asmdef)는 `Common/Editor`, 화면 목록과 캔버스를 아는 앱 빌드(`KedUIBuild` · `KedUIAssets`)는 `KedUI/Editor`(+`.asmref`). 실행 쪽과 짝이 맞는다 — 공용 `Common/Scripts` ↔ `Common/Editor`, 앱 `Runtime/` ↔ `Editor/`, 화면 `Screens/X/Scripts` ↔ `Screens/X/Editor`.
+빌더 자리(10-27): 화면을 모르는 도구(`KedUIKit` · `KedUIUnits` · `KedUIFonts` · `KedUIArtImporter` · `KedUIValidate`, 에디터 asmdef)는 `Common/Editor` — 그 가운데 게임에 매이지 않은 부분은 같은 날 UIPF로 옮겼다(아래 "UIPF로 되돌림"의 B), 화면 목록과 캔버스를 아는 앱 빌드(`KedUIBuild` · `KedUIAssets`)는 `KedUI/Editor`(+`.asmref`). 실행 쪽과 짝이 맞는다 — 공용 `Common/Scripts` ↔ `Common/Editor`, 앱 `Runtime/` ↔ `Editor/`, 화면 `Screens/X/Scripts` ↔ `Screens/X/Editor`.
 
 ### UIPF로 되돌림 (2026-10-27, 아미야 결정 "C, A까지만 먼저")
 여기서 쓰다 드러난 것을 UIPF 원본으로 되돌렸다. 원본에서 먼저 고치고(`feat/from-ked` @ `3a26d8b`, `dev` 머지 전), 다시 반입하고, 이쪽의 임시 해결책을 지웠다. 범위와 다음 일(B — 빌더 가운데 어느 게임에도 쓸 부분을 원본 도구로)은 원본 `docs/PLAN_from-ked.md`.
@@ -273,6 +273,24 @@ AI가 프리팹(Unity 직렬화 데이터)을 직접 쓰지 않는다. AI는 화
   - 이전에 커밋한 프리팹 10개의 버튼에 `UI_EventHandler`가 있었다. 이것은 `KedButton.Awake`(→ `ButtonFeedback.Bind`)가 실행 중에만 붙이므로, 이전 빌드는 플레이 중에 돈 것이다. 편집 모드 결과(10개 프리팹에서 47개가 빠짐)를 커밋했다. 실행하면 같은 것이 붙어 동작은 같다. 빌더가 플레이 중에는 거부하게 하는 것은 B에서.
   - 저장/불러오기 패널은 두 번의 편집 모드 빌드 결과가 서로 달랐다. 같은 이름의 자식(슬롯 카드 6장의 `CardButton` 등)이 여러 개라 Unity가 파일 안 fileID를 다시 매긴다. fileID를 뺀 비교에서는 `UI_EventHandler` 11개 말고 같다. GUID 참조는 그대로다. 그래서 "재생성 git 변경 0"은 이름이 겹치지 않는 프리팹에서만 맞다.
 - Unity 확인: 남음 — 백로그 목록을 이동 버튼 위에서 끌기, 메뉴를 연 채 방향키 · Enter가 재생 화면에 닿지 않음, 메뉴 · 설정을 닫으면 연 버튼으로 포커스, `Validate Sample UI` 문제 0. 원본 블랙홀 데모도 따로(원본 PLAN의 "확인").
+
+#### B — 빌더의 공용 부분을 UIPF 도구로 (10-27, 아미야 결정: 게임에 매이지 않은 것만 · 앱이 목록과 뿌리를 쥔다 · 블랙홀 일시 정지 창으로 증명)
+UIPF `feat/authoring-tools` @ `f912e99`(`dev` 머지 전)에 `Editor/UI/Authoring`과 에디터 asmdef `UIPresentationFlow.Editor`를 두고 다시 반입했다(대조 0줄, UIPF `.meta` 118개).
+
+| 이쪽에 있던 것 | 지금 |
+|---|---|
+| `KedNode` · `KedAnchor` · 자리 계산(`Node` · `Fill` · `Stretch` · `StretchX` · `Place` · 기준점 가운데로) | UIPF `UINode` · `UIAnchor` · `UINodes`. 명세 여덟과 키트는 이름만 바꿨다(`KedNode` → `UINode`). 키트의 `Node` · `Fill` …은 UIPF를 부르는 한 줄 |
+| 직렬화 칸 쓰기(`SetFloat` · `SetObject`) | UIPF `UISerialized` |
+| 그림 색인 · 겹침(`KedUIUnits.ArtIndex`) | UIPF `UISpriteIndex`. KedUI는 겹침을 모두 문제로(`KedUIUnits.Art`) |
+| 묶음 규칙 · 감사(`KedUIUnits`) | UIPF `UIScreenUnits`. `KedUIUnits`에는 뿌리와 허용할 곳(UIPF 사본 · 본체)만 남았다(`Rules`) |
+| 검사(Refs · Presentation) | UIPF `UIScreenValidation`. `KedUIValidate`는 엄하게(위젯 Refs · presentationId) 부르고 묶음 감사 · 그림 이름을 더한다 |
+| 프리팹 저장 · Presentation 만들기 | UIPF `UIPrefabs.Save` · `UIPresentationAssets.Ensure`. 빌드는 플레이 중이면 멈춘다(`UIPrefabs.CanBuild`) |
+| 글꼴 만들기 · 비우기 · 굵기 표 | UIPF `UIFontAssets`. `KedUIFonts`에는 KedUI의 글꼴과 자리만 |
+
+- 남은 것(ked의 몫): 부품 꼴(`KedUIKit` — 그림 · 글꼴 · 버튼 · 슬라이더 · 스위치), 설정, 검사 메뉴, 명세 여덟, 앱 빌드(`KedUIBuild` · `KedUIAssets`), 그림 임포트.
+- 오프라인 컴파일(6000.3): 15개 어셈블리 오류 0 · 경고 0. `UIPresentationFlow.Editor` 18파일(옛 `Editor/UI` 10 + `Authoring` 8)이 새 어셈블리가 되어 `Assembly-CSharp-Editor`는 1파일.
+- 자리 계산은 옮기기 전과 같은 식이다 — 다시 지으면 슬롯 카드 프리팹(fileID만) 말고 git 변경 0이어야 한다. 보고의 검사 줄은 "검사: 화면 묶음 7 · 프리팹 13(화면 · 위젯 N) · Presentation 12"로 바뀐다.
+- Unity 확인: 남음 — `Build Sample UI`(편집 모드) 뒤 git 변경이 `SaveLoadPanel.prefab`의 fileID뿐인지, `Validate Sample UI` 문제 0.
 
 ### U5. 문서
 - SCOPE-BOUNDARY에 "꽂힌 모듈 둘"(진행 · UI), ASSEMBLY-BOUNDARY의 어셈블리 표, `PLAN_framework-scope` 분류표.

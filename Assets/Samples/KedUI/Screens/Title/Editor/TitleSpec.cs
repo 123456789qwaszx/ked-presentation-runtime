@@ -10,11 +10,11 @@ namespace Ked.Samples.UI.Editor
     {
         public static GameObject Build(KedUIKit kit)
         {
-            KedNode view = kit.NewView<TitleScreen>(nameof(TitleScreen));
+            UINode view = kit.NewView<TitleScreen>(nameof(TitleScreen));
             kit.Backdrop(view, nameof(R.Background), "background_title");
 
-            KedNode safe = kit.Fill(view, nameof(R.SafeAreaRoot));
-            KedNode frame = kit.Frame(safe, nameof(R.Frame));
+            UINode safe = kit.Fill(view, nameof(R.SafeAreaRoot));
+            UINode frame = kit.Frame(safe, nameof(R.Frame));
 
             TextMeshProUGUI brand = kit.Label(frame, nameof(R.Brand), "KED", 110, 100, 500, 128, 90, KedColors.Navy, bold: true);
             brand.characterSpacing = 11f;
@@ -26,7 +26,7 @@ namespace Ked.Samples.UI.Editor
             kit.Label(frame, nameof(R.CurrentExample), "현재 예제  /  —", 116, 345, 600, 36, 20, KedColors.Muted);
 
             // 버튼 열: 예제에 따라 불러오기가 빠진다 — 세로 레이아웃이 자리를 메운다.
-            KedNode column = kit.Node(frame, nameof(R.MenuColumn), 110, 422, 390, 444);
+            UINode column = kit.Node(frame, nameof(R.MenuColumn), 110, 422, 390, 444);
             VerticalLayoutGroup layout = column.Go.AddComponent<VerticalLayoutGroup>();
             layout.spacing = 14f;
             layout.childAlignment = TextAnchor.UpperLeft;
@@ -43,21 +43,21 @@ namespace Ked.Samples.UI.Editor
             kit.LinkButton(column, nameof(R.Quit), nameof(R.QuitLabel), "종료", new Rect(110, 832, 140, 32), 19, KedColors.Muted);
 
             // 예제 카드: 둥근 틀 안에 실제 예제 배경(런타임에 호스트가 준다)과 이름 띠.
-            KedNode preview = kit.Node(frame, nameof(R.ScenePreview), 700, 169, 780, 486);
+            UINode preview = kit.Node(frame, nameof(R.ScenePreview), 700, 169, 780, 486);
             kit.Surface(preview, KedColors.Hex(0xE4F6F6), radius: 16f);
 
-            KedNode mask = kit.Node(preview, "PreviewMask", 703, 172, 774, 480);
+            UINode mask = kit.Node(preview, "PreviewMask", 703, 172, 774, 480);
             kit.Surface(mask, KedColors.Divider, radius: 13f);
             mask.Go.AddComponent<Mask>().showMaskGraphic = true;
 
-            KedNode scene = kit.Fill(mask, nameof(R.PreviewScene));
+            UINode scene = kit.Fill(mask, nameof(R.PreviewScene));
             Image sceneImage = kit.Clear(scene, raycast: false);
             sceneImage.color = KedColors.Divider;
             AspectRatioFitter fitter = scene.Go.AddComponent<AspectRatioFitter>();
             fitter.aspectMode = AspectRatioFitter.AspectMode.EnvelopeParent;
             fitter.aspectRatio = 16f / 9f;
 
-            KedNode caption = kit.Node(mask, nameof(R.PreviewCaption), 703, 550, 774, 102);
+            UINode caption = kit.Node(mask, nameof(R.PreviewCaption), 703, 550, 774, 102);
             kit.Solid(caption, KedColors.PreviewCaption);
 
             kit.Label(mask, nameof(R.PreviewTitle), "—", 737, 565, 600, 42, 30, KedColors.White, bold: true);

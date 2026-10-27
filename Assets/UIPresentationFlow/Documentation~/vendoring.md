@@ -15,10 +15,10 @@
 
 | | |
 |---|---|
-| 원본 | `UIPresentationFlow` · `dev` @ `4a4af6f` (2026-10-27). `cf3fa98` 위에 이 저장소에서 드러난 빈틈 셋(끌기 넘기기 · Panel 아래 Root 막기 · 포커스 되돌리기)과 문서를 더했다 — 원본 `docs/PLAN_from-ked.md`. 반입한 `feat/from-ked` @ `3a26d8b`와 트리가 같다(`dev`에는 커밋을 새로 지어 합쳤다) |
-| 반입 | 2026-10-27 · 원본 → 사본. 처음은 `cf3fa98`, 같은 날 `3a26d8b`로 다시(`Scripts/UI`의 셋을 고치고 `UIManager.PanelInput.cs` 하나를 더함) |
+| 원본 | `UIPresentationFlow` · `feat/authoring-tools` @ `f912e99` (2026-10-27, `dev` 머지 전). `dev` @ `4a4af6f` 위에 화면 짓기 도구(`Editor/UI/Authoring`)와 에디터 asmdef를 더했다. `4a4af6f`는 `cf3fa98` 위에 이 저장소에서 드러난 빈틈 셋(끌기 넘기기 · Panel 아래 Root 막기 · 포커스 되돌리기)을 더한 것 — 원본 `docs/PLAN_from-ked.md` |
+| 반입 | 2026-10-27 · 원본 → 사본. 처음은 `cf3fa98`, 같은 날 `3a26d8b`(= `dev` `4a4af6f`)로 다시(`Scripts/UI`의 셋을 고치고 `UIManager.PanelInput.cs` 하나를 더함), 그다음 `f912e99`로 다시(`Editor/UI`에 asmdef와 `Authoring/` 여덟 파일) |
 | 원본 Unity | 6000.6.2f1 (ugui 2.6.0). 이 저장소는 6000.3.16f1 (ugui 2.0.0)이다. 코드만 들이고 에셋은 이 저장소에서 새로 만든다 |
-| GUID | 원본 `.meta`를 그대로 가져왔다(106개, 같은 날 구조를 원본대로 되돌리며 `Scripts.meta`를 더해 107개, `3a26d8b`에서 `UIManager.PanelInput.cs.meta`를 더해 108개). 반입 때 이 저장소 전체 `.meta` 888개와 겹치는 GUID는 0개였고, 뒤에 더한 둘의 GUID도 겹치지 않는다. 사본 폴더 자신의 `Assets/UIPresentationFlow.meta`만 이 저장소에서 만든 것이다 |
+| GUID | 원본 `.meta`를 그대로 가져왔다(106개, 같은 날 구조를 원본대로 되돌리며 `Scripts.meta`를 더해 107개, `3a26d8b`에서 `UIManager.PanelInput.cs.meta`를 더해 108개, `f912e99`에서 asmdef · `Authoring` 폴더 · 스크립트 여덟의 `.meta`를 더해 118개). 반입 때 이 저장소 전체 `.meta` 888개와 겹치는 GUID는 0개였고, 뒤에 더한 것들의 GUID도 겹치지 않는다. 사본 폴더 자신의 `Assets/UIPresentationFlow.meta`만 이 저장소에서 만든 것이다 |
 
 **원본과 갈리면 이 표를 고친다.** 표가 낡으면 사본이 어디서 왔는지 아무도 모르게 된다.
 
@@ -33,7 +33,7 @@
 | `Assets/Shaders/` | `Assets/UIPresentationFlow/Shaders/` |
 | 폴더 `.meta` `Scripts` · `Editor` · `Shaders` | 같은 GUID 그대로 |
 
-에디터 코드(`Editor/UI`)는 원본처럼 런타임 asmdef 밖에 있어서, Unity의 `Editor` 특수 폴더로 `Assembly-CSharp-Editor`에 든다. 에디터용 asmdef는 따로 두지 않는다.
+에디터 코드(`Editor/UI`)는 원본의 에디터 asmdef `Editor/UI/UIPresentationFlow.Editor.asmdef`(`f912e99`부터)에 든다. 예제 UI의 에디터 asmdef(`Ked.Samples.UI.Editor`)가 이것을 참조해 화면 짓기 도구를 쓴다 — asmdef 어셈블리는 `Assembly-CSharp-Editor`를 참조할 수 없다.
 
 가져오지 않은 것은 다음과 같다.
 - `Assets/Scripts/Demo/`: Adaptive UI 데모 코드
@@ -49,7 +49,7 @@
 | 반입 때의 갈림 | 왜 있었나 | 어떻게 없앴나 |
 |---|---|---|
 | 원본의 `Scripts/` 한 층을 걷어 네 폴더와 런타임 asmdef를 이 폴더 뿌리에 둠 | 경로를 짧게 하려고 | 원본 구조로 되돌렸다(`Scripts/` 아래로 옮김, `.meta`째) |
-| `Editor/UIPresentationFlow.Editor.asmdef` 추가 | 위 구조 때문에 `Editor/UI`가 런타임 asmdef 아래에 들었다. Unity는 asmdef 아래의 `Editor` 폴더를 에디터 전용으로 보지 않아서, 이것이 없으면 에디터 코드가 런타임 어셈블리에 섞인다. 반입 때 먼저 드러난 증상은 옛 예제 UI와 이름이 겹친 CS0433이었다 | 구조를 되돌려 필요 없어졌다. 지웠다 |
+| `Editor/UIPresentationFlow.Editor.asmdef` 추가 | 위 구조 때문에 `Editor/UI`가 런타임 asmdef 아래에 들었다. Unity는 asmdef 아래의 `Editor` 폴더를 에디터 전용으로 보지 않아서, 이것이 없으면 에디터 코드가 런타임 어셈블리에 섞인다. 반입 때 먼저 드러난 증상은 옛 예제 UI와 이름이 겹친 CS0433이었다 | 구조를 되돌려 필요 없어졌다. 지웠다. 뒤에 원본이 같은 이름의 asmdef를 `Editor/UI`에 두었다(`f912e99`) — 이것은 원본의 것이고 까닭도 다르다(앱의 빌드 명세가 참조) |
 | 런타임 asmdef `autoReferenced: true → false` | 옛 예제 UI(기본 어셈블리)가 UIPF와 같은 전역 타입 이름 20개를 써서, 자동 참조면 CS0436 경고가 사용처마다 났다 | PLAN U3에서 옛 UI를 걷고 원본 값 `true`로 |
 
 다시 갈림이 생기면 이 절에 이유와 "언제까지"를 적는다.
@@ -68,7 +68,7 @@ diff -r -q --strip-trailing-cr                     /tmp/uipf/Assets/Shaders  Ass
 for m in Scripts Editor Shaders; do diff --strip-trailing-cr /tmp/uipf/Assets/$m.meta Assets/UIPresentationFlow/$m.meta; done
 ```
 
-결과가 0줄이면 같다. 결과(2026-10-27, `cf3fa98`)는 PLAN_uipf-ui의 U3 기록에, `3a26d8b`(= `dev` `4a4af6f`)는 "UIPF로 되돌림"에 있다.
+결과가 0줄이면 같다. 결과(2026-10-27, `cf3fa98`)는 PLAN_uipf-ui의 U3 기록에, `3a26d8b`(= `dev` `4a4af6f`)와 `f912e99`는 "UIPF로 되돌림"에 있다.
 
 ## 반입 — 원본 → 사본
 

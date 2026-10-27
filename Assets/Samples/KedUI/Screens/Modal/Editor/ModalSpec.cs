@@ -10,15 +10,15 @@ namespace Ked.Samples.UI.Editor
     {
         public static GameObject Confirm(KedUIKit kit)
         {
-            KedNode view = kit.NewView<ConfirmPanel>(nameof(ConfirmPanel));
+            UINode view = kit.NewView<ConfirmPanel>(nameof(ConfirmPanel));
 
-            KedNode dim = kit.Fill(view, nameof(C.ConfirmDim));
+            UINode dim = kit.Fill(view, nameof(C.ConfirmDim));
             kit.Solid(dim, KedColors.Dim, raycast: true);
 
-            KedNode safe = kit.Fill(view, nameof(C.SafeAreaRoot));
-            KedNode frame = kit.Frame(safe, "ConfirmFrame");
+            UINode safe = kit.Fill(view, nameof(C.SafeAreaRoot));
+            UINode frame = kit.Frame(safe, "ConfirmFrame");
 
-            KedNode popup = kit.Node(frame, nameof(C.ConfirmPopup), 400, 235, 800, 430);
+            UINode popup = kit.Node(frame, nameof(C.ConfirmPopup), 400, 235, 800, 430);
             kit.Image(popup, "panel_popup", raycast: true);
 
             kit.Label(frame, nameof(C.ConfirmTitle), "", 440, 257, 650, 48, 28, KedColors.White, bold: true,
@@ -26,7 +26,7 @@ namespace Ked.Samples.UI.Editor
             kit.IconButton(frame, nameof(C.ConfirmClose), "close", new Rect(1128, 249, 42, 42), padding: 11f);
 
             // 두 줄 이상의 본문도 버튼에 닿지 않게 시안(116)보다 높게 둔다.
-            KedNode body = kit.Node(frame, nameof(C.ConfirmBody), 452, 335, 696, 190);
+            UINode body = kit.Node(frame, nameof(C.ConfirmBody), 452, 335, 696, 190);
             kit.Text(body, "", 25, KedColors.Navy, TextAlignmentOptions.Center, wrap: true, lineSpacing: 12f);
 
             kit.TextButton(frame, nameof(C.ConfirmCancel), nameof(C.ConfirmCancelLabel), "취소",
@@ -39,28 +39,28 @@ namespace Ked.Samples.UI.Editor
 
         public static GameObject Notice(KedUIKit kit)
         {
-            KedNode view = kit.NewView<NoticePanel>(nameof(NoticePanel));
+            UINode view = kit.NewView<NoticePanel>(nameof(NoticePanel));
 
-            KedNode dim = kit.Fill(view, nameof(N.NoticeDim));
+            UINode dim = kit.Fill(view, nameof(N.NoticeDim));
             kit.Solid(dim, KedColors.Dim, raycast: true);
 
-            KedNode safe = kit.Fill(view, nameof(N.SafeAreaRoot));
-            KedNode frame = kit.Frame(safe, "NoticeFrame");
+            UINode safe = kit.Fill(view, nameof(N.SafeAreaRoot));
+            UINode frame = kit.Frame(safe, "NoticeFrame");
 
-            KedNode popup = kit.Node(frame, nameof(N.NoticePopup), 400, 235, 800, 430);
+            UINode popup = kit.Node(frame, nameof(N.NoticePopup), 400, 235, 800, 430);
             kit.Image(popup, "panel_popup", raycast: true);
 
             kit.Label(frame, nameof(N.NoticeTitle), "", 440, 257, 650, 48, 28, KedColors.White, bold: true,
                 overflow: TextOverflowModes.Ellipsis);
 
-            KedNode check = kit.Node(frame, nameof(N.NoticeCheck), 756, 340, 88, 72);
+            UINode check = kit.Node(frame, nameof(N.NoticeCheck), 756, 340, 88, 72);
             kit.Image(check, "checkmark", preserveAspect: true);
 
-            KedNode warning = kit.Node(frame, nameof(N.NoticeWarning), 768, 342, 64, 64);
+            UINode warning = kit.Node(frame, nameof(N.NoticeWarning), 768, 342, 64, 64);
             kit.Image(warning, "icon_close", preserveAspect: true);
             warning.Go.SetActive(false);
 
-            KedNode body = kit.Node(frame, nameof(N.NoticeBody), 452, 420, 696, 110);
+            UINode body = kit.Node(frame, nameof(N.NoticeBody), 452, 420, 696, 110);
             kit.Text(body, "", 25, KedColors.Navy, TextAlignmentOptions.Center, wrap: true, lineSpacing: 10f);
 
             kit.TextButton(frame, nameof(N.NoticeAccept), nameof(N.NoticeAcceptLabel), "확인",
