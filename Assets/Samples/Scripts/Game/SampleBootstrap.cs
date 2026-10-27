@@ -277,7 +277,7 @@ public class SampleBootstrap : MonoBehaviour, IRigPrefabSource
             SummaryKey = prefix + ".summary",
             Preview = Resources.Load<Sprite>(presentationOnly
                 ? "Backgrounds/class_day"
-                : "Backgrounds/1_골동품상점_에피1용오픈"),
+                : "Backgrounds/class_lunch"),
         };
     }
 

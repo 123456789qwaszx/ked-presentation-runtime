@@ -1,58 +1,60 @@
 {
-  "ChapterId": "qwer_scene",
-  "DisplayName": "qwer (장면 묶음 테스트)",
+  "ChapterId": "festival_eve",
+  "DisplayName": "축제 전날",
   "StartEpisodeId": "EP01",
   "Stats": [
-    { "Key": "int", "DisplayName": "성실성", "Type": "Number", "Initial": 0, "Minimum": 0, "Maximum": 5 },
-    { "Key": "power", "DisplayName": "요령있음", "Type": "Number", "Initial": 0, "Minimum": 0, "Maximum": 5 }
+    { "Key": "성실", "DisplayName": "성실", "Type": "Number", "Initial": 0, "Minimum": 0, "Maximum": 5 },
+    { "Key": "요령", "DisplayName": "요령", "Type": "Number", "Initial": 0, "Minimum": 0, "Maximum": 5 }
   ],
   "Nodes": [
     {
       "EpisodeId": "EP01",
-      "Title": "사무실 - 도착",
-      "DialogueEntryId": "SC_EP01",
-      "SceneId": "사무실",
+      "Title": "교실 - 반쯤 빈 간판",
+      "DialogueEntryId": "Festival_Classroom",
+      "SceneId": "교실",
       "EventKey": "",
       "NextOptions": [
-        { "TargetEpisodeId": "EP02_01", "ChoiceLabel": "성실하게 (Via 있음, 같은 장면)", "VisibleConditions": [], "Conditions": [], "LockedReasonText": "", "ViaNodeId": "SC_VIA_1", "StatChanges": [ { "Key": "int", "Amount": 2, "Op": "Add" } ] },
-        { "TargetEpisodeId": "EP02_02", "ChoiceLabel": "요령있게 (Via 없음, 같은 장면)", "VisibleConditions": [], "Conditions": [], "LockedReasonText": "", "ViaNodeId": "", "StatChanges": [ { "Key": "power", "Amount": 2, "Op": "Add" } ] }
+        { "TargetEpisodeId": "EP02_REMAKE", "ChoiceLabel": "처음부터 다시 그린다", "VisibleConditions": [], "Conditions": [], "LockedReasonText": "", "StatChanges": [ { "Key": "성실", "Amount": 2, "Op": "Add" } ] },
+        { "TargetEpisodeId": "EP02_SHORTCUT", "ChoiceLabel": "있는 걸로 빨리 끝낸다", "VisibleConditions": [], "Conditions": [], "LockedReasonText": "", "StatChanges": [ { "Key": "요령", "Amount": 2, "Op": "Add" } ] }
       ]
     },
     {
-      "EpisodeId": "EP02_01",
-      "Title": "사무실 - 성실 루트",
-      "DialogueEntryId": "SC_EP02_01",
-      "SceneId": "사무실",
+      "EpisodeId": "EP02_REMAKE",
+      "Title": "교실 - 처음부터 다시",
+      "DialogueEntryId": "Festival_Remake",
+      "SceneId": "교실",
       "EventKey": "",
       "NextOptions": [
-        { "TargetEpisodeId": "EP03", "ChoiceLabel": "복도로 (장면 나감)", "VisibleConditions": [], "Conditions": [], "LockedReasonText": "", "ViaNodeId": "", "StatChanges": [] }
+        { "TargetEpisodeId": "EP02_WRAPUP", "ChoiceLabel": "", "Auto": true, "VisibleConditions": [], "Conditions": [], "LockedReasonText": "", "StatChanges": [] }
       ]
     },
     {
-      "EpisodeId": "EP02_02",
-      "Title": "사무실 - 요령 루트",
-      "DialogueEntryId": "SC_EP02_02",
-      "SceneId": "사무실",
+      "EpisodeId": "EP02_SHORTCUT",
+      "Title": "교실 - 있는 걸로",
+      "DialogueEntryId": "Festival_Shortcut",
+      "SceneId": "교실",
       "EventKey": "",
       "NextOptions": [
-        { "TargetEpisodeId": "EP03", "ChoiceLabel": "복도로 (Via 있음, 장면 나감)", "VisibleConditions": [], "Conditions": [], "LockedReasonText": "", "ViaNodeId": "SC_VIA_2", "StatChanges": [] }
+        { "TargetEpisodeId": "EP02_WRAPUP", "ChoiceLabel": "", "Auto": true, "VisibleConditions": [], "Conditions": [], "LockedReasonText": "", "StatChanges": [] }
+      ]
+    },
+    {
+      "EpisodeId": "EP02_WRAPUP",
+      "Title": "교실 - 간판 완성",
+      "DialogueEntryId": "Festival_Wrapup",
+      "SceneId": "교실",
+      "EventKey": "",
+      "NextOptions": [
+        { "TargetEpisodeId": "EP03", "ChoiceLabel": "교무실로 간다", "VisibleConditions": [], "Conditions": [], "LockedReasonText": "", "StatChanges": [] },
+        { "TargetEpisodeId": "EP03", "ChoiceLabel": "선생님께 진행 상황도 보고한다", "VisibleConditions": [ { "Kind": "Stat", "Key": "성실", "Op": "GreaterOrEqual", "IntValue": 2 } ], "Conditions": [], "LockedReasonText": "", "StatChanges": [ { "Key": "성실", "Amount": 1, "Op": "Add" } ] },
+        { "TargetEpisodeId": "EP03", "ChoiceLabel": "카스미에게 마무리를 부탁하고 간다", "VisibleConditions": [], "Conditions": [ { "Kind": "Stat", "Key": "요령", "Op": "GreaterOrEqual", "IntValue": 2 } ], "LockedReasonText": "요령 2 이상", "StatChanges": [ { "Key": "요령", "Amount": 1, "Op": "Add" } ] }
       ]
     },
     {
       "EpisodeId": "EP03",
-      "Title": "복도",
-      "DialogueEntryId": "SC_EP03",
-      "SceneId": "복도",
-      "EventKey": "",
-      "NextOptions": [
-        { "TargetEpisodeId": "EP04", "ChoiceLabel": "", "Auto": true, "VisibleConditions": [], "Conditions": [], "LockedReasonText": "", "ViaNodeId": "", "StatChanges": [] }
-      ]
-    },
-    {
-      "EpisodeId": "EP04",
-      "Title": "복도 - 끝",
-      "DialogueEntryId": "SC_EP04",
-      "SceneId": "복도",
+      "Title": "교무실 앞 - 간판 검사",
+      "DialogueEntryId": "Festival_Staffroom",
+      "SceneId": "교무실 앞",
       "EventKey": "",
       "NextOptions": []
     }

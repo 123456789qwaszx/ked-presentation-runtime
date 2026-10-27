@@ -60,6 +60,8 @@ Yarn Spinner를 기반으로 제작한 **비주얼 노벨 화면 연출 런타�
 ```
 
 진행·저장 예제의 대본은 `Assets/Samples/Dialogue/test/qwer_scene.yarn`(챕터 JSON `ChapterProgression/qwer_scene.progression.json`)입니다.
+챕터 하나(축제 전날)에 장면 둘 — 진행 선택지와 스탯, 대사 선택지와의 차이, 숨는 · 잠기는 선택지, 자동 간선,
+장면 확정과 지난 장면에서 갈라지기, 챕터 끝(끝 카드)을 한 번씩 지나갑니다.
 
 ### 3. 대사 실행 흐름
 
