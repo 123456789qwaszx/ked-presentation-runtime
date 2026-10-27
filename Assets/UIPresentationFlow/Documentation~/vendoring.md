@@ -42,7 +42,7 @@
 
 | 갈림 | 이유 | 언제까지 |
 |---|---|---|
-| `Editor/UIPresentationFlow.Editor.asmdef` (+`.meta`) 추가 | 원본의 `Editor/UI`에는 asmdef가 없다. 반입할 때는 옛 예제 UI가 기본 어셈블리(`Assembly-CSharp`)에 같은 전역 이름(`UIBase` 등)을 들고 있어서, 에디터 코드가 `Assembly-CSharp-Editor`로 컴파일되면 CS0433 오류가 났다. 이 asmdef는 에디터 코드를 런타임 asmdef만 참조하도록 감싼다. 옛 UI를 걷은 뒤(PLAN U3)로는 이 오류의 원인이 없다 — asmdef 없이도 컴파일된다 | 원본에 넣을지, 사본에서 뺄지 정한다. 원본에 넣거나 사본에서 빼면 이 줄을 지운다 |
+| `Editor/UIPresentationFlow.Editor.asmdef` (+`.meta`) 추가 | 원본의 `Editor/UI`에는 asmdef가 없다. 원본에서는 `Assets/Editor/`가 런타임 asmdef(`Assets/Scripts/`) 밖이라 Unity의 `Editor` 특수 폴더로 `Assembly-CSharp-Editor`에 든다. 사본은 `Scripts/` 한 층을 걷어 런타임 asmdef가 이 폴더 뿌리에 있으므로 `Editor/UI`가 그 아래에 든다. Unity는 asmdef 아래의 `Editor` 폴더를 에디터 전용으로 보지 않는다. 이 asmdef가 없으면 에디터 코드(가드 없이 `UnityEditor` 사용)가 런타임 어셈블리에 섞여 플레이어 빌드가 깨진다. (반입 때 처음 드러난 증상은 옛 예제 UI와 겹친 이름의 CS0433이었다 — 그 원인은 U3에서 없어졌다) | 사본 폴더 구조가 원본과 다른 동안. 사본도 `Scripts/`와 `Editor/`를 형제로 두면(원본 구조) 필요 없다 |
 
 `UIPresentationFlow.Runtime.asmdef`의 `autoReferenced`는 반입 때 `false`로 바꿨다가(옛 예제 UI와 이름 20개가 겹쳐 CS0436 경고) PLAN U3에서 옛 UI를 걷으며 원본 값 `true`로 되돌렸다. 지금은 원본과 같다.
 

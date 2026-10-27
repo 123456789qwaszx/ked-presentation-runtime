@@ -115,7 +115,7 @@ UIPF에서 그림이 화면에 들어가는 길은 둘이다.
 ### U0. 반입 ✅ (2026-10-27, Unity 확인 10-27)
 - UIPF `dev` @ `cf3fa98`의 blob을 `git archive`로 꺼내 복사했다(`.meta`째, 원본 GUID 106개 유지 — 이 저장소 `.meta` 888개와 겹침 0). 새 폴더 `.meta` 1개.
 - 사본에만 있는 갈림 둘(`Assets/UIPresentationFlow/Documentation~/vendoring.md`):
-  - **Editor asmdef 추가** — 원본의 `Editor/UI`에는 asmdef가 없어 그대로 두면 `Assembly-CSharp-Editor`로 컴파일되고, 그 어셈블리가 옛 UI(`Assembly-CSharp`)와 UIPF를 함께 참조해 `UIBase` 같은 이름이 CS0433 오류가 된다. **원본에도 같은 파일을 넣어야 한다.** — U3에서 옛 UI를 걷어 이 오류의 원인은 없어졌다. 원본에 넣을지, 사본에서 뺄지 정한다.
+  - **Editor asmdef 추가** — 원본의 `Editor/UI`에는 asmdef가 없어 그대로 두면 `Assembly-CSharp-Editor`로 컴파일되고, 그 어셈블리가 옛 UI(`Assembly-CSharp`)와 UIPF를 함께 참조해 `UIBase` 같은 이름이 CS0433 오류가 된다. **원본에도 같은 파일을 넣어야 한다.** — U3에서 옛 UI를 걷어 CS0433의 원인은 없어졌다. 하지만 이 asmdef는 그것과 별개로 필요하다. 사본은 원본의 `Scripts/` 한 층을 걷어 런타임 asmdef가 폴더 뿌리에 있고, 그래서 `Editor/UI`가 런타임 asmdef 아래에 든다. Unity는 asmdef 아래의 `Editor` 폴더를 에디터 전용으로 보지 않는다. 빼면 에디터 코드(가드 없이 `UnityEditor` 사용)가 런타임 어셈블리에 섞여 플레이어 빌드가 깨진다. 10-27에 빼려다 오프라인 컴파일에서 런타임 어셈블리가 78 → 88파일이 되는 것을 보고 되돌렸다.
   - **런타임 asmdef `autoReferenced: false`** — 처음 계획은 "U0–U3 동안 CS0436 경고 감수"였다. 경고가 사용처마다 나서 "새 경고 0" 기준과 맞지 않으므로, UIPF를 이름으로 참조하는 어셈블리(새 예제 UI)에만 보이게 했다. → U3에서 원본 값 `true`로 되돌렸다.
 - 그래서 옛 UI·본체·진행은 UIPF를 전혀 보지 않는다. 바뀐 것은 UIPF 어셈블리 둘이 새로 생긴 것뿐이다.
 - Unity 확인: 컴파일 오류·새 경고 0, 메뉴 `Tools/UI Presentation/…`이 보인다, 두 예제 동작이 그대로.
@@ -131,7 +131,7 @@ UIPF에서 그림이 화면에 들어가는 길은 둘이다.
 ① `PlayScreen`(대화 · 퀵메뉴 · 선택지) ② 백로그 ③ 시스템 메뉴 ④ 세이브 ⑤ 로드 ⑥ 설정 ⑦ 확인 · 알림 ⑧ 타이틀.
 화면마다: 빌드 명세 → 빌더 → 미리보기 장면에서 확인. 본체 계약 구현은 가짜 데이터로 먼저 돌린다.
 
-### U3. 교체 ✅ (2026-10-27, Unity 확인 남음)
+### U3. 교체 ✅ (2026-10-27, Unity 확인 10-27)
 Unity를 닫고 했다.
 
 - **씬 `PresentationSample`** (YAML 문서 1,090 → 291):
@@ -152,7 +152,7 @@ Unity를 닫고 했다.
   - `PresentationAssembler`: 옛 관리자 · 그림 패치 설치를 지웠다. 대사창 · 선택지 상자는 화면 쪽이 넘긴 것만 쓴다(없으면 조립 오류).
   - `StageForKedUI`(옛 `LegacyStageForKedUI`): 무대가 꺼져 있으면 켜기만 한다.
   - `<<ui_patch>>`: 옛 그림 패치와 함께 걷었다. 지금은 `UIThemePatchNotConnected`가 받아 경고만 남기고 화면은 그대로 둔다. U4에서 UIPF `SetContext`로 잇는다. 지금 예제 대본에는 ui_patch가 없다.
-  - UIPF 런타임 asmdef의 `autoReferenced`를 원본 값 `true`로 되돌렸다. 사본 갈림은 Editor asmdef 하나로 줄었다(`vendoring.md`).
+  - UIPF 런타임 asmdef의 `autoReferenced`를 원본 값 `true`로 되돌렸다. 사본 갈림은 Editor asmdef 하나로 줄었다(`vendoring.md`). 남은 하나는 사본의 폴더 구조 때문이다(위 U0).
 - **에셋 삭제**: 옛 UI만 쓰던 것이다. 다른 에셋 · 코드 · 대본에서 GUID나 경로로 참조하는 곳이 없음을 확인했다.
   - `Samples/Prefabs/`: 백로그 줄 · 저장 슬롯 · 선택지 항목 프리팹
   - `Samples/Resources/ui/test/`: 옛 그림 패치 테마
@@ -167,10 +167,11 @@ Unity를 닫고 했다.
 - **Unity 확인**: 아래 "U3 확인"과 7절.
 
 #### U3 확인
-- [ ] 컴파일 오류 · 새 경고 0, 씬을 열어 Missing Script 0(`[StageCanvas]/Root/PresentataionUIRoot`)
-- [ ] 무대 — 배경 · 인물 · 화면 효과 · 무대 마스크 · 샷(팬 · 줌)이 전과 같다
-- [ ] 두 예제의 전 기능 — 재생 · 되감기 · 백로그 이동 · 빨리 넘기기 · 이어하기 · 슬롯 · 갈라지기
-- [ ] 디버그 — `DebugView`의 `ScreenFocusGridOverlay` · `CharacterFocusDebugView`
+2026-10-27 Unity 확인(아미야): 아래 넷을 요청했고 "잘 된다".
+- [x] 컴파일 오류 · 새 경고 0, 씬을 열어 Missing Script 0(`[StageCanvas]/Root/PresentataionUIRoot`)
+- [x] 무대 — 배경 · 인물 · 화면 효과 · 무대 마스크 · 샷(팬 · 줌)이 전과 같다
+- [x] 두 예제의 전 기능 — 재생 · 되감기 · 백로그 이동 · 빨리 넘기기 · 이어하기 · 슬롯 · 갈라지기
+- [x] 디버그 — `DebugView`의 `ScreenFocusGridOverlay` · `CharacterFocusDebugView`
 
 ### U4. 시연
 - `<<ui_patch dark>>` — `IUIThemePatchPort` → `UIManager.SetContext`. 데모 대본에 한 장면. 지금 그 자리는 `UIThemePatchNotConnected`(경고만)다.
