@@ -39,13 +39,15 @@ Assets/
 ├─ UIPresentationFlow/     UIPF 사본 — 원본과 같은 구조(Scripts/ · Editor/UI · Shaders), asmdef는 런타임 하나
 │   └─ Documentation~/vendoring.md
 └─ Samples/
-    ├─ KedUI/              새 예제 UI
-    │   ├─ Runtime/        asmdef Ked.Samples.UI — 화면(Screens) · 흐름(Flow) · 부품(Kit) · 설정(Settings) · KedUIHost
-    │   ├─ Editor/         asmdef Ked.Samples.UI.Editor — 빌더(Build/ · Build/Specs/)와 패키지의 KedUIArtImporter
-    │   ├─ Art/            패키지 PNG 49장(.meta는 Unity가 만든다)
-    │   ├─ Fonts/          Noto Sans KR Medium · Bold(가변 글꼴에서 뽑은 정적 굵기, OFL)
+    ├─ KedUI/              새 예제 UI — 화면 하나 = 묶음 하나(아래 "화면 묶음")
+    │   ├─ Ked.Samples.UI.asmdef   런타임 asmdef(뿌리 — Common · Screens · Runtime을 덮는다)
+    │   ├─ Common/         여러 화면이 같이 쓰는 것 — Scripts(부품 키트) · Sprites · Fonts(TTF · SDF · UIPF 글꼴 묶음)
+    │   ├─ Screens/        화면 묶음 7 — Title · Play · Menu · SaveLoad · Backlog · Settings · Modal
+    │   │                  각 묶음: Scripts · Prefabs · Presentation · Sprites · Editor(+.asmref) (Play만 Data)
+    │   ├─ Runtime/        앱 쪽 — 흐름(Flow) · 설정 값(Settings/KedSettings) · KedUIHost
+    │   ├─ Editor/         asmdef Ked.Samples.UI.Editor — 빌더(Build/)와 패키지의 KedUIArtImporter
+    │   ├─ Art/            받았지만 어느 화면도 쓰지 않는 그림 14장(시안 배경 포함)
     │   ├─ Texts/          UI 글자 표 KedUITexts.csv(ko-KR · en-US)
-    │   ├─ Generated/      빌더가 만든다 — Screens/*.prefab · KedOptionItem · 글꼴 SDF · Presentations · 프리셋 DB
     │   └─ Resources/KedUI/KedUICanvas.prefab   빌더가 만든다 — SampleBootstrap이 읽는다
     └─ Scripts/
         ├─ Game/KedUI/     호스트 어댑터(기본 어셈블리) — KedHostPorts · StageForKedUI
@@ -188,40 +190,47 @@ Unity를 닫고 했다. 사본에 남은 갈림(Editor asmdef)의 원인이 사�
 - `<<ui_patch>>`는 `UIThemePatchNotConnected`가 받아 경고만 남기고 화면은 그대로 둔다.
 - 원래 U4에 있던 README 절("AI가 UIPF 구조로 화면을 만든다")은 테마 전환을 빼고 U5로 옮겼다.
 
-### 화면 묶음 시험 (2026-10-27~, 아미야 제안)
-UIPF 위에 만든 화면을 "화면 하나 = 묶음 하나"(코드 · 프리팹 · 그림 · Presentation)로 두고 `.meta`째 반입하는 구성이 괜찮은지 여기서 먼저 써 본다. UIPF 원본도 아직 이 구조가 아니다. 바꾸는 곳은 `Samples/KedUI`뿐이고 UIPF 사본은 건드리지 않는다.
+### 화면 묶음 (2026-10-27, 아미야 제안 → 두 화면으로 시험 → 전체 적용)
+UIPF 위에 만든 화면을 "화면 하나 = 묶음 하나"(코드 · 프리팹 · 그림 · Presentation)로 두고 `.meta`째 반입하는 구성. UIPF 원본도 아직 이 구조가 아니어서 여기서 먼저 써 봤다. 바꾼 곳은 `Samples/KedUI`뿐이고 UIPF 사본은 건드리지 않았다.
 
 ```
 Samples/KedUI/
-├─ Ked.Samples.UI.asmdef   런타임 asmdef를 뿌리로 올림(Runtime/ · Common/ · Screens/를 덮는다)
-├─ Common/                 여러 화면이 같이 쓰는 것
+├─ Ked.Samples.UI.asmdef   런타임 asmdef를 뿌리로(Common/ · Screens/ · Runtime/을 덮는다)
+├─ Common/
 │   ├─ Scripts/            부품 키트 8 (옛 Runtime/Kit)
 │   ├─ Sprites/            키트가 쓰는 15장 + 여러 화면이 쓰는 3장(background_title · icon_close · icon_rollback)
-│   └─ Fonts/              Noto Sans KR TTF 2 · OFL · SDF 2 (옛 Fonts/ · Generated/Fonts/)
-├─ Screens/{묶음}/
-│   ├─ Scripts/            화면 · 위젯 스크립트
-│   ├─ Prefabs/            빌더가 만든 화면 프리팹
-│   ├─ Presentation/       {화면}Presentation.asset
-│   ├─ Sprites/            그 화면만 쓰는 그림
-│   └─ Editor/             빌드 명세 + Ked.Samples.UI.Editor.asmref
-└─ (아직 그대로) Runtime/ · Editor/ · Art/ · Generated/ · Texts/ · Resources/
+│   └─ Fonts/              Noto Sans KR TTF 2 · OFL · SDF 2 · UIPF 글꼴 묶음(KedUIFontSet)
+├─ Screens/
+│   ├─ Title/              TitleScreen
+│   ├─ Play/               PlayScreen(+ 대사창 · 선택지 상자 어댑터) · 선택지 항목 KedOptionItem · Data/ 대사창 배치 DB
+│   ├─ Menu/               SystemMenuPanel
+│   ├─ SaveLoad/           SaveLoadPanel(+ 위젯 SaveSlotCard)
+│   ├─ Backlog/            BacklogPanel(+ 위젯 BacklogRow)
+│   ├─ Settings/           SettingsPanel + Page 넷(Page는 주인 Panel의 묶음)
+│   └─ Modal/              ConfirmPanel · NoticePanel(명세 하나가 둘을 만든다)
+│      각 묶음: Scripts/ · Prefabs/ · Presentation/({화면}Presentation.asset) · Sprites/(그 화면만 쓰는 그림, 없으면 폴더 없음)
+│               · Editor/(빌드 명세 + Ked.Samples.UI.Editor.asmref)
+├─ Runtime/                앱 쪽 — Flow · Settings/KedSettings · KedUIHost
+├─ Editor/                 빌더(Build/) · 임포트 도구
+├─ Art/                    아무 화면도 쓰지 않는 그림 14장
+└─ Texts/ · Resources/ · asset-manifest.json
 ```
 
-- 시험 묶음: **백로그**(위젯 하나 · 전용 판 그림 하나), **설정**(Panel 하나 + Page 넷 — Page는 주인 Panel의 묶음에 둔다).
 - 묶음에 넣지 않는 것: 화면 흐름(`KedUIFlow.*`) · 설정 값(`KedSettings`) · 캔버스와 호스트 · 글자 표(CSV 하나). 화면을 쓰는 앱 쪽이다.
 - 빌더 규칙(`Editor/Build/KedUIUnits.cs`):
   - 그림은 이름으로 찾는다(KedUI 아래 어디든, 같은 이름 둘이면 문제). 패키지 임포트 도구도 같은 규칙. `asset-manifest.json`은 받은 그대로.
-  - 화면 스크립트가 `Screens/{묶음}/Scripts/`에 있으면 프리팹 · Presentation은 그 묶음에, 없으면 `Generated/`.
-  - 묶음 감사: 묶음 안 에셋이 직접 가리키는 것이 제 묶음 · Common · UIPF · 패키지뿐인지. 빌드 보고에 나온다.
-- 옮긴 것은 모두 `.meta`째(GUID 그대로). 새로 만든 것: 폴더 `.meta` 15 · `.asmref` 2(+`.meta`) · `KedUIUnits.cs`.
+  - 화면 스크립트가 `Screens/{묶음}/Scripts/`에 있으면 프리팹 · Presentation · Data는 그 묶음에. 아니면 `Generated/`(지금은 그런 화면이 없어 폴더도 없다).
+  - 묶음 감사: 묶음 안 에셋이 직접 가리키는 것이 제 묶음 · Common · UIPF · 본체(게임 쪽 프레임워크 — 선택지 항목 `VNOptionItem`, 대사창 배치 DB 형식) · 패키지뿐인지. 빌드 보고에 나온다.
+- 옮긴 것은 모두 `.meta`째(GUID 그대로). 새로 만든 것: 폴더 `.meta` · 묶음마다 `.asmref` 하나 · `KedUIUnits.cs`.
+- 시험(백로그 · 설정, `cd517f70`) → 10-27 Unity 확인(아미야 "너무 좋다") → 나머지 다섯 묶음과 `Generated/`의 남은 것(선택지 항목 · 대사창 배치 DB · 글꼴 묶음)까지 옮겼다.
 
 판단 기준과 결과:
 
 | 기준 | 결과 |
 |---|---|
-| 1. 묶음이 닫혀 있다(다른 묶음 · `Art/` · `Generated/`를 가리키지 않는다) | 정적 검사(클라우드, GUID 참조를 셈): 백로그 · 설정 모두 밖을 가리키는 것 0. Unity 묶음 감사는 확인 남음 |
-| 2. 빌더가 그대로 돈다 — 생성물이 묶음에 갱신되고 `Generated/`에 같은 이름이 새로 생기지 않는다, 보고 문제 0 | Unity 확인 남음 |
-| 3. 묶음 안 에디터 코드가 `.asmref`로 에디터 어셈블리에 붙는다 | 오프라인 컴파일: 명세 둘이 `Ked.Samples.UI.Editor`로(런타임 37파일 그대로), 14개 어셈블리 오류 0 · 경고 0. Unity 확인 남음 |
+| 1. 묶음이 닫혀 있다(다른 묶음 · `Art/` · `Generated/`를 가리키지 않는다) | 정적 검사(GUID 참조를 셈): 7묶음 모두 밖을 가리키는 것 0. 시험 두 묶음은 Unity 묶음 감사도 통과(10-27) |
+| 2. 빌더가 그대로 돈다 — 생성물이 묶음에 갱신되고 `Generated/`에 같은 이름이 새로 생기지 않는다, 보고 문제 0 | 시험 두 묶음: Unity 확인(10-27). 전체 적용: Unity 확인 남음 |
+| 3. 묶음 안 에디터 코드가 `.asmref`로 에디터 어셈블리에 붙는다 | 오프라인 컴파일: 명세 여덟이 모두 `Ked.Samples.UI.Editor`로(런타임 37파일 그대로), 14개 어셈블리 오류 0 · 경고 0. 시험 두 묶음은 Unity 확인(10-27) |
 | 4. 화면 하나를 빼고 다시 넣어도 이어진다 | 1이 성립하면 GUID로 이어진다 — 필요하면 Unity에서 따로 시험 |
 
 ### U5. 문서
@@ -346,7 +355,7 @@ Panel이 열린 동안 Root(타이틀·재생 화면)의 CanvasGroup도 막는�
 
 1. Unity를 연다 — 새 PNG · TTF의 `.meta`를 Unity가 만든다(이 커밋에는 없다).
 2. `Tools/Ked UI/Build Sample UI` — 그림 임포트 설정(패키지 도구) → TMP 글꼴 → 화면 프리팹 12 → 데이터 자산 → `Resources/KedUI/KedUICanvas` → Refs 감사. 콘솔 보고에 "문제"가 없어야 한다.
-3. 만들어진 `.meta` · `Generated/` · `Resources/KedUI/`를 커밋한다(10-27 커밋함).
+3. 만들어진 `.meta` · 생성물 · `Resources/KedUI/`를 커밋한다(10-27 커밋함. 생성물 자리는 그 뒤 화면 묶음으로 바뀌었다).
    - 빌더는 끝에 두 TMP 글꼴의 동적 데이터를 비우고 저장한다(`TMP_FontAsset.ClearFontAssetData(true)` — 아틀라스 1×1, 자산 몇 KB). 비우지 않으면 글자 몇 개만 들어가도 2048² 아틀라스가 자산에 통째로 저장되어 8MB가 넘는다.
    - 플레이하거나 프리팹을 열면 쓴 글자가 다시 채워져 글꼴 SDF 자산(화면 묶음 시험 뒤로는 `Common/Fonts/*.asset`, 그 전은 `Generated/Fonts/`)이 바뀐다. **그 변경은 커밋하지 않는다** — `git restore`로 되돌리거나, 빌더를 다시 돌리거나, 글꼴 자산 톱니 메뉴 `Clear Dynamic Data`로 비운다. 플레이어 빌드에는 `Clear Dynamic Data On Build`(켜 둠)가 같은 일을 한다.
 4. 플레이 — 두 예제(인스펙터 '예제')에서 아래 확인 목록.

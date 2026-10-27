@@ -30,7 +30,7 @@ namespace Ked.Samples.UI.Editor
         public const string ScreensDir = KedUIKit.Root + "/Generated/Screens";
         public const string CanvasDir = KedUIKit.Root + "/Resources/KedUI";
         public const string CanvasPath = CanvasDir + "/KedUICanvas.prefab";
-        public const string OptionItemPath = KedUIKit.Root + "/Generated/KedOptionItem.prefab";
+        public const string OptionItemName = "KedOptionItem";
 
         [MenuItem("Tools/Ked UI/Build Sample UI")]
         public static void BuildFromMenu()
@@ -73,12 +73,14 @@ namespace Ked.Samples.UI.Editor
 
                 var kit = new KedUIKit(font);
 
-                EnsureFolder(ScreensDir);
                 EnsureFolder(CanvasDir);
 
                 EditorUtility.DisplayProgressBar("Ked UI", "화면", 0.3f);
 
-                GameObject optionItem = Save(OptionItemSpec.Build(kit), OptionItemPath, built);
+                // 선택지 항목은 재생 화면의 선택지 상자가 쓴다 — 재생 묶음에 둔다.
+                string optionItemPath = KedUIUnits.PrefabPath(typeof(PlayScreen), OptionItemName, ScreensDir);
+                EnsureFolder(optionItemPath.Substring(0, optionItemPath.LastIndexOf('/')));
+                GameObject optionItem = Save(OptionItemSpec.Build(kit), optionItemPath, built);
 
                 GameObject[] pages =
                 {

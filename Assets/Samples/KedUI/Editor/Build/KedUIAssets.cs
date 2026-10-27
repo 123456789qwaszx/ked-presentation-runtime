@@ -10,11 +10,14 @@ namespace Ked.Samples.UI.Editor
     /// <summary>
     /// 화면 밖의 UIPF·연출 데이터 자산. 한 번 만들면 다시 만들지 않는다(사람이 고친 값을 빌드가 덮지 않게) —
     /// 글꼴 묶음만 매번 글꼴을 다시 건다.
+    /// 자리: 글꼴 묶음은 Common/Fonts, Presentation과 대사창 배치 DB는 그 화면의 묶음(KedUIUnits).
+    /// Generated/는 묶음에 들지 않은 화면이 있을 때만 쓴다(지금은 없다).
     /// </summary>
     internal static class KedUIAssets
     {
         public const string OutputDir = KedUIKit.Root + "/Generated";
         public const string PresentationDir = OutputDir + "/Presentations";
+        public const string FontSetPath = KedUIFonts.FontDir + "/KedUIFontSet.asset";
         public const string TextsPath = KedUIKit.Root + "/Texts/KedUITexts.csv";
 
         public static readonly Type[] ViewTypes =
@@ -36,7 +39,7 @@ namespace Ked.Samples.UI.Editor
         /// <summary>UIPF 공용 글꼴 묶음(UIThemeAssets.Fonts). 언어 줄마다 같은 글꼴 — Noto Sans KR은 라틴 글자도 갖는다.</summary>
         public static UIFontSet FontSet(TMP_FontAsset font)
         {
-            string path = OutputDir + "/KedUIFontSet.asset";
+            string path = FontSetPath;
             UIFontSet set = AssetDatabase.LoadAssetAtPath<UIFontSet>(path);
 
             if (set == null)
@@ -58,8 +61,6 @@ namespace Ked.Samples.UI.Editor
         /// <summary>화면마다 Presentation 하나(presentationId = 화면 키). 지금은 비어 있다 — 테마·변형을 더할 자리.</summary>
         public static UIPresentationSpec[] Presentations()
         {
-            KedUIBuild.EnsureFolder(PresentationDir);
-
             var specs = new List<UIPresentationSpec>(ViewTypes.Length);
 
             foreach (Type type in ViewTypes)
@@ -89,7 +90,8 @@ namespace Ked.Samples.UI.Editor
         /// </summary>
         public static DialogueSurfaceLayoutPresetDBSO SurfaceLayoutDb(List<string> problems)
         {
-            string path = OutputDir + "/KedSurfaceLayoutPresetDB.asset";
+            // 재생 화면의 대사창에 맞춘 데이터라 재생 묶음에 둔다(Screens/Play/Data).
+            string path = KedUIUnits.DataPath(typeof(PlayScreen), "KedSurfaceLayoutPresetDB.asset", OutputDir);
             var db = AssetDatabase.LoadAssetAtPath<DialogueSurfaceLayoutPresetDBSO>(path);
             if (db != null)
                 return db;
@@ -135,6 +137,7 @@ namespace Ked.Samples.UI.Editor
                 field.SetValue(db, entries);
             }
 
+            KedUIBuild.EnsureFolder(path.Substring(0, path.LastIndexOf('/')));
             AssetDatabase.CreateAsset(db, path);
             EditorUtility.SetDirty(db);
             return db;
