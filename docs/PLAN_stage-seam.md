@@ -83,8 +83,8 @@ VN 쪽은 `PresentationSessionContext`(Playback/Host)가 재생 상태를 그 �
 
 ### 한 것
 
-- [ked-command-executor](https://github.com/123456789qwaszx/ked-command-executor) `main` @ `0ad0b3f` — `Runtime/PresentationCore/` → `Assets/Ked.CommandExecutor/`(어셈블리 `Ked.CommandExecutor`, 참조 DOTween.Modules). 뼈대는 이 저장소의 ProjectSettings·Packages(Yarn 제외)·DOTween·URP 설정.
-- [ked-stage-runtime](https://github.com/123456789qwaszx/ked-stage-runtime) `main` @ `b7c712f` — `Assets/Ked.Presentation/`(Playback 제외) + `ExportedTuning/` + 실행기 반입본. asmdef: Runtime·Editor·Core.Tests가 `Ked.CommandExecutor`를 참조, 쓰지 않던 `Unity.TextMeshPro` 참조는 걷음. 무대 에셋이 재생 저장소 파일을 가리키는 GUID 0건.
+- [ked-command-executor](https://github.com/123456789qwaszx/ked-command-executor) `main` @ `d12e098` — `Runtime/PresentationCore/` → `Assets/Ked.CommandExecutor/`(어셈블리 `Ked.CommandExecutor`, 참조 DOTween.Modules). 뼈대는 이 저장소의 ProjectSettings·Packages(Yarn 제외)·DOTween·URP 설정.
+- [ked-stage-runtime](https://github.com/123456789qwaszx/ked-stage-runtime) `main` @ `1f40501` — `Assets/Ked.Presentation/`(Playback 제외) + `ExportedTuning/` + 실행기 반입본. asmdef: Runtime·Editor·Core.Tests가 `Ked.CommandExecutor`를 참조, 쓰지 않던 `Unity.TextMeshPro` 참조는 걷음. 무대 에셋이 재생 저장소 파일을 가리키는 GUID 0건.
 - 이 저장소: `PresentationCore/`를 `Assets/Ked.CommandExecutor/`로 옮기고(GUID 그대로), Playback asmdef가 실행기를 참조. 공유 파일(asmdef 셋·ASSEMBLY-BOUNDARY.md)은 무대 원본의 것. `diff -r` 0건 — 각 `Documentation~/vendoring.md`의 대조 명령.
 - 세 저장소 모두 `main`·`dev`. 어셈블리·네임스페이스 이름(`Ked.Presentation.*`)은 그대로다 — VnTool 반입과 스크립트 GUID가 매달려 있어서, 바꿀 날이 오면 셋을 한 번에.
 
