@@ -44,6 +44,7 @@ public sealed class PresentationAssembler
     private VNFeatureController _vnFeatureController;
     private VNLinePresentationFlow _linePresentationFlow;
     private ScenePresentation _scenePresentation;
+    private YarnPlaybackDriver _yarnPlaybackDriver;
 
     private PresentationAssembler(
         PresentationSceneRefs refs,
@@ -229,6 +230,7 @@ public sealed class PresentationAssembler
     private void BootstrapYarn()
     {
         YarnPlaybackDriver yarnPlaybackDriver = new(_refs.CommandExecutor, _presentationScopeSession);
+        _yarnPlaybackDriver = yarnPlaybackDriver;
 
         // 대사창 · 선택지 상자는 화면 쪽(새 예제 UI)이 넘긴다.
         IPresentationDialogueBoxView dialogueSurfaceBox = _refs.DialogueBoxView
@@ -312,7 +314,8 @@ public sealed class PresentationAssembler
             _presentationScopeSession,
             _choiceHistory,
             _episodeSkipController,
-            _linePresentationAdvanceState);
+            _linePresentationAdvanceState,
+            _yarnPlaybackDriver);
     }
 
     // 입력 폴러의 연결은 여기서 하지 않는다 — 재생 호스트가 정해진 뒤 PresentationRuntime.AttachHost가 한다.
