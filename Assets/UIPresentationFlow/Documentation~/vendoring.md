@@ -15,8 +15,8 @@
 
 | | |
 |---|---|
-| 원본 | `UIPresentationFlow` · `feat/authoring-tools` @ `f912e99` (2026-10-27, `dev` 머지 전). `dev` @ `4a4af6f` 위에 화면 짓기 도구(`Editor/UI/Authoring`)와 에디터 asmdef를 더했다. `4a4af6f`는 `cf3fa98` 위에 이 저장소에서 드러난 빈틈 셋(끌기 넘기기 · Panel 아래 Root 막기 · 포커스 되돌리기)을 더한 것 — 원본 `docs/PLAN_from-ked.md` |
-| 반입 | 2026-10-27 · 원본 → 사본. 처음은 `cf3fa98`, 같은 날 `3a26d8b`(= `dev` `4a4af6f`)로 다시(`Scripts/UI`의 셋을 고치고 `UIManager.PanelInput.cs` 하나를 더함), 그다음 `f912e99`로 다시(`Editor/UI`에 asmdef와 `Authoring/` 여덟 파일) |
+| 원본 | `UIPresentationFlow` · `feat/authoring-tools` @ `c22bb76` (2026-10-27, `dev` 머지 전). `dev` @ `4a4af6f` 위에 화면 짓기 도구(`Editor/UI/Authoring`)와 에디터 asmdef를 더했다(`f912e99`, `c22bb76`은 그 주석 · 문서 고침과 블랙홀 일시 정지 창 산출물). `4a4af6f`는 `cf3fa98` 위에 이 저장소에서 드러난 빈틈 셋(끌기 넘기기 · Panel 아래 Root 막기 · 포커스 되돌리기)을 더한 것 — 원본 `docs/PLAN_from-ked.md` |
+| 반입 | 2026-10-27 · 원본 → 사본. 처음은 `cf3fa98`, 같은 날 `3a26d8b`(= `dev` `4a4af6f`)로 다시(`Scripts/UI`의 셋을 고치고 `UIManager.PanelInput.cs` 하나를 더함), 그다음 `f912e99`로 다시(`Editor/UI`에 asmdef와 `Authoring/` 여덟 파일), `c22bb76`으로 다시(`UIPrefabs.cs` 주석) |
 | 원본 Unity | 6000.6.2f1 (ugui 2.6.0). 이 저장소는 6000.3.16f1 (ugui 2.0.0)이다. 코드만 들이고 에셋은 이 저장소에서 새로 만든다 |
 | GUID | 원본 `.meta`를 그대로 가져왔다(106개, 같은 날 구조를 원본대로 되돌리며 `Scripts.meta`를 더해 107개, `3a26d8b`에서 `UIManager.PanelInput.cs.meta`를 더해 108개, `f912e99`에서 asmdef · `Authoring` 폴더 · 스크립트 여덟의 `.meta`를 더해 118개). 반입 때 이 저장소 전체 `.meta` 888개와 겹치는 GUID는 0개였고, 뒤에 더한 것들의 GUID도 겹치지 않는다. 사본 폴더 자신의 `Assets/UIPresentationFlow.meta`만 이 저장소에서 만든 것이다 |
 
@@ -68,7 +68,7 @@ diff -r -q --strip-trailing-cr                     /tmp/uipf/Assets/Shaders  Ass
 for m in Scripts Editor Shaders; do diff --strip-trailing-cr /tmp/uipf/Assets/$m.meta Assets/UIPresentationFlow/$m.meta; done
 ```
 
-결과가 0줄이면 같다. 결과(2026-10-27, `cf3fa98`)는 PLAN_uipf-ui의 U3 기록에, `3a26d8b`(= `dev` `4a4af6f`)와 `f912e99`는 "UIPF로 되돌림"에 있다.
+결과가 0줄이면 같다. 결과(2026-10-27, `cf3fa98`)는 PLAN_uipf-ui의 U3 기록에, `3a26d8b`(= `dev` `4a4af6f`)와 `f912e99` · `c22bb76`은 "UIPF로 되돌림"에 있다.
 
 ## 반입 — 원본 → 사본
 

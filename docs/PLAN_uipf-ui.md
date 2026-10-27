@@ -272,7 +272,7 @@ AI가 프리팹(Unity 직렬화 데이터)을 직접 쓰지 않는다. AI는 화
 - Unity 재빌드(10-27, 편집 모드로 두 번): 지운 컴포넌트가 걷혔다. 함께 드러난 것 둘.
   - 이전에 커밋한 프리팹 10개의 버튼에 `UI_EventHandler`가 있었다. 이것은 `KedButton.Awake`(→ `ButtonFeedback.Bind`)가 실행 중에만 붙이므로, 이전 빌드는 플레이 중에 돈 것이다. 편집 모드 결과(10개 프리팹에서 47개가 빠짐)를 커밋했다. 실행하면 같은 것이 붙어 동작은 같다. 빌더가 플레이 중에는 거부하게 하는 것은 B에서.
   - 저장/불러오기 패널은 두 번의 편집 모드 빌드 결과가 서로 달랐다. 같은 이름의 자식(슬롯 카드 6장의 `CardButton` 등)이 여러 개라 Unity가 파일 안 fileID를 다시 매긴다. fileID를 뺀 비교에서는 `UI_EventHandler` 11개 말고 같다. GUID 참조는 그대로다. 그래서 "재생성 git 변경 0"은 이름이 겹치지 않는 프리팹에서만 맞다.
-- Unity 확인: 남음 — 백로그 목록을 이동 버튼 위에서 끌기, 메뉴를 연 채 방향키 · Enter가 재생 화면에 닿지 않음, 메뉴 · 설정을 닫으면 연 버튼으로 포커스, `Validate Sample UI` 문제 0. 원본 블랙홀 데모도 따로(원본 PLAN의 "확인").
+- Unity 확인(10-27): 백로그 목록을 이동 버튼 위에서 끌기, 메뉴를 연 채 방향키 · Enter가 재생 화면에 닿지 않음, 메뉴 · 설정을 닫으면 연 버튼으로 포커스, `Validate Sample UI` 문제 0. 원본 블랙홀 데모도 확인한 뒤 아미야가 UIPF `dev`에 합쳤다(`4a4af6f`).
 
 #### B — 빌더의 공용 부분을 UIPF 도구로 (10-27, 아미야 결정: 게임에 매이지 않은 것만 · 앱이 목록과 뿌리를 쥔다 · 블랙홀 일시 정지 창으로 증명)
 UIPF `feat/authoring-tools` @ `f912e99`(`dev` 머지 전)에 `Editor/UI/Authoring`과 에디터 asmdef `UIPresentationFlow.Editor`를 두고 다시 반입했다(대조 0줄, UIPF `.meta` 118개).
@@ -290,7 +290,8 @@ UIPF `feat/authoring-tools` @ `f912e99`(`dev` 머지 전)에 `Editor/UI/Authorin
 - 남은 것(ked의 몫): 부품 꼴(`KedUIKit` — 그림 · 글꼴 · 버튼 · 슬라이더 · 스위치), 설정, 검사 메뉴, 명세 여덟, 앱 빌드(`KedUIBuild` · `KedUIAssets`), 그림 임포트.
 - 오프라인 컴파일(6000.3): 15개 어셈블리 오류 0 · 경고 0. `UIPresentationFlow.Editor` 18파일(옛 `Editor/UI` 10 + `Authoring` 8)이 새 어셈블리가 되어 `Assembly-CSharp-Editor`는 1파일.
 - 자리 계산은 옮기기 전과 같은 식이다 — 다시 지으면 슬롯 카드 프리팹(fileID만) 말고 git 변경 0이어야 한다. 보고의 검사 줄은 "검사: 화면 묶음 7 · 프리팹 13(화면 · 위젯 N) · Presentation 12"로 바뀐다.
-- Unity 확인: 남음 — `Build Sample UI`(편집 모드) 뒤 git 변경이 `SaveLoadPanel.prefab`의 fileID뿐인지, `Validate Sample UI` 문제 0.
+- Unity 확인(10-27, 아미야 "문제 없는 것을 확인함"): `Build Sample UI`(편집 모드) 뒤 git 변경은 `SaveLoadPanel.prefab`의 fileID뿐, `Validate Sample UI` 문제 0. UIPF 블랙홀 일시 정지 창도 명세로 다시 지어 같은 화면임을 확인했다(UIPF `c22bb76`).
+- 다시 반입: UIPF `c22bb76`(`UIPrefabs.cs` 주석 — fileID 설명을 관찰한 것만으로 고침). 대조 0줄.
 
 ### U5. 문서
 - SCOPE-BOUNDARY에 "꽂힌 모듈 둘"(진행 · UI), ASSEMBLY-BOUNDARY의 어셈블리 표, `PLAN_framework-scope` 분류표.
