@@ -1369,7 +1369,6 @@ GameObject:
   - component: {fileID: 1850285802362363084}
   - component: {fileID: 7199332710704364320}
   - component: {fileID: 2086111897640555353}
-  - component: {fileID: 1689489358467478144}
   m_Layer: 5
   m_Name: SpeedChoice_1
   m_TagString: Untagged
@@ -1532,19 +1531,6 @@ MonoBehaviour:
   backgroundSelected: {r: 1, g: 1, b: 1, a: 1}
   labelNormal: {r: 0.16078432, g: 0.2784314, b: 0.42352942, a: 1}
   labelSelected: {r: 1, g: 1, b: 1, a: 1}
---- !u!114 &1689489358467478144
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5387347199135953684}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0078d1cb3dc7f61458d111fc28adc889, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UIPresentationFlow.Runtime::UI_EventHandler
-  _longPressDuration: 1
 --- !u!1 &6156413830690857523
 GameObject:
   m_ObjectHideFlags: 0
@@ -1560,7 +1546,6 @@ GameObject:
   - component: {fileID: 789312691945627673}
   - component: {fileID: 1619503176715405595}
   - component: {fileID: 2558011850969087719}
-  - component: {fileID: 2678735010601661218}
   m_Layer: 5
   m_Name: SpeedChoice_0
   m_TagString: Untagged
@@ -1723,19 +1708,6 @@ MonoBehaviour:
   backgroundSelected: {r: 1, g: 1, b: 1, a: 1}
   labelNormal: {r: 0.16078432, g: 0.2784314, b: 0.42352942, a: 1}
   labelSelected: {r: 1, g: 1, b: 1, a: 1}
---- !u!114 &2678735010601661218
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6156413830690857523}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0078d1cb3dc7f61458d111fc28adc889, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UIPresentationFlow.Runtime::UI_EventHandler
-  _longPressDuration: 1
 --- !u!1 &7303654804853063767
 GameObject:
   m_ObjectHideFlags: 0
@@ -2109,7 +2081,6 @@ GameObject:
   - component: {fileID: 662507205109990723}
   - component: {fileID: 7550754596521002419}
   - component: {fileID: 4858003434394435729}
-  - component: {fileID: 293890128192774464}
   m_Layer: 5
   m_Name: SpeedChoice_2
   m_TagString: Untagged
@@ -2272,19 +2243,6 @@ MonoBehaviour:
   backgroundSelected: {r: 1, g: 1, b: 1, a: 1}
   labelNormal: {r: 0.16078432, g: 0.2784314, b: 0.42352942, a: 1}
   labelSelected: {r: 1, g: 1, b: 1, a: 1}
---- !u!114 &293890128192774464
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8015010988277634360}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0078d1cb3dc7f61458d111fc28adc889, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UIPresentationFlow.Runtime::UI_EventHandler
-  _longPressDuration: 1
 --- !u!1 &8429272014500991187
 GameObject:
   m_ObjectHideFlags: 0

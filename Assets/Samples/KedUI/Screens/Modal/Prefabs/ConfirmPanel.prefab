@@ -313,7 +313,6 @@ GameObject:
   - component: {fileID: 9195696644370295342}
   - component: {fileID: 8607298149185183348}
   - component: {fileID: 2371993993070099921}
-  - component: {fileID: 1593347597234706043}
   m_Layer: 5
   m_Name: ConfirmClose
   m_TagString: Untagged
@@ -439,19 +438,6 @@ MonoBehaviour:
   backgroundSelected: {r: 0.07450981, g: 0.7411765, b: 0.77254903, a: 0.2509804}
   labelNormal: {r: 0.16078432, g: 0.2784314, b: 0.42352942, a: 1}
   labelSelected: {r: 0.16078432, g: 0.2784314, b: 0.42352942, a: 1}
---- !u!114 &1593347597234706043
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1993126765082879261}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0078d1cb3dc7f61458d111fc28adc889, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UIPresentationFlow.Runtime::UI_EventHandler
-  _longPressDuration: 1
 --- !u!1 &2214959473129841671
 GameObject:
   m_ObjectHideFlags: 0
@@ -604,7 +590,6 @@ GameObject:
   - component: {fileID: 5381025638003159145}
   - component: {fileID: 3475296713411753246}
   - component: {fileID: 576866890009639408}
-  - component: {fileID: 7911838070240344898}
   m_Layer: 5
   m_Name: ConfirmAccept
   m_TagString: Untagged
@@ -767,19 +752,6 @@ MonoBehaviour:
   backgroundSelected: {r: 1, g: 1, b: 1, a: 1}
   labelNormal: {r: 1, g: 1, b: 1, a: 1}
   labelSelected: {r: 1, g: 1, b: 1, a: 1}
---- !u!114 &7911838070240344898
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2419229250457471244}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0078d1cb3dc7f61458d111fc28adc889, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UIPresentationFlow.Runtime::UI_EventHandler
-  _longPressDuration: 1
 --- !u!1 &2933460326313655058
 GameObject:
   m_ObjectHideFlags: 0
@@ -870,7 +842,6 @@ GameObject:
   - component: {fileID: 3349749519531247512}
   - component: {fileID: 7537166666595117478}
   - component: {fileID: 359711891105594831}
-  - component: {fileID: 7284513975483170072}
   m_Layer: 5
   m_Name: ConfirmCancel
   m_TagString: Untagged
@@ -1033,19 +1004,6 @@ MonoBehaviour:
   backgroundSelected: {r: 1, g: 1, b: 1, a: 1}
   labelNormal: {r: 0.16078432, g: 0.2784314, b: 0.42352942, a: 1}
   labelSelected: {r: 1, g: 1, b: 1, a: 1}
---- !u!114 &7284513975483170072
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4265349420203934800}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0078d1cb3dc7f61458d111fc28adc889, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UIPresentationFlow.Runtime::UI_EventHandler
-  _longPressDuration: 1
 --- !u!1 &5472769428095972664
 GameObject:
   m_ObjectHideFlags: 0

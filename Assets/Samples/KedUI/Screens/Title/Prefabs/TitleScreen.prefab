@@ -406,7 +406,6 @@ GameObject:
   - component: {fileID: 1134947228676792342}
   - component: {fileID: 2123955123259197933}
   - component: {fileID: 9102170995292958471}
-  - component: {fileID: 983037023694344307}
   m_Layer: 5
   m_Name: Quit
   m_TagString: Untagged
@@ -569,19 +568,6 @@ MonoBehaviour:
   backgroundSelected: {r: 1, g: 1, b: 1, a: 0}
   labelNormal: {r: 0.44313726, g: 0.52156866, b: 0.59607846, a: 1}
   labelSelected: {r: 0.44313726, g: 0.52156866, b: 0.59607846, a: 1}
---- !u!114 &983037023694344307
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1586528760755976688}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0078d1cb3dc7f61458d111fc28adc889, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UIPresentationFlow.Runtime::UI_EventHandler
-  _longPressDuration: 1
 --- !u!1 &1697740597684314933
 GameObject:
   m_ObjectHideFlags: 0
@@ -672,7 +658,6 @@ GameObject:
   - component: {fileID: 6175001895584519572}
   - component: {fileID: 8861914531297549400}
   - component: {fileID: 1600875364684465550}
-  - component: {fileID: 2952952431153482587}
   m_Layer: 5
   m_Name: Continue
   m_TagString: Untagged
@@ -835,19 +820,6 @@ MonoBehaviour:
   backgroundSelected: {r: 1, g: 1, b: 1, a: 1}
   labelNormal: {r: 0.16078432, g: 0.2784314, b: 0.42352942, a: 1}
   labelSelected: {r: 1, g: 1, b: 1, a: 1}
---- !u!114 &2952952431153482587
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2340869104993540807}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0078d1cb3dc7f61458d111fc28adc889, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UIPresentationFlow.Runtime::UI_EventHandler
-  _longPressDuration: 1
 --- !u!1 &2884919764800019696
 GameObject:
   m_ObjectHideFlags: 0
@@ -938,7 +910,6 @@ GameObject:
   - component: {fileID: 5677159902564142401}
   - component: {fileID: 6605516476025971356}
   - component: {fileID: 4854712396701183323}
-  - component: {fileID: 8658105653875501131}
   m_Layer: 5
   m_Name: OpenSettings
   m_TagString: Untagged
@@ -1101,19 +1072,6 @@ MonoBehaviour:
   backgroundSelected: {r: 1, g: 1, b: 1, a: 1}
   labelNormal: {r: 0.16078432, g: 0.2784314, b: 0.42352942, a: 1}
   labelSelected: {r: 1, g: 1, b: 1, a: 1}
---- !u!114 &8658105653875501131
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3084665039438545402}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0078d1cb3dc7f61458d111fc28adc889, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UIPresentationFlow.Runtime::UI_EventHandler
-  _longPressDuration: 1
 --- !u!1 &3313258275157799572
 GameObject:
   m_ObjectHideFlags: 0
@@ -1591,7 +1549,6 @@ GameObject:
   - component: {fileID: 1299875144683388790}
   - component: {fileID: 3317023415482687610}
   - component: {fileID: 1520942882280601956}
-  - component: {fileID: 4494766504142182294}
   m_Layer: 5
   m_Name: SwitchExample
   m_TagString: Untagged
@@ -1754,19 +1711,6 @@ MonoBehaviour:
   backgroundSelected: {r: 1, g: 1, b: 1, a: 1}
   labelNormal: {r: 0.16078432, g: 0.2784314, b: 0.42352942, a: 1}
   labelSelected: {r: 1, g: 1, b: 1, a: 1}
---- !u!114 &4494766504142182294
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4727997211373372262}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0078d1cb3dc7f61458d111fc28adc889, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UIPresentationFlow.Runtime::UI_EventHandler
-  _longPressDuration: 1
 --- !u!1 &4893847734594848833
 GameObject:
   m_ObjectHideFlags: 0
@@ -1782,7 +1726,6 @@ GameObject:
   - component: {fileID: 3492798100898604234}
   - component: {fileID: 489406221446595033}
   - component: {fileID: 8896266244258584211}
-  - component: {fileID: 677921922273907839}
   m_Layer: 5
   m_Name: NewGame
   m_TagString: Untagged
@@ -1945,19 +1888,6 @@ MonoBehaviour:
   backgroundSelected: {r: 1, g: 1, b: 1, a: 1}
   labelNormal: {r: 1, g: 1, b: 1, a: 1}
   labelSelected: {r: 1, g: 1, b: 1, a: 1}
---- !u!114 &677921922273907839
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4893847734594848833}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0078d1cb3dc7f61458d111fc28adc889, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UIPresentationFlow.Runtime::UI_EventHandler
-  _longPressDuration: 1
 --- !u!1 &4918660722544770497
 GameObject:
   m_ObjectHideFlags: 0
@@ -3423,7 +3353,6 @@ GameObject:
   - component: {fileID: 8442741619510644863}
   - component: {fileID: 1096462177018617421}
   - component: {fileID: 5400963154147321622}
-  - component: {fileID: 8292826004143070881}
   m_Layer: 5
   m_Name: Load
   m_TagString: Untagged
@@ -3586,19 +3515,6 @@ MonoBehaviour:
   backgroundSelected: {r: 1, g: 1, b: 1, a: 1}
   labelNormal: {r: 0.16078432, g: 0.2784314, b: 0.42352942, a: 1}
   labelSelected: {r: 1, g: 1, b: 1, a: 1}
---- !u!114 &8292826004143070881
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8346468388866950750}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0078d1cb3dc7f61458d111fc28adc889, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UIPresentationFlow.Runtime::UI_EventHandler
-  _longPressDuration: 1
 --- !u!1 &8384133764292082237
 GameObject:
   m_ObjectHideFlags: 0

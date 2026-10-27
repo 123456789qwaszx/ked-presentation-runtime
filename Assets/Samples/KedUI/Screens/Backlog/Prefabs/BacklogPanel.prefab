@@ -1168,7 +1168,6 @@ GameObject:
   - component: {fileID: 7695090719223063505}
   - component: {fileID: 6455779236763650340}
   - component: {fileID: 4787645201909624517}
-  - component: {fileID: 8143826446273534924}
   m_Layer: 5
   m_Name: BacklogClose
   m_TagString: Untagged
@@ -1294,19 +1293,6 @@ MonoBehaviour:
   backgroundSelected: {r: 0.07450981, g: 0.7411765, b: 0.77254903, a: 0.2509804}
   labelNormal: {r: 0.16078432, g: 0.2784314, b: 0.42352942, a: 1}
   labelSelected: {r: 0.16078432, g: 0.2784314, b: 0.42352942, a: 1}
---- !u!114 &8143826446273534924
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6445076604482848002}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0078d1cb3dc7f61458d111fc28adc889, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UIPresentationFlow.Runtime::UI_EventHandler
-  _longPressDuration: 1
 --- !u!1 &6608739595263603036
 GameObject:
   m_ObjectHideFlags: 0
@@ -1478,9 +1464,7 @@ GameObject:
   - component: {fileID: 4570654039145731387}
   - component: {fileID: 3691136511101746236}
   - component: {fileID: 9177272378100645831}
-  - component: {fileID: 517008767278618395}
   - component: {fileID: 4044077902465300494}
-  - component: {fileID: 1942468651214308140}
   m_Layer: 5
   m_Name: RowJump
   m_TagString: Untagged
@@ -1606,19 +1590,6 @@ MonoBehaviour:
   backgroundSelected: {r: 0.07450981, g: 0.7411765, b: 0.77254903, a: 0.2509804}
   labelNormal: {r: 0.16078432, g: 0.2784314, b: 0.42352942, a: 1}
   labelSelected: {r: 0.16078432, g: 0.2784314, b: 0.42352942, a: 1}
---- !u!114 &517008767278618395
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7149836633191397431}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0078d1cb3dc7f61458d111fc28adc889, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UIPresentationFlow.Runtime::UI_EventHandler
-  _longPressDuration: 1
 --- !u!114 &4044077902465300494
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1639,18 +1610,6 @@ MonoBehaviour:
   m_FlexibleWidth: 0
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
---- !u!114 &1942468651214308140
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7149836633191397431}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c248fe7c3a764dbeab89f59359dcdce9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Ked.Samples.UI::Ked.Samples.UI.KedDragToScroll
 --- !u!1 &7327818625467717946
 GameObject:
   m_ObjectHideFlags: 0

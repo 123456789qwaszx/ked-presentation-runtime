@@ -591,7 +591,6 @@ GameObject:
   - component: {fileID: 8643504946618010555}
   - component: {fileID: 8292536942970655806}
   - component: {fileID: 2064147391549677921}
-  - component: {fileID: 2786927092076286277}
   m_Layer: 5
   m_Name: NoticeAccept
   m_TagString: Untagged
@@ -754,19 +753,6 @@ MonoBehaviour:
   backgroundSelected: {r: 1, g: 1, b: 1, a: 1}
   labelNormal: {r: 1, g: 1, b: 1, a: 1}
   labelSelected: {r: 1, g: 1, b: 1, a: 1}
---- !u!114 &2786927092076286277
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5390912348756626722}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0078d1cb3dc7f61458d111fc28adc889, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UIPresentationFlow.Runtime::UI_EventHandler
-  _longPressDuration: 1
 --- !u!1 &5611585611608369214
 GameObject:
   m_ObjectHideFlags: 0

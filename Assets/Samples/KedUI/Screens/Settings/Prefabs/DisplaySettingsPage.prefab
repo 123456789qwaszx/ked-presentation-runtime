@@ -2171,7 +2171,6 @@ GameObject:
   - component: {fileID: 223182087588970025}
   - component: {fileID: 6335967869146708481}
   - component: {fileID: 6930089823679855840}
-  - component: {fileID: 6329838480680397870}
   m_Layer: 5
   m_Name: Windowed
   m_TagString: Untagged
@@ -2334,19 +2333,6 @@ MonoBehaviour:
   backgroundSelected: {r: 1, g: 1, b: 1, a: 1}
   labelNormal: {r: 0.16078432, g: 0.2784314, b: 0.42352942, a: 1}
   labelSelected: {r: 1, g: 1, b: 1, a: 1}
---- !u!114 &6329838480680397870
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5054095610398036750}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0078d1cb3dc7f61458d111fc28adc889, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UIPresentationFlow.Runtime::UI_EventHandler
-  _longPressDuration: 1
 --- !u!1 &5343832457508361006
 GameObject:
   m_ObjectHideFlags: 0
@@ -2786,7 +2772,6 @@ GameObject:
   - component: {fileID: 614568666875098088}
   - component: {fileID: 9019091005122444922}
   - component: {fileID: 6241145611921267285}
-  - component: {fileID: 2245400259530620852}
   m_Layer: 5
   m_Name: Fullscreen
   m_TagString: Untagged
@@ -2949,19 +2934,6 @@ MonoBehaviour:
   backgroundSelected: {r: 1, g: 1, b: 1, a: 1}
   labelNormal: {r: 0.16078432, g: 0.2784314, b: 0.42352942, a: 1}
   labelSelected: {r: 1, g: 1, b: 1, a: 1}
---- !u!114 &2245400259530620852
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6521660959619772923}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0078d1cb3dc7f61458d111fc28adc889, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UIPresentationFlow.Runtime::UI_EventHandler
-  _longPressDuration: 1
 --- !u!1 &6553636896120523394
 GameObject:
   m_ObjectHideFlags: 0
