@@ -124,7 +124,7 @@ relative의 전 구간 중립값 성분은 싣지 않는다. 규약은 무대 �
 연출 데모 S3에서 `<<motion s1 nod>>` · `<<motion s1 bow>>` → `place_center`(숙인 채로 이동, 장부) → `char_rotate_to 0`(같은 노드를 다른 명령이 이어받음) → `place_right`.
 재생·스킵·롤백 모두 기대대로. 씬의 `SampleBootstrap › 작가 자산`에 `curves.json`·`motions.json`이 꽂혀 있다.
 
-**motions/2 (2026-10-28, 소유자 결정 — 무대 반입본 @ `05d0c8f`, 브랜치 `motion/motions-2`).** 모션은 값만 갖고 relative/absolute는
+**motions/2 (2026-10-28, 소유자 결정 — 무대 반입본 @ `40d19d7`, 브랜치 `motion/motions-2`).** 모션은 값만 갖고 relative/absolute는
 `<<motion slot 이름 [relative|absolute]>>`의 세 번째 인자(생략 relative)가 정한다. 채널 `mode`와 중립값 규칙(relative 첫 키 0 ·
 restore 마지막 키 0 · restore는 relative만)이 규약에서 빠졌다. restore는 재생이 끝·스킵·스텝 경계에서 **시작값을 되써서** 지킨다.
 이 저장소: Yarn 등록 `motion`이 인자 셋, 견본 `motions.json`은 motions/2, 데모 S3는 `<<motion s1 bow absolute>>`. 규약은 무대 저장소 `docs/motion-contract.md`.
