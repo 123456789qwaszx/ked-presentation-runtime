@@ -73,8 +73,8 @@ title: Demo_Presentation
 시구레: 자세를 바꾸고, 가볍게 몸짓도.
 <<motion s1 nod>>
 하린: 만들어 둔 모션(motions.json의 nod)은 이름만 불러.
-<<motion s1 bow>>
-하린: 이건 숙인 채로 남는 모션(bow). 끝나도 자세가 그대로야.
+<<motion s1 bow absolute>>
+하린: 이건 숙인 채로 남는 모션(bow). 끝나도 자세가 그대로야. 셋째 인자가 relative(기본)·absolute를 정해.
 <<place_center s1 bust 16fr>>
 하린: 자리를 옮겨도 숙인 채로 가. 장부가 기울기를 알아서 얼굴 자리가 맞아.
 <<char_rotate_to s1 0 10fr>>
