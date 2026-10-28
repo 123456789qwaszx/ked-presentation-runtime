@@ -34,7 +34,6 @@ using KedUI = Ked.Samples.UI;
 public class SampleBootstrap : MonoBehaviour, IRigPrefabSource
 {
     RectTransform IRigPrefabSource.CharacterRigPrefab => rigPrefab;
-    RectTransform IRigPrefabSource.BackgroundRigPrefab => backgroundRigPrefab;
 
     public enum SampleExample
     {
@@ -131,11 +130,10 @@ public class SampleBootstrap : MonoBehaviour, IRigPrefabSource
     [SerializeField] private VNAdvanceInputPoller vnAdvanceInputPoller;
 
     [Header("RigPrefab")]
-    [Tooltip("CharacterRig prefab used for command presentation. " +
+    [Tooltip("CharacterRig prefab used for command presentation. 배경(bg_*)도 이 리그로 선다 — 캐스팅하지 않은 슬롯. " +
              "Empty fields bake a complete rig from CharacterRigSchema at runtime. " +
              "Prefab the baked result when you need performance setup, external systems, response targets, or shot helpers.")]
     [SerializeField] private RectTransform rigPrefab;
-    [SerializeField] private RectTransform backgroundRigPrefab;
 
     [Header("작가 자산")]
     [Tooltip("대본 번들 곁의 curves.json. 비우면 에디터에서만 Assets/Samples/Dialogue/curves.json을 읽는다 — 빌드에서는 읽지 않는다.")]
@@ -320,7 +318,6 @@ public class SampleBootstrap : MonoBehaviour, IRigPrefabSource
             OptionsBoxView = _kedUI.OptionsBox,
 
             CharacterRigPrefab = rigPrefab,
-            BackgroundRigPrefab = backgroundRigPrefab,
 
             EaseCurvesJson = easeCurvesJson,
             MotionsJson = motionsJson,

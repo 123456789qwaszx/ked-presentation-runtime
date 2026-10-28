@@ -12,6 +12,7 @@
 //
 // 공개된 예제 초상화만 쓴다(Assets/Samples/Portraits): harin·sigure(a/b, 01~05), kasmi(a/01).
 // 배경 키는 Resources/Backgrounds/의 파일 이름, 음원 키는 Resources 아래 경로(audio/파일이름)다.
+// 배경은 캐스팅하지 않은 캐릭터 슬롯이다 — bg_spawn은 숨은 채 세우고 bg_fade_in으로 들인다.
 // 없는 음원 키는 소리 없이 넘어가되 콘솔에 한 번 경고가 남는다.
 //
 // 선택지를 지난 뒤 R(되감기)이나 백로그로 돌아가 다른 선택을 볼 수 있고,
@@ -20,14 +21,13 @@
 
 title: Demo_Presentation
 ---
-// ─── 준비: 배경 리그와 캐릭터 슬롯 ───
+// ─── 준비: 배경 슬롯과 캐릭터 슬롯 ───
 <<shot_reset 0fr>>
 <<screen_vignette_clear 0fr>>
 
 <<screen_noise_clear 0fr>>
 
 <<bg_spawn bg_main class_day>>
-<<bg_size bg_main 1>>
 <<slot s1 stage00 mid>>
 <<cast s1 harin a 1>>
 <<slot s2 stage00 mid>>

@@ -1428,7 +1428,6 @@ MonoBehaviour:
   saveContentVersion: 1
   vnAdvanceInputPoller: {fileID: 1315566987}
   rigPrefab: {fileID: 2306115306432438348, guid: c7b3ab204cabea145aff7affa87d3d9d, type: 3}
-  backgroundRigPrefab: {fileID: 6323253774795375343, guid: 18f0ce8dac4b54f44a88bdcceac48012, type: 3}
   easeCurvesJson: {fileID: 4900000, guid: bcc8c6406551a2145bd79365c17af88b, type: 3}
   motionsJson: {fileID: 4900000, guid: 37b1063b22b44e749aa45eff7720d772, type: 3}
   enableEquivalenceHarness: 0

@@ -18,8 +18,8 @@
 
 | | |
 |---|---|
-| 원본 | `ked-stage-runtime` · `dev` @ `64e7679` |
-| 마지막 동기화 | 2026-10-27 · 사본 → 원본 (첫 분리 — 이 저장소 `refactor/stage-seam`에서 떼어 냈다) |
+| 원본 | `ked-stage-runtime` · `refactor/background-as-slot` @ `859281c` (`dev` @ `640ac60` 위 3커밋 — 배경 리그 제거) |
+| 마지막 동기화 | 2026-10-29 · 원본 → 사본 (배경 리그 제거, `docs/PLAN_background-as-slot.md`). 그 전: 2026-10-28 `dev` @ `640ac60`(이 표는 `64e7679`에 멈춰 있었다), 2026-10-27 첫 분리 |
 | 맞춘 것 | 위 폴더 전부 + `ExportedTuning/` |
 | 코드 일치 | `diff -r` 0건 (아래 "대조" 명령) |
 

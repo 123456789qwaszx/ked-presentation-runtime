@@ -183,7 +183,39 @@ public sealed class StageEquivalenceHarness : MonoBehaviour
 
             // 재생이 읽은 것과 같은 클립 — 폴드가 다른 파일을 보면 대조가 거짓이다.
             Motions = _motions.Clips,
+
+            BackgroundDimensions = LoadBackgroundDimensions(tuningDir),
         };
+    }
+
+    /// <summary>
+    /// 배경 치수 — 초상 치수와 같은 규율. 없으면 bg_* 사이징이 전부 Unhandled로 잡히므로 경고한다.
+    /// (배경은 캐스팅하지 않은 슬롯이라 캐릭터 리그로 서지만, 종횡비만 이 표에서 온다.)
+    /// </summary>
+    private static BackgroundDimensionsFileDto LoadBackgroundDimensions(string tuningDir)
+    {
+        string path = Path.Combine(tuningDir, "background-dimensions.json");
+
+        if (!File.Exists(path))
+        {
+            Debug.LogWarning(
+                $"[StageEquivalenceHarness] background-dimensions.json이 없다 ({path}). " +
+                "배경 사이징이 전부 Unhandled가 된다 — Ked/U12/Export Presentation Tuning Dump 실행 필요.");
+
+            return null;
+        }
+
+        BackgroundDimensionsFileDto dto = JsonUtility.FromJson<BackgroundDimensionsFileDto>(
+            File.ReadAllText(path));
+
+        if (dto?.entries == null || dto.entries.Count == 0)
+        {
+            Debug.LogWarning(
+                "[StageEquivalenceHarness] background-dimensions.json이 비어 있다 — " +
+                "Resources/Backgrounds를 읽지 못했을 수 있다. export-report.json의 경고를 확인할 것.");
+        }
+
+        return dto;
     }
 
     /// <summary>

@@ -29,7 +29,7 @@ public sealed partial class YarnCommandBridge
     {
         RegisterCharFocusPlacementCommands(runner);
         RegisterCharRigPlacementCommands(runner);
-        BindBackgroundRig(runner);
+        BindBackground(runner);
         
         BindControl(runner);
 
@@ -312,26 +312,22 @@ public sealed partial class YarnCommandBridge
             "char_visual_clear", EnqueueCharRigVisualClearSpec);
     }
     
-    private void BindBackgroundRig(DialogueRunner runner)
+    // 배경 = 캐스팅하지 않은 캐릭터 슬롯. 뜻은 무대의 StageCommandParser.Background에 있다.
+    // bg_place·bg_size는 지운 어휘라 등록하지 않는다 — 남은 대본은 Yarn이 "모르는 커맨드"로 소리 낸다.
+    private void BindBackground(DialogueRunner runner)
     {
         runner.AddCommandHandler<string, string>(
-            "bg_spawn", EnqueueSpawnBackgroundRigSpec);
+            "bg_spawn", EnqueueSpawnBackgroundSpec);
         
         runner.AddCommandHandler<string, string, string>(
-            "bg_slot00", EnqueueSpawnBackgroundRigStage00Spec);
+            "bg_slot00", EnqueueSpawnBackgroundStage00Spec);
         runner.AddCommandHandler<string, string, string>(
-            "bg_slot01", EnqueueSpawnBackgroundRigStage01Spec);
+            "bg_slot01", EnqueueSpawnBackgroundStage01Spec);
         runner.AddCommandHandler<string, string, string>(
-            "bg_slot02", EnqueueSpawnBackgroundRigStage02Spec);
-
-        runner.AddCommandHandler<string, string, string, string>(
-            "bg_place", EnqueueSetBackgroundAnchorDslSpec);
-
-        runner.AddCommandHandler<string, string, string>(
-            "bg_sprite", EnqueueSetBackgroundSpriteSpec);
+            "bg_slot02", EnqueueSpawnBackgroundStage02Spec);
 
         runner.AddCommandHandler<string, string>(
-            "bg_size", EnqueueSetBackgroundOriginSizeSpec);
+            "bg_sprite", EnqueueSetBackgroundSpriteSpec);
 
         runner.AddCommandHandler<string, string>(
             "bg_fade_in", EnqueueFadeInBackgroundDslSpec);

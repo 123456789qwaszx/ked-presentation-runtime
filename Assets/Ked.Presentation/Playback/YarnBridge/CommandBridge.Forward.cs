@@ -218,26 +218,20 @@ public sealed partial class YarnCommandBridge
     private void EnqueueCharRigVisualClearSpec(string roleKey = null, string durationToken = null)
         => Forward("char_visual_clear", roleKey, durationToken);
 
-    private void EnqueueSpawnBackgroundRigSpec(string rigKey = null, string spriteKey = null)
+    private void EnqueueSpawnBackgroundSpec(string rigKey = null, string spriteKey = null)
         => Forward("bg_spawn", rigKey, spriteKey);
 
-    private void EnqueueSpawnBackgroundRigStage00Spec(string rigKey = null, string spriteKey = null, string layerKey = null)
+    private void EnqueueSpawnBackgroundStage00Spec(string rigKey = null, string spriteKey = null, string layerKey = null)
         => Forward("bg_slot00", rigKey, spriteKey, layerKey);
 
-    private void EnqueueSpawnBackgroundRigStage01Spec(string rigKey = null, string spriteKey = null, string layerKey = null)
+    private void EnqueueSpawnBackgroundStage01Spec(string rigKey = null, string spriteKey = null, string layerKey = null)
         => Forward("bg_slot01", rigKey, spriteKey, layerKey);
 
-    private void EnqueueSpawnBackgroundRigStage02Spec(string rigKey = null, string spriteKey = null, string layerKey = null)
+    private void EnqueueSpawnBackgroundStage02Spec(string rigKey = null, string spriteKey = null, string layerKey = null)
         => Forward("bg_slot02", rigKey, spriteKey, layerKey);
 
-    private void EnqueueSetBackgroundAnchorDslSpec(string rigKey = null, string xToken = null, string yToken = null, string rotationZ = null)
-        => Forward("bg_place", rigKey, xToken, yToken, rotationZ);
-
-    private void EnqueueSetBackgroundSpriteSpec(string rigKey = null, string spriteKey = null, string layerKey = null)
-        => Forward("bg_sprite", rigKey, spriteKey, layerKey);
-
-    private void EnqueueSetBackgroundOriginSizeSpec(string rigKey = null, string scaleArg = null)
-        => Forward("bg_size", rigKey, scaleArg);
+    private void EnqueueSetBackgroundSpriteSpec(string rigKey = null, string spriteKey = null)
+        => Forward("bg_sprite", rigKey, spriteKey);
 
     private void EnqueueFadeInBackgroundDslSpec(string rigKey = null, string durationToken = null)
         => Forward("bg_fade_in", rigKey, durationToken);

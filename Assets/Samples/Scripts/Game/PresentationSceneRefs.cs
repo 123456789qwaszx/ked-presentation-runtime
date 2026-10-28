@@ -42,9 +42,8 @@ public sealed class PresentationSceneRefs
     public IPresentationDialogueBoxView DialogueBoxView;
     public IPresentationOptionsBoxView OptionsBoxView;
 
-    // 리그
+    // 리그 — 배경도 캐릭터 리그다(캐스팅하지 않은 슬롯)
     public RectTransform CharacterRigPrefab;
-    public RectTransform BackgroundRigPrefab;
 
     // 작가 자산 — 대본 번들 곁의 curves.json · motions.json. TextAsset이라 빌드에서도 읽힌다.
     // 안 꽂혀 있으면 조립기가 에디터에서만 대본 폴더의 파일을 읽고(옛 경로), 빌드에서는 0개로 간다.

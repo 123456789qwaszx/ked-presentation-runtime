@@ -179,15 +179,6 @@ public sealed class PresentationAssembler
             _refs.CharacterDepthTuning,
             _presentationUIRoot);
 
-        // Background Rig
-        BackgroundRigBuilder backgroundRigBuilder = new();
-        BackgroundRigSlotResolver backgroundRigSlotResolver = new(_presentationUIRoot);
-
-        BackgroundRigCommandFactory backgroundRigFactory = new(
-            _presentationStage,
-            backgroundRigBuilder,
-            backgroundRigSlotResolver);
-
         ShotResponseCommandFactory presentationShotFactory = new(
             _presentationStage, _presentationResponseRig, _refs.CharacterFocusTuningDb, _presentationUIRoot);
 
@@ -216,7 +207,6 @@ public sealed class PresentationAssembler
 
         CompositeCommandFactory factory = new(
             charRigFactory,
-            backgroundRigFactory,
             presentationShotFactory,
             presentationControlFactory,
             audioFactory,
@@ -253,9 +243,9 @@ public sealed class PresentationAssembler
         EaseCurveLibrary easeCurves = LoadEaseCurves();
         _motions = LoadMotions();
 
+        // 배경(bg_*)도 캐릭터 리그로 선다 — 캐스팅하지 않은 슬롯. 리그 프리팹은 하나다.
         StageCommandParser stageCommandParser = new(
             _refs.CharacterRigPrefab,
-            _refs.BackgroundRigPrefab,
             easeCurves,
             _motions);
 

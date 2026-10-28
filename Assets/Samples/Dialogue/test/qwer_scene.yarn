@@ -20,7 +20,6 @@ title: Festival_Classroom
 // ─── 장면 "교실"의 루트: 무대를 세운다. 이 장면의 캐스팅은 여기 한 번뿐이다 ───
 <<shot_reset 0fr>>
 <<bg_spawn bg_main class_lunch>>
-<<bg_size bg_main 1>>
 <<slot s1 stage00 mid>>
 <<cast s1 harin a 1>>
 <<slot s2 stage00 mid>>
@@ -98,7 +97,6 @@ title: Festival_Staffroom
 // ─── 장면 "교무실 앞"의 루트: 앞 장면은 확정(저장)됐고 무대가 비워졌다. 여기서 다시 세운다 ───
 <<shot_reset 0fr>>
 <<bg_spawn bg_main staffroom_evening>>
-<<bg_size bg_main 1>>
 <<slot s1 stage00 mid>>
 <<cast s1 harin a 1>>
 <<slot s2 stage00 mid>>
