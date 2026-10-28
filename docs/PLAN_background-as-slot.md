@@ -2,16 +2,17 @@
 
 | | |
 |---|---|
-| 무대(원본) | `ked-stage-runtime` · `refactor/background-as-slot` ← `dev` @ `640ac60` |
+| 무대(원본) | `ked-stage-runtime` · `refactor/background-as-slot` @ `dc690c1` ← `dev` @ `640ac60` |
 | 재생(이 저장소) | `ked-presentation-runtime` · `refactor/background-as-slot` ← `dev` @ `0020943` (무대 반입본 = 위 브랜치, `diff -r` 0) |
 | 분석 | 프로젝트 문서 `claude/analysis-2026-10-28-bgrig.md` — 노드 대응표 · 이력 · 발견한 고장 |
 
 **현재 위치(2026-10-29):** 코드·문서·손 덤프 끝. 오프라인 컴파일(Unity 6000.3 참조) 18개 어셈블리 오류 0,
-Core 순수 테스트 413/413. **Unity 확인이 남았다**(아래 목록). 두 브랜치는 `dev`에 합치지 않았다.
+Core 순수 테스트 414/414. **Unity 확인이 남았다**(아래 목록). 두 브랜치는 `dev`에 합치지 않았다.
 
 > 첫 시도는 낡은 기준(`refactor/framework-scope` @ `7ed5c1a5`) 위에서 했다가 버렸다 — 10-27에 무대가
 > `ked-stage-runtime`으로 갈라진 것을 늦게 봤다. 설계는 그대로 옮겼고, 독립 검토에서 나온 결함(아래 D8·D11·D12)을
-> 다시 하면서 반영했다. 옛 커밋은 이 컨테이너의 `wip/background-as-slot-stale`에만 있다(푸시하지 않았다).
+> 다시 하면서 반영했다. 다시 한 결과도 두 번째 독립 검토를 받았다(D13 · D14와 아래 `dc690c1`).
+> 옛 커밋은 작업 컨테이너의 `wip/background-as-slot-stale`에만 있었다(푸시하지 않았다).
 
 ## 목표 한 문장
 
@@ -39,9 +40,11 @@ Core 순수 테스트 413/413. **Unity 확인이 남았다**(아래 목록). 두
 | D7 | `bg_spawn` 첫 보임 | **숨은 채 선다**(캐릭터 `slot`과 같다), `bg_fade_in`으로 들인다 | 처음엔 "바로 보임"(옛 동작)으로 정했다가 바꿨다(아미야, 10-29) — 대본 세 곳이 모두 `bg_spawn` 뒤에 `bg_fade_in 24fr`을 쓴다. 대가: `bg_fade_in` 없이 `bg_spawn`만 쓰면 배경이 안 보인다(캐릭터와 같은 규칙) |
 | D8 | 키 공간·덮어쓰기 | **하나.** 배경이 **배역 있는 슬롯**을 덮을 때만 배역을 풀고 경고한다 | 처음엔 "같은 키 재등록이면 늘 경고"였다 — 정상적인 재선언·배경 교체마다 울려 경고가 무뎌진다(검토 지적). 배역을 안 풀면 `fade_in harin`이 배경을 페이드하고 D4가 뚫린다 |
 | D9 | `bg_sprite` 셋째 인자 | **제거.** | 받고 버리던 인자 |
-| D10 | 스프라이트 키 | `Resources/Backgrounds/` 아래 **상대 경로, 확장자 없이** — 런타임이 `Resources.Load`에 넘기는 문자열 그대로 | 덤프도 같은 키를 쓴다. 이름만 쓰면 하위 폴더의 같은 이름이 서로를 덮는다(검토 지적) |
+| D10 | 스프라이트 키 | `Resources/Backgrounds/` 아래 **상대 경로, 확장자 없이**, **대소문자 무시** — `Resources.Load`가 받는 그대로 | 덤프도 같은 키를 쓴다. 이름만 쓰면 하위 폴더의 같은 이름이 서로를 덮는다. 대소문자를 가리면 런타임은 그림을 찾는데 폴드만 Unhandled가 된다(검토 지적 둘) |
 | D11 | 재선언(같은 키로 다시 세우기) | **새 리그.** 노드·α가 스키마로, 배역은 남는다 — 캐릭터 `slot`도 같다 | 런타임은 처음부터 그랬다(`SetupCharRigCommand` + `Register`). 폴드만 "재사용한다 — 좌표도 유지"로 접고 있었다 — 배경 교체가 매번 그 경로를 타서 하네스 불일치가 될 자리였다(검토 지적) |
-| D12 | 배경 이미지 클릭 | **받지 않는다**(`raycastTarget` 끔) | 옛 배경 이미지는 꺼져 있었다. 캐릭터 프리팹은 켜져 있어, 그대로면 화면 전체가 레이캐스트를 받는다(검토 지적) |
+| D12 | 배경 리그 클릭 | **받지 않는다** — `asBackground`로 세울 때 리그 안 그래픽 전부 `raycastTarget` 끔 | 옛 배경 이미지는 꺼져 있었다. 캐릭터 프리팹은 본 그림과 위 겹(스프라이트 없이 화면 크기)이 켜져 있어, 그대로면 화면 전체가 레이캐스트를 받는다(검토 지적 둘) |
+| D13 | 대상 키 해석 순서 | 코어도 런타임처럼 **캐릭터 키 먼저**, 그다음 슬롯 키. 슬롯 키가 캐스팅된 캐릭터 키와 같으면 런타임이 세울 때 경고 | 코어만 슬롯 키를 먼저 봤다(주석은 "런타임과 같다"). 키 공간을 합치면서 `bg_spawn harin`처럼 부딪칠 길이 넓어졌다(검토 지적) |
+| D14 | 재선언 뒤 방향 | 배역의 방향을 Right로 되돌린다 | 새 리그는 반전 전이다. 바인딩만 Left로 남으면 다음 `mirror` 토글이 아무것도 바꾸지 않는다(검토 지적, 원래 있던 문제) |
 
 ## 명령 대응표
 
@@ -65,6 +68,7 @@ Core 순수 테스트 413/413. **Unity 확인이 남았다**(아래 목록). 두
 | `a5c6471` S1 코어 | `StageReducer.Background.cs`, `BackgroundDimensionsFileDto` + `StageReducerTuning.BackgroundDimensions`, `SpawnSlot`(재선언 = 새 리그, D11), `StageState.ClearCast`(D8). 기존 테스트 `같은_슬롯_재선언은_부착만_갱신한다` → `…리그를_새로_세운다`. `BackgroundReductionTests` 15개. `reduction-boundary.md` |
 | `fee00b0` S2 런타임·에디터·덤프 | 파서(`StageCommandParser.Background.cs`, GUID 유지) · 표에서 `bg_size`·`bg_place` 삭제 · 생성자에서 배경 프리팹 삭제 · `ParseSignedUnit`을 파서 본체로. `SetSpriteCommandSpecCharR`가 Resources 키 + `raycastTarget`, 못 찾으면 이미지를 끈다. `ResourcesSpriteResolver`(GUID 유지). `SetupCharRigCommandSpec.asBackground`. `DepthFocusCommandCharR` 필터. 배경 리그 전부 삭제(Runtime/BackgroundRig · Commands_BackgroundRig 9 · Factory · 프리팹 · Stage 레지스트리 · 블러 루프 · `IRigPrefabSource.BackgroundRigPrefab`). 익스포터: background 분기 삭제, `ExportBackgroundDimensions`(D10). `rig-schemas.json`에서 background 항목을 손으로 걷음, `background-dimensions.json` 손 덤프. 파서 테스트 4개. 문서(rig-axis-order §1.5 · ASSEMBLY-BOUNDARY · BLUR · transform-math · README · schema.md 2·4b) |
 | `859281c` D7 | `bg_spawn`이 숨은 채 선다 — 파서는 `FadeIn 0초`를 더 내지 않고, 코어는 α를 1로 접지 않는다 |
+| `dc690c1` 두 번째 검토 | D13(해석 순서 + 경고) · D12(위 겹까지) · D10(대소문자 무시) · D14(재선언 방향). 문서: 그림 교체는 `bg_sprite`(재선언은 새 리그를 숨긴 채 세운다), §1.5 제목, `StageState` 주석 자리. 테스트 1개 추가 |
 
 ### 재생 `ked-presentation-runtime` (이 저장소)
 
@@ -79,7 +83,7 @@ Core 순수 테스트 413/413. **Unity 확인이 남았다**(아래 목록). 두
 ## 검증
 
 **오프라인 하네스**(이 컨테이너, dotnet 없음): Ubuntu mono + `mono/roslyn-binaries`(Roslyn 3.9, C# 9).
-- Core 순수 테스트 — NUnit 2.6 콘솔 + NUnit 3 문법 shim. **413/413.**
+- Core 순수 테스트 — NUnit 2.6 콘솔 + NUnit 3 문법 shim. **414/414.**
 - 전 어셈블리 컴파일 — PC의 Unity 6000.3.16f1 `Managed/UnityEngine/*.dll` · `NetStandard`(ref + compat shims) ·
   `Library/ScriptAssemblies`의 패키지 어셈블리(UGUI·TMP·Yarn Spinner·테스트 러너·UIPF) · Yarn DLL · Newtonsoft · NUnit을 받아
   asmdef를 읽는 스크립트로 Unity 순서대로 컴파일. 기준(`dev`) 18개 오류 0 → 이 브랜치 **18개 오류 0**.
@@ -100,10 +104,11 @@ Core 순수 테스트 413/413. **Unity 확인이 남았다**(아래 목록). 두
 4. EditMode 테스트 전부(Unity 대조 포함).
 5. 연출 데모: S1 배경이 **24fr 페이드로 들어온다**(처음 보는 모습). S4 `screen_blur`가 배경을 흐리고 `focus_on`은 배경을 흐리지 않는다. S6 트랜지션 아래 배경 교체. S7 `bg_fade_out`.
 6. 진행 예제: 두 장면 모두 배경이 페이드로 들어온다. 장면 경계·이어하기·되감기에서 배경이 다시 선다.
-7. 하이어라키: `bg_main_CharacterRig` 아래 25노드(덤프는 루트 포함 26), 배경 Image의 Raycast Target이 꺼져 있다. 배경 위 UI가 클릭을 받는다.
+7. 하이어라키: `bg_main_CharacterRig` 아래 25노드(덤프는 루트 포함 26), 배경 리그의 Image **둘**(본 그림·위 겹) 모두 Raycast Target이 꺼져 있다. 배경 위 UI가 클릭을 받는다.
 8. 21:9: 배경 양옆에 무엇이 보이는지(흰 바탕이 사라졌다).
 9. 등가성 하네스: 예제 장면에서 불일치 0, `finalUnhandled`에 `bg_*` 없음.
 10. (선택) 임시 대본 `slot s1` → `cast s1 harin` → `bg_spawn s1 class_day` → 경고 1건, `fade_in harin`이 배경을 건드리지 않는다.
+11. (선택) `bg_sprite bg_main CLASS_DAY`가 그림을 찾는지 — `Resources.Load`가 대소문자를 가리지 않는다는 가정(D10)의 확인. 찾지 못하면 D10을 되돌린다.
 
 ## 하지 않은 것 · 남은 것
 
