@@ -49,6 +49,21 @@ title: Demo_Presentation
 하린: 배경이 들어오고, 음악이 깔리고, 내가 걸어 들어왔어.
 하린: 지금부터 보이는 건 전부 이 대본 한 장에 적힌 명령이야.
 
+// 이 줄만 편지지 모양으로, 사라졌다 나타나며
+그녀의 편지에는 이렇게 적혀 있었다. #letterbox
+
+// 컷신 앞뒤로 대사창 치우기
+<<box_hide>>
+<<place_left s1 bust 33fr>>
+<<24fr>>
+<<place_right s1 bust 33fr>>
+<<24fr>>
+<<place_center s1 bust 33fr>>
+<<24fr>>
+(하린 이리저리) #boxhide #auto
+//<<box_show>>
+연출 컷신 앞뒤로 대사창 치우기.
+
 // ═════ S2. 배치·크기 ═════
 <<place_left s2 bust 0fr>>
 <<size s2 mid bust 0fr>>
