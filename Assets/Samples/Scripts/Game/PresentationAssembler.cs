@@ -258,8 +258,7 @@ public sealed class PresentationAssembler
         VNYarnLineBoundary vnYarnLineBoundary = new(
             _backlogRecorder,
             _rollbackHistory,
-            _vnRuntimeStateProvider,
-            _linePresentationAdvanceState);
+            _vnRuntimeStateProvider);
 
         LineHurrySpeedController lineHurrySpeed = new(_refs.EllipsisBreathTypewriter);
 

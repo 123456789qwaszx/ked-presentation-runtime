@@ -13,9 +13,6 @@ public sealed class VNLinePresentationFlow
     private readonly YarnPlaybackDriver _playbackDriver;
     private readonly LineHurrySpeedController _lineHurrySpeed;
 
-    public VNLinePresentationPhase CurrentPhase { get; private set; } =
-        VNLinePresentationPhase.None;
-
     public VNLinePresentationFlow(
         VNYarnLineBoundary vnYarnLineBoundary,
         VNLinePresentationState advanceState,
@@ -41,14 +38,21 @@ public sealed class VNLinePresentationFlow
         SetPhase(ctx, VNLinePresentationPhase.LineReceived);
 
         _advanceState.MarkLineEntered();
+
         ctx.Meta = _vnYarnLineBoundary.BuildLineMeta(ctx.Line, ctx.NodeName);
-        _vnYarnLineBoundary.CommitLineEntered(ctx.Meta);
+        
+        ctx.ActiveSeek = _advanceState.IsSeekingActive
+            ? _advanceState.SeekKind
+            : null;
+
+        ctx.RecordDecision = VNLineRecordPolicy.Resolve(ctx.ActiveSeek);
+        _vnYarnLineBoundary.CommitLineEntered(ctx.Meta, ctx.RecordDecision);
 
         _playbackDriver.PlayCollected();
         SetPhase(ctx, VNLinePresentationPhase.LineEnteredCommitted);
 
         // Phase: LineRuntimeStateResolved
-        if (_advanceState.IsSeekingActive){
+        if (ctx.ActiveSeek.HasValue){
             ctx.SeekDecision = _advanceState.IsSeekTargetLine(ctx.Meta)
                 ? VNSeekLineDecision.TargetLineReached
                 : VNSeekLineDecision.SkipVisualAndDispatchSeekNext;
@@ -63,9 +67,8 @@ public sealed class VNLinePresentationFlow
         }
 
         // #auto — 다 보이면 입력 없이 넘긴다(VNLineAdvanceTag). 되감기로 닿은 줄은 다시 보려고 온 것이라 넘기지 않는다.
-        // 시크 종류는 ClearSeek 전에 읽는다.
         bool rollbackTarget =
-            ctx.IsTargetLineReached && _advanceState.SeekKind == VNSeekKind.Rollback;
+            ctx.IsTargetLineReached && ctx.ActiveSeek == VNSeekKind.Rollback;
 
         if (ctx.IsTargetLineReached)
             _advanceState.ClearSeek();
@@ -178,6 +181,5 @@ public sealed class VNLinePresentationFlow
     private void SetPhase(VNLinePresentationContext ctx, VNLinePresentationPhase phase)
     {
         ctx.Phase = phase;
-        CurrentPhase = phase;
     }
 }

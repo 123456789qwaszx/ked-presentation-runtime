@@ -20,12 +20,18 @@ public sealed class VNLinePresentationContext
     // Derived
     public YarnLineMeta Meta { get; set; }
 
+    // Seek Kind
+    public VNSeekKind? ActiveSeek { get; set; }
+    
+    // Record Decision
+    public VNLineRecordDecision RecordDecision { get; set; }
+
     // Seek Decision
     public VNSeekLineDecision SeekDecision { get; set; }
 
     public bool IsTargetLineReached => SeekDecision == VNSeekLineDecision.TargetLineReached;
     public bool ShouldSkipVisual => SeekDecision == VNSeekLineDecision.SkipVisualAndDispatchSeekNext;
-    
+
     // Visual Run
     public LinePresentationRun Run { get; set; }
 
