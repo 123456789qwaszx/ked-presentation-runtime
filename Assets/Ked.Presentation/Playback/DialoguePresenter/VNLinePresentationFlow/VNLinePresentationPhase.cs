@@ -5,24 +5,26 @@ public enum VNLinePresentationPhase
     // Yarn has delivered a line, but no VN-side state has been committed yet.
     LineReceived = 10,
 
-    // The line has been converted into YarnLineMeta and committed as the current line.
-    // Backlog and rollback points may also have been recorded, depending on the current state.
-    LineEnteredCommitted = 20,
-    
-    // The current line's runtime state has been resolved before any visual work begins.
-    // This includes line meta propagation, runtime state update, backlog/rollback handling,
-    // collected command registration, and seek decision.
-    // Seek pass-through lines may be consumed for alignment and leave the visual flow here.
-    LineRuntimeStateResolved = 30,
-    
-    // The line is being consumed silently as part of an active seek.
-    // It should complete processing without showing the dialogue box or typewriter.
-    SeekPassThrough = 31,
+    // The current line's entry seek kind, record decision, and seek decision have been resolved
+    // before any line state is committed.
+    // YarnLineMeta has been built for seek matching, and resolving the seek decision advances
+    // the seek target match count. No current-line state, backlog, or rollback point has been written yet.
+    LineRuntimeStateResolved = 20,
 
+    // The line has been committed as the current line.
+    // Backlog and rollback points have been recorded according to the resolved record decision,
+    // and collected commands have been played.
+    // Seek pass-through lines may be consumed for alignment and leave the visual flow here.
+    LineEnteredCommitted = 30,
+    
     // A new LinePresentationRun has started.
     // The previous visual run has been cancelled by the presenter owner.
     VisualRunStarted = 40,
 
+    // The line is being consumed silently as part of an active seek.
+    // It should complete processing without showing the dialogue box or typewriter.
+    SeekPassThrough = 41,
+    
     // The dialogue presentation route for this line has been resolved.
     // A visible dialogue surface may have been prepared, or dialogue presentation may have been suppressed.
     DialogueSurfaceResolved = 60,

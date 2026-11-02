@@ -34,42 +34,34 @@ public sealed class VNLinePresentationFlow
         Func<LinePresentationRun> beginRun,
         Func<LineCancellationToken, YarnTask> waitForAdvance)
     {
-        // Phase: LineReceived -> LineEnteredCommitted
+        // Phase: LineReceived -> LineRuntimeStateResolved
         SetPhase(ctx, VNLinePresentationPhase.LineReceived);
-
-        _advanceState.MarkLineEntered();
-
-        ctx.Meta = _vnYarnLineBoundary.BuildLineMeta(ctx.Line, ctx.NodeName);
         
-        ctx.EntrySeekKind = _advanceState.SeekKind;
-
-        _vnYarnLineBoundary.CommitLineEntered(
-            ctx.Meta,
-            VNLineRecordPolicy.Resolve(ctx.EntrySeekKind));
-
+        // Phase: LineRuntimeStateResolved
+        _advanceState.MarkLineEntered();
+        YarnLineMeta meta = _vnYarnLineBoundary.BuildLineMeta(ctx.Line, ctx.NodeName);
+        
+        ctx.EntrySeekKind  = _advanceState.SeekKind;
+        ctx.RecordDecision = VNLineRecordPolicy.Resolve(ctx.EntrySeekKind);
+        ctx.SeekDecision   = ResolveSeekDecision(ctx.EntrySeekKind, meta);
+        SetPhase(ctx, VNLinePresentationPhase.LineRuntimeStateResolved);
+        
+        // Phase: LineEnteredCommitted
+        _vnYarnLineBoundary.CommitLineEntered(meta, ctx.RecordDecision);
         _playbackDriver.PlayCollected();
         SetPhase(ctx, VNLinePresentationPhase.LineEnteredCommitted);
-
-        // Phase: LineRuntimeStateResolved
-        if (ctx.EntrySeekKind != VNSeekKind.None){
-            ctx.SeekDecision = _advanceState.IsSeekTargetLine(ctx.Meta)
-                ? VNSeekLineDecision.TargetLineReached
-                : VNSeekLineDecision.SkipVisualAndDispatchSeekNext;
-        }
-        else ctx.SeekDecision = VNSeekLineDecision.NotSeeking;
-
-        SetPhase(ctx, VNLinePresentationPhase.LineRuntimeStateResolved);
-
-        if (ctx.ShouldSkipVisual) {
+        
+        if (ctx.SeekDecision == VNSeekLineDecision.SkipVisualAndDispatchSeekNext) {
             RunSeekPassThrough(ctx);
             return;
         }
 
         // #auto — 다 보이면 입력 없이 넘긴다(VNLineAdvanceTag). 되감기로 닿은 줄은 다시 보려고 온 것이라 넘기지 않는다.
-        bool rollbackTarget =
-            ctx.IsTargetLineReached && ctx.EntrySeekKind == VNSeekKind.Rollback;
+        bool rollbackTarget = 
+            ctx.SeekDecision == VNSeekLineDecision.TargetLineReached
+            && ctx.EntrySeekKind == VNSeekKind.Rollback;
 
-        if (ctx.IsTargetLineReached)
+        if (ctx.SeekDecision == VNSeekLineDecision.TargetLineReached)
             _advanceState.ClearSeek();
 
         _advanceState.SetLineAutoAdvance(
@@ -126,7 +118,7 @@ public sealed class VNLinePresentationFlow
         }
 
         // Phase: DisplayCommitted
-        _advanceState.MarkLineDisplayCompleted(ctx.Meta, "normal");
+        _advanceState.MarkLineDisplayCompleted("normal");
         _typewriter.ContentWillDismiss();
         SetPhase(ctx, VNLinePresentationPhase.DisplayCommitted);
 
@@ -138,13 +130,13 @@ public sealed class VNLinePresentationFlow
 
         SetPhase(ctx, VNLinePresentationPhase.Completed);
     }
-
+    
     private void RunSeekPassThrough(VNLinePresentationContext ctx)
     {
         SetPhase(ctx, VNLinePresentationPhase.SeekPassThrough);
 
         _boxPresentation.CloseAll();
-        _advanceState.MarkLineDisplayCompleted(ctx.Meta, "passThrough");
+        _advanceState.MarkLineDisplayCompleted("passThrough");
     }
 
     private async YarnTask CompleteStaleAfterBoxAsync(
@@ -154,7 +146,7 @@ public sealed class VNLinePresentationFlow
         SetPhase(ctx, VNLinePresentationPhase.Stale);
 
         _boxPresentation.CleanupStale();
-        _advanceState.MarkLineTornDown(ctx.Meta, "StaleAfterBox");
+        _advanceState.MarkLineTornDown("StaleAfterBox");
 
         SetPhase(ctx, VNLinePresentationPhase.WaitingForAdvance);
         await waitForAdvance(ctx.Token);
@@ -169,12 +161,23 @@ public sealed class VNLinePresentationFlow
         SetPhase(ctx, VNLinePresentationPhase.Stale);
 
         _typewriter.ContentWillDismiss();
-        _advanceState.MarkLineTornDown(ctx.Meta, "StaleAfterTypewriter");
+        _advanceState.MarkLineTornDown("StaleAfterTypewriter");
 
         SetPhase(ctx, VNLinePresentationPhase.WaitingForAdvance);
         await waitForAdvance(ctx.Token);
 
         SetPhase(ctx, VNLinePresentationPhase.Completed);
+    }
+    
+    
+    private VNSeekLineDecision ResolveSeekDecision(VNSeekKind entrySeekKind, YarnLineMeta meta)
+    {
+        if (entrySeekKind == VNSeekKind.None)
+            return VNSeekLineDecision.NotSeeking;
+
+        return _advanceState.IsSeekTargetLine(meta)
+            ? VNSeekLineDecision.TargetLineReached
+            : VNSeekLineDecision.SkipVisualAndDispatchSeekNext;
     }
 
     private void SetPhase(VNLinePresentationContext ctx, VNLinePresentationPhase phase)

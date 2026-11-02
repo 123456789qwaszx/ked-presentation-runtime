@@ -50,13 +50,13 @@ public sealed class VNLinePresentationState : ISeekStateQuery
     }
 
     // 라인이 안정된 경계까지 갔다(= Ready).
-    public void MarkLineDisplayCompleted(YarnLineMeta meta, string reason)
+    public void MarkLineDisplayCompleted(string reason)
     {
         IsLineFullyShown = true;
     }
 
     // 라인이 정상 경계 전에 무너짐.(= Released). 롤백 · 정지 · 선점으로 잘린 경우.
-    public void MarkLineTornDown(YarnLineMeta meta, string reason)
+    public void MarkLineTornDown(string reason)
     {
         IsLineFullyShown = false;
         IsLineAutoAdvancePending = false;

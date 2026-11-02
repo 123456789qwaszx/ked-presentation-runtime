@@ -41,14 +41,14 @@ public sealed class VNYarnLineBoundary
             line.TextWithoutCharacterName.Text);
     }
 
-    public void CommitLineEntered(YarnLineMeta meta, VNLineRecordDecision record)
+    public void CommitLineEntered(YarnLineMeta meta, VNLineRecordDecision decision)
     {
         _runtimeStateProvider.UpdateCurrentLineMeta(meta);
 
-        if (record.RecordBacklog)
+        if (decision.RecordBacklog)
             _backlogRecorder.Record(meta);
 
-        if (record.AddRollbackPoint)
+        if (decision.AddRollbackPoint)
             _rollbackHistory.AddRollbackPoint(meta);
     }
 }
