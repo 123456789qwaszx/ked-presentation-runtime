@@ -3,22 +3,8 @@ using Yarn.Unity;
 
 public partial class DialogueBoxPresentationController
 {
-    private int _visibilityTransitionEpoch;
+    // box_hide·box_show 페이드의 수명. 다음 수동 전환·줄 전환(ShowLineAsync)·CloseAll·CleanupStale이 끊는다.
     private CancellationTokenSource _visibilityTransitionCts;
-
-    private readonly struct VisibilityTransitionRun
-    {
-        public readonly int Epoch;
-        public readonly CancellationToken Token;
-
-        public VisibilityTransitionRun(
-            int epoch,
-            CancellationToken token)
-        {
-            Epoch = epoch;
-            Token = token;
-        }
-    }
 
     // surface_layout is a persistent presentation state mutation.
     // It is intentionally not applied to the currently committed box here,
@@ -37,7 +23,7 @@ public partial class DialogueBoxPresentationController
 
     public async YarnTask HideCurrentAsync()
     {
-        VisibilityTransitionRun visibilityRun = BeginVisibilityTransition();
+        CancellationToken token = BeginVisibilityTransition();
 
         if (_boxState.Box == null || !_boxState.IsVisible)
         {
@@ -48,9 +34,9 @@ public partial class DialogueBoxPresentationController
 
         await _box.FadeOutAsync(
             FadeDownDuration,
-            visibilityRun.Token);
+            token);
 
-        if (!IsCurrentVisibilityTransition(visibilityRun))
+        if (token.IsCancellationRequested)
             return;
 
         _box.SetVisibleImmediate(false);
@@ -59,7 +45,7 @@ public partial class DialogueBoxPresentationController
 
     public async YarnTask ShowCurrentAsync()
     {
-        VisibilityTransitionRun visibilityRun = BeginVisibilityTransition();
+        CancellationToken token = BeginVisibilityTransition();
 
         if (_boxState.Box == null)
             return;
@@ -75,40 +61,30 @@ public partial class DialogueBoxPresentationController
 
         await _box.FadeInAsync(
             FadeUpDuration,
-            visibilityRun.Token);
+            token);
 
-        if (!IsCurrentVisibilityTransition(visibilityRun))
+        if (token.IsCancellationRequested)
             return;
 
         _box.SetVisibleImmediate(true);
         _boxState.TryMarkVisible();
     }
 
-    private VisibilityTransitionRun BeginVisibilityTransition()
+    private CancellationToken BeginVisibilityTransition()
     {
         InvalidateVisibilityTransition();
 
         _visibilityTransitionCts = new CancellationTokenSource();
-
-        return new VisibilityTransitionRun(
-            _visibilityTransitionEpoch,
-            _visibilityTransitionCts.Token);
+        return _visibilityTransitionCts.Token;
     }
 
     private void InvalidateVisibilityTransition()
     {
-        _visibilityTransitionEpoch++;
-
         if (_visibilityTransitionCts == null)
             return;
 
         _visibilityTransitionCts.Cancel();
+        _visibilityTransitionCts.Dispose();
         _visibilityTransitionCts = null;
-    }
-
-    private bool IsCurrentVisibilityTransition(VisibilityTransitionRun visibilityRun)
-    {
-        return _visibilityTransitionEpoch == visibilityRun.Epoch &&
-               !visibilityRun.Token.IsCancellationRequested;
     }
 }

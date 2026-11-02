@@ -143,9 +143,7 @@ public partial class DialogueBoxPresentationController
             case DialogueBoxTransitionKind.Keep:
             case DialogueBoxTransitionKind.Cut:
                 ApplyContent(nextBoxKind, displayCharacterName, ctx);
-
-                if (immediate || run.IsValid)
-                    _box.SetVisibleImmediate(true);
+                _box.SetVisibleImmediate(true);
                 
                 break;
 
