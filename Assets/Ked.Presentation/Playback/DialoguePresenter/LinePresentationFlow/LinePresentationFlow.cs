@@ -46,16 +46,16 @@ public sealed class LinePresentationFlow
         ctx.EntrySeekKind = _seekState.Kind;
         _seekState.ObserveLine(meta.lineId);
 
-        ctx.SeekDecision = ResolveSeekDecision(ctx.EntrySeekKind);
+        ctx.SeekDecision   = ResolveSeekDecision(ctx.EntrySeekKind);
         ctx.RecordDecision = LineRecordPolicy.Resolve(ctx.EntrySeekKind);
+        ctx.AdvanceMode    = LineAdvancePolicy.Resolve(ctx.EntrySeekKind, ctx.SeekDecision, ctx.Line.Metadata);
         SetPhase(ctx, LinePresentationPhase.LineRuntimeStateResolved);
         
         // Phase: LineEnteredCommitted
         _yarnLineBoundary.CommitLineEntered(meta, ctx.RecordDecision);
+        _lineDisplayState.SetLineAutoAdvance(ctx.AdvanceMode == LineAdvanceMode.AutoWhenShown);
 
-        bool targetReached = ctx.SeekDecision == SeekLineDecision.TargetLineReached;
-
-        if (targetReached)
+        if (ctx.SeekDecision == SeekLineDecision.TargetLineReached)
             _seekState.End(SeekEndReason.Arrived);
 
         _playbackDriver.PlayCollected();
@@ -65,12 +65,6 @@ public sealed class LinePresentationFlow
             RunSeekPassThrough(ctx);
             return;
         }
-
-        // #auto — 다 보이면 입력 없이 넘긴다(LineAdvanceTag). 되감기로 닿은 줄은 다시 보려고 온 것이라 넘기지 않는다.
-        bool rollbackTarget = targetReached && ctx.EntrySeekKind == SeekKind.Rollback;
-
-        _lineDisplayState.SetLineAutoAdvance(
-            !rollbackTarget && LineAdvanceTag.IsAuto(ctx.Line.Metadata));
 
         // Phase: VisualRunStarted
         ctx.Run = beginRun();

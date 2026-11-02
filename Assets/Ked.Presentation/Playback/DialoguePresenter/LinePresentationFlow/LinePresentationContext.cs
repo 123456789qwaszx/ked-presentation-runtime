@@ -25,6 +25,9 @@ public sealed class LinePresentationContext
     // Seek Decision
     public SeekLineDecision SeekDecision { get; set; }
 
+    // Advance Mode
+    public LineAdvanceMode AdvanceMode { get; set; }
+
     // Visual Run
     public LinePresentationRun Run { get; set; }
 

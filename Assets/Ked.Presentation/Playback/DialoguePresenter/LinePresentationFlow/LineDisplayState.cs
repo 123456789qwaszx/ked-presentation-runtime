@@ -13,7 +13,7 @@ public sealed class LineDisplayState
         IsLineAutoAdvancePending = false;
     }
     
-    // 줄의 넘김 태그를 정한 뒤(시크 판정 다음) 한 번. 시크로 지나가는 줄에는 부르지 않는다.
+    // 줄마다 한 번, 넘김 정책(LineAdvancePolicy)이 정한 대로.
     public void SetLineAutoAdvance(bool autoAdvance)
     {
         IsLineAutoAdvancePending = autoAdvance;
