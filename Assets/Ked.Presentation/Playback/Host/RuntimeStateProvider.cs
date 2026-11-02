@@ -16,17 +16,6 @@ public sealed class RuntimeStateProvider
         _choiceHistory = choiceHistory;
     }
 
-    public string CurrentNodeName
-    {
-        get
-        {
-            if (TryGetCurrentSavePoint(out RollbackPoint point))
-                return point.nodeName;
-
-            return _hasCurrentLineMeta ? _currentLineMeta.nodeName : "";
-        }
-    }
-
     public string CurrentLineId
     {
         get

@@ -2,14 +2,12 @@ using Yarn.Unity;
 
 public readonly struct YarnLineMeta
 {
-    public readonly string nodeName;
     public readonly string lineId;
     public readonly string charName;
     public readonly string rawText;
 
-    public YarnLineMeta(string nodeName, string lineId, string charName, string rawText)
+    public YarnLineMeta(string lineId, string charName, string rawText)
     {
-        this.nodeName = nodeName;
         this.lineId = lineId;
         this.charName = charName;
         this.rawText = rawText;
@@ -32,10 +30,9 @@ public sealed class YarnLineBoundary
         _runtimeStateProvider = runtimeStateProvider;
     }
 
-    public YarnLineMeta BuildLineMeta(LocalizedLine line, string nodeName)
+    public YarnLineMeta BuildLineMeta(LocalizedLine line)
     {
         return new YarnLineMeta(
-            nodeName,
             line.TextID,
             line.CharacterName,
             line.TextWithoutCharacterName.Text);

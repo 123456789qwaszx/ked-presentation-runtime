@@ -6,7 +6,6 @@ public struct DialogueLogEntry
 {
     public string lineId;
     public int lineSequence;
-    public string nodeName;
     public string rawText;
     public double timestamp;
 }
@@ -54,7 +53,6 @@ public sealed class BacklogRecorder
         {
             lineId = meta.lineId,
             lineSequence = _nextLineSequence++,
-            nodeName = meta.nodeName,
             rawText = meta.rawText,
         });
     }

@@ -6,7 +6,6 @@ public sealed class OptionsPresentationContext
 {
     public DialogueOption[] SourceOptions;
     public LineCancellationToken Token;
-    public string NodeName;
 
     public int ChoiceSequence;
 

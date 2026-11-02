@@ -291,7 +291,6 @@ public sealed class PresentationAssembler
             _seekState);
 
         _refs.OptionsPresenter.Initialize(
-            _refs.DialogueRunner,
             optionsPresentationFlow,
             _refs.OptionItem);
     }

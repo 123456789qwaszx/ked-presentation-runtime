@@ -41,7 +41,7 @@ public class ChoiceHistory
     public List<ChoiceRecord> CreateChoiceSnapshot() => new (_choices);
 
 
-    public void AddChoiceRecord(IReadOnlyList<RollbackPoint> rollbackPoints, string nodeName, int choiceSequence, int selectedOptionIndex, string selectedOptionLineId)
+    public void AddChoiceRecord(IReadOnlyList<RollbackPoint> rollbackPoints, int choiceSequence, int selectedOptionIndex, string selectedOptionLineId)
     {
         if (rollbackPoints.Count <= 0)
             return;

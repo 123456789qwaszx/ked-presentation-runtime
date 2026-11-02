@@ -17,14 +17,12 @@ namespace UnityEngine
 // 진짜는 YarnLineBoundary.cs에 있고 Yarn.Unity를 참조한다. 모양만 같게 둔다.
 public readonly struct YarnLineMeta
 {
-    public readonly string nodeName;
     public readonly string lineId;
     public readonly string charName;
     public readonly string rawText;
 
-    public YarnLineMeta(string nodeName, string lineId, string charName, string rawText)
+    public YarnLineMeta(string lineId, string charName, string rawText)
     {
-        this.nodeName = nodeName;
         this.lineId = lineId;
         this.charName = charName;
         this.rawText = rawText;

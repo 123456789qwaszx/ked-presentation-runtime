@@ -14,7 +14,6 @@ public sealed class CustomOptionsPresenter
     private readonly List<CustomOptionItem> _activeItems = new();
 
     private OptionSelectionSession _selectionSession;
-    private string _currentNodeName;
 
     // 진행 중인 RunOptionsAsync가 실제로 빠져나올 때까지 기다리기 위한 통로.
     // 이게 없으면 정지 이후에도 옵션 태스크가 살아남아,
@@ -22,17 +21,12 @@ public sealed class CustomOptionsPresenter
     private YarnTaskCompletionSource _optionsDrain;
 
     public void Initialize(
-        DialogueRunner dialogueRunner,
         OptionsPresentationFlow flow,
         CustomOptionItem optionItem)
     {
         _flow = flow;
         _optionItemPrefab = optionItem;
-
-        dialogueRunner.onNodeStart?.AddListener(HandleNodeStarted);
     }
-    
-    private void HandleNodeStarted(string nodeName) => _currentNodeName = nodeName;
 
     public override YarnTask OnDialogueStartedAsync()
     {
@@ -78,7 +72,6 @@ public sealed class CustomOptionsPresenter
             {
                 SourceOptions = dialogueOptions,
                 Token = cancellationToken,
-                NodeName = _currentNodeName,
             };
 
             // Phase: ChoiceSequenceReserved -> (ReplayResolved | Stale | Aborted | ViewModelsBuilt -> OptionsBoxShown)

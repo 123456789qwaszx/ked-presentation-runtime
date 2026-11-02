@@ -169,7 +169,7 @@ internal static class Program
             Check(rig.Backlog.GetCurrentSceneHistoryIndex(backlog[2]) == 0, "현재 장면 첫 줄의 백로그 좌표가 0이 아니다");
 
             Check(rig.Rollback.Points.Count == 2, "롤백 기록이 장면 진입에서 비워지지 않았다");
-            Check(rig.Rollback.Points[0].nodeName == "N_ep-2" && rig.Rollback.Points[0].historyIndex == 0,
+            Check(rig.Rollback.Points[0].lineId == "N_ep-2#0" && rig.Rollback.Points[0].historyIndex == 0,
                 "현재 장면 첫 줄의 롤백 좌표가 0이 아니다");
             Check(rig.Backlog.GetCurrentSceneHistoryIndex(backlog[3]) == rig.Rollback.Points[1].historyIndex,
                 "백로그 좌표와 롤백 좌표가 어긋났다");
@@ -453,7 +453,7 @@ internal static class Program
         await Test("노드 재생: 열기 순서, 끝까지 간 노드는 마지막 화면을 남긴다", async () =>
         {
             var rig = new Rig();
-            rig.Backlog.Record(new YarnLineMeta("old", "old#0", "", "이전 단위의 줄"));
+            rig.Backlog.Record(new YarnLineMeta("old#0", "", "이전 단위의 줄"));
             var host = new NodePlaybackHost(rig.Unit);
 
             bool completed = await host.PlayAsync("N_solo");
@@ -462,7 +462,7 @@ internal static class Program
             Check(completed, "끝까지 간 노드가 완료로 보고되지 않았다");
             Check(!host.IsRunning, "끝난 뒤에도 실행 중이다");
             Check(!rig.Backlog.IsInCurrentScene(rig.Backlog.Entries[0]), "단위를 열 때 백로그 경계가 서지 않았다");
-            Check(rig.Rollback.Points.Count == 2 && rig.Rollback.Points[0].nodeName == "N_solo", "롤백 기록이 이 단위의 것이 아니다");
+            Check(rig.Rollback.Points.Count == 2 && rig.Rollback.Points[0].lineId == "N_solo#0", "롤백 기록이 이 단위의 것이 아니다");
         });
 
         await Test("노드 재생: 리플레이는 단위를 다시 열지 않고 루트부터 다시 돈다, 롤백 표적은 소비된다", async () =>

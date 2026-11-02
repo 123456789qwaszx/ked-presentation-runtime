@@ -40,7 +40,7 @@ public sealed class LinePresentationFlow
         SetPhase(ctx, LinePresentationPhase.LineReceived);
         
         _lineDisplayState.MarkLineEntered();
-        YarnLineMeta meta = _yarnLineBoundary.BuildLineMeta(ctx.Line, ctx.NodeName);
+        YarnLineMeta meta = _yarnLineBoundary.BuildLineMeta(ctx.Line);
         
         // Phase: LineRuntimeStateResolved
         ctx.EntrySeekKind = _seekState.Kind;

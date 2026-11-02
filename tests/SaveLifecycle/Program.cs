@@ -52,9 +52,9 @@ internal static class Program
         SavedAtUtc = Timestamp,
     };
 
-    private static DialogueLogEntry Line(int sequence, string lineId = "line", string node = "node") => new()
+    private static DialogueLogEntry Line(int sequence, string lineId = "line") => new()
     {
-        lineId = lineId, nodeName = node, lineSequence = sequence, rawText = lineId + sequence,
+        lineId = lineId, lineSequence = sequence, rawText = lineId + sequence,
     };
 
     private static LineTarget Target(string lineId = "line", int occurrence = 1) =>
@@ -119,7 +119,7 @@ internal static class Program
                 var save = Coordinator(store);
                 var bridge = new ProgressionSaveBridge(save, presentation.Memory);
 
-                presentation.Show("old-line", "old-node");
+                presentation.Show("old-line");
                 presentation.OpenAndTakeResume();
                 presentation.Choices.RestoreChoices(new[] { new ChoiceRecord(0, 0, 2, "picked") });
 
@@ -230,14 +230,14 @@ internal static class Program
 
             await Test("갈라지기 셈법: 줄은 장면 안 등장 순번으로, 물려받는 백로그는 장면 앞까지", () => Run(() =>
             {
-                var backlog = new List<DialogueLogEntry> { Line(0, "a"), Line(1, "b"), Line(2, "line"), Line(3, "line"), Line(4, "line", "other") };
+                var backlog = new List<DialogueLogEntry> { Line(0, "a"), Line(1, "b"), Line(2, "line"), Line(3, "line"), Line(4, "line") };
                 int sceneStart = 2;
 
                 Check(BacklogForkPoints.TryMakeLineTarget(backlog, backlog[3], sceneStart, out LineTarget target), "줄 좌표를 만들지 못했다");
                 Check(target.LineId == "line" && target.Occurrence == 2, "같은 줄의 두 번째 등장을 1로 셌다");
 
                 Check(BacklogForkPoints.TryMakeLineTarget(backlog, backlog[2], sceneStart, out target) && target.Occurrence == 1, "첫 등장이 1이 아니다");
-                Check(BacklogForkPoints.TryMakeLineTarget(backlog, backlog[4], sceneStart, out target) && target.LineId == "line" && target.Occurrence == 3, "노드가 달라도 같은 줄 ID는 이어서 세야 한다(SeekState와 같은 규칙)");
+                Check(BacklogForkPoints.TryMakeLineTarget(backlog, backlog[4], sceneStart, out target) && target.LineId == "line" && target.Occurrence == 3, "같은 줄 ID의 세 번째 등장을 3으로 세지 않았다(SeekState와 같은 규칙)");
 
                 Check(!BacklogForkPoints.TryMakeLineTarget(backlog, Line(9, "missing"), sceneStart, out _), "백로그에 없는 줄에 좌표를 만들었다");
                 Check(!BacklogForkPoints.TryMakeLineTarget(backlog, backlog[1], sceneStart, out _), "장면 앞의 줄에 좌표를 만들었다");
@@ -407,7 +407,7 @@ internal static class Program
                 var sourcePlaythrough = new NodePlaythrough(sourceHost, source.Memory, "other-node", path, new FakeEndView());
                 sourcePlaythrough.StartNew();
                 await Until(() => source.Stage.Plays == 1, "다른 노드 재생");
-                source.Show("x", "other-node");
+                source.Show("x");
                 sourcePlaythrough.SaveCurrentLine();
                 await sourceHost.ExitAsync();
 

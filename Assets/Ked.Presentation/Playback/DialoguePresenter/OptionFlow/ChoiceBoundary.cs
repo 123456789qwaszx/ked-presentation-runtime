@@ -108,11 +108,10 @@ public sealed class ChoiceBoundary
         return true;
     }
 
-    public void CommitSelection(string nodeName, int choiceSequence, int selectedOptionIndex, string selectedOptionLineId)
+    public void CommitSelection(int choiceSequence, int selectedOptionIndex, string selectedOptionLineId)
     {
         _choiceHistory.AddChoiceRecord(
             _rollbackController.Points,
-            nodeName,
             choiceSequence,
             selectedOptionIndex,
             selectedOptionLineId);

@@ -17,7 +17,7 @@ namespace UnityEngine
     }
 }
 
-public struct YarnLineMeta { public string lineId, nodeName, rawText; }
+public struct YarnLineMeta { public string lineId, rawText; }
 
 public sealed class ProgressionDriver
 {
@@ -109,9 +109,9 @@ internal sealed class PresentationRig
     }
 
     // 줄 하나가 보였다 — YarnLineBoundary가 하는 두 기록.
-    public void Show(string lineId, string node = "node")
+    public void Show(string lineId)
     {
-        var meta = new YarnLineMeta { lineId = lineId, nodeName = node, rawText = lineId + " 대사" };
+        var meta = new YarnLineMeta { lineId = lineId, rawText = lineId + " 대사" };
         Backlog.Record(meta);
         Rollback.AddRollbackPoint(meta);
     }

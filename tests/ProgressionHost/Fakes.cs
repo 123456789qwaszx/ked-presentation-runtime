@@ -110,7 +110,7 @@ internal sealed class FakePresentation : IPlaybackStage
 
         for (int i = 0; i < LinesPerNode; i++)
         {
-            var meta = new YarnLineMeta(nodeName, $"{nodeName}#{i}", "", $"{nodeName} line {i}");
+            var meta = new YarnLineMeta($"{nodeName}#{i}", "", $"{nodeName} line {i}");
             _backlog.Record(meta);
             _rollback.AddRollbackPoint(meta);
         }

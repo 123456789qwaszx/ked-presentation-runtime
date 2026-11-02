@@ -14,7 +14,6 @@ public sealed class LinePresentationContext
     // Input
     public LocalizedLine Line { get; set; }
     public LineCancellationToken Token { get; set; }
-    public string NodeName { get; set; }
     public bool ShouldUseImmediateTransition { get; set; }
 
     // Seek Kind

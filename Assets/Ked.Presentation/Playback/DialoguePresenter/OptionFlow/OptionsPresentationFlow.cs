@@ -86,7 +86,6 @@ public sealed class OptionsPresentationFlow
     public void CommitSelection(OptionsPresentationContext ctx, OptionViewModel selected)
     {
         _choiceBoundary.CommitSelection(
-            ctx.NodeName,
             selected.ChoiceSequence,
             selected.SourceOptionIndex,
             selected.SourceOption.Line.TextID);

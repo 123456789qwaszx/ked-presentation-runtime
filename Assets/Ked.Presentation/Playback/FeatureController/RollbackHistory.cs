@@ -5,7 +5,6 @@ using System.Collections.Generic;
 public struct RollbackPoint
 {
     public int historyIndex;
-    public string nodeName;
     public string lineId;
     public string rawText;
 
@@ -14,13 +13,11 @@ public struct RollbackPoint
 
     public RollbackPoint(
         int historyIndex,
-        string nodeName,
         string lineId,
         string rawText,
         int occurrence)
     {
         this.historyIndex = historyIndex;
-        this.nodeName = nodeName;
         this.lineId = lineId;
         this.rawText = rawText;
         this.occurrence = occurrence;
@@ -56,7 +53,6 @@ public sealed class RollbackHistory
 
         _points.Add(new RollbackPoint(
             historyIndex: _nextHistoryIndex++,
-            nodeName: meta.nodeName,
             lineId: meta.lineId,
             rawText: meta.rawText,
             occurrence: occurrence));

@@ -15,8 +15,6 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILineAborter
     private EllipsisBreathTypewriter _typewriter;
     private PlaybackRuntimeState _playbackRuntimeState;
 
-    private string _currentNodeName;
-
     private int _presenterGeneration;
     private CancellationTokenSource _presenterLifetimeCts = new();
     private CancellationTokenSource _lineVisualCts;
@@ -45,7 +43,6 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILineAborter
         EllipsisBreathTypewriter typewriter,
         PlaybackRuntimeState playbackRuntimeState)
     {
-        dialogueRunner.onNodeStart?.AddListener(nodeName => _currentNodeName = nodeName);
         RegisterPresenter(dialogueRunner);
         
         _linePresentationFlow = linePresentationFlow;
@@ -69,7 +66,6 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILineAborter
             {
                 Line = line,
                 Token = token,
-                NodeName = _currentNodeName,
                 ShouldUseImmediateTransition = _playbackRuntimeState.IsSpeedUpMode
             };
 
