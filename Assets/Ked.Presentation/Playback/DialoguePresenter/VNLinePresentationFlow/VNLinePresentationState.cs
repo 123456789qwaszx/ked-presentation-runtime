@@ -7,7 +7,7 @@ public sealed class VNLinePresentationState : ISeekStateQuery
     public bool IsLineFullyShown { get; private set; } = true;
     
     // 지금 줄이 #auto이고 아직 넘기지 않았다(VNLineAdvanceTag). 다 보이면 재생 입력의 프레임이 넘기고 내린다.
-    // 줄에 들어갈 때 · 무너질 때 · 시크를 걸 때 내린다 — 다음 줄로 새지 않는다.
+    // 줄에 들어갈 때 · 무너질 때 내린다 — 다음 줄로 새지 않는다.
     public bool IsLineAutoAdvancePending { get; private set; }
 
     public void BeginRollbackSeek(string lineId, int occurrence)
@@ -17,12 +17,10 @@ public sealed class VNLinePresentationState : ISeekStateQuery
     public void BeginLoadSeek(string lineId, int occurrence)
         => BeginSeek(VNSeekKind.Load, lineId, occurrence);
 
+    // 줄 표시 상태는 건드리지 않는다. 시크 중 넘김은 AdvanceGate가 막고(seek_active),
+    // 리플레이 첫 줄의 MarkLineEntered가 다시 내린다.
     private void BeginSeek(VNSeekKind kind, string lineId, int occurrence)
-    {
-        IsLineFullyShown = false;
-        IsLineAutoAdvancePending = false;
-        _seekState.Begin(new VNSeekTarget(kind, lineId, occurrence));
-    }
+        => _seekState.Begin(new VNSeekTarget(kind, lineId, occurrence));
     
     // 시크 중 지나가는 줄을 하나 관측한다. 줄마다 정확히 한 번 부른다(VNSeekState 참고).
     public void ObserveSeekLine(YarnLineMeta meta) => _seekState.ObserveLine(meta);
