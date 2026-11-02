@@ -21,7 +21,7 @@ public sealed class VNLinePresentationState : ISeekStateQuery
     {
         IsLineFullyShown = false;
         IsLineAutoAdvancePending = false;
-        _seekState.Begin(kind, lineId, occurrence);
+        _seekState.Begin(new VNSeekTarget(kind, lineId, occurrence));
     }
     
     // 시크 중 지나가는 줄을 하나 관측한다. 줄마다 정확히 한 번 부른다(VNSeekState 참고).
