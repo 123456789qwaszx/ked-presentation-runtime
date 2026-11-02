@@ -39,6 +39,7 @@ public readonly struct SeekTarget
 /// <summary>
 /// 시크 하나의 수명과 목표 판정. 시작은 Begin, 끝은 End(사유) 하나뿐이다.
 /// - 목표와 같은 줄 ID가 지나갈 때마다 세고, Occurrence번째 일치가 목표다.
+///   순번을 만드는 RollbackHistory·BacklogForkPoints도 줄 ID 하나로 센다 — 세 곳의 규칙이 같아야 한다.
 /// 전제: 리플레이는 장면 시작에서 같은 경로를 탄다. 줄 ID는 프로젝트에서 고유하다.
 ///       시크 중 줄마다 ObserveLine을 정확히 한 번 부른다.
 /// </summary>

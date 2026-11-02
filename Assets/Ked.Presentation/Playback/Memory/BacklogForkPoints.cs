@@ -19,7 +19,7 @@ internal static class BacklogForkPoints
         return inherited;
     }
 
-    // occurrence = (NodeName, LineId)가 그 장면 안에서 몇 번째인지 (첫 번째 = 1).
+    // occurrence = 같은 LineId가 그 장면 안에서 몇 번째인지 (첫 번째 = 1). RollbackHistory·SeekState와 같은 규칙.
     // 그 줄이 백로그에 없으면(기록이 잘려 나갔으면) false.
     public static bool TryMakeLineTarget(
         IReadOnlyList<DialogueLogEntry> backlog,
@@ -39,8 +39,7 @@ internal static class BacklogForkPoints
                 || candidate.lineSequence > entry.lineSequence)
                 continue;
 
-            if (!string.Equals(candidate.nodeName, entry.nodeName, StringComparison.Ordinal)
-                || !string.Equals(candidate.lineId, entry.lineId, StringComparison.Ordinal))
+            if (!string.Equals(candidate.lineId, entry.lineId, StringComparison.Ordinal))
                 continue;
 
             occurrence++;

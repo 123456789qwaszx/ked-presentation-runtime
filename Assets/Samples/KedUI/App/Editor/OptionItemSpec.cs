@@ -6,7 +6,7 @@ using UnityEngine.UI;
 namespace Ked.Samples.UI.Editor
 {
     /// <summary>
-    /// 선택지 항목 — 본체의 VNOptionItem을 새 그림(choice_normal, 760×74)으로 감싼 프리팹. 선택 가능·불가는 재생 쪽이
+    /// 선택지 항목 — 본체의 CustomOptionItem을 새 그림(choice_normal, 760×74)으로 감싼 프리팹. 선택 가능·불가는 재생 쪽이
     /// 정하고(CustomOptionItem.Bind), 이 프리팹은 그 상태를 그린다: 포커스 = 청록 테두리, 불가 = 투명도.
     /// </summary>
     internal static class OptionItemSpec

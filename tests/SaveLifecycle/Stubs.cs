@@ -108,7 +108,7 @@ internal sealed class PresentationRig
         Memory = new PlaybackMemory(Unit, Backlog, Choices, Rollback);
     }
 
-    // 줄 하나가 보였다 — VNYarnLineBoundary가 하는 두 기록.
+    // 줄 하나가 보였다 — YarnLineBoundary가 하는 두 기록.
     public void Show(string lineId, string node = "node")
     {
         var meta = new YarnLineMeta { lineId = lineId, nodeName = node, rawText = lineId + " 대사" };

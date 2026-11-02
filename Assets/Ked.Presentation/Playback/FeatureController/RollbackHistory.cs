@@ -9,7 +9,7 @@ public struct RollbackPoint
     public string lineId;
     public string rawText;
 
-    // 장면 시작 이후 같은 (nodeName, lineId)의 몇 번째 등장인가 (1부터).
+    // 장면 시작 이후 같은 lineId의 몇 번째 등장인가 (1부터). SeekState가 같은 규칙으로 찾아간다.
     public int occurrence;
 
     public RollbackPoint(
@@ -32,8 +32,8 @@ public sealed class RollbackHistory
     private readonly List<RollbackPoint> _points = new();
     private int _nextHistoryIndex;
 
-    // (노드, 라인)별 등장 횟수. 시크 좌표 용도(occurrence).
-    private readonly Dictionary<(string nodeName, string lineId), int> _seenCount = new();
+    // 줄 ID별 등장 횟수. 시크 좌표 용도(occurrence). 줄 ID는 프로젝트에서 고유하므로 노드는 세지 않는다.
+    private readonly Dictionary<string, int> _seenCount = new();
 
     // 마지막 롤백 요청의 표적. 리플레이를 여는 쪽이 가져가서 표적 뒤 기록을 정리한다.
     private RollbackPoint _pendingTarget;
@@ -47,7 +47,8 @@ public sealed class RollbackHistory
     
     public void AddRollbackPoint(YarnLineMeta meta)
     {
-        (string, string) key = (meta.nodeName, meta.lineId);
+        // 줄 ID가 없는 줄도 예전처럼 받아 둔다(딕셔너리 키는 null이 될 수 없다).
+        string key = meta.lineId ?? string.Empty;
 
         _seenCount.TryGetValue(key, out int seen);
         int occurrence = seen + 1;

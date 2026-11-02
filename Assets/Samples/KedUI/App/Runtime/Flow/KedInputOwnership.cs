@@ -3,7 +3,7 @@ namespace Ked.Samples.UI
     /// <summary>
     /// 재생 입력과 UI 입력의 소유권(Docs/IMPLEMENTATION.md §7).
     ///
-    /// 재생 입력의 유일한 구동자는 VNAdvanceInputPoller다(Space·Ctrl·A·S·R, 그리고 자동·빨리 넘기기의 Tick).
+    /// 재생 입력의 유일한 구동자는 AdvanceInputPoller다(Space·Ctrl·A·S·R, 그리고 자동·빨리 넘기기의 Tick).
     /// 메뉴·목록·설정·팝업이 열려 있거나 UI를 숨긴 동안에는 UI가 입력을 갖는다 — 폴러를 끈다. 그래서
     /// - 같은 Space·Enter가 메뉴 버튼과 아래 대사를 함께 넘기지 않는다.
     /// - 메뉴가 열린 동안 자동 진행·빨리 넘기기가 대사를 넘기지 않는다(멈춤). 닫으면 이어진다.

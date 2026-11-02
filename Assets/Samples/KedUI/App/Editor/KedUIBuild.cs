@@ -47,7 +47,7 @@ namespace Ked.Samples.UI.Editor
         public static string CanvasDir => AppDir + "/Resources/KedUI";
         public static string CanvasPath => CanvasDir + "/KedUICanvas.prefab";
 
-        // 선택지 항목은 본체의 VNOptionItem이라 앱 쪽에 둔다(재생 쪽 선택지 표시자가 이 프리팹으로 항목을 만든다).
+        // 선택지 항목은 본체의 CustomOptionItem이라 앱 쪽에 둔다(재생 쪽 선택지 표시자가 이 프리팹으로 항목을 만든다).
         public static string OptionItemPath => AppDir + "/Prefabs/KedOptionItem.prefab";
 
         [MenuItem("Tools/Ked UI/Build Sample UI")]
