@@ -80,7 +80,7 @@ namespace Ked.Samples.UI
         // 기본값은 씬·본체에 적힌 값(출력 속도·자동 대기·배속)을 읽어 쓴다. 저장된 값이 있으면 그것을 적용한다.
         private void InitializeSettings()
         {
-            VNPlaybackSettings playback = _playback.PlaybackState?.PlaybackSettings;
+            PlaybackSettings playback = _playback.PlaybackState?.PlaybackSettings;
 
             _settingsDefaults = new KedSettings
             {
@@ -114,7 +114,7 @@ namespace Ked.Samples.UI
         }
 
         // 본체가 허용하는 배속(하한·상한) 안의 보기 셋. 마지막은 본체 기본값.
-        private void BuildSpeedChoices(VNPlaybackSettings playback)
+        private void BuildSpeedChoices(PlaybackSettings playback)
         {
             float min = playback != null ? playback.speedupModeMinMultiplier : 2f;
             float max = playback != null ? playback.speedupModeMaxMultiplier : 32f;
@@ -317,7 +317,7 @@ namespace Ked.Samples.UI
         // 배속은 다음에 빠르게 재생을 켤 때부터 적용된다(본체가 켤 때 배속을 읽는다).
         private void ApplyPlaybackSettings()
         {
-            VNPlaybackSettings playback = _playback.PlaybackState?.PlaybackSettings;
+            PlaybackSettings playback = _playback.PlaybackState?.PlaybackSettings;
             if (playback == null)
                 return;
 

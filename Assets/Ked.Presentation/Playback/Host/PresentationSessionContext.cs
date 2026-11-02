@@ -20,7 +20,7 @@ public sealed class PresentationSessionContext : ICommandPacePolicy
         (_playback != null && _playback.IsRapidSkipMode) ||
         (_seek != null && _seek.IsSeekingActive);
 
-    // 속도 모드가 아닐 때 재생 상태의 TimeScale은 1로 되돌아가 있지만(VNFeatureController.ApplySpeedUpModeState),
+    // 속도 모드가 아닐 때 재생 상태의 TimeScale은 1로 되돌아가 있지만(PlaybackFeatureController.ApplySpeedUpModeState),
     // 규약을 여기서도 못박는다 — 실행기는 "속도 모드"라는 말을 모른다.
     public float TimeScale =>
         _playback != null && _playback.IsSpeedUpMode ? _playback.TimeScale : 1f;

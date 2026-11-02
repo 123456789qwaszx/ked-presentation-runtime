@@ -31,7 +31,7 @@ namespace Ked.Samples.UI
         // 빨리 넘기기 = Ctrl을 누르고 있는 것과 같은 기능(rapid skip). 버튼은 눌러서 켜고 다시 눌러 끈다.
         private void HandleFastForward()
         {
-            VNFeatureController features = _playback?.Features;
+            PlaybackFeatureController features = _playback?.Features;
             if (features == null)
                 return;
 

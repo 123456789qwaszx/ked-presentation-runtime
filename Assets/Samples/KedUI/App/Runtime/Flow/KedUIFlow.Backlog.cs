@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Ked.Samples.UI
 {
     // 08 백로그 — 기록은 재생 쪽 백로그를 그대로 읽는다. 줄로 가는 길은 둘이고 서로 다른 호스트 동작이다.
-    //   지금 장면의 줄   → 되감기(VNFeatureController.RequestBacklogJump → IPlaybackHost.RequestReplayAsync)
+    //   지금 장면의 줄   → 되감기(PlaybackFeatureController.RequestBacklogJump → IPlaybackHost.RequestReplayAsync)
     //   확정된 과거 장면 → 그 지점에서 새 회차로 갈라지기(IKedSaveSlotPort.ForkFromBacklogAsync). 확인을 받는다.
     // 갈 수 없는 줄(지금 줄 · 연출 단독의 과거 장면 등)은 이동 버튼이 없다.
     public sealed partial class KedUIFlow

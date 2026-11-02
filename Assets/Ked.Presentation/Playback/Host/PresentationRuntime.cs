@@ -12,7 +12,7 @@ using UnityEngine;
 /// </summary>
 public sealed class PresentationRuntime
 {
-    private readonly VNAdvanceInputPoller _inputPoller;
+    private readonly AdvanceInputPoller _inputPoller;
 
     /// <summary>재생 단위의 수명. 호스트는 이것으로 열고, 재생하고, 멈추고, 루트부터 다시 달린다.</summary>
     public PlaybackUnit Unit { get; }
@@ -20,7 +20,7 @@ public sealed class PresentationRuntime
     /// <summary>연출 기억의 입구. 호스트는 이것으로 기억을 문자열로 꺼내고 되돌린다.</summary>
     public PlaybackMemory Memory { get; }
 
-    public VNFeatureController Features { get; }
+    public PlaybackFeatureController Features { get; }
     public DialogueAdvanceDispatcher AdvanceDispatcher { get; }
 
     public LinePresentationFlow LineFlow { get; }
@@ -29,13 +29,13 @@ public sealed class PresentationRuntime
 
     public PresentationRuntime(
         ScenePresentation scenePresentation,
-        VNFeatureController features,
+        PlaybackFeatureController features,
         DialogueAdvanceDispatcher advanceDispatcher,
         LinePresentationFlow lineFlow,
         RollbackHistory rollbackHistory,
         ChoiceHistory choiceHistory,
         BacklogRecorder backlog,
-        VNAdvanceInputPoller inputPoller)
+        AdvanceInputPoller inputPoller)
     {
         Unit = new PlaybackUnit(scenePresentation, backlog, rollbackHistory);
         Memory = new PlaybackMemory(Unit, backlog, choiceHistory, rollbackHistory);

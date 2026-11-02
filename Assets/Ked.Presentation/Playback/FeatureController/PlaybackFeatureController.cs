@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public sealed class VNFeatureController
+public sealed class PlaybackFeatureController
 {
     private readonly PlaybackRuntimeState _playbackState;
 
@@ -27,7 +27,7 @@ public sealed class VNFeatureController
 
     public IReadOnlyList<DialogueLogEntry> Backlogs => _backlogRecorder.Entries;
 
-    public VNFeatureController(
+    public PlaybackFeatureController(
         PlaybackRuntimeState playbackState,
         LineDisplayState lineDisplayState,
         SeekState seekState,

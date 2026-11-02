@@ -6,7 +6,7 @@ using UnityEngine.UI;
 namespace Ked.Samples.UI
 {
     /// <summary>
-    /// 08 백로그. UIPF Panel. 기록은 재생 쪽 백로그(VNFeatureController.Backlogs)를 흐름이 읽어 넘긴다.
+    /// 08 백로그. UIPF Panel. 기록은 재생 쪽 백로그(PlaybackFeatureController.Backlogs)를 흐름이 읽어 넘긴다.
     /// 줄은 ScrollRect 안의 VerticalLayoutGroup에 견본(LogRowTemplate)을 복제해 쌓는다. 열면 맨 아래(지금 줄)로 간다.
     /// 지금 줄은 옅은 청록 바탕으로 표시한다.
     /// </summary>

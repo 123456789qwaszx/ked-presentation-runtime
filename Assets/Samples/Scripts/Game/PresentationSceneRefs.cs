@@ -36,7 +36,7 @@ public sealed class PresentationSceneRefs
     public CustomOptionItem OptionItem;
 
     // 입력
-    public VNAdvanceInputPoller InputPoller;
+    public AdvanceInputPoller InputPoller;
 
     // 대사창 · 선택지 상자 — 화면 쪽(새 예제 UI, KedUI)의 구현. 연출 런타임은 계약만 안다.
     public IPresentationDialogueBoxView DialogueBoxView;

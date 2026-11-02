@@ -127,7 +127,7 @@ public class SampleBootstrap : MonoBehaviour, IRigPrefabSource
     [SerializeField] private string saveContentVersion = "2";
 
     [Header("VNAdvanceGate")]
-    [SerializeField] private VNAdvanceInputPoller vnAdvanceInputPoller;
+    [SerializeField] private AdvanceInputPoller vnAdvanceInputPoller;
 
     [Header("RigPrefab")]
     [Tooltip("CharacterRig prefab used for command presentation. 배경(bg_*)도 이 리그로 선다 — 캐스팅하지 않은 슬롯. " +

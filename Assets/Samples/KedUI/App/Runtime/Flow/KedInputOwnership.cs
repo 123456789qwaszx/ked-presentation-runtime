@@ -15,13 +15,13 @@ namespace Ked.Samples.UI
     /// </summary>
     internal sealed class KedInputOwnership
     {
-        private readonly VNAdvanceInputPoller _poller;
+        private readonly AdvanceInputPoller _poller;
 
         private bool _uiOwns;
         private bool _priorEnabled = true;
         private bool _restorePending;
 
-        public KedInputOwnership(VNAdvanceInputPoller poller)
+        public KedInputOwnership(AdvanceInputPoller poller)
         {
             _poller = poller;
         }

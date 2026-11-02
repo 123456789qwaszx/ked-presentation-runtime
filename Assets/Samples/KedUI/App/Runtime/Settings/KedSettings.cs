@@ -12,8 +12,8 @@ namespace Ked.Samples.UI
     /// | 대사 | 글자 크기 | UIPF UIContext.TextScale → 대사·선택지·백로그·팝업 본문 |
     /// | 대사 | 글자 출력 속도 | EllipsisBreathTypewriter.unitsPerSecond |
     /// | 대사 | 대사창 불투명도 | 대사창·이름표 그림의 투명도(0–100%, 0이면 그림 없이 글자만). 글자는 그대로 |
-    /// | 재생 | 자동 진행 대기 | VNPlaybackSettings.autoModeDelaySeconds |
-    /// | 재생 | 빠르게 재생 배속 | VNPlaybackSettings.speedupModeMultiplier (본체 하한 2배) |
+    /// | 재생 | 자동 진행 대기 | PlaybackSettings.autoModeDelaySeconds |
+    /// | 재생 | 빠르게 재생 배속 | PlaybackSettings.speedupModeMultiplier (본체 하한 2배) |
     /// | 화면 | 창 모드 · 전체 화면 | Screen.fullScreenMode — 엔진이 스스로 기억한다. 에디터에서는 바뀌지 않는다 |
     ///
     /// 기본값 중 둘(출력 속도·자동 대기·배속)은 씬·본체에 적힌 값을 시작할 때 읽어 쓴다 — 여기서 새 기본을 만들지 않는다.

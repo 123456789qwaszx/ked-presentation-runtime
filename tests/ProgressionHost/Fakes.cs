@@ -302,7 +302,7 @@ internal sealed class Rig
         Driver = new ProgressionDriver(Runner, DriverLog);
     }
 
-    // 진짜 VNFeatureController.RequestRollbackTo가 하는 일 중 장면 루프에 닿는 부분.
+    // 진짜 PlaybackFeatureController.RequestRollbackTo가 하는 일 중 장면 루프에 닿는 부분.
     public void MarkRollback(int historyIndex, string untilNode)
     {
         if (!Rollback.TryGetRollbackPoint(historyIndex, out RollbackPoint target))

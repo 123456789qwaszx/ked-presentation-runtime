@@ -44,7 +44,7 @@ public sealed class PresentationAssembler
     private ScreenEffectRig _screenEffectRig;
 
     private PresentationScopeSession _presentationScopeSession;
-    private VNFeatureController _vnFeatureController;
+    private PlaybackFeatureController _playbackFeatureController;
     private LinePresentationFlow _linePresentationFlow;
     private ScenePresentation _scenePresentation;
     private YarnPlaybackDriver _yarnPlaybackDriver;
@@ -101,7 +101,7 @@ public sealed class PresentationAssembler
 
         return new PresentationRuntime(
             _scenePresentation,
-            _vnFeatureController,
+            _playbackFeatureController,
             _dialogueAdvanceDispatcher,
             _linePresentationFlow,
             _rollbackHistory,
@@ -331,7 +331,7 @@ public sealed class PresentationAssembler
         _episodeSkipController.Initialize(
             _dialogueAdvanceDispatcher);
 
-        _vnFeatureController = new VNFeatureController(
+        _playbackFeatureController = new PlaybackFeatureController(
             _playbackState,
             _lineDisplayState,
             _seekState,

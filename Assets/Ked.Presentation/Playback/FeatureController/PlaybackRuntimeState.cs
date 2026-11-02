@@ -2,7 +2,7 @@ using UnityEngine;
 
 public sealed class PlaybackRuntimeState
 {
-    public VNPlaybackSettings PlaybackSettings { get; set; } = new();
+    public PlaybackSettings PlaybackSettings { get; set; } = new();
     
     private bool _isAutoMode;
     private bool _isSpeedUpMode;

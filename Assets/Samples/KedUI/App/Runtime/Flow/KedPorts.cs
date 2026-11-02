@@ -105,11 +105,11 @@ namespace Ked.Samples.UI
     /// <summary>재생 쪽에서 UI가 직접 쓰는 것. 조립(PresentationAssembler)이 만든 것을 호스트가 모아 넘긴다.</summary>
     public sealed class KedPlaybackBindings
     {
-        public VNFeatureController Features;
+        public PlaybackFeatureController Features;
         public DialogueAdvanceDispatcher AdvanceDispatcher;
         public IPlaybackHost Host;
         public LinePresentationFlow LineFlow;
-        public VNAdvanceInputPoller InputPoller;
+        public AdvanceInputPoller InputPoller;
 
         // 상태 읽기(퀵메뉴의 켜짐 표시)와 설정(자동 대기·빠르게 배속).
         public PlaybackRuntimeState PlaybackState;

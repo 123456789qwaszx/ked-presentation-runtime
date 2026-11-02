@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 
 [Serializable]
-public sealed class VNAdvanceInputBindings
+public sealed class AdvanceInputBindings
 {
     [Header("Advance")]
     public KeyCode advance = KeyCode.Space;
