@@ -84,7 +84,7 @@ public sealed class ScenePresentation : IPlaybackStage
         }
     }
     
-    // 단위의 Yarn 선택 기록을 되돌리고 표적 줄까지 시크한다. 로드 시크는 백로그를 다시 적는다(VNYarnLineBoundary).
+    // 단위의 Yarn 선택 기록을 되돌리고 표적 줄까지 시크한다. 로드 시크는 백로그를 다시 적는다(VNLineRecordPolicy).
     void IPlaybackStage.BeginResume(PresentationResumePoint resume)
     {
         _choiceHistory.RestoreChoices(resume.YarnChoices);
