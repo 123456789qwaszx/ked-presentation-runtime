@@ -8,6 +8,7 @@ public sealed class VNLinePresentationFlow
 
     private readonly VNYarnLineBoundary _vnYarnLineBoundary;
     private readonly VNLinePresentationState _advanceState;
+    private readonly VNSeekState _seekState;
     private readonly DialogueBoxPresentationController _boxPresentation;
     private readonly EllipsisBreathTypewriter _typewriter;
     private readonly YarnPlaybackDriver _playbackDriver;
@@ -16,6 +17,7 @@ public sealed class VNLinePresentationFlow
     public VNLinePresentationFlow(
         VNYarnLineBoundary vnYarnLineBoundary,
         VNLinePresentationState advanceState,
+        VNSeekState seekState,
         DialogueBoxPresentationController boxPresentation,
         EllipsisBreathTypewriter typewriter,
         YarnPlaybackDriver playbackDriver,
@@ -23,6 +25,7 @@ public sealed class VNLinePresentationFlow
     {
         _vnYarnLineBoundary = vnYarnLineBoundary;
         _advanceState = advanceState;
+        _seekState = seekState;
         _boxPresentation = boxPresentation;
         _typewriter = typewriter;
         _playbackDriver = playbackDriver;
@@ -40,8 +43,8 @@ public sealed class VNLinePresentationFlow
         YarnLineMeta meta = _vnYarnLineBoundary.BuildLineMeta(ctx.Line, ctx.NodeName);
         
         // Phase: LineRuntimeStateResolved
-        ctx.EntrySeekKind = _advanceState.SeekKind;
-        _advanceState.ObserveSeekLine(meta);
+        ctx.EntrySeekKind = _seekState.Kind;
+        _seekState.ObserveLine(meta);
 
         ctx.SeekDecision   = ResolveSeekDecision(ctx.EntrySeekKind);
         ctx.RecordDecision = VNLineRecordPolicy.Resolve(ctx.EntrySeekKind);
@@ -63,7 +66,7 @@ public sealed class VNLinePresentationFlow
             && ctx.EntrySeekKind == VNSeekKind.Rollback;
 
         if (ctx.SeekDecision == VNSeekLineDecision.TargetLineReached)
-            _advanceState.EndSeek(VNSeekEndReason.Arrived);
+            _seekState.End(VNSeekEndReason.Arrived);
 
         _advanceState.SetLineAutoAdvance(
             !rollbackTarget && VNLineAdvanceTag.IsAuto(ctx.Line.Metadata));
@@ -175,7 +178,7 @@ public sealed class VNLinePresentationFlow
         if (entrySeekKind == VNSeekKind.None)
             return VNSeekLineDecision.NotSeeking;
 
-        return _advanceState.IsAtSeekTarget
+        return _seekState.LastObservedIsTarget
             ? VNSeekLineDecision.TargetLineReached
             : VNSeekLineDecision.SkipVisualAndDispatchSeekNext;
     }

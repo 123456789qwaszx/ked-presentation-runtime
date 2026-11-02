@@ -8,6 +8,7 @@ public sealed class VNFeatureController
 
     private readonly EllipsisBreathTypewriter _typewriter;
     private readonly VNLinePresentationState _linePresentationAdvanceState;
+    private readonly VNSeekState _seekState;
 
     private readonly BacklogRecorder _backlogRecorder;
     private readonly AutoAdvanceScheduler _autoAdvanceScheduler;
@@ -29,6 +30,7 @@ public sealed class VNFeatureController
     public VNFeatureController(
         VNPlaybackRuntimeState vnPlaybackSettings,
         VNLinePresentationState linePresentationAdvanceState,
+        VNSeekState seekState,
         EllipsisBreathTypewriter ellipsisBreathTypewriter,
         BacklogRecorder backlogRecorder,
         AutoAdvanceScheduler autoAdvanceScheduler,
@@ -39,6 +41,7 @@ public sealed class VNFeatureController
     {
         _vnPlaybackSettings = vnPlaybackSettings;
         _linePresentationAdvanceState = linePresentationAdvanceState;
+        _seekState = seekState;
         _typewriter = ellipsisBreathTypewriter;
 
         _backlogRecorder = backlogRecorder;
@@ -118,7 +121,7 @@ public sealed class VNFeatureController
 
     public bool RequestRollbackOneStep()
     {
-        if (_linePresentationAdvanceState.IsSeekingActive)
+        if (_seekState.IsSeeking)
             return false;
 
         if (!_rollbackController.GetRollbackPoint(out RollbackPoint target))
@@ -131,11 +134,11 @@ public sealed class VNFeatureController
     // 이전 장면 항목은 그 장면의 루트에서만 시작할 수 있는데, 그것은 되감기가 아니라 확정된
     // 장면을 다시 여는 일이라 여기 기전이 아니다(후속 — scene-future-plan §1).
     public bool CanJumpTo(in DialogueLogEntry entry) =>
-        !_linePresentationAdvanceState.IsSeekingActive && TryResolveJumpTarget(entry, out _);
+        !_seekState.IsSeeking && TryResolveJumpTarget(entry, out _);
 
     public bool RequestBacklogJump(in DialogueLogEntry entry)
     {
-        if (_linePresentationAdvanceState.IsSeekingActive)
+        if (_seekState.IsSeeking)
             return false;
 
         if (!TryResolveJumpTarget(entry, out RollbackPoint target))
@@ -180,7 +183,7 @@ public sealed class VNFeatureController
         _backlogRecorder.TruncateFromEnd(_rollbackController.CountPointsAfter(target));
 
         _rollbackController.ClearRollbackPoints();
-        _linePresentationAdvanceState.BeginRollbackSeek(target.lineId, target.occurrence);
+        _seekState.Begin(new VNSeekTarget(VNSeekKind.Rollback, target.lineId, target.occurrence));
 
         DisablePlaybackModifiers();
 
@@ -234,7 +237,7 @@ public sealed class VNFeatureController
     public bool RequestSkipCurrentEpisode()
     {
         // Load / Rollback replay 중에는 별도 Skip을 열지 않는다.
-        if (_linePresentationAdvanceState.IsSeekingActive)
+        if (_seekState.IsSeeking)
             return false;
 
         if (!_episodeSkipController.Request())

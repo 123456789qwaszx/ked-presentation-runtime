@@ -27,7 +27,7 @@ public sealed class PresentationAssembler
     private readonly RollbackHistory _rollbackHistory = new();
     private readonly ChoiceHistory _choiceHistory = new();
     private readonly VNSeekState _seekState = new();
-    private readonly VNLinePresentationState _linePresentationAdvanceState;
+    private readonly VNLinePresentationState _linePresentationAdvanceState = new();
 
     private readonly PresentationStage _presentationStage = new();
     private readonly BacklogRecorder _backlogRecorder = new();
@@ -55,8 +55,6 @@ public sealed class PresentationAssembler
     {
         _refs = refs;
         _presentationView = presentationView;
-
-        _linePresentationAdvanceState = new VNLinePresentationState(_seekState);
     }
 
     /// <param name="presentationView">재생을 시작할 때 무대 화면을 앞으로 가져올 자리.</param>
@@ -268,6 +266,7 @@ public sealed class PresentationAssembler
         _linePresentationFlow = new VNLinePresentationFlow(
             vnYarnLineBoundary,
             _linePresentationAdvanceState,
+            _seekState,
             dialogueBoxPresentationController,
             _refs.EllipsisBreathTypewriter,
             yarnPlaybackDriver,
@@ -335,6 +334,7 @@ public sealed class PresentationAssembler
         _vnFeatureController = new VNFeatureController(
             _playbackState,
             _linePresentationAdvanceState,
+            _seekState,
             _refs.EllipsisBreathTypewriter,
             _backlogRecorder,
             _refs.AutoAdvanceScheduler,
