@@ -158,7 +158,7 @@ public partial class DialogueBoxPresentationController
                 else 
                 {
                     _box.PrepareHidden();
-                    await _box.FadeInAsync(FadeUpDuration, run);
+                    await _box.FadeInAsync(FadeUpDuration, run.VisualToken);
                 }
                 
                 break;
@@ -173,7 +173,7 @@ public partial class DialogueBoxPresentationController
                     break;
                 }
 
-                await _box.FadeOutAsync(FadeDownDuration, run);
+                await _box.FadeOutAsync(FadeDownDuration, run.VisualToken);
 
                 if (!run.IsValid)
                     break;
@@ -183,7 +183,7 @@ public partial class DialogueBoxPresentationController
                 ApplyContent(nextBoxKind, displayCharacterName, ctx);
 
                 _box.PrepareHidden();
-                await _box.FadeInAsync(FadeUpDuration, run);
+                await _box.FadeInAsync(FadeUpDuration, run.VisualToken);
 
                 break;
 
@@ -200,7 +200,7 @@ public partial class DialogueBoxPresentationController
                     break;
                 }
 
-                await _box.FadeOutAsync(FadeDownDuration, run);
+                await _box.FadeOutAsync(FadeDownDuration, run.VisualToken);
 
                 if (!run.IsValid)
                     break;

@@ -76,43 +76,6 @@ namespace Ked.Samples.UI
             _box.SetShown(false);
         }
 
-        public async YarnTask FadeInAsync(float duration, LinePresentationRun run)
-        {
-            if (!run.IsValid)
-                return;
-
-            _box.SetVisibleImmediate(true);
-
-            if (_box.Group == null)
-                return;
-
-            _box.Group.alpha = 0f;
-
-            await Effects
-                .FadeAlphaAsync(_box.Group, 0f, 1f, duration, run.VisualToken)
-                .SuppressCancellationThrow();
-
-            if (!run.IsValid)
-                return;
-
-            _box.SetShown(true);
-        }
-
-        public async YarnTask FadeOutAsync(float duration, LinePresentationRun run)
-        {
-            if (!run.IsValid || _box.Group == null)
-                return;
-
-            await Effects
-                .FadeAlphaAsync(_box.Group, _box.Group.alpha, 0f, duration, run.VisualToken)
-                .SuppressCancellationThrow();
-
-            if (!run.IsValid)
-                return;
-
-            _box.SetShown(false);
-        }
-
         private static PlayDialogueLayout ToLayout(DialogueSurfaceLayoutPresetDBSO.Entry entry) => new()
         {
             lineAnchorMin = entry.lineAnchorMin,
