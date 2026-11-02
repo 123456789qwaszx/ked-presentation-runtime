@@ -122,7 +122,7 @@ public sealed class ScenePresentation : IPlaybackStage
         // Yarn이 멈춘 뒤라 더 쌓이지 않는다.
         DiscardPendingCommands(warn: false);
 
-        _linePresentationAborter.AbortCurrentVNLine();
+        _linePresentationAborter.AbortCurrentLine();
         _rollbackHistory.ClearRollbackPoints();
         _shotResponseSystem.Clear();
         _presentationScope.End();

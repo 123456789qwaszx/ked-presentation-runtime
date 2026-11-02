@@ -5,7 +5,7 @@ using Yarn.Unity;
 
 public interface ILineAborter
 {
-    void AbortCurrentVNLine();
+    void AbortCurrentLine();
 }
 
 public sealed class CustomLinePresenter : DialoguePresenterBase, ILineAborter
@@ -15,7 +15,6 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILineAborter
     private EllipsisBreathTypewriter _typewriter;
     private PlaybackRuntimeState _playbackRuntimeState;
 
-    private int _presenterGeneration;
     private CancellationTokenSource _presenterLifetimeCts = new();
     private CancellationTokenSource _lineVisualCts;
 
@@ -91,10 +90,7 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILineAborter
             CancellationTokenSource.CreateLinkedTokenSource(
                 _presenterLifetimeCts.Token);
 
-        return new LinePresentationRun(
-            _presenterGeneration,
-            () => _presenterGeneration,
-            _lineVisualCts.Token);
+        return new LinePresentationRun(_lineVisualCts.Token);
     }
 
     private async YarnTask WaitForLineAdvanceAsync(LineCancellationToken token)
@@ -117,9 +113,9 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILineAborter
         }
     }
 
-    public void AbortCurrentVNLine()
+    // 지금 줄의 화면 작업을 끊는다. 그 줄의 run은 무효가 되어 stale 경로로 정리된다.
+    public void AbortCurrentLine()
     {
-        _presenterGeneration++;
         CancelLineVisualToken();
     }
 
