@@ -10,8 +10,8 @@ on:
       - 'Assets/Ked.Presentation/Playback/Memory/PresentationResumePoint.cs'
       - 'Assets/Ked.Presentation/Playback/FeatureController/RollbackHistory.cs'
       - 'Assets/Ked.Presentation/Playback/FeatureController/BacklogRecorder.cs'
-      - 'Assets/Ked.Presentation/Playback/DialoguePresenter/VNLinePresentationFlow/LineTarget.cs'
-      - 'Assets/Ked.Presentation/Playback/DialoguePresenter/VNOptionFlow/VNChoiceRecord.cs'
+      - 'Assets/Ked.Presentation/Playback/DialoguePresenter/LinePresentationFlow/LineTarget.cs'
+      - 'Assets/Ked.Presentation/Playback/DialoguePresenter/OptionFlow/ChoiceRecord.cs'
       - 'tests/ProgressionHost/**'
       - '.github/workflows/progression-host.yml'
   workflow_dispatch:

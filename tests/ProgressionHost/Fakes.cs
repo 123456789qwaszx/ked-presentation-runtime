@@ -26,7 +26,7 @@ internal sealed class EventLog
 // 정지하면 롤백 기록을 비운다(ScenePresentation.StopAsync).
 //
 // 줄 시크 자체는 이 하네스의 관심사가 아니다. 진짜는 표적 줄에 닿으면 시크가 끝난다.
-// 여기서는 "표적이 든 노드를 재생하면 끝난다"로 줄인다 — 재개 지점의 노드 이름이 그 표적이다.
+// 여기서는 "표적이 든 노드를 재생하면 끝난다"로 줄인다 — 재개 지점 줄 ID의 노드 부분("노드#번호")이 그 표적이다.
 internal sealed class FakePresentation : IPlaybackStage
 {
     private readonly EventLog _log;
@@ -75,10 +75,18 @@ internal sealed class FakePresentation : IPlaybackStage
     {
         ResumeCount++;
         LastResume = resume;
-        _log.Add("resume:" + resume.Target.NodeName);
+        string untilNode = NodeOf(resume.Target.LineId);
+        _log.Add("resume:" + untilNode);
 
         IsSeeking = true;
-        SeekUntilNode = resume.Target.NodeName;
+        SeekUntilNode = untilNode;
+    }
+
+    // 하네스의 줄 ID는 "노드#번호"로 짓는다(PlayEpisodeAsync). 재개 표적의 노드는 줄 ID에서 읽는다.
+    private static string NodeOf(string lineId)
+    {
+        int hash = lineId.IndexOf('#');
+        return hash < 0 ? lineId : lineId.Substring(0, hash);
     }
 
     public void AbandonSeek()
@@ -88,7 +96,7 @@ internal sealed class FakePresentation : IPlaybackStage
         SeekUntilNode = null;
     }
 
-    // 롤백 시크. 진짜로는 VNFeatureController가 VNLinePresentationState에 건다.
+    // 롤백 시크. 진짜로는 PlaybackFeatureController가 SeekState에 건다.
     public void BeginRollbackSeek(string untilNode)
     {
         IsSeeking = true;
@@ -313,11 +321,11 @@ internal sealed class Rig
         Presentation.BeginRollbackSeek(untilNode);
     }
 
-    // 진짜로는 PlaybackMemory.Restore가 저장된 문자열을 되읽어 건다. 여기서는 표적 노드만 정한다.
+    // 진짜로는 PlaybackMemory.Restore가 저장된 문자열을 되읽어 건다. 여기서는 표적 노드의 첫 줄을 정한다.
     public void StageResume(string untilNode)
     {
         Unit.StageResume(new PresentationResumePoint(
-            new LineTarget { NodeName = untilNode, LineId = untilNode + "#0", Occurrence = 1 },
+            new LineTarget { LineId = untilNode + "#0", Occurrence = 1 },
             Array.Empty<ChoiceRecord>()));
     }
 }

@@ -33,7 +33,7 @@ internal static class Program
     }
 
     private static PresentationResumePoint SomeResume() =>
-        new(new LineTarget { NodeName = "stale", LineId = "stale", Occurrence = 1 }, Array.Empty<ChoiceRecord>());
+        new(new LineTarget { LineId = "stale", Occurrence = 1 }, Array.Empty<ChoiceRecord>());
 
     private static async Task Test(string name, Func<Task> body)
     {
@@ -58,7 +58,7 @@ internal static class Program
     };
 
     private static LineTarget Target(string lineId = "line", int occurrence = 1) =>
-        new() { NodeName = "node", LineId = lineId, Occurrence = occurrence };
+        new() { LineId = lineId, Occurrence = occurrence };
 
     private static ChapterState State(string episode = "scene1") =>
         ChapterState.CreateInitial(Array.Empty<StatDefinition>(), episode);
@@ -237,7 +237,7 @@ internal static class Program
                 Check(target.LineId == "line" && target.Occurrence == 2, "같은 줄의 두 번째 등장을 1로 셌다");
 
                 Check(BacklogForkPoints.TryMakeLineTarget(backlog, backlog[2], sceneStart, out target) && target.Occurrence == 1, "첫 등장이 1이 아니다");
-                Check(BacklogForkPoints.TryMakeLineTarget(backlog, backlog[4], sceneStart, out target) && target.NodeName == "other" && target.Occurrence == 1, "노드가 다른 줄을 같이 셌다");
+                Check(BacklogForkPoints.TryMakeLineTarget(backlog, backlog[4], sceneStart, out target) && target.LineId == "line" && target.Occurrence == 3, "노드가 달라도 같은 줄 ID는 이어서 세야 한다(SeekState와 같은 규칙)");
 
                 Check(!BacklogForkPoints.TryMakeLineTarget(backlog, Line(9, "missing"), sceneStart, out _), "백로그에 없는 줄에 좌표를 만들었다");
                 Check(!BacklogForkPoints.TryMakeLineTarget(backlog, backlog[1], sceneStart, out _), "장면 앞의 줄에 좌표를 만들었다");
@@ -384,7 +384,7 @@ internal static class Program
                 resumed.Resume();
                 await Until(() => second.Stage.Resumes == 1, "재개 시크");
 
-                Check(second.Stage.Resumed.Target.LineId == "b" && second.Stage.Resumed.Target.NodeName == "node", "마지막으로 본 줄이 아니다");
+                Check(second.Stage.Resumed.Target.LineId == "b", "마지막으로 본 줄이 아니다");
                 await Until(() => !host2.IsRunning, "노드 끝");
                 Check(!File.Exists(path), "끝까지 본 노드의 파일이 남았다");
             });
