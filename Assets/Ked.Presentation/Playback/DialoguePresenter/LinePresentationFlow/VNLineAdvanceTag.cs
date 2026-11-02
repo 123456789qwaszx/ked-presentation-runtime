@@ -4,7 +4,7 @@
 //           연출만 하는 줄(#boxhide)을 클릭 없이 지나가게 할 때 쓴다 — 노드의 마지막 줄이면 그대로 노드가 끝난다.
 //           자동 진행(Auto)의 대기 시간은 쓰지 않는다 — 다 보인 다음 프레임에 넘긴다.
 //           재생 입력이 멈춘 동안(메뉴 · 팝업 · UI 숨김)은 기다린다. 넘기는 길이 재생 입력의 프레임(VNFeatureController.Tick)이다.
-//           되감기로 닿은 줄에서는 넘기지 않는다 — 다시 보려고 돌아온 것이다(VNLinePresentationFlow).
+//           되감기로 닿은 줄에서는 넘기지 않는다 — 다시 보려고 돌아온 것이다(LinePresentationFlow).
 //
 // 표기는 박스 태그와 같은 정규화를 거친다(#auto · #Auto · #AUTO가 같다).
 public static class VNLineAdvanceTag

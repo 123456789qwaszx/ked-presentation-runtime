@@ -1,4 +1,4 @@
-public enum VNLinePresentationPhase
+public enum LinePresentationPhase
 {
     None = 0,
 

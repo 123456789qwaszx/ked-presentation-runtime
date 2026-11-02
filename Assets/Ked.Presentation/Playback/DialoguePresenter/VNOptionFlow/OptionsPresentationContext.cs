@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Yarn.Unity;
 
-public sealed class VNOptionsPresentationContext
+public sealed class OptionsPresentationContext
 {
     public DialogueOption[] SourceOptions;
     public LineCancellationToken Token;
@@ -18,7 +18,7 @@ public sealed class VNOptionsPresentationContext
     public DialogueOption SelectedOption;
 
     // Phase Tracking
-    public VNOptionsPresentationPhase Phase = VNOptionsPresentationPhase.None;
+    public OptionsPresentationPhase Phase = OptionsPresentationPhase.None;
 
     public bool HasAnyAvailableOption
     {

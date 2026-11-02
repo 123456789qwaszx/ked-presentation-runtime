@@ -108,7 +108,7 @@ namespace Ked.Samples.UI
         public VNFeatureController Features;
         public DialogueAdvanceDispatcher AdvanceDispatcher;
         public IPlaybackHost Host;
-        public VNLinePresentationFlow LineFlow;
+        public LinePresentationFlow LineFlow;
         public VNAdvanceInputPoller InputPoller;
 
         // 상태 읽기(퀵메뉴의 켜짐 표시)와 설정(자동 대기·빠르게 배속).

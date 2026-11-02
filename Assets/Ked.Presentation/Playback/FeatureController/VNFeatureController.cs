@@ -7,7 +7,7 @@ public sealed class VNFeatureController
     private readonly VNPlaybackRuntimeState _vnPlaybackSettings;
 
     private readonly EllipsisBreathTypewriter _typewriter;
-    private readonly VNLinePresentationState _linePresentationAdvanceState;
+    private readonly LineDisplayState _lineDisplayState;
     private readonly VNSeekState _seekState;
 
     private readonly BacklogRecorder _backlogRecorder;
@@ -23,13 +23,13 @@ public sealed class VNFeatureController
 
     private bool IsAuto => _vnPlaybackSettings.IsAutoMode;
 
-    private bool LineFullyShown => _linePresentationAdvanceState.IsLineFullyShown;
+    private bool LineFullyShown => _lineDisplayState.IsLineFullyShown;
 
     public IReadOnlyList<DialogueLogEntry> Backlogs => _backlogRecorder.Entries;
 
     public VNFeatureController(
         VNPlaybackRuntimeState vnPlaybackSettings,
-        VNLinePresentationState linePresentationAdvanceState,
+        LineDisplayState lineDisplayState,
         VNSeekState seekState,
         EllipsisBreathTypewriter ellipsisBreathTypewriter,
         BacklogRecorder backlogRecorder,
@@ -40,7 +40,7 @@ public sealed class VNFeatureController
         ChoiceHistory choiceHistory)
     {
         _vnPlaybackSettings = vnPlaybackSettings;
-        _linePresentationAdvanceState = linePresentationAdvanceState;
+        _lineDisplayState = lineDisplayState;
         _seekState = seekState;
         _typewriter = ellipsisBreathTypewriter;
 
@@ -59,10 +59,10 @@ public sealed class VNFeatureController
     public void Tick()
     {
         // #auto 줄은 자동 진행보다 먼저 — 켜져 있지 않아도, 대기 없이 넘긴다. 막히면(연출 명령 · 시크) 다음 프레임에 다시.
-        if (LineFullyShown && _linePresentationAdvanceState.IsLineAutoAdvancePending)
+        if (LineFullyShown && _lineDisplayState.IsLineAutoAdvancePending)
         {
             if (_autoAdvanceScheduler.TryDispatchLineAutoAdvance())
-                _linePresentationAdvanceState.ConsumeLineAutoAdvance();
+                _lineDisplayState.ConsumeLineAutoAdvance();
         }
         else if (IsAuto && LineFullyShown)
         {

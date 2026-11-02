@@ -4,7 +4,7 @@ public sealed class DialogueAdvanceDispatcher
 {
     private AdvanceGate _gate;
     private DialogueRunner _dialogueRunner;
-    private VNLinePresentationState _linePresentationAdvanceState;
+    private LineDisplayState _lineDisplayState;
 
     public bool IsDialogueRunning =>
         _dialogueRunner != null &&
@@ -18,11 +18,11 @@ public sealed class DialogueAdvanceDispatcher
     public void Initialize(
         AdvanceGate gate,
         DialogueRunner dialogueRunner,
-        VNLinePresentationState linePresentationAdvanceState)
+        LineDisplayState lineDisplayState)
     {
         _gate = gate;
         _dialogueRunner = dialogueRunner;
-        _linePresentationAdvanceState = linePresentationAdvanceState;
+        _lineDisplayState = lineDisplayState;
     }
 
     public void DispatchAdvance() => DispatchAdvance(AdvanceRequestKind.User);
@@ -36,7 +36,7 @@ public sealed class DialogueAdvanceDispatcher
         if (!_dialogueRunner.IsDialogueRunning)
             return true;
 
-        if (!_linePresentationAdvanceState.IsLineFullyShown)
+        if (!_lineDisplayState.IsLineFullyShown)
             return false;
 
         if (!_gate.TryAccept(AdvanceRequestKind.Auto))
@@ -54,7 +54,7 @@ public sealed class DialogueAdvanceDispatcher
         if (!_dialogueRunner.IsDialogueRunning)
             return;
 
-        if (!_linePresentationAdvanceState.IsLineFullyShown)
+        if (!_lineDisplayState.IsLineFullyShown)
         {
             _dialogueRunner.RequestHurryUpLine();
             _gate.AddCooldownSeconds(_gate.GetCooldownAfterHurryUp(kind));

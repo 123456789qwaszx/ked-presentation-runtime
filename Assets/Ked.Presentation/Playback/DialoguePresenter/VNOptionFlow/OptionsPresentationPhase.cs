@@ -1,4 +1,4 @@
-public enum VNOptionsPresentationPhase
+public enum OptionsPresentationPhase
 {
     None = 0,
     

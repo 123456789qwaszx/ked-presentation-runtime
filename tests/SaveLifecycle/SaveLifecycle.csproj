@@ -35,7 +35,7 @@
     <Compile Include="../../Assets/Ked.Presentation/Playback/FeatureController/BacklogRecorder.cs" />
     <Compile Include="../../Assets/Ked.Presentation/Playback/FeatureController/RollbackHistory.cs" />
     <Compile Include="../../Assets/Ked.Presentation/Playback/DialoguePresenter/VNOptionFlow/VNChoiceRecord.cs" />
-    <Compile Include="../../Assets/Ked.Presentation/Playback/DialoguePresenter/VNLinePresentationFlow/LineTarget.cs" />
+    <Compile Include="../../Assets/Ked.Presentation/Playback/DialoguePresenter/LinePresentationFlow/LineTarget.cs" />
     <Compile Include="Stubs.cs" />
     <Compile Include="Program.cs" />
   </ItemGroup>

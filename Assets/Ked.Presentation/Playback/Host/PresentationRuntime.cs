@@ -23,7 +23,7 @@ public sealed class PresentationRuntime
     public VNFeatureController Features { get; }
     public DialogueAdvanceDispatcher AdvanceDispatcher { get; }
 
-    public VNLinePresentationFlow LineFlow { get; }
+    public LinePresentationFlow LineFlow { get; }
 
     public IPlaybackHost Host { get; private set; }
 
@@ -31,7 +31,7 @@ public sealed class PresentationRuntime
         ScenePresentation scenePresentation,
         VNFeatureController features,
         DialogueAdvanceDispatcher advanceDispatcher,
-        VNLinePresentationFlow lineFlow,
+        LinePresentationFlow lineFlow,
         RollbackHistory rollbackHistory,
         ChoiceHistory choiceHistory,
         BacklogRecorder backlog,

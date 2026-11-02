@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Yarn.Unity;
 
-public enum VNOptionsPresentationBeginResult
+public enum OptionsPresentationBeginResult
 {
     
     NoOption = 0,         // 고를 수 있는 옵션이 없다 — 정상적인 종료.
@@ -11,13 +11,13 @@ public enum VNOptionsPresentationBeginResult
     Aborted = 4,          // 선택 없이 끊겼다 — 옵션 토큰이 취소된 경우(대화 정지).
 }
 
-public sealed class VNOptionsPresentationFlow
+public sealed class OptionsPresentationFlow
 {
     private readonly OptionsBoxPresentationController _boxPresentation;
     private readonly VNChoiceBoundary _choiceBoundary;
     private readonly VNSeekState _seekState;
 
-    public VNOptionsPresentationFlow(
+    public OptionsPresentationFlow(
         OptionsBoxPresentationController boxPresentation,
         VNChoiceBoundary choiceBoundary,
         VNSeekState seekState)
@@ -27,19 +27,19 @@ public sealed class VNOptionsPresentationFlow
         _seekState = seekState;
     }
 
-    public async YarnTask<VNOptionsPresentationBeginResult> BeginAsync(
-        VNOptionsPresentationContext ctx)
+    public async YarnTask<OptionsPresentationBeginResult> BeginAsync(
+        OptionsPresentationContext ctx)
     {
         // Phase: ChoiceSequenceReserved
         ctx.ChoiceSequence = _choiceBoundary.ReserveChoiceSequence();
-        SetPhase(ctx, VNOptionsPresentationPhase.ChoiceSequenceReserved);
+        SetPhase(ctx, OptionsPresentationPhase.ChoiceSequenceReserved);
 
         // Phase: ReplayResolved
         if (_seekState.IsSeeking) {
             // 옵션들이 있지만, 조건 제한등으로 선택 불가능할 경우.
             if (!ctx.HasAnyAvailableOption) {
-                SetPhase(ctx, VNOptionsPresentationPhase.NoOption);
-                return VNOptionsPresentationBeginResult.NoOption;
+                SetPhase(ctx, OptionsPresentationPhase.NoOption);
+                return OptionsPresentationBeginResult.NoOption;
             }
             
             if (!_choiceBoundary.TryResolveReplayOption(ctx.ChoiceSequence, ctx.SourceOptions,
@@ -47,43 +47,43 @@ public sealed class VNOptionsPresentationFlow
                 _seekState.End(VNSeekEndReason.ReplayChoiceMismatch);
                 ctx.SelectedOption = null;
                 
-                SetPhase(ctx, VNOptionsPresentationPhase.Stale);
-                return VNOptionsPresentationBeginResult.Stale;
+                SetPhase(ctx, OptionsPresentationPhase.Stale);
+                return OptionsPresentationBeginResult.Stale;
             }
 
             // Pass the restored choice to the normal flow without user input.
             ctx.SelectedOption = replayOption;
-            SetPhase(ctx, VNOptionsPresentationPhase.ReplayResolved);
+            SetPhase(ctx, OptionsPresentationPhase.ReplayResolved);
 
-            return VNOptionsPresentationBeginResult.ReplayResolved;
+            return OptionsPresentationBeginResult.ReplayResolved;
         }
 
         // Phase: ViewModelsBuilt
         ctx.ViewModels = BuildViewModels(ctx.SourceOptions, ctx.ChoiceSequence);
 
         if (ctx.ViewModels.Count == 0) {
-            SetPhase(ctx, VNOptionsPresentationPhase.NoOption);
-            return VNOptionsPresentationBeginResult.NoOption;
+            SetPhase(ctx, OptionsPresentationPhase.NoOption);
+            return OptionsPresentationBeginResult.NoOption;
         }
 
-        SetPhase(ctx, VNOptionsPresentationPhase.ViewModelsBuilt);
+        SetPhase(ctx, OptionsPresentationPhase.ViewModelsBuilt);
 
         // Phase: OptionsBoxShown
         if (!await _boxPresentation.ShowAsync(ctx.Token)) {
             EndInteractiveImmediate();
 
-            SetPhase(ctx, VNOptionsPresentationPhase.Aborted);
-            return VNOptionsPresentationBeginResult.Aborted;
+            SetPhase(ctx, OptionsPresentationPhase.Aborted);
+            return OptionsPresentationBeginResult.Aborted;
         }
 
         ctx.ItemContainer = _boxPresentation.ItemContainer;
 
-        SetPhase(ctx, VNOptionsPresentationPhase.OptionsBoxShown);
+        SetPhase(ctx, OptionsPresentationPhase.OptionsBoxShown);
 
-        return VNOptionsPresentationBeginResult.InteractiveReady;
+        return OptionsPresentationBeginResult.InteractiveReady;
     }
 
-    public void CommitSelection(VNOptionsPresentationContext ctx, VNOptionViewModel selected)
+    public void CommitSelection(OptionsPresentationContext ctx, VNOptionViewModel selected)
     {
         _choiceBoundary.CommitSelection(
             ctx.NodeName,
@@ -139,7 +139,7 @@ public sealed class VNOptionsPresentationFlow
             isAvailable: option.IsAvailable);
     }
 
-    private static void SetPhase(VNOptionsPresentationContext ctx, VNOptionsPresentationPhase phase)
+    private static void SetPhase(OptionsPresentationContext ctx, OptionsPresentationPhase phase)
     {
         ctx.Phase = phase;
     }

@@ -10,7 +10,7 @@ public interface IVNLineAborter
 
 public sealed class CustomLinePresenter : DialoguePresenterBase, IVNLineAborter
 {
-    private VNLinePresentationFlow _vnLinePresentationFlow;
+    private LinePresentationFlow _linePresentationFlow;
 
     private EllipsisBreathTypewriter _typewriter;
     private VNPlaybackRuntimeState _vnPlaybackRuntimeState;
@@ -41,14 +41,14 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, IVNLineAborter
 
     public void Initialize(
         DialogueRunner dialogueRunner,
-        VNLinePresentationFlow vnLinePresentationFlow,
+        LinePresentationFlow linePresentationFlow,
         EllipsisBreathTypewriter typewriter,
         VNPlaybackRuntimeState vnPlaybackRuntimeState)
     {
         dialogueRunner.onNodeStart?.AddListener(nodeName => _currentNodeName = nodeName);
         RegisterPresenter(dialogueRunner);
         
-        _vnLinePresentationFlow = vnLinePresentationFlow;
+        _linePresentationFlow = linePresentationFlow;
 
         _typewriter = typewriter;
         _typewriter.ActionMarkupHandlers = ActionMarkupHandlers;
@@ -65,7 +65,7 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, IVNLineAborter
 
         try
         {
-            var ctx = new VNLinePresentationContext
+            var ctx = new LinePresentationContext
             {
                 Line = line,
                 Token = token,
@@ -73,7 +73,7 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, IVNLineAborter
                 ShouldUseImmediateTransition = _vnPlaybackRuntimeState.IsSpeedUpMode
             };
 
-            await _vnLinePresentationFlow.RunAsync(
+            await _linePresentationFlow.RunAsync(
                 ctx,
                 beginRun: BeginLinePresentationRun,
                 waitForAdvance: WaitForLineAdvanceAsync);

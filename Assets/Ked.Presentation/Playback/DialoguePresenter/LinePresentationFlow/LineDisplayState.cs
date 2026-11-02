@@ -1,5 +1,5 @@
 // 지금 줄의 표시 상태 — 다 보였나 · #auto 넘김 대기. 시크는 VNSeekState가 가진다.
-public sealed class VNLinePresentationState
+public sealed class LineDisplayState
 {
     public bool IsLineFullyShown { get; private set; } = true;
     

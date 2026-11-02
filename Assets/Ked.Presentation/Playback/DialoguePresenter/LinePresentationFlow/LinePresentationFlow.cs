@@ -2,21 +2,21 @@ using System;
 using Yarn.Unity;
 
 // Runs one line presentation transaction through its explicit phase sequence.
-public sealed class VNLinePresentationFlow
+public sealed class LinePresentationFlow
 {
     public event Action LineDisplayed;
 
     private readonly VNYarnLineBoundary _vnYarnLineBoundary;
-    private readonly VNLinePresentationState _advanceState;
+    private readonly LineDisplayState _lineDisplayState;
     private readonly VNSeekState _seekState;
     private readonly DialogueBoxPresentationController _boxPresentation;
     private readonly EllipsisBreathTypewriter _typewriter;
     private readonly YarnPlaybackDriver _playbackDriver;
     private readonly LineHurrySpeedController _lineHurrySpeed;
 
-    public VNLinePresentationFlow(
+    public LinePresentationFlow(
         VNYarnLineBoundary vnYarnLineBoundary,
-        VNLinePresentationState advanceState,
+        LineDisplayState lineDisplayState,
         VNSeekState seekState,
         DialogueBoxPresentationController boxPresentation,
         EllipsisBreathTypewriter typewriter,
@@ -24,7 +24,7 @@ public sealed class VNLinePresentationFlow
         LineHurrySpeedController lineHurrySpeed)
     {
         _vnYarnLineBoundary = vnYarnLineBoundary;
-        _advanceState = advanceState;
+        _lineDisplayState = lineDisplayState;
         _seekState = seekState;
         _boxPresentation = boxPresentation;
         _typewriter = typewriter;
@@ -33,13 +33,13 @@ public sealed class VNLinePresentationFlow
     }
 
     public async YarnTask RunAsync(
-        VNLinePresentationContext ctx,
+        LinePresentationContext ctx,
         Func<LinePresentationRun> beginRun,
         Func<LineCancellationToken, YarnTask> waitForAdvance)
     {
-        SetPhase(ctx, VNLinePresentationPhase.LineReceived);
+        SetPhase(ctx, LinePresentationPhase.LineReceived);
         
-        _advanceState.MarkLineEntered();
+        _lineDisplayState.MarkLineEntered();
         YarnLineMeta meta = _vnYarnLineBoundary.BuildLineMeta(ctx.Line, ctx.NodeName);
         
         // Phase: LineRuntimeStateResolved
@@ -48,12 +48,12 @@ public sealed class VNLinePresentationFlow
 
         ctx.SeekDecision   = ResolveSeekDecision(ctx.EntrySeekKind);
         ctx.RecordDecision = VNLineRecordPolicy.Resolve(ctx.EntrySeekKind);
-        SetPhase(ctx, VNLinePresentationPhase.LineRuntimeStateResolved);
+        SetPhase(ctx, LinePresentationPhase.LineRuntimeStateResolved);
         
         // Phase: LineEnteredCommitted
         _vnYarnLineBoundary.CommitLineEntered(meta, ctx.RecordDecision);
         _playbackDriver.PlayCollected();
-        SetPhase(ctx, VNLinePresentationPhase.LineEnteredCommitted);
+        SetPhase(ctx, LinePresentationPhase.LineEnteredCommitted);
         
         if (ctx.SeekDecision == VNSeekLineDecision.SkipVisualAndDispatchSeekNext) {
             RunSeekPassThrough(ctx);
@@ -68,12 +68,12 @@ public sealed class VNLinePresentationFlow
         if (ctx.SeekDecision == VNSeekLineDecision.TargetLineReached)
             _seekState.End(VNSeekEndReason.Arrived);
 
-        _advanceState.SetLineAutoAdvance(
+        _lineDisplayState.SetLineAutoAdvance(
             !rollbackTarget && VNLineAdvanceTag.IsAuto(ctx.Line.Metadata));
 
         // Phase: VisualRunStarted
         ctx.Run = beginRun();
-        SetPhase(ctx, VNLinePresentationPhase.VisualRunStarted);
+        SetPhase(ctx, LinePresentationPhase.VisualRunStarted);
 
         DialogueBoxPresentationContext boxCtx = new(
             ctx.Line,
@@ -83,7 +83,7 @@ public sealed class VNLinePresentationFlow
         // Phase: BoxTransitioning -> BoxReady
         await _boxPresentation.ShowLineAsync(boxCtx);
 
-        SetPhase(ctx, VNLinePresentationPhase.DialogueSurfaceResolved);
+        SetPhase(ctx, LinePresentationPhase.DialogueSurfaceResolved);
 
         if (!ctx.Run.IsValid) {
             await CompleteStaleAfterBoxAsync(ctx, waitForAdvance);
@@ -96,7 +96,7 @@ public sealed class VNLinePresentationFlow
 
         ctx.Text = ctx.Line.TextWithoutCharacterName;
         _typewriter.PrepareForContent(ctx.Text);
-        SetPhase(ctx, VNLinePresentationPhase.TypewriterReady);
+        SetPhase(ctx, LinePresentationPhase.TypewriterReady);
         
         // Phase: TypewriterCompleted
         try 
@@ -114,7 +114,7 @@ public sealed class VNLinePresentationFlow
             _lineHurrySpeed.Exit();
         }
 
-        SetPhase(ctx, VNLinePresentationPhase.TypewriterCompleted);
+        SetPhase(ctx, LinePresentationPhase.TypewriterCompleted);
 
         if (!ctx.Run.IsValid) {
             await CompleteStaleAfterTypewriterAsync(ctx, waitForAdvance);
@@ -122,55 +122,55 @@ public sealed class VNLinePresentationFlow
         }
 
         // Phase: DisplayCommitted
-        _advanceState.MarkLineDisplayCompleted("normal");
+        _lineDisplayState.MarkLineDisplayCompleted("normal");
         _typewriter.ContentWillDismiss();
-        SetPhase(ctx, VNLinePresentationPhase.DisplayCommitted);
+        SetPhase(ctx, LinePresentationPhase.DisplayCommitted);
 
         LineDisplayed?.Invoke();
 
         // Phase: WaitingForAdvance -> Completed
-        SetPhase(ctx, VNLinePresentationPhase.WaitingForAdvance);
+        SetPhase(ctx, LinePresentationPhase.WaitingForAdvance);
         await waitForAdvance(ctx.Token);
 
-        SetPhase(ctx, VNLinePresentationPhase.Completed);
+        SetPhase(ctx, LinePresentationPhase.Completed);
     }
     
-    private void RunSeekPassThrough(VNLinePresentationContext ctx)
+    private void RunSeekPassThrough(LinePresentationContext ctx)
     {
-        SetPhase(ctx, VNLinePresentationPhase.SeekPassThrough);
+        SetPhase(ctx, LinePresentationPhase.SeekPassThrough);
 
         _boxPresentation.CloseAll();
-        _advanceState.MarkLineDisplayCompleted("passThrough");
+        _lineDisplayState.MarkLineDisplayCompleted("passThrough");
     }
 
     private async YarnTask CompleteStaleAfterBoxAsync(
-        VNLinePresentationContext ctx,
+        LinePresentationContext ctx,
         Func<LineCancellationToken, YarnTask> waitForAdvance)
     {
-        SetPhase(ctx, VNLinePresentationPhase.Stale);
+        SetPhase(ctx, LinePresentationPhase.Stale);
 
         _boxPresentation.CleanupStale();
-        _advanceState.MarkLineTornDown("StaleAfterBox");
+        _lineDisplayState.MarkLineTornDown("StaleAfterBox");
 
-        SetPhase(ctx, VNLinePresentationPhase.WaitingForAdvance);
+        SetPhase(ctx, LinePresentationPhase.WaitingForAdvance);
         await waitForAdvance(ctx.Token);
 
-        SetPhase(ctx, VNLinePresentationPhase.Completed);
+        SetPhase(ctx, LinePresentationPhase.Completed);
     }
 
     private async YarnTask CompleteStaleAfterTypewriterAsync(
-        VNLinePresentationContext ctx,
+        LinePresentationContext ctx,
         Func<LineCancellationToken, YarnTask> waitForAdvance)
     {
-        SetPhase(ctx, VNLinePresentationPhase.Stale);
+        SetPhase(ctx, LinePresentationPhase.Stale);
 
         _typewriter.ContentWillDismiss();
-        _advanceState.MarkLineTornDown("StaleAfterTypewriter");
+        _lineDisplayState.MarkLineTornDown("StaleAfterTypewriter");
 
-        SetPhase(ctx, VNLinePresentationPhase.WaitingForAdvance);
+        SetPhase(ctx, LinePresentationPhase.WaitingForAdvance);
         await waitForAdvance(ctx.Token);
 
-        SetPhase(ctx, VNLinePresentationPhase.Completed);
+        SetPhase(ctx, LinePresentationPhase.Completed);
     }
     
     private VNSeekLineDecision ResolveSeekDecision(VNSeekKind entrySeekKind)
@@ -183,7 +183,7 @@ public sealed class VNLinePresentationFlow
             : VNSeekLineDecision.SkipVisualAndDispatchSeekNext;
     }
 
-    private void SetPhase(VNLinePresentationContext ctx, VNLinePresentationPhase phase)
+    private void SetPhase(LinePresentationContext ctx, LinePresentationPhase phase)
     {
         ctx.Phase = phase;
     }

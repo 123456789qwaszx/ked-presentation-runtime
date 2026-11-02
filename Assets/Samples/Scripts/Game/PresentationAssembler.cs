@@ -27,7 +27,7 @@ public sealed class PresentationAssembler
     private readonly RollbackHistory _rollbackHistory = new();
     private readonly ChoiceHistory _choiceHistory = new();
     private readonly VNSeekState _seekState = new();
-    private readonly VNLinePresentationState _linePresentationAdvanceState = new();
+    private readonly LineDisplayState _lineDisplayState = new();
 
     private readonly PresentationStage _presentationStage = new();
     private readonly BacklogRecorder _backlogRecorder = new();
@@ -45,7 +45,7 @@ public sealed class PresentationAssembler
 
     private PresentationScopeSession _presentationScopeSession;
     private VNFeatureController _vnFeatureController;
-    private VNLinePresentationFlow _linePresentationFlow;
+    private LinePresentationFlow _linePresentationFlow;
     private ScenePresentation _scenePresentation;
     private YarnPlaybackDriver _yarnPlaybackDriver;
 
@@ -263,9 +263,9 @@ public sealed class PresentationAssembler
 
         LineHurrySpeedController lineHurrySpeed = new(_refs.EllipsisBreathTypewriter);
 
-        _linePresentationFlow = new VNLinePresentationFlow(
+        _linePresentationFlow = new LinePresentationFlow(
             vnYarnLineBoundary,
-            _linePresentationAdvanceState,
+            _lineDisplayState,
             _seekState,
             dialogueBoxPresentationController,
             _refs.EllipsisBreathTypewriter,
@@ -287,7 +287,7 @@ public sealed class PresentationAssembler
 
         OptionsBoxPresentationController optionsBoxPresentation = new(optionsBox);
 
-        VNOptionsPresentationFlow optionsPresentationFlow = new(
+        OptionsPresentationFlow optionsPresentationFlow = new(
             optionsBoxPresentation,
             vnChoiceBoundary,
             _seekState);
@@ -333,7 +333,7 @@ public sealed class PresentationAssembler
 
         _vnFeatureController = new VNFeatureController(
             _playbackState,
-            _linePresentationAdvanceState,
+            _lineDisplayState,
             _seekState,
             _refs.EllipsisBreathTypewriter,
             _backlogRecorder,
@@ -351,7 +351,7 @@ public sealed class PresentationAssembler
         _dialogueAdvanceDispatcher.Initialize(
             advanceGate,
             _refs.DialogueRunner,
-            _linePresentationAdvanceState);
+            _lineDisplayState);
     }
 
     private void BootstrapEquivalenceHarness()

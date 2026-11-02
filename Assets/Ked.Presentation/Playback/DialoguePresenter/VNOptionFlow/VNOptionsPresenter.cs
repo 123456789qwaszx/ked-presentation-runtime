@@ -4,12 +4,12 @@ using UnityEngine;
 
 // Owns option item instances, the interactive selection session,
 // and DialoguePresenterBase adapter work.
-// Transaction ordering lives in VNOptionsPresentationFlow.
+// Transaction ordering lives in OptionsPresentationFlow.
 public sealed class VNOptionsPresenter
     : DialoguePresenterBase
 {
     private VNOptionItem _optionItemPrefab;
-    private VNOptionsPresentationFlow _flow;
+    private OptionsPresentationFlow _flow;
 
     private readonly List<VNOptionItem> _activeItems = new();
 
@@ -23,7 +23,7 @@ public sealed class VNOptionsPresenter
 
     public void Initialize(
         DialogueRunner dialogueRunner,
-        VNOptionsPresentationFlow flow,
+        OptionsPresentationFlow flow,
         VNOptionItem optionItem)
     {
         _flow = flow;
@@ -74,7 +74,7 @@ public sealed class VNOptionsPresenter
 
         try
         {
-            VNOptionsPresentationContext ctx = new()
+            OptionsPresentationContext ctx = new()
             {
                 SourceOptions = dialogueOptions,
                 Token = cancellationToken,
@@ -82,16 +82,16 @@ public sealed class VNOptionsPresenter
             };
 
             // Phase: ChoiceSequenceReserved -> (ReplayResolved | Stale | Aborted | ViewModelsBuilt -> OptionsBoxShown)
-            VNOptionsPresentationBeginResult beginResult = await _flow.BeginAsync(ctx);
+            OptionsPresentationBeginResult beginResult = await _flow.BeginAsync(ctx);
 
             switch (beginResult)
             {
-                case VNOptionsPresentationBeginResult.NoOption:
-                case VNOptionsPresentationBeginResult.Stale:
-                case VNOptionsPresentationBeginResult.Aborted:
+                case OptionsPresentationBeginResult.NoOption:
+                case OptionsPresentationBeginResult.Stale:
+                case OptionsPresentationBeginResult.Aborted:
                     return await DialogueRunner.NoOptionSelected;
 
-                case VNOptionsPresentationBeginResult.ReplayResolved:
+                case OptionsPresentationBeginResult.ReplayResolved:
                     return ctx.SelectedOption;
             }
 
@@ -99,19 +99,19 @@ public sealed class VNOptionsPresenter
             {
                 // Phase: InteractiveReady -> AwaitingSelection
                 PrepareInteractiveItems(ctx);
-                SetPhase(ctx, VNOptionsPresentationPhase.InteractiveReady);
+                SetPhase(ctx, OptionsPresentationPhase.InteractiveReady);
 
                 VNOptionViewModel selected = await AwaitSelectionAsync(ctx);
 
                 if (cancellationToken.IsNextContentRequested || selected == null)
                 {
-                    SetPhase(ctx, VNOptionsPresentationPhase.Aborted);
+                    SetPhase(ctx, OptionsPresentationPhase.Aborted);
                     return await DialogueRunner.NoOptionSelected;
                 }
 
                 // Phase: SelectionCommitted
                 _flow.CommitSelection(ctx, selected);
-                SetPhase(ctx, VNOptionsPresentationPhase.SelectionCommitted);
+                SetPhase(ctx, OptionsPresentationPhase.SelectionCommitted);
 
                 return ctx.SelectedOption ?? await DialogueRunner.NoOptionSelected;
             }
@@ -130,7 +130,7 @@ public sealed class VNOptionsPresenter
         }
     }
 
-    private void PrepareInteractiveItems(VNOptionsPresentationContext ctx)
+    private void PrepareInteractiveItems(OptionsPresentationContext ctx)
     {
         EndSelectionSession();
         DestroyActiveItems();
@@ -145,13 +145,13 @@ public sealed class VNOptionsPresenter
         SelectFirstAvailableItem();
     }
 
-    private async YarnTask<VNOptionViewModel> AwaitSelectionAsync(VNOptionsPresentationContext ctx)
+    private async YarnTask<VNOptionViewModel> AwaitSelectionAsync(OptionsPresentationContext ctx)
     {
         if (_selectionSession == null)
             return null;
 
         // Phase: AwaitingSelection
-        SetPhase(ctx, VNOptionsPresentationPhase.AwaitingSelection);
+        SetPhase(ctx, OptionsPresentationPhase.AwaitingSelection);
 
         VNOptionViewModel selected = await _selectionSession.Task;
 
@@ -160,7 +160,7 @@ public sealed class VNOptionsPresenter
         return selected;
     }
 
-    private async YarnTask CleanupInteractiveAsync(VNOptionsPresentationContext ctx)
+    private async YarnTask CleanupInteractiveAsync(OptionsPresentationContext ctx)
     {
         _flow.SetInputEnabled(false);
 
@@ -238,7 +238,7 @@ public sealed class VNOptionsPresenter
         }
     }
 
-    private static void SetPhase(VNOptionsPresentationContext ctx, VNOptionsPresentationPhase phase)
+    private static void SetPhase(OptionsPresentationContext ctx, OptionsPresentationPhase phase)
     {
         ctx.Phase = phase;
     }

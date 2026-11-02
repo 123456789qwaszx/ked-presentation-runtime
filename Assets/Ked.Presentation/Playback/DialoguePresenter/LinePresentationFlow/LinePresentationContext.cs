@@ -9,7 +9,7 @@ public enum VNSeekLineDecision
     TargetLineReached,
 }
 
-public sealed class VNLinePresentationContext
+public sealed class LinePresentationContext
 {
     // Input
     public LocalizedLine Line { get; set; }
@@ -34,5 +34,5 @@ public sealed class VNLinePresentationContext
     public MarkupParseResult Text { get; set; }
 
     // Phase Tracking
-    public VNLinePresentationPhase Phase { get; set; } = VNLinePresentationPhase.None;
+    public LinePresentationPhase Phase { get; set; } = LinePresentationPhase.None;
 }

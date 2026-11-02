@@ -112,7 +112,7 @@ public sealed class NodePlaythrough : IPlaythroughEntry
 
     #region 저장
 
-    /// <summary>줄이 다 보였을 때 부른다(VNLinePresentationFlow.LineDisplayed). 시크 중이면 아무것도 쓰지 않는다.</summary>
+    /// <summary>줄이 다 보였을 때 부른다(LinePresentationFlow.LineDisplayed). 시크 중이면 아무것도 쓰지 않는다.</summary>
     public void SaveCurrentLine()
     {
         if (!_host.IsRunning)
