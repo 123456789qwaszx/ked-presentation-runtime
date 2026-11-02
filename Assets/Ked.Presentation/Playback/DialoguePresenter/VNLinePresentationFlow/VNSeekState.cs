@@ -10,7 +10,7 @@ public enum VNSeekKind
 public sealed class VNSeekState
 {
     public VNSeekKind Kind { get; private set; } = VNSeekKind.None;
-    public bool IsSeeking { get; private set; }
+    public bool IsSeeking => Kind != VNSeekKind.None;
 
     public string TargetNodeName { get; private set; }
     public string TargetLineId { get; private set; }
@@ -25,7 +25,6 @@ public sealed class VNSeekState
     public void Begin(VNSeekKind kind, string nodeName, string lineId, int occurrence)
     {
         Kind = kind;
-        IsSeeking = true;
 
         TargetNodeName = nodeName;
         TargetLineId = lineId;
@@ -55,7 +54,6 @@ public sealed class VNSeekState
     public void Clear()
     {
         Kind = VNSeekKind.None;
-        IsSeeking = false;
 
         TargetNodeName = null;
         TargetLineId = null;

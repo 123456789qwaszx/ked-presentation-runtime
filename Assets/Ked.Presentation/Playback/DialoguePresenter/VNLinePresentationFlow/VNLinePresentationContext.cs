@@ -21,10 +21,7 @@ public sealed class VNLinePresentationContext
     public YarnLineMeta Meta { get; set; }
 
     // Seek Kind
-    public VNSeekKind? ActiveSeek { get; set; }
-    
-    // Record Decision
-    public VNLineRecordDecision RecordDecision { get; set; }
+    public VNSeekKind EntrySeekKind { get; set; }
 
     // Seek Decision
     public VNSeekLineDecision SeekDecision { get; set; }

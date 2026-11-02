@@ -41,18 +41,17 @@ public sealed class VNLinePresentationFlow
 
         ctx.Meta = _vnYarnLineBoundary.BuildLineMeta(ctx.Line, ctx.NodeName);
         
-        ctx.ActiveSeek = _advanceState.IsSeekingActive
-            ? _advanceState.SeekKind
-            : null;
+        ctx.EntrySeekKind = _advanceState.SeekKind;
 
-        ctx.RecordDecision = VNLineRecordPolicy.Resolve(ctx.ActiveSeek);
-        _vnYarnLineBoundary.CommitLineEntered(ctx.Meta, ctx.RecordDecision);
+        _vnYarnLineBoundary.CommitLineEntered(
+            ctx.Meta,
+            VNLineRecordPolicy.Resolve(ctx.EntrySeekKind));
 
         _playbackDriver.PlayCollected();
         SetPhase(ctx, VNLinePresentationPhase.LineEnteredCommitted);
 
         // Phase: LineRuntimeStateResolved
-        if (ctx.ActiveSeek.HasValue){
+        if (ctx.EntrySeekKind != VNSeekKind.None){
             ctx.SeekDecision = _advanceState.IsSeekTargetLine(ctx.Meta)
                 ? VNSeekLineDecision.TargetLineReached
                 : VNSeekLineDecision.SkipVisualAndDispatchSeekNext;
@@ -68,7 +67,7 @@ public sealed class VNLinePresentationFlow
 
         // #auto — 다 보이면 입력 없이 넘긴다(VNLineAdvanceTag). 되감기로 닿은 줄은 다시 보려고 온 것이라 넘기지 않는다.
         bool rollbackTarget =
-            ctx.IsTargetLineReached && ctx.ActiveSeek == VNSeekKind.Rollback;
+            ctx.IsTargetLineReached && ctx.EntrySeekKind == VNSeekKind.Rollback;
 
         if (ctx.IsTargetLineReached)
             _advanceState.ClearSeek();

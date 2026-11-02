@@ -18,10 +18,9 @@ public readonly struct VNLineRecordDecision
 // 전제: TruncateFromEnd는 목표 줄을 남긴다. 시크 종류는 ClearSeek 전에 읽는다.
 public static class VNLineRecordPolicy
 {
-    public static VNLineRecordDecision Resolve(VNSeekKind? activeSeek) => activeSeek switch
+    public static VNLineRecordDecision Resolve(VNSeekKind activeSeek) => activeSeek switch
     {
-        // 일반 재생
-        null => new VNLineRecordDecision(
+        VNSeekKind.None => new VNLineRecordDecision(
             recordBacklog: true,
             addRollbackPoint: true),
 
