@@ -76,7 +76,7 @@ public sealed class SeekState : ISeekStateQuery
     }
 
     // 시크 중 지나가는 줄을 하나 관측한다. 목표와 같은 줄이면 일치 횟수를 센다.
-    public void ObserveLine(YarnLineMeta meta)
+    public void ObserveLine(string lineId)
     {
         _inFlight.LastObservedIsTarget = false;
 
@@ -86,7 +86,7 @@ public sealed class SeekState : ISeekStateQuery
         if (string.IsNullOrWhiteSpace(_target.LineId))
             return;
 
-        if (!string.Equals(meta.lineId, _target.LineId, StringComparison.Ordinal))
+        if (!string.Equals(lineId, _target.LineId, StringComparison.Ordinal))
             return;
 
         _inFlight.MatchedCount++;

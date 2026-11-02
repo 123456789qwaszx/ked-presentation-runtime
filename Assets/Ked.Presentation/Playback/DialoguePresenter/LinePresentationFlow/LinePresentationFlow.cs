@@ -44,7 +44,7 @@ public sealed class LinePresentationFlow
         
         // Phase: LineRuntimeStateResolved
         ctx.EntrySeekKind = _seekState.Kind;
-        _seekState.ObserveLine(meta);
+        _seekState.ObserveLine(meta.lineId);
 
         ctx.SeekDecision   = ResolveSeekDecision(ctx.EntrySeekKind);
         ctx.RecordDecision = LineRecordPolicy.Resolve(ctx.EntrySeekKind);
