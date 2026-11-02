@@ -18,16 +18,13 @@ public sealed class YarnLineBoundary
 {
     private readonly BacklogRecorder _backlogRecorder;
     private readonly RollbackHistory _rollbackHistory;
-    private readonly RuntimeStateProvider _runtimeStateProvider;
 
     public YarnLineBoundary(
         BacklogRecorder backlogRecorder,
-        RollbackHistory rollbackHistory,
-        RuntimeStateProvider runtimeStateProvider)
+        RollbackHistory rollbackHistory)
     {
         _backlogRecorder = backlogRecorder;
         _rollbackHistory = rollbackHistory;
-        _runtimeStateProvider = runtimeStateProvider;
     }
 
     public YarnLineMeta BuildLineMeta(LocalizedLine line)
@@ -40,8 +37,6 @@ public sealed class YarnLineBoundary
 
     public void CommitLineEntered(YarnLineMeta meta, LineRecordDecision decision)
     {
-        _runtimeStateProvider.UpdateCurrentLineMeta(meta);
-
         if (decision.RecordBacklog)
             _backlogRecorder.Record(meta);
 

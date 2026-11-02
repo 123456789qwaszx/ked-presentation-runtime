@@ -50,7 +50,7 @@ using Yarn.Unity;
 // ─────────────────────────────────────────────────────────────────────────────
 public sealed class StageEquivalenceHarness : MonoBehaviour
 {
-    private RuntimeStateProvider _provider;
+    private RollbackHistory _rollbackHistory;
     private PresentationScopeSession _session;
     private PresentationStage _stage;
     private MotionLibrary _motions = MotionLibrary.Empty;
@@ -107,7 +107,7 @@ public sealed class StageEquivalenceHarness : MonoBehaviour
 
     /// <param name="dialogueFolder">대본(.yarn) 폴더의 절대 경로. 하위 폴더까지 읽는다 — 어디에 두는지는 호스트가 정한다.</param>
     public void Initialize(
-        RuntimeStateProvider provider,
+        RollbackHistory rollbackHistory,
         DialogueRunner dialogueRunner,
         PresentationScopeSession session,
         PresentationStage stage,
@@ -117,7 +117,7 @@ public sealed class StageEquivalenceHarness : MonoBehaviour
         string dialogueFolder)
     {
         _motions = motions ?? MotionLibrary.Empty;
-        _provider = provider;
+        _rollbackHistory = rollbackHistory;
         _dialogueRunner = dialogueRunner;
         _session = session;
         _stage = stage;
@@ -332,6 +332,10 @@ public sealed class StageEquivalenceHarness : MonoBehaviour
 
     private void HandleNodeStarted(string nodeName) => _currentNodeName = nodeName;
 
+    // 지금 줄 = 마지막으로 쌓인 롤백 포인트. 판정 시점(다음 줄 요청 직전)에는 지금 줄이 이미 쌓여 있다.
+    private string CurrentLineId => _rollbackHistory.Points.Count > 0 ? _rollbackHistory.Points[^1].lineId : "";
+    private string CurrentLineText => _rollbackHistory.Points.Count > 0 ? _rollbackHistory.Points[^1].rawText : "";
+
     // ── 판정 ─────────────────────────────────────────────────────────
 
     private void CompareAtCurrentLine()
@@ -342,7 +346,7 @@ public sealed class StageEquivalenceHarness : MonoBehaviour
         try
         {
             string nodeName = _currentNodeName;
-            string lineId = _provider.CurrentLineId;
+            string lineId = CurrentLineId;
 
             if (string.IsNullOrEmpty(nodeName))
                 return;
@@ -436,7 +440,7 @@ public sealed class StageEquivalenceHarness : MonoBehaviour
             return;
 
         string expected = Normalize(_storyGroups[lineIndex].LineText);
-        string actual = Normalize(_provider.CurrentLinePreview);
+        string actual = Normalize(CurrentLineText);
 
         if (string.IsNullOrEmpty(expected) || string.IsNullOrEmpty(actual))
             return;
@@ -449,7 +453,7 @@ public sealed class StageEquivalenceHarness : MonoBehaviour
         Debug.LogWarning(
             $"[등가성 하네스] 라인 {lineIndex}의 대사가 원문 시간표와 다르다 — " +
             "시간표 어긋남(분기/롤백/스킵?). 이후 판정의 인덱스를 의심할 것.\n" +
-            $"원문: {_storyGroups[lineIndex].LineText}\n표시: {_provider.CurrentLinePreview}");
+            $"원문: {_storyGroups[lineIndex].LineText}\n표시: {CurrentLineText}");
 
         static string Normalize(string s)
             => string.IsNullOrEmpty(s) ? null : s.Replace(" ", "").Replace("　", "").Trim();

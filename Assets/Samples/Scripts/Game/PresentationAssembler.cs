@@ -37,8 +37,6 @@ public sealed class PresentationAssembler
 
     private IUIThemePatchPort _uiThemePatch;
 
-    private RuntimeStateProvider _runtimeStateProvider;
-
     private PresentationUIRoot _presentationUIRoot;
     private PresentationShotResponseSystem _presentationResponseRig;
     private ScreenEffectRig _screenEffectRig;
@@ -110,8 +108,6 @@ public sealed class PresentationAssembler
 
     private void BootstrapPresentationRoots()
     {
-        _runtimeStateProvider = new RuntimeStateProvider(_rollbackHistory, _choiceHistory);
-
         _presentationUIRoot = _refs.Stage
             ? _refs.Stage
             : throw new InvalidOperationException("[연출 조립] 무대(PresentationUIRoot)가 없다 — 부트스트랩의 '무대' 칸을 채운다.");
@@ -256,8 +252,7 @@ public sealed class PresentationAssembler
 
         YarnLineBoundary yarnLineBoundary = new(
             _backlogRecorder,
-            _rollbackHistory,
-            _runtimeStateProvider);
+            _rollbackHistory);
 
         LineHurrySpeedController lineHurrySpeed = new(_refs.EllipsisBreathTypewriter);
 
@@ -362,7 +357,7 @@ public sealed class PresentationAssembler
         StageEquivalenceHarness harness = harnessGo.AddComponent<StageEquivalenceHarness>();
 
         harness.Initialize(
-            _runtimeStateProvider,
+            _rollbackHistory,
             _refs.DialogueRunner,
             _presentationScopeSession,
             _presentationStage,
