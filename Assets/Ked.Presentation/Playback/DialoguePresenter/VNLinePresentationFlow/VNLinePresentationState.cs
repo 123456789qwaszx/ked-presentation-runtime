@@ -30,10 +30,8 @@ public sealed class VNLinePresentationState : ISeekStateQuery
     // 마지막으로 관측한 줄이 시크 목표였는가.
     public bool IsAtSeekTarget => _seekState.LastObservedIsTarget;
 
-    public void ClearSeek()
-    {
-        _seekState.Clear();
-    }
+    // 시크를 끝낸다 — 사유만 보고한다(VNSeekState.End). 시크 중이 아니면 무시된다.
+    public void EndSeek(VNSeekEndReason reason) => _seekState.End(reason);
     
     public void MarkLineEntered()
     {

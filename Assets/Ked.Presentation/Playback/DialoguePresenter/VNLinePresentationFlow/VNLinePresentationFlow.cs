@@ -63,7 +63,7 @@ public sealed class VNLinePresentationFlow
             && ctx.EntrySeekKind == VNSeekKind.Rollback;
 
         if (ctx.SeekDecision == VNSeekLineDecision.TargetLineReached)
-            _advanceState.ClearSeek();
+            _advanceState.EndSeek(VNSeekEndReason.Arrived);
 
         _advanceState.SetLineAutoAdvance(
             !rollbackTarget && VNLineAdvanceTag.IsAuto(ctx.Line.Metadata));

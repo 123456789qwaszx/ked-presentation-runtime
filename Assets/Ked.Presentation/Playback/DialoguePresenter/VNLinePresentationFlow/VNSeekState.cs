@@ -7,6 +7,16 @@ public enum VNSeekKind
     Load = 2,
 }
 
+/// <summary>시크가 끝난 사유. 끝내는 쪽은 사유만 보고하고, 정리는 VNSeekState.End가 한다.</summary>
+public enum VNSeekEndReason
+{
+    None = 0,                 // 진행 중이거나 아직 끝난 적 없다
+    Arrived = 1,              // 목표 줄에 도착했다
+    ReplayChoiceMismatch = 2, // 리플레이할 선택지를 기록에서 찾지 못했다
+    SceneReset = 3,           // 새 장면이 열렸다 — 앞 단위의 시크는 이 단위의 것이 아니다
+    Abandoned = 4,            // 호스트의 기록이 바닥났는데 목표에 닿지 못했다
+}
+
 /// <summary>
 /// 시크가 찾아갈 줄. 줄 ID와 장면 내 등장 순번으로 정해진다.
 /// </summary>
@@ -27,7 +37,7 @@ public readonly struct VNSeekTarget
 }
 
 /// <summary>
-/// 시크 하나의 수명과 목표 판정.
+/// 시크 하나의 수명과 목표 판정. 시작은 Begin, 끝은 End(사유) 하나뿐이다.
 /// - 목표와 같은 줄 ID가 지나갈 때마다 세고, Occurrence번째 일치가 목표다.
 /// 전제: 리플레이는 장면 시작에서 같은 경로를 탄다. 줄 ID는 프로젝트에서 고유하다.
 ///       시크 중 줄마다 ObserveLine을 정확히 한 번 부른다.
@@ -50,6 +60,9 @@ public sealed class VNSeekState
     // 마지막으로 관측한 줄이 목표였는가.
     public bool LastObservedIsTarget => _inFlight.LastObservedIsTarget;
 
+    // 지금 시크가 끝난 사유. 진행 중이면 None.
+    public VNSeekEndReason LastEndReason { get; private set; }
+
     public void Begin(VNSeekTarget target)
     {
         if (target.Kind == VNSeekKind.None)
@@ -57,6 +70,7 @@ public sealed class VNSeekState
 
         _target = target;
         _inFlight = default;
+        LastEndReason = VNSeekEndReason.None;
     }
 
     // 시크 중 지나가는 줄을 하나 관측한다. 목표와 같은 줄이면 일치 횟수를 센다.
@@ -77,9 +91,17 @@ public sealed class VNSeekState
         _inFlight.LastObservedIsTarget = _inFlight.MatchedCount == _target.Occurrence;
     }
 
-    public void Clear()
+    // 시크를 끝낸다. 시크 중이 아니면 무시한다.
+    public void End(VNSeekEndReason reason)
     {
+        if (reason == VNSeekEndReason.None)
+            throw new ArgumentException("[시크] 종료 사유가 없다.", nameof(reason));
+
+        if (!IsSeeking)
+            return;
+
         _target = default;
         _inFlight = default;
+        LastEndReason = reason;
     }
 }

@@ -58,7 +58,7 @@ public sealed class ScenePresentation : IPlaybackStage
         _choiceHistory.ClearChoiceRecords();
 
         // 앞 단위가 시크 도중에 끝났다면 그 표적은 이 단위의 것이 아니다.
-        _lineState.ClearSeek();
+        _lineState.EndSeek(VNSeekEndReason.SceneReset);
 
         _presentationView.GoToPresentationView();
         _presentationStage.Clear();
@@ -98,7 +98,7 @@ public sealed class ScenePresentation : IPlaybackStage
 
     bool IPlaybackStage.IsSeeking => _lineState.IsSeekingActive;
 
-    void IPlaybackStage.AbandonSeek() => _lineState.ClearSeek();
+    void IPlaybackStage.AbandonSeek() => _lineState.EndSeek(VNSeekEndReason.Abandoned);
 
     public void PrepareReplay()
     {

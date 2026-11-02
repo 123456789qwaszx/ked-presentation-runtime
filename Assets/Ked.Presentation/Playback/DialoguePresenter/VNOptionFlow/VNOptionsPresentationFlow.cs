@@ -44,7 +44,7 @@ public sealed class VNOptionsPresentationFlow
             
             if (!_choiceBoundary.TryResolveReplayOption(ctx.ChoiceSequence, ctx.SourceOptions,
                     out DialogueOption replayOption)) {
-                _advanceState.ClearSeek();
+                _advanceState.EndSeek(VNSeekEndReason.ReplayChoiceMismatch);
                 ctx.SelectedOption = null;
                 
                 SetPhase(ctx, VNOptionsPresentationPhase.Stale);
