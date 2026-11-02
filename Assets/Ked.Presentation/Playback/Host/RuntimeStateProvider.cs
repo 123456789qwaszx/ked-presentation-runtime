@@ -65,19 +65,6 @@ public sealed class RuntimeStateProvider
         }
     }
 
-    public string CurrentChapterLabel
-    {
-        get
-        {
-            string nodeName = CurrentNodeName;
-
-            if (string.IsNullOrWhiteSpace(nodeName))
-                return "";
-
-            return nodeName;
-        }
-    }
-
     public string CurrentLinePreview
     {
         get

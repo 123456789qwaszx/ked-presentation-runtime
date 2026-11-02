@@ -250,7 +250,6 @@ public class SampleBootstrap : MonoBehaviour, IRigPrefabSource
             Typewriter = ellipsisBreathTypewriter,
             Audio = audioSystem,
             DialogueRunner = dialogueRunner,
-            CurrentUnitLabel = () => _internals.RuntimeState?.CurrentChapterLabel,
         };
 
         SampleExample other = SampleExampleSwitch.Other(_example);

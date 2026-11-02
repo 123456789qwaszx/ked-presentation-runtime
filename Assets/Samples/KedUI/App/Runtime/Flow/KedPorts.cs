@@ -119,7 +119,5 @@ namespace Ked.Samples.UI
         // 백로그의 화자 이름(대본의 "이름: 대사"에서 읽는다).
         public DialogueRunner DialogueRunner;
 
-        // 지금 장면 이름(대사창 위 꼬리표). 없으면 예제 이름만.
-        public Func<string> CurrentUnitLabel;
     }
 }

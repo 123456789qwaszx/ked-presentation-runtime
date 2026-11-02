@@ -78,16 +78,7 @@ namespace Ked.Samples.UI
             _play.SetChapterLabel(ChapterLabel());
         }
 
-        // 대사창 위 꼬리표: "예제 · 지금 장면". 장면 이름은 재생 쪽이 아는 노드 이름이다.
-        private string ChapterLabel()
-        {
-            string example = Text(_titlePort?.Example?.NameKey);
-            string unit = _playback?.CurrentUnitLabel?.Invoke();
-
-            if (string.IsNullOrEmpty(unit))
-                return example;
-
-            return Format("play.chapterTag", example, unit);
-        }
+        // 대사창 위 꼬리표: 예제 이름.
+        private string ChapterLabel() => Text(_titlePort?.Example?.NameKey);
     }
 }

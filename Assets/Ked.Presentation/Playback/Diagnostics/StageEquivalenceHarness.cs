@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using Ked.Presentation.Core;
 using UnityEngine;
+using Yarn.Unity;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 등가성 하네스 — "코어가 접은 상태"와 "실제 재생한 무대"가 같은지 라인마다 판정한다.
@@ -55,6 +56,10 @@ public sealed class StageEquivalenceHarness : MonoBehaviour
     private MotionLibrary _motions = MotionLibrary.Empty;
     private PresentationShotResponseSystem _shotSystem;
     private DialogueAdvanceDispatcher _dispatcher;
+    private DialogueRunner _dialogueRunner;
+
+    // 지금 재생 중인 노드. 비교할 타임라인을 고르는 색인이다 — 줄 데이터에는 노드를 싣지 않는다.
+    private string _currentNodeName;
 
     private StageReducerTuning _tuning;
     private string _dialogueFolder;
@@ -103,6 +108,7 @@ public sealed class StageEquivalenceHarness : MonoBehaviour
     /// <param name="dialogueFolder">대본(.yarn) 폴더의 절대 경로. 하위 폴더까지 읽는다 — 어디에 두는지는 호스트가 정한다.</param>
     public void Initialize(
         RuntimeStateProvider provider,
+        DialogueRunner dialogueRunner,
         PresentationScopeSession session,
         PresentationStage stage,
         PresentationShotResponseSystem shotSystem,
@@ -112,6 +118,7 @@ public sealed class StageEquivalenceHarness : MonoBehaviour
     {
         _motions = motions ?? MotionLibrary.Empty;
         _provider = provider;
+        _dialogueRunner = dialogueRunner;
         _session = session;
         _stage = stage;
         _shotSystem = shotSystem;
@@ -125,6 +132,7 @@ public sealed class StageEquivalenceHarness : MonoBehaviour
 
             _ready = true;
             _dispatcher.BeforeNextLineDispatched += CompareAtCurrentLine;
+            _dialogueRunner.onNodeStart.AddListener(HandleNodeStarted);
 
             Debug.Log(
                 $"[등가성 하네스] 준비 완료. 노드 {_nodeGroups.Count}개 파싱, " +
@@ -141,6 +149,9 @@ public sealed class StageEquivalenceHarness : MonoBehaviour
     {
         if (_dispatcher != null)
             _dispatcher.BeforeNextLineDispatched -= CompareAtCurrentLine;
+
+        if (_dialogueRunner != null)
+            _dialogueRunner.onNodeStart.RemoveListener(HandleNodeStarted);
 
         if (_verdicts.Count > 0)
             WriteReport();
@@ -319,6 +330,8 @@ public sealed class StageEquivalenceHarness : MonoBehaviour
         return _foldedByLine[lineIndex];
     }
 
+    private void HandleNodeStarted(string nodeName) => _currentNodeName = nodeName;
+
     // ── 판정 ─────────────────────────────────────────────────────────
 
     private void CompareAtCurrentLine()
@@ -328,7 +341,7 @@ public sealed class StageEquivalenceHarness : MonoBehaviour
 
         try
         {
-            string nodeName = _provider.CurrentNodeName;
+            string nodeName = _currentNodeName;
             string lineId = _provider.CurrentLineId;
 
             if (string.IsNullOrEmpty(nodeName))
