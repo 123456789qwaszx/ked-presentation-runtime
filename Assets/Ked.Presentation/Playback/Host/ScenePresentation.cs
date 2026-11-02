@@ -92,7 +92,6 @@ public sealed class ScenePresentation : IPlaybackStage
         LineTarget target = resume.Target;
 
         _lineState.BeginLoadSeek(
-            target.NodeName,
             target.LineId,
             target.Occurrence);
     }

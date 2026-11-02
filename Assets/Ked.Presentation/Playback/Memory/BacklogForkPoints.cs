@@ -51,7 +51,6 @@ internal static class BacklogForkPoints
 
         target = new LineTarget
         {
-            NodeName = entry.nodeName,
             LineId = entry.lineId,
             Occurrence = occurrence,
         };

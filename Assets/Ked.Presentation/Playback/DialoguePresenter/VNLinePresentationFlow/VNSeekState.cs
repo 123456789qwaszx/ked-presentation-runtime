@@ -12,7 +12,6 @@ public sealed class VNSeekState
     public VNSeekKind Kind { get; private set; } = VNSeekKind.None;
     public bool IsSeeking => Kind != VNSeekKind.None;
 
-    public string TargetNodeName { get; private set; }
     public string TargetLineId { get; private set; }
 
     // SeekTargetLine의 장면 내 등장 순번 (1부터). RollbackPoint.occurrence와 같은 좌표계.
@@ -22,11 +21,10 @@ public sealed class VNSeekState
     // 리플레이가 시작에피소드에서부터 같은 길을 루트를 타기 때문에, N번째 일치 = 원래 그 라인.
     private int _matchedCount;
 
-    public void Begin(VNSeekKind kind, string nodeName, string lineId, int occurrence)
+    public void Begin(VNSeekKind kind, string lineId, int occurrence)
     {
         Kind = kind;
 
-        TargetNodeName = nodeName;
         TargetLineId = lineId;
 
         TargetOccurrence = occurrence < 1 ? 1 : occurrence;
@@ -56,7 +54,6 @@ public sealed class VNSeekState
     {
         Kind = VNSeekKind.None;
 
-        TargetNodeName = null;
         TargetLineId = null;
 
         TargetOccurrence = 0;

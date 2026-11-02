@@ -10,18 +10,18 @@ public sealed class VNLinePresentationState : ISeekStateQuery
     // 줄에 들어갈 때 · 무너질 때 · 시크를 걸 때 내린다 — 다음 줄로 새지 않는다.
     public bool IsLineAutoAdvancePending { get; private set; }
 
-    public void BeginRollbackSeek(string nodeName, string lineId, int occurrence)
-        => BeginSeek(VNSeekKind.Rollback, nodeName, lineId, occurrence);
+    public void BeginRollbackSeek(string lineId, int occurrence)
+        => BeginSeek(VNSeekKind.Rollback, lineId, occurrence);
     
     // 로드 - 장면 루트에서 표적까지. 롤백과 달리 백로그를 다시 적는다(VNLineRecordPolicy).
-    public void BeginLoadSeek(string nodeName, string lineId, int occurrence)
-        => BeginSeek(VNSeekKind.Load, nodeName, lineId, occurrence);
+    public void BeginLoadSeek(string lineId, int occurrence)
+        => BeginSeek(VNSeekKind.Load, lineId, occurrence);
 
-    private void BeginSeek(VNSeekKind kind, string nodeName, string lineId, int occurrence)
+    private void BeginSeek(VNSeekKind kind, string lineId, int occurrence)
     {
         IsLineFullyShown = false;
         IsLineAutoAdvancePending = false;
-        _seekState.Begin(kind, nodeName, lineId, occurrence);
+        _seekState.Begin(kind, lineId, occurrence);
     }
     
     // 시크 중 지나가는 줄을 하나 관측한다. 줄마다 정확히 한 번 부른다(VNSeekState 참고).

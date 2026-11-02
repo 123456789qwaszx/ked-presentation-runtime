@@ -89,7 +89,6 @@ public sealed class PlaybackMemory
 
         var target = new LineTarget
         {
-            NodeName = point.nodeName,
             LineId = point.lineId,
             Occurrence = point.occurrence,
         };

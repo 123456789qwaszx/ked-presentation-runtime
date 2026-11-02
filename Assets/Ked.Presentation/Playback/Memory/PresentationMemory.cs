@@ -105,7 +105,6 @@ internal static class PresentationMemory
         {
             Target = new LineTarget
             {
-                NodeName = target.NodeName,
                 LineId = target.LineId,
                 Occurrence = target.Occurrence,
             },
@@ -119,7 +118,6 @@ internal static class PresentationMemory
 
         LineTarget target = dto.Target;
         if (target == null
-            || string.IsNullOrWhiteSpace(target.NodeName)
             || string.IsNullOrWhiteSpace(target.LineId)
             || target.Occurrence < 1)
             throw new InvalidDataException("저장된 줄 좌표가 잘못됐다.");

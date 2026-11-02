@@ -180,7 +180,7 @@ public sealed class VNFeatureController
         _backlogRecorder.TruncateFromEnd(_rollbackController.CountPointsAfter(target));
 
         _rollbackController.ClearRollbackPoints();
-        _linePresentationAdvanceState.BeginRollbackSeek(target.nodeName, target.lineId, target.occurrence);
+        _linePresentationAdvanceState.BeginRollbackSeek(target.lineId, target.occurrence);
 
         DisablePlaybackModifiers();
 
