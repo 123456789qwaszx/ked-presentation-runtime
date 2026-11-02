@@ -95,7 +95,7 @@ public sealed class RuntimeStateProvider
         _hasCurrentLineMeta = true;
     }
 
-    public List<VNChoiceRecord> CreateChoiceSnapshot() => _choiceHistory.CreateChoiceSnapshot();
+    public List<ChoiceRecord> CreateChoiceSnapshot() => _choiceHistory.CreateChoiceSnapshot();
     
 
     private bool TryGetCurrentSavePoint(out RollbackPoint point)

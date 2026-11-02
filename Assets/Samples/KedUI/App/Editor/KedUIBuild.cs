@@ -230,7 +230,7 @@ namespace Ked.Samples.UI.Editor
             so.FindProperty("overlayLayer").objectReferenceValue = overlayLayer;
             so.FindProperty("fontSet").objectReferenceValue = fontSet;
             so.FindProperty("texts").objectReferenceValue = texts;
-            so.FindProperty("optionItemPrefab").objectReferenceValue = optionItem != null ? optionItem.GetComponent<VNOptionItem>() : null;
+            so.FindProperty("optionItemPrefab").objectReferenceValue = optionItem != null ? optionItem.GetComponent<CustomOptionItem>() : null;
             so.FindProperty("surfaceLayoutDb").objectReferenceValue = surfaceDb;
 
             SerializedProperty list = so.FindProperty("presentations");

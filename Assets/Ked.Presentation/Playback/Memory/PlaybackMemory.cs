@@ -157,7 +157,7 @@ public sealed class PlaybackMemory
         if (!BacklogForkPoints.TryMakeLineTarget(entries, line, unitStartSerial, out LineTarget target))
             return;
 
-        List<VNChoiceRecord> choices;
+        List<ChoiceRecord> choices;
 
         try
         {

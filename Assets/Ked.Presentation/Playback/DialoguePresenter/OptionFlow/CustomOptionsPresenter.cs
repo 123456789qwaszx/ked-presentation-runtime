@@ -5,15 +5,15 @@ using UnityEngine;
 // Owns option item instances, the interactive selection session,
 // and DialoguePresenterBase adapter work.
 // Transaction ordering lives in OptionsPresentationFlow.
-public sealed class VNOptionsPresenter
+public sealed class CustomOptionsPresenter
     : DialoguePresenterBase
 {
-    private VNOptionItem _optionItemPrefab;
+    private CustomOptionItem _optionItemPrefab;
     private OptionsPresentationFlow _flow;
 
-    private readonly List<VNOptionItem> _activeItems = new();
+    private readonly List<CustomOptionItem> _activeItems = new();
 
-    private VNOptionSelectionSession _selectionSession;
+    private OptionSelectionSession _selectionSession;
     private string _currentNodeName;
 
     // 진행 중인 RunOptionsAsync가 실제로 빠져나올 때까지 기다리기 위한 통로.
@@ -24,7 +24,7 @@ public sealed class VNOptionsPresenter
     public void Initialize(
         DialogueRunner dialogueRunner,
         OptionsPresentationFlow flow,
-        VNOptionItem optionItem)
+        CustomOptionItem optionItem)
     {
         _flow = flow;
         _optionItemPrefab = optionItem;
@@ -101,7 +101,7 @@ public sealed class VNOptionsPresenter
                 PrepareInteractiveItems(ctx);
                 SetPhase(ctx, OptionsPresentationPhase.InteractiveReady);
 
-                VNOptionViewModel selected = await AwaitSelectionAsync(ctx);
+                OptionViewModel selected = await AwaitSelectionAsync(ctx);
 
                 if (cancellationToken.IsNextContentRequested || selected == null)
                 {
@@ -137,7 +137,7 @@ public sealed class VNOptionsPresenter
 
         _flow.SetInputEnabled(false);
 
-        _selectionSession = new VNOptionSelectionSession(ctx.Token);
+        _selectionSession = new OptionSelectionSession(ctx.Token);
 
         CreateItems(ctx.ViewModels, ctx.ItemContainer);
 
@@ -145,7 +145,7 @@ public sealed class VNOptionsPresenter
         SelectFirstAvailableItem();
     }
 
-    private async YarnTask<VNOptionViewModel> AwaitSelectionAsync(OptionsPresentationContext ctx)
+    private async YarnTask<OptionViewModel> AwaitSelectionAsync(OptionsPresentationContext ctx)
     {
         if (_selectionSession == null)
             return null;
@@ -153,7 +153,7 @@ public sealed class VNOptionsPresenter
         // Phase: AwaitingSelection
         SetPhase(ctx, OptionsPresentationPhase.AwaitingSelection);
 
-        VNOptionViewModel selected = await _selectionSession.Task;
+        OptionViewModel selected = await _selectionSession.Task;
 
         _flow.SetInputEnabled(false);
 
@@ -171,12 +171,12 @@ public sealed class VNOptionsPresenter
     }
 
     private void CreateItems(
-        List<VNOptionViewModel> viewModels,
+        List<OptionViewModel> viewModels,
         RectTransform container)
     {
         for (int i = 0; i < viewModels.Count; i++)
         {
-            VNOptionItem item = Instantiate(_optionItemPrefab, container);
+            CustomOptionItem item = Instantiate(_optionItemPrefab, container);
             
             if (!item.gameObject.activeSelf)
                 item.gameObject.SetActive(true);
@@ -193,7 +193,7 @@ public sealed class VNOptionsPresenter
     {
         for (int i = 0; i < _activeItems.Count; i++)
         {
-            VNOptionItem item = _activeItems[i];
+            CustomOptionItem item = _activeItems[i];
 
             if (!item)
                 continue;
@@ -207,7 +207,7 @@ public sealed class VNOptionsPresenter
         _activeItems.Clear();
     }
 
-    private void HandleItemSubmitted(VNOptionItem item)
+    private void HandleItemSubmitted(CustomOptionItem item)
     {
         if (item == null)
             return;
@@ -228,7 +228,7 @@ public sealed class VNOptionsPresenter
     {
         for (int i = 0; i < _activeItems.Count; i++)
         {
-            VNOptionItem item = _activeItems[i];
+            CustomOptionItem item = _activeItems[i];
 
             if (item != null && item.isActiveAndEnabled && item.IsInteractable())
             {

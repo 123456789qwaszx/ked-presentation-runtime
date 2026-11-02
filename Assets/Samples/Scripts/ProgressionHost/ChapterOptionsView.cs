@@ -13,16 +13,16 @@ public sealed class ChapterOptionsView : IChapterOptionsView
     private const float FadeInDuration = 0.12f;
 
     private readonly IPresentationOptionsBoxView _box;
-    private readonly VNOptionItem _itemPrefab;
+    private readonly CustomOptionItem _itemPrefab;
 
-    private readonly List<VNOptionItem> _activeItems = new();
+    private readonly List<CustomOptionItem> _activeItems = new();
 
     // 현재 ShowAsync transaction에 외부 Cancel/Select가 접근하기 위한 handle.
     private TaskCompletionSource<int> _pending;
 
     public ChapterOptionsView(
         IPresentationOptionsBoxView box,
-        VNOptionItem itemPrefab)
+        CustomOptionItem itemPrefab)
     {
         _box = box;
         _itemPrefab = itemPrefab;
@@ -89,7 +89,7 @@ public sealed class ChapterOptionsView : IChapterOptionsView
         for (int i = 0; i < options.Count; i++)
         {
             ResolvedOption resolved = options[i];
-            VNOptionItem item = UnityEngine.Object.Instantiate(_itemPrefab, _box.ItemContainer);
+            CustomOptionItem item = UnityEngine.Object.Instantiate(_itemPrefab, _box.ItemContainer);
 
             if (!item.gameObject.activeSelf)
                 item.gameObject.SetActive(true);
@@ -151,7 +151,7 @@ public sealed class ChapterOptionsView : IChapterOptionsView
     {
         for (int i = 0; i < _activeItems.Count; i++)
         {
-            VNOptionItem item = _activeItems[i];
+            CustomOptionItem item = _activeItems[i];
 
             if (item != null && item.isActiveAndEnabled && item.IsInteractable())
             {
@@ -173,7 +173,7 @@ public sealed class ChapterOptionsView : IChapterOptionsView
     {
         for (int i = 0; i < _activeItems.Count; i++)
         {
-            VNOptionItem item = _activeItems[i];
+            CustomOptionItem item = _activeItems[i];
 
             if (!item)
                 continue;

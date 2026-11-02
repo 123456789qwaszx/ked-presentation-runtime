@@ -318,7 +318,7 @@ internal sealed class Rig
     {
         Unit.StageResume(new PresentationResumePoint(
             new LineTarget { NodeName = untilNode, LineId = untilNode + "#0", Occurrence = 1 },
-            Array.Empty<VNChoiceRecord>()));
+            Array.Empty<ChoiceRecord>()));
     }
 }
 

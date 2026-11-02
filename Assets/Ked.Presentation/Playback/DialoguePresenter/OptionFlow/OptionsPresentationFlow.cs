@@ -14,12 +14,12 @@ public enum OptionsPresentationBeginResult
 public sealed class OptionsPresentationFlow
 {
     private readonly OptionsBoxPresentationController _boxPresentation;
-    private readonly VNChoiceBoundary _choiceBoundary;
+    private readonly ChoiceBoundary _choiceBoundary;
     private readonly SeekState _seekState;
 
     public OptionsPresentationFlow(
         OptionsBoxPresentationController boxPresentation,
-        VNChoiceBoundary choiceBoundary,
+        ChoiceBoundary choiceBoundary,
         SeekState seekState)
     {
         _boxPresentation = boxPresentation;
@@ -83,7 +83,7 @@ public sealed class OptionsPresentationFlow
         return OptionsPresentationBeginResult.InteractiveReady;
     }
 
-    public void CommitSelection(OptionsPresentationContext ctx, VNOptionViewModel selected)
+    public void CommitSelection(OptionsPresentationContext ctx, OptionViewModel selected)
     {
         _choiceBoundary.CommitSelection(
             ctx.NodeName,
@@ -104,9 +104,9 @@ public sealed class OptionsPresentationFlow
         _boxPresentation.CloseImmediate();
     }
 
-    private List<VNOptionViewModel> BuildViewModels(DialogueOption[] options, int choiceSequence)
+    private List<OptionViewModel> BuildViewModels(DialogueOption[] options, int choiceSequence)
     {
-        var result = new List<VNOptionViewModel>();
+        var result = new List<OptionViewModel>();
 
         for (int i = 0; i < options.Length; i++)
         {
@@ -124,14 +124,14 @@ public sealed class OptionsPresentationFlow
         return result;
     }
 
-    private VNOptionViewModel BuildViewModel(
+    private OptionViewModel BuildViewModel(
         DialogueOption option,
         int sourceOptionIndex,
         int choiceSequence)
     {
         string label = option.Line.TextWithoutCharacterName.Text;
 
-        return new VNOptionViewModel(
+        return new OptionViewModel(
             sourceOption: option,
             sourceOptionIndex: sourceOptionIndex,
             choiceSequence: choiceSequence,

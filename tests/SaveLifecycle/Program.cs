@@ -33,7 +33,7 @@ internal static class Program
     }
 
     private static PresentationResumePoint SomeResume() =>
-        new(new LineTarget { NodeName = "stale", LineId = "stale", Occurrence = 1 }, Array.Empty<VNChoiceRecord>());
+        new(new LineTarget { NodeName = "stale", LineId = "stale", Occurrence = 1 }, Array.Empty<ChoiceRecord>());
 
     private static async Task Test(string name, Func<Task> body)
     {
@@ -84,8 +84,8 @@ internal static class Program
 
             await Test("코덱: 장면·회차·재생 계획이 왕복한다", () => Run(() =>
             {
-                var choices = new[] { new VNChoiceRecord(0, 0, 1, "choice-line") };
-                List<VNChoiceRecord> scene = PresentationMemory.ReadUnitChoices(PresentationMemory.UnitChoices(choices));
+                var choices = new[] { new ChoiceRecord(0, 0, 1, "choice-line") };
+                List<ChoiceRecord> scene = PresentationMemory.ReadUnitChoices(PresentationMemory.UnitChoices(choices));
                 Check(scene.Single().selectedOptionLineId == "choice-line", "장면 Yarn 선택이 왕복하지 않았다");
 
                 var backlog = new[] { Line(0), Line(1, "other") };
@@ -121,7 +121,7 @@ internal static class Program
 
                 presentation.Show("old-line", "old-node");
                 presentation.OpenAndTakeResume();
-                presentation.Choices.RestoreChoices(new[] { new VNChoiceRecord(0, 0, 2, "picked") });
+                presentation.Choices.RestoreChoices(new[] { new ChoiceRecord(0, 0, 2, "picked") });
 
                 save.BeginNewPlaythrough();
                 bridge.EnterScene("chapter", State());
@@ -164,7 +164,7 @@ internal static class Program
             {
                 var store = new LocalFileSaveStore(Dir());
                 PlaythroughSave file = Save("A");
-                file.PendingLoad = new SavedLoadPlan { HostState = PresentationMemory.ResumePoint(Target("line", 2), Array.Empty<VNChoiceRecord>()) };
+                file.PendingLoad = new SavedLoadPlan { HostState = PresentationMemory.ResumePoint(Target("line", 2), Array.Empty<ChoiceRecord>()) };
                 store.Create(file);
                 store.SetActive("A");
 
@@ -183,7 +183,7 @@ internal static class Program
                 file.PendingLoad = new SavedLoadPlan
                 {
                     Path = new List<SavedChoice> { new() { FromEpisodeId = "scene1", OptionIndex = 3 } },
-                    HostState = PresentationMemory.ResumePoint(Target(), Array.Empty<VNChoiceRecord>()),
+                    HostState = PresentationMemory.ResumePoint(Target(), Array.Empty<ChoiceRecord>()),
                 };
                 store.Create(file);
                 store.SetActive("A");
@@ -301,7 +301,7 @@ internal static class Program
                 before.Show("a");
                 before.Show("b");
                 before.Show("a");
-                before.Choices.RestoreChoices(new[] { new VNChoiceRecord(1, 0, 1, "picked") });
+                before.Choices.RestoreChoices(new[] { new ChoiceRecord(1, 0, 1, "picked") });
 
                 before.Stage.IsSeeking = true;
                 Check(!before.Memory.TryCaptureResumePoint(out _, out _), "시크 중에 재개 지점을 꺼냈다");

@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public sealed class VNOptionItem : Selectable, ISubmitHandler, IPointerClickHandler
+public sealed class CustomOptionItem : Selectable, ISubmitHandler, IPointerClickHandler
 {
     [Header("Text")]
     [SerializeField] private TextMeshProUGUI _label;
@@ -19,22 +19,22 @@ public sealed class VNOptionItem : Selectable, ISubmitHandler, IPointerClickHand
     [SerializeField] private float _normalAlpha = 0.75f;
     [SerializeField] private float _hoveredAlpha = 1.0f;
 
-    private VNOptionViewModel _viewModel;
+    private OptionViewModel _viewModel;
     private bool _hasSubmitted;
 
     private float _revealAlpha;
     private float _stateAlpha;
 
-    public event Action<VNOptionItem> Submitted;
+    public event Action<CustomOptionItem> Submitted;
 
     public bool HasViewModel => _viewModel != null;
 
-    public VNOptionViewModel ViewModel
+    public OptionViewModel ViewModel
     {
         get
         {
             if (_viewModel == null)
-                throw new InvalidOperationException("VNOptionItem has no bound view model.");
+                throw new InvalidOperationException("CustomOptionItem has no bound view model.");
 
             return _viewModel;
         }
@@ -46,7 +46,7 @@ public sealed class VNOptionItem : Selectable, ISubmitHandler, IPointerClickHand
         ResetView();
     }
 
-    public void Bind(VNOptionViewModel viewModel)
+    public void Bind(OptionViewModel viewModel)
     {
         if (viewModel == null)
         {
@@ -69,7 +69,7 @@ public sealed class VNOptionItem : Selectable, ISubmitHandler, IPointerClickHand
     // 진행 층의 에피소드 선택지(ChapterOptionsView).
     public void Bind(string label, bool isAvailable, string effectText = null)
     {
-        Bind(new VNOptionViewModel(
+        Bind(new OptionViewModel(
             sourceOption: null,
             sourceOptionIndex: -1,
             choiceSequence: -1,

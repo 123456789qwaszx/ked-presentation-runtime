@@ -278,7 +278,7 @@ public sealed class PresentationAssembler
             _refs.EllipsisBreathTypewriter,
             _playbackState);
 
-        VNChoiceBoundary vnChoiceBoundary = new(
+        ChoiceBoundary choiceBoundary = new(
             _choiceHistory,
             _rollbackHistory);
 
@@ -289,7 +289,7 @@ public sealed class PresentationAssembler
 
         OptionsPresentationFlow optionsPresentationFlow = new(
             optionsBoxPresentation,
-            vnChoiceBoundary,
+            choiceBoundary,
             _seekState);
 
         _refs.OptionsPresenter.Initialize(

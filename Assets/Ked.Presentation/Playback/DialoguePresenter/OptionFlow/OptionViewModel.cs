@@ -1,6 +1,6 @@
 using Yarn.Unity;
 
-public sealed class VNOptionViewModel
+public sealed class OptionViewModel
 {
     public DialogueOption SourceOption { get; private set; }
 
@@ -14,7 +14,7 @@ public sealed class VNOptionViewModel
     public string Label { get; private set; }
     public bool IsAvailable { get; private set; }
     
-    public VNOptionViewModel(
+    public OptionViewModel(
         DialogueOption sourceOption,
         int sourceOptionIndex,
         int choiceSequence,

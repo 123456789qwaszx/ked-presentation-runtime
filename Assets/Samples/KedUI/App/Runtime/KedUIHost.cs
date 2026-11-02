@@ -37,8 +37,8 @@ namespace Ked.Samples.UI
         [SerializeField] private UIPresentationSpec[] presentations = Array.Empty<UIPresentationSpec>();
 
         [Header("재생 쪽에 넘기는 것")]
-        [Tooltip("선택지 항목 프리팹(본체 VNOptionItem). 새 그림으로 빌더가 만든다.")]
-        [SerializeField] private VNOptionItem optionItemPrefab;
+        [Tooltip("선택지 항목 프리팹(본체 CustomOptionItem). 새 그림으로 빌더가 만든다.")]
+        [SerializeField] private CustomOptionItem optionItemPrefab;
         [Tooltip("새 대사창에 맞춘 연출 프리셋 DB. 대본의 surface_layout 키는 옛 DB와 같다.")]
         [SerializeField] private DialogueSurfaceLayoutPresetDBSO surfaceLayoutDb;
 
@@ -51,7 +51,7 @@ namespace Ked.Samples.UI
 
         public bool IsPrepared => _flow != null;
 
-        public VNOptionItem OptionItemPrefab => optionItemPrefab;
+        public CustomOptionItem OptionItemPrefab => optionItemPrefab;
         public DialogueSurfaceLayoutPresetDBSO SurfaceLayoutDb => surfaceLayoutDb;
 
         public IPresentationDialogueBoxView DialogueBox => RequireFlow().DialogueBox;

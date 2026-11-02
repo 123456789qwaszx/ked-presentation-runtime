@@ -32,8 +32,8 @@ public sealed class PresentationSceneRefs
     public CustomLinePresenter CustomLinePresenter;
     public EllipsisBreathTypewriter EllipsisBreathTypewriter;
     public AutoAdvanceScheduler AutoAdvanceScheduler;
-    public VNOptionsPresenter OptionsPresenter;
-    public VNOptionItem OptionItem;
+    public CustomOptionsPresenter OptionsPresenter;
+    public CustomOptionItem OptionItem;
 
     // 입력
     public VNAdvanceInputPoller InputPoller;

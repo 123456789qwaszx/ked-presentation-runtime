@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 
 [Serializable]
-public struct VNChoiceRecord
+public struct ChoiceRecord
 {
     public int anchorHistoryIndex;
 
@@ -19,7 +19,7 @@ public struct VNChoiceRecord
     public string selectedOptionLineId;
     public int selectedOptionIndex;
 
-    public VNChoiceRecord(
+    public ChoiceRecord(
         int anchorHistoryIndex,
         int choiceSequence,
         int selectedOptionIndex,
@@ -36,9 +36,9 @@ public class ChoiceHistory
 {
     public int NextChoiceSequence { get; set; }
 
-    private readonly List<VNChoiceRecord> _choices = new();
+    private readonly List<ChoiceRecord> _choices = new();
 
-    public List<VNChoiceRecord> CreateChoiceSnapshot() => new (_choices);
+    public List<ChoiceRecord> CreateChoiceSnapshot() => new (_choices);
 
 
     public void AddChoiceRecord(IReadOnlyList<RollbackPoint> rollbackPoints, string nodeName, int choiceSequence, int selectedOptionIndex, string selectedOptionLineId)
@@ -55,20 +55,20 @@ public class ChoiceHistory
                 _choices.RemoveAt(i);
         }
 
-        _choices.Add(new VNChoiceRecord(
+        _choices.Add(new ChoiceRecord(
             anchorHistoryIndex,
             choiceSequence,
             selectedOptionIndex,
             selectedOptionLineId));
     }
 
-    public bool TryGetChoiceRecord(int choiceSequence, out VNChoiceRecord record)
+    public bool TryGetChoiceRecord(int choiceSequence, out ChoiceRecord record)
     {
         record = default;
 
         for (int i = _choices.Count - 1; i >= 0; i--)
         {
-            VNChoiceRecord choice = _choices[i];
+            ChoiceRecord choice = _choices[i];
 
             if (choice.choiceSequence != choiceSequence)
                 continue;
@@ -80,7 +80,7 @@ public class ChoiceHistory
         return false;
     }
 
-    public void RestoreChoices(IReadOnlyList<VNChoiceRecord> choices)
+    public void RestoreChoices(IReadOnlyList<ChoiceRecord> choices)
     {
         for (int i = 0; i < choices.Count; i++)
         {

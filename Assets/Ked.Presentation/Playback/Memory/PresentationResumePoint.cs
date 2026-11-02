@@ -7,9 +7,9 @@ using System.Collections.Generic;
 internal sealed class PresentationResumePoint
 {
     public LineTarget Target { get; }
-    public IReadOnlyList<VNChoiceRecord> YarnChoices { get; }
+    public IReadOnlyList<ChoiceRecord> YarnChoices { get; }
 
-    public PresentationResumePoint(LineTarget target, IReadOnlyList<VNChoiceRecord> yarnChoices)
+    public PresentationResumePoint(LineTarget target, IReadOnlyList<ChoiceRecord> yarnChoices)
     {
         Target = target;
         YarnChoices = yarnChoices;

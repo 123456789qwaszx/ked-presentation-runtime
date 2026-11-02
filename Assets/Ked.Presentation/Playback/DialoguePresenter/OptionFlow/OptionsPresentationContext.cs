@@ -10,7 +10,7 @@ public sealed class OptionsPresentationContext
 
     public int ChoiceSequence;
 
-    public List<VNOptionViewModel> ViewModels;
+    public List<OptionViewModel> ViewModels;
 
     // 옵션 항목을 붙일 자리. 박스가 뜬 뒤 flow가 채운다.
     public RectTransform ItemContainer;

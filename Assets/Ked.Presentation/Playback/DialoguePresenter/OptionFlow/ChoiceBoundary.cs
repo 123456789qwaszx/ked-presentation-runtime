@@ -2,12 +2,12 @@ using System;
 using UnityEngine;
 using Yarn.Unity;
 
-public sealed class VNChoiceBoundary
+public sealed class ChoiceBoundary
 {
     private readonly ChoiceHistory _choiceHistory;
     private readonly RollbackHistory _rollbackController;
 
-    public VNChoiceBoundary(
+    public ChoiceBoundary(
         ChoiceHistory choiceHistory,
         RollbackHistory rollbackController)
     {
@@ -27,11 +27,11 @@ public sealed class VNChoiceBoundary
     {
         option = null;
 
-        if (!_choiceHistory.TryGetChoiceRecord(choiceSequence, out VNChoiceRecord record))
+        if (!_choiceHistory.TryGetChoiceRecord(choiceSequence, out ChoiceRecord record))
         {
             // 이 순번을 지나갔다면 기록이 있어야 한다. 없다는 건 기록이 누락됐거나 잘렸다는 뜻.
             Debug.LogWarning(
-                $"[VNChoiceBoundary] 리플레이 복원 실패 — 이 순번의 선택 기록이 없다. " +
+                $"[ChoiceBoundary] 리플레이 복원 실패 — 이 순번의 선택 기록이 없다. " +
                 $"choiceSequence={choiceSequence}.");
 
             return false;
@@ -46,7 +46,7 @@ public sealed class VNChoiceBoundary
         {
             // 기록은 있는데 그 선택지가 지금 목록에 없다(대본 변경) 또는 지금은 잠겨 있다(조건 변경).
             Debug.LogWarning(
-                $"[VNChoiceBoundary] 리플레이 복원 실패 — 기록된 선택지를 지금 목록에서 고를 수 없다. " +
+                $"[ChoiceBoundary] 리플레이 복원 실패 — 기록된 선택지를 지금 목록에서 고를 수 없다. " +
                 $"choiceSequence={choiceSequence}, lineId='{record.selectedOptionLineId}', " +
                 $"index={record.selectedOptionIndex}, optionCount={sourceOptions.Length}.");
 
@@ -58,7 +58,7 @@ public sealed class VNChoiceBoundary
         if (hasLineId)
         {
             Debug.LogWarning(
-                $"[VNChoiceBoundary] 기록된 선택지 라인이 대본에 없어 위치로 복원했다. " +
+                $"[ChoiceBoundary] 기록된 선택지 라인이 대본에 없어 위치로 복원했다. " +
                 $"choiceSequence={choiceSequence}, lineId='{record.selectedOptionLineId}', " +
                 $"index={record.selectedOptionIndex}. 리플레이가 다른 선택지를 고를 수 있다.");
         }

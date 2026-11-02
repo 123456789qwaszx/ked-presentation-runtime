@@ -39,7 +39,7 @@ internal static class PresentationMemory
     // 필드 이름이 곧 저장 형식이다.
     private sealed class UnitChoicesDto
     {
-        public List<VNChoiceRecord> YarnChoices = new();
+        public List<ChoiceRecord> YarnChoices = new();
     }
 
     private sealed class BacklogDto
@@ -50,7 +50,7 @@ internal static class PresentationMemory
     private sealed class ResumePointDto
     {
         public LineTarget Target;
-        public List<VNChoiceRecord> YarnChoices = new();
+        public List<ChoiceRecord> YarnChoices = new();
     }
 
     #region 백로그
@@ -81,22 +81,22 @@ internal static class PresentationMemory
 
     #region 단위의 선택 기록
 
-    public static string UnitChoices(IReadOnlyList<VNChoiceRecord> yarnChoices) =>
-        Write(new UnitChoicesDto { YarnChoices = new List<VNChoiceRecord>(yarnChoices) });
+    public static string UnitChoices(IReadOnlyList<ChoiceRecord> yarnChoices) =>
+        Write(new UnitChoicesDto { YarnChoices = new List<ChoiceRecord>(yarnChoices) });
 
-    public static List<VNChoiceRecord> ReadUnitChoices(string memory)
+    public static List<ChoiceRecord> ReadUnitChoices(string memory)
     {
         if (string.IsNullOrEmpty(memory))
-            return new List<VNChoiceRecord>();
+            return new List<ChoiceRecord>();
 
-        return Read<UnitChoicesDto>(memory, "선택 기록").YarnChoices ?? new List<VNChoiceRecord>();
+        return Read<UnitChoicesDto>(memory, "선택 기록").YarnChoices ?? new List<ChoiceRecord>();
     }
 
     #endregion
 
     #region 재개 지점
 
-    public static string ResumePoint(LineTarget target, IReadOnlyList<VNChoiceRecord> yarnChoices)
+    public static string ResumePoint(LineTarget target, IReadOnlyList<ChoiceRecord> yarnChoices)
     {
         if (target == null)
             throw new ArgumentNullException(nameof(target));
@@ -108,7 +108,7 @@ internal static class PresentationMemory
                 LineId = target.LineId,
                 Occurrence = target.Occurrence,
             },
-            YarnChoices = new List<VNChoiceRecord>(yarnChoices),
+            YarnChoices = new List<ChoiceRecord>(yarnChoices),
         });
     }
 
@@ -122,7 +122,7 @@ internal static class PresentationMemory
             || target.Occurrence < 1)
             throw new InvalidDataException("저장된 줄 좌표가 잘못됐다.");
 
-        return new PresentationResumePoint(target, dto.YarnChoices ?? new List<VNChoiceRecord>());
+        return new PresentationResumePoint(target, dto.YarnChoices ?? new List<ChoiceRecord>());
     }
 
     #endregion

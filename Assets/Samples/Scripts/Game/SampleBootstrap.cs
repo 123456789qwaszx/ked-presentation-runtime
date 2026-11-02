@@ -110,7 +110,7 @@ public class SampleBootstrap : MonoBehaviour, IRigPrefabSource
     [SerializeField] private EllipsisBreathTypewriter ellipsisBreathTypewriter;
     [SerializeField] private AutoAdvanceScheduler autoAdvanceScheduler;
 
-    [SerializeField] private VNOptionsPresenter vnOptionsPresenter;
+    [SerializeField] private CustomOptionsPresenter vnOptionsPresenter;
 
     [Header("진행 층")]
     [Tooltip("툴이 낸 챕터 JSON. Assets/Samples/Dialogue/ChapterProgression/ 아래의 .json 을 넣는다. " +

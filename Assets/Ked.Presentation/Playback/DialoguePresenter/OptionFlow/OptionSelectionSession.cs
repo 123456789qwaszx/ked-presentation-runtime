@@ -1,22 +1,22 @@
 using System;
 using Yarn.Unity;
 
-public sealed class VNOptionSelectionSession : IDisposable
+public sealed class OptionSelectionSession : IDisposable
 {
-    private readonly YarnTaskCompletionSource<VNOptionViewModel> _source = new();
+    private readonly YarnTaskCompletionSource<OptionViewModel> _source = new();
     private readonly LineCancellationToken _lineToken;
 
     private bool _disposed;
 
-    public YarnTask<VNOptionViewModel> Task => _source.Task;
+    public YarnTask<OptionViewModel> Task => _source.Task;
 
-    public VNOptionSelectionSession(LineCancellationToken lineToken)
+    public OptionSelectionSession(LineCancellationToken lineToken)
     {
         _lineToken = lineToken;
         WatchCancellationAsync().Forget();
     }
 
-    public bool TrySubmit(VNOptionViewModel viewModel)
+    public bool TrySubmit(OptionViewModel viewModel)
     {
         if (_disposed)
             return false;
