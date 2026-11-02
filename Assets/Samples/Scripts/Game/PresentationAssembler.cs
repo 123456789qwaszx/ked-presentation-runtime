@@ -26,7 +26,8 @@ public sealed class PresentationAssembler
 
     private readonly RollbackHistory _rollbackHistory = new();
     private readonly ChoiceHistory _choiceHistory = new();
-    private readonly VNLinePresentationState _linePresentationAdvanceState = new();
+    private readonly VNSeekState _seekState = new();
+    private readonly VNLinePresentationState _linePresentationAdvanceState;
 
     private readonly PresentationStage _presentationStage = new();
     private readonly BacklogRecorder _backlogRecorder = new();
@@ -54,6 +55,8 @@ public sealed class PresentationAssembler
     {
         _refs = refs;
         _presentationView = presentationView;
+
+        _linePresentationAdvanceState = new VNLinePresentationState(_seekState);
     }
 
     /// <param name="presentationView">재생을 시작할 때 무대 화면을 앞으로 가져올 자리.</param>
@@ -214,7 +217,7 @@ public sealed class PresentationAssembler
 
         _refs.CommandExecutor.Initialize(factory);
 
-        PresentationSessionContext pacePolicy = new(_playbackState, _linePresentationAdvanceState);
+        PresentationSessionContext pacePolicy = new(_playbackState, _seekState);
 
         _presentationScopeSession = new(
             _refs.CommandExecutor,
@@ -288,7 +291,7 @@ public sealed class PresentationAssembler
         VNOptionsPresentationFlow optionsPresentationFlow = new(
             optionsBoxPresentation,
             vnChoiceBoundary,
-            _linePresentationAdvanceState);
+            _seekState);
 
         _refs.OptionsPresenter.Initialize(
             _refs.DialogueRunner,
@@ -311,7 +314,7 @@ public sealed class PresentationAssembler
             _presentationScopeSession,
             _choiceHistory,
             _episodeSkipController,
-            _linePresentationAdvanceState,
+            _seekState,
             _yarnPlaybackDriver);
     }
 
@@ -342,7 +345,7 @@ public sealed class PresentationAssembler
 
         AdvanceGate advanceGate = new(
             _playbackState,
-            _linePresentationAdvanceState,
+            _seekState,
             _presentationScopeSession);
 
         _dialogueAdvanceDispatcher.Initialize(

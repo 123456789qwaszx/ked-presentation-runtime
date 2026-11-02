@@ -12,7 +12,7 @@ public sealed class AdvanceGate
     private const int AdvanceRequestKindCount = 3;
 
     private readonly VNPlaybackRuntimeState _vnPlaybackSettings;
-    private readonly ISeekStateQuery _lineState;
+    private readonly ISeekStateQuery _seekState;
     private readonly ICommandRunScopeProvider _scopeProvider;
 
     // null이면 세션 미시작 — 방어가 아니라 도메인 상태다.
@@ -23,11 +23,11 @@ public sealed class AdvanceGate
 
     public AdvanceGate(
         VNPlaybackRuntimeState vnPlaybackSettings,
-        ISeekStateQuery lineState,
+        ISeekStateQuery seekState,
         ICommandRunScopeProvider scopeProvider)
     {
         _vnPlaybackSettings = vnPlaybackSettings;
-        _lineState = lineState;
+        _seekState = seekState;
         _scopeProvider = scopeProvider;
 
         for (int i = 0; i < _lastAcceptedAt.Length; i++)
@@ -46,7 +46,7 @@ public sealed class AdvanceGate
 
     public bool TryAccept(AdvanceRequestKind kind)
     {
-        if (_lineState.IsSeekingActive)
+        if (_seekState.IsSeekingActive)
             return Reject(kind, "seek_active");
 
         if (kind != AdvanceRequestKind.RapidSkip)

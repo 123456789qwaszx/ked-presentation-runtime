@@ -42,7 +42,7 @@ public readonly struct VNSeekTarget
 /// 전제: 리플레이는 장면 시작에서 같은 경로를 탄다. 줄 ID는 프로젝트에서 고유하다.
 ///       시크 중 줄마다 ObserveLine을 정확히 한 번 부른다.
 /// </summary>
-public sealed class VNSeekState
+public sealed class VNSeekState : ISeekStateQuery
 {
     // 시크가 살아 있는 동안만 의미가 있다. 시작·종료 때 통째로 비운다.
     private struct InFlight
@@ -56,6 +56,7 @@ public sealed class VNSeekState
 
     public VNSeekKind Kind => _target.Kind;
     public bool IsSeeking => Kind != VNSeekKind.None;
+    bool ISeekStateQuery.IsSeekingActive => IsSeeking;
 
     // 마지막으로 관측한 줄이 목표였는가.
     public bool LastObservedIsTarget => _inFlight.LastObservedIsTarget;

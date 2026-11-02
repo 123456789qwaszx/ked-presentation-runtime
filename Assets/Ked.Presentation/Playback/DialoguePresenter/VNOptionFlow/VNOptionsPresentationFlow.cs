@@ -15,16 +15,16 @@ public sealed class VNOptionsPresentationFlow
 {
     private readonly OptionsBoxPresentationController _boxPresentation;
     private readonly VNChoiceBoundary _choiceBoundary;
-    private readonly VNLinePresentationState _advanceState;
+    private readonly VNSeekState _seekState;
 
     public VNOptionsPresentationFlow(
         OptionsBoxPresentationController boxPresentation,
         VNChoiceBoundary choiceBoundary,
-        VNLinePresentationState advanceState)
+        VNSeekState seekState)
     {
         _boxPresentation = boxPresentation;
         _choiceBoundary = choiceBoundary;
-        _advanceState = advanceState;
+        _seekState = seekState;
     }
 
     public async YarnTask<VNOptionsPresentationBeginResult> BeginAsync(
@@ -35,7 +35,7 @@ public sealed class VNOptionsPresentationFlow
         SetPhase(ctx, VNOptionsPresentationPhase.ChoiceSequenceReserved);
 
         // Phase: ReplayResolved
-        if (_advanceState.IsSeekingActive) {
+        if (_seekState.IsSeeking) {
             // 옵션들이 있지만, 조건 제한등으로 선택 불가능할 경우.
             if (!ctx.HasAnyAvailableOption) {
                 SetPhase(ctx, VNOptionsPresentationPhase.NoOption);
@@ -44,7 +44,7 @@ public sealed class VNOptionsPresentationFlow
             
             if (!_choiceBoundary.TryResolveReplayOption(ctx.ChoiceSequence, ctx.SourceOptions,
                     out DialogueOption replayOption)) {
-                _advanceState.EndSeek(VNSeekEndReason.ReplayChoiceMismatch);
+                _seekState.End(VNSeekEndReason.ReplayChoiceMismatch);
                 ctx.SelectedOption = null;
                 
                 SetPhase(ctx, VNOptionsPresentationPhase.Stale);

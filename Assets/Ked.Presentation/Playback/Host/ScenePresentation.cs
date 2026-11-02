@@ -15,7 +15,7 @@ public sealed class ScenePresentation : IPlaybackStage
     private readonly PresentationScopeSession _presentationScope;
     private readonly ChoiceHistory _choiceHistory;
     private readonly EpisodeSkipController _episodeSkipController;
-    private readonly VNLinePresentationState _lineState;
+    private readonly VNSeekState _seekState;
     private readonly YarnPlaybackDriver _playbackDriver;
 
     // 이번 재생 구간에 정지가 걸렸나. 정지 없이 노드가 돌아오면 끝까지 간 것이다.
@@ -32,7 +32,7 @@ public sealed class ScenePresentation : IPlaybackStage
         PresentationScopeSession presentationScope,
         ChoiceHistory choiceHistory,
         EpisodeSkipController episodeSkipController,
-        VNLinePresentationState lineState,
+        VNSeekState seekState,
         YarnPlaybackDriver playbackDriver)
     {
         _nodeRunner = nodeRunner;
@@ -44,7 +44,7 @@ public sealed class ScenePresentation : IPlaybackStage
         _presentationScope = presentationScope;
         _choiceHistory = choiceHistory;
         _episodeSkipController = episodeSkipController;
-        _lineState = lineState;
+        _seekState = seekState;
         _playbackDriver = playbackDriver;
     }
 
@@ -58,7 +58,7 @@ public sealed class ScenePresentation : IPlaybackStage
         _choiceHistory.ClearChoiceRecords();
 
         // 앞 단위가 시크 도중에 끝났다면 그 표적은 이 단위의 것이 아니다.
-        _lineState.EndSeek(VNSeekEndReason.SceneReset);
+        _seekState.End(VNSeekEndReason.SceneReset);
 
         _presentationView.GoToPresentationView();
         _presentationStage.Clear();
@@ -91,14 +91,15 @@ public sealed class ScenePresentation : IPlaybackStage
 
         LineTarget target = resume.Target;
 
-        _lineState.BeginLoadSeek(
+        _seekState.Begin(new VNSeekTarget(
+            VNSeekKind.Load,
             target.LineId,
-            target.Occurrence);
+            target.Occurrence));
     }
 
-    bool IPlaybackStage.IsSeeking => _lineState.IsSeekingActive;
+    bool IPlaybackStage.IsSeeking => _seekState.IsSeeking;
 
-    void IPlaybackStage.AbandonSeek() => _lineState.EndSeek(VNSeekEndReason.Abandoned);
+    void IPlaybackStage.AbandonSeek() => _seekState.End(VNSeekEndReason.Abandoned);
 
     public void PrepareReplay()
     {

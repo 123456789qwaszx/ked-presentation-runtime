@@ -1,6 +1,13 @@
 public sealed class VNLinePresentationState : ISeekStateQuery
 {
-    private readonly VNSeekState _seekState = new ();
+    // 임시 위임 — 시크는 VNSeekState가 가진다(조립에서 같은 인스턴스를 받는다). 소비자 이전이 끝나면 지운다.
+    private readonly VNSeekState _seekState;
+
+    public VNLinePresentationState(VNSeekState seekState)
+    {
+        _seekState = seekState;
+    }
+
     public VNSeekKind SeekKind => _seekState.Kind;
     public bool IsSeekingActive => _seekState.IsSeeking;
     
