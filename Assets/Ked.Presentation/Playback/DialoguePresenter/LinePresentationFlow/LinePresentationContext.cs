@@ -2,7 +2,7 @@ using TMPro;
 using Yarn.Markup;
 using Yarn.Unity;
 
-public enum VNSeekLineDecision
+public enum SeekLineDecision
 {
     NotSeeking = 0,
     SkipVisualAndDispatchSeekNext,
@@ -18,13 +18,13 @@ public sealed class LinePresentationContext
     public bool ShouldUseImmediateTransition { get; set; }
 
     // Seek Kind
-    public VNSeekKind EntrySeekKind { get; set; }
+    public SeekKind EntrySeekKind { get; set; }
     
     // Record Decision
-    public VNLineRecordDecision RecordDecision { get; set; }
+    public LineRecordDecision RecordDecision { get; set; }
 
     // Seek Decision
-    public VNSeekLineDecision SeekDecision { get; set; }
+    public SeekLineDecision SeekDecision { get; set; }
 
     // Visual Run
     public LinePresentationRun Run { get; set; }

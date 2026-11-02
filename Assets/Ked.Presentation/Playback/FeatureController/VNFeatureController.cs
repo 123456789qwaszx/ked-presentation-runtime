@@ -4,11 +4,11 @@ using UnityEngine;
 
 public sealed class VNFeatureController
 {
-    private readonly VNPlaybackRuntimeState _vnPlaybackSettings;
+    private readonly PlaybackRuntimeState _playbackState;
 
     private readonly EllipsisBreathTypewriter _typewriter;
     private readonly LineDisplayState _lineDisplayState;
-    private readonly VNSeekState _seekState;
+    private readonly SeekState _seekState;
 
     private readonly BacklogRecorder _backlogRecorder;
     private readonly AutoAdvanceScheduler _autoAdvanceScheduler;
@@ -21,16 +21,16 @@ public sealed class VNFeatureController
     private bool _speedUpHeld;
     private bool _rapidSkipHeld;
 
-    private bool IsAuto => _vnPlaybackSettings.IsAutoMode;
+    private bool IsAuto => _playbackState.IsAutoMode;
 
     private bool LineFullyShown => _lineDisplayState.IsLineFullyShown;
 
     public IReadOnlyList<DialogueLogEntry> Backlogs => _backlogRecorder.Entries;
 
     public VNFeatureController(
-        VNPlaybackRuntimeState vnPlaybackSettings,
+        PlaybackRuntimeState playbackState,
         LineDisplayState lineDisplayState,
-        VNSeekState seekState,
+        SeekState seekState,
         EllipsisBreathTypewriter ellipsisBreathTypewriter,
         BacklogRecorder backlogRecorder,
         AutoAdvanceScheduler autoAdvanceScheduler,
@@ -39,7 +39,7 @@ public sealed class VNFeatureController
         RollbackHistory rollbackController,
         ChoiceHistory choiceHistory)
     {
-        _vnPlaybackSettings = vnPlaybackSettings;
+        _playbackState = playbackState;
         _lineDisplayState = lineDisplayState;
         _seekState = seekState;
         _typewriter = ellipsisBreathTypewriter;
@@ -69,7 +69,7 @@ public sealed class VNFeatureController
             _autoAdvanceScheduler.Tick();
         }
 
-        if (_vnPlaybackSettings.IsSpeedUpMode &&
+        if (_playbackState.IsSpeedUpMode &&
             LineFullyShown)
         {
             _autoAdvanceScheduler.ResetAutoAdvanceTimer();
@@ -83,7 +83,7 @@ public sealed class VNFeatureController
     {
         bool next = !IsAuto;
 
-        _vnPlaybackSettings.SetAutoModeEnabled(next);
+        _playbackState.SetAutoModeEnabled(next);
 
         if (next && LineFullyShown)
             _autoAdvanceScheduler.ResetAutoAdvanceTimer();
@@ -179,11 +179,11 @@ public sealed class VNFeatureController
         _choiceHistory.RemoveChoiceAnchorAfterRollbackPoint(target);
 
         // 백로그는 세션 연속 - 지우고 다시 쌓는 게 아니라 표적 뒤 꼬리만 걷는다.
-        // 리플레이 패스스루는 백로그를 다시 적지 않으므로(VNLineRecordPolicy) 표적까지의 기록이 그대로 남는다.
+        // 리플레이 패스스루는 백로그를 다시 적지 않으므로(LineRecordPolicy) 표적까지의 기록이 그대로 남는다.
         _backlogRecorder.TruncateFromEnd(_rollbackController.CountPointsAfter(target));
 
         _rollbackController.ClearRollbackPoints();
-        _seekState.Begin(new VNSeekTarget(VNSeekKind.Rollback, target.lineId, target.occurrence));
+        _seekState.Begin(new SeekTarget(SeekKind.Rollback, target.lineId, target.occurrence));
 
         DisablePlaybackModifiers();
 
@@ -194,7 +194,7 @@ public sealed class VNFeatureController
 
     private void DisablePlaybackModifiers()
     {
-        _vnPlaybackSettings.SetAutoModeEnabled(false);
+        _playbackState.SetAutoModeEnabled(false);
 
         _speedUpToggled = false;
         _speedUpHeld = false;
@@ -217,20 +217,20 @@ public sealed class VNFeatureController
         if (speedUp)
         {
             multiplier = Mathf.Clamp(
-                _vnPlaybackSettings.PlaybackSettings.speedupModeMultiplier,
-                _vnPlaybackSettings.PlaybackSettings.speedupModeMinMultiplier,
-                _vnPlaybackSettings.PlaybackSettings.speedupModeMaxMultiplier);
+                _playbackState.PlaybackSettings.speedupModeMultiplier,
+                _playbackState.PlaybackSettings.speedupModeMinMultiplier,
+                _playbackState.PlaybackSettings.speedupModeMaxMultiplier);
         }
 
-        _vnPlaybackSettings.SetSpeedUpModeEnabled(speedUp);
-        _vnPlaybackSettings.SetTimeScale(multiplier);
+        _playbackState.SetSpeedUpModeEnabled(speedUp);
+        _playbackState.SetTimeScale(multiplier);
 
         _typewriter.SetSpeedMultiplier(multiplier);
     }
 
     private void ApplyRapidSkipState()
     {
-        _vnPlaybackSettings.SetRapidSkipModeEnabled(_rapidSkipHeld);
+        _playbackState.SetRapidSkipModeEnabled(_rapidSkipHeld);
         _rapidSkipController.SetHeld(_rapidSkipHeld);
     }
     

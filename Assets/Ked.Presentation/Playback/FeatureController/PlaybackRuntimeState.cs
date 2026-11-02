@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public sealed class VNPlaybackRuntimeState
+public sealed class PlaybackRuntimeState
 {
     public VNPlaybackSettings PlaybackSettings { get; set; } = new();
     

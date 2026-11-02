@@ -22,11 +22,11 @@ public sealed class PresentationAssembler
     private readonly PresentationSceneRefs _refs;
     private readonly IPresentationView _presentationView;
 
-    private readonly VNPlaybackRuntimeState _playbackState = new();
+    private readonly PlaybackRuntimeState _playbackState = new();
 
     private readonly RollbackHistory _rollbackHistory = new();
     private readonly ChoiceHistory _choiceHistory = new();
-    private readonly VNSeekState _seekState = new();
+    private readonly SeekState _seekState = new();
     private readonly LineDisplayState _lineDisplayState = new();
 
     private readonly PresentationStage _presentationStage = new();
@@ -37,7 +37,7 @@ public sealed class PresentationAssembler
 
     private IUIThemePatchPort _uiThemePatch;
 
-    private VNRuntimeStateProvider _vnRuntimeStateProvider;
+    private RuntimeStateProvider _runtimeStateProvider;
 
     private PresentationUIRoot _presentationUIRoot;
     private PresentationShotResponseSystem _presentationResponseRig;
@@ -76,7 +76,7 @@ public sealed class PresentationAssembler
 
         internals = new PresentationInternals(
             assembler._playbackState,
-            assembler._vnRuntimeStateProvider);
+            assembler._runtimeStateProvider);
 
         return runtime;
     }
@@ -112,7 +112,7 @@ public sealed class PresentationAssembler
 
     private void BootstrapPresentationRoots()
     {
-        _vnRuntimeStateProvider = new VNRuntimeStateProvider(_rollbackHistory, _choiceHistory);
+        _runtimeStateProvider = new RuntimeStateProvider(_rollbackHistory, _choiceHistory);
 
         _presentationUIRoot = _refs.Stage
             ? _refs.Stage
@@ -256,15 +256,15 @@ public sealed class PresentationAssembler
             stageCommandParser,
             dialogueBoxPresentationController);
 
-        VNYarnLineBoundary vnYarnLineBoundary = new(
+        YarnLineBoundary yarnLineBoundary = new(
             _backlogRecorder,
             _rollbackHistory,
-            _vnRuntimeStateProvider);
+            _runtimeStateProvider);
 
         LineHurrySpeedController lineHurrySpeed = new(_refs.EllipsisBreathTypewriter);
 
         _linePresentationFlow = new LinePresentationFlow(
-            vnYarnLineBoundary,
+            yarnLineBoundary,
             _lineDisplayState,
             _seekState,
             dialogueBoxPresentationController,
@@ -365,7 +365,7 @@ public sealed class PresentationAssembler
         StageEquivalenceHarness harness = harnessGo.AddComponent<StageEquivalenceHarness>();
 
         harness.Initialize(
-            _vnRuntimeStateProvider,
+            _runtimeStateProvider,
             _presentationScopeSession,
             _presentationStage,
             _presentationResponseRig,
@@ -444,12 +444,12 @@ internal sealed class UIThemePatchNotConnected : IUIThemePatchPort
 /// </summary>
 public sealed class PresentationInternals
 {
-    public VNPlaybackRuntimeState PlaybackState { get; }
-    public VNRuntimeStateProvider RuntimeState { get; }
+    public PlaybackRuntimeState PlaybackState { get; }
+    public RuntimeStateProvider RuntimeState { get; }
 
     public PresentationInternals(
-        VNPlaybackRuntimeState playbackState,
-        VNRuntimeStateProvider runtimeState)
+        PlaybackRuntimeState playbackState,
+        RuntimeStateProvider runtimeState)
     {
         PlaybackState = playbackState;
         RuntimeState = runtimeState;

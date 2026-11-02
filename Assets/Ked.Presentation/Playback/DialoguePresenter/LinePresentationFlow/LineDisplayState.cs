@@ -3,7 +3,7 @@ public sealed class LineDisplayState
 {
     public bool IsLineFullyShown { get; private set; } = true;
     
-    // 지금 줄이 #auto이고 아직 넘기지 않았다(VNLineAdvanceTag). 다 보이면 재생 입력의 프레임이 넘기고 내린다.
+    // 지금 줄이 #auto이고 아직 넘기지 않았다(LineAdvanceTag). 다 보이면 재생 입력의 프레임이 넘기고 내린다.
     // 줄에 들어갈 때 · 무너질 때 내린다 — 다음 줄로 새지 않는다.
     public bool IsLineAutoAdvancePending { get; private set; }
 

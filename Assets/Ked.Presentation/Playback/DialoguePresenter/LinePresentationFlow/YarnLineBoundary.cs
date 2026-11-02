@@ -16,16 +16,16 @@ public readonly struct YarnLineMeta
     }
 }
 
-public sealed class VNYarnLineBoundary
+public sealed class YarnLineBoundary
 {
     private readonly BacklogRecorder _backlogRecorder;
     private readonly RollbackHistory _rollbackHistory;
-    private readonly VNRuntimeStateProvider _runtimeStateProvider;
+    private readonly RuntimeStateProvider _runtimeStateProvider;
 
-    public VNYarnLineBoundary(
+    public YarnLineBoundary(
         BacklogRecorder backlogRecorder,
         RollbackHistory rollbackHistory,
-        VNRuntimeStateProvider runtimeStateProvider)
+        RuntimeStateProvider runtimeStateProvider)
     {
         _backlogRecorder = backlogRecorder;
         _rollbackHistory = rollbackHistory;
@@ -41,7 +41,7 @@ public sealed class VNYarnLineBoundary
             line.TextWithoutCharacterName.Text);
     }
 
-    public void CommitLineEntered(YarnLineMeta meta, VNLineRecordDecision decision)
+    public void CommitLineEntered(YarnLineMeta meta, LineRecordDecision decision)
     {
         _runtimeStateProvider.UpdateCurrentLineMeta(meta);
 

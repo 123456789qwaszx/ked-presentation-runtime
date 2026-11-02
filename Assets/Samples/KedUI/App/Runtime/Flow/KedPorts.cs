@@ -112,7 +112,7 @@ namespace Ked.Samples.UI
         public VNAdvanceInputPoller InputPoller;
 
         // 상태 읽기(퀵메뉴의 켜짐 표시)와 설정(자동 대기·빠르게 배속).
-        public VNPlaybackRuntimeState PlaybackState;
+        public PlaybackRuntimeState PlaybackState;
         public EllipsisBreathTypewriter Typewriter;
         public AudioSystem Audio;
 

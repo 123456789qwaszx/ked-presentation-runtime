@@ -7,10 +7,10 @@ using System;
 [Serializable]
 public sealed class PresentationSessionContext : ICommandPacePolicy
 {
-    private readonly VNPlaybackRuntimeState _playback;
+    private readonly PlaybackRuntimeState _playback;
     private readonly ISeekStateQuery _seek;
 
-    public PresentationSessionContext(VNPlaybackRuntimeState playback, ISeekStateQuery seek)
+    public PresentationSessionContext(PlaybackRuntimeState playback, ISeekStateQuery seek)
     {
         _playback = playback;
         _seek = seek;

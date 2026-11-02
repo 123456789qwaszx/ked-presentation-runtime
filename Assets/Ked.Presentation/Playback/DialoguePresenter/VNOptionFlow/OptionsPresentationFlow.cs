@@ -15,12 +15,12 @@ public sealed class OptionsPresentationFlow
 {
     private readonly OptionsBoxPresentationController _boxPresentation;
     private readonly VNChoiceBoundary _choiceBoundary;
-    private readonly VNSeekState _seekState;
+    private readonly SeekState _seekState;
 
     public OptionsPresentationFlow(
         OptionsBoxPresentationController boxPresentation,
         VNChoiceBoundary choiceBoundary,
-        VNSeekState seekState)
+        SeekState seekState)
     {
         _boxPresentation = boxPresentation;
         _choiceBoundary = choiceBoundary;
@@ -44,7 +44,7 @@ public sealed class OptionsPresentationFlow
             
             if (!_choiceBoundary.TryResolveReplayOption(ctx.ChoiceSequence, ctx.SourceOptions,
                     out DialogueOption replayOption)) {
-                _seekState.End(VNSeekEndReason.ReplayChoiceMismatch);
+                _seekState.End(SeekEndReason.ReplayChoiceMismatch);
                 ctx.SelectedOption = null;
                 
                 SetPhase(ctx, OptionsPresentationPhase.Stale);

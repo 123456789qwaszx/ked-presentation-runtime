@@ -7,7 +7,7 @@
 //           되감기로 닿은 줄에서는 넘기지 않는다 — 다시 보려고 돌아온 것이다(LinePresentationFlow).
 //
 // 표기는 박스 태그와 같은 정규화를 거친다(#auto · #Auto · #AUTO가 같다).
-public static class VNLineAdvanceTag
+public static class LineAdvanceTag
 {
     private const string Auto = "auto";
 

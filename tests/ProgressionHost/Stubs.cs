@@ -14,7 +14,7 @@ namespace UnityEngine
     }
 }
 
-// 진짜는 VNYarnLineBoundary.cs에 있고 Yarn.Unity를 참조한다. 모양만 같게 둔다.
+// 진짜는 YarnLineBoundary.cs에 있고 Yarn.Unity를 참조한다. 모양만 같게 둔다.
 public readonly struct YarnLineMeta
 {
     public readonly string nodeName;

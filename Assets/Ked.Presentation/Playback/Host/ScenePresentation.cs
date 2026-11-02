@@ -9,13 +9,13 @@ public sealed class ScenePresentation : IPlaybackStage
     private readonly IEpisodeNodeRunner _nodeRunner;
     private readonly IPresentationView _presentationView;
     private readonly RollbackHistory _rollbackHistory;
-    private readonly IVNLineAborter _linePresentationAborter;
+    private readonly ILineAborter _linePresentationAborter;
     private readonly PresentationShotResponseSystem _shotResponseSystem;
     private readonly PresentationStage _presentationStage;
     private readonly PresentationScopeSession _presentationScope;
     private readonly ChoiceHistory _choiceHistory;
     private readonly EpisodeSkipController _episodeSkipController;
-    private readonly VNSeekState _seekState;
+    private readonly SeekState _seekState;
     private readonly YarnPlaybackDriver _playbackDriver;
 
     // 이번 재생 구간에 정지가 걸렸나. 정지 없이 노드가 돌아오면 끝까지 간 것이다.
@@ -26,13 +26,13 @@ public sealed class ScenePresentation : IPlaybackStage
         IEpisodeNodeRunner nodeRunner,
         IPresentationView presentationView,
         RollbackHistory rollbackHistory,
-        IVNLineAborter linePresentationAborter,
+        ILineAborter linePresentationAborter,
         PresentationShotResponseSystem shotResponseSystem,
         PresentationStage presentationStage,
         PresentationScopeSession presentationScope,
         ChoiceHistory choiceHistory,
         EpisodeSkipController episodeSkipController,
-        VNSeekState seekState,
+        SeekState seekState,
         YarnPlaybackDriver playbackDriver)
     {
         _nodeRunner = nodeRunner;
@@ -58,7 +58,7 @@ public sealed class ScenePresentation : IPlaybackStage
         _choiceHistory.ClearChoiceRecords();
 
         // 앞 단위가 시크 도중에 끝났다면 그 표적은 이 단위의 것이 아니다.
-        _seekState.End(VNSeekEndReason.SceneReset);
+        _seekState.End(SeekEndReason.SceneReset);
 
         _presentationView.GoToPresentationView();
         _presentationStage.Clear();
@@ -84,22 +84,22 @@ public sealed class ScenePresentation : IPlaybackStage
         }
     }
     
-    // 단위의 Yarn 선택 기록을 되돌리고 표적 줄까지 시크한다. 로드 시크는 백로그를 다시 적는다(VNLineRecordPolicy).
+    // 단위의 Yarn 선택 기록을 되돌리고 표적 줄까지 시크한다. 로드 시크는 백로그를 다시 적는다(LineRecordPolicy).
     void IPlaybackStage.BeginResume(PresentationResumePoint resume)
     {
         _choiceHistory.RestoreChoices(resume.YarnChoices);
 
         LineTarget target = resume.Target;
 
-        _seekState.Begin(new VNSeekTarget(
-            VNSeekKind.Load,
+        _seekState.Begin(new SeekTarget(
+            SeekKind.Load,
             target.LineId,
             target.Occurrence));
     }
 
     bool IPlaybackStage.IsSeeking => _seekState.IsSeeking;
 
-    void IPlaybackStage.AbandonSeek() => _seekState.End(VNSeekEndReason.Abandoned);
+    void IPlaybackStage.AbandonSeek() => _seekState.End(SeekEndReason.Abandoned);
 
     public void PrepareReplay()
     {

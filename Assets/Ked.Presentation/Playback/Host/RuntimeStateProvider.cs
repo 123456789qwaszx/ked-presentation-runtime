@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-public sealed class VNRuntimeStateProvider
+public sealed class RuntimeStateProvider
 {
     private readonly RollbackHistory _rollbackHistory;
     private readonly ChoiceHistory _choiceHistory;
@@ -8,7 +8,7 @@ public sealed class VNRuntimeStateProvider
     private YarnLineMeta _currentLineMeta;
     private bool _hasCurrentLineMeta;
 
-    public VNRuntimeStateProvider(
+    public RuntimeStateProvider(
         RollbackHistory rollbackHistory,
         ChoiceHistory choiceHistory)
     {

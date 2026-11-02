@@ -135,7 +135,7 @@ namespace Ked.Samples.UI
 
             if (IsPlayRoot)
             {
-                VNPlaybackRuntimeState state = _playback.PlaybackState;
+                PlaybackRuntimeState state = _playback.PlaybackState;
                 if (state != null)
                     _play.SetModes(state.IsAutoMode, state.IsRapidSkipMode);
             }

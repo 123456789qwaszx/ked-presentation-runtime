@@ -11,7 +11,7 @@ public sealed class AdvanceGate
 {
     private const int AdvanceRequestKindCount = 3;
 
-    private readonly VNPlaybackRuntimeState _vnPlaybackSettings;
+    private readonly PlaybackRuntimeState _playbackState;
     private readonly ISeekStateQuery _seekState;
     private readonly ICommandRunScopeProvider _scopeProvider;
 
@@ -22,11 +22,11 @@ public sealed class AdvanceGate
     private double _cooldownUntilUnscaled = double.NegativeInfinity;
 
     public AdvanceGate(
-        VNPlaybackRuntimeState vnPlaybackSettings,
+        PlaybackRuntimeState playbackState,
         ISeekStateQuery seekState,
         ICommandRunScopeProvider scopeProvider)
     {
-        _vnPlaybackSettings = vnPlaybackSettings;
+        _playbackState = playbackState;
         _seekState = seekState;
         _scopeProvider = scopeProvider;
 
@@ -86,14 +86,14 @@ public sealed class AdvanceGate
         switch (kind)
         {
             case AdvanceRequestKind.Auto:
-                return _vnPlaybackSettings.PlaybackSettings.autoAdvanceRateLimitSec;
+                return _playbackState.PlaybackSettings.autoAdvanceRateLimitSec;
 
             case AdvanceRequestKind.RapidSkip:
-                return _vnPlaybackSettings.PlaybackSettings.rapidSkipAdvanceRateLimitSec;
+                return _playbackState.PlaybackSettings.rapidSkipAdvanceRateLimitSec;
 
             case AdvanceRequestKind.User:
             default:
-                return _vnPlaybackSettings.PlaybackSettings.userAdvanceCooldownSec;
+                return _playbackState.PlaybackSettings.userAdvanceCooldownSec;
         }
     }
 
@@ -102,12 +102,12 @@ public sealed class AdvanceGate
         switch (kind)
         {
             case AdvanceRequestKind.RapidSkip:
-                return _vnPlaybackSettings.PlaybackSettings.rapidSkipCooldownAfterHurryUpSec;
+                return _playbackState.PlaybackSettings.rapidSkipCooldownAfterHurryUpSec;
 
             case AdvanceRequestKind.Auto:
             case AdvanceRequestKind.User:
             default:
-                return _vnPlaybackSettings.PlaybackSettings.cooldownAfterHurryUpSec;
+                return _playbackState.PlaybackSettings.cooldownAfterHurryUpSec;
         }
     }
 
@@ -116,12 +116,12 @@ public sealed class AdvanceGate
         switch (kind)
         {
             case AdvanceRequestKind.RapidSkip:
-                return _vnPlaybackSettings.PlaybackSettings.rapidSkipCooldownAfterNextLineSec;
+                return _playbackState.PlaybackSettings.rapidSkipCooldownAfterNextLineSec;
 
             case AdvanceRequestKind.Auto:
             case AdvanceRequestKind.User:
             default:
-                return _vnPlaybackSettings.PlaybackSettings.cooldownAfterNextLineSec;
+                return _playbackState.PlaybackSettings.cooldownAfterNextLineSec;
         }
     }
 

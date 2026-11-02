@@ -3,17 +3,17 @@ using System.Threading;
 using UnityEngine;
 using Yarn.Unity;
 
-public interface IVNLineAborter
+public interface ILineAborter
 {
     void AbortCurrentVNLine();
 }
 
-public sealed class CustomLinePresenter : DialoguePresenterBase, IVNLineAborter
+public sealed class CustomLinePresenter : DialoguePresenterBase, ILineAborter
 {
     private LinePresentationFlow _linePresentationFlow;
 
     private EllipsisBreathTypewriter _typewriter;
-    private VNPlaybackRuntimeState _vnPlaybackRuntimeState;
+    private PlaybackRuntimeState _playbackRuntimeState;
 
     private string _currentNodeName;
 
@@ -43,7 +43,7 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, IVNLineAborter
         DialogueRunner dialogueRunner,
         LinePresentationFlow linePresentationFlow,
         EllipsisBreathTypewriter typewriter,
-        VNPlaybackRuntimeState vnPlaybackRuntimeState)
+        PlaybackRuntimeState playbackRuntimeState)
     {
         dialogueRunner.onNodeStart?.AddListener(nodeName => _currentNodeName = nodeName);
         RegisterPresenter(dialogueRunner);
@@ -53,7 +53,7 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, IVNLineAborter
         _typewriter = typewriter;
         _typewriter.ActionMarkupHandlers = ActionMarkupHandlers;
 
-        _vnPlaybackRuntimeState = vnPlaybackRuntimeState;
+        _playbackRuntimeState = playbackRuntimeState;
     }
 
     public override async YarnTask RunLineAsync(
@@ -70,7 +70,7 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, IVNLineAborter
                 Line = line,
                 Token = token,
                 NodeName = _currentNodeName,
-                ShouldUseImmediateTransition = _vnPlaybackRuntimeState.IsSpeedUpMode
+                ShouldUseImmediateTransition = _playbackRuntimeState.IsSpeedUpMode
             };
 
             await _linePresentationFlow.RunAsync(

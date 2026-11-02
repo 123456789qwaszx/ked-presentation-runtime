@@ -6,24 +6,24 @@ public sealed class LinePresentationFlow
 {
     public event Action LineDisplayed;
 
-    private readonly VNYarnLineBoundary _vnYarnLineBoundary;
+    private readonly YarnLineBoundary _yarnLineBoundary;
     private readonly LineDisplayState _lineDisplayState;
-    private readonly VNSeekState _seekState;
+    private readonly SeekState _seekState;
     private readonly DialogueBoxPresentationController _boxPresentation;
     private readonly EllipsisBreathTypewriter _typewriter;
     private readonly YarnPlaybackDriver _playbackDriver;
     private readonly LineHurrySpeedController _lineHurrySpeed;
 
     public LinePresentationFlow(
-        VNYarnLineBoundary vnYarnLineBoundary,
+        YarnLineBoundary yarnLineBoundary,
         LineDisplayState lineDisplayState,
-        VNSeekState seekState,
+        SeekState seekState,
         DialogueBoxPresentationController boxPresentation,
         EllipsisBreathTypewriter typewriter,
         YarnPlaybackDriver playbackDriver,
         LineHurrySpeedController lineHurrySpeed)
     {
-        _vnYarnLineBoundary = vnYarnLineBoundary;
+        _yarnLineBoundary = yarnLineBoundary;
         _lineDisplayState = lineDisplayState;
         _seekState = seekState;
         _boxPresentation = boxPresentation;
@@ -40,36 +40,36 @@ public sealed class LinePresentationFlow
         SetPhase(ctx, LinePresentationPhase.LineReceived);
         
         _lineDisplayState.MarkLineEntered();
-        YarnLineMeta meta = _vnYarnLineBoundary.BuildLineMeta(ctx.Line, ctx.NodeName);
+        YarnLineMeta meta = _yarnLineBoundary.BuildLineMeta(ctx.Line, ctx.NodeName);
         
         // Phase: LineRuntimeStateResolved
         ctx.EntrySeekKind = _seekState.Kind;
         _seekState.ObserveLine(meta);
 
         ctx.SeekDecision   = ResolveSeekDecision(ctx.EntrySeekKind);
-        ctx.RecordDecision = VNLineRecordPolicy.Resolve(ctx.EntrySeekKind);
+        ctx.RecordDecision = LineRecordPolicy.Resolve(ctx.EntrySeekKind);
         SetPhase(ctx, LinePresentationPhase.LineRuntimeStateResolved);
         
         // Phase: LineEnteredCommitted
-        _vnYarnLineBoundary.CommitLineEntered(meta, ctx.RecordDecision);
+        _yarnLineBoundary.CommitLineEntered(meta, ctx.RecordDecision);
         _playbackDriver.PlayCollected();
         SetPhase(ctx, LinePresentationPhase.LineEnteredCommitted);
         
-        if (ctx.SeekDecision == VNSeekLineDecision.SkipVisualAndDispatchSeekNext) {
+        if (ctx.SeekDecision == SeekLineDecision.SkipVisualAndDispatchSeekNext) {
             RunSeekPassThrough(ctx);
             return;
         }
 
-        // #auto — 다 보이면 입력 없이 넘긴다(VNLineAdvanceTag). 되감기로 닿은 줄은 다시 보려고 온 것이라 넘기지 않는다.
+        // #auto — 다 보이면 입력 없이 넘긴다(LineAdvanceTag). 되감기로 닿은 줄은 다시 보려고 온 것이라 넘기지 않는다.
         bool rollbackTarget = 
-            ctx.SeekDecision == VNSeekLineDecision.TargetLineReached
-            && ctx.EntrySeekKind == VNSeekKind.Rollback;
+            ctx.SeekDecision == SeekLineDecision.TargetLineReached
+            && ctx.EntrySeekKind == SeekKind.Rollback;
 
-        if (ctx.SeekDecision == VNSeekLineDecision.TargetLineReached)
-            _seekState.End(VNSeekEndReason.Arrived);
+        if (ctx.SeekDecision == SeekLineDecision.TargetLineReached)
+            _seekState.End(SeekEndReason.Arrived);
 
         _lineDisplayState.SetLineAutoAdvance(
-            !rollbackTarget && VNLineAdvanceTag.IsAuto(ctx.Line.Metadata));
+            !rollbackTarget && LineAdvanceTag.IsAuto(ctx.Line.Metadata));
 
         // Phase: VisualRunStarted
         ctx.Run = beginRun();
@@ -173,14 +173,14 @@ public sealed class LinePresentationFlow
         SetPhase(ctx, LinePresentationPhase.Completed);
     }
     
-    private VNSeekLineDecision ResolveSeekDecision(VNSeekKind entrySeekKind)
+    private SeekLineDecision ResolveSeekDecision(SeekKind entrySeekKind)
     {
-        if (entrySeekKind == VNSeekKind.None)
-            return VNSeekLineDecision.NotSeeking;
+        if (entrySeekKind == SeekKind.None)
+            return SeekLineDecision.NotSeeking;
 
         return _seekState.LastObservedIsTarget
-            ? VNSeekLineDecision.TargetLineReached
-            : VNSeekLineDecision.SkipVisualAndDispatchSeekNext;
+            ? SeekLineDecision.TargetLineReached
+            : SeekLineDecision.SkipVisualAndDispatchSeekNext;
     }
 
     private void SetPhase(LinePresentationContext ctx, LinePresentationPhase phase)

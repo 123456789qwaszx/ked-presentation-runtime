@@ -49,7 +49,7 @@ using UnityEngine;
 // ─────────────────────────────────────────────────────────────────────────────
 public sealed class StageEquivalenceHarness : MonoBehaviour
 {
-    private VNRuntimeStateProvider _provider;
+    private RuntimeStateProvider _provider;
     private PresentationScopeSession _session;
     private PresentationStage _stage;
     private MotionLibrary _motions = MotionLibrary.Empty;
@@ -102,7 +102,7 @@ public sealed class StageEquivalenceHarness : MonoBehaviour
 
     /// <param name="dialogueFolder">대본(.yarn) 폴더의 절대 경로. 하위 폴더까지 읽는다 — 어디에 두는지는 호스트가 정한다.</param>
     public void Initialize(
-        VNRuntimeStateProvider provider,
+        RuntimeStateProvider provider,
         PresentationScopeSession session,
         PresentationStage stage,
         PresentationShotResponseSystem shotSystem,
