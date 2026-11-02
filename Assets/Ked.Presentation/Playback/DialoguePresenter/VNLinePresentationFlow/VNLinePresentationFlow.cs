@@ -34,16 +34,17 @@ public sealed class VNLinePresentationFlow
         Func<LinePresentationRun> beginRun,
         Func<LineCancellationToken, YarnTask> waitForAdvance)
     {
-        // Phase: LineReceived -> LineRuntimeStateResolved
         SetPhase(ctx, VNLinePresentationPhase.LineReceived);
         
-        // Phase: LineRuntimeStateResolved
         _advanceState.MarkLineEntered();
         YarnLineMeta meta = _vnYarnLineBoundary.BuildLineMeta(ctx.Line, ctx.NodeName);
         
-        ctx.EntrySeekKind  = _advanceState.SeekKind;
+        // Phase: LineRuntimeStateResolved
+        ctx.EntrySeekKind = _advanceState.SeekKind;
+        _advanceState.ObserveSeekLine(meta);
+
+        ctx.SeekDecision   = ResolveSeekDecision(ctx.EntrySeekKind);
         ctx.RecordDecision = VNLineRecordPolicy.Resolve(ctx.EntrySeekKind);
-        ctx.SeekDecision   = ResolveSeekDecision(ctx.EntrySeekKind, meta);
         SetPhase(ctx, VNLinePresentationPhase.LineRuntimeStateResolved);
         
         // Phase: LineEnteredCommitted
@@ -169,13 +170,12 @@ public sealed class VNLinePresentationFlow
         SetPhase(ctx, VNLinePresentationPhase.Completed);
     }
     
-    
-    private VNSeekLineDecision ResolveSeekDecision(VNSeekKind entrySeekKind, YarnLineMeta meta)
+    private VNSeekLineDecision ResolveSeekDecision(VNSeekKind entrySeekKind)
     {
         if (entrySeekKind == VNSeekKind.None)
             return VNSeekLineDecision.NotSeeking;
 
-        return _advanceState.IsSeekTargetLine(meta)
+        return _advanceState.IsAtSeekTarget
             ? VNSeekLineDecision.TargetLineReached
             : VNSeekLineDecision.SkipVisualAndDispatchSeekNext;
     }

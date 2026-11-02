@@ -33,23 +33,24 @@ public sealed class VNSeekState
         _matchedCount = 0;
     }
 
-    public bool IsCurrentTarget(YarnLineMeta meta)
+    public void ObserveLine(YarnLineMeta meta)
     {
-        if (!IsSeeking)
-            return false;
+        LastObservedIsTarget = false;
 
-        if (!string.Equals(meta.nodeName, TargetNodeName, StringComparison.Ordinal))
-            return false;
+        if (!IsSeeking)
+            return;
 
         if (string.IsNullOrWhiteSpace(TargetLineId))
-            return false;
+            return;
 
         if (!string.Equals(meta.lineId, TargetLineId, StringComparison.Ordinal))
-            return false;
+            return;
 
         _matchedCount++;
-        return _matchedCount == TargetOccurrence;
+        LastObservedIsTarget = _matchedCount == TargetOccurrence;
     }
+
+    public bool LastObservedIsTarget { get; private set; }
 
     public void Clear()
     {
