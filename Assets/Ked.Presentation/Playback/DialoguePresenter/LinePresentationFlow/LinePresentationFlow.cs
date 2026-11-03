@@ -13,6 +13,7 @@ public sealed class LinePresentationFlow
     private readonly EllipsisBreathTypewriter _typewriter;
     private readonly YarnPlaybackDriver _playbackDriver;
     private readonly LineHurrySpeedController _lineHurrySpeed;
+    private readonly LineVoiceController _lineVoice;
 
     public LinePresentationFlow(
         YarnLineBoundary yarnLineBoundary,
@@ -21,7 +22,8 @@ public sealed class LinePresentationFlow
         DialogueBoxPresentationController boxPresentation,
         EllipsisBreathTypewriter typewriter,
         YarnPlaybackDriver playbackDriver,
-        LineHurrySpeedController lineHurrySpeed)
+        LineHurrySpeedController lineHurrySpeed,
+        LineVoiceController lineVoice)
     {
         _yarnLineBoundary = yarnLineBoundary;
         _lineDisplayState = lineDisplayState;
@@ -30,6 +32,7 @@ public sealed class LinePresentationFlow
         _typewriter = typewriter;
         _playbackDriver = playbackDriver;
         _lineHurrySpeed = lineHurrySpeed;
+        _lineVoice = lineVoice;
     }
 
     public async YarnTask RunAsync(
@@ -58,6 +61,8 @@ public sealed class LinePresentationFlow
         if (ctx.SeekDecision == SeekLineDecision.TargetLineReached)
             _seekState.End(SeekEndReason.Arrived);
 
+        // 앞 줄의 보이스는 여기서 끝난다. 이 줄의 보이스는 PlayCollected가 낸다.
+        _lineVoice.EndPreviousLine();
         _playbackDriver.PlayCollected();
         SetPhase(ctx, LinePresentationPhase.LineEnteredCommitted);
         

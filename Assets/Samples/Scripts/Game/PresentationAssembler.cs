@@ -239,6 +239,7 @@ public sealed class PresentationAssembler
             _rollbackHistory);
 
         LineHurrySpeedController lineHurrySpeed = new(_refs.EllipsisBreathTypewriter);
+        LineVoiceController lineVoice = new(_refs.AudioSystem.Voice);
 
         _linePresentationFlow = new LinePresentationFlow(
             yarnLineBoundary,
@@ -247,7 +248,8 @@ public sealed class PresentationAssembler
             dialogueBoxPresentationController,
             _refs.EllipsisBreathTypewriter,
             yarnPlaybackDriver,
-            lineHurrySpeed);
+            lineHurrySpeed,
+            lineVoice);
 
         _refs.CustomLinePresenter.Initialize(
             _refs.DialogueRunner,
