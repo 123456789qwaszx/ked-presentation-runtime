@@ -4,10 +4,11 @@ namespace Ked.Samples.UI
 {
     /// <summary>
     /// 10 안내 팝업 — 확인 버튼 하나. 확인 팝업과 같은 Panel 규칙(모달·한 번만 처리).
-    /// 성공 표시(체크)는 실제로 끝난 일에만 쓴다(저장 완료 등). 실패는 체크 대신 경고 표시와 실제 이유.
+    /// 무엇을 알리는지(Message)와 번호만 받는다. 글자와 표시는 이 창이 정한다(ILocalizedView).
+    /// 성공 표시(체크)는 실제로 끝난 일에만 쓴다(저장 완료). 실패는 체크 대신 경고 표시와 실제 이유.
     /// </summary>
     [UIViewKey("Ked.NoticePanel")]
-    public sealed class NoticePanel : UIPanel<NoticePanel.Refs>
+    public sealed class NoticePanel : UIPanel<NoticePanel.Refs>, ILocalizedView
     {
         public enum Refs
         {
@@ -22,26 +23,28 @@ namespace Ked.Samples.UI
             NoticeAcceptLabel,
         }
 
-        public enum Kind
+        public enum Message
         {
-            Success,
-            Failure,
+            Saved,
+            SaveFailed,
+            LoadFailed,
+            ForkFailed,
+            SkipUnavailable,
         }
 
-        public sealed class Request
+        public sealed class Model
         {
-            public string Title;
-            public string Body;
-            public string AcceptLabel;
-            public Kind Kind;
-            public Action OnClosed;
+            public Message Message;
+            public int SlotNumber;      // 저장 완료 본문의 번호(1부터)
         }
 
-        public event Action<Request> Resolved;
+        public event Action Resolved;
 
-        private Request _request;
+        private Model _model;
+        private bool _pending;
+        private Localizer _texts;
 
-        public bool IsPending => _request != null;
+        public bool IsPending => _pending;
 
         protected override void OnInitialize()
         {
@@ -50,37 +53,66 @@ namespace Ked.Samples.UI
             Styled.AddText(View.Text(Refs.NoticeBody), UITextRole.Body, UITextSizePolicy.Prefab);
         }
 
-        public void Present(Request request)
+        public void Present(Model model)
         {
-            _request = request ?? throw new ArgumentNullException(nameof(request));
-
-            KedUIUtil.SetText(View.Text(Refs.NoticeTitle), request.Title);
-            KedUIUtil.SetText(View.Text(Refs.NoticeBody), request.Body);
-            KedUIUtil.SetText(View.Text(Refs.NoticeAcceptLabel), request.AcceptLabel);
-
-            KedUIUtil.SetActive(View.Image(Refs.NoticeCheck), request.Kind == Kind.Success);
-            KedUIUtil.SetActive(View.Image(Refs.NoticeWarning), request.Kind == Kind.Failure);
+            _model = model ?? throw new ArgumentNullException(nameof(model));
+            _pending = true;
+            Redraw();
 
             KedUIUtil.SetButton(View.Button(Refs.NoticeAccept), true, true);
             KedUIUtil.Focus(View.Button(Refs.NoticeAccept));
         }
 
+        public void Relocalize(Localizer localizer)
+        {
+            _texts = localizer;
+            Redraw();
+        }
+
         /// <summary>확인 버튼 · Esc · Enter.</summary>
         public void Accept()
         {
-            Request request = _request;
-            if (request == null)
+            if (!_pending)
                 return;
 
-            _request = null;
+            _pending = false;
             KedUIUtil.SetButton(View.Button(Refs.NoticeAccept), true, false);
 
-            Resolved?.Invoke(request);
+            Resolved?.Invoke();
         }
+
+        private void Redraw()
+        {
+            if (_model == null)
+                return;
+
+            string key = KeyOf(_model.Message);
+            bool success = _model.Message == Message.Saved;
+
+            KedUIUtil.SetText(View.Text(Refs.NoticeTitle), Text(key + ".title"));
+            KedUIUtil.SetText(View.Text(Refs.NoticeBody), success
+                ? KedUIUtil.Format(_texts, key + ".body", KedUIUtil.TwoDigits(_model.SlotNumber))
+                : Text(key + ".body"));
+            KedUIUtil.SetText(View.Text(Refs.NoticeAcceptLabel), Text("common.ok"));
+
+            KedUIUtil.SetActive(View.Image(Refs.NoticeCheck), success);
+            KedUIUtil.SetActive(View.Image(Refs.NoticeWarning), !success);
+        }
+
+        private static string KeyOf(Message message) => message switch
+        {
+            Message.Saved => "notice.saved",
+            Message.SaveFailed => "notice.saveFailed",
+            Message.LoadFailed => "notice.loadFailed",
+            Message.ForkFailed => "notice.forkFailed",
+            _ => "notice.skipUnavailable",
+        };
+
+        private string Text(string key) => KedUIUtil.Text(_texts, key);
 
         private void OnDisable()
         {
-            _request = null;
+            _pending = false;
         }
     }
 }

@@ -586,5 +586,9 @@ App(흐름 · 바인딩 · KedUIHost)을 asmdef(`Ked.Samples.UI.App` · `.App.Ed
 - 탭 분기는 흐름의 `ShowTabPage` 하나(어느 Page를 열고 무엇을 그리나)와 상태의 `ResetTab` 하나(어느 값이 어느 탭인가)로(11-04). 전에는 흐름에 둘이 더 있었다.
   되돌리기는 값을 모두 다시 적용하고(`ApplySettings` — 같은 값은 그대로) `ShowTabPage`로 지금 Page를 다시 그린다. UIPF `SwitchPage`는 같은 Page를 닫지 않고, `BindView`가 먼저 풀어 묶기는 한 벌이다.
   탭별로 남은 것은 음량 탭의 채널 음량(본체가 들고 있다) 되돌리기 한 줄뿐이다. 탭이 늘면 이 두 곳을 고친다.
-- 확인 창 요청(제목 · 본문 · 수락 · 취소 네 줄)은 메뉴 · 저장 · 백로그에 아직 반복된다 — 확인 창 종류별 글자를 화면이 갖게 할지는 따로 정한다.
+- 확인 · 안내 창(11-04): 부르는 쪽이 글자 넉 줄과 콜백을 담은 `Request`를 만들던 것을, 무엇을 묻고 알리는지(`ConfirmPanel.Question` · `NoticePanel.Message`)와 번호만 넘기게 했다.
+  글자(취소가 "계속하기"인 타이틀로 포함)와 성공/실패 표시는 창이 고른다(`ILocalizedView`, `SaveLoadPanel.Hint`와 같은 방식). 부르는 자리는 8줄 → 1줄.
+  - 묶기는 하나(`ApplyConfirmBindings`)로 둔다. 부르는 길마다 다른 것은 "수락하면 무엇을 하나"뿐이고, 연결(수락 · 취소 → 먼저 닫기 → 그 일)은 다섯 곳이 같다.
+    그 일은 `Confirm(question, onAccept, …)`의 인자로 받아 흐름이 든다(`_confirmAccepted`, 모달이라 하나). 창은 콜백을 받지 않고 `Resolved(bool)`만 낸다.
+  - 쓰이지 않던 `OnCancel` · `OnClosed` · `NoticePanel.Kind`와 흐름의 `Format` 도우미를 지웠다.
 

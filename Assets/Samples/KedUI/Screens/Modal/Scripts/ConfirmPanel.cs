@@ -8,12 +8,13 @@ namespace Ked.Samples.UI
     /// 딤이 화면 전체의 포인터를 막는다. 그래서 "모달"의 입력 차단은 UIPF의 Panel 규칙으로 얻는다.
     /// (UIPF의 Overlay는 아래 화면을 막지 않는 층이라 모달에 쓰지 않는다.)
     ///
-    /// 한 번 열 때 받은 요청(제목·본문·버튼 글자·콜백)으로 동작한다. 수락·취소·닫기·Esc 중 무엇이든
-    /// 처음 하나만 처리한다 — 두 번 누르거나 Esc와 겹쳐도 콜백은 한 번이다.
+    /// 무엇을 묻는지(Question)와 번호만 받는다. 글자는 이 창이 제 글자 표 키로 고른다(ILocalizedView).
+    /// 수락하면 무엇을 할지는 부른 쪽(흐름)이 든다.
+    /// 수락·취소·닫기·Esc 중 무엇이든 처음 하나만 처리한다 — 두 번 누르거나 Esc와 겹쳐도 사건은 한 번이다.
     /// 버튼은 OnInitialize에서 한 번만 묶는다. 다시 열어도 리스너가 늘지 않는다.
     /// </summary>
     [UIViewKey("Ked.ConfirmPanel")]
-    public sealed class ConfirmPanel : UIPanel<ConfirmPanel.Refs>
+    public sealed class ConfirmPanel : UIPanel<ConfirmPanel.Refs>, ILocalizedView
     {
         public enum Refs
         {
@@ -31,22 +32,29 @@ namespace Ked.Samples.UI
             ConfirmAcceptLabel,
         }
 
-        public sealed class Request
+        public enum Question
         {
-            public string Title;
-            public string Body;
-            public string AcceptLabel;
-            public string CancelLabel;
-            public Action OnAccept;
-            public Action OnCancel;
+            SkipEpisode,
+            ReturnToTitle,
+            Overwrite,
+            Load,
+            Fork,
         }
 
-        /// <summary>요청이 끝났다(수락이면 true). 흐름이 이 Panel을 닫고 요청의 콜백을 부른다.</summary>
-        public event Action<Request, bool> Resolved;
+        public sealed class Model
+        {
+            public Question Question;
+            public int SlotNumber;      // 덮어쓰기 · 불러오기 본문의 번호(1부터)
+        }
 
-        private Request _request;
+        /// <summary>요청이 끝났다(수락이면 true). 흐름이 이 Panel을 닫고 부른 쪽의 일을 한다.</summary>
+        public event Action<bool> Resolved;
 
-        public bool IsPending => _request != null;
+        private Model _model;
+        private bool _pending;
+        private Localizer _texts;
+
+        public bool IsPending => _pending;
 
         protected override void OnInitialize()
         {
@@ -57,14 +65,11 @@ namespace Ked.Samples.UI
             Styled.AddText(View.Text(Refs.ConfirmBody), UITextRole.Body, UITextSizePolicy.Prefab);
         }
 
-        public void Present(Request request)
+        public void Present(Model model)
         {
-            _request = request ?? throw new ArgumentNullException(nameof(request));
-
-            KedUIUtil.SetText(View.Text(Refs.ConfirmTitle), request.Title);
-            KedUIUtil.SetText(View.Text(Refs.ConfirmBody), request.Body);
-            KedUIUtil.SetText(View.Text(Refs.ConfirmAcceptLabel), request.AcceptLabel);
-            KedUIUtil.SetText(View.Text(Refs.ConfirmCancelLabel), request.CancelLabel);
+            _model = model ?? throw new ArgumentNullException(nameof(model));
+            _pending = true;
+            Redraw();
 
             SetButtonsInteractable(true);
 
@@ -72,19 +77,52 @@ namespace Ked.Samples.UI
             KedUIUtil.Focus(View.Button(Refs.ConfirmCancel));
         }
 
+        public void Relocalize(Localizer localizer)
+        {
+            _texts = localizer;
+            Redraw();
+        }
+
         /// <summary>Esc. 취소와 같다.</summary>
         public void Cancel() => Resolve(false);
 
-        private void Resolve(bool accepted)
+        private void Redraw()
         {
-            Request request = _request;
-            if (request == null)
+            if (_model == null)
                 return;
 
-            _request = null;
+            string key = KeyOf(_model.Question);
+            bool numbered = _model.Question is Question.Overwrite or Question.Load;
+
+            KedUIUtil.SetText(View.Text(Refs.ConfirmTitle), Text(key + ".title"));
+            KedUIUtil.SetText(View.Text(Refs.ConfirmBody), numbered
+                ? KedUIUtil.Format(_texts, key + ".body", KedUIUtil.TwoDigits(_model.SlotNumber))
+                : Text(key + ".body"));
+            KedUIUtil.SetText(View.Text(Refs.ConfirmAcceptLabel), Text(key + ".accept"));
+
+            // 타이틀로만 취소가 "계속하기"다.
+            KedUIUtil.SetText(View.Text(Refs.ConfirmCancelLabel),
+                Text(_model.Question == Question.ReturnToTitle ? "confirm.title.cancel" : "common.cancel"));
+        }
+
+        private static string KeyOf(Question question) => question switch
+        {
+            Question.SkipEpisode => "confirm.skip",
+            Question.ReturnToTitle => "confirm.title",
+            Question.Overwrite => "confirm.overwrite",
+            Question.Load => "confirm.load",
+            _ => "confirm.fork",
+        };
+
+        private void Resolve(bool accepted)
+        {
+            if (!_pending)
+                return;
+
+            _pending = false;
             SetButtonsInteractable(false);
 
-            Resolved?.Invoke(request, accepted);
+            Resolved?.Invoke(accepted);
         }
 
         private void SetButtonsInteractable(bool interactable)
@@ -94,10 +132,12 @@ namespace Ked.Samples.UI
             KedUIUtil.SetButton(View.Button(Refs.ConfirmClose), true, interactable);
         }
 
+        private string Text(string key) => KedUIUtil.Text(_texts, key);
+
         private void OnDisable()
         {
-            // 다른 길(전체 닫기)로 닫혀도 남은 요청을 콜백 없이 버린다 — 나중에 늦게 불리지 않게.
-            _request = null;
+            // 다른 길(전체 닫기)로 닫혀도 남은 요청을 사건 없이 버린다 — 나중에 늦게 불리지 않게.
+            _pending = false;
         }
     }
 }

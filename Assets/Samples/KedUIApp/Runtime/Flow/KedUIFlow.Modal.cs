@@ -3,36 +3,32 @@ using System;
 namespace Ked.Samples.UI
 {
     // 09 확인 · 10 안내 — 모달. 맨 위 Panel만 입력을 받는 UIPF 규칙과 딤으로 아래를 막는다. Esc는 확인 → 취소, 안내 → 확인(HandleCancel).
-    // 요청 하나에 콜백은 한 번(화면이 보장). 먼저 팝업을 닫고 그다음 콜백을 부른다 — 콜백이 새 Panel을 열 수 있게.
+    // 무엇을 묻고 알리는지만 넘기고 글자는 창이 고른다. 수락하면 할 일은 부른 쪽이 넘기고 여기서 든다 — 모달이라 한 번에 하나다.
+    // 먼저 팝업을 닫고 그다음 그 일을 한다 — 그 일이 새 Panel을 열 수 있게.
     public sealed partial class KedUIFlow
     {
         private readonly ConfirmPanel _confirmPanel;
         private readonly NoticePanel _noticePanel;
 
-        private void Confirm(ConfirmPanel.Request request)
+        private Action _confirmAccepted;
+
+        private void Confirm(ConfirmPanel.Question question, Action onAccept, int slotNumber = 0)
         {
+            _confirmAccepted = onAccept;
+
             PushPanel<ConfirmPanel>(panel =>
             {
                 BindView(panel, ApplyConfirmBindings);
-                panel.Present(request);
+                panel.Present(new ConfirmPanel.Model { Question = question, SlotNumber = slotNumber });
             });
         }
 
-        private void Notice(string title, string body, NoticePanel.Kind kind, Action onClosed = null)
+        private void Notice(NoticePanel.Message message, int slotNumber = 0)
         {
-            NoticePanel.Request request = new()
-            {
-                Title = title,
-                Body = body,
-                AcceptLabel = Text("common.ok"),
-                Kind = kind,
-                OnClosed = onClosed,
-            };
-
             PushPanel<NoticePanel>(panel =>
             {
                 BindView(panel, ApplyNoticeBindings);
-                panel.Present(request);
+                panel.Present(new NoticePanel.Model { Message = message, SlotNumber = slotNumber });
             });
         }
 
@@ -50,23 +46,22 @@ namespace Ked.Samples.UI
                 p => p.Resolved -= HandleNoticeResolved);
         }
 
-        private void HandleConfirmResolved(ConfirmPanel.Request request, bool accepted)
+        private void HandleConfirmResolved(bool accepted)
         {
+            Action accept = _confirmAccepted;
+            _confirmAccepted = null;
+
             if (IsTop(_confirmPanel))
                 ClosePanel();
 
             if (accepted)
-                request.OnAccept?.Invoke();
-            else
-                request.OnCancel?.Invoke();
+                accept?.Invoke();
         }
 
-        private void HandleNoticeResolved(NoticePanel.Request request)
+        private void HandleNoticeResolved()
         {
             if (IsTop(_noticePanel))
                 ClosePanel();
-
-            request.OnClosed?.Invoke();
         }
     }
 }

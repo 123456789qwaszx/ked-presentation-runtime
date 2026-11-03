@@ -97,8 +97,6 @@ namespace Ked.Samples.UI
             if (_saveLoadBusy || !_saveSlots.HasTarget)
                 return;
 
-            string number = KedUIUtil.TwoDigits(_saveSlots.SelectedNumber);
-
             if (_saveSlots.SaveMode)
             {
                 if (!_saves.CanSave)
@@ -111,14 +109,7 @@ namespace Ked.Samples.UI
                 }
 
                 string overwriteId = _saveSlots.SelectedEntry.Id;
-                Confirm(new ConfirmPanel.Request
-                {
-                    Title = Text("confirm.overwrite.title"),
-                    Body = Format("confirm.overwrite.body", number),
-                    AcceptLabel = Text("confirm.overwrite.accept"),
-                    CancelLabel = Text("common.cancel"),
-                    OnAccept = () => SaveIntoSlot(overwriteId),
-                });
+                Confirm(ConfirmPanel.Question.Overwrite, () => SaveIntoSlot(overwriteId), _saveSlots.SelectedNumber);
                 return;
             }
 
@@ -127,14 +118,7 @@ namespace Ked.Samples.UI
             // 재생 중이면 지금 장면을 벗어난다는 것을 확인한다. 타이틀에서는 잃을 진행이 없다.
             if (IsRunning)
             {
-                Confirm(new ConfirmPanel.Request
-                {
-                    Title = Text("confirm.load.title"),
-                    Body = Format("confirm.load.body", number),
-                    AcceptLabel = Text("confirm.load.accept"),
-                    CancelLabel = Text("common.cancel"),
-                    OnAccept = () => LoadFromSlot(loadId),
-                });
+                Confirm(ConfirmPanel.Question.Load, () => LoadFromSlot(loadId), _saveSlots.SelectedNumber);
                 return;
             }
 
@@ -166,20 +150,15 @@ namespace Ked.Samples.UI
                 _saveSlots.SelectLatest();
                 PresentSlots(focus: true);
 
-                Notice(
-                    Text("notice.saved.title"),
-                    Format("notice.saved.body", KedUIUtil.TwoDigits(1)),
-                    NoticePanel.Kind.Success);
+                // 방금 저장한 기록은 언제나 01이다.
+                Notice(NoticePanel.Message.Saved, slotNumber: 1);
                 return;
             }
 
             _saveSlots.ClampSelection();
             PresentSlots(focus: true);
 
-            Notice(
-                Text("notice.saveFailed.title"),
-                Text("notice.saveFailed.body"),
-                NoticePanel.Kind.Failure);
+            Notice(NoticePanel.Message.SaveFailed);
         }
 
         private async void LoadFromSlot(string slotId)
@@ -218,10 +197,7 @@ namespace Ked.Samples.UI
                 _saveSlots.ForgetLoadable(slotId);
                 PresentSlots(focus: true);
 
-                Notice(
-                    Text("notice.loadFailed.title"),
-                    Text("notice.loadFailed.body"),
-                    NoticePanel.Kind.Failure);
+                Notice(NoticePanel.Message.LoadFailed);
             }
         }
     }

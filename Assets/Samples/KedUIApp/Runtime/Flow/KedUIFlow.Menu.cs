@@ -48,36 +48,22 @@ namespace Ked.Samples.UI
 
         private void ConfirmSkipEpisode()
         {
-            Confirm(new ConfirmPanel.Request
+            Confirm(ConfirmPanel.Question.SkipEpisode, () =>
             {
-                Title = Text("confirm.skip.title"),
-                Body = Text("confirm.skip.body"),
-                AcceptLabel = Text("confirm.skip.accept"),
-                CancelLabel = Text("common.cancel"),
-                OnAccept = () =>
-                {
-                    CloseAllPanels();
+                CloseAllPanels();
 
-                    if (Features.RequestSkipCurrentEpisode())
-                        return;
+                if (Features.RequestSkipCurrentEpisode())
+                    return;
 
-                    Debug.Log("[Ked UI] 지금 건너뛸 수 있는 에피소드가 없다.");
-                    Notice(Text("notice.skipUnavailable.title"), Text("notice.skipUnavailable.body"), NoticePanel.Kind.Failure);
-                },
+                Debug.Log("[Ked UI] 지금 건너뛸 수 있는 에피소드가 없다.");
+                Notice(NoticePanel.Message.SkipUnavailable);
             });
         }
 
         // 타이틀 복귀는 확인한 뒤에만 호스트를 부른다. 재생 단위를 끝내는 것은 호스트(ExitAsync)다.
         private void ConfirmReturnToTitle()
         {
-            Confirm(new ConfirmPanel.Request
-            {
-                Title = Text("confirm.title.title"),
-                Body = Text("confirm.title.body"),
-                AcceptLabel = Text("confirm.title.accept"),
-                CancelLabel = Text("confirm.title.cancel"),
-                OnAccept = ReturnToTitle,
-            });
+            Confirm(ConfirmPanel.Question.ReturnToTitle, ReturnToTitle);
         }
     }
 }

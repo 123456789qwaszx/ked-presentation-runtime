@@ -140,14 +140,7 @@ namespace Ked.Samples.UI
                 if (!SafeCanFork(entry))
                     return;
 
-                Confirm(new ConfirmPanel.Request
-                {
-                    Title = Text("confirm.fork.title"),
-                    Body = Text("confirm.fork.body"),
-                    AcceptLabel = Text("confirm.fork.accept"),
-                    CancelLabel = Text("common.cancel"),
-                    OnAccept = () => ForkFromBacklog(entry),
-                });
+                Confirm(ConfirmPanel.Question.Fork, () => ForkFromBacklog(entry));
             }
             catch (Exception error)
             {
@@ -188,7 +181,7 @@ namespace Ked.Samples.UI
             catch (Exception error)
             {
                 Debug.LogException(error);
-                Notice(Text("notice.forkFailed.title"), Text("notice.forkFailed.body"), NoticePanel.Kind.Failure);
+                Notice(NoticePanel.Message.ForkFailed);
             }
         }
     }

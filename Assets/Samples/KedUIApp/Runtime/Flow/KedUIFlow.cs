@@ -204,7 +204,6 @@ namespace Ked.Samples.UI
         }
 
         private string Text(string key) => KedUIUtil.Text(_texts, key);
-        private string Format(string key, params object[] args) => KedUIUtil.Format(_texts, key, args);
 
         #endregion
 
