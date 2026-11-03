@@ -2,6 +2,8 @@ using System.Collections;
 using UnityEngine;
 
 // BGM policy: single active track; crossfade on replace; snap while skipping.
+// BGM은 장면 전역 의도다 — 장면을 넘어 이어 간다. 시크(롤백·로드) 중에는 의도만 쌓고(Hold),
+// 시크가 끝나면 실제와 맞춘다(Release). 같은 곡이 흐르고 있으면 처음부터 다시 틀지 않는다.
 public sealed class BgmPlayer
 {
     private readonly AudioSource _sourceA;
@@ -13,8 +15,13 @@ public sealed class BgmPlayer
 
     private Coroutine _fadeRoutine;
 
+    private bool _held;
+
     public AudioClip CurrentClip => _current?.clip;
     public bool IsPlaying => _current != null && _current.isPlaying;
+
+    // 지금 흘러야 할 곡. 없으면 null.
+    public AudioClip Intent { get; private set; }
 
     public BgmPlayer(AudioSource sourceA, AudioSource sourceB, MonoBehaviour host)
     {
@@ -41,6 +48,11 @@ public sealed class BgmPlayer
             return;
         }
 
+        Intent = clip;
+
+        if (_held)
+            return;
+
         if (_current.clip == clip && _current.isPlaying)
             return;
 
@@ -57,6 +69,11 @@ public sealed class BgmPlayer
 
     public void Stop(float fadeDuration, bool isSkipping)
     {
+        Intent = null;
+
+        if (_held)
+            return;
+
         StopFade();
 
         if (isSkipping || fadeDuration <= 0f)
@@ -68,6 +85,46 @@ public sealed class BgmPlayer
         }
 
         _fadeRoutine = _host.StartCoroutine(FadeOut(fadeDuration));
+    }
+
+    // 시크 시작 — 의도를 출발점(장면 머리의 곡)으로 되돌리고, 실제 소리는 시크가 끝날 때까지 그대로 둔다.
+    public void Hold(AudioClip intent)
+    {
+        _held = true;
+        Intent = intent;
+
+        StopFade();
+    }
+
+    // 시크 끝 — 의도와 실제를 맞춘다. 의도한 곡이 이미 흐르고 있으면(페이드 도중이어도) 그 자리에서 이어 간다.
+    public void Release()
+    {
+        if (!_held)
+            return;
+
+        _held = false;
+        StopFade();
+
+        if (Intent == null)
+        {
+            Stop(0f, isSkipping: true);
+            return;
+        }
+
+        if (_next.clip == Intent && _next.isPlaying)
+            (_current, _next) = (_next, _current);
+
+        if (_current.clip == Intent && _current.isPlaying)
+        {
+            _current.volume = 1f;
+
+            _next.Stop();
+            _next.clip   = null;
+            _next.volume = 0f;
+            return;
+        }
+
+        SnapTo(Intent);
     }
 
     private void SnapTo(AudioClip clip)

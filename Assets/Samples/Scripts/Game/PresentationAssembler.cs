@@ -297,6 +297,7 @@ public sealed class PresentationAssembler
             _presentationResponseRig,
             _screenEffectRig,
             _presentationUIRoot,
+            _refs.AudioSystem,
             _presentationStage,
             _dialogueSurfaceState,
             _presentationScopeSession,
