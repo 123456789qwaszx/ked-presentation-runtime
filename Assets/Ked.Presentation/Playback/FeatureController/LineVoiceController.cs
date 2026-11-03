@@ -11,5 +11,8 @@ public sealed class LineVoiceController
         _voice = voice;
     }
 
+    // 앞 줄 보이스는 줄 진입 때 끝나므로, 표시가 끝난 뒤 흐르는 보이스는 이 줄 것이다.
+    public bool IsPlaying => _voice != null && _voice.IsPlaying;
+
     public void EndPreviousLine() => _voice?.FadeOut(LineEndFadeSeconds);
 }

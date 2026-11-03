@@ -42,6 +42,7 @@ public sealed class PresentationAssembler
     private PresentationScopeSession _presentationScopeSession;
     private PlaybackFeatureController _playbackFeatureController;
     private LinePresentationFlow _linePresentationFlow;
+    private LineVoiceController _lineVoice;
     private ScenePresentation _scenePresentation;
     private YarnPlaybackDriver _yarnPlaybackDriver;
 
@@ -239,7 +240,7 @@ public sealed class PresentationAssembler
             _rollbackHistory);
 
         LineHurrySpeedController lineHurrySpeed = new(_refs.EllipsisBreathTypewriter);
-        LineVoiceController lineVoice = new(_refs.AudioSystem.Voice);
+        _lineVoice = new LineVoiceController(_refs.AudioSystem.Voice);
 
         _linePresentationFlow = new LinePresentationFlow(
             yarnLineBoundary,
@@ -249,7 +250,7 @@ public sealed class PresentationAssembler
             _refs.EllipsisBreathTypewriter,
             yarnPlaybackDriver,
             lineHurrySpeed,
-            lineVoice);
+            _lineVoice);
 
         _refs.CustomLinePresenter.Initialize(
             _refs.DialogueRunner,
@@ -305,6 +306,7 @@ public sealed class PresentationAssembler
         _refs.AutoAdvanceScheduler.Initialize(
             _playbackState,
             _dialogueAdvanceDispatcher,
+            _lineVoice,
             () => Time.unscaledTimeAsDouble);
 
         RapidSkipController rapidSkipController = new(

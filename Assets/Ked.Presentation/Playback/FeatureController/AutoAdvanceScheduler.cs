@@ -8,6 +8,7 @@ public sealed class AutoAdvanceScheduler : ActionMarkupHandler
 {
     private PlaybackRuntimeState _playbackSettings;
     private DialogueAdvanceDispatcher _dialogueAdvanceDispatcher;
+    private LineVoiceController _lineVoice;
     private Func<double> _getNow;
 
     private double _nextAutoAdvanceAt = double.PositiveInfinity;
@@ -15,10 +16,12 @@ public sealed class AutoAdvanceScheduler : ActionMarkupHandler
     public void Initialize(
         PlaybackRuntimeState playbackState,
         DialogueAdvanceDispatcher dialogueAdvanceDispatcher,
+        LineVoiceController lineVoice,
         Func<double> getNow)
     {
         _playbackSettings = playbackState;
         _dialogueAdvanceDispatcher = dialogueAdvanceDispatcher;
+        _lineVoice = lineVoice;
         _getNow = getNow;
         Disarm();
     }
@@ -49,6 +52,13 @@ public sealed class AutoAdvanceScheduler : ActionMarkupHandler
     {
         if (_dialogueAdvanceDispatcher == null || _getNow == null)
             return;
+
+        // 줄의 보이스가 흐르는 동안은 미룬다 — 보이스가 끝난 뒤부터 같은 지연을 센다.
+        if (_lineVoice != null && _lineVoice.IsPlaying)
+        {
+            ArmAutoAdvance();
+            return;
+        }
 
         if (_getNow() < _nextAutoAdvanceAt)
             return;
