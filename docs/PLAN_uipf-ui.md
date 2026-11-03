@@ -506,6 +506,7 @@ Panel이 열린 동안 Root(타이틀·재생 화면)의 CanvasGroup도 막는�
 3. 만들어진 `.meta` · 생성물 · `Resources/KedUI/`를 커밋한다(10-27 커밋함. 생성물 자리는 그 뒤 화면 묶음으로 바뀌었다).
    - 빌더는 끝에 두 TMP 글꼴의 동적 데이터를 비우고 저장한다(`TMP_FontAsset.ClearFontAssetData(true)` — 아틀라스 1×1, 자산 몇 KB). 비우지 않으면 글자 몇 개만 들어가도 2048² 아틀라스가 자산에 통째로 저장되어 8MB가 넘는다.
    - 플레이하거나 프리팹을 열면 쓴 글자가 다시 채워져 글꼴 SDF 자산(화면 묶음 시험 뒤로는 `Common/Fonts/*.asset`, 그 전은 `Generated/Fonts/`)이 바뀐다. **그 변경은 커밋하지 않는다** — `git restore`로 되돌리거나, 빌더를 다시 돌리거나, 글꼴 자산 톱니 메뉴 `Clear Dynamic Data`로 비운다. 플레이어 빌드에는 `Clear Dynamic Data On Build`(켜 둠)가 같은 일을 한다.
+   - 2026-11-03부터는 UIPF의 `UIDynamicFontGuard`(`bfbb7fd`)가 저장 직전 · 에디터 종료 때 비운다 — 위처럼 손으로 되돌릴 일이 없다. 디스크에 이미 부푼 자산은 `Tools/UI Presentation/Clear Dynamic Font Data`. 그 전에는 되돌리기를 놓쳐 `0470cf8ee`부터 부푼 채 커밋됐다(Medium 6 KB → 8.4 MB → 9.2 MB → `bf42cdfe`의 1.1 MB). 마지막 1.1 MB는 TMP 종료 정리가 글자 · 글리프 표와 아틀라스만 비우고 글꼴 기능 표(커닝 등)를 남긴 반쪽 상태다. 두 자산을 `cd517f70c`의 깨끗한 것으로 되돌렸다.
 4. 플레이 — 두 예제(인스펙터 '예제')에서 아래 확인 목록.
 
 ### 7. 확인 목록 (패키지 IMPLEMENTATION §9)
