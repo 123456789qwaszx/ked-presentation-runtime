@@ -126,7 +126,7 @@ face_swap만 모델 안(폴드가 `ApplyFace`로 접음)이라 클레임을 맞�
 | | gesture · mirror · rotate_by | 〃 | 즉시 확정 | `DOKill(true)` |
 | 리그 비주얼 (컨트롤러 소유) | char_visual_* · focus_on/clear · screen_blur | 컨트롤러 `Snap` | 가속 ×1.5 | 없음 — 리그 컨트롤러가 출처(모양·초점·레이어)마다 전환을 소유, 블러는 가장 큰 값 |
 | 샷 (장면 전역 의도) | shot_* | `Snap(다음 의도)` | 시스템 가속 ×20 | 없음 — 시스템이 전환 하나를 소유, 새 의도는 보이는 값에서 재조준 |
-| 모션 | motion | OnSkip → Commit | 즉시 확정 | 노드마다 `DOKill(true)` |
+| 모션 | motion | OnSkip → Commit | 즉시 확정 | 노드마다 `DOKill(true)` — 소유는 모션 하나(노드 묶음), 노드 하나라도 잡히면 전부 확정 |
 | 비워 둠 | face_swap | OnSkip → 확정 | 없음(의도) | `CompleteInFlight` |
 | 무대 마스크 (장면 전역 의도) | tx · tx_stage_mask_clear | `SnapMotionEnd` / 같은 `Clear` | 없음 — 슬롯의 모션이 끝까지 감 | 없음 — 슬롯이 모션 하나를 소유, 새 모션·clear가 앞 것을 끊음 |
 | 화면 효과 (장면 전역 의도) | screen_vignette · screen_noise (+`_clear`) | `Snap(의도)` | 없음 — 컨트롤러의 전환이 끝까지 감 | 없음 — 컨트롤러가 전환 하나를 소유(`IntentTransition`), 재조준 |
@@ -176,6 +176,12 @@ screen_blur는 이름과 달리 화면 포스트 이펙트가 아니라 리그�
 - 나머지 노드가 끝날 때(또는 스텝 경계에서) `Commit`이 바인딩된 **모든** 노드에 종점을 다시 쓰고, 그 노드들의 장부 항목을 `Clear`한다.
 - 가져간 커맨드가 먼저 끝났으면 그 최종값이 motion의 종점으로 덮이고, 아직 돌고 있으면 그 커맨드가 게시한 장부 항목이 지워진다. 노드가 하나인 motion은 문제없다.
 - [추론] 실제로 겹치는지는 motions.json의 채널 노드와 다른 커맨드의 표적이 같은 노드인지에 달렸다.
+  (조사: 지금 모션은 전부 노드 하나짜리라 잠재 버그. 계약·모션 툴은 여러 노드를 허용한다.
+  겹치는 노드 예: `CharacterPortrait_SwayPivot` — bow·sway ↔ `char_rotate_to`, `CharSlot_Scale` — grow ↔ `scale_by`·`scale_reset`.)
+- **해결(2026-11-03) — 모션은 한 덩어리.** 소유 단위를 노드가 아니라 모션 하나(노드 묶음)로 둔다(소유자 제안).
+  노드 트윈 하나라도 끝나면(자연 종료든 다른 커맨드의 `DOKill(true)`든) 나머지 트윈을 멈추고 전부 확정한 뒤 넘겨준다.
+  스텝 경계의 "전부 즉시 확정"과 같은 규칙이고, 섞인 자세가 남지 않으며, 잡은 쪽은 모션의 종점에서 출발한다.
+  장부도 모션 것을 다 지운 **뒤에** 새 커맨드가 게시하므로 지워지지 않는다. 노드가 하나인 지금 모션은 동작이 같다.
 
 **E5. HoldSignal과 RaiseSignal은 대본에서 쓸 수 없다.**
 - 팩토리와 커맨드는 있지만 파서 표에 이름이 없다.
@@ -258,7 +264,7 @@ screen_blur는 이름과 달리 화면 포스트 이펙트가 아니라 리그�
 | S1 | "E1과 같은 뿌리" | 별개. 모델 밖 상태를 리플레이가 초기화하지 않는 것이 뿌리 |
 | E2 | 먼저 끝나는 쪽이 이김 | B가 이미 끝났으면 앞 것이 확정적으로 이김 → **해결**: 리그 컨트롤러가 전환 소유 |
 | E3 | clear가 focus_on 블러를 지움 | defocus를 뺀 모든 char_visual 프리셋이 블러를 0으로 씀 → **해결**: 출처 셋을 나누고 가장 큰 값 |
-| E4 | 종점을 다시 씀 | 장부 항목도 지움 |
+| E4 | 종점을 다시 씀 | 장부 항목도 지움 → **해결**: 모션은 한 덩어리 — 노드 하나라도 잡히면 전부 확정 |
 | S2 | Token·CommandIsPlaying을 덮음 | `_mainRoutine`도 null로 덮음 → **해결**: pause가 압축에 반응, 관문이 RapidSkip도 막음, 스텝 세대 가드 |
 | S5 | 즉시 실행 6개 | `debug_log` 삭제(`fc39ae36`), `box_hide/show/close` 삭제 — `surface_*` 둘만 남음(시점은 큐와 같음) |
 | tx | `tx_<이름>` 18개, 커맨드가 그래픽 트윈을 쥠, 장면 경계 초기화 없음 | `tx <preset> [stage]` 하나(`StageCommandParser.Transition.cs:8`). 무대 마스크 = 장면 전역 의도 — 슬롯이 모션 소유, 정지에서 기준 모양으로 |

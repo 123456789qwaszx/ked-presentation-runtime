@@ -28,7 +28,7 @@ title: Demo_Presentation
 <<screen_noise_clear 0fr>>
 
 <<bg_spawn bg_main class_day>>
-<<slot s1 stage00 mid>>
+<<slot s1 stage00 front>>
 <<cast s1 harin a 1>>
 <<slot s2 stage00 mid>>
 <<cast s2 sigure a 1>>
@@ -47,6 +47,20 @@ title: Demo_Presentation
 <<size s1 mid bust 0fr>>
 <<fade_in s1 18fr>>
 하린: 배경이 들어오고, 음악이 깔리고, 내가 걸어 들어왔어.
+
+<<screen_blur far>>
+하린: 지금부터 보이는 건 전부 이 대본 한 장에 적힌 명령이야.
+
+<<screen_blur front 0.5>>
+<<char_visual_dim s1 2>>
+<<shot_to 12 24u>>
+
+<<show sigure>>
+<<size sigure 12>>
+<<place_left sigure bust>>
+
+하린: 지금부터 보이는 건 전부 이 대본 한 장에 적힌 명령이야.
+<<screen_blur_reset>>
 하린: 지금부터 보이는 건 전부 이 대본 한 장에 적힌 명령이야.
 
 // 이 줄만 편지지 모양으로, 사라졌다 나타나며
