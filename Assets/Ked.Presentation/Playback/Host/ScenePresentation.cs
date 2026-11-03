@@ -51,14 +51,14 @@ public sealed class ScenePresentation : IPlaybackStage
     public void BeginScene()
     {
         _stopRequested = false;
-
-        // 앞 단위가 남긴 명령은 이 단위의 것이 아니다(정지가 이미 버렸어야 한다 — 빠진 길이 있어도 새지 않게).
-        DiscardPendingCommands(warn: false);
-
+        
+        // 앞 단위가 남긴 명령은 이 단위의 것이 아님.
+        DiscardPendingCommands(warn: false); 
+        
         _choiceHistory.ClearChoiceRecords();
-
-        // 앞 단위가 시크 도중에 끝났다면 그 표적은 이 단위의 것이 아니다.
-        _seekState.End(SeekEndReason.SceneReset);
+        
+        // 앞 단위가 시크 도중에 끝났다면 그 표적은 이 단위의 것이 아님.
+        _seekState.End(SeekEndReason.SceneReset); 
 
         _presentationView.GoToPresentationView();
         _presentationStage.Clear();
