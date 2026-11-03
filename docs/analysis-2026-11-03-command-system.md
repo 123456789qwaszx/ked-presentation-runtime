@@ -227,6 +227,9 @@ screen_blur는 이름과 달리 화면 포스트 이펙트가 아니라 리그�
   - 한계: 로드는 저장에 장면 머리 곡이 없어서, 로드 시점에 흐르던 곡을 출발점으로 삼는다. 앞 장면에서 이어 온 곡에 기대는 장면을 로드하면 다를 수 있다.
 - 대사창 레이아웃(`surface_layout`의 `DialogueSurfaceState`)도 같은 부류였다 — 조립 때 한 번 만들어지고 `surface_reset`만 비웠다.
   **해결:** `BeginScene`·`PrepareReplay`가 무대와 함께 비운다. 리플레이 중에 Yarn이 `surface_*`를 다시 지나가며 표적 줄의 상태를 다시 세운다.
+- 대사창의 현재 상태(`DialogueBoxCurrentState` — 보이는가·어떤 종류인가)도 같은 부류였다. 비우는 곳이 시크 통과 줄의 `CloseAll`뿐이라,
+  새 장면 첫 줄은 앞 장면 대사창을 이어받아 `Keep`(페이드인 없음)이 됐고, 되감기는 표적이 장면 첫 줄일 때만(통과 줄이 없어) `Keep`이 됐다.
+  **해결(2026-11-03):** `BeginScene`·`PrepareReplay`가 대사창을 닫고(`CloseAll` — 즉시 숨김·상태 비움) 시작한다. 장면 첫 줄·되감기 표적 줄은 언제나 페이드인.
 
 **S2. `pause` 중에 RapidSkip하면 앞 줄의 run이 다음 줄과 나란히 계속 돈다.**
 - RapidSkip은 `cps_node_busy`를 통과한다. `PlaySpecs`는 `_runId`를 올리지 않고, 앞 토큰을 취소하지 않은 채 Dispose만 한 뒤 새 토큰을 같은 `scope.Token`에 넣는다.

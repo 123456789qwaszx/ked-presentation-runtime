@@ -43,6 +43,7 @@ public sealed class PresentationAssembler
     private PlaybackFeatureController _playbackFeatureController;
     private LinePresentationFlow _linePresentationFlow;
     private LineVoiceController _lineVoice;
+    private DialogueBoxPresentationController _dialogueBoxPresentation;
     private ScenePresentation _scenePresentation;
     private YarnPlaybackDriver _yarnPlaybackDriver;
 
@@ -219,6 +220,7 @@ public sealed class PresentationAssembler
             _dialogueSurfaceState,
             _refs.SurfaceLayoutPresetDb,
             _refs.SpeakerPolicyDb);
+        _dialogueBoxPresentation = dialogueBoxPresentationController;
 
         EaseCurveLibrary easeCurves = LoadEaseCurves();
         _motions = LoadMotions();
@@ -293,6 +295,7 @@ public sealed class PresentationAssembler
             _refs.AudioSystem,
             _presentationStage,
             _dialogueSurfaceState,
+            _dialogueBoxPresentation,
             _presentationScopeSession,
             _choiceHistory,
             _episodeSkipController,

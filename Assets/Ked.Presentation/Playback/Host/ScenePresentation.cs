@@ -19,6 +19,8 @@ public sealed class ScenePresentation : IPlaybackStage
     private readonly PresentationStage _presentationStage;
     // 대사창 레이아웃(surface_layout)도 무대처럼 단위마다 처음부터 — 리플레이가 다시 건다.
     private readonly DialogueSurfaceState _dialogueSurfaceState;
+    // 대사창도 닫힌 채로 시작한다 — 장면 첫 줄·되감기 표적 줄이 언제나 페이드인한다(표적이 장면 첫 줄이어도).
+    private readonly DialogueBoxPresentationController _dialogueBox;
     private readonly PresentationScopeSession _presentationScope;
     private readonly ChoiceHistory _choiceHistory;
     private readonly EpisodeSkipController _episodeSkipController;
@@ -43,6 +45,7 @@ public sealed class ScenePresentation : IPlaybackStage
         AudioSystem audio,
         PresentationStage presentationStage,
         DialogueSurfaceState dialogueSurfaceState,
+        DialogueBoxPresentationController dialogueBox,
         PresentationScopeSession presentationScope,
         ChoiceHistory choiceHistory,
         EpisodeSkipController episodeSkipController,
@@ -59,6 +62,7 @@ public sealed class ScenePresentation : IPlaybackStage
         _audio = audio;
         _presentationStage = presentationStage;
         _dialogueSurfaceState = dialogueSurfaceState;
+        _dialogueBox = dialogueBox;
         _presentationScope = presentationScope;
         _choiceHistory = choiceHistory;
         _episodeSkipController = episodeSkipController;
@@ -84,6 +88,7 @@ public sealed class ScenePresentation : IPlaybackStage
         _presentationView.GoToPresentationView();
         _presentationStage.Clear();
         _dialogueSurfaceState.Reset();
+        _dialogueBox?.CloseAll();
         _presentationScope.Start();
 
         // BGM은 앞 장면에서 이어 간다 — 그 곡이 이 단위의 출발점이다.
@@ -136,6 +141,7 @@ public sealed class ScenePresentation : IPlaybackStage
         _presentationView.GoToPresentationView();
         _presentationStage.Clear();
         _dialogueSurfaceState.Reset();
+        _dialogueBox?.CloseAll();
         _presentationScope.Start();
 
         // 되감기 시크는 이미 걸려 있다(PlaybackFeatureController) — 표적까지 BGM은 의도만 쌓는다.
