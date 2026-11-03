@@ -72,7 +72,8 @@ RunNode → SequencePlayer.PlayCommands   (CommandIsPlaying = true)
 - 롤백·로드는 장면을 처음부터 압축 재생한다. 그래서 **`OnSkip`은 자연 종료와 같은 종점을 써야 한다** — 재현의 근거다.
 - 기본값 `CompleteImmediately`. 구조 커맨드(slot · cast · actor · sibling_* · char_to · stop_voice · stop_all_sfx)는 `ExecuteEvenIfSkipping`. 효과음·보이스는 `Ignore`.
 
-**R4 전경만 줄 진행을 막는다.** `CommandIsPlaying`은 전경이 도는 동안만 true다. RapidSkip은 이 막음을 통과한다.
+**R4 전경만 줄 진행을 막는다.** `CommandIsPlaying`은 전경이 도는 동안만 true다. RapidSkip도 막힌다(2026-11-03, S2) —
+대신 압축이 켜지면 `pause`가 그 자리에서 끝나므로 막힘은 한 프레임이다.
 
 **R5 클레임 — 한 대상에 쓰는 것은 하나다.**
 - 대상을 잡을 때 앞 트윈을 `DOKill(true)`로 **완주**시킨다 → 앞 소유자의 `OnComplete → Commit`이 먼저 돌고 claim을 내려놓는다.
@@ -211,6 +212,11 @@ screen_blur는 이름과 달리 화면 포스트 이펙트가 아니라 리그�
   - 앞 run의 `finally`가 새 run의 `scope.Token`을 `None`으로, `_mainRoutine`을 null로 바꾸고 `CommandIsPlaying`을 false로 만든다.
     새 run에 전경 `pause`가 있으면 관문이 일찍 열린다.
 - `Stop`은 `_runId`를 올리므로 이 문제가 없다. 줄 경계에만 세대 구분이 없다.
+- **해결(2026-11-03)** — 셋을 함께:
+  1. `WaitCommand`가 기다리는 도중 압축(RapidSkip·시크)이 켜지면 그 자리에서 끝난다. 줄의 남은 커맨드는 같은 프레임에 압축되어 끝 상태로 간다.
+  2. 관문이 RapidSkip도 `cps_node_busy`로 막는다. 1 덕분에 기다림은 한 프레임이다 → 앞 줄의 실행이 끝난 뒤에야 다음 줄이 열린다.
+  3. 실행기에 스텝 세대(`_stepId`)를 두어, `RunNode`의 `finally`는 마지막 스텝일 때만 Token·`_mainRoutine`·`CommandIsPlaying`을 정리한다(방어선).
+  - 앞 실행을 취소하는 방식은 쓰지 않았다 — 앞 줄의 남은 커맨드가 아예 실행되지 않아 폴드·리플레이와 또 갈린다.
 
 **S3. 시간 배율을 반영하는 트윈이 0개다.**
 - `ScalePresentationDuration`을 부르는 곳이 없다. `scope.TimeScale`을 읽는 곳은 HoldSignal(대본에서 못 씀) 하나다.
@@ -247,7 +253,7 @@ screen_blur는 이름과 달리 화면 포스트 이펙트가 아니라 리그�
 | E2 | 먼저 끝나는 쪽이 이김 | B가 이미 끝났으면 앞 것이 확정적으로 이김 |
 | E3 | clear가 focus_on 블러를 지움 | defocus를 뺀 모든 char_visual 프리셋이 블러를 0으로 씀 |
 | E4 | 종점을 다시 씀 | 장부 항목도 지움 |
-| S2 | Token·CommandIsPlaying을 덮음 | `_mainRoutine`도 null로 덮음 |
+| S2 | Token·CommandIsPlaying을 덮음 | `_mainRoutine`도 null로 덮음 → **해결**: pause가 압축에 반응, 관문이 RapidSkip도 막음, 스텝 세대 가드 |
 | S5 | 즉시 실행 6개 | `debug_log` 삭제(`fc39ae36`), `box_hide/show/close` 삭제 — `surface_*` 둘만 남음(시점은 큐와 같음) |
 | tx | `tx_<이름>` 18개, 커맨드가 그래픽 트윈을 쥠, 장면 경계 초기화 없음 | `tx <preset> [stage]` 하나(`StageCommandParser.Transition.cs:8`). 무대 마스크 = 장면 전역 의도 — 슬롯이 모션 소유, 정지에서 기준 모양으로 |
 | ui_patch | 포트가 경고만 냄 | 커맨드 삭제(`bf42cdfe`), 인터페이스만 남음 |

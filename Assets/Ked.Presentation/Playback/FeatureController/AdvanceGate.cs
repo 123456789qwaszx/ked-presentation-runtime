@@ -49,9 +49,10 @@ public sealed class AdvanceGate
         if (_seekState.IsSeekingActive)
             return Reject(kind, "seek_active");
 
-        if (kind != AdvanceRequestKind.RapidSkip)
-            if (CurrentScope != null && CurrentScope.CommandIsPlaying)
-                return Reject(kind, "cps_node_busy");
+        // RapidSkip도 막는다 — 앞 줄의 실행이 끝나기 전에 다음 줄을 열면 두 실행이 나란히 돈다(S2).
+        // 압축이 켜지면 pause가 그 자리에서 끝나므로(WaitCommand) 기다림은 한 프레임이다.
+        if (CurrentScope != null && CurrentScope.CommandIsPlaying)
+            return Reject(kind, "cps_node_busy");
         
         double unscaledNow = Time.unscaledTimeAsDouble;
 
