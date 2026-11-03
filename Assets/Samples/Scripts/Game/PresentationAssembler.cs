@@ -29,6 +29,7 @@ public sealed class PresentationAssembler
     private readonly LineDisplayState _lineDisplayState = new();
 
     private readonly PresentationStage _presentationStage = new();
+    private readonly DialogueSurfaceState _dialogueSurfaceState = new();
     private readonly BacklogRecorder _backlogRecorder = new();
 
     private readonly DialogueAdvanceDispatcher _dialogueAdvanceDispatcher = new();
@@ -220,12 +221,11 @@ public sealed class PresentationAssembler
             ?? throw new InvalidOperationException("[연출 조립] 대사창(DialogueBoxView)이 없다.");
 
         DialogueBoxCurrentState dialogueBoxState = new();
-        DialogueSurfaceState dialogueSurfaceState = new();
 
         DialogueBoxPresentationController dialogueBoxPresentationController = new(
             dialogueBoxState,
             dialogueSurfaceBox,
-            dialogueSurfaceState,
+            _dialogueSurfaceState,
             _refs.SurfaceLayoutPresetDb,
             _refs.SpeakerPolicyDb);
 
@@ -296,6 +296,7 @@ public sealed class PresentationAssembler
             _refs.CustomLinePresenter,
             _presentationResponseRig,
             _presentationStage,
+            _dialogueSurfaceState,
             _presentationScopeSession,
             _choiceHistory,
             _episodeSkipController,

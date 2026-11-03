@@ -12,6 +12,8 @@ public sealed class ScenePresentation : IPlaybackStage
     private readonly ILineAborter _linePresentationAborter;
     private readonly PresentationShotResponseSystem _shotResponseSystem;
     private readonly PresentationStage _presentationStage;
+    // 대사창 레이아웃(surface_layout)도 무대처럼 단위마다 처음부터 — 리플레이가 다시 건다.
+    private readonly DialogueSurfaceState _dialogueSurfaceState;
     private readonly PresentationScopeSession _presentationScope;
     private readonly ChoiceHistory _choiceHistory;
     private readonly EpisodeSkipController _episodeSkipController;
@@ -29,6 +31,7 @@ public sealed class ScenePresentation : IPlaybackStage
         ILineAborter linePresentationAborter,
         PresentationShotResponseSystem shotResponseSystem,
         PresentationStage presentationStage,
+        DialogueSurfaceState dialogueSurfaceState,
         PresentationScopeSession presentationScope,
         ChoiceHistory choiceHistory,
         EpisodeSkipController episodeSkipController,
@@ -41,6 +44,7 @@ public sealed class ScenePresentation : IPlaybackStage
         _linePresentationAborter = linePresentationAborter;
         _shotResponseSystem = shotResponseSystem;
         _presentationStage = presentationStage;
+        _dialogueSurfaceState = dialogueSurfaceState;
         _presentationScope = presentationScope;
         _choiceHistory = choiceHistory;
         _episodeSkipController = episodeSkipController;
@@ -62,9 +66,10 @@ public sealed class ScenePresentation : IPlaybackStage
 
         _presentationView.GoToPresentationView();
         _presentationStage.Clear();
+        _dialogueSurfaceState.Reset();
         _presentationScope.Start();
     }
-    
+
     public async Task PlayEpisodeAsync(string nodeName)
     {
         _currentNodeName = nodeName;
@@ -108,6 +113,7 @@ public sealed class ScenePresentation : IPlaybackStage
 
         _presentationView.GoToPresentationView();
         _presentationStage.Clear();
+        _dialogueSurfaceState.Reset();
         _presentationScope.Start();
     }
 

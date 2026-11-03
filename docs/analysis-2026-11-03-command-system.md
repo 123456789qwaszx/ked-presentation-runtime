@@ -187,6 +187,8 @@ screen_blur는 이름과 달리 화면 포스트 이펙트가 아니라 리그�
 - 그래서 장면의 첫 vignette보다 앞 줄로 롤백하면 롤백 전의 vignette가 남는다. BGM·마스크도 같다. 진행 중이던 화면 효과 트윈도 정지에서 죽지 않는다.
 - **뿌리는 "비워 둠"(R6)이 아니다.** 스텝 경계에서 가속하든 확정하든 종점은 같으니 상태는 남는다.
   스텝 경계에서 놔두는 것은 남은 트윈 시간이고, 장면 경계에서 놔두는 것은 종점 상태다.
+- 대사창 레이아웃(`surface_layout`의 `DialogueSurfaceState`)도 같은 부류였다 — 조립 때 한 번 만들어지고 `surface_reset`만 비웠다.
+  **해결:** `BeginScene`·`PrepareReplay`가 무대와 함께 비운다. 리플레이 중에 Yarn이 `surface_*`를 다시 지나가며 표적 줄의 상태를 다시 세운다.
 
 **S2. `pause` 중에 RapidSkip하면 앞 줄의 run이 다음 줄과 나란히 계속 돈다.**
 - RapidSkip은 `cps_node_busy`를 통과한다. `PlaySpecs`는 `_runId`를 올리지 않고, 앞 토큰을 취소하지 않은 채 Dispose만 한 뒤 새 토큰을 같은 `scope.Token`에 넣는다.
