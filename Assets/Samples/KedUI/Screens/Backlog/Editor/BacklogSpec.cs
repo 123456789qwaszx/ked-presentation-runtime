@@ -102,10 +102,13 @@ namespace Ked.Samples.UI.Editor
             kit.Text(text, "", 23, KedColors.Navy, TextAlignmentOptions.TopLeft, wrap: true, lineSpacing: 6f);
             Fixed(text.Go, 919f, null);
 
-            // 보이스 없는 줄은 CanvasGroup으로 감춘다(자리는 남아 이동 버튼이 줄마다 같은 곳에 선다).
-            KedButton voice = kit.IconButton(row, nameof(W.RowVoice), "voice", new Rect(1286, 176, 46, 46), padding: 12f);
-            Fixed(voice.gameObject, 46f, 46f);
-            voice.gameObject.AddComponent<CanvasGroup>();
+            // 보이스 없는 줄은 바깥 자리(RowVoiceSlot)의 CanvasGroup으로 감춘다 — 자리는 남아 이동 버튼이 줄마다 같은 곳에 선다.
+            // 버튼 자신의 CanvasGroup은 KedButton이 막힘 모양에 쓰므로 건드리지 않는다.
+            Rect voiceRect = new(1286, 176, 46, 46);
+            UINode voiceSlot = kit.Node(row, nameof(W.RowVoiceSlot), voiceRect);
+            Fixed(voiceSlot.Go, 46f, 46f);
+            voiceSlot.Go.AddComponent<CanvasGroup>();
+            kit.IconButton(voiceSlot, nameof(W.RowVoice), "voice", voiceRect, padding: 12f);
 
             KedButton jump = kit.IconButton(row, nameof(W.RowJump), "rollback", new Rect(1352, 176, 46, 46), padding: 12f);
             Fixed(jump.gameObject, 46f, 46f);

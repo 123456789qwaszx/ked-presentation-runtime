@@ -76,6 +76,13 @@ namespace Ked.Samples.UI
             KedUIUtil.Focus(View.Button(Refs.BacklogClose));
         }
 
+        // 재생 중인 보이스 줄 하나만 켜짐 그림. -1이면 모두 끈다.
+        public void ShowVoicePlaying(int index)
+        {
+            for (int i = 0; i < _rows.Count; i++)
+                _rows[i].SetVoicePlaying(i == index);
+        }
+
         private void LateUpdate()
         {
             if (_scrollToEndPending)

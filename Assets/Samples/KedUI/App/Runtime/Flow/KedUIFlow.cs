@@ -140,6 +140,7 @@ namespace Ked.Samples.UI
                     _play.SetModes(state.IsAutoMode, state.IsRapidSkipMode);
             }
 
+            TickBacklogVoice();
             SyncInput();
         }
 

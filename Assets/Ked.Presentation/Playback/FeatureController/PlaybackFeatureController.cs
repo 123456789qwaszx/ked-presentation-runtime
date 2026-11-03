@@ -140,6 +140,10 @@ public sealed class PlaybackFeatureController
     public bool ReplayVoice(in DialogueLogEntry entry) =>
         CanReplayVoice(entry) && _lineVoice != null && _lineVoice.Replay(entry.voiceKey);
 
+    public bool IsVoiceReplaying => _lineVoice != null && _lineVoice.IsReplaying;
+
+    public void StopVoiceReplay() => _lineVoice?.StopReplay();
+
     // 백점프 — 백로그 항목의 라인으로 되돌아간다. 현재 장면 항목만.
     // 이전 장면 항목은 그 장면의 루트에서만 시작할 수 있는데, 그것은 되감기가 아니라 확정된
     // 장면을 다시 여는 일이라 여기 기전이 아니다(후속 — scene-future-plan §1).

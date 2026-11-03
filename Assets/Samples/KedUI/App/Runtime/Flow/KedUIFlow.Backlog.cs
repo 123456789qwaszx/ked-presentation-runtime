@@ -9,9 +9,14 @@ namespace Ked.Samples.UI
     //   확정된 과거 장면 → 그 지점에서 새 회차로 갈라지기(IKedSaveSlotPort.ForkFromBacklogAsync). 확인을 받는다.
     // 갈 수 없는 줄(지금 줄 · 연출 단독의 과거 장면 등)은 이동 버튼이 없다.
     // 보이스가 있는 줄은 다시 듣기 버튼이 있다 — 장면을 가리지 않고, 패널은 열어 둔다.
+    // 재생 중인 줄은 켜짐 그림이고 다시 누르면 멈춘다. 재생이 저절로 끝나면 Tick이 그림을 끈다.
+    // 패널을 닫아도 보이스는 이어지고, 다음 줄에 들어가면 끝난다(줄 소속 이벤트).
     public sealed partial class KedUIFlow
     {
         private readonly List<DialogueLogEntry> _backlogEntries = new();
+
+        // 다시 듣는 줄의 순번. 없으면 -1. 패널을 다시 열어도 같은 줄을 켜 두려고 순번으로 든다.
+        private int _voiceReplaySequence = -1;
 
         private void SubscribeBacklog()
         {
@@ -33,6 +38,7 @@ namespace Ked.Samples.UI
 
             var rows = new List<BacklogRow.Model>(_backlogEntries.Count);
             int last = _backlogEntries.Count - 1;
+            bool replaying = IsRunning && _playback.Features.IsVoiceReplaying;
 
             for (int i = 0; i < _backlogEntries.Count; i++)
             {
@@ -44,6 +50,7 @@ namespace Ked.Samples.UI
                     Text = entry.rawText,
                     CanJump = CanActOn(entry),
                     HasVoice = IsRunning && _playback.Features.CanReplayVoice(entry),
+                    VoicePlaying = replaying && entry.lineSequence == _voiceReplaySequence,
                     IsCurrent = i == last,
                     ShowDivider = i < last,
                 });
@@ -120,7 +127,33 @@ namespace Ked.Samples.UI
             if (index < 0 || index >= _backlogEntries.Count || !IsRunning)
                 return;
 
-            _playback.Features.ReplayVoice(_backlogEntries[index]);
+            DialogueLogEntry entry = _backlogEntries[index];
+            PlaybackFeatureController features = _playback.Features;
+
+            if (entry.lineSequence == _voiceReplaySequence && features.IsVoiceReplaying)
+            {
+                features.StopVoiceReplay();
+                _voiceReplaySequence = -1;
+            }
+            else
+            {
+                _voiceReplaySequence = features.ReplayVoice(entry) ? entry.lineSequence : -1;
+            }
+
+            _backlog.ShowVoicePlaying(_voiceReplaySequence >= 0 ? index : -1);
+        }
+
+        // 다시 듣던 보이스가 저절로 끝났거나(다음 줄 · 롤백 포함) 다른 보이스가 덮었으면 그림을 끈다.
+        private void TickBacklogVoice()
+        {
+            if (_voiceReplaySequence < 0)
+                return;
+
+            if (IsRunning && _playback.Features.IsVoiceReplaying)
+                return;
+
+            _voiceReplaySequence = -1;
+            _backlog.ShowVoicePlaying(-1);
         }
 
         private async void Fork(DialogueLogEntry entry)

@@ -9,6 +9,8 @@ public sealed class LineVoiceController
 
     private readonly VoicePlayer _voice;
 
+    private AudioClip _replayClip;
+
     public LineVoiceController(VoicePlayer voice)
     {
         _voice = voice;
@@ -17,7 +19,15 @@ public sealed class LineVoiceController
     // 앞 줄 보이스는 줄 진입 때 끝나므로, 표시가 끝난 뒤 흐르는 보이스는 이 줄 것이다.
     public bool IsPlaying => _voice != null && _voice.IsPlaying;
 
-    public void EndPreviousLine() => _voice?.FadeOut(LineEndFadeSeconds);
+    // 백로그에서 다시 튼 보이스가 아직 흐르는가. 끝나거나, 멈추거나, 다른 보이스가 덮거나, 줄이 바뀌면 false.
+    public bool IsReplaying =>
+        _replayClip != null && IsPlaying && _voice.CurrentClip == _replayClip;
+
+    public void EndPreviousLine()
+    {
+        _replayClip = null;
+        _voice?.FadeOut(LineEndFadeSeconds);
+    }
 
     // 줄의 보이스 = 그 줄 머리에서 실행할 마지막 voice. 뒤에 stop_voice가 있으면 없다.
     // 키 없이 클립만 든 스펙은 기록할 수 없어 빠진다.
@@ -57,6 +67,15 @@ public sealed class LineVoiceController
         }
 
         _voice.Play(clip);
+        _replayClip = clip;
         return true;
+    }
+
+    public void StopReplay()
+    {
+        if (IsReplaying)
+            _voice.FadeOut(LineEndFadeSeconds);
+
+        _replayClip = null;
     }
 }

@@ -206,6 +206,8 @@ screen_blur는 이름과 달리 화면 포스트 이펙트가 아니라 리그�
   3. **(해결)** 백로그 다시 듣기. 줄의 보이스 키 = 그 줄 머리에서 모은 마지막 `PlayVoiceCommandSpec`(뒤에 `stop_voice`면 없음, `LineVoiceController.FindLineVoiceKey`).
      `DialogueLogEntry.voiceKey`로 백로그·저장에 실린다 — 칸을 더한 것이라 옛 저장은 null로 읽힌다.
      `PlaybackFeatureController.CanReplayVoice`·`ReplayVoice`, 백로그 줄의 보이스 버튼(장면 가리지 않음, 시크 중엔 막음). 아이콘 `icon_voice`는 코드로 그린 임시 그림.
+     버튼은 보이스 있는 줄에만 보이고(없는 줄은 자리 유지), 재생 중엔 켜짐 그림(청록 바탕), 다시 누르면 멈춘다.
+     패널을 닫아도 이어지고 다음 줄 진입에서 끝난다(`LineVoiceController.IsReplaying`·`StopReplay`).
   - 만들지 않음: "계속 재생" 설정, 줄을 넘는 보이스 표시(필요하면 효과음으로). `#auto` 줄은 연출 전용이라 보이스가 없다(소유자).
 
 ### 시스템
