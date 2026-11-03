@@ -47,7 +47,7 @@ Assets/
     │   │                  각 묶음: Scripts · Prefabs · Presentation · Sprites · Editor(+.asmref)
     │   └─ Art/            받았지만 어느 화면도 쓰지 않는 그림 14장(시안 배경 포함)
     ├─ KedUIApp/           ked 앱 쪽 — 흐름 · 화면 바인딩 · 재생에 잇는 것. asmdef 없음 = 기본 어셈블리(2026-11-03, 아래)
-    │   ├─ Runtime/        흐름(Flow) · 바인딩(Bindings) · 설정 값(Settings/KedSettings) · KedUIHost · 대사창 · 선택지 상자 어댑터(Play/)
+    │   ├─ Runtime/        흐름 KedUIFlow(Flow/ — 클래스 하나, 화면별 부분 파일) · 설정 값(Settings/KedSettings) · KedUIHost · 대사창 · 선택지 상자 어댑터(Play/)
     │   ├─ Editor/         앱 빌드 — 화면 목록 · 캔버스 · 선택지 항목(KedUIBuild · KedUIAssets · OptionItemSpec)
     │   ├─ Prefabs/        선택지 항목 KedOptionItem(본체 VNOptionItem) · Data/ 대사창 배치 DB(본체 형식)
     │   ├─ Texts/          UI 글자 표 KedUITexts.csv(ko-KR · en-US)
@@ -536,3 +536,15 @@ App(흐름 · 바인딩 · KedUIHost)을 asmdef(`Ked.Samples.UI.App` · `.App.Ed
 - 챕터 끝: `KedUIHost`가 `IChapterEndView`를 구현하고, 끝 카드가 진행 타입을 직접 읽는다. 계약은 남긴다 — `SceneRunner`를 유니티 없이 시험한다.
 - `Ked.Samples.UI.Editor`를 autoReferenced로(앱 빌드가 기본 에디터 어셈블리로 들어와 키트·명세를 본다). 앱 빌드는 앱 폴더를 `KedUIBuild.cs` 자리로 찾는다.
 - 남긴 경계: 화면 묶음(`Ked.Samples.UI`, 그리기만) asmdef, 재생 본체의 `IPresentationView` · 대사창/선택지 계약(본체가 UI를 모른다).
+
+### 화면 바인딩을 옛 구조로 — 클래스 하나 · 화면별 부분 파일 (2026-11-03, 소유자 결정)
+
+화면마다 바인딩 클래스(ScreenBinding 8개)로 나눴더니, 화면끼리 직접 부를 수 없어 중개(KedUIFlow의 넘겨주기 메서드 9개),
+꾸러미(KedUIServices), 화면→바인딩 장부(닫힘·Esc 돌려보내기), 가상 훅(OnConfigured · Tick · Back)이 생겼다.
+옛 `VNScreenBindings`처럼 `KedUIFlow` 하나로 합쳤다 — `KedUIFlow.cs`(호스트 · 스택 · Esc · 포커스 · 입력 소유권 · 이벤트 묶기/풀기)와
+화면별 부분 파일(`KedUIFlow.Title/Play/Menu/SaveLoad/Backlog/Settings/Modal/End.cs`).
+
+- 호스트는 필드로 직접 든다. 화면 이동은 메서드 직접 호출, 닫힘은 `afterClosed: Unbind`로 바로.
+- Esc는 맨 위 Panel로 고른다(확인 → 취소, 안내 → 확인, 끝 카드 → 닫지 않음, 설정 → 저장하고 닫기, 그 밖 → 한 층).
+- 한 클래스라 화면 것에는 화면 이름을 붙였다(`_saveLoadPage` · `_settingsTab` · `OpenSaveLoad` · `TickBacklog` …).
+- 지운 것: `ScreenBinding`, `KedUIServices`, `Bindings/` 폴더(바인딩 8개). 동작은 그대로다.

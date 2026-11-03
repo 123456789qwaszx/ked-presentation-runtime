@@ -3,47 +3,39 @@ using UnityEngine;
 namespace Ked.Samples.UI
 {
     // 04 시스템 메뉴 — 여닫는 것만 UI가. 일시 정지·복귀 정책(입력 소유권)은 흐름이, 재생 단위는 그대로.
-    internal sealed class MenuBinding : ScreenBinding
+    public sealed partial class KedUIFlow
     {
-        public MenuBinding(KedUIFlow flow, KedUIServices services)
-            : base(flow, services)
+        private void OpenMenu()
         {
-            Own(flow.Require<SystemMenuPanel>());
-        }
-
-        public void Open()
-        {
-            ManualSaveFlow saves = Services.Saves;
-
-            Flow.PushPanel<SystemMenuPanel>(panel =>
+            PushPanel<SystemMenuPanel>(panel =>
             {
-                BindView(panel, ApplyBindings);
+                BindView(panel, ApplyMenuBindings);
                 panel.Present(new SystemMenuPanel.Model
                 {
-                    HasSaveSlots = saves != null,
-                    CanSave = saves != null && saves.CanSave,
-                    CanSkipEpisode = Services.IsRunning,
+                    HasSaveSlots = _saves != null,
+                    CanSave = _saves != null && _saves.CanSave,
+                    CanSkipEpisode = IsRunning,
                 });
             });
         }
 
-        private void ApplyBindings(SystemMenuPanel panel)
+        private void ApplyMenuBindings(SystemMenuPanel panel)
         {
             AddBinding(panel,
-                p => p.CloseClicked += Flow.ClosePanel,
-                p => p.CloseClicked -= Flow.ClosePanel);
+                p => p.CloseClicked += ClosePanel,
+                p => p.CloseClicked -= ClosePanel);
 
             AddBinding(panel,
-                p => p.SaveClicked += Flow.OpenSave,
-                p => p.SaveClicked -= Flow.OpenSave);
+                p => p.SaveClicked += OpenSave,
+                p => p.SaveClicked -= OpenSave);
 
             AddBinding(panel,
-                p => p.LoadClicked += Flow.OpenLoad,
-                p => p.LoadClicked -= Flow.OpenLoad);
+                p => p.LoadClicked += OpenLoad,
+                p => p.LoadClicked -= OpenLoad);
 
             AddBinding(panel,
-                p => p.SettingsClicked += Flow.OpenSettings,
-                p => p.SettingsClicked -= Flow.OpenSettings);
+                p => p.SettingsClicked += OpenSettings,
+                p => p.SettingsClicked -= OpenSettings);
 
             AddBinding(panel,
                 p => p.SkipEpisodeClicked += ConfirmSkipEpisode,
@@ -56,7 +48,7 @@ namespace Ked.Samples.UI
 
         private void ConfirmSkipEpisode()
         {
-            Flow.Confirm(new ConfirmPanel.Request
+            Confirm(new ConfirmPanel.Request
             {
                 Title = Text("confirm.skip.title"),
                 Body = Text("confirm.skip.body"),
@@ -64,13 +56,13 @@ namespace Ked.Samples.UI
                 CancelLabel = Text("common.cancel"),
                 OnAccept = () =>
                 {
-                    Flow.CloseAllPanels();
+                    CloseAllPanels();
 
-                    if (Services.Playback.Features.RequestSkipCurrentEpisode())
+                    if (Features.RequestSkipCurrentEpisode())
                         return;
 
                     Debug.Log("[Ked UI] 지금 건너뛸 수 있는 에피소드가 없다.");
-                    Flow.Notice(Text("notice.skipUnavailable.title"), Text("notice.skipUnavailable.body"), NoticePanel.Kind.Failure);
+                    Notice(Text("notice.skipUnavailable.title"), Text("notice.skipUnavailable.body"), NoticePanel.Kind.Failure);
                 },
             });
         }
@@ -78,13 +70,13 @@ namespace Ked.Samples.UI
         // 타이틀 복귀는 확인한 뒤에만 호스트를 부른다. 재생 단위를 끝내는 것은 호스트(ExitAsync)다.
         private void ConfirmReturnToTitle()
         {
-            Flow.Confirm(new ConfirmPanel.Request
+            Confirm(new ConfirmPanel.Request
             {
                 Title = Text("confirm.title.title"),
                 Body = Text("confirm.title.body"),
                 AcceptLabel = Text("confirm.title.accept"),
                 CancelLabel = Text("confirm.title.cancel"),
-                OnAccept = Flow.ReturnToTitle,
+                OnAccept = ReturnToTitle,
             });
         }
     }
