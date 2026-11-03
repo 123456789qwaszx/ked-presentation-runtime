@@ -101,7 +101,7 @@ RunNode → SequencePlayer.PlayCommands   (CommandIsPlaying = true)
 |---|---|---|---|
 | screen_flash | 컨트롤러가 재생을 소유(이벤트) | `_clear`도 같은 클래스(preset `clear`) | ✅ 종점이 0 — 남는 상태 없음 |
 | screen_vignette / noise | 컨트롤러가 전환을 소유(장면 전역 의도) | 같은 클래스뿐 | ✅ 새 의도는 보이는 값에서 재조준 |
-| tx | `StageMaskGraphic`(+edge) | `tx_stage_mask_clear` — 같은 `DOTween.Kill(graphic, true)` | ✅ |
+| tx | 슬롯이 모션을 소유(장면 전역 의도) | `tx_stage_mask_clear` — 같은 슬롯의 `Clear`가 모션을 끊음 | ✅ 새 모션은 제 시작 모양부터 다시 세움 |
 | face_swap | 위 겹 루트 시퀀스 | face · show · cast · bg_sprite — 모두 `CompleteInFlight`를 거친다 (`00534410`) | ✅ |
 
 이력상 이 다섯은 스텝 훅을 가진 적이 없다. reduction-boundary.md도 화면 효과·tx를 "무대 상태 모델 밖"으로 둔다.
@@ -126,7 +126,8 @@ face_swap만 모델 안(폴드가 `ApplyFace`로 접음)이라 클레임을 맞�
 | | char_visual_* · focus_on/clear · screen_blur | 〃 | 가속 ×1.5 | **`Kill(false)`** |
 | 샷 (장면 전역 의도) | shot_* | `Snap(다음 의도)` | 시스템 가속 ×20 | 없음 — 시스템이 전환 하나를 소유, 새 의도는 보이는 값에서 재조준 |
 | 모션 | motion | OnSkip → Commit | 즉시 확정 | 노드마다 `DOKill(true)` |
-| 비워 둠 | tx · face_swap | OnSkip → 확정 | 없음(의도) | 그래픽 `Kill(true)` / `CompleteInFlight` |
+| 비워 둠 | face_swap | OnSkip → 확정 | 없음(의도) | `CompleteInFlight` |
+| 무대 마스크 (장면 전역 의도) | tx · tx_stage_mask_clear | `SnapMotionEnd` / 같은 `Clear` | 없음 — 슬롯의 모션이 끝까지 감 | 없음 — 슬롯이 모션 하나를 소유, 새 모션·clear가 앞 것을 끊음 |
 | 화면 효과 (장면 전역 의도) | screen_vignette · screen_noise (+`_clear`) | `Snap(의도)` | 없음 — 컨트롤러의 전환이 끝까지 감 | 없음 — 컨트롤러가 전환 하나를 소유(`IntentTransition`), 재조준 |
 | 화면 효과 (이벤트) | screen_flash | 재생 중인 플래시를 끊음 | 없음 — 끝까지 터짐 | 없음 — 컨트롤러가 재생을 소유, 새 플래시는 앞 것을 끊음 |
 | 즉시 실행 | face · bg_sprite · set_anchor 계열 · ApplyTrackOffset · tx_stage_mask_clear · pose | OnSkip = 같은 적용 | 해당 없음 | face·bg_sprite는 `CompleteInFlight`, 나머지 대부분 `DOKill(true)` |
@@ -191,7 +192,9 @@ screen_blur는 이름과 달리 화면 포스트 이펙트가 아니라 리그�
   스텝 경계에서 놔두는 것은 남은 트윈 시간이고, 장면 경계에서 놔두는 것은 종점 상태다.
 - **화면 효과 — 해결.** vignette·noise는 장면 전역 의도, flash는 이벤트로 바꿨다. 정지(`StopAsync`)가 `ScreenEffectRig.ResetToBaselineImmediate`를 불러
   진행 중인 전환·플래시를 확정 없이 끊고 세기를 0으로 둔다. 리플레이가 화면 효과 커맨드를 다시 지나가며 표적 줄의 상태를 세운다.
-- 남은 것: 스테이지 마스크(장면 전역 의도로 옮길 차례 — 기준은 씬에 저장된 FullRect 마스크 켜짐), 오디오.
+- **스테이지 마스크 — 해결.** 무대(s1·s2·s3)를 어디까지·어떻게 보여줄지는 장면 전역 의도다. tx 모션은 `StageMaskSlot`이 소유하고,
+  정지가 `IStageMaskProvider.ResetAllToBaseline`으로 모션을 끊고 기준 모양(FullRect 마스크 켜짐·오프셋 0 + 씬에 저장된 테두리)으로 돌린다.
+- 남은 것: 오디오.
 - 대사창 레이아웃(`surface_layout`의 `DialogueSurfaceState`)도 같은 부류였다 — 조립 때 한 번 만들어지고 `surface_reset`만 비웠다.
   **해결:** `BeginScene`·`PrepareReplay`가 무대와 함께 비운다. 리플레이 중에 Yarn이 `surface_*`를 다시 지나가며 표적 줄의 상태를 다시 세운다.
 
@@ -241,7 +244,7 @@ screen_blur는 이름과 달리 화면 포스트 이펙트가 아니라 리그�
 | E4 | 종점을 다시 씀 | 장부 항목도 지움 |
 | S2 | Token·CommandIsPlaying을 덮음 | `_mainRoutine`도 null로 덮음 |
 | S5 | 즉시 실행 6개 | `debug_log` 삭제(`fc39ae36`), `box_hide/show/close` 삭제 — `surface_*` 둘만 남음(시점은 큐와 같음) |
-| tx | `tx_<이름>` 18개 | `tx <preset> [stage]` 하나(`StageCommandParser.Transition.cs:8`) |
+| tx | `tx_<이름>` 18개, 커맨드가 그래픽 트윈을 쥠, 장면 경계 초기화 없음 | `tx <preset> [stage]` 하나(`StageCommandParser.Transition.cs:8`). 무대 마스크 = 장면 전역 의도 — 슬롯이 모션 소유, 정지에서 기준 모양으로 |
 | ui_patch | 포트가 경고만 냄 | 커맨드 삭제(`bf42cdfe`), 인터페이스만 남음 |
 | screen_blur | — | `reduction-boundary.md` 표가 "화면 효과(포스트 이펙트 축)"로 분류 — 지금은 리그 블러라 낡음 |
 | 샷 | `Kill(rig, true)` 클레임, 정지의 `Clear`가 진행 중 트윈을 남김 | **장면 전역 의도 시범.** 시스템이 Intent·Presented를 나눠 들고 전환을 소유한다. 커맨드는 `Reduce(Intent)`를 넘기기만 한다. `Clear`가 전환까지 멈춘다 |

@@ -296,6 +296,7 @@ public sealed class PresentationAssembler
             _refs.CustomLinePresenter,
             _presentationResponseRig,
             _screenEffectRig,
+            _presentationUIRoot,
             _presentationStage,
             _dialogueSurfaceState,
             _presentationScopeSession,
