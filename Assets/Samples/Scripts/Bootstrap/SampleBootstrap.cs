@@ -12,7 +12,7 @@ using KedUI = Ked.Samples.UI;
 /// 재생은 언제나 챕터 → 장면 → 에피소드다. 예제는 어느 챕터 JSON을 돌릴지만 고른다 —
 /// 인스펙터의 '예제' 칸이 기본이고, 타이틀의 [다른 예제로]를 누르면 그 예제로 씬을 다시 연다(SampleExampleSwitch).
 ///
-/// - 진행·저장: 여러 장면·선택·스탯이 있는 챕터(qwer_scene).
+/// - 진행·저장: 여러 장면·선택·스탯이 있는 챕터(FestivalEve).
 /// - 연출 데모: 챕터 하나 · 장면 하나 · 에피소드 하나(Demo_Presentation).
 /// 둘 다 장면 경계 저장 → 슬롯·갈라지기를 쓰고, 연출 기억 문자열을 진행 저장의 HostState 칸에 둔다.
 /// 저장 폴더만 예제마다 나눈다 — 슬롯이 섞이지 않게.
@@ -72,7 +72,7 @@ public class SampleBootstrap : MonoBehaviour, IRigPrefabSource
              "연출 데모: 챕터 하나 · 장면 하나 · 에피소드 하나짜리 챕터 JSON.")]
     [SerializeField] private SampleExample example = SampleExample.ProgressionAndSave;
 
-    [Tooltip("연출 데모 챕터 JSON — 에피소드 하나가 연출 데모 노드(Assets/Samples/Dialogue/Demo_Presentation.yarn)를 재생한다.")]
+    [Tooltip("연출 데모 챕터 JSON — 에피소드 하나가 연출 데모 노드(Assets/Samples/Dialogue/ChapterProgression/Demo_Presentation.yarn)를 재생한다.")]
     [SerializeField] private TextAsset presentationDemoChapterJson;
 
     [Header("무대")]

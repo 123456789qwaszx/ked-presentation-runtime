@@ -1,4 +1,4 @@
-// 진행·저장 예제 — 챕터 하나(축제 전날), 장면 둘. 진행 구조는 qwer_scene.progression.json에 있다.
+// 진행·저장 예제 — 챕터 하나(축제 전날), 장면 둘. 진행 구조는 곁의 FestivalEve.progression.json에 있다.
 //
 //   장면 "교실"       Festival_Classroom → Festival_Remake / Festival_Shortcut → (자동) Festival_Wrapup
 //   장면 "교무실 앞"  Festival_Staffroom — 챕터 끝(끝 카드)

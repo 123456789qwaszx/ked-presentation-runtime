@@ -58,10 +58,10 @@ SCOPE-BOUNDARY.md §1은 "여기 적힌 것은 전부 필요한 기능이고 주
 | 저장 모델·조정자·포크 | `Ked.Progression/Save/` | 꽂힌 모듈 (반입본) | 진행 겹. 과거 장면 루트 보관(E3)은 여기 몫 |
 | 로컬 파일 저장 | `Ked.Progression/Save/{Persistence,Slots,Maintenance}` | 꽂힌 모듈 (기본 제공 구현) | D2. 연출 겹은 `PlaybackMemory`가 문자열로 싣는다 |
 | 익스포트 산출물·하네스 | `ExportedTuning/`, `tests/` (레포 루트) | 본체 | CI 게이트 3개 유지 (+ 원본의 ProgressionSave) |
-| 진행 어댑터 | `Samples/Scripts/ProgressionHost/` | 샘플 (진행·저장 예제) | 진행 코어를 연출에 꽂는 얇은 어댑터. `Unit`·`Memory`만 쓴다 |
-| 부트스트랩·세이브 플로우 | `Samples/Scripts/Game/` | 샘플 | `SampleBootstrap`(예제 = 돌릴 챕터 고르기) · `PresentationAssembler`(조립) · 저장 흐름. (`NodePlaythrough`는 2026-11-03에 걷음) 학습 토글은 통합 샘플에만(D1) |
+| 진행 어댑터 | `Samples/Scripts/ProgressionHost/` | 샘플 (진행·저장 예제) | 진행 코어를 연출에 꽂는 얇은 어댑터. `Unit`·`Memory`만 쓴다. 저장 흐름(`ManualSaveFlow` · `ActiveResumeSaveFlow` · `ProgressionSaveBridge`)도 여기(11-04) |
+| 부트스트랩 | `Samples/Scripts/Bootstrap/` | 샘플 | `SampleBootstrap`(예제 = 돌릴 챕터 고르기) · `PresentationAssembler`(조립) · `SampleExampleSwitch`. 11-04에 `Game/`에서 이름을 바꾸고 저장 흐름은 `ProgressionHost/`로 보냄. (`NodePlaythrough`는 2026-11-03에 걷음) 학습 토글은 통합 샘플에만(D1) |
 | UI 프레임·화면·바인딩 | `Samples/Scripts/UI/` | 샘플 | 두 예제가 타이틀([처음부터]·[이어하기]·[다른 예제로])을 같이 쓴다 |
-| 예제 대본·진행 JSON·커브 | `Samples/Dialogue/` | 샘플 | `curves.json`은 작가 자산이라 대본 곁에 산다 |
+| 예제 대본·진행 JSON·커브 | `Samples/Dialogue/` | 샘플 | 예제 챕터마다 대본과 진행 JSON이 `ChapterProgression/`에 나란히(`Demo_Presentation` · `FestivalEve`, 11-04 — 전 이름 `qwer_scene`). `curves.json`은 작가 자산이라 대본 곁에 산다 |
 | 예제 에셋 | `Samples/{Prefabs,Resources,Scenes,Data,Portraits,Art,Editor}/` | 샘플 | 대사창 항목·선택지·저장 슬롯 프리팹 · 배경·음원·UI 이미지 · 씬 · 초상화 DB·대사창 배치·화자 정책 · 공개 초상화 · 이모지(참조 없음) · 폰트 교체 도구 |
 | 앨범·CG 해금·앨범 저장 | `Scripts/Album/`, `UI/Screens/AlbumUIRoot.cs`, `UI/Bindings/VnScreenBindings.Album.cs`, `Data/Album/`, `VNAlbumSlotButton.prefab` | 게임 층 | 제거 |
 | Settings 버튼 | `TitleUIRoot`·`VNScreenBindings.Title` | 미구현 메뉴 | 제거 (D3) |

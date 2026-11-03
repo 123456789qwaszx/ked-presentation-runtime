@@ -25,7 +25,7 @@ Yarn Spinner를 기반으로 제작한 **비주얼 노벨 화면 연출 런타�
 시작 예제는 하이어라키 `[VNAppBootstrap]`(`SampleBootstrap`)의 **예제** 칸이고, 실행 중에는 타이틀의
 **[다른 예제로]**로 바꾼다 — 챕터와 저장 폴더는 조립 때 정해지므로 씬을 다시 연다.
 
-- **진행·저장** — **진행 층 › Progression Chapter Json**의 챕터(`Assets/Samples/Dialogue/ChapterProgression/qwer_scene.progression.json`).
+- **진행·저장** — **진행 층 › Progression Chapter Json**의 챕터(`Assets/Samples/Dialogue/ChapterProgression/FestivalEve.progression.json`).
   여러 장면·선택·스탯이 있다.
 - **연출 데모** — **Presentation Demo Chapter Json**의 챕터(`Demo_Presentation.progression.json`).
   챕터 하나 · 장면 하나 · 에피소드 하나가 `Demo_Presentation` 노드를 재생한다.
@@ -50,7 +50,7 @@ Yarn Spinner를 기반으로 제작한 **비주얼 노벨 화면 연출 런타�
 
 ### 2. 연출 스크립트 예제
 
-`Assets/Samples/Dialogue/Demo_Presentation.yarn` — 연출 데모 챕터의 에피소드 하나가 재생하는 노드
+`Assets/Samples/Dialogue/ChapterProgression/Demo_Presentation.yarn` — 연출 데모 챕터의 에피소드 하나가 재생하는 노드
 
 짧은 장면 하나에서 배경·BGM·등장, 배치·크기, 표정·포즈·모션, 포커스·카메라, 화면 효과·효과음,
 트랜지션·선택지를 한 번씩 지나갑니다. 공개된 예제 초상화(harin·sigure·kasmi)와 저장소에 있는 배경·음원만 씁니다.
@@ -64,7 +64,7 @@ Yarn Spinner를 기반으로 제작한 **비주얼 노벨 화면 연출 런타�
 하린: 배경이 들어오고, 음악이 깔리고, 내가 걸어 들어왔어.
 ```
 
-진행·저장 예제의 대본은 `Assets/Samples/Dialogue/test/qwer_scene.yarn`(챕터 JSON `ChapterProgression/qwer_scene.progression.json`)입니다.
+진행·저장 예제의 대본은 `Assets/Samples/Dialogue/ChapterProgression/FestivalEve.yarn`(챕터 JSON은 곁의 `FestivalEve.progression.json`)입니다.
 챕터 하나(축제 전날)에 장면 둘 — 진행 선택지와 스탯, 대사 선택지와의 차이, 숨는 · 잠기는 선택지, 자동 간선,
 장면 확정과 지난 장면에서 갈라지기, 챕터 끝(끝 카드)을 한 번씩 지나갑니다.
 
