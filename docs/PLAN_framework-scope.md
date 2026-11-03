@@ -49,7 +49,7 @@ SCOPE-BOUNDARY.md §1은 "여기 적힌 것은 전부 필요한 기능이고 주
 | 커맨드·리그·실행 수명 | `Ked.Presentation/Runtime/` | 본체 | |
 | Yarn 파싱·브리지 | `Ked.Presentation/Playback/YarnBridge/` | 본체 | |
 | 라인 표시 트랜잭션 | `Ked.Presentation/Playback/DialoguePresenter/` | 본체 | 대사창·선택지 뷰 베이스는 `Samples/Scripts/UI/DialogueBox/`(예제)로 갈랐다 — `PLAN_playback-unit.md` P2 |
-| 전진·스킵·롤백·백로그 | `Ked.Presentation/Playback/FeatureController/` | 본체 | 소비자 없던 키 `2`~`7` 바인딩은 4단계에서 걷었다 |
+| 전진·스킵·자동·보이스 | `Ked.Presentation/Playback/FeatureController/` | 본체 | 소비자 없던 키 `2`~`7` 바인딩은 4단계에서 걷었다. 롤백 · 백로그 기록(`RollbackHistory` · `BacklogRecorder`)은 11-04에 `Memory/`로 — 연출 기억이 꺼내 저장하는 재료다 |
 | 재생 단위·연출 기억 | `Ked.Presentation/Playback/{Host,Memory}/` | 본체 | 호스트가 보는 면은 `PlaybackUnit`·`PlaybackMemory` 둘 — `PLAN_playback-unit.md` |
 | 등가성 하네스 | `Ked.Presentation/Playback/Host/StageEquivalenceHarness.cs` | 본체 (Diagnostics) | 본체 타입만 쓴다. 대본 폴더는 호스트가 넘긴다 |
 | 에디터 도구 | `Ked.Presentation/Editor/` | 본체 (Editor) | `Ked.Presentation.Editor` asmdef(에디터 전용). 씬에서는 본체 계약으로만 찾는다 |
@@ -187,7 +187,7 @@ SCOPE-BOUNDARY.md §1은 "여기 적힌 것은 전부 필요한 기능이고 주
 - progression-core: `Assets/Scripts/Ked.Progression` → `Assets/Ked.Progression` (paths·sparse 둘 다)
 - progression-host: sparse `Assets/Scripts` → `Assets/Ked.Progression` · `Assets/Ked.Presentation/Playback` · `Assets/Samples/Scripts/ProgressionHost`.
   paths는 `Assets/Ked.Progression/**` · `Assets/Samples/Scripts/ProgressionHost/SceneRunner.cs` · `Assets/Ked.Presentation/Playback/Host/**` ·
-  `Assets/Ked.Presentation/Playback/FeatureController/{RollbackHistory,BacklogRecorder}.cs`
+  `Assets/Ked.Presentation/Playback/Memory/{RollbackHistory,BacklogRecorder}.cs`(11-04에 `FeatureController/`에서 옮김)
 - save-lifecycle: sparse `Assets/Scripts` → `Assets/Ked.Progression` · `Assets/Ked.Presentation/Playback` · `Assets/Samples/Scripts`.
   paths는 `Assets/Ked.Progression/**` · `Assets/Ked.Presentation/Playback/**` · `Assets/Samples/Scripts/**`(옛 `DialoguePresenter/**`·`FeatureController/**`는 P2부터 이미 낡았다)
 

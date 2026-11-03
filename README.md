@@ -70,7 +70,7 @@ Yarn Spinner를 기반으로 제작한 **비주얼 노벨 화면 연출 런타�
 
 ### 3. 대사 실행 흐름
 
-`Assets/Ked.Presentation/Playback/DialoguePresenter/VNLinePresentationFlow/`
+`Assets/Ked.Presentation/Playback/DialoguePresenter/Line/`
 
 한 줄의 대사가 들어온 뒤 연출 실행, 텍스트 출력, 입력 대기, 스킵 및 상태 복원으로 이어지는 흐름을 담당합니다.
 이 폴더는 이름 있는 어셈블리 `Ked.Presentation.Playback`의 일부입니다. 롤백 기록·백로그·줄 시크·선택 기록과
