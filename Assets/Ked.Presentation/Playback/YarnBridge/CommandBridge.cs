@@ -50,6 +50,8 @@ public sealed partial class YarnCommandBridge
 
     private void BindControl(DialogueRunner runner)
     {
+        BindFramePauseAliases(runner);
+
         runner.AddCommandHandler<string>(
             "pause", EnqueueWaitSpec);
 
@@ -218,7 +220,28 @@ public sealed partial class YarnCommandBridge
     {
         runner.AddCommandHandler<string, string, string, string>(
             "char_visual", EnqueueCharVisualPresetSpec);
+        
+        runner.AddCommandHandler<string, string, string>(
+            "char_visual_focus", EnqueueCharFocusSpec);
 
+        runner.AddCommandHandler<string, string, string>(
+            "char_visual_defocus", EnqueueCharDefocusSpec);
+
+
+        runner.AddCommandHandler<string, string, string>(
+            "char_visual_dim", EnqueueCharDimSpec);
+
+        runner.AddCommandHandler<string, string, string>(
+            "char_visual_silhouette", EnqueueCharSilhouetteSpec);
+
+        runner.AddCommandHandler<string, string, string>(
+            "char_visual_inner_rim", EnqueueCharInnerRimSpec);
+
+        runner.AddCommandHandler<string, string, string>(
+            "char_visual_outer_rim", EnqueueCharOuterRimSpec);
+        
+        runner.AddCommandHandler<string, string>(
+            "char_visual_clear", EnqueueCharRigVisualClearSpec);
     }
     
     // 배경 = 캐스팅하지 않은 캐릭터 슬롯. 뜻은 무대의 StageCommandParser.Background에 있다.

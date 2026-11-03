@@ -131,6 +131,27 @@ public sealed partial class YarnCommandBridge
     private void EnqueueCharVisualPresetSpec(string roleKey = null, string presetKey = null, string intensity = null, string durationToken = null)
         => Forward("char_visual", roleKey, presetKey, intensity, durationToken);
 
+    private void EnqueueCharFocusSpec(string roleKey = null, string intensity = null, string durationToken = null)
+        => Forward("char_visual_focus", roleKey, intensity, durationToken);
+
+    private void EnqueueCharDefocusSpec(string roleKey = null, string intensity = null, string durationToken = null)
+        => Forward("char_visual_defocus", roleKey, intensity, durationToken);
+
+    private void EnqueueCharDimSpec(string roleKey = null, string intensity = null, string durationToken = null)
+        => Forward("char_visual_dim", roleKey, intensity, durationToken);
+
+    private void EnqueueCharSilhouetteSpec(string roleKey = null, string intensity = null, string durationToken = null)
+        => Forward("char_visual_silhouette", roleKey, intensity, durationToken);
+
+    private void EnqueueCharInnerRimSpec(string roleKey = null, string intensity = null, string durationToken = null)
+        => Forward("char_visual_inner_rim", roleKey, intensity, durationToken);
+
+    private void EnqueueCharOuterRimSpec(string roleKey = null, string intensity = null, string durationToken = null)
+        => Forward("char_visual_outer_rim", roleKey, intensity, durationToken);
+
+    private void EnqueueCharRigVisualClearSpec(string roleKey = null, string durationToken = null)
+        => Forward("char_visual_clear", roleKey, durationToken);
+
     private void EnqueueSpawnBackgroundSpec(string rigKey = null, string spriteKey = null, string stageKey = null, string layerKey = null)
         => Forward("bg_spawn", rigKey, spriteKey, stageKey, layerKey);
 

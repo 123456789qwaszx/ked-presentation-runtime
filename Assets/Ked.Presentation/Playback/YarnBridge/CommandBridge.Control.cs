@@ -2,9 +2,24 @@ using Yarn.Unity;
 
 public sealed partial class YarnCommandBridge
 {
-    // 대기는 <<pause 시간>>(무대 파서 표)이다. 옛 프레임 별칭 <<1fr>>~<<48fr>>과 debug_log는
-    // 2026-11-03에 걷었다 — 대본은 저작 툴이 내고, 툴은 정본만 낸다.
+    private const int FramePauseAliasMaxFrame = StageCommandParser.FramePauseAliasMaxFrame;
+    
+    // Animator-style frame wait aliases.
+    // 24fps basis: <<24fr>> = 1 second.
+    // Registered up to <<48fr>> = 2 seconds.
+    // Longer or precise waits should use <<pause 시간>> (12fr · 0.5s · 0.5).
+    private void BindFramePauseAliases(DialogueRunner runner)
+    {
+        for (int i = 1; i <= FramePauseAliasMaxFrame; i++)
+        {
+            int frame = i;
 
+            string alias = $"{frame}fr";
+
+            runner.AddCommandHandler(alias, () => Forward(alias));
+        }
+    }
+    
     private YarnTask HideDialogueBox() 
         => _dialogueBoxPresentation.HideCurrentAsync();
     

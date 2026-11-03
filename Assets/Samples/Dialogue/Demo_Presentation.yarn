@@ -4,7 +4,7 @@
 //   S1 배경·BGM·등장     bg_spawn · bg_sprite · bg_fade_in · bgm · fade_in · place_center
 //   S2 배치·크기         slide_in · place_left / place_right · size · sibling_front
 //   S3 표정·포즈·모션    face · face_swap · pose · gesture · motion
-//   S4 포커스·카메라     char_visual focus / dim / clear · screen_blur · shot_focus_to · shot_reset
+//   S4 포커스·카메라     char_visual_focus / dim / clear · screen_blur · shot_focus_to · shot_reset
 //   S5 화면 효과·효과음  screen_vignette · screen_noise · screen_flash · sfx
 //   S6 트랜지션          tx daze_close / daze_open · 배경 교체 · 세 번째 인물 · 선택지
 //   S7 퇴장              fade_out · stop_bgm · bg_fade_out
@@ -41,7 +41,7 @@ title: Demo_Presentation
 <<bg_sprite bg_main class_day>>
 <<bg_fade_in bg_main 24fr>>
 <<bgm audio/bgm_idoberg-relaxing-guitar-loop-v5-245859 2s>>
-<<pause 12fr>>
+<<12fr>>
 
 <<place_center s1 bust 0fr>>
 <<size s1 mid bust 0fr>>
@@ -55,11 +55,11 @@ title: Demo_Presentation
 // 컷신 앞뒤로 대사창 치우기
 <<box_hide>>
 <<place_left s1 bust 33fr>>
-<<pause 24fr>>
+<<24fr>>
 <<place_right s1 bust 33fr>>
-<<pause 24fr>>
+<<24fr>>
 <<place_center s1 bust 33fr>>
-<<pause 24fr>>
+<<24fr>>
 (하린 이리저리) #boxhide #auto
 //<<box_show>>
 연출 컷신 앞뒤로 대사창 치우기.
@@ -97,16 +97,16 @@ title: Demo_Presentation
 하린: 같은 축을 다른 명령이 잡으면 그게 이어받아. 이제 똑바로.
 
 // ═════ S4. 포커스·카메라 ═════
-<<char_visual s1 focus 1 14fr>>
-<<char_visual s2 dim 0.5 20fr>>
+<<char_visual_focus s1 1 14fr>>
+<<char_visual_dim s2 0.5 20fr>>
 하린: 말하는 사람에게 빛을 모으고, 듣는 사람은 한 톤 낮춰.
 <<screen_blur far 1>>
 <<shot_focus_to s1 face center 1.25 30fr>>
 하린: 배경을 흐리고, 카메라를 얼굴 쪽으로 당기면…
 <<shot_reset 20fr>>
 <<screen_blur_reset>>
-<<char_visual s1 clear 1 10fr>>
-<<char_visual s2 clear 1 10fr>>
+<<char_visual_clear s1 10fr>>
+<<char_visual_clear s2 10fr>>
 시구레: 다시 넓게. 원래 무대로 돌아왔어요.
 
 // ═════ S5. 화면 효과·효과음 ═════
@@ -143,6 +143,6 @@ title: Demo_Presentation
 <<fade_out s1 12fr>>
 <<stop_bgm 2s>>
 <<bg_fade_out bg_main 20fr>>
-<<pause 24fr>>
+<<24fr>>
 캐릭터 퇴장 #boxhide #auto
 ===
