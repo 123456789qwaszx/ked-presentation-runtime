@@ -5,23 +5,11 @@ public sealed partial class YarnCommandBridge
     private void EnqueueWaitSpec(string duration = null)
         => Forward("pause", duration);
 
-    private void EnqueueUIPatchSpec(string themeId = null)
-        => Forward("ui_patch", themeId);
-
     private void EnqueuePresentationActorAliasSpec(string aliasSymbol = null, string targetKey = null)
         => Forward("actor", aliasSymbol, targetKey);
 
     private void EnqueueSetupCharRigSpec(string slotKey = null, string stageKey = null, string layerKey = null)
         => Forward("slot", slotKey, stageKey, layerKey);
-
-    private void EnqueueSetupCharRigStage00Spec(string slotKey = null, string layerKey = null)
-        => Forward("slot00", slotKey, layerKey);
-
-    private void EnqueueSetupCharRigStage01Spec(string slotKey = null, string layerKey = null)
-        => Forward("slot01", slotKey, layerKey);
-
-    private void EnqueueSetupCharRigStage02Spec(string slotKey = null, string layerKey = null)
-        => Forward("slot02", slotKey, layerKey);
 
     private void EnqueueCastCharacterSpec(string slotKey = null, string characterKey = null, string variantKey = null, string emotionKey = null)
         => Forward("cast", slotKey, characterKey, variantKey, emotionKey);
@@ -71,15 +59,6 @@ public sealed partial class YarnCommandBridge
     private void EnqueueMoveCharacterRigToStageLayerSpec(string roleKey = null, string stageKey = null, string layerKey = null)
         => Forward("char_to", roleKey, stageKey, layerKey);
 
-    private void EnqueueMoveCharacterRigToStage00LayerSpec(string roleKey = null, string layerKey = null)
-        => Forward("char_to_s0", roleKey, layerKey);
-
-    private void EnqueueMoveCharacterRigToStage01LayerSpec(string roleKey = null, string layerKey = null)
-        => Forward("char_to_s1", roleKey, layerKey);
-
-    private void EnqueueMoveCharacterRigToStage02LayerSpec(string roleKey = null, string layerKey = null)
-        => Forward("char_to_s2", roleKey, layerKey);
-
     private void EnqueueShotZoomFocusSpec(string roleKey = null, string focusName = null, string screenPointName = null, string zoom = null, string durationToken = null, string easeToken = null)
         => Forward("shot_focus_to", roleKey, focusName, screenPointName, zoom, durationToken, easeToken);
 
@@ -122,53 +101,8 @@ public sealed partial class YarnCommandBridge
     private void EnqueueFocusToRightSpec(string roleKey = null, string focus = null, string durationToken = null, string easeToken = null)
         => Forward("place_right", roleKey, focus, durationToken, easeToken);
 
-    private void EnqueueFocusToTopLeftSpec(string roleKey = null, string focus = null, string durationToken = null, string easeToken = null)
-        => Forward("place_tl", roleKey, focus, durationToken, easeToken);
-
-    private void EnqueueFocusToTopSpec(string roleKey = null, string focus = null, string durationToken = null, string easeToken = null)
-        => Forward("place_top", roleKey, focus, durationToken, easeToken);
-
-    private void EnqueueFocusToTopRightSpec(string roleKey = null, string focus = null, string durationToken = null, string easeToken = null)
-        => Forward("place_tr", roleKey, focus, durationToken, easeToken);
-
-    private void EnqueueFocusToBottomLeftSpec(string roleKey = null, string focus = null, string durationToken = null, string easeToken = null)
-        => Forward("place_bl", roleKey, focus, durationToken, easeToken);
-
-    private void EnqueueFocusToBottomSpec(string roleKey = null, string focus = null, string durationToken = null, string easeToken = null)
-        => Forward("place_bottom", roleKey, focus, durationToken, easeToken);
-
-    private void EnqueueFocusToBottomRightSpec(string roleKey = null, string focus = null, string durationToken = null, string easeToken = null)
-        => Forward("place_br", roleKey, focus, durationToken, easeToken);
-
-    private void EnqueueFocusToInnerTopLeftSpec(string roleKey = null, string focus = null, string durationToken = null, string easeToken = null)
-        => Forward("place_inner_tl", roleKey, focus, durationToken, easeToken);
-
-    private void EnqueueFocusToInnerTopRightSpec(string roleKey = null, string focus = null, string durationToken = null, string easeToken = null)
-        => Forward("place_inner_tr", roleKey, focus, durationToken, easeToken);
-
-    private void EnqueueFocusToInnerBottomLeftSpec(string roleKey = null, string focus = null, string durationToken = null, string easeToken = null)
-        => Forward("place_inner_bl", roleKey, focus, durationToken, easeToken);
-
-    private void EnqueueFocusToInnerBottomRightSpec(string roleKey = null, string focus = null, string durationToken = null, string easeToken = null)
-        => Forward("place_inner_br", roleKey, focus, durationToken, easeToken);
-
     private void EnqueueDepthAtPresetSpec(string roleKey = null, string depthArg = null, string preserveFocusArg = null, string durationToken = null, string easeToken = null)
         => Forward("size", roleKey, depthArg, preserveFocusArg, durationToken, easeToken);
-
-    private void EnqueueDepthAtFarSpec(string roleKey = null, string preserveFocusArg = null, string durationToken = null, string easeToken = null)
-        => Forward("size_far", roleKey, preserveFocusArg, durationToken, easeToken);
-
-    private void EnqueueDepthAtBackSpec(string roleKey = null, string preserveFocusArg = null, string durationToken = null, string easeToken = null)
-        => Forward("size_back", roleKey, preserveFocusArg, durationToken, easeToken);
-
-    private void EnqueueDepthAtMidSpec(string roleKey = null, string preserveFocusArg = null, string durationToken = null, string easeToken = null)
-        => Forward("size_mid", roleKey, preserveFocusArg, durationToken, easeToken);
-
-    private void EnqueueDepthAtFrontSpec(string roleKey = null, string preserveFocusArg = null, string durationToken = null, string easeToken = null)
-        => Forward("size_front", roleKey, preserveFocusArg, durationToken, easeToken);
-
-    private void EnqueueDepthAtCloseSpec(string roleKey = null, string preserveFocusArg = null, string durationToken = null, string easeToken = null)
-        => Forward("size_close", roleKey, preserveFocusArg, durationToken, easeToken);
 
     private void EnqueueDepthResetSpec(string roleKey = null, string duration = null, string easeToken = null)
         => Forward("size_reset", roleKey, duration, easeToken);
@@ -197,38 +131,8 @@ public sealed partial class YarnCommandBridge
     private void EnqueueCharVisualPresetSpec(string roleKey = null, string presetKey = null, string intensity = null, string durationToken = null)
         => Forward("char_visual", roleKey, presetKey, intensity, durationToken);
 
-    private void EnqueueCharFocusSpec(string roleKey = null, string intensity = null, string durationToken = null)
-        => Forward("char_visual_focus", roleKey, intensity, durationToken);
-
-    private void EnqueueCharDefocusSpec(string roleKey = null, string intensity = null, string durationToken = null)
-        => Forward("char_visual_defocus", roleKey, intensity, durationToken);
-
-    private void EnqueueCharDimSpec(string roleKey = null, string intensity = null, string durationToken = null)
-        => Forward("char_visual_dim", roleKey, intensity, durationToken);
-
-    private void EnqueueCharSilhouetteSpec(string roleKey = null, string intensity = null, string durationToken = null)
-        => Forward("char_visual_silhouette", roleKey, intensity, durationToken);
-
-    private void EnqueueCharInnerRimSpec(string roleKey = null, string intensity = null, string durationToken = null)
-        => Forward("char_visual_inner_rim", roleKey, intensity, durationToken);
-
-    private void EnqueueCharOuterRimSpec(string roleKey = null, string intensity = null, string durationToken = null)
-        => Forward("char_visual_outer_rim", roleKey, intensity, durationToken);
-
-    private void EnqueueCharRigVisualClearSpec(string roleKey = null, string durationToken = null)
-        => Forward("char_visual_clear", roleKey, durationToken);
-
-    private void EnqueueSpawnBackgroundSpec(string rigKey = null, string spriteKey = null)
-        => Forward("bg_spawn", rigKey, spriteKey);
-
-    private void EnqueueSpawnBackgroundStage00Spec(string rigKey = null, string spriteKey = null, string layerKey = null)
-        => Forward("bg_slot00", rigKey, spriteKey, layerKey);
-
-    private void EnqueueSpawnBackgroundStage01Spec(string rigKey = null, string spriteKey = null, string layerKey = null)
-        => Forward("bg_slot01", rigKey, spriteKey, layerKey);
-
-    private void EnqueueSpawnBackgroundStage02Spec(string rigKey = null, string spriteKey = null, string layerKey = null)
-        => Forward("bg_slot02", rigKey, spriteKey, layerKey);
+    private void EnqueueSpawnBackgroundSpec(string rigKey = null, string spriteKey = null, string stageKey = null, string layerKey = null)
+        => Forward("bg_spawn", rigKey, spriteKey, stageKey, layerKey);
 
     private void EnqueueSetBackgroundSpriteSpec(string rigKey = null, string spriteKey = null)
         => Forward("bg_sprite", rigKey, spriteKey);
@@ -245,59 +149,8 @@ public sealed partial class YarnCommandBridge
     private void EnqueueScaleBackgroundDslSpec(string rigKey = null, string scale = null, string durationToken = null)
         => Forward("bg_scale", rigKey, scale, durationToken);
 
-    private void EnqueueSlantedMaskCutInSpec(string stage = null, string durationToken = null)
-        => Forward("tx_slant_in", stage, durationToken);
-
-    private void EnqueueSlantedMaskCutOutSpec(string stage = null, string durationToken = null)
-        => Forward("tx_slant_out", stage, durationToken);
-
-    private void EnqueueHorizontalStripOpenInSpec(string stage = null, string durationToken = null)
-        => Forward("tx_hstrip_open", stage, durationToken);
-
-    private void EnqueueHorizontalStripCloseOutSpec(string stage = null, string durationToken = null)
-        => Forward("tx_hstrip_close", stage, durationToken);
-
-    private void EnqueueHorizontalStripCutInSpec(string stage = null, string durationToken = null)
-        => Forward("tx_hstrip_in", stage, durationToken);
-
-    private void EnqueueHorizontalStripCutOutSpec(string stage = null, string durationToken = null)
-        => Forward("tx_hstrip_out", stage, durationToken);
-
-    private void EnqueueVerticalStripOpenInSpec(string stage = null, string durationToken = null)
-        => Forward("tx_vstrip_open", stage, durationToken);
-
-    private void EnqueueVerticalStripCloseOutSpec(string stage = null, string durationToken = null)
-        => Forward("tx_vstrip_close", stage, durationToken);
-
-    private void EnqueueVerticalStripCutInSpec(string stage = null, string durationToken = null)
-        => Forward("tx_vstrip_in", stage, durationToken);
-
-    private void EnqueueVerticalStripCutOutSpec(string stage = null, string durationToken = null)
-        => Forward("tx_vstrip_out", stage, durationToken);
-
-    private void EnqueueDiagonalBandCutInSpec(string stage = null, string durationToken = null)
-        => Forward("tx_band_in", stage, durationToken);
-
-    private void EnqueueDiagonalBandCutOutSpec(string stage = null, string durationToken = null)
-        => Forward("tx_band_out", stage, durationToken);
-
-    private void EnqueueCircleIrisInSpec(string stage = null, string durationToken = null)
-        => Forward("tx_iris_in", stage, durationToken);
-
-    private void EnqueueCircleIrisOutSpec(string stage = null, string durationToken = null)
-        => Forward("tx_iris_out", stage, durationToken);
-
-    private void EnqueueDazeFadeCloseSpec(string stage = null, string durationToken = null)
-        => Forward("tx_daze_in", stage, durationToken);
-
-    private void EnqueueTransitionOutDazeFadeSpec(string stage = null, string durationToken = null)
-        => Forward("tx_daze_out", stage, durationToken);
-
-    private void EnqueueVerticalStripCoverSpec(string stage = null, string durationToken = null)
-        => Forward("tx_strip_in", stage, durationToken);
-
-    private void EnqueueTransitionOutStripSpec(string stage = null, string durationToken = null)
-        => Forward("tx_strip_out", stage, durationToken);
+    private void EnqueueStageMaskMotionPresetSpec(string presetKey = null, string stageKey = null, string durationToken = null)
+        => Forward("tx", presetKey, stageKey, durationToken);
 
     private void EnqueueStageMaskClearSpec()
         => Forward("tx_stage_mask_clear");
@@ -344,14 +197,8 @@ public sealed partial class YarnCommandBridge
     private void EnqueueDepthFocusClearSpec(string durationToken = null)
         => Forward("focus_clear", durationToken);
 
-    private void EnqueueStage00LayerBlurSpec(string layerKey = null, string amount = null)
-        => Forward("screen_blur", layerKey, amount);
-
-    private void EnqueueStage01LayerBlurSpec(string layerKey = null, string amount = null)
-        => Forward("screen_blur_s1", layerKey, amount);
-
-    private void EnqueueStage02LayerBlurSpec(string layerKey = null, string amount = null)
-        => Forward("screen_blur_s2", layerKey, amount);
+    private void EnqueueLayerBlurSpec(string layerKey = null, string amount = null, string stageKey = null)
+        => Forward("screen_blur", layerKey, amount, stageKey);
 
     private void EnqueueStageLayerBlurClearSpec()
         => Forward("screen_blur_reset");

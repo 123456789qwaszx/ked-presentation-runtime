@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using UnityEngine;
 
 /// <summary>
@@ -34,8 +33,6 @@ public sealed class PresentationAssembler
 
     private readonly DialogueAdvanceDispatcher _dialogueAdvanceDispatcher = new();
     private readonly EpisodeSkipController _episodeSkipController = new();
-
-    private IUIThemePatchPort _uiThemePatch;
 
     private PresentationUIRoot _presentationUIRoot;
     private PresentationShotResponseSystem _presentationResponseRig;
@@ -79,8 +76,6 @@ public sealed class PresentationAssembler
 
     private PresentationRuntime Assemble()
     {
-        _uiThemePatch = new UIThemePatchNotConnected();
-
         BootstrapPresentationRoots();
 
         BootstrapAudioSystem();
@@ -182,7 +177,6 @@ public sealed class PresentationAssembler
 
         PresentationControlCommandFactory presentationControlFactory = new(
             _presentationStage,
-            _uiThemePatch,
             unityTimeSource,
             unitySignalBus,
             signalLatch);
@@ -410,22 +404,6 @@ public sealed class PresentationAssembler
 #else
         return null;
 #endif
-    }
-}
-
-/// <summary>
-/// 대본의 <c>&lt;&lt;ui_patch 테마 언어&gt;&gt;</c>를 받는 자리. 옛 UI의 그림 패치(UIPatchService)는 옛 화면과 함께 걷었다.
-/// 새 예제 UI는 테마를 하나만 쓰므로 잇지 않는다(PLAN_uipf-ui U4 뺌). 아무것도 바꾸지 않고 알린다 — 바꾼 척하지 않는다.
-/// 지금 예제 대본에는 ui_patch가 없다.
-/// </summary>
-internal sealed class UIThemePatchNotConnected : IUIThemePatchPort
-{
-    public IEnumerator PatchCurrentScreen(string themeId, string localeId)
-    {
-        Debug.LogWarning(
-            $"[예제 UI] <<ui_patch {themeId} {localeId}>> — 새 예제 UI는 테마를 하나만 써서 테마 패치를 받지 않는다. 화면은 그대로다.");
-
-        yield break;
     }
 }
 

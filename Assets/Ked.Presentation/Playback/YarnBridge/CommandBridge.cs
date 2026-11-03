@@ -50,17 +50,9 @@ public sealed partial class YarnCommandBridge
 
     private void BindControl(DialogueRunner runner)
     {
-        BindFramePauseAliases(runner);
-
         runner.AddCommandHandler<string>(
             "pause", EnqueueWaitSpec);
-        
-        runner.AddCommandHandler<string>(
-            "ui_patch", EnqueueUIPatchSpec);
-        
-        runner.AddCommandHandler<string>(
-            "debug_log", LogImmediate);
-        
+
         runner.AddCommandHandler<string, string>(
             "actor", EnqueuePresentationActorAliasSpec);
         
@@ -84,13 +76,6 @@ public sealed partial class YarnCommandBridge
     {
         runner.AddCommandHandler<string, string, string>(
             "slot", EnqueueSetupCharRigSpec);
-        
-        runner.AddCommandHandler<string, string>(
-            "slot00", EnqueueSetupCharRigStage00Spec);
-        runner.AddCommandHandler<string, string>(
-            "slot01", EnqueueSetupCharRigStage01Spec);
-        runner.AddCommandHandler<string, string>(
-            "slot02", EnqueueSetupCharRigStage02Spec);
 
         runner.AddCommandHandler<string, string, string, string>(
             "cast", EnqueueCastCharacterSpec);
@@ -137,19 +122,9 @@ public sealed partial class YarnCommandBridge
 
         runner.AddCommandHandler<string>(
             "sibling_back", EnqueueCharacterSiblingBackSpec);
-        
-        
+
         runner.AddCommandHandler<string, string, string>(
             "char_to", EnqueueMoveCharacterRigToStageLayerSpec);
-
-        runner.AddCommandHandler<string, string>(
-            "char_to_s0", EnqueueMoveCharacterRigToStage00LayerSpec);
-
-        runner.AddCommandHandler<string, string>(
-            "char_to_s1", EnqueueMoveCharacterRigToStage01LayerSpec);
-
-        runner.AddCommandHandler<string, string>(
-            "char_to_s2", EnqueueMoveCharacterRigToStage02LayerSpec);
     }
     
     private void BindShotStaging(DialogueRunner runner)
@@ -203,36 +178,6 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler<string, string, string, string>(
             "place_right", EnqueueFocusToRightSpec);
 
-        runner.AddCommandHandler<string, string, string, string>(
-            "place_tl", EnqueueFocusToTopLeftSpec);
-
-        runner.AddCommandHandler<string, string, string, string>(
-            "place_top", EnqueueFocusToTopSpec);
-
-        runner.AddCommandHandler<string, string, string, string>(
-            "place_tr", EnqueueFocusToTopRightSpec);
-
-        runner.AddCommandHandler<string, string, string, string>(
-            "place_bl", EnqueueFocusToBottomLeftSpec);
-
-        runner.AddCommandHandler<string, string, string, string>(
-            "place_bottom", EnqueueFocusToBottomSpec);
-
-        runner.AddCommandHandler<string, string, string, string>(
-            "place_br", EnqueueFocusToBottomRightSpec);
-
-        runner.AddCommandHandler<string, string, string, string>(
-            "place_inner_tl", EnqueueFocusToInnerTopLeftSpec);
-
-        runner.AddCommandHandler<string, string, string, string>(
-            "place_inner_tr", EnqueueFocusToInnerTopRightSpec);
-
-        runner.AddCommandHandler<string, string, string, string>(
-            "place_inner_bl", EnqueueFocusToInnerBottomLeftSpec);
-
-        runner.AddCommandHandler<string, string, string, string>(
-            "place_inner_br", EnqueueFocusToInnerBottomRightSpec);
-        
         // Char focus depth
         // Generic form:
         // <<at c1 close bust 12fr>>
@@ -241,21 +186,6 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler<string, string, string, string, string>(
             "size", EnqueueDepthAtPresetSpec);
 
-        runner.AddCommandHandler<string, string, string, string>(
-            "size_far", EnqueueDepthAtFarSpec);
-        
-        runner.AddCommandHandler<string, string, string, string>(
-            "size_back", EnqueueDepthAtBackSpec);
-        
-        runner.AddCommandHandler<string, string, string, string>(
-            "size_mid", EnqueueDepthAtMidSpec);
-
-        runner.AddCommandHandler<string, string, string, string>(
-            "size_front", EnqueueDepthAtFrontSpec);
-        
-        runner.AddCommandHandler<string, string, string, string>(
-            "size_close", EnqueueDepthAtCloseSpec);
-        
         runner.AddCommandHandler<string, string, string>(
             "size_reset", EnqueueDepthResetSpec);
     }
@@ -288,43 +218,15 @@ public sealed partial class YarnCommandBridge
     {
         runner.AddCommandHandler<string, string, string, string>(
             "char_visual", EnqueueCharVisualPresetSpec);
-        
-        runner.AddCommandHandler<string, string, string>(
-            "char_visual_focus", EnqueueCharFocusSpec);
 
-        runner.AddCommandHandler<string, string, string>(
-            "char_visual_defocus", EnqueueCharDefocusSpec);
-
-
-        runner.AddCommandHandler<string, string, string>(
-            "char_visual_dim", EnqueueCharDimSpec);
-
-        runner.AddCommandHandler<string, string, string>(
-            "char_visual_silhouette", EnqueueCharSilhouetteSpec);
-
-        runner.AddCommandHandler<string, string, string>(
-            "char_visual_inner_rim", EnqueueCharInnerRimSpec);
-
-        runner.AddCommandHandler<string, string, string>(
-            "char_visual_outer_rim", EnqueueCharOuterRimSpec);
-        
-        runner.AddCommandHandler<string, string>(
-            "char_visual_clear", EnqueueCharRigVisualClearSpec);
     }
     
     // 배경 = 캐스팅하지 않은 캐릭터 슬롯. 뜻은 무대의 StageCommandParser.Background에 있다.
-    // bg_place·bg_size는 지운 어휘라 등록하지 않는다 — 남은 대본은 Yarn이 "모르는 커맨드"로 소리 낸다.
+    // bg_place·bg_size·bg_slotNN은 지운 어휘라 등록하지 않는다 — 남은 대본은 Yarn이 "모르는 커맨드"로 소리 낸다.
     private void BindBackground(DialogueRunner runner)
     {
-        runner.AddCommandHandler<string, string>(
+        runner.AddCommandHandler<string, string, string, string>(
             "bg_spawn", EnqueueSpawnBackgroundSpec);
-        
-        runner.AddCommandHandler<string, string, string>(
-            "bg_slot00", EnqueueSpawnBackgroundStage00Spec);
-        runner.AddCommandHandler<string, string, string>(
-            "bg_slot01", EnqueueSpawnBackgroundStage01Spec);
-        runner.AddCommandHandler<string, string, string>(
-            "bg_slot02", EnqueueSpawnBackgroundStage02Spec);
 
         runner.AddCommandHandler<string, string>(
             "bg_sprite", EnqueueSetBackgroundSpriteSpec);
@@ -342,69 +244,15 @@ public sealed partial class YarnCommandBridge
             "bg_scale", EnqueueScaleBackgroundDslSpec);
     }
     
+    // <<tx 프리셋 [무대] [시간]>> — 옛 tx_<이름> 18개를 접었다. 프리셋은 무대의 StageMaskMotionPresetDB 키.
     private void BindTransition(DialogueRunner runner)
     {
-        runner.AddCommandHandler<string, string>(
-            "tx_slant_in", EnqueueSlantedMaskCutInSpec);
-        runner.AddCommandHandler<string, string>(
-            "tx_slant_out", EnqueueSlantedMaskCutOutSpec);
-        
-        runner.AddCommandHandler<string, string>(
-            "tx_hstrip_open",
-            EnqueueHorizontalStripOpenInSpec);
-        runner.AddCommandHandler<string, string>(
-            "tx_hstrip_close",
-            EnqueueHorizontalStripCloseOutSpec);
-        
-        runner.AddCommandHandler<string, string>(
-            "tx_hstrip_in",
-            EnqueueHorizontalStripCutInSpec);
-        runner.AddCommandHandler<string, string>(
-            "tx_hstrip_out",
-            EnqueueHorizontalStripCutOutSpec);
+        runner.AddCommandHandler<string, string, string>(
+            "tx", EnqueueStageMaskMotionPresetSpec);
 
-        runner.AddCommandHandler<string, string>(
-            "tx_vstrip_open",
-            EnqueueVerticalStripOpenInSpec);
-        runner.AddCommandHandler<string, string>(
-            "tx_vstrip_close",
-            EnqueueVerticalStripCloseOutSpec);
-        
-        runner.AddCommandHandler<string, string>(
-            "tx_vstrip_in",
-            EnqueueVerticalStripCutInSpec);
-        runner.AddCommandHandler<string, string>(
-            "tx_vstrip_out",
-            EnqueueVerticalStripCutOutSpec);
-
-        runner.AddCommandHandler<string, string>(
-            "tx_band_in",
-            EnqueueDiagonalBandCutInSpec);
-        runner.AddCommandHandler<string, string>(
-            "tx_band_out",
-            EnqueueDiagonalBandCutOutSpec);
-
-        runner.AddCommandHandler<string, string>(
-            "tx_iris_in",
-            EnqueueCircleIrisInSpec);
-        runner.AddCommandHandler<string, string>(
-            "tx_iris_out",
-            EnqueueCircleIrisOutSpec);
-        
-        runner.AddCommandHandler<string, string>(
-            "tx_daze_in", EnqueueDazeFadeCloseSpec);
-        runner.AddCommandHandler<string, string>(
-            "tx_daze_out", EnqueueTransitionOutDazeFadeSpec);
-        
-        runner.AddCommandHandler<string, string>(
-            "tx_strip_in", EnqueueVerticalStripCoverSpec);
-        runner.AddCommandHandler<string, string>(
-            "tx_strip_out", EnqueueTransitionOutStripSpec);
-        
         runner.AddCommandHandler(
             "tx_stage_mask_clear",
             EnqueueStageMaskClearSpec);
-
     }
     
     private void BindAudio(DialogueRunner runner)
@@ -454,14 +302,8 @@ public sealed partial class YarnCommandBridge
 
     private void BindStageDepthDefocus(DialogueRunner runner)
     {
-        runner.AddCommandHandler<string, string>(
-            "screen_blur", EnqueueStage00LayerBlurSpec);
-
-        runner.AddCommandHandler<string, string>(
-            "screen_blur_s1", EnqueueStage01LayerBlurSpec);
-
-        runner.AddCommandHandler<string, string>(
-            "screen_blur_s2", EnqueueStage02LayerBlurSpec);
+        runner.AddCommandHandler<string, string, string>(
+            "screen_blur", EnqueueLayerBlurSpec);
 
         runner.AddCommandHandler(
             "screen_blur_reset", EnqueueStageLayerBlurClearSpec);

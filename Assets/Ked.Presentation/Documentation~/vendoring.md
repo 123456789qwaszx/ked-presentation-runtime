@@ -18,8 +18,8 @@
 
 | | |
 |---|---|
-| 원본 | `ked-stage-runtime` · `refactor/background-as-slot` @ `dc690c1` (`dev` @ `640ac60` 위 4커밋 — 배경 리그 제거) |
-| 마지막 동기화 | 2026-10-29 · 원본 → 사본 (배경 리그 제거, `docs/PLAN_background-as-slot.md`). 그 전: 2026-10-28 `dev` @ `640ac60`(이 표는 `64e7679`에 멈춰 있었다), 2026-10-27 첫 분리 |
+| 원본 | `ked-stage-runtime` · `refactor/canonical-commands` @ `2df7fff` (`dev` @ `7aeef7f` 위 1커밋 — 대본 커맨드 정본만) |
+| 마지막 동기화 | 2026-11-03 · 원본 → 사본 (별칭 · `<<Nfr>>` · `ui_patch`를 걷고 정본만 남김. 함께 `dev`의 `ToolExportMotionParityTests`(M6)도 들어왔다 — 그 전에는 사본에 없었다). 그 전: 2026-10-29 배경 리그 제거, 2026-10-28 `dev` @ `640ac60`, 2026-10-27 첫 분리 |
 | 맞춘 것 | 위 폴더 전부 + `ExportedTuning/` |
 | 코드 일치 | `diff -r` 0건 (아래 "대조" 명령) |
 
