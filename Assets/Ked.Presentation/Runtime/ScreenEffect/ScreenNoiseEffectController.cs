@@ -128,6 +128,8 @@ public sealed class ScreenNoiseEffectController :
         DisposeMaterial();
     }
 
+    public Material SourceMaterial => sourceMaterial;
+
     public void Bind(Image image, Material material)
     {
         if (image != null)

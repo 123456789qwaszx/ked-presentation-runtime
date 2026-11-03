@@ -53,7 +53,7 @@ SCOPE-BOUNDARY.md §1은 "여기 적힌 것은 전부 필요한 기능이고 주
 | 재생 단위·연출 기억 | `Ked.Presentation/Playback/{Host,Memory}/` | 본체 | 호스트가 보는 면은 `PlaybackUnit`·`PlaybackMemory` 둘 — `PLAN_playback-unit.md` |
 | 등가성 하네스 | `Ked.Presentation/Playback/Host/StageEquivalenceHarness.cs` | 본체 (Diagnostics) | 본체 타입만 쓴다. 대본 폴더는 호스트가 넘긴다 |
 | 에디터 도구 | `Ked.Presentation/Editor/` | 본체 (Editor) | `Ked.Presentation.Editor` asmdef(에디터 전용). 씬에서는 본체 계약으로만 찾는다 |
-| 본체 에셋 | `Ked.Presentation/{Prefabs,Audio,Resources,Shaders,Data}/` | 본체 | 리그 프리팹 3 · 믹서 · VisualEffects 재질(이름으로 읽는다) · 셰이더 · 화면 효과 프리셋·튜닝 |
+| 본체 에셋 | `Ked.Presentation/{Prefabs,Audio,Resources,Data}/` | 본체 | 리그 프리팹 3 · 믹서 · VisualEffects 재질과 셰이더(재질은 이름으로 읽는다 — 프리팹이 들고 있으면 그것이 먼저) · 화면 효과 프리셋·튜닝 |
 | 진행 판정·실행 | `Ked.Progression/` | 꽂힌 모듈 (반입본) | 원본은 ked-progression-runtime. 고칠 일은 원본과 함께(vendoring) |
 | 저장 모델·조정자·포크 | `Ked.Progression/Save/` | 꽂힌 모듈 (반입본) | 진행 겹. 과거 장면 루트 보관(E3)은 여기 몫 |
 | 로컬 파일 저장 | `Ked.Progression/Save/{Persistence,Slots,Maintenance}` | 꽂힌 모듈 (기본 제공 구현) | D2. 연출 겹은 `PlaybackMemory`가 문자열로 싣는다 |
