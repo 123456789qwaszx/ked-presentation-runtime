@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Text;
-using UnityEngine;
 
 namespace Ked.Samples.UI
 {
@@ -9,48 +8,57 @@ namespace Ked.Samples.UI
     //   진행 예제   챕터가 끝났다(SceneRunner → IChapterEndView) — 마지막 장면을 확정(저장)한 뒤.
     // 재생 화면(마지막 장면)을 딤 아래 두고 Panel을 쌓는다 — Panel이 있으니 재생 입력은 UI가 쥔다(SyncInput).
     // 갈 곳은 타이틀 하나다. 길은 메뉴의 "타이틀로"와 같다(ReturnToTitle) — 끊을 것이 없으니 확인은 묻지 않는다.
-    public sealed partial class KedUIFlow
+    // Esc로 닫지 않는다 — 닫으면 끝난 재생 화면에 남는다.
+    internal sealed class EpisodeEndBinding : ScreenBinding
     {
         private const string StatSeparator = "   ·   ";
         private const int StatsPerLine = 3;
 
-        private void SubscribeEnd()
+        public EpisodeEndBinding(KedUIFlow flow, KedUIServices services)
+            : base(flow, services)
         {
-            _end.TitleClicked += ReturnToTitle;
+            Own(flow.Require<EpisodeEndPanel>());
         }
 
-        public void ShowPlaythroughEnd(KedPlaythroughEnd end)
+        // 띄울 자리(재생 화면인지)는 흐름이 먼저 보았다.
+        public void Open(KedPlaythroughEnd end)
         {
-            if (!_configured || end == null)
-                return;
-
-            // 끝은 재생 화면에서만 온다. 타이틀로 나가는 중이거나 이미 타이틀이면 띄울 자리가 없다.
-            if (_exiting || !IsPlayRoot)
-            {
-                Debug.Log("[Ked UI] 재생 화면이 아니라 끝 카드를 띄우지 않는다.");
-                return;
-            }
-
-            StopFastForward();
+            Services.StopFastForward();
 
             // 끝은 진행 입력으로만 온다 — 열린 Panel이 있을 수 없다. 있어도 끝 카드 하나만 남긴다.
-            if (_ui.HasPanel)
-                CloseAllPanels();
+            if (Flow.HasPanel)
+                Flow.CloseAllPanels();
 
             // 카드 아래는 재생 화면이다. UI를 숨긴 채였으면 되돌린다.
-            if (_play.IsHudHidden)
-                _play.SetHudHidden(false);
+            if (Flow.IsHudHidden)
+                Flow.RestoreHud();
 
-            EpisodeEndPanel.Model model = EndModel(end);
-            PushPanel<EpisodeEndPanel>(panel => panel.Present(model));
+            EpisodeEndPanel.Model model = BuildModel(end);
+
+            Flow.PushPanel<EpisodeEndPanel>(panel =>
+            {
+                BindView(panel, ApplyBindings);
+                panel.Present(model);
+            });
         }
 
-        private EpisodeEndPanel.Model EndModel(KedPlaythroughEnd end)
+        public override void Back(UIBase view)
+        {
+        }
+
+        private void ApplyBindings(EpisodeEndPanel panel)
+        {
+            AddBinding(panel,
+                p => p.TitleClicked += Flow.ReturnToTitle,
+                p => p.TitleClicked -= Flow.ReturnToTitle);
+        }
+
+        private EpisodeEndPanel.Model BuildModel(KedPlaythroughEnd end)
         {
             bool chapter = end.Kind == KedPlaythroughEnd.EndKind.Chapter;
 
             string title = string.IsNullOrWhiteSpace(end.Title)
-                ? Text(_titlePort?.Example?.TitleKey)
+                ? Text(Services.Title?.Example?.TitleKey)
                 : end.Title;
 
             string body = string.IsNullOrWhiteSpace(end.LastEpisode)

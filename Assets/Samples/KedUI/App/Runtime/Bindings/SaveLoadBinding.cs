@@ -14,98 +14,122 @@ namespace Ked.Samples.UI
     // 저장 모드에서는 목록 다음 칸 하나가 "빈 슬롯(새로 저장)"이고, 그 뒤 칸은 비어 있는 자리(누를 수 없음)다 —
     // 서비스에 번호 칸이 없으니 아무 빈 칸에나 저장할 수 있는 것처럼 보이게 하지 않는다.
     // 자동 저장 탭은 만들지 않는다(서비스에 없다). 이어하기 기록은 타이틀의 이어하기가 쓴다.
-    public sealed partial class KedUIFlow
+    internal sealed class SaveLoadBinding : ScreenBinding
     {
-        private enum SlotMode
+        public enum Mode
         {
             Save,
             Load,
         }
 
-        private readonly List<SaveSlotEntry> _slotEntries = new();
+        private readonly SaveLoadPanel _panel;
+        private readonly List<SaveSlotEntry> _entries = new();
         private readonly Dictionary<string, bool> _loadable = new(StringComparer.Ordinal);
 
-        private SlotMode _slotMode;
-        private bool _slotsReadable;
-        private int _slotPage;
-        private int _slotSelected = -1;
-        private bool _slotBusy;
+        private Mode _mode;
+        private bool _readable;
+        private int _page;
+        private int _selected = -1;
+        private bool _busy;
 
-        private void SubscribeSlots()
+        public SaveLoadBinding(KedUIFlow flow, KedUIServices services)
+            : base(flow, services)
         {
-            _slots.BackClicked += SlotsBack;
-            _slots.CloseClicked += CloseAllPanels;
-            _slots.PreviousClicked += () => TurnSlotPage(-1);
-            _slots.NextClicked += () => TurnSlotPage(+1);
-            _slots.CardClicked += SelectSlotCard;
-            _slots.CardDoubleClicked += index =>
-            {
-                SelectSlotCard(index);
-                ActOnSelectedSlot();
-            };
-            _slots.ActionClicked += ActOnSelectedSlot;
+            _panel = Own(flow.Require<SaveLoadPanel>());
         }
 
-        private void OpenSlots(SlotMode mode)
+        private IKedSaveSlotPort Slots => Services.Slots;
+
+        public void Open(Mode mode)
         {
-            if (_slotPort == null)
+            if (Slots == null)
                 return;
 
-            _slotMode = mode;
-            _slotBusy = false;
-            ReloadSlots();
+            _mode = mode;
+            _busy = false;
+            Reload();
 
             // 저장은 "새로 저장" 칸을 먼저 고른다 — 열자마자 실행 버튼을 눌러도 기록을 덮어쓰지 않게.
-            _slotSelected = mode == SlotMode.Save && HasNewSlotCell
-                ? _slotEntries.Count
-                : FirstSelectableSlot();
+            _selected = mode == Mode.Save && HasNewSlotCell
+                ? _entries.Count
+                : FirstSelectable();
 
-            _slotPage = _slotSelected >= 0 ? _slotSelected / SaveLoadPanel.SlotsPerPage : 0;
+            _page = _selected >= 0 ? _selected / SaveLoadPanel.SlotsPerPage : 0;
 
-            PushPanel<SaveLoadPanel>(_ => RedrawSlots(focus: true));
+            Flow.PushPanel<SaveLoadPanel>(panel =>
+            {
+                BindView(panel, ApplyBindings);
+                Redraw(focus: true);
+            });
         }
 
-        private void SlotsBack()
+        private void ApplyBindings(SaveLoadPanel panel)
         {
-            ClosePanel();
+            AddBinding(panel,
+                p => p.BackClicked += Flow.ClosePanel,
+                p => p.BackClicked -= Flow.ClosePanel);
+
+            AddBinding(panel,
+                p => p.CloseClicked += Flow.CloseAllPanels,
+                p => p.CloseClicked -= Flow.CloseAllPanels);
+
+            AddBinding(panel,
+                p => p.PreviousClicked += PreviousPage,
+                p => p.PreviousClicked -= PreviousPage);
+
+            AddBinding(panel,
+                p => p.NextClicked += NextPage,
+                p => p.NextClicked -= NextPage);
+
+            AddBinding(panel,
+                p => p.CardClicked += SelectCard,
+                p => p.CardClicked -= SelectCard);
+
+            AddBinding(panel,
+                p => p.CardDoubleClicked += ActOnCard,
+                p => p.CardDoubleClicked -= ActOnCard);
+
+            AddBinding(panel,
+                p => p.ActionClicked += ActOnSelected,
+                p => p.ActionClicked -= ActOnSelected);
         }
 
-        private void ReloadSlots()
+        private void Reload()
         {
-            _slotEntries.Clear();
+            _entries.Clear();
             _loadable.Clear();
 
-            _slotsReadable = _slotPort.TryReadSlots(out IReadOnlyList<SaveSlotEntry> slots);
+            _readable = Slots.TryReadSlots(out IReadOnlyList<SaveSlotEntry> slots);
 
             if (slots != null)
             {
                 for (int i = 0; i < slots.Count; i++)
                 {
                     if (slots[i] != null)
-                        _slotEntries.Add(slots[i]);
+                        _entries.Add(slots[i]);
                 }
             }
 
             // 최근 저장이 앞(01). 시각을 읽지 못하는 항목은 뒤로.
-            _slotEntries.Sort((a, b) => ParseUtc(b.SavedAtUtc).CompareTo(ParseUtc(a.SavedAtUtc)));
+            _entries.Sort((a, b) => ParseUtc(b.SavedAtUtc).CompareTo(ParseUtc(a.SavedAtUtc)));
         }
 
-        private int CellCount => _slotEntries.Count + (HasNewSlotCell ? 1 : 0);
-        private bool HasNewSlotCell => _slotMode == SlotMode.Save && _slotsReadable;
+        private int CellCount => _entries.Count + (HasNewSlotCell ? 1 : 0);
+        private bool HasNewSlotCell => _mode == Mode.Save && _readable;
         private int PageCount => Mathf.Max(1, Mathf.CeilToInt(CellCount / (float)SaveLoadPanel.SlotsPerPage));
 
-        private bool IsFilledCell(int cell) => cell >= 0 && cell < _slotEntries.Count;
-        private bool IsNewSlotCell(int cell) => HasNewSlotCell && cell == _slotEntries.Count;
+        private bool IsFilledCell(int cell) => cell >= 0 && cell < _entries.Count;
+        private bool IsNewSlotCell(int cell) => HasNewSlotCell && cell == _entries.Count;
 
         private bool IsSelectableCell(int cell)
         {
-            if (_slotMode == SlotMode.Save)
+            if (_mode == Mode.Save)
                 return IsFilledCell(cell) || IsNewSlotCell(cell);
 
-            return IsFilledCell(cell) && CanLoad(_slotEntries[cell].Id);
+            return IsFilledCell(cell) && CanLoad(_entries[cell].Id);
         }
 
-        private int FirstSelectableSlot()
+        private int FirstSelectable()
         {
             for (int cell = 0; cell < CellCount; cell++)
             {
@@ -123,23 +147,26 @@ namespace Ked.Samples.UI
 
             if (!_loadable.TryGetValue(id, out bool loadable))
             {
-                loadable = _slotPort.CanLoad(id);
+                loadable = Slots.CanLoad(id);
                 _loadable[id] = loadable;
             }
 
             return loadable;
         }
 
+        private void PreviousPage() => TurnPage(-1);
+        private void NextPage() => TurnPage(+1);
+
         // 쪽을 넘기면 선택도 그 쪽의 첫 칸으로 옮긴다 — 보이지 않는 칸에 실행이 걸리지 않게.
-        private void TurnSlotPage(int delta)
+        private void TurnPage(int delta)
         {
-            int next = Mathf.Clamp(_slotPage + delta, 0, PageCount - 1);
-            if (next == _slotPage)
+            int next = Mathf.Clamp(_page + delta, 0, PageCount - 1);
+            if (next == _page)
                 return;
 
-            _slotPage = next;
-            _slotSelected = FirstSelectableOnPage(_slotPage);
-            RedrawSlots(focus: false);
+            _page = next;
+            _selected = FirstSelectableOnPage(_page);
+            Redraw(focus: false);
         }
 
         private int FirstSelectableOnPage(int page)
@@ -157,22 +184,28 @@ namespace Ked.Samples.UI
         }
 
         private bool IsOnCurrentPage(int cell) =>
-            cell >= 0 && cell / SaveLoadPanel.SlotsPerPage == _slotPage;
+            cell >= 0 && cell / SaveLoadPanel.SlotsPerPage == _page;
 
-        private void SelectSlotCard(int indexOnPage)
+        private void SelectCard(int indexOnPage)
         {
-            int cell = _slotPage * SaveLoadPanel.SlotsPerPage + indexOnPage;
+            int cell = _page * SaveLoadPanel.SlotsPerPage + indexOnPage;
             if (!IsSelectableCell(cell))
                 return;
 
-            _slotSelected = cell;
-            RedrawSlots(focus: false);
+            _selected = cell;
+            Redraw(focus: false);
         }
 
-        private void RedrawSlots(bool focus)
+        private void ActOnCard(int indexOnPage)
         {
-            bool save = _slotMode == SlotMode.Save;
-            int first = _slotPage * SaveLoadPanel.SlotsPerPage;
+            SelectCard(indexOnPage);
+            ActOnSelected();
+        }
+
+        private void Redraw(bool focus)
+        {
+            bool save = _mode == Mode.Save;
+            int first = _page * SaveLoadPanel.SlotsPerPage;
 
             var cards = new SaveSlotCard.Model[SaveLoadPanel.SlotsPerPage];
 
@@ -180,42 +213,42 @@ namespace Ked.Samples.UI
                 cards[i] = CardFor(first + i);
 
             string hint;
-            if (!_slotsReadable)
+            if (!_readable)
                 hint = Text("slots.hint.unreadable");
-            else if (!save && _slotEntries.Count == 0)
+            else if (!save && _entries.Count == 0)
                 hint = Text("slots.hint.none");
             else
                 hint = Text(save ? "slots.hint.save" : "slots.hint.load");
 
-            bool actionEnabled = !_slotBusy && IsOnCurrentPage(_slotSelected) && IsSelectableCell(_slotSelected) &&
-                                 (!save || _slotPort.CanSave);
+            bool actionEnabled = !_busy && IsOnCurrentPage(_selected) && IsSelectableCell(_selected) &&
+                                 (!save || Slots.CanSave);
 
-            _slots.Present(new SaveLoadPanel.Model
+            _panel.Present(new SaveLoadPanel.Model
             {
                 Title = Text(save ? "slots.save.title" : "slots.load.title"),
                 Subtitle = Text(save ? "slots.save.subtitle" : "slots.load.subtitle"),
                 TabLabel = Text("slots.tab.manual"),
-                PageInfo = Format("slots.pageInfo", KedUIUtil.TwoDigits(_slotPage + 1), KedUIUtil.TwoDigits(PageCount)),
+                PageInfo = Format("slots.pageInfo", KedUIUtil.TwoDigits(_page + 1), KedUIUtil.TwoDigits(PageCount)),
                 PageNumbers = PageNumbers(),
                 Hint = hint,
                 ActionLabel = Text(save ? "slots.save.action" : "slots.load.action"),
                 ActionEnabled = actionEnabled,
-                CanPrevious = _slotPage > 0,
-                CanNext = _slotPage < PageCount - 1,
+                CanPrevious = _page > 0,
+                CanNext = _page < PageCount - 1,
                 Cards = cards,
-                FocusCard = focus && _slotSelected >= first && _slotSelected < first + cards.Length
-                    ? _slotSelected - first
+                FocusCard = focus && _selected >= first && _selected < first + cards.Length
+                    ? _selected - first
                     : -1,
             });
         }
 
         private SaveSlotCard.Model CardFor(int cell)
         {
-            bool selected = cell == _slotSelected;
+            bool selected = cell == _selected;
 
             if (IsFilledCell(cell))
             {
-                SaveSlotEntry entry = _slotEntries[cell];
+                SaveSlotEntry entry = _entries[cell];
 
                 return new SaveSlotCard.Model
                 {
@@ -247,40 +280,40 @@ namespace Ked.Samples.UI
         {
             const int window = 5;
             int count = PageCount;
-            int start = Mathf.Clamp(_slotPage - window / 2, 0, Mathf.Max(0, count - window));
+            int start = Mathf.Clamp(_page - window / 2, 0, Mathf.Max(0, count - window));
             int end = Mathf.Min(count, start + window);
 
             var parts = new List<string>(window);
             for (int p = start; p < end; p++)
             {
                 string number = (p + 1).ToString(CultureInfo.InvariantCulture);
-                parts.Add(p == _slotPage ? $"<color=#13BDC5>{number}</color>" : number);
+                parts.Add(p == _page ? $"<color=#13BDC5>{number}</color>" : number);
             }
 
             return string.Join("   ", parts);
         }
 
-        private void ActOnSelectedSlot()
+        private void ActOnSelected()
         {
-            if (_slotBusy || !IsOnCurrentPage(_slotSelected) || !IsSelectableCell(_slotSelected))
+            if (_busy || !IsOnCurrentPage(_selected) || !IsSelectableCell(_selected))
                 return;
 
-            if (_slotMode == SlotMode.Save)
+            if (_mode == Mode.Save)
             {
-                if (!_slotPort.CanSave)
+                if (!Slots.CanSave)
                     return;
 
-                if (IsNewSlotCell(_slotSelected))
+                if (IsNewSlotCell(_selected))
                 {
                     SaveInto(null);
                     return;
                 }
 
-                SaveSlotEntry entry = _slotEntries[_slotSelected];
-                Confirm(new ConfirmPanel.Request
+                SaveSlotEntry entry = _entries[_selected];
+                Flow.Confirm(new ConfirmPanel.Request
                 {
                     Title = Text("confirm.overwrite.title"),
-                    Body = Format("confirm.overwrite.body", KedUIUtil.TwoDigits(_slotSelected + 1)),
+                    Body = Format("confirm.overwrite.body", KedUIUtil.TwoDigits(_selected + 1)),
                     AcceptLabel = Text("confirm.overwrite.accept"),
                     CancelLabel = Text("common.cancel"),
                     OnAccept = () => SaveInto(entry.Id),
@@ -288,15 +321,15 @@ namespace Ked.Samples.UI
                 return;
             }
 
-            SaveSlotEntry target = _slotEntries[_slotSelected];
+            SaveSlotEntry target = _entries[_selected];
 
             // 재생 중이면 지금 장면을 벗어난다는 것을 확인한다. 타이틀에서는 잃을 진행이 없다.
-            if (IsRunning)
+            if (Services.IsRunning)
             {
-                Confirm(new ConfirmPanel.Request
+                Flow.Confirm(new ConfirmPanel.Request
                 {
                     Title = Text("confirm.load.title"),
-                    Body = Format("confirm.load.body", KedUIUtil.TwoDigits(_slotSelected + 1)),
+                    Body = Format("confirm.load.body", KedUIUtil.TwoDigits(_selected + 1)),
                     AcceptLabel = Text("confirm.load.accept"),
                     CancelLabel = Text("common.cancel"),
                     OnAccept = () => LoadFrom(target.Id),
@@ -315,8 +348,8 @@ namespace Ked.Samples.UI
             try
             {
                 saved = overwriteId == null
-                    ? _slotPort.TryCreate()
-                    : _slotPort.TryOverwrite(overwriteId);
+                    ? Slots.TryCreate()
+                    : Slots.TryOverwrite(overwriteId);
             }
             catch (Exception error)
             {
@@ -324,25 +357,25 @@ namespace Ked.Samples.UI
                 saved = false;
             }
 
-            ReloadSlots();
+            Reload();
 
             if (saved)
             {
-                _slotPage = 0;
-                _slotSelected = 0;
-                RedrawSlots(focus: true);
+                _page = 0;
+                _selected = 0;
+                Redraw(focus: true);
 
-                Notice(
+                Flow.Notice(
                     Text("notice.saved.title"),
                     Format("notice.saved.body", KedUIUtil.TwoDigits(1)),
                     NoticePanel.Kind.Success);
                 return;
             }
 
-            _slotSelected = Mathf.Min(_slotSelected, CellCount - 1);
-            RedrawSlots(focus: true);
+            _selected = Mathf.Min(_selected, CellCount - 1);
+            Redraw(focus: true);
 
-            Notice(
+            Flow.Notice(
                 Text("notice.saveFailed.title"),
                 Text("notice.saveFailed.body"),
                 NoticePanel.Kind.Failure);
@@ -350,21 +383,21 @@ namespace Ked.Samples.UI
 
         private async void LoadFrom(string slotId)
         {
-            if (_slotBusy)
+            if (_busy)
                 return;
 
-            _slotBusy = true;
-            RedrawSlots(focus: false);
+            _busy = true;
+            Redraw(focus: false);
 
             bool transitionStarted = false;
 
             try
             {
-                Task load = _slotPort.LoadAsync(slotId, () =>
+                Task load = Slots.LoadAsync(slotId, () =>
                 {
                     transitionStarted = true;
-                    StopFastForward();
-                    CloseAllPanels();
+                    Services.StopFastForward();
+                    Flow.CloseAllPanels();
                 });
 
                 await load;
@@ -375,16 +408,16 @@ namespace Ked.Samples.UI
             }
             finally
             {
-                _slotBusy = false;
+                _busy = false;
             }
 
             // 회차 전환까지 가지 못했다(본문을 읽지 못함 등) — 화면은 열린 채로 두고 알린다.
-            if (!transitionStarted && _ui.TopPanel == _slots)
+            if (!transitionStarted && Flow.IsTop(_panel))
             {
                 _loadable.Remove(slotId);
-                RedrawSlots(focus: true);
+                Redraw(focus: true);
 
-                Notice(
+                Flow.Notice(
                     Text("notice.loadFailed.title"),
                     Text("notice.loadFailed.body"),
                     NoticePanel.Kind.Failure);
