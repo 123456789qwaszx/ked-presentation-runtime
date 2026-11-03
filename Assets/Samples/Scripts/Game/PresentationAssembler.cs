@@ -42,6 +42,7 @@ public sealed class PresentationAssembler
     private LinePresentationFlow _linePresentationFlow;
     private LineVoiceController _lineVoice;
     private SceneBgmController _sceneBgm;
+    private RigBlurIntentSystem _rigBlur;
     private DialogueBoxPresentationController _dialogueBoxPresentation;
     private ScenePresentation _scenePresentation;
     private YarnPlaybackDriver _yarnPlaybackDriver;
@@ -151,6 +152,9 @@ public sealed class PresentationAssembler
 
     private void BootstrapPresentationSession()
     {
+        // 블러 의도(focus_on·screen_blur) — 커맨드는 의도만 넘기고, 줄 머리에서 시스템이 리그를 다시 맞춘다.
+        _rigBlur = new RigBlurIntentSystem(_presentationStage, _presentationUIRoot);
+
         // Character Rig
         CharRigSlotResolver charRigSlotResolver = new(_presentationUIRoot);
         CharacterRigBuilder characterRigBuilder = new();
@@ -165,7 +169,8 @@ public sealed class PresentationAssembler
             _refs.CharacterFocusTuningDb,
             _refs.CharacterVisualFocusPresetDb,
             _refs.CharacterDepthTuning,
-            _presentationUIRoot);
+            _presentationUIRoot,
+            _rigBlur);
 
         ShotResponseCommandFactory presentationShotFactory = new(
             _presentationStage, _presentationResponseRig, _refs.CharacterFocusTuningDb, _presentationUIRoot);
@@ -184,7 +189,7 @@ public sealed class PresentationAssembler
             _refs.ScreenVignettePresetDb,
             _refs.StageMaskMotionPresetDb,
             _presentationUIRoot,
-            _presentationUIRoot);
+            _rigBlur);
 
         CompositeCommandFactory factory = new(
             charRigFactory,
@@ -206,6 +211,7 @@ public sealed class PresentationAssembler
     {
         YarnPlaybackDriver yarnPlaybackDriver = new(_refs.CommandExecutor, _presentationScopeSession);
         _yarnPlaybackDriver = yarnPlaybackDriver;
+        yarnPlaybackDriver.LineHeadPlayed += _rigBlur.Reconcile;
 
         // 대사창 · 선택지 상자는 화면 쪽(새 예제 UI)이 넘긴다.
         IPresentationDialogueBoxView dialogueSurfaceBox = _refs.DialogueBoxView
@@ -291,6 +297,7 @@ public sealed class PresentationAssembler
             _rollbackHistory,
             _refs.CustomLinePresenter,
             _presentationResponseRig,
+            _rigBlur,
             _screenEffectRig,
             _presentationUIRoot,
             _refs.AudioSystem,

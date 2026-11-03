@@ -1,6 +1,5 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
 
@@ -30,17 +29,12 @@ public sealed class DepthFocusCommandSpecCharR : CharacterRigCommandSpecBase
 ///
 /// v2를 버린 이유가 여기서 해결된다 — 레이어를 통째로 균일하게 흐리면 초점이 나간 게 아니라
 /// 렌즈에 자국이 남은 것처럼 보인다. 흐림이 깊이마다 달라야 디포커스로 읽힌다.
-///
 /// 깊이는 레이어가 아니라 <see cref="CharacterRigRefs.SettledDepthScale"/>에서 온다.
-/// 캐릭터는 대부분 mid 레이어에 몰려 있고 깊이는 size 커맨드의 프리셋으로 갈리기 때문에,
-/// 레이어를 기준으로 삼으면 전원이 같은 값이 되어 v2의 실패를 반복한다.
 ///
-/// 배경은 대상이 아니다 — screen_blur가 이미 레이어 단위로 처리한다. 배경도 캐릭터 리그로 서지만
-/// **캐스팅하지 않은 슬롯**이라, 배역이 있는 슬롯만 훑는다(focus_clear도 같다 — 배경의 screen_blur를 지우지 않는다).
-/// 플래그가 아니라 구조로 빠진다.
+/// 배경은 대상이 아니다 — screen_blur가 레이어 단위로 처리한다. 배역이 있는 슬롯만 흐린다(focus_clear도 같다).
 ///
-/// 리그마다 "초점 블러" 의도만 넘긴다 — 전환은 각 리그의 RigVisualEffectController가 소유하고,
-/// 모양(char_visual)·레이어(screen_blur) 블러와는 가장 큰 값으로 합쳐진다.
+/// 초점은 장면 전역 의도다 — 의도만 RigBlurIntentSystem에 넘기고, 리그마다 블러를 정하고 줄 머리에서 다시 맞추는 것은 시스템이 한다.
+/// 그래서 뒤에 등장한 캐릭터, size로 바뀐 깊이도 초점을 따라간다.
 /// </summary>
 public sealed class DepthFocusCommandCharR : CommandBase
 {
@@ -48,101 +42,37 @@ public sealed class DepthFocusCommandCharR : CommandBase
     private const float StepFinishSpeedUpMultiplier = 1.5f;
 
     private readonly DepthFocusCommandSpecCharR _spec;
-    private readonly PresentationStage _stage;
-
-    private readonly List<(RigVisualEffectController Controller, float Blur)> _targets = new();
-    private readonly List<KeyValuePair<string, CharacterRigRefs>> _scratch = new();
+    private readonly RigBlurIntentSystem _blur;
 
     public override bool WaitForCompletion => _spec.wait;
 
-    public DepthFocusCommandCharR(PresentationStage stage, DepthFocusCommandSpecCharR spec)
+    public DepthFocusCommandCharR(RigBlurIntentSystem blur, DepthFocusCommandSpecCharR spec)
     {
-        _stage = stage;
+        _blur = blur;
         _spec = spec;
     }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
-        CollectTargets();
-
-        for (int i = 0; i < _targets.Count; i++)
-            _targets[i].Controller.FollowFocusBlur(_targets[i].Blur, _spec.duration, _spec.ease);
+        Apply(snap: false);
 
         if (!_spec.wait)
             yield break;
 
-        while (AnyTransitioning())
+        while (_blur.IsFocusTransitioning)
             yield return null;
     }
 
-    protected override void OnSkip(CommandRunScope scope)
-    {
-        CollectTargets();
-
-        for (int i = 0; i < _targets.Count; i++)
-            _targets[i].Controller.SnapFocusBlur(_targets[i].Blur);
-    }
+    protected override void OnSkip(CommandRunScope scope) => Apply(snap: true);
 
     protected override void OnStepLifetimeFinished(CommandRunScope scope)
+        => _blur.AccelerateFocus(StepFinishSpeedUpMultiplier);
+
+    private void Apply(bool snap)
     {
-        for (int i = 0; i < _targets.Count; i++)
-            _targets[i].Controller.AccelerateFocusBlur(StepFinishSpeedUpMultiplier);
-    }
-
-    private void CollectTargets()
-    {
-        _targets.Clear();
-
-        CharacterRigRefs focusRig = null;
-
-        if (!_spec.clear)
-        {
-            focusRig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(_stage, _spec.slotKey);
-
-            if (focusRig == null)
-            {
-                Debug.LogWarning(
-                    $"[DepthFocusCommandCharR] Focus character not found. " +
-                    $"slotKey='{_spec.slotKey}'. 초점면을 정할 수 없어 아무것도 흐리지 않는다.");
-                return;
-            }
-        }
-
-        float focusScale = focusRig != null ? focusRig.SettledDepthScale : 0f;
-
-        _scratch.Clear();
-        _stage.characterRigs.CollectAliveRigEntries(_scratch);
-
-        for (int i = 0; i < _scratch.Count; i++)
-        {
-            CharacterRigRefs refs = _scratch[i].Value;
-
-            if (refs?.VisualEffect == null)
-                continue;
-
-            // 배경(캐스팅하지 않은 슬롯)은 초점면 계산에 끼지 않는다 — SettledDepthScale 1로 섞이면
-            // 배경이 초점 캐릭터와 같은 깊이에 있는 척 흐려지거나 선명해진다.
-            if (!_stage.castRegistry.TryPeekCharacter(_scratch[i].Key, out _))
-                continue;
-
-            _targets.Add((
-                refs.VisualEffect,
-                _spec.clear ? 0f : CircleOfConfusion(refs.SettledDepthScale, focusScale)));
-        }
-    }
-
-    private float CircleOfConfusion(float depthScale, float focusScale)
-        => Mathf.Clamp01(Mathf.Abs(depthScale - focusScale) * _spec.falloff)
-           * Mathf.Clamp01(_spec.maxBlur);
-
-    private bool AnyTransitioning()
-    {
-        for (int i = 0; i < _targets.Count; i++)
-        {
-            if (_targets[i].Controller.IsFocusBlurTransitioning)
-                return true;
-        }
-
-        return false;
+        if (_spec.clear)
+            _blur.ClearFocus(_spec.duration, _spec.ease, snap);
+        else
+            _blur.SetFocus(_spec.slotKey, _spec.falloff, _spec.maxBlur, _spec.duration, _spec.ease, snap);
     }
 }

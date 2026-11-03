@@ -142,6 +142,10 @@ public sealed class RigVisualEffectController : IDisposable
     public float FocusBlur => _focusBlur;
     public float LayerBlur => _layerBlur;
 
+    // 전환이 향하는 값 — RigBlurIntentSystem이 목표가 바뀌었는지 볼 때 쓴다.
+    public float FocusBlurIntent => _focusBlurTransition.Intent;
+    public float LayerBlurIntent => _layerBlurTransition.Intent;
+
     public bool IsStyleTransitioning => _styleTransition.IsTransitioning;
     public bool IsFocusBlurTransitioning => _focusBlurTransition.IsTransitioning;
     public bool IsLayerBlurTransitioning => _layerBlurTransition.IsTransitioning;

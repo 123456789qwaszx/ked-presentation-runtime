@@ -11,6 +11,8 @@ public sealed class ScenePresentation : IPlaybackStage
     private readonly RollbackHistory _rollbackHistory;
     private readonly ILineAborter _linePresentationAborter;
     private readonly PresentationShotResponseSystem _shotResponseSystem;
+    // 블러 의도(focus_on·screen_blur)도 샷처럼 정지에서 비운다 — 리플레이가 다시 건다.
+    private readonly RigBlurIntentSystem _rigBlur;
     // 화면 효과(vignette·noise 의도, flash 이벤트)와 무대 마스크도 샷처럼 정지에서 기준으로 — 리플레이가 다시 건다.
     private readonly ScreenEffectRig _screenEffects;
     private readonly IStageMaskProvider _stageMasks;
@@ -38,6 +40,7 @@ public sealed class ScenePresentation : IPlaybackStage
         RollbackHistory rollbackHistory,
         ILineAborter linePresentationAborter,
         PresentationShotResponseSystem shotResponseSystem,
+        RigBlurIntentSystem rigBlur,
         ScreenEffectRig screenEffects,
         IStageMaskProvider stageMasks,
         AudioSystem audio,
@@ -56,6 +59,7 @@ public sealed class ScenePresentation : IPlaybackStage
         _rollbackHistory = rollbackHistory;
         _linePresentationAborter = linePresentationAborter;
         _shotResponseSystem = shotResponseSystem;
+        _rigBlur = rigBlur;
         _screenEffects = screenEffects;
         _stageMasks = stageMasks;
         _audio = audio;
@@ -153,6 +157,7 @@ public sealed class ScenePresentation : IPlaybackStage
         _linePresentationAborter.AbortCurrentLine();
         _rollbackHistory.ClearRollbackPoints();
         _shotResponseSystem.Clear();
+        _rigBlur?.Clear();
 
         if (_screenEffects != null)
             _screenEffects.ResetToBaselineImmediate();

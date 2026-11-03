@@ -139,6 +139,8 @@ face_swap만 모델 안(폴드가 `ApplyFace`로 접음)이라 클레임을 맞�
 
 screen_blur는 이름과 달리 화면 포스트 이펙트가 아니라 리그마다 거는 셰이더 블러다(`StageLayerBlurCommand` 머리 주석).
 그래서 리그 상태를 쓰는 char_visual·focus_on과 같은 무리로 관리된다.
+다만 focus_on·screen_blur는 리그 하나가 아니라 장면 전역 의도다(2026-11-03) — `RigBlurIntentSystem`이 의도를 들고
+줄 머리마다 살아 있는 리그에 다시 맞춘다(뒤에 등장한 리그·`size` 깊이·`char_to` 레이어가 따라감). BLUR-DECISIONS.md 참조.
 
 ## 6. 예외 — 규칙대로 동작하지 않는 것
 

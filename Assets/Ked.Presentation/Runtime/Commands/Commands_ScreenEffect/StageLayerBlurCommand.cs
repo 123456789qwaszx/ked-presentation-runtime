@@ -1,6 +1,5 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
 
@@ -26,12 +25,11 @@ public sealed class StageLayerBlurCommandSpec : CommandSpecBase
 /// 옛 캡처 방식(레이어를 통째로 RT에 굽고 오버레이로 덮기)을 대체한다. 판단은 그대로다 —
 /// "이 레이어에 있는 것을 흐린다". 기구만 요소별 셰이더로 바뀌었고, 그래서
 /// 착란원이 요소마다 따로 서고 렌더러 종류(Image / 훗날 SkeletonGraphic)를 가리지 않는다.
+/// 배경도 캐릭터 리그다(캐스팅하지 않은 슬롯) — 그 레이어에 있으면 같이 흐려진다.
 ///
-/// 레이어 아래의 리그를 전부 훑는다. 배경도 캐릭터 리그다(캐스팅하지 않은 슬롯) — far 레이어에는
-/// 보통 배경만 있지만, 캐릭터를 그 레이어에 올리면 같이 흐려지는 것이 이 커맨드의 의미상 맞다.
-///
-/// 리그마다 "레이어 블러" 의도만 넘긴다 — 전환은 각 리그의 RigVisualEffectController가 소유하고,
-/// 모양(char_visual)·초점(focus_on) 블러와는 가장 큰 값으로 합쳐진다.
+/// 레이어 블러는 장면 전역 의도다 — 의도만 RigBlurIntentSystem에 넘기고, 줄 머리에서 다시 맞추는 것은 시스템이 한다.
+/// 그래서 뒤늦게 그 레이어에 붙은 리그도 흐려지고, char_to로 빠져나간 리그는 선명해진다.
+/// 모양(char_visual)·초점(focus_on) 블러와는 리그 컨트롤러에서 가장 큰 값으로 합쳐진다.
 /// </summary>
 public sealed class StageLayerBlurCommand : CommandBase
 {
@@ -39,115 +37,32 @@ public sealed class StageLayerBlurCommand : CommandBase
     private const float StepFinishSpeedUpMultiplier = 1.5f;
 
     private readonly StageLayerBlurCommandSpec _spec;
-    private readonly IStageDepthContentSlotProvider _slots;
-    private readonly PresentationStage _stage;
-
-    private readonly List<RigVisualEffectController> _targets = new();
-    private readonly List<CharacterRigRefs> _charScratch = new();
+    private readonly RigBlurIntentSystem _blur;
 
     public override bool WaitForCompletion => _spec.wait;
 
-    public StageLayerBlurCommand(
-        PresentationStage stage,
-        StageLayerBlurCommandSpec spec,
-        IStageDepthContentSlotProvider slots)
+    public StageLayerBlurCommand(RigBlurIntentSystem blur, StageLayerBlurCommandSpec spec)
     {
-        _stage = stage;
+        _blur = blur;
         _spec = spec;
-        _slots = slots;
     }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
-        CollectTargets();
-
-        float amount = Mathf.Clamp01(_spec.amount);
-
-        for (int i = 0; i < _targets.Count; i++)
-            _targets[i].FollowLayerBlur(amount, _spec.duration, _spec.ease);
+        Apply(snap: false);
 
         if (!_spec.wait)
             yield break;
 
-        while (AnyTransitioning())
+        while (_blur.IsLayerTransitioning)
             yield return null;
     }
 
-    protected override void OnSkip(CommandRunScope scope)
-    {
-        CollectTargets();
-
-        float amount = Mathf.Clamp01(_spec.amount);
-
-        for (int i = 0; i < _targets.Count; i++)
-            _targets[i].SnapLayerBlur(amount);
-    }
+    protected override void OnSkip(CommandRunScope scope) => Apply(snap: true);
 
     protected override void OnStepLifetimeFinished(CommandRunScope scope)
-    {
-        for (int i = 0; i < _targets.Count; i++)
-            _targets[i].AccelerateLayerBlur(StepFinishSpeedUpMultiplier);
-    }
+        => _blur.AccelerateLayer(StepFinishSpeedUpMultiplier);
 
-    // 실행 시점에 레이어 아래에 있던 리그만 잡는다.
-    // 뒤늦게 붙는 리그는 의도적으로 포함하지 않는다 (레거시 CollectEdgeHideControllers와 같은 규칙).
-    private void CollectTargets()
-    {
-        _targets.Clear();
-
-        RectTransform contentRoot = _slots?.GetDepthContent(_spec.stage, _spec.layer);
-
-        if (contentRoot == null)
-        {
-            Debug.LogWarning(
-                $"[StageLayerBlurCommand] Depth content slot is missing. " +
-                $"stage='{_spec.stage}', layer='{_spec.layer}'.");
-            return;
-        }
-
-        _charScratch.Clear();
-        _stage.characterRigs.CollectAliveRigs(_charScratch);
-
-        for (int i = 0; i < _charScratch.Count; i++)
-        {
-            CharacterRigRefs refs = _charScratch[i];
-
-            if (refs?.VisualEffect == null)
-                continue;
-
-            if (!IsDescendantOf(refs.RigRoot, contentRoot))
-                continue;
-
-            _targets.Add(refs.VisualEffect);
-        }
-    }
-
-    private bool AnyTransitioning()
-    {
-        for (int i = 0; i < _targets.Count; i++)
-        {
-            if (_targets[i].IsLayerBlurTransitioning)
-                return true;
-        }
-
-        return false;
-    }
-
-    private static bool IsDescendantOf(Transform child, Transform parent)
-    {
-        if (child == null || parent == null)
-            return false;
-
-        Transform t = child;
-
-        while (t != null)
-        {
-            if (t == parent)
-                return true;
-
-            t = t.parent;
-        }
-
-        return false;
-    }
+    private void Apply(bool snap)
+        => _blur.SetLayerBlur(_spec.stage, _spec.layer, _spec.amount, _spec.duration, _spec.ease, snap);
 }
