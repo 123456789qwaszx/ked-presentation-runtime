@@ -51,7 +51,7 @@ SCOPE-BOUNDARY.md §1은 "여기 적힌 것은 전부 필요한 기능이고 주
 | 라인 표시 트랜잭션 | `Ked.Presentation/Playback/DialoguePresenter/` | 본체 | 대사창·선택지 뷰 베이스는 `Samples/Scripts/UI/DialogueBox/`(예제)로 갈랐다 — `PLAN_playback-unit.md` P2 |
 | 전진·스킵·롤백·백로그 | `Ked.Presentation/Playback/FeatureController/` | 본체 | 소비자 없던 키 `2`~`7` 바인딩은 4단계에서 걷었다 |
 | 재생 단위·연출 기억 | `Ked.Presentation/Playback/{Host,Memory}/` | 본체 | 호스트가 보는 면은 `PlaybackUnit`·`PlaybackMemory` 둘 — `PLAN_playback-unit.md` |
-| 등가성 하네스 | `Ked.Presentation/Playback/Diagnostics/` | 본체 (Diagnostics) | 본체 타입만 쓴다. 대본 폴더는 호스트가 넘긴다 |
+| 등가성 하네스 | `Ked.Presentation/Playback/Host/StageEquivalenceHarness.cs` | 본체 (Diagnostics) | 본체 타입만 쓴다. 대본 폴더는 호스트가 넘긴다 |
 | 에디터 도구 | `Ked.Presentation/Editor/` | 본체 (Editor) | `Ked.Presentation.Editor` asmdef(에디터 전용). 씬에서는 본체 계약으로만 찾는다 |
 | 본체 에셋 | `Ked.Presentation/{Prefabs,Audio,Resources,Shaders,Data}/` | 본체 | 리그 프리팹 3 · 믹서 · VisualEffects 재질(이름으로 읽는다) · 셰이더 · 화면 효과 프리셋·튜닝 |
 | 진행 판정·실행 | `Ked.Progression/` | 꽂힌 모듈 (반입본) | 원본은 ked-progression-runtime. 고칠 일은 원본과 함께(vendoring) |

@@ -7,7 +7,7 @@ namespace Ked.Samples.UI
     /// <summary>
     /// 재생 화면의 대사창 — PlayScreen의 Refs 위에서 UI 쪽 일만 한다: 글자 · 이름 넣기, 자리(레이아웃), 글자 배율,
     /// 불투명도, 다음 표시, 보이기. 재생 런타임은 모른다.
-    /// 재생 쪽 계약(ked 본체의 대사창 — 연출 프리셋 · 페이드)은 앱이 이것 위에 구현한다(ked: App/Runtime/Play/KedDialogueBoxView).
+    /// 재생 쪽 계약(ked 본체의 대사창 — 연출 프리셋 · 페이드)은 앱이 이것 위에 구현한다(ked: KedUIApp/Runtime/Flow/KedDialogueBoxView).
     ///
     /// 소유권: 줄 · 이름 글자의 자리 · 크기 · 정렬은 앱이 넘기는 레이아웃(PlayDialogueLayout)이 정한다. 넘기지 않으면 프리팹의 자리다.
     /// 그림(박스 · 이름표) · 글꼴 · 불투명도 · 글자 배율은 UI가 정한다.

@@ -74,7 +74,7 @@ Core 순수 테스트 414/414. **Unity 확인이 남았다**(아래 목록). 두
 
 - 무대 반입(`Assets/Ked.Presentation/` Playback 밖 전부 + `ExportedTuning/`), `Documentation~/vendoring.md` 스냅샷 표.
 - `Playback/YarnBridge`: `bg_place`·`bg_size` 등록 삭제, `bg_sprite` 2인자, 이름 `BindBackground`·`Enqueue…Background…`.
-- `Playback/Diagnostics/StageEquivalenceHarness`: `LoadBackgroundDimensions`(없거나 비면 경고).
+- `Playback/Host/StageEquivalenceHarness`: `LoadBackgroundDimensions`(없거나 비면 경고).
 - 예제 배선: `PresentationAssembler`(배경 팩토리·빌더·해석기, 파서 인자) · `PresentationSceneRefs` · `SampleBootstrap`(필드·`IRigPrefabSource`).
   씬 `PresentationSample.unity`의 죽은 줄 `backgroundRigPrefab`(지운 프리팹 GUID)을 YAML에서 뺐다.
 - 대본: 데모·진행 예제의 `<<bg_size bg_main 1>>` 세 줄 삭제, 데모 머리말에 규칙 한 줄. 이제 세 곳의 `bg_fade_in 24fr`이 보인다.

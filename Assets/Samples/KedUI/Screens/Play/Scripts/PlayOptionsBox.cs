@@ -5,7 +5,7 @@ namespace Ked.Samples.UI
     /// <summary>
     /// 재생 화면의 선택지 상자 — 딤과 상자의 보이기 · 입력만 맡는다(시안 03). 항목은 앱이 ItemContainer에 만든다
     /// (선택 가능 · 불가 조건도 그쪽이 정한다). 재생 런타임은 모른다.
-    /// 재생 쪽 계약(ked 본체의 선택지 상자 — 페이드)은 앱이 이것 위에 구현한다(ked: App/Runtime/Play/KedOptionsBoxView).
+    /// 재생 쪽 계약(ked 본체의 선택지 상자 — 페이드)은 앱이 이것 위에 구현한다(ked: KedUIApp/Runtime/Flow/KedOptionsBoxView).
     /// </summary>
     public sealed class PlayOptionsBox
     {
