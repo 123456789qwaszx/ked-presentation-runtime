@@ -52,8 +52,8 @@ title: Demo_Presentation
 // 이 줄만 편지지 모양으로, 사라졌다 나타나며
 그녀의 편지에는 이렇게 적혀 있었다. #letterbox
 
-// 컷신 앞뒤로 대사창 치우기
-<<box_hide>>
+// 컷신 앞뒤로 대사창 치우기 — #boxhide 줄이 대사창을 걷고, #auto가 연출이 끝나면 입력 없이 넘긴다.
+// 다음 줄이 대사창을 다시 띄운다.
 <<place_left s1 bust 33fr>>
 <<24fr>>
 <<place_right s1 bust 33fr>>
@@ -61,7 +61,6 @@ title: Demo_Presentation
 <<place_center s1 bust 33fr>>
 <<24fr>>
 (하린 이리저리) #boxhide #auto
-//<<box_show>>
 연출 컷신 앞뒤로 대사창 치우기.
 
 // ═════ S2. 배치·크기 ═════

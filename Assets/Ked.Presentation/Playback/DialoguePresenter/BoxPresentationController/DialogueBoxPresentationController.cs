@@ -35,8 +35,6 @@ public partial class DialogueBoxPresentationController
     public async YarnTask ShowLineAsync(
         DialogueBoxPresentationContext ctx)
     {
-        InvalidateVisibilityTransition();
-
         DialogueSpeakerPresentationPolicyDBSO.Entry speakerPolicy = default;
         bool hasSpeakerPolicy = false;
 
@@ -212,8 +210,6 @@ public partial class DialogueBoxPresentationController
 
     public void CloseAll()
     {
-        InvalidateVisibilityTransition();
-
         _box.SetVisibleImmediate(false);
         _boxState.Reset();
     }
@@ -221,8 +217,6 @@ public partial class DialogueBoxPresentationController
     // 뷰가 하나이므로 "중단된 전환이 건드린 박스"와 "현재 박스"가 같은 객체
     public void CleanupStale()
     {
-        InvalidateVisibilityTransition();
-
         bool committedVisible = _boxState.IsVisible && _boxState.Box != null;
 
         _box.SetVisibleImmediate(committedVisible);

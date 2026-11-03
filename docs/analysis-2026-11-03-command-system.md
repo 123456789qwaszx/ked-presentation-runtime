@@ -55,8 +55,9 @@ RunNode → SequencePlayer.PlayCommands   (CommandIsPlaying = true)
 [리플레이]  PrepareReplay : PresentationStage.Clear → scope.Start   (롤백·로드는 장면을 처음부터 압축 재생)
 ```
 
-큐를 거치지 않는 커맨드가 다섯 있다. 브리지에서 바로 실행된다:
-`box_hide`·`box_show`(YarnTask — Yarn이 기다림) · `box_close` · `surface_layout` · `surface_reset`.
+큐를 거치지 않는 커맨드는 `surface_layout` · `surface_reset` 둘이다. 브리지에서 상태만 바꾸고,
+적용은 다음 줄의 `ShowLineAsync`가 한다 — 효과가 나는 시점은 큐와 같다.
+대사창 표시는 커맨드가 아니라 줄 태그(`#boxhide` · `#boxfadein` · `#auto` …)가 정한다.
 
 ## 4. 규칙
 
@@ -205,7 +206,12 @@ screen_blur는 이름과 달리 화면 포스트 이펙트가 아니라 리그�
 - 그동안 앱 전체의 unscaled 트윈(UI 포함)이 30배로 돈다. 연출 트윈과 `pause`도 포함이다.
 - 압축(R3)·스텝 경계(R6)와 별개인 네 번째 시간 경로다.
 
-**S5. 즉시 실행 커맨드 다섯은 큐를 앞질러 간다.** `<<fade_out c1>> <<box_hide>>`라고 쓰면 `box_hide`가 Yarn이 그 줄을 만날 때 먼저 돌고, `fade_out`은 다음 줄 머리에서 돈다.
+**S5. 해결 — 큐를 앞지르던 대사창 커맨드 셋(`box_hide` · `box_show` · `box_close`)을 지웠다.**
+- 이 셋은 Yarn이 만나는 자리에서 바로 돌았고(`box_hide/show`는 `YarnTask`로 Yarn을 기다리게 함), 큐 커맨드는 다음 줄 머리에서 돈다.
+  그래서 `<<fade_out c1>> <<box_hide>>`는 대사창이 먼저 사라졌다.
+- 대사 없이 연출만 보이는 용도는 `#boxhide #auto` 줄이 맡는다. `box_close`는 `#boxfadein`, `box_show`는 다음 줄의 FadeIn이 대신한다.
+- 잃은 것: 대사창을 다 걷은 뒤에 연출을 시작하는 순서(약 0.1초 차이), 줄 없이 대사창을 숨기는 것(예: 선택지 동안). 둘 다 쓰던 곳이 없었다.
+- `surface_*`는 남는다 — 상태만 바꾸고 다음 줄에서 적용되므로 순서가 뒤집히지 않는다.
 
 **S6. 잔재와 예외 경로.**
 - `DecideCleanupPolicy`의 scope null 분기는 바로 다음 줄 `_activeScope.CleanupStep`에서 NRE가 난다. 방어가 아니다.
@@ -227,7 +233,7 @@ screen_blur는 이름과 달리 화면 포스트 이펙트가 아니라 리그�
 | E3 | clear가 focus_on 블러를 지움 | defocus를 뺀 모든 char_visual 프리셋이 블러를 0으로 씀 |
 | E4 | 종점을 다시 씀 | 장부 항목도 지움 |
 | S2 | Token·CommandIsPlaying을 덮음 | `_mainRoutine`도 null로 덮음 |
-| S5 | 즉시 실행 6개 | 5개 — `debug_log` 삭제(`fc39ae36`). `Runtime/ASSEMBLY-BOUNDARY.md:114`가 아직 언급 |
+| S5 | 즉시 실행 6개 | `debug_log` 삭제(`fc39ae36`), `box_hide/show/close` 삭제 — `surface_*` 둘만 남음(시점은 큐와 같음) |
 | tx | `tx_<이름>` 18개 | `tx <preset> [stage]` 하나(`StageCommandParser.Transition.cs:8`) |
 | ui_patch | 포트가 경고만 냄 | 커맨드 삭제(`bf42cdfe`), 인터페이스만 남음 |
 | screen_blur | — | `reduction-boundary.md` 표가 "화면 효과(포스트 이펙트 축)"로 분류 — 지금은 리그 블러라 낡음 |

@@ -57,16 +57,7 @@ public sealed partial class YarnCommandBridge
 
         runner.AddCommandHandler<string, string>(
             "actor", EnqueuePresentationActorAliasSpec);
-        
-        runner.AddCommandHandler(
-            "box_hide", HideDialogueBox);
-        
-        runner.AddCommandHandler(
-            "box_show", ShowDialogueBox);
-        
-        runner.AddCommandHandler(
-            "box_close", CloseDialogueBox);
-        
+
         runner.AddCommandHandler<string>(
             "surface_layout", SetSurfaceLayout);
 

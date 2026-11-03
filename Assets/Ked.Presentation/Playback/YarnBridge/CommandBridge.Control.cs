@@ -20,18 +20,7 @@ public sealed partial class YarnCommandBridge
         }
     }
     
-    private YarnTask HideDialogueBox() 
-        => _dialogueBoxPresentation.HideCurrentAsync();
-    
-    private YarnTask ShowDialogueBox() 
-        => _dialogueBoxPresentation.ShowCurrentAsync();
-    
-    // 대사창을 닫고 현재 대사창 상태도 버리는 것.
-    // 이후 box_show를 하더라도 켤 대상이 없기에 무시됨.
-    // 따라서 다음 대사가 나오면 "현재 열려있는 대사창이 없음"이므로 새로 FadeIn을 함.
-    private void CloseDialogueBox() 
-        => _dialogueBoxPresentation.CloseAll();
-    
+    // 대사창 표시는 줄 태그(#boxhide · #boxfadein …)가 정한다 — 커맨드로 끄고 켜지 않는다.
     private void SetSurfaceLayout(string presetKey) 
         => _dialogueBoxPresentation.SetSurfaceLayout(presetKey);
     

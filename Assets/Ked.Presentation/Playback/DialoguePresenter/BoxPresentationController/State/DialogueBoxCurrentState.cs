@@ -14,20 +14,6 @@ public sealed class DialogueBoxCurrentState
         IsVisible = transitionKind != DialogueBoxTransitionKind.Hide;
     }
 
-    public void MarkHidden()
-    {
-        IsVisible = false;
-    }
-
-    public bool TryMarkVisible()
-    {
-        if (Box == null || BoxKind.HasValue == false)
-            return false;
-
-        IsVisible = true;
-        return true;
-    }
-
     public void Reset()
     {
         Box = null;

@@ -111,7 +111,8 @@ Ked.Presentation.Editor (에디터 전용) ────────────�
 생략값은 `StageCommandParser.Table.cs`에만 있다 — 브리지의 전달 메서드는 전부 `= null`이다(두 곳이 되지 않게).
 
 Runtime의 `Yarn.Unity` 참조는 여전히 **0**이다 — 코어가 Yarn을 모르는 상태가 U13-b(순수 코어 추출)의 전제다.
-Yarn을 아는 것은 Playback부터다. 대사창·표면 레이아웃(`box_*`·`surface_*`)과 `debug_log`는 재생 쪽이라 브리지에 남는다.
+Yarn을 아는 것은 Playback부터다. 대사창 표면 레이아웃(`surface_*`)은 재생 쪽이라 브리지에 남는다.
+대사창 표시는 커맨드가 아니라 줄 태그(`#boxhide` · `#boxfadein` …)가 정한다(2026-11-03 `box_hide/show/close` 제거).
 
 ## 5. ⚠ `partial class`는 어셈블리를 넘을 수 없다
 
