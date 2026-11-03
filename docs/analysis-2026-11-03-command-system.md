@@ -99,8 +99,8 @@ RunNode → SequencePlayer.PlayCommands   (CommandIsPlaying = true)
 
 | 커맨드 | 트윈 타깃 | 같은 대상의 다른 쓰기 | ① |
 |---|---|---|---|
-| screen_flash | `Flash.transform` | `_clear`도 같은 클래스(preset `clear`) | ✅ 종점이 0 — 남는 상태 없음 |
-| screen_vignette / noise | 각 컨트롤러 `transform` | 같은 클래스뿐 | ✅ |
+| screen_flash | 컨트롤러가 재생을 소유(이벤트) | `_clear`도 같은 클래스(preset `clear`) | ✅ 종점이 0 — 남는 상태 없음 |
+| screen_vignette / noise | 컨트롤러가 전환을 소유(장면 전역 의도) | 같은 클래스뿐 | ✅ 새 의도는 보이는 값에서 재조준 |
 | tx | `StageMaskGraphic`(+edge) | `tx_stage_mask_clear` — 같은 `DOTween.Kill(graphic, true)` | ✅ |
 | face_swap | 위 겹 루트 시퀀스 | face · show · cast · bg_sprite — 모두 `CompleteInFlight`를 거친다 (`00534410`) | ✅ |
 
@@ -126,7 +126,9 @@ face_swap만 모델 안(폴드가 `ApplyFace`로 접음)이라 클레임을 맞�
 | | char_visual_* · focus_on/clear · screen_blur | 〃 | 가속 ×1.5 | **`Kill(false)`** |
 | 샷 (장면 전역 의도) | shot_* | `Snap(다음 의도)` | 시스템 가속 ×20 | 없음 — 시스템이 전환 하나를 소유, 새 의도는 보이는 값에서 재조준 |
 | 모션 | motion | OnSkip → Commit | 즉시 확정 | 노드마다 `DOKill(true)` |
-| 비워 둠 | screen_flash · screen_vignette · screen_noise · tx · face_swap | OnSkip → 확정 | 없음(의도) | 컨트롤러·그래픽 `Kill(true)` / `CompleteInFlight` |
+| 비워 둠 | tx · face_swap | OnSkip → 확정 | 없음(의도) | 그래픽 `Kill(true)` / `CompleteInFlight` |
+| 화면 효과 (장면 전역 의도) | screen_vignette · screen_noise (+`_clear`) | `Snap(의도)` | 없음 — 컨트롤러의 전환이 끝까지 감 | 없음 — 컨트롤러가 전환 하나를 소유(`IntentTransition`), 재조준 |
+| 화면 효과 (이벤트) | screen_flash | 재생 중인 플래시를 끊음 | 없음 — 끝까지 터짐 | 없음 — 컨트롤러가 재생을 소유, 새 플래시는 앞 것을 끊음 |
 | 즉시 실행 | face · bg_sprite · set_anchor 계열 · ApplyTrackOffset · tx_stage_mask_clear · pose | OnSkip = 같은 적용 | 해당 없음 | face·bg_sprite는 `CompleteInFlight`, 나머지 대부분 `DOKill(true)` |
 | 구조 | slot · cast · actor · sibling_* · char_to | 그대로 실행 | 해당 없음 | — |
 | 시간 | pause · Nfr | OnSkip(기다리지 않음) | 전경 | — |
@@ -187,6 +189,9 @@ screen_blur는 이름과 달리 화면 포스트 이펙트가 아니라 리그�
 - 그래서 장면의 첫 vignette보다 앞 줄로 롤백하면 롤백 전의 vignette가 남는다. BGM·마스크도 같다. 진행 중이던 화면 효과 트윈도 정지에서 죽지 않는다.
 - **뿌리는 "비워 둠"(R6)이 아니다.** 스텝 경계에서 가속하든 확정하든 종점은 같으니 상태는 남는다.
   스텝 경계에서 놔두는 것은 남은 트윈 시간이고, 장면 경계에서 놔두는 것은 종점 상태다.
+- **화면 효과 — 해결.** vignette·noise는 장면 전역 의도, flash는 이벤트로 바꿨다. 정지(`StopAsync`)가 `ScreenEffectRig.ResetToBaselineImmediate`를 불러
+  진행 중인 전환·플래시를 확정 없이 끊고 세기를 0으로 둔다. 리플레이가 화면 효과 커맨드를 다시 지나가며 표적 줄의 상태를 세운다.
+- 남은 것: 스테이지 마스크(장면 전역 의도로 옮길 차례 — 기준은 씬에 저장된 FullRect 마스크 켜짐), 오디오.
 - 대사창 레이아웃(`surface_layout`의 `DialogueSurfaceState`)도 같은 부류였다 — 조립 때 한 번 만들어지고 `surface_reset`만 비웠다.
   **해결:** `BeginScene`·`PrepareReplay`가 무대와 함께 비운다. 리플레이 중에 Yarn이 `surface_*`를 다시 지나가며 표적 줄의 상태를 다시 세운다.
 
@@ -240,3 +245,4 @@ screen_blur는 이름과 달리 화면 포스트 이펙트가 아니라 리그�
 | ui_patch | 포트가 경고만 냄 | 커맨드 삭제(`bf42cdfe`), 인터페이스만 남음 |
 | screen_blur | — | `reduction-boundary.md` 표가 "화면 효과(포스트 이펙트 축)"로 분류 — 지금은 리그 블러라 낡음 |
 | 샷 | `Kill(rig, true)` 클레임, 정지의 `Clear`가 진행 중 트윈을 남김 | **장면 전역 의도 시범.** 시스템이 Intent·Presented를 나눠 들고 전환을 소유한다. 커맨드는 `Reduce(Intent)`를 넘기기만 한다. `Clear`가 전환까지 멈춘다 |
+| 화면 효과 | 커맨드마다 자기 트윈, `KillTween(true)` 클레임, 장면 경계 초기화 없음 | vignette·noise = 장면 전역 의도(`IntentTransition`, 재조준), flash = 이벤트(컨트롤러가 재생 소유). 정지에서 기준으로 |

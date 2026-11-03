@@ -295,6 +295,7 @@ public sealed class PresentationAssembler
             _rollbackHistory,
             _refs.CustomLinePresenter,
             _presentationResponseRig,
+            _screenEffectRig,
             _presentationStage,
             _dialogueSurfaceState,
             _presentationScopeSession,

@@ -11,6 +11,8 @@ public sealed class ScenePresentation : IPlaybackStage
     private readonly RollbackHistory _rollbackHistory;
     private readonly ILineAborter _linePresentationAborter;
     private readonly PresentationShotResponseSystem _shotResponseSystem;
+    // 화면 효과(vignette·noise 의도, flash 이벤트)도 샷처럼 정지에서 기준으로 — 리플레이가 다시 건다.
+    private readonly ScreenEffectRig _screenEffects;
     private readonly PresentationStage _presentationStage;
     // 대사창 레이아웃(surface_layout)도 무대처럼 단위마다 처음부터 — 리플레이가 다시 건다.
     private readonly DialogueSurfaceState _dialogueSurfaceState;
@@ -30,6 +32,7 @@ public sealed class ScenePresentation : IPlaybackStage
         RollbackHistory rollbackHistory,
         ILineAborter linePresentationAborter,
         PresentationShotResponseSystem shotResponseSystem,
+        ScreenEffectRig screenEffects,
         PresentationStage presentationStage,
         DialogueSurfaceState dialogueSurfaceState,
         PresentationScopeSession presentationScope,
@@ -43,6 +46,7 @@ public sealed class ScenePresentation : IPlaybackStage
         _rollbackHistory = rollbackHistory;
         _linePresentationAborter = linePresentationAborter;
         _shotResponseSystem = shotResponseSystem;
+        _screenEffects = screenEffects;
         _presentationStage = presentationStage;
         _dialogueSurfaceState = dialogueSurfaceState;
         _presentationScope = presentationScope;
@@ -131,6 +135,10 @@ public sealed class ScenePresentation : IPlaybackStage
         _linePresentationAborter.AbortCurrentLine();
         _rollbackHistory.ClearRollbackPoints();
         _shotResponseSystem.Clear();
+
+        if (_screenEffects != null)
+            _screenEffects.ResetToBaselineImmediate();
+
         _presentationScope.End();
     }
 
