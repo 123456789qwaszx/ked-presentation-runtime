@@ -70,7 +70,7 @@ namespace Ked.Samples.UI.Editor
             return view.Go;
         }
 
-        // 줄: [화자 180 · 대사 985 · 이동 46], 지금 줄은 옅은 청록 바탕, 아래는 구분선.
+        // 줄: [화자 180 · 대사 919 · 보이스 46 · 이동 46], 지금 줄은 옅은 청록 바탕, 아래는 구분선.
         private static void BuildRow(KedUIKit kit, UINode content)
         {
             Rect d = new(120, 165, 1320, 98);
@@ -98,9 +98,14 @@ namespace Ked.Samples.UI.Editor
                 overflow: TextOverflowModes.Ellipsis);
             Fixed(speaker.Go, 180f, null);
 
-            UINode text = kit.Node(row, nameof(W.RowText), 345, 172, 985, 66);
+            UINode text = kit.Node(row, nameof(W.RowText), 345, 172, 919, 66);
             kit.Text(text, "", 23, KedColors.Navy, TextAlignmentOptions.TopLeft, wrap: true, lineSpacing: 6f);
-            Fixed(text.Go, 985f, null);
+            Fixed(text.Go, 919f, null);
+
+            // 보이스 없는 줄은 CanvasGroup으로 감춘다(자리는 남아 이동 버튼이 줄마다 같은 곳에 선다).
+            KedButton voice = kit.IconButton(row, nameof(W.RowVoice), "voice", new Rect(1286, 176, 46, 46), padding: 12f);
+            Fixed(voice.gameObject, 46f, 46f);
+            voice.gameObject.AddComponent<CanvasGroup>();
 
             KedButton jump = kit.IconButton(row, nameof(W.RowJump), "rollback", new Rect(1352, 176, 46, 46), padding: 12f);
             Fixed(jump.gameObject, 46f, 46f);

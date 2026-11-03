@@ -652,6 +652,24 @@
       "notes": "Keep aspect ratio close to supplied artwork; do not stretch decoration."
     },
     {
+      "name": "icon_voice",
+      "file": "Art/icon_voice.png",
+      "width": 136,
+      "height": 121,
+      "role": "백로그 아이콘",
+      "imageType": "Simple",
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "pixelsPerUnit": 100,
+      "padding": 4,
+      "source": "코드로 그림(2026-11-03) — 퀵메뉴 아이콘의 색·두께·여백에 맞춤. 작가 그림이 오면 같은 이름으로 바꾼다.",
+      "notes": "Keep aspect ratio close to supplied artwork; do not stretch decoration."
+    },
+    {
       "name": "slider_track",
       "file": "Art/slider_track.png",
       "width": 408,

@@ -55,7 +55,8 @@ public sealed class LinePresentationFlow
         SetPhase(ctx, LinePresentationPhase.LineRuntimeStateResolved);
         
         // Phase: LineEnteredCommitted
-        _yarnLineBoundary.CommitLineEntered(meta, ctx.RecordDecision);
+        string voiceKey = LineVoiceController.FindLineVoiceKey(_playbackDriver.Collected);
+        _yarnLineBoundary.CommitLineEntered(meta, voiceKey, ctx.RecordDecision);
         _lineDisplayState.SetLineAutoAdvance(ctx.AdvanceMode == LineAdvanceMode.AutoWhenShown);
 
         if (ctx.SeekDecision == SeekLineDecision.TargetLineReached)

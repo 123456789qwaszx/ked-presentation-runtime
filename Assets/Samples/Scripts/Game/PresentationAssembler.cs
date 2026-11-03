@@ -325,7 +325,8 @@ public sealed class PresentationAssembler
             rapidSkipController,
             _episodeSkipController,
             _rollbackHistory,
-            _choiceHistory);
+            _choiceHistory,
+            _lineVoice);
 
         AdvanceGate advanceGate = new(
             _playbackState,

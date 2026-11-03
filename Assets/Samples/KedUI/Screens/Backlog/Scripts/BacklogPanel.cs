@@ -34,6 +34,7 @@ namespace Ked.Samples.UI
 
         public event Action CloseClicked;
         public event Action<int> JumpClicked;
+        public event Action<int> VoiceClicked;
 
         private readonly List<BacklogRow> _rows = new();
         private BacklogRow _template;
@@ -105,6 +106,7 @@ namespace Ked.Samples.UI
                 row.EnsureInitialized();
                 row.Index = _rows.Count;
                 row.JumpClicked += r => JumpClicked?.Invoke(r.Index);
+                row.VoiceClicked += r => VoiceClicked?.Invoke(r.Index);
 
                 // 읽는 글자는 사용자 글자 크기를 따른다.
                 Styled.AddText(row.SpeakerText, UITextRole.Body, UITextSizePolicy.Prefab);

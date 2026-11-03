@@ -8,6 +8,9 @@ public struct DialogueLogEntry
     public int lineSequence;
     public string rawText;
     public double timestamp;
+
+    // 그 줄의 보이스 키(Resources 경로). 없으면 null — 이 칸이 없던 저장도 null로 읽힌다.
+    public string voiceKey;
 }
 
 // 백로그는 playthrough 전체에서 유지한다.
@@ -47,13 +50,14 @@ public sealed class BacklogRecorder
     }
 
     
-    public void Record(YarnLineMeta meta)
+    public void Record(YarnLineMeta meta, string voiceKey = null)
     {
         Add(new DialogueLogEntry
         {
             lineId = meta.lineId,
             lineSequence = _nextLineSequence++,
             rawText = meta.rawText,
+            voiceKey = voiceKey,
         });
     }
     

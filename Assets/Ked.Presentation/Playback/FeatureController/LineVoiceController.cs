@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using UnityEngine;
+
 // 보이스는 줄 소속 이벤트다 — 새 줄에 들어오면 앞 줄의 보이스를 짧게 줄이며 끝낸다(2026-11-03 소유자 결정).
 // 서두르기·선택지는 줄 진입이 아니라 끊지 않는다. 새 줄의 보이스는 그 뒤 PlayCollected에서 나온다.
 public sealed class LineVoiceController
@@ -15,4 +18,45 @@ public sealed class LineVoiceController
     public bool IsPlaying => _voice != null && _voice.IsPlaying;
 
     public void EndPreviousLine() => _voice?.FadeOut(LineEndFadeSeconds);
+
+    // 줄의 보이스 = 그 줄 머리에서 실행할 마지막 voice. 뒤에 stop_voice가 있으면 없다.
+    // 키 없이 클립만 든 스펙은 기록할 수 없어 빠진다.
+    public static string FindLineVoiceKey(IReadOnlyList<CommandSpecBase> lineSpecs)
+    {
+        string key = null;
+
+        if (lineSpecs == null)
+            return null;
+
+        for (int i = 0; i < lineSpecs.Count; i++)
+        {
+            switch (lineSpecs[i])
+            {
+                case PlayVoiceCommandSpec play:
+                    key = string.IsNullOrWhiteSpace(play.clipKey) ? null : play.clipKey;
+                    break;
+                case StopVoiceCommandSpec:
+                    key = null;
+                    break;
+            }
+        }
+
+        return key;
+    }
+
+    // 백로그 다시 듣기. 같은 채널이라 지금 흐르는 보이스를 덮는다.
+    public bool Replay(string voiceKey)
+    {
+        if (_voice == null || string.IsNullOrWhiteSpace(voiceKey))
+            return false;
+
+        if (!ResourcesAudioClipResolver.TryResolve(voiceKey, out AudioClip clip))
+        {
+            Debug.LogWarning($"[백로그] 보이스 '{voiceKey}'를 Resources에서 찾지 못했다.");
+            return false;
+        }
+
+        _voice.Play(clip);
+        return true;
+    }
 }

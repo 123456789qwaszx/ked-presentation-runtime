@@ -17,7 +17,10 @@ public sealed class YarnPlaybackDriver
     }
     
     public void Enqueue(CommandSpecBase spec) => _collectedSpecs.Add(spec);
-    
+
+    // 다음 PlayCollected가 실행할 것 — 그 줄 머리의 커맨드.
+    public IReadOnlyList<CommandSpecBase> Collected => _collectedSpecs;
+
     public void PlayCollected()
     {
         var specs = new List<CommandSpecBase>(_collectedSpecs);

@@ -8,6 +8,7 @@ namespace Ked.Samples.UI
     //   지금 장면의 줄   → 되감기(PlaybackFeatureController.RequestBacklogJump → IPlaybackHost.RequestReplayAsync)
     //   확정된 과거 장면 → 그 지점에서 새 회차로 갈라지기(IKedSaveSlotPort.ForkFromBacklogAsync). 확인을 받는다.
     // 갈 수 없는 줄(지금 줄 · 연출 단독의 과거 장면 등)은 이동 버튼이 없다.
+    // 보이스가 있는 줄은 다시 듣기 버튼이 있다 — 장면을 가리지 않고, 패널은 열어 둔다.
     public sealed partial class KedUIFlow
     {
         private readonly List<DialogueLogEntry> _backlogEntries = new();
@@ -16,6 +17,7 @@ namespace Ked.Samples.UI
         {
             _backlog.CloseClicked += ClosePanel;
             _backlog.JumpClicked += HandleBacklogJump;
+            _backlog.VoiceClicked += HandleBacklogVoice;
         }
 
         private void OpenBacklog()
@@ -41,6 +43,7 @@ namespace Ked.Samples.UI
                     Speaker = _speakers?.Find(entry.lineId),
                     Text = entry.rawText,
                     CanJump = CanActOn(entry),
+                    HasVoice = IsRunning && _playback.Features.CanReplayVoice(entry),
                     IsCurrent = i == last,
                     ShowDivider = i < last,
                 });
@@ -110,6 +113,14 @@ namespace Ked.Samples.UI
             {
                 Debug.LogException(error);
             }
+        }
+
+        private void HandleBacklogVoice(int index)
+        {
+            if (index < 0 || index >= _backlogEntries.Count || !IsRunning)
+                return;
+
+            _playback.Features.ReplayVoice(_backlogEntries[index]);
         }
 
         private async void Fork(DialogueLogEntry entry)

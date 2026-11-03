@@ -16,6 +16,7 @@ public sealed class PlaybackFeatureController
     private readonly RollbackHistory _rollbackController;
     private readonly ChoiceHistory _choiceHistory;
     private readonly EpisodeSkipController _episodeSkipController;
+    private readonly LineVoiceController _lineVoice;
 
     private bool _speedUpToggled;
     private bool _speedUpHeld;
@@ -37,7 +38,8 @@ public sealed class PlaybackFeatureController
         RapidSkipController rapidSkipController,
         EpisodeSkipController episodeSkipController,
         RollbackHistory rollbackController,
-        ChoiceHistory choiceHistory)
+        ChoiceHistory choiceHistory,
+        LineVoiceController lineVoice)
     {
         _playbackState = playbackState;
         _lineDisplayState = lineDisplayState;
@@ -51,6 +53,7 @@ public sealed class PlaybackFeatureController
 
         _rollbackController = rollbackController;
         _choiceHistory = choiceHistory;
+        _lineVoice = lineVoice;
 
         ApplySpeedUpModeState();
         ApplyRapidSkipState();
@@ -129,6 +132,13 @@ public sealed class PlaybackFeatureController
 
         return RequestRollbackTo(target);
     }
+
+    // 백로그 다시 듣기 — 장면을 가리지 않는다. 시크 중에는 막는다(시크가 끝나며 보이스를 다시 정한다).
+    public bool CanReplayVoice(in DialogueLogEntry entry) =>
+        !_seekState.IsSeeking && !string.IsNullOrWhiteSpace(entry.voiceKey);
+
+    public bool ReplayVoice(in DialogueLogEntry entry) =>
+        CanReplayVoice(entry) && _lineVoice != null && _lineVoice.Replay(entry.voiceKey);
 
     // 백점프 — 백로그 항목의 라인으로 되돌아간다. 현재 장면 항목만.
     // 이전 장면 항목은 그 장면의 루트에서만 시작할 수 있는데, 그것은 되감기가 아니라 확정된

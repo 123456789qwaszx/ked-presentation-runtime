@@ -35,10 +35,10 @@ public sealed class YarnLineBoundary
             line.TextWithoutCharacterName.Text);
     }
 
-    public void CommitLineEntered(YarnLineMeta meta, LineRecordDecision decision)
+    public void CommitLineEntered(YarnLineMeta meta, string voiceKey, LineRecordDecision decision)
     {
         if (decision.RecordBacklog)
-            _backlogRecorder.Record(meta);
+            _backlogRecorder.Record(meta, voiceKey);
 
         if (decision.AddRollbackPoint)
             _rollbackHistory.AddRollbackPoint(meta);
