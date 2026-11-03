@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
@@ -28,38 +29,23 @@ public sealed class StageLayerBlurCommandSpec : CommandSpecBase
 ///
 /// 레이어 아래의 리그를 전부 훑는다. 배경도 캐릭터 리그다(캐스팅하지 않은 슬롯) — far 레이어에는
 /// 보통 배경만 있지만, 캐릭터를 그 레이어에 올리면 같이 흐려지는 것이 이 커맨드의 의미상 맞다.
+///
+/// 리그마다 "레이어 블러" 의도만 넘긴다 — 전환은 각 리그의 RigVisualEffectController가 소유하고,
+/// 모양(char_visual)·초점(focus_on) 블러와는 가장 큰 값으로 합쳐진다.
 /// </summary>
-public sealed class StageLayerBlurCommand : ClaimTweenCommandBase
+public sealed class StageLayerBlurCommand : CommandBase
 {
-    private struct Binding
-    {
-        public RigVisualEffectController Controller;
-        public float FromValue;
-
-        public Binding(RigVisualEffectController controller, float fromValue)
-        {
-            Controller = controller;
-            FromValue = fromValue;
-        }
-    }
+    // 화면의 큰 면적이 한꺼번에 초점을 되찾으면 눈에 띄게 튄다 — 훨씬 완만하게 붙인다.
+    private const float StepFinishSpeedUpMultiplier = 1.5f;
 
     private readonly StageLayerBlurCommandSpec _spec;
     private readonly IStageDepthContentSlotProvider _slots;
+    private readonly PresentationStage _stage;
 
-    private readonly List<Binding> _bindings = new();
+    private readonly List<RigVisualEffectController> _targets = new();
     private readonly List<CharacterRigRefs> _charScratch = new();
 
-    private RectTransform _contentRoot;
-    private float _destAmount;
-
     public override bool WaitForCompletion => _spec.wait;
-
-    protected override float TweenDuration => _spec.duration;
-
-    // 화면의 큰 면적이 한꺼번에 초점을 되찾으면 눈에 띄게 튄다 — 훨씬 완만하게 붙인다.
-    protected override float StepFinishSpeedUpMultiplier => 1.5f;
-
-    private readonly PresentationStage _stage;
 
     public StageLayerBlurCommand(
         PresentationStage stage,
@@ -71,24 +57,53 @@ public sealed class StageLayerBlurCommand : ClaimTweenCommandBase
         _slots = slots;
     }
 
-    protected override void ResolveTargets(CommandRunScope scope)
+    protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
-        _contentRoot = _slots?.GetDepthContent(_spec.stage, _spec.layer);
+        CollectTargets();
 
-        if (_contentRoot == null)
+        float amount = Mathf.Clamp01(_spec.amount);
+
+        for (int i = 0; i < _targets.Count; i++)
+            _targets[i].FollowLayerBlur(amount, _spec.duration, _spec.ease);
+
+        if (!_spec.wait)
+            yield break;
+
+        while (AnyTransitioning())
+            yield return null;
+    }
+
+    protected override void OnSkip(CommandRunScope scope)
+    {
+        CollectTargets();
+
+        float amount = Mathf.Clamp01(_spec.amount);
+
+        for (int i = 0; i < _targets.Count; i++)
+            _targets[i].SnapLayerBlur(amount);
+    }
+
+    protected override void OnStepLifetimeFinished(CommandRunScope scope)
+    {
+        for (int i = 0; i < _targets.Count; i++)
+            _targets[i].AccelerateLayerBlur(StepFinishSpeedUpMultiplier);
+    }
+
+    // 실행 시점에 레이어 아래에 있던 리그만 잡는다.
+    // 뒤늦게 붙는 리그는 의도적으로 포함하지 않는다 (레거시 CollectEdgeHideControllers와 같은 규칙).
+    private void CollectTargets()
+    {
+        _targets.Clear();
+
+        RectTransform contentRoot = _slots?.GetDepthContent(_spec.stage, _spec.layer);
+
+        if (contentRoot == null)
+        {
             Debug.LogWarning(
                 $"[StageLayerBlurCommand] Depth content slot is missing. " +
                 $"stage='{_spec.stage}', layer='{_spec.layer}'.");
-    }
-
-    // Claim 시점에 레이어 아래에 있던 리그만 잡는다.
-    // 뒤늦게 붙는 리그는 의도적으로 포함하지 않는다 (레거시 CollectEdgeHideControllers와 같은 규칙).
-    private void CollectBindings(CommandRunScope scope)
-    {
-        _bindings.Clear();
-
-        if (_contentRoot == null)
             return;
+        }
 
         _charScratch.Clear();
         _stage.characterRigs.CollectAliveRigs(_charScratch);
@@ -100,111 +115,22 @@ public sealed class StageLayerBlurCommand : ClaimTweenCommandBase
             if (refs?.VisualEffect == null)
                 continue;
 
-            if (!IsDescendantOf(refs.RigRoot, _contentRoot))
+            if (!IsDescendantOf(refs.RigRoot, contentRoot))
                 continue;
 
-            _bindings.Add(new Binding(refs.VisualEffect, refs.VisualEffect.BlurAmount));
+            _targets.Add(refs.VisualEffect);
         }
     }
 
-    protected override void ClaimTarget(CommandRunScope scope)
+    private bool AnyTransitioning()
     {
-        // 트윈 타깃은 커맨드 인스턴스가 아니라 레이어의 content root다 —
-        // this로 잡으면 같은 레이어에 screen_blur를 다시 걸 때 이전 트윈이 안 죽어 둘이 싸운다.
-        DOTween.Kill(_contentRoot, false);
-
-        CollectBindings(scope);
-
-        _destAmount = Mathf.Clamp01(_spec.amount);
-    }
-
-    protected override Tween CreateTween(float duration)
-        => DOTween
-            .To(
-                () => 0f,
-                ApplyAt,
-                1f,
-                duration)
-            .SetEase(_spec.ease)
-            .SetTarget(_contentRoot);
-
-    /// <summary>
-    /// 진행률(0→1) 트윈이라 그대로 재시작하면 처음부터 다시 돈다 —
-    /// 현재 값을 새 출발점으로 삼아 남은 구간만 태운다.
-    /// </summary>
-    protected override Tween CreateAcceleratedTween(float duration)
-    {
-        RefreshFromValues();
-
-        return CreateTween(duration);
-    }
-
-    protected override void OnCommitFinalState()
-    {
-        DOTween.Kill(_contentRoot, false);
-
-        ApplyAt(1f);
-    }
-
-    protected override float MeasureRemainingRatio()
-        => RemainingRatio(ClaimedDistance(), CurrentDistance());
-
-    private void RefreshFromValues()
-    {
-        for (int i = 0; i < _bindings.Count; i++)
+        for (int i = 0; i < _targets.Count; i++)
         {
-            Binding binding = _bindings[i];
-
-            if (binding.Controller == null)
-                continue;
-
-            binding.FromValue = binding.Controller.BlurAmount;
-            _bindings[i] = binding;
-        }
-    }
-
-    private void ApplyAt(float t)
-    {
-        t = Mathf.Clamp01(t);
-
-        for (int i = 0; i < _bindings.Count; i++)
-        {
-            Binding binding = _bindings[i];
-
-            if (binding.Controller == null)
-                continue;
-
-            binding.Controller.SetBlurAmountImmediate(
-                Mathf.Lerp(binding.FromValue, _destAmount, t));
-        }
-    }
-
-    // 가장 멀리 가야 하는 리그를 기준으로 잰다 — 하나라도 남아 있으면 아직 안 끝난 것이다.
-    private float ClaimedDistance()
-    {
-        float max = 0f;
-
-        for (int i = 0; i < _bindings.Count; i++)
-            max = Mathf.Max(max, Mathf.Abs(_destAmount - _bindings[i].FromValue));
-
-        return max;
-    }
-
-    private float CurrentDistance()
-    {
-        float max = 0f;
-
-        for (int i = 0; i < _bindings.Count; i++)
-        {
-            Binding binding = _bindings[i];
-
-            if (binding.Controller == null)
-                continue;
-
-            max = Mathf.Max(max, Mathf.Abs(_destAmount - binding.Controller.BlurAmount));
+            if (_targets[i].IsLayerBlurTransitioning)
+                return true;
         }
 
-        return max;
+        return false;
     }
 
     private static bool IsDescendantOf(Transform child, Transform parent)

@@ -86,7 +86,7 @@ RunNode → SequencePlayer.PlayCommands   (CommandIsPlaying = true)
 | 경계 처리 | 커맨드 |
 |---|---|
 | 가속 ×30 | `ClaimTweenCommandBase` 계열 (fade · slide · move_by · rotate_to · scale_to · size · place) |
-| 가속 ×1.5 | char_visual_* · focus_on/clear · screen_blur |
+| 가속 ×1.5 | char_visual_* · focus_on/clear · screen_blur (컨트롤러가 소유한 전환을 가속) |
 | 가속 ×20 | shot_* (시스템이 소유한 전환을 가속) |
 | 즉시 확정 | gesture · mirror · rotate_by (`AccelerateOnStepFinish => false`), motion |
 | **비워 둠 (의도)** | screen_flash · screen_vignette · screen_noise (+`_clear`) · tx · face_swap |
@@ -124,7 +124,7 @@ face_swap만 모델 안(폴드가 `ApplyFace`로 접음)이라 클레임을 맞�
 |---|---|---|---|---|
 | 클레임-트윈 | fade_in/out · slide_in/out · move_by · rotate_to · scale_to · size · place | OnSkip → Commit | 가속 ×30 | `DOKill(true)` |
 | | gesture · mirror · rotate_by | 〃 | 즉시 확정 | `DOKill(true)` |
-| | char_visual_* · focus_on/clear · screen_blur | 〃 | 가속 ×1.5 | **`Kill(false)`** |
+| 리그 비주얼 (컨트롤러 소유) | char_visual_* · focus_on/clear · screen_blur | 컨트롤러 `Snap` | 가속 ×1.5 | 없음 — 리그 컨트롤러가 출처(모양·초점·레이어)마다 전환을 소유, 블러는 가장 큰 값 |
 | 샷 (장면 전역 의도) | shot_* | `Snap(다음 의도)` | 시스템 가속 ×20 | 없음 — 시스템이 전환 하나를 소유, 새 의도는 보이는 값에서 재조준 |
 | 모션 | motion | OnSkip → Commit | 즉시 확정 | 노드마다 `DOKill(true)` |
 | 비워 둠 | face_swap | OnSkip → 확정 | 없음(의도) | `CompleteInFlight` |
@@ -158,12 +158,18 @@ screen_blur는 이름과 달리 화면 포스트 이펙트가 아니라 리그�
 - 경계 전에 B가 이미 끝났으면(줄을 B의 길이 이상 읽으면): B의 훅은 할 일이 없고, A의 훅이 B의 결과에서 A의 목표로 다시 트윈한다 → **앞 것(A)이 확정적으로 이긴다.**
   예: `<<char_visual_clear c1>> <<char_visual_dim c1>>` → 다음 줄에서 clear로 돌아간다. 폴드는 dim이다.
 - 다른 줄에 나눠 쓰면 안전하다 — A의 훅은 앞 경계에서 이미 돌고 수명 목록에서 빠졌다.
+- **해결(2026-11-03) — 컨트롤러 소유.** 셋 다 `ClaimTweenCommandBase`를 떠나 `CommandBase`로 목표만 넘긴다.
+  전환은 리그의 `RigVisualEffectController`가 출처마다 하나씩 소유하므로(`IntentTransition`) "주인" 상태 자체가 없다.
+  `Kill(false)`가 노리던 부드러운 재조준은 그대로이고, 스텝 경계 ×1.5 가속은 `IntentTransition.Accelerate`(남은 시간 기준)로 옮겼다.
 
 **E3. 블러 채널(`RigVisualEffectController.BlurAmount`)에 쓰는 커맨드가 셋이고, 서로를 죽이지 않는다.**
 - focus_on(타깃: 리그 레지스트리) · screen_blur(레이어 content root) · char_visual_*(리그 컨트롤러). `BLUR-DECISIONS.md`가 "동시에 걸면 싸운다, 한 번에 하나만 쓴다"로 인정해 둔 예외다.
 - **동시가 아니어도 지운다.** char_visual은 프리셋의 `blur` 필드를 언제나 쓴다. 프리셋 DB에서 blur가 0이 아닌 것은 `defocus`(0.5)뿐이다.
   그래서 focus_on·screen_blur로 흐려 둔 리그에 dim · rim · silhouette · focus · clear 중 무엇을 걸어도 그 리그의 블러가 0이 된다.
   BLUR-DECISIONS.md는 이 순차 덮어쓰기를 다루지 않는다 — 의도인지 정해 둘 자리다.
+- **해결(2026-11-03).** 컨트롤러가 블러 출처 셋(모양·초점·레이어)을 따로 들고, 셰이더에는 **가장 큰 값**을 쓴다(소유자 결정).
+  서로 덮어쓰지 않으므로 동시에 걸어도 싸우지 않고, dim·rim 같은 blur 0 프리셋이 초점·레이어 블러를 지우지 않는다.
+  `focus_clear`는 초점 블러만, `screen_blur_reset`은 레이어 블러만 걷는다. BLUR-DECISIONS.md §7 갱신.
 
 **E4. motion은 노드 여러 개를 잡지만 확정은 한꺼번에 한다.**
 - 다른 커맨드가 그중 한 노드를 `DOKill(true)`로 가져가도 motion의 `_claimed`는 true로 남는다.
@@ -250,8 +256,8 @@ screen_blur는 이름과 달리 화면 포스트 이펙트가 아니라 리그�
 | E1 face_swap | R5가 깨진 채 끝까지 둠 | 해결(`00534410`). α 축 충돌도 함께 닫음 |
 | R6 "오버라이드하지 않음" | 규칙의 빈자리처럼 서술 | 화면상의 연출을 일부러 비워 둔 부류로 정리, 안전 조건 둘 |
 | S1 | "E1과 같은 뿌리" | 별개. 모델 밖 상태를 리플레이가 초기화하지 않는 것이 뿌리 |
-| E2 | 먼저 끝나는 쪽이 이김 | B가 이미 끝났으면 앞 것이 확정적으로 이김 |
-| E3 | clear가 focus_on 블러를 지움 | defocus를 뺀 모든 char_visual 프리셋이 블러를 0으로 씀 |
+| E2 | 먼저 끝나는 쪽이 이김 | B가 이미 끝났으면 앞 것이 확정적으로 이김 → **해결**: 리그 컨트롤러가 전환 소유 |
+| E3 | clear가 focus_on 블러를 지움 | defocus를 뺀 모든 char_visual 프리셋이 블러를 0으로 씀 → **해결**: 출처 셋을 나누고 가장 큰 값 |
 | E4 | 종점을 다시 씀 | 장부 항목도 지움 |
 | S2 | Token·CommandIsPlaying을 덮음 | `_mainRoutine`도 null로 덮음 → **해결**: pause가 압축에 반응, 관문이 RapidSkip도 막음, 스텝 세대 가드 |
 | S5 | 즉시 실행 6개 | `debug_log` 삭제(`fc39ae36`), `box_hide/show/close` 삭제 — `surface_*` 둘만 남음(시점은 큐와 같음) |

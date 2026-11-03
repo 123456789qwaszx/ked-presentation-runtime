@@ -199,18 +199,21 @@ coc = saturate(|depthScale_char − depthScale_focus| × falloff) × maxBlur
 
 배경은 대상이 아니다. `screen_blur far`가 이미 레이어 단위로 처리한다.
 
-### ⚠ 블러를 쓰는 커맨드가 셋이다
+### 블러를 쓰는 커맨드가 셋이다 — 출처를 나누고 가장 큰 값으로 합친다 (2026-11-03)
 
-`focus_on` · `screen_blur` · `char_visual_focus/defocus`(프리셋의 `blur` 필드)가 모두
-같은 `_BlurAmount`를 쓴다. 서로 죽이지 않으므로 **동시에 걸면 매 프레임 싸운다.**
+`focus_on` · `screen_blur` · `char_visual_*`(프리셋의 `blur` 필드)가 모두 `_BlurAmount`에 닿는다.
+예전에는 셋이 같은 값을 서로 다른 트윈 타깃으로 써서 **동시에 걸면 매 프레임 싸웠고**,
+blur가 0인 `char_visual` 프리셋(dim·rim·clear …)은 앞서 걸린 초점·레이어 블러를 지웠다.
 
-재발행만은 막아 두었다 — 트윈 타깃을 커맨드 인스턴스가 아니라 공유 스코프로 잡는다:
+지금은 리그의 `RigVisualEffectController`가 출처를 따로 든다:
 
-| 커맨드 | 트윈 타깃 |
-|---|---|
-| `focus_on` | `CharacterRigRegistry` (모든 캐릭터) |
-| `screen_blur` | 레이어의 content root |
-| `char_visual_*` | 해당 리그의 컨트롤러 |
+| 출처 | 커맨드 | 대상 |
+|---|---|---|
+| 모양(Style)의 blur | `char_visual_*` | 그 리그 |
+| 초점 블러 | `focus_on` · `focus_clear` | 배역이 있는 리그 전부(CoC) |
+| 레이어 블러 | `screen_blur` · `screen_blur_reset` | 그 레이어 아래 리그 |
 
-같은 커맨드를 다시 걸면 이전 트윈이 죽는다. **다른 커맨드끼리는 여전히 겹칠 수 있다** —
-저작에서 한 번에 하나만 쓰는 것이 전제다.
+- **셰이더에 쓰는 값은 셋 중 가장 큰 값이다**(소유자 결정). 서로 덮어쓰지 않고, 흐림이 겹쳐도 더 흐려지지 않는다.
+- 각 출처의 전환은 컨트롤러가 하나씩 소유한다(`IntentTransition`). 커맨드는 목표만 넘기고,
+  새 목표는 지금 보이는 값에서 다시 조준한다. 같은 줄에 두 번 걸어도 나중 것이 이긴다.
+- 스텝 경계 가속(×1.5)은 그대로다 — 커맨드가 컨트롤러의 전환을 가속시킨다.
