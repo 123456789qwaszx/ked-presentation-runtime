@@ -8,9 +8,10 @@ namespace Ked.Samples.UI
     /// 12 설정 · 재생 탭. 자동 진행 대기(초)와 "빠르게 재생"(S 키·속도 올림 모드)의 배속.
     /// 배속 보기는 본체가 허용하는 값만 낸다 — 시안의 1.5×는 본체 하한(2배) 아래라 넣지 않는다.
     /// 시안의 "읽은 대사만 넘기기"는 본체에 읽음 기록이 없어 만들지 않는다(안내 글만).
+    /// 대기 시간의 "초" 표기는 이 화면이 제 글자 표 키로 정한다(ILocalizedView) — 모델에는 값만 온다.
     /// </summary>
     [UIViewKey("Ked.PlaybackSettingsPage")]
-    public sealed class PlaybackSettingsPage : UIPage<PlaybackSettingsPage.Refs>
+    public sealed class PlaybackSettingsPage : UIPage<PlaybackSettingsPage.Refs>, ILocalizedView
     {
         public const int SpeedChoiceCount = 3;
 
@@ -36,7 +37,6 @@ namespace Ked.Samples.UI
             public float AutoDelay;
             public IReadOnlyList<float> SpeedChoices;
             public float SpeedUpMultiplier;
-            public Func<float, string> FormatSeconds;
         }
 
         public event Action<float> AutoDelayChanged;
@@ -45,7 +45,7 @@ namespace Ked.Samples.UI
         private readonly KedButton[] _choices = new KedButton[SpeedChoiceCount];
         private readonly float[] _choiceValues = new float[SpeedChoiceCount];
         private KedSliderField _autoDelay;
-        private Func<float, string> _formatSeconds = s => s.ToString("0.0");
+        private Localizer _texts;
 
         protected override void OnInitialize()
         {
@@ -54,7 +54,7 @@ namespace Ked.Samples.UI
                 View.Component<Slider>(Refs.AutoDelaySlider),
                 View.Text(Refs.AutoDelayValue),
                 KedSettingRanges.MinAutoDelay * 10f, KedSettingRanges.MaxAutoDelay * 10f, wholeNumbers: true,
-                format: v => _formatSeconds(v / 10f),
+                format: v => KedUIUtil.Format(_texts, "settings.playback.seconds", (v / 10f).ToString("0.0")),
                 changed: v => AutoDelayChanged?.Invoke(v / 10f));
 
             Refs[] choices = { Refs.SpeedChoice_0, Refs.SpeedChoice_1, Refs.SpeedChoice_2 };
@@ -70,11 +70,14 @@ namespace Ked.Samples.UI
             }
         }
 
+        public void Relocalize(Localizer localizer)
+        {
+            _texts = localizer;
+            _autoDelay?.Redraw();
+        }
+
         public void Present(Model model)
         {
-            if (model.FormatSeconds != null)
-                _formatSeconds = model.FormatSeconds;
-
             _autoDelay.Set(model.AutoDelay * 10f);
 
             for (int i = 0; i < _choices.Length; i++)

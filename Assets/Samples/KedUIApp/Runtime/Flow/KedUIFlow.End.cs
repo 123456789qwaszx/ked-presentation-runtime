@@ -1,4 +1,4 @@
-using System.Text;
+using System.Collections.Generic;
 using Ked.Progression;
 
 namespace Ked.Samples.UI
@@ -8,11 +8,9 @@ namespace Ked.Samples.UI
     // 재생 화면(마지막 장면)을 딤 아래 두고 Panel을 쌓는다 — Panel이 있으니 재생 입력은 UI가 쥔다(SyncInput).
     // 갈 곳은 타이틀 하나다. 길은 메뉴의 "타이틀로"와 같다(ReturnToTitle) — 끊을 것이 없으니 확인은 묻지 않는다.
     // Esc로 닫지 않는다(HandleCancel) — 닫으면 끝난 재생 화면에 남는다.
+    // 여기서는 내용(챕터 이름 · 마지막 에피소드 · 스탯)만 모은다. 글자와 줄 모양은 화면(EpisodeEndPanel)이 정한다.
     public sealed partial class KedUIFlow
     {
-        private const string EndStatSeparator = "   ·   ";
-        private const int EndStatsPerLine = 3;
-
         private readonly EpisodeEndPanel _endPanel;
 
         // 띄울 자리(재생 화면인지)는 ShowChapterEnd가 먼저 보았다.
@@ -28,7 +26,12 @@ namespace Ked.Samples.UI
             if (IsHudHidden)
                 RestoreHud();
 
-            EpisodeEndPanel.Model model = BuildEndModel(chapter, lastEpisode, state);
+            var model = new EpisodeEndPanel.Model
+            {
+                Title = string.IsNullOrWhiteSpace(chapter.DisplayName) ? chapter.ChapterId : chapter.DisplayName,
+                LastEpisode = lastEpisode?.Title,
+                Stats = EndStats(chapter, state),
+            };
 
             PushPanel<EpisodeEndPanel>(panel =>
             {
@@ -44,49 +47,21 @@ namespace Ked.Samples.UI
                 p => p.TitleClicked -= ReturnToTitle);
         }
 
-        // 글자는 콘텐츠의 이름(챕터·에피소드·스탯 표시 이름)이다 — 챕터 이름이 없으면 예제 카드 제목으로 채운다.
-        private EpisodeEndPanel.Model BuildEndModel(ChapterDefinition chapter, EpisodeNode lastEpisode, ChapterState state)
+        // 정의 순서로, 값이 있는 스탯만. 이름이 없으면 키.
+        private static List<EpisodeEndPanel.Stat> EndStats(ChapterDefinition chapter, ChapterState state)
         {
-            string title = !string.IsNullOrWhiteSpace(chapter.DisplayName)
-                ? chapter.DisplayName
-                : Text(_example?.TitleKey) ?? chapter.ChapterId;
+            var stats = new List<EpisodeEndPanel.Stat>();
 
-            string body = string.IsNullOrWhiteSpace(lastEpisode?.Title)
-                ? Text("end.chapter.body")
-                : Format("end.lastEpisode", lastEpisode.Title);
-
-            return new EpisodeEndPanel.Model
-            {
-                Kicker = Text("end.chapter.kicker"),
-                Title = title,
-                Body = body,
-                Result = EndStatsText(chapter, state),
-            };
-        }
-
-        // "성실성 2   ·   요령있음 1" — 정의 순서로, 한 줄에 셋까지, 넘치면 다음 줄로.
-        private string EndStatsText(ChapterDefinition chapter, ChapterState state)
-        {
             if (state == null)
-                return null;
-
-            var sb = new StringBuilder();
-            int shown = 0;
+                return stats;
 
             foreach (StatDefinition stat in chapter.Stats)
             {
-                if (!state.Stats.TryGetValue(stat.Key, out int value))
-                    continue;
-
-                if (shown > 0)
-                    sb.Append(shown % EndStatsPerLine == 0 ? "\n" : EndStatSeparator);
-
-                string name = string.IsNullOrWhiteSpace(stat.DisplayName) ? stat.Key : stat.DisplayName;
-                sb.Append(Format("end.stat", name, value));
-                shown++;
+                if (state.Stats.TryGetValue(stat.Key, out int value))
+                    stats.Add(new EpisodeEndPanel.Stat(string.IsNullOrWhiteSpace(stat.DisplayName) ? stat.Key : stat.DisplayName, value));
             }
 
-            return shown > 0 ? sb.ToString() : null;
+            return stats;
         }
     }
 }

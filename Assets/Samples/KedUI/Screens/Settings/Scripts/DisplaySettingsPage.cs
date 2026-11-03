@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 using UnityEngine.UI;
 
 namespace Ked.Samples.UI
@@ -6,10 +7,10 @@ namespace Ked.Samples.UI
     /// <summary>
     /// 13 설정 · 화면·조작 탭. 화면 모드(창/전체 화면)와 키보드 조작 안내.
     /// 키 목록은 재생 입력(AdvanceInputBindings)의 기본 키다 — 인스펙터에서 키를 바꾸면 이 안내도 같이 고쳐야 한다.
-    /// 에디터의 게임 창은 화면 모드를 바꾸지 않는다(빌드에서만). 그 사실을 화면에 적는다.
+    /// 에디터의 게임 창은 화면 모드를 바꾸지 않는다(빌드에서만). 그 사실을 화면이 스스로 적는다(ILocalizedView).
     /// </summary>
     [UIViewKey("Ked.DisplaySettingsPage")]
-    public sealed class DisplaySettingsPage : UIPage<DisplaySettingsPage.Refs>
+    public sealed class DisplaySettingsPage : UIPage<DisplaySettingsPage.Refs>, ILocalizedView
     {
         public enum Refs
         {
@@ -40,13 +41,14 @@ namespace Ked.Samples.UI
         public sealed class Model
         {
             public bool Fullscreen;
-            public string Note;
         }
 
         public event Action<bool> WindowModeClicked;
 
         private KedButton _windowed;
         private KedButton _fullscreen;
+
+        private Localizer _texts;
 
         protected override void OnInitialize()
         {
@@ -68,8 +70,20 @@ namespace Ked.Samples.UI
             _windowed?.SetSelectedLook(!model.Fullscreen);
             _fullscreen?.SetSelectedLook(model.Fullscreen);
 
-            KedUIUtil.SetText(View.Text(Refs.WindowModeNote), model.Note);
-            KedUIUtil.SetActive(View.Text(Refs.WindowModeNote), !string.IsNullOrEmpty(model.Note));
+            DrawNote();
+        }
+
+        public void Relocalize(Localizer localizer)
+        {
+            _texts = localizer;
+            DrawNote();
+        }
+
+        private void DrawNote()
+        {
+            bool editor = Application.isEditor;
+            KedUIUtil.SetText(View.Text(Refs.WindowModeNote), editor ? KedUIUtil.Text(_texts, "settings.display.editorNote") : string.Empty);
+            KedUIUtil.SetActive(View.Text(Refs.WindowModeNote), editor);
         }
 
         public Selectable FirstSelectable => _windowed != null ? _windowed.Button : null;

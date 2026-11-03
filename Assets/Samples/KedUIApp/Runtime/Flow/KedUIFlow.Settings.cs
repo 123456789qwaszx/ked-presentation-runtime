@@ -1,18 +1,13 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace Ked.Samples.UI
 {
-    // 07 · 11 · 12 · 13 설정. 연결할 수 있는 항목만(KedSettings 표). 바꾸는 즉시 적용하고 저장한다.
+    // 07 · 11 · 12 · 13 설정 — 화면 연결, 값을 엔진 · 본체에 적용, 저장. 바꾸는 즉시 적용하고 저장한다.
+    // 기본값 · 배속 보기 · 탭 · 되돌리기는 SettingsState가, 글자는 각 Page가 정한다.
     // 탭은 UIPF Page — SettingsPanel(Page Owner)의 PageRoot 아래 Page 넷을 SwitchPage로 바꿔 낀다. Page 이벤트도 그 Page를 열 때 묶는다.
     // Esc는 저장하고 닫는다(HandleCancel → CloseSettings).
     public sealed partial class KedUIFlow
     {
-        private const int AudioTab = 0;
-        private const int TextTab = 1;
-        private const int PlaybackTab = 2;
-        private const int DisplayTab = 3;
-
         // 본체 AudioVolumeSettings.DefaultVolume과 같은 값(그쪽은 상수를 내놓지 않는다).
         private const float DefaultChannelVolume = 0.8f;
 
@@ -21,64 +16,29 @@ namespace Ked.Samples.UI
         private readonly TextSettingsPage _textPage;
         private readonly PlaybackSettingsPage _playbackPage;
         private readonly DisplaySettingsPage _displayPage;
+        private readonly SettingsState _settings = new();
 
-        private KedSettings _settingsDefaults;
-        private KedSettings _settingsValues;
-        private readonly List<float> _speedChoices = new();
-        private int _settingsTab;
+        private KedSettings SettingsValues => _settings.Values;
 
-        // 기본값은 씬·본체에 적힌 값(출력 속도·자동 대기·배속)을 읽어 쓴다. 저장된 값이 있으면 그것을 적용한다.
+        // 기본값은 씬 · 본체에 적힌 값(출력 속도 · 자동 대기 · 배속)을 읽어 쓴다. 저장된 값이 있으면 그것을 적용한다.
         private void ConfigureSettings()
         {
             PlaybackSettings playback = _playback.PlaybackState?.PlaybackSettings;
 
-            _settingsDefaults = new KedSettings
-            {
-                MasterVolume = 1f,
-                Muted = false,
-                TextScale = 1f,
-                TypeSpeed = Mathf.Clamp(
-                    _playback.Typewriter != null ? _playback.Typewriter.unitsPerSecond : 30f,
-                    KedSettings.MinTypeSpeed,
-                    KedSettings.MaxTypeSpeed),
-                BoxOpacity = 1f,
-                AutoDelay = Mathf.Clamp(
-                    playback != null ? playback.autoModeDelaySeconds : 1.5f,
-                    KedSettings.MinAutoDelay,
-                    KedSettings.MaxAutoDelay),
-                SpeedUpMultiplier = playback != null ? playback.speedupModeMultiplier : 12f,
-            };
+            _settings.SetDefaults(
+                typeSpeed: _playback.Typewriter != null ? _playback.Typewriter.unitsPerSecond : 30f,
+                autoDelay: playback != null ? playback.autoModeDelaySeconds : 1.5f,
+                speedUp: playback != null ? playback.speedupModeMultiplier : 12f,
+                minMultiplier: playback != null ? playback.speedupModeMinMultiplier : 2f,
+                maxMultiplier: playback != null ? playback.speedupModeMaxMultiplier : 32f);
 
-            BuildSpeedChoices(playback);
-
-            _settingsValues = KedSettings.Load(_settingsDefaults);
-
-            if (!_speedChoices.Contains(_settingsValues.SpeedUpMultiplier))
-                _settingsValues.SpeedUpMultiplier = _settingsDefaults.SpeedUpMultiplier;
+            _settings.Adopt(KedSettings.Load(_settings.Defaults));
 
             ApplyMasterVolume();
             ApplyTextScale();
             ApplyTypeSpeed();
             ApplyBoxOpacity();
             ApplyPlaybackSettings();
-        }
-
-        // 본체가 허용하는 배속(하한·상한) 안의 보기 셋. 마지막은 본체 기본값.
-        private void BuildSpeedChoices(PlaybackSettings playback)
-        {
-            float min = playback != null ? playback.speedupModeMinMultiplier : 2f;
-            float max = playback != null ? playback.speedupModeMaxMultiplier : 32f;
-
-            _speedChoices.Clear();
-
-            foreach (float candidate in new[] { 2f, 4f, _settingsDefaults.SpeedUpMultiplier })
-            {
-                float value = Mathf.Clamp(candidate, min, max);
-                if (!_speedChoices.Contains(value))
-                    _speedChoices.Add(value);
-            }
-
-            _speedChoices.Sort();
         }
 
         #region 열고 닫기 · 탭
@@ -88,13 +48,13 @@ namespace Ked.Samples.UI
             PushPanel<SettingsPanel>(panel =>
             {
                 BindView(panel, ApplySettingsBindings);
-                SelectTab(_settingsTab);
+                SelectTab(_settings.Tab);
             });
         }
 
         private void CloseSettings()
         {
-            _settingsValues?.Store();
+            SettingsValues.Store();
             PlayerPrefs.Save();
             ClosePanel();
         }
@@ -116,52 +76,53 @@ namespace Ked.Samples.UI
 
         private void SelectTab(int tab)
         {
-            _settingsTab = Mathf.Clamp(tab, 0, SettingsPanel.TabCount - 1);
-            _settingsPanel.SetSelectedTab(_settingsTab);
-            _settingsPanel.SetResetAvailable(_settingsTab != DisplayTab);
+            int selected = _settings.SelectTab(tab);
+            _settingsPanel.SetSelectedTab(selected);
+            _settingsPanel.SetResetAvailable(_settings.CanResetTab);
 
-            switch (_settingsTab)
+            switch (selected)
             {
-                case AudioTab:
+                case SettingsState.AudioTab:
                     SwitchPage<AudioSettingsPage>(_settingsPanel, page =>
                     {
                         BindView(page, ApplyAudioBindings);
                         PresentAudioPage(page);
                     });
                     break;
-                case TextTab:
+                case SettingsState.TextTab:
                     SwitchPage<TextSettingsPage>(_settingsPanel, page =>
                     {
                         BindView(page, ApplyTextBindings);
-                        PresentTextPage(page);
+                        page.Present(_settings.TextModel());
                     });
                     break;
-                case PlaybackTab:
+                case SettingsState.PlaybackTab:
                     SwitchPage<PlaybackSettingsPage>(_settingsPanel, page =>
                     {
                         BindView(page, ApplyPlaybackBindings);
-                        PresentPlaybackPage(page);
+                        page.Present(_settings.PlaybackModel());
                     });
                     break;
                 default:
                     SwitchPage<DisplaySettingsPage>(_settingsPanel, page =>
                     {
                         BindView(page, ApplyDisplayBindings);
-                        PresentDisplayPage(page, Screen.fullScreen);
+                        page.Present(new DisplaySettingsPage.Model { Fullscreen = Screen.fullScreen });
                     });
                     break;
             }
 
-            _settingsPanel.FocusTab(_settingsTab);
+            _settingsPanel.FocusTab(selected);
         }
 
+        // 값은 상태가 기본값으로 되돌리고, 여기서 그 탭의 것을 다시 적용한다.
         private void ResetTab()
         {
-            switch (_settingsTab)
+            _settings.ResetTab();
+
+            switch (_settings.Tab)
             {
-                case AudioTab:
-                    _settingsValues.MasterVolume = _settingsDefaults.MasterVolume;
-                    _settingsValues.Muted = _settingsDefaults.Muted;
+                case SettingsState.AudioTab:
                     ApplyMasterVolume();
 
                     AudioVolumeSettings volume = Volume;
@@ -175,25 +136,30 @@ namespace Ked.Samples.UI
                     PresentAudioPage(_audioPage);
                     break;
 
-                case TextTab:
-                    _settingsValues.TextScale = _settingsDefaults.TextScale;
-                    _settingsValues.TypeSpeed = _settingsDefaults.TypeSpeed;
-                    _settingsValues.BoxOpacity = _settingsDefaults.BoxOpacity;
+                case SettingsState.TextTab:
                     ApplyTextScale();
                     ApplyTypeSpeed();
                     ApplyBoxOpacity();
-                    PresentTextPage(_textPage);
+                    _textPage.Present(_settings.TextModel());
                     break;
 
-                case PlaybackTab:
-                    _settingsValues.AutoDelay = _settingsDefaults.AutoDelay;
-                    _settingsValues.SpeedUpMultiplier = _settingsDefaults.SpeedUpMultiplier;
+                case SettingsState.PlaybackTab:
                     ApplyPlaybackSettings();
-                    PresentPlaybackPage(_playbackPage);
+                    _playbackPage.Present(_settings.PlaybackModel());
                     break;
             }
 
-            _settingsValues.Store();
+            SettingsValues.Store();
+        }
+
+        private void PresentAudioPage(AudioSettingsPage page)
+        {
+            AudioVolumeSettings volume = Volume;
+
+            page.Present(_settings.AudioModel(
+                volume != null ? volume.BgmVolume : DefaultChannelVolume,
+                volume != null ? volume.SfxVolume : DefaultChannelVolume,
+                volume != null ? volume.VoiceVolume : DefaultChannelVolume));
         }
 
         #endregion
@@ -246,54 +212,6 @@ namespace Ked.Samples.UI
 
         #endregion
 
-        #region 탭 그리기
-
-        private void PresentAudioPage(AudioSettingsPage page)
-        {
-            AudioVolumeSettings volume = Volume;
-
-            page.Present(new AudioSettingsPage.Model
-            {
-                Master = _settingsValues.MasterVolume,
-                Bgm = volume != null ? volume.BgmVolume : DefaultChannelVolume,
-                Sfx = volume != null ? volume.SfxVolume : DefaultChannelVolume,
-                Voice = volume != null ? volume.VoiceVolume : DefaultChannelVolume,
-                Muted = _settingsValues.Muted,
-            });
-        }
-
-        private void PresentTextPage(TextSettingsPage page)
-        {
-            page.Present(new TextSettingsPage.Model
-            {
-                TextScale = _settingsValues.TextScale,
-                TypeSpeed = _settingsValues.TypeSpeed,
-                BoxOpacity = _settingsValues.BoxOpacity,
-            });
-        }
-
-        private void PresentPlaybackPage(PlaybackSettingsPage page)
-        {
-            page.Present(new PlaybackSettingsPage.Model
-            {
-                AutoDelay = _settingsValues.AutoDelay,
-                SpeedChoices = _speedChoices,
-                SpeedUpMultiplier = _settingsValues.SpeedUpMultiplier,
-                FormatSeconds = seconds => Format("settings.playback.seconds", seconds.ToString("0.0")),
-            });
-        }
-
-        private void PresentDisplayPage(DisplaySettingsPage page, bool fullscreen)
-        {
-            page.Present(new DisplaySettingsPage.Model
-            {
-                Fullscreen = fullscreen,
-                Note = Application.isEditor ? Text("settings.display.editorNote") : string.Empty,
-            });
-        }
-
-        #endregion
-
         #region 바뀜 → 적용 · 저장
 
         private void HandleVolumeChanged(AudioSettingsPage.Channel channel, float value)
@@ -303,9 +221,9 @@ namespace Ked.Samples.UI
             switch (channel)
             {
                 case AudioSettingsPage.Channel.Master:
-                    _settingsValues.MasterVolume = Mathf.Clamp01(value);
+                    SettingsValues.MasterVolume = Mathf.Clamp01(value);
                     ApplyMasterVolume();
-                    _settingsValues.Store();
+                    SettingsValues.Store();
                     break;
                 case AudioSettingsPage.Channel.Bgm:
                     volume?.SetBgmVolume(value);
@@ -321,81 +239,81 @@ namespace Ked.Samples.UI
 
         private void HandleMuteChanged(bool muted)
         {
-            _settingsValues.Muted = muted;
+            SettingsValues.Muted = muted;
             ApplyMasterVolume();
-            _settingsValues.Store();
+            SettingsValues.Store();
         }
 
         private void HandleTextScaleChanged(float scale)
         {
-            _settingsValues.TextScale = scale;
+            SettingsValues.TextScale = scale;
             ApplyTextScale();
-            _settingsValues.Store();
+            SettingsValues.Store();
         }
 
         private void HandleTypeSpeedChanged(float speed)
         {
-            _settingsValues.TypeSpeed = speed;
+            SettingsValues.TypeSpeed = speed;
             ApplyTypeSpeed();
-            _settingsValues.Store();
+            SettingsValues.Store();
         }
 
         private void HandleBoxOpacityChanged(float opacity)
         {
-            _settingsValues.BoxOpacity = opacity;
+            SettingsValues.BoxOpacity = opacity;
             ApplyBoxOpacity();
-            _settingsValues.Store();
+            SettingsValues.Store();
         }
 
         private void HandleAutoDelayChanged(float seconds)
         {
-            _settingsValues.AutoDelay = seconds;
+            SettingsValues.AutoDelay = seconds;
             ApplyPlaybackSettings();
-            _settingsValues.Store();
+            SettingsValues.Store();
         }
 
         private void HandleSpeedChoiceClicked(float multiplier)
         {
-            _settingsValues.SpeedUpMultiplier = multiplier;
+            SettingsValues.SpeedUpMultiplier = multiplier;
             ApplyPlaybackSettings();
-            _settingsValues.Store();
-            PresentPlaybackPage(_playbackPage);
+            SettingsValues.Store();
+            _playbackPage.Present(_settings.PlaybackModel());
         }
 
         private void HandleWindowModeClicked(bool fullscreen)
         {
             Screen.fullScreenMode = fullscreen ? FullScreenMode.FullScreenWindow : FullScreenMode.Windowed;
-            PresentDisplayPage(_displayPage, fullscreen);
+            _displayPage.Present(new DisplaySettingsPage.Model { Fullscreen = fullscreen });
         }
 
         #endregion
 
-        #region 적용
+        #region 적용 — 엔진 · 본체
 
         private AudioVolumeSettings Volume => _playback?.Audio != null ? _playback.Audio.Volume : null;
 
         private void ApplyMasterVolume()
         {
-            AudioListener.volume = _settingsValues.Muted ? 0f : Mathf.Clamp01(_settingsValues.MasterVolume);
+            AudioListener.volume = SettingsValues.Muted ? 0f : Mathf.Clamp01(SettingsValues.MasterVolume);
         }
 
         // 글자 크기는 UIPF의 사용자 문맥(UIContext.TextScale)이다. 바꾸면 보이는 화면에 바로 다시 적용된다.
         private void ApplyTextScale()
         {
             UIContext context = _ui.Context;
-            _ui.SetContext(context.With(context.ThemeId, context.LocaleId, _settingsValues.TextScale));
+            _ui.SetContext(context.With(context.ThemeId, context.LocaleId, SettingsValues.TextScale));
         }
 
         private void ApplyTypeSpeed()
         {
             if (_playback.Typewriter != null)
-                _playback.Typewriter.unitsPerSecond = _settingsValues.TypeSpeed;
+                _playback.Typewriter.unitsPerSecond = SettingsValues.TypeSpeed;
         }
 
         // 대사창 불투명도는 재생 화면에 그린다.
         private void ApplyBoxOpacity()
         {
-            _playScreen.SetDialogueOpacity(_settingsValues.BoxOpacity);
+            _playScreen.SetDialogueOpacity(SettingsValues.BoxOpacity);
         }
 
         // 배속은 다음에 빠르게 재생을 켤 때부터 적용된다(본체가 켤 때 배속을 읽는다).
@@ -405,9 +323,9 @@ namespace Ked.Samples.UI
             if (playback == null)
                 return;
 
-            playback.autoModeDelaySeconds = _settingsValues.AutoDelay;
+            playback.autoModeDelaySeconds = SettingsValues.AutoDelay;
             playback.speedupModeMultiplier = Mathf.Clamp(
-                _settingsValues.SpeedUpMultiplier,
+                SettingsValues.SpeedUpMultiplier,
                 playback.speedupModeMinMultiplier,
                 playback.speedupModeMaxMultiplier);
         }
