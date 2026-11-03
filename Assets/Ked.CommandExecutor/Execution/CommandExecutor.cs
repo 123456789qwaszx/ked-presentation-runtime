@@ -25,12 +25,18 @@ public class CommandExecutor : MonoBehaviour
     
     public void PlaySpecs(IReadOnlyList<CommandSpecBase> specs, CommandRunScope scope)
     {
+        // 세션(scope)이 없을 때 스텝이 오는 것은 호출 순서의 잘못이다 — 막는 척하지 않고 드러낸다.
+        if (scope == null)
+        {
+            Debug.LogWarning("[CommandExecutor] PlaySpecs without a scope — the session has not started or already ended. Skipped.");
+            return;
+        }
+
         int runId = _runId;
         int stepId = ++_stepId;
         _activeScope = scope;
 
-        CleanupPolicy policy = DecideCleanupPolicy(_activeScope);
-        _activeScope.CleanupStep(policy);
+        _activeScope.CleanupStep(CleanupPolicy.Finish);
 
         List<ISequenceCommand> commands = BuildCommandsFromSpecs(specs);
 
@@ -127,13 +133,5 @@ public class CommandExecutor : MonoBehaviour
 
         _cts.Dispose();
         _cts = null;
-    }
-
-    private CleanupPolicy DecideCleanupPolicy(CommandRunScope scope)
-    {
-        if (scope == null)
-            return CleanupPolicy.Cancel;
-
-        return CleanupPolicy.Finish;
     }
 }

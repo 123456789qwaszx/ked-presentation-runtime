@@ -254,6 +254,14 @@ screen_blur는 이름과 달리 화면 포스트 이펙트가 아니라 리그�
   - 첫 `MoveNext`(= `Execute`의 머리, 압축 시 `OnSkip` 포함)는 `PlayCommands` 안에서 try 없이 돈다.
     [추론] 그래서 압축 중(RapidSkip · 시크 · 롤백/로드 재생) 한 커맨드의 `OnSkip`이 던지면 `RunNode`가 멈추고 그 줄의 남은 커맨드가 실행되지 않는다. 리플레이 상태가 갈리는 길이다.
   - `RunAfterFirstYield`의 try/catch는 바깥 `MoveNext`만 감싼다. `ExecuteInner` 본문은 Unity의 중첩 코루틴에서 돌아 여기서 잡히지 않는다.
+  - 스텝 경계 훅의 예외는 `LifetimeScope.Cleanup`의 `catch { }`가 로그 없이 삼켰다.
+- **해결(2026-11-03):**
+  - `PlayCommands`가 첫 `MoveNext`를 try로 감싼다 — 던진 커맨드만 로그를 남기고 빠지고 그 줄의 나머지는 돈다.
+    라이브(본문 예외는 유니티가 그 커맨드만 죽임)와 압축 재생의 결과가 같아져 리플레이가 갈리지 않는다.
+    리그를 못 찾아 null을 쓰는 커맨드 각각의 방어는 범위 밖으로 남겼다(로그로 드러난다).
+  - `LifetimeScope.Cleanup`은 하나가 던져도 나머지 정리를 계속하되 `Debug.LogException`으로 남긴다.
+  - `DecideCleanupPolicy`를 지우고 `PlaySpecs` 머리에 "scope 없으면 경고 후 반환"을 뒀다. `PlayCollected`의 0개 분기와 `ticket` 주석을 걷었다.
+  - (한 번 되돌려 비교해 본 뒤 소유자가 이쪽으로 확정.)
 
 ## 7. 앞 판(`ec1a5d2`)과 달라진 곳
 

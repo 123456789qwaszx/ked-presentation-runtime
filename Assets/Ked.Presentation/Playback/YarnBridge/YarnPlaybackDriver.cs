@@ -23,9 +23,7 @@ public sealed class YarnPlaybackDriver
         var specs = new List<CommandSpecBase>(_collectedSpecs);
         _collectedSpecs.Clear();
 
-        if (specs.Count == 0)
-            CurrentScope?.CleanupStep(CleanupPolicy.Finish);
-
+        // 커맨드가 0개여도 PlaySpecs가 스텝 경계(CleanupStep)를 연다 — 여기서 따로 부르지 않는다.
         _executor.PlaySpecs(specs, CurrentScope);
     }
 
