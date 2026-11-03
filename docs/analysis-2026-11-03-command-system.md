@@ -86,7 +86,7 @@ RunNode → SequencePlayer.PlayCommands   (CommandIsPlaying = true)
 |---|---|
 | 가속 ×30 | `ClaimTweenCommandBase` 계열 (fade · slide · move_by · rotate_to · scale_to · size · place) |
 | 가속 ×1.5 | char_visual_* · focus_on/clear · screen_blur |
-| 가속 ×20 | shot_* |
+| 가속 ×20 | shot_* (시스템이 소유한 전환을 가속) |
 | 즉시 확정 | gesture · mirror · rotate_by (`AccelerateOnStepFinish => false`), motion |
 | **비워 둠 (의도)** | screen_flash · screen_vignette · screen_noise (+`_clear`) · tx · face_swap |
 | 해당 없음 | 즉시 실행류(face · bg_sprite · set_anchor 계열 · pose · tx_stage_mask_clear), 오디오 |
@@ -124,7 +124,7 @@ face_swap만 모델 안(폴드가 `ApplyFace`로 접음)이라 클레임을 맞�
 | 클레임-트윈 | fade_in/out · slide_in/out · move_by · rotate_to · scale_to · size · place | OnSkip → Commit | 가속 ×30 | `DOKill(true)` |
 | | gesture · mirror · rotate_by | 〃 | 즉시 확정 | `DOKill(true)` |
 | | char_visual_* · focus_on/clear · screen_blur | 〃 | 가속 ×1.5 | **`Kill(false)`** |
-| 샷 | shot_* | OnSkip → Commit | 가속 ×20 | `Kill(rig, true)` |
+| 샷 (장면 전역 의도) | shot_* | `Snap(다음 의도)` | 시스템 가속 ×20 | 없음 — 시스템이 전환 하나를 소유, 새 의도는 보이는 값에서 재조준 |
 | 모션 | motion | OnSkip → Commit | 즉시 확정 | 노드마다 `DOKill(true)` |
 | 비워 둠 | screen_flash · screen_vignette · screen_noise · tx · face_swap | OnSkip → 확정 | 없음(의도) | 컨트롤러·그래픽 `Kill(true)` / `CompleteInFlight` |
 | 즉시 실행 | face · bg_sprite · set_anchor 계열 · ApplyTrackOffset · tx_stage_mask_clear · pose | OnSkip = 같은 적용 | 해당 없음 | face·bg_sprite는 `CompleteInFlight`, 나머지 대부분 `DOKill(true)` |
@@ -239,3 +239,4 @@ screen_blur는 이름과 달리 화면 포스트 이펙트가 아니라 리그�
 | tx | `tx_<이름>` 18개 | `tx <preset> [stage]` 하나(`StageCommandParser.Transition.cs:8`) |
 | ui_patch | 포트가 경고만 냄 | 커맨드 삭제(`bf42cdfe`), 인터페이스만 남음 |
 | screen_blur | — | `reduction-boundary.md` 표가 "화면 효과(포스트 이펙트 축)"로 분류 — 지금은 리그 블러라 낡음 |
+| 샷 | `Kill(rig, true)` 클레임, 정지의 `Clear`가 진행 중 트윈을 남김 | **장면 전역 의도 시범.** 시스템이 Intent·Presented를 나눠 들고 전환을 소유한다. 커맨드는 `Reduce(Intent)`를 넘기기만 한다. `Clear`가 전환까지 멈춘다 |
