@@ -13,7 +13,7 @@ using UnityEngine;
 //
 // 연출 기억은 문자열로만 다룬다. 저장에서 꺼낸 두 문자열(회차 백로그, 재개 지점)을
 // PlaybackMemory.Restore에 넘기면 복원 장면을 열 때 연출이 알아서 그 줄까지 달린다.
-public sealed class ProgressionLauncher : IPlaybackHost, IPlaythroughEntry
+public sealed class ProgressionLauncher : IPlaybackHost
 {
     private readonly ProgressionDriver _driver;
     private readonly ScenarioDefinition _scenarioDef;

@@ -13,15 +13,15 @@ namespace Ked.Samples.UI
 
         public void Open()
         {
-            IKedSaveSlotPort slots = Services.Slots;
+            ManualSaveFlow saves = Services.Saves;
 
             Flow.PushPanel<SystemMenuPanel>(panel =>
             {
                 BindView(panel, ApplyBindings);
                 panel.Present(new SystemMenuPanel.Model
                 {
-                    HasSaveSlots = slots != null,
-                    CanSave = slots != null && slots.CanSave,
+                    HasSaveSlots = saves != null,
+                    CanSave = saves != null && saves.CanSave,
                     CanSkipEpisode = Services.IsRunning,
                 });
             });

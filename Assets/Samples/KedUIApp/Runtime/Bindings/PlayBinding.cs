@@ -49,7 +49,7 @@ namespace Ked.Samples.UI
         // 무대를 앞으로 가져오고 Root를 재생 화면으로 바꾼다. 이미 재생 화면이면 Presentation만 다시 적용된다(되감기·장면 전환).
         public void Open()
         {
-            Services.Stage?.ShowStage();
+            Services.ShowStage();
 
             bool entering = !Flow.IsPlayRoot;
 
@@ -146,7 +146,7 @@ namespace Ked.Samples.UI
                 if (!Services.Playback.Features.RequestRollbackOneStep())
                     return;
 
-                await Services.Playback.Host.RequestReplayAsync();
+                await Services.Launcher.RequestReplayAsync();
             }
             catch (Exception error)
             {
@@ -161,6 +161,6 @@ namespace Ked.Samples.UI
         }
 
         // 대사창 위 꼬리표: 예제 이름.
-        private string ChapterLabel() => Text(Services.Title?.Example?.NameKey);
+        private string ChapterLabel() => Text(Services.Example?.NameKey);
     }
 }

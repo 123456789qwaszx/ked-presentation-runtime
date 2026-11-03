@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Ked.Progression;
 using UnityEngine;
 
 namespace Ked.Samples.UI
@@ -9,14 +10,14 @@ namespace Ked.Samples.UI
     /// UIPF를 세우는 일 — 층 셋(Root · Panel · Overlay), UIResolver(문맥·글꼴), UIManager, 화면 등록,
     /// UI 글자 표(Localizer · ViewTexts) — 과 흐름(KedUIFlow)의 수명을 갖는다.
     ///
-    /// 호스트(SampleBootstrap)가 쓰는 길은 넷뿐이다 — UIPF 타입을 바깥에 내놓지 않는다(기본 어셈블리는 UIPF를 모른다).
-    ///   Prepare()              조립 전: 화면을 세우고 대사창·선택지 상자 계약을 내준다.
-    ///   Configure()            조립 후: 재생과 호스트 계약을 잇는다.
-    ///   OpenTitle()            시작.
-    ///   ShowPlaythroughEnd()   회차가 끝까지 갔을 때: 끝 카드(끝을 정하는 것은 호스트다).
+    /// 호스트(SampleBootstrap)가 쓰는 길:
+    ///   Prepare()     조립 전: 화면을 세우고 대사창·선택지 상자 계약을 내준다.
+    ///   Configure()   조립 후: 재생과 호스트(회차 입구 · 수동 저장 · 무대)를 잇는다.
+    ///   OpenTitle()   시작.
+    /// 챕터 끝 화면(IChapterEndView)이기도 하다 — 챕터가 끝나면 SceneRunner가 부르고, 끝 카드를 연다.
     /// </summary>
     [DisallowMultipleComponent]
-    public sealed class KedUIHost : MonoBehaviour
+    public sealed class KedUIHost : MonoBehaviour, IChapterEndView
     {
         public const string ResourcePath = "KedUI/KedUICanvas";
 
@@ -93,14 +94,17 @@ namespace Ked.Samples.UI
                 driver.Initialize(_ui);
         }
 
-        /// <summary>재생과 호스트를 잇는다. slots는 저장 슬롯이 없는 예제에서 null.</summary>
+        /// <summary>재생과 호스트를 잇는다.</summary>
         public void Configure(
             KedPlaybackBindings playback,
-            IKedTitlePort title,
-            IKedSaveSlotPort slots,
-            IKedStagePort stage)
+            ProgressionLauncher launcher,
+            ManualSaveFlow saves,
+            PresentationUIRoot stage,
+            KedExampleCard example,
+            Func<bool> hasResumePoint,
+            Action switchExample)
         {
-            RequireFlow().Configure(playback, title, slots, stage);
+            RequireFlow().Configure(playback, launcher, saves, stage, example, hasResumePoint, switchExample);
         }
 
         public void OpenTitle()
@@ -108,10 +112,10 @@ namespace Ked.Samples.UI
             RequireFlow().GoToTitle();
         }
 
-        /// <summary>회차가 끝까지 갔다 — 재생 화면 위에 끝 카드를 연다. 갈 곳은 타이틀 하나다.</summary>
-        public void ShowPlaythroughEnd(KedPlaythroughEnd end)
+        /// <summary>챕터가 끝까지 갔다 — 재생 화면 위에 끝 카드를 연다. 갈 곳은 타이틀 하나다.</summary>
+        public void Show(ChapterDefinition chapter, EpisodeNode lastEpisode, ChapterState state)
         {
-            RequireFlow().ShowPlaythroughEnd(end);
+            RequireFlow().ShowChapterEnd(chapter, lastEpisode, state);
         }
 
         private void Update()

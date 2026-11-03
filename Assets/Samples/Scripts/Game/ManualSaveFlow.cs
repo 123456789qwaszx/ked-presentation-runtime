@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using Ked.Progression;
 using Ked.Progression.Save;
@@ -37,6 +38,39 @@ public sealed class ManualSaveFlow
     }
 
     #region 수동 슬롯
+
+    // 진행 저장은 읽을 수 없는 목록(옛 형식·손상)을 예외로 알린다. 화면은 빈 목록으로 열고 이유를 남긴다.
+    public bool TryReadSlots(out IReadOnlyList<SaveSlotEntry> slots)
+    {
+        try
+        {
+            slots = _saveSlots.Slots;
+            return true;
+        }
+        catch (InvalidDataException error)
+        {
+            Debug.LogWarning(
+                $"[수동 저장] 저장 목록을 읽지 못해 빈 목록으로 연다 — {error.Message} " +
+                "옛 형식이면 저장 폴더의 save-slots.json과 save-slot-data/를 치우면 된다.");
+
+            slots = Array.Empty<SaveSlotEntry>();
+            return false;
+        }
+    }
+
+    // 본문을 실제로 읽어 본다(콘텐츠 버전이 다르면 SaveSlotService.Load가 거부한다). 화면은 읽을 수 없는 슬롯을 막는다.
+    public bool CanLoad(string slotId)
+    {
+        try
+        {
+            return _saveSlots.Load(slotId) != null;
+        }
+        catch (Exception error)
+        {
+            Debug.Log($"[수동 저장] 슬롯 {slotId}은 지금 불러올 수 없다 — {error.Message}");
+            return false;
+        }
+    }
 
     public bool TryCreate()
     {

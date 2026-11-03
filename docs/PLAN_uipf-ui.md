@@ -39,21 +39,20 @@ Assets/
 ├─ UIPresentationFlow/     UIPF 사본 — 원본과 같은 구조(Scripts/ · Editor/UI · Shaders), asmdef는 런타임 하나
 │   └─ Documentation~/vendoring.md
 └─ Samples/
-    ├─ KedUI/              새 예제 UI — 화면 하나 = 묶음 하나(아래 "화면 묶음"). App/과 Art/를 뺀 것이 "VN UI 묶음"이다 —
+    ├─ KedUI/              새 예제 UI — 화면 하나 = 묶음 하나(아래 "화면 묶음"). Art/를 뺀 것이 "VN UI 묶음"이다 —
     │   │                  재생 런타임(본체)을 모르고, UIPF 저장소의 비주얼 노벨 데모로 그대로 복사된다(아래 "VN UI를 UIPF 샘플로")
     │   ├─ Ked.Samples.UI.asmdef   런타임 asmdef(뿌리 — Common · Screens). 참조는 UIPF · TMP · UGUI뿐
     │   ├─ Common/         여러 화면이 같이 쓰는 것 — Scripts(부품 키트) · Editor(키트로 짓는 도구 · 검사 · 에디터 asmdef) · Sprites · Fonts
     │   ├─ Screens/        화면 묶음 8 — Title · Play · Menu · SaveLoad · Backlog · Settings · Modal · EpisodeEnd(끝 카드, 10-27 더함)
     │   │                  각 묶음: Scripts · Prefabs · Presentation · Sprites · Editor(+.asmref)
-    │   ├─ App/            ked 앱 쪽 — 재생 런타임에 잇는 것. asmdef 둘(Ked.Samples.UI.App · .App.Editor)
-    │   │   ├─ Runtime/    흐름(Flow) · 설정 값(Settings/KedSettings) · KedUIHost · 대사창 · 선택지 상자 어댑터(Play/)
-    │   │   ├─ Editor/     앱 빌드 — 화면 목록 · 캔버스 · 선택지 항목(KedUIBuild · KedUIAssets · OptionItemSpec)
-    │   │   ├─ Prefabs/    선택지 항목 KedOptionItem(본체 VNOptionItem) · Data/ 대사창 배치 DB(본체 형식)
-    │   │   ├─ Texts/      UI 글자 표 KedUITexts.csv(ko-KR · en-US)
-    │   │   └─ Resources/KedUI/KedUICanvas.prefab   빌더가 만든다 — SampleBootstrap이 읽는다
     │   └─ Art/            받았지만 어느 화면도 쓰지 않는 그림 14장(시안 배경 포함)
+    ├─ KedUIApp/           ked 앱 쪽 — 흐름 · 화면 바인딩 · 재생에 잇는 것. asmdef 없음 = 기본 어셈블리(2026-11-03, 아래)
+    │   ├─ Runtime/        흐름(Flow) · 바인딩(Bindings) · 설정 값(Settings/KedSettings) · KedUIHost · 대사창 · 선택지 상자 어댑터(Play/)
+    │   ├─ Editor/         앱 빌드 — 화면 목록 · 캔버스 · 선택지 항목(KedUIBuild · KedUIAssets · OptionItemSpec)
+    │   ├─ Prefabs/        선택지 항목 KedOptionItem(본체 VNOptionItem) · Data/ 대사창 배치 DB(본체 형식)
+    │   ├─ Texts/          UI 글자 표 KedUITexts.csv(ko-KR · en-US)
+    │   └─ Resources/KedUI/KedUICanvas.prefab   빌더가 만든다 — SampleBootstrap이 읽는다
     └─ Scripts/
-        ├─ Game/KedUI/     호스트 어댑터(기본 어셈블리) — KedHostPorts · StageForKedUI
         └─ Stage/          연출 무대 PresentationUIRoot(+ Providers/) — 옛 UI/는 U3에서 걷었다
 ```
 
@@ -304,6 +303,7 @@ UIPF 저장소의 Adaptive UI 데모를 걷고, 그 자리에 이 VN UI를 샘�
 정한 것(넷 모두 추천안):
 - **ked가 원본이고 UIPF는 복사본이다.** 블랙홀과 같은 방식이다. UIPF 쪽의 데모 흐름(가짜 데이터)만 UIPF가 원본이다.
 - **재생 런타임에 묶인 것은 `KedUI/App/`으로 뺀다.** 복사 규칙은 "KedUI에서 `App/`과 `Art/`를 뺀 것"이다.
+  (2026-11-03: App은 `Samples/KedUIApp/`으로 나가 KedUI 밖이다 — 복사 규칙은 "KedUI에서 `Art/`를 뺀 것".)
 - **UIPF의 Adaptive UI 데모는 전부 걷는다.** `Scripts/Demo`, `Demo/AdaptiveUI`, `Assets/UI`, 씬을 걷는다.
 - **화면비 Variant를 ked 원본에 하나 더한다.** 지금은 레이아웃 Variant 시연이 Adaptive에만 있다.
 
@@ -522,3 +522,17 @@ Panel이 열린 동안 Root(타이틀·재생 화면)의 CanvasGroup도 막는�
 - [ ] 진행·자동·빨리 넘기기·되감기·선택지·백로그 이동이 그대로, 같은 입력이 두 번 먹지 않음
 - [ ] 긴 한국어·영어(KedUIHost › localeId = en-US) · 두 줄 확인 문구 · 긴 저장 이름 · 글자 크기 130%
 - [x] 1600×900 화면을 Design/*.png와 비교 캡처, 1920×1080 · 1920×1200 · 2560×1080 잘림·입력 (10-27)
+
+### App을 기본 어셈블리로 — 호스트 포트를 걷다 (2026-11-03, 소유자 결정)
+
+App(흐름 · 바인딩 · KedUIHost)을 asmdef(`Ked.Samples.UI.App` · `.App.Editor`)로 두었더니, 유니티 규칙상 기본 어셈블리를 참조할 수 없어
+호스트(`ProgressionLauncher` · `ManualSaveFlow` · `SceneRunner` · `PresentationUIRoot`)를 부를 때마다 UI 쪽 인터페이스와
+기본 어셈블리 쪽 넘겨주기 클래스가 생겼다(`IKedTitlePort`/`KedTitlePort` · `IKedSaveSlotPort`/`KedSaveSlotPort` · `IKedStagePort`/`StageForKedUI` ·
+`KedPlaythroughEnd`/`KedPlaythroughEndView`). 대부분 판단 없이 그대로 넘겼다. 복사 대상은 화면 묶음뿐이라 App이 asmdef일 이유는 없었다.
+
+- App을 `Samples/KedUIApp/`으로 옮기고(폴더째, GUID 그대로) asmdef 둘을 지웠다 — 이제 기본 어셈블리다. 옛 `VNScreenBindings`처럼 바인딩이 호스트를 직접 쓴다.
+- 걷은 것: 위 포트·어댑터 전부, `IPlaythroughEntry`(구현 하나), `KedPlaybackBindings.Host`(→ `ProgressionLauncher`).
+- 화면이 쓰던 두 판단(슬롯 목록 읽기 · 슬롯 불러오기 가능)은 `ManualSaveFlow.TryReadSlots` · `CanLoad`로.
+- 챕터 끝: `KedUIHost`가 `IChapterEndView`를 구현하고, 끝 카드가 진행 타입을 직접 읽는다. 계약은 남긴다 — `SceneRunner`를 유니티 없이 시험한다.
+- `Ked.Samples.UI.Editor`를 autoReferenced로(앱 빌드가 기본 에디터 어셈블리로 들어와 키트·명세를 본다). 앱 빌드는 앱 폴더를 `KedUIBuild.cs` 자리로 찾는다.
+- 남긴 경계: 화면 묶음(`Ked.Samples.UI`, 그리기만) asmdef, 재생 본체의 `IPresentationView` · 대사창/선택지 계약(본체가 UI를 모른다).

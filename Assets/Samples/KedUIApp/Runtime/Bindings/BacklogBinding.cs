@@ -6,7 +6,7 @@ namespace Ked.Samples.UI
 {
     // 08 백로그 — 기록은 재생 쪽 백로그를 그대로 읽는다. 줄로 가는 길은 둘이고 서로 다른 호스트 동작이다.
     //   지금 장면의 줄   → 되감기(PlaybackFeatureController.RequestBacklogJump → IPlaybackHost.RequestReplayAsync)
-    //   확정된 과거 장면 → 그 지점에서 새 회차로 갈라지기(IKedSaveSlotPort.ForkFromBacklogAsync). 확인을 받는다.
+    //   확정된 과거 장면 → 그 지점에서 새 회차로 갈라지기(ManualSaveFlow.ForkFromBacklogAsync). 확인을 받는다.
     // 갈 수 없는 줄(지금 줄 · 저장 슬롯이 없는 호스트의 과거 장면 등)은 이동 버튼이 없다.
     // 보이스가 있는 줄은 다시 듣기 버튼이 있다 — 장면을 가리지 않고, 패널은 열어 둔다.
     // 재생 중인 줄은 켜짐 그림이고 다시 누르면 멈춘다. 재생이 저절로 끝나면 Tick이 그림을 끈다.
@@ -108,14 +108,14 @@ namespace Ked.Samples.UI
             if (Features.CanJumpTo(entry))
                 return true;
 
-            return Services.Slots != null && SafeCanFork(entry);
+            return Services.Saves != null && SafeCanFork(entry);
         }
 
         private bool SafeCanFork(DialogueLogEntry entry)
         {
             try
             {
-                return Services.Slots.CanForkFrom(entry);
+                return Services.Saves.CanForkFrom(entry);
             }
             catch (Exception error)
             {
@@ -140,12 +140,12 @@ namespace Ked.Samples.UI
                         return;
 
                     Flow.CloseAllPanels();
-                    await Services.Playback.Host.RequestReplayAsync();
+                    await Services.Launcher.RequestReplayAsync();
                     return;
                 }
 
                 // 과거 장면: 새 회차가 생긴다 — 확인한 뒤에만.
-                if (Services.Slots == null || !SafeCanFork(entry))
+                if (Services.Saves == null || !SafeCanFork(entry))
                     return;
 
                 Flow.Confirm(new ConfirmPanel.Request
@@ -187,7 +187,7 @@ namespace Ked.Samples.UI
         {
             try
             {
-                await Services.Slots.ForkFromBacklogAsync(entry, () =>
+                await Services.Saves.ForkFromBacklogAsync(entry, () =>
                 {
                     Services.StopFastForward();
                     Flow.CloseAllPanels();

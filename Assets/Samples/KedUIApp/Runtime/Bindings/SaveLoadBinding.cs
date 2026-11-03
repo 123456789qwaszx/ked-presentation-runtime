@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Ked.Samples.UI
 {
-    // 05 저장 · 06 불러오기 — 기존 수동 저장 유즈케이스(IKedSaveSlotPort = ManualSaveFlow · SaveSlotService)만 쓴다.
+    // 05 저장 · 06 불러오기 — 수동 저장 유즈케이스(ManualSaveFlow)만 쓴다.
     //
     // 슬롯 순서: 저장 서비스의 슬롯은 번호 칸이 아니라 목록이고, 덮어쓰면 그 항목이 목록 끝으로 간다.
     // 그래서 화면은 "최근 저장이 01"로 보인다(SavedAtUtc 내림차순). 저장·덮어쓰기 직후의 기록은 언제나 01이다.
@@ -38,11 +38,11 @@ namespace Ked.Samples.UI
             _panel = Own(flow.Require<SaveLoadPanel>());
         }
 
-        private IKedSaveSlotPort Slots => Services.Slots;
+        private ManualSaveFlow Saves => Services.Saves;
 
         public void Open(Mode mode)
         {
-            if (Slots == null)
+            if (Saves == null)
                 return;
 
             _mode = mode;
@@ -99,7 +99,7 @@ namespace Ked.Samples.UI
             _entries.Clear();
             _loadable.Clear();
 
-            _readable = Slots.TryReadSlots(out IReadOnlyList<SaveSlotEntry> slots);
+            _readable = Saves.TryReadSlots(out IReadOnlyList<SaveSlotEntry> slots);
 
             if (slots != null)
             {
@@ -147,7 +147,7 @@ namespace Ked.Samples.UI
 
             if (!_loadable.TryGetValue(id, out bool loadable))
             {
-                loadable = Slots.CanLoad(id);
+                loadable = Saves.CanLoad(id);
                 _loadable[id] = loadable;
             }
 
@@ -221,7 +221,7 @@ namespace Ked.Samples.UI
                 hint = Text(save ? "slots.hint.save" : "slots.hint.load");
 
             bool actionEnabled = !_busy && IsOnCurrentPage(_selected) && IsSelectableCell(_selected) &&
-                                 (!save || Slots.CanSave);
+                                 (!save || Saves.CanSave);
 
             _panel.Present(new SaveLoadPanel.Model
             {
@@ -300,7 +300,7 @@ namespace Ked.Samples.UI
 
             if (_mode == Mode.Save)
             {
-                if (!Slots.CanSave)
+                if (!Saves.CanSave)
                     return;
 
                 if (IsNewSlotCell(_selected))
@@ -348,8 +348,8 @@ namespace Ked.Samples.UI
             try
             {
                 saved = overwriteId == null
-                    ? Slots.TryCreate()
-                    : Slots.TryOverwrite(overwriteId);
+                    ? Saves.TryCreate()
+                    : Saves.TryOverwrite(overwriteId);
             }
             catch (Exception error)
             {
@@ -393,7 +393,7 @@ namespace Ked.Samples.UI
 
             try
             {
-                Task load = Slots.LoadAsync(slotId, () =>
+                Task load = Saves.LoadAsync(slotId, () =>
                 {
                     transitionStarted = true;
                     Services.StopFastForward();

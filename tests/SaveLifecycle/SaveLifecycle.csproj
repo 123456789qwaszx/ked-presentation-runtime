@@ -23,7 +23,6 @@
              Exclude="../../Assets/Ked.Progression/Tests/**/*.cs;../../Assets/Ked.Progression/ProgressionDriver.cs" />
     <Compile Include="../../Assets/Samples/Scripts/ProgressionHost/ProgressionLauncher.cs" />
     <Compile Include="../../Assets/Samples/Scripts/ProgressionHost/ProgressionSaveBridge.cs" />
-    <Compile Include="../../Assets/Samples/Scripts/Game/IPlaythroughEntry.cs" />
     <Compile Include="../../Assets/Ked.Presentation/Playback/Host/IPlaybackHost.cs" />
     <Compile Include="../../Assets/Ked.Presentation/Playback/Host/IPlaybackStage.cs" />
     <Compile Include="../../Assets/Ked.Presentation/Playback/Host/PlaybackUnit.cs" />

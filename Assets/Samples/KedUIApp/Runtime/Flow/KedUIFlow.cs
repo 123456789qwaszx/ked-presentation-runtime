@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Ked.Progression;
 using UnityEngine;
 
 namespace Ked.Samples.UI
@@ -13,7 +14,7 @@ namespace Ked.Samples.UI
     ///   Panel   메뉴 · 저장/불러오기 · 백로그 · 설정  UIManager.PushPanel / PopPanel / PopAllPanels
     ///   Page    설정의 탭 넷                          UIManager.SwitchPage(SettingsPanel, …)
     ///   모달    확인 · 안내                           Panel(맨 위만 입력을 받는 Panel 스택 규칙). Overlay는 아래를 막지 않아 쓰지 않는다.
-    ///   끝 카드 회차 끝                               Panel. 호스트가 끝을 알릴 때만 연다(ShowPlaythroughEnd).
+    ///   끝 카드 회차 끝                               Panel. 챕터가 끝날 때만 연다(ShowChapterEnd — SceneRunner가 KedUIHost를 거쳐 부른다).
     ///
     /// 바인딩은 화면을 열 때 View 이벤트를 묶는다. 닫힘(Pop · Root 교체 · Page 교체)은 여기서 UIPF 닫힘 콜백으로 받아 그 화면의 바인딩에 알린다.
     /// </summary>
@@ -63,26 +64,27 @@ namespace Ked.Samples.UI
         /// <summary>재생 본체 쪽 선택지 상자 계약의 구현. 조립과 진행 예제의 선택지 화면에 넘긴다.</summary>
         public IPresentationOptionsBoxView OptionsBox => _play.OptionsBox;
 
-        /// <summary>
-        /// 재생과 호스트를 잇는다. 조립이 끝난 뒤(재생 호스트가 정해진 뒤) 한 번.
-        /// slots는 저장 슬롯이 없는 호스트에서 null — 저장·불러오기·갈라지기가 빠진다(예제는 늘 넘긴다).
-        /// </summary>
+        /// <summary>재생과 호스트를 잇는다. 조립이 끝난 뒤(재생 호스트가 정해진 뒤) 한 번.</summary>
         public void Configure(
             KedPlaybackBindings playback,
-            IKedTitlePort title,
-            IKedSaveSlotPort slots,
-            IKedStagePort stage)
+            ProgressionLauncher launcher,
+            ManualSaveFlow saves,
+            PresentationUIRoot stage,
+            KedExampleCard example,
+            Func<bool> hasResumePoint,
+            Action switchExample)
         {
             if (_configured)
                 throw new InvalidOperationException("[Ked UI] 흐름은 한 번만 잇는다.");
 
-            if (playback == null)
-                throw new ArgumentNullException(nameof(playback));
-
-            if (title == null)
-                throw new ArgumentNullException(nameof(title));
-
-            _services.Configure(playback, title, slots, stage);
+            _services.Configure(
+                playback ?? throw new ArgumentNullException(nameof(playback)),
+                launcher ?? throw new ArgumentNullException(nameof(launcher)),
+                saves ?? throw new ArgumentNullException(nameof(saves)),
+                stage,
+                example,
+                hasResumePoint,
+                switchExample);
             _configured = true;
 
             _input = new KedInputOwnership(playback.InputPoller);
@@ -134,9 +136,9 @@ namespace Ked.Samples.UI
         /// <summary>IPresentationView — 재생이 시작될 때 본체가 부른다. Root를 재생 화면으로 바꾼다.</summary>
         public void GoToPresentationView() => _play.Open();
 
-        public void ShowPlaythroughEnd(KedPlaythroughEnd end)
+        public void ShowChapterEnd(ChapterDefinition chapter, EpisodeNode lastEpisode, ChapterState state)
         {
-            if (!_configured || end == null)
+            if (!_configured || chapter == null)
                 return;
 
             // 끝은 재생 화면에서만 온다. 타이틀로 나가는 중이거나 이미 타이틀이면 띄울 자리가 없다.
@@ -146,7 +148,7 @@ namespace Ked.Samples.UI
                 return;
             }
 
-            _end.Open(end);
+            _end.Open(chapter, lastEpisode, state);
         }
 
         internal void OpenMenu() => _menu.Open();
@@ -171,8 +173,8 @@ namespace Ked.Samples.UI
                 _services.StopFastForward();
                 CloseAllPanels();
 
-                if (_services.Playback?.Host != null)
-                    await _services.Playback.Host.ExitAsync();
+                if (_services.Launcher != null)
+                    await _services.Launcher.ExitAsync();
             }
             catch (Exception error)
             {

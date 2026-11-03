@@ -20,11 +20,13 @@ using KedUI = Ked.Samples.UI;
 /// 연출 런타임의 조립은 PresentationAssembler가 한다. 여기는 씬 참조를 넘기고,
 /// 그 위에 진행 호스트와 저장을 얹는다.
 ///
-/// 화면은 새 예제 UI(Samples/KedUI, UIPresentationFlow 위)다. Resources/KedUI/KedUICanvas를 띄우고 호스트 계약(KedHostPorts)으로 잇는다.
+/// 화면은 새 예제 UI(화면 묶음 Samples/KedUI + 흐름·바인딩 Samples/KedUIApp, UIPresentationFlow 위)다.
+/// Resources/KedUI/KedUICanvas를 띄우고 KedUIHost.Configure로 호스트를 직접 넘긴다.
 /// 캔버스가 없으면(빌더 Tools/Ked UI/Build Sample UI 실행 전) 아무것도 세우지 않고 알린다.
 /// 연출 무대(배경·인물·화면 효과)는 씬의 무대 캔버스에 놓인 PresentationUIRoot가 그리고, 새 UI는 그 위 캔버스에 얹힌다.
 ///
-/// 회차의 끝은 챕터의 끝이다 — SceneRunner가 IChapterEndView를 부르고, KedPlaythroughEndView가 UI의 끝 카드로 잇는다.
+/// 회차의 끝은 챕터의 끝이다 — SceneRunner가 IChapterEndView(= KedUIHost)를 부르고, UI가 끝 카드를 연다.
+/// UI의 흐름·바인딩(Samples/KedUIApp)은 이 기본 어셈블리에 있어 호스트(ProgressionLauncher · ManualSaveFlow · 무대)를 직접 받는다.
 ///
 /// 스크립트 GUID는 예전 VNAppBootstrap 그대로다 — 씬에 직렬화된 값이 유지된다.
 ///
@@ -189,12 +191,10 @@ public class SampleBootstrap : MonoBehaviour, IRigPrefabSource
             _kedUI.PresentationView,
             out _internals);
 
-        IPlaybackHost host = InstallProgression();
-
-        _runtime.AttachHost(host);
+        _runtime.AttachHost(InstallProgression());
         InstallProgressionSaves();
 
-        ConfigureKedUI(host);
+        ConfigureKedUI();
     }
 
     #region 화면
@@ -228,13 +228,12 @@ public class SampleBootstrap : MonoBehaviour, IRigPrefabSource
         }
     }
 
-    private void ConfigureKedUI(IPlaybackHost host)
+    private void ConfigureKedUI()
     {
         var playback = new KedUI.KedPlaybackBindings
         {
             Features = _runtime.Features,
             AdvanceDispatcher = _runtime.AdvanceDispatcher,
-            Host = host,
             LineFlow = _runtime.LineFlow,
             InputPoller = vnAdvanceInputPoller,
             PlaybackState = _internals.PlaybackState,
@@ -245,15 +244,14 @@ public class SampleBootstrap : MonoBehaviour, IRigPrefabSource
 
         SampleExample other = SampleExampleSwitch.Other(_example);
 
-        var title = new KedTitlePort(
+        _kedUI.Configure(
+            playback,
             _progressionLauncher,
-            HasProgressionResumePoint,
+            _manualSaveFlow,
+            stage,
             ExampleCard(_example),
+            HasProgressionResumePoint,
             () => SampleExampleSwitch.SwitchTo(other));
-
-        KedUI.IKedSaveSlotPort slots = new KedSaveSlotPort(_manualSaveFlow, _saveSlotService);
-
-        _kedUI.Configure(playback, title, slots, new StageForKedUI(stage));
     }
 
     // 타이틀 오른쪽 카드. 글자는 UI 글자 표의 키, 그림은 그 예제 대본이 실제로 쓰는 배경.
@@ -392,7 +390,7 @@ public class SampleBootstrap : MonoBehaviour, IRigPrefabSource
             _runtime.Unit,
             _progressionOptions,
             savePersistence,
-            new KedPlaythroughEndView(_kedUI));
+            _kedUI);
 
         _progressionDriver = new ProgressionDriver(sceneRunner);
 
