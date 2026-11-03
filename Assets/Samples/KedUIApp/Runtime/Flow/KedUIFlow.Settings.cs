@@ -3,7 +3,7 @@ using UnityEngine;
 namespace Ked.Samples.UI
 {
     // 07 · 11 · 12 · 13 설정 — 화면 연결, 값을 엔진 · 본체에 적용, 저장. 바꾸는 즉시 적용하고 저장한다.
-    // 기본값 · 배속 보기 · 탭 · 되돌리기는 SettingsState가, 글자는 각 Page가 정한다.
+    // 기본값 · 값 범위 · 배속 보기 · 탭 · 되돌리기는 SettingsState가, 글자는 각 Page가 정한다. 값은 상태의 Set*으로만 바꾼다.
     // 탭은 UIPF Page — SettingsPanel(Page Owner)의 PageRoot 아래 Page 넷을 SwitchPage로 바꿔 낀다. Page 이벤트도 그 Page를 열 때 묶는다.
     // Esc는 저장하고 닫는다(HandleCancel → CloseSettings).
     public sealed partial class KedUIFlow
@@ -12,8 +12,6 @@ namespace Ked.Samples.UI
         private const float DefaultChannelVolume = 0.8f;
 
         private readonly SettingsPanel _settingsPanel;
-        private readonly AudioSettingsPage _audioPage;
-        private readonly TextSettingsPage _textPage;
         private readonly PlaybackSettingsPage _playbackPage;
         private readonly DisplaySettingsPage _displayPage;
         private readonly SettingsState _settings = new();
@@ -33,12 +31,7 @@ namespace Ked.Samples.UI
                 maxMultiplier: playback != null ? playback.speedupModeMaxMultiplier : 32f);
 
             _settings.Adopt(KedSettings.Load(_settings.Defaults));
-
-            ApplyMasterVolume();
-            ApplyTextScale();
-            ApplyTypeSpeed();
-            ApplyBoxOpacity();
-            ApplyPlaybackSettings();
+            ApplySettings();
         }
 
         #region 열고 닫기 · 탭
@@ -74,36 +67,65 @@ namespace Ked.Samples.UI
                 p => p.ResetClicked -= ResetTab);
         }
 
-        private void SelectTab(int tab)
+        private void SelectTab(SettingsPanel.Tab tab)
         {
-            int selected = _settings.SelectTab(tab);
-            _settingsPanel.SetSelectedTab(selected);
+            _settings.Tab = tab;
+            _settingsPanel.SetSelectedTab(tab);
             _settingsPanel.SetResetAvailable(_settings.CanResetTab);
+            ShowTabPage();
+            _settingsPanel.FocusTab(tab);
+        }
 
-            switch (selected)
+        // 값은 상태가 기본값으로 되돌린다. 채널 음량만 본체가 들고 있어 여기서 되돌린다.
+        // 바뀐 값은 모두 다시 적용하고(같은 값은 그대로다) 지금 Page를 다시 그린다.
+        private void ResetTab()
+        {
+            _settings.ResetTab();
+
+            if (_settings.Tab == SettingsPanel.Tab.Audio)
             {
-                case SettingsState.AudioTab:
+                AudioVolumeSettings volume = Volume;
+                if (volume != null)
+                {
+                    volume.SetBgmVolume(DefaultChannelVolume);
+                    volume.SetSfxVolume(DefaultChannelVolume);
+                    volume.SetVoiceVolume(DefaultChannelVolume);
+                }
+            }
+
+            ApplySettings();
+            SettingsValues.Store();
+            ShowTabPage();
+        }
+
+        // 지금 탭의 Page를 열고 그린다. 이미 열린 Page면 다시 그리기만 한다(UIPF는 같은 Page를 닫지 않고, 묶기는 한 벌만 남는다).
+        // 탭마다 나뉘는 곳은 여기 하나다(되돌릴 값의 탭 나눔은 SettingsState.ResetTab).
+        private void ShowTabPage()
+        {
+            switch (_settings.Tab)
+            {
+                case SettingsPanel.Tab.Audio:
                     SwitchPage<AudioSettingsPage>(_settingsPanel, page =>
                     {
                         BindView(page, ApplyAudioBindings);
                         PresentAudioPage(page);
                     });
                     break;
-                case SettingsState.TextTab:
+                case SettingsPanel.Tab.Text:
                     SwitchPage<TextSettingsPage>(_settingsPanel, page =>
                     {
                         BindView(page, ApplyTextBindings);
                         page.Present(_settings.TextModel());
                     });
                     break;
-                case SettingsState.PlaybackTab:
+                case SettingsPanel.Tab.Playback:
                     SwitchPage<PlaybackSettingsPage>(_settingsPanel, page =>
                     {
                         BindView(page, ApplyPlaybackBindings);
                         page.Present(_settings.PlaybackModel());
                     });
                     break;
-                default:
+                case SettingsPanel.Tab.Display:
                     SwitchPage<DisplaySettingsPage>(_settingsPanel, page =>
                     {
                         BindView(page, ApplyDisplayBindings);
@@ -111,45 +133,6 @@ namespace Ked.Samples.UI
                     });
                     break;
             }
-
-            _settingsPanel.FocusTab(selected);
-        }
-
-        // 값은 상태가 기본값으로 되돌리고, 여기서 그 탭의 것을 다시 적용한다.
-        private void ResetTab()
-        {
-            _settings.ResetTab();
-
-            switch (_settings.Tab)
-            {
-                case SettingsState.AudioTab:
-                    ApplyMasterVolume();
-
-                    AudioVolumeSettings volume = Volume;
-                    if (volume != null)
-                    {
-                        volume.SetBgmVolume(DefaultChannelVolume);
-                        volume.SetSfxVolume(DefaultChannelVolume);
-                        volume.SetVoiceVolume(DefaultChannelVolume);
-                    }
-
-                    PresentAudioPage(_audioPage);
-                    break;
-
-                case SettingsState.TextTab:
-                    ApplyTextScale();
-                    ApplyTypeSpeed();
-                    ApplyBoxOpacity();
-                    _textPage.Present(_settings.TextModel());
-                    break;
-
-                case SettingsState.PlaybackTab:
-                    ApplyPlaybackSettings();
-                    _playbackPage.Present(_settings.PlaybackModel());
-                    break;
-            }
-
-            SettingsValues.Store();
         }
 
         private void PresentAudioPage(AudioSettingsPage page)
@@ -221,7 +204,7 @@ namespace Ked.Samples.UI
             switch (channel)
             {
                 case AudioSettingsPage.Channel.Master:
-                    SettingsValues.MasterVolume = Mathf.Clamp01(value);
+                    _settings.SetMasterVolume(value);
                     ApplyMasterVolume();
                     SettingsValues.Store();
                     break;
@@ -239,42 +222,44 @@ namespace Ked.Samples.UI
 
         private void HandleMuteChanged(bool muted)
         {
-            SettingsValues.Muted = muted;
+            _settings.SetMuted(muted);
             ApplyMasterVolume();
             SettingsValues.Store();
         }
 
         private void HandleTextScaleChanged(float scale)
         {
-            SettingsValues.TextScale = scale;
+            _settings.SetTextScale(scale);
             ApplyTextScale();
             SettingsValues.Store();
         }
 
         private void HandleTypeSpeedChanged(float speed)
         {
-            SettingsValues.TypeSpeed = speed;
+            _settings.SetTypeSpeed(speed);
             ApplyTypeSpeed();
             SettingsValues.Store();
         }
 
         private void HandleBoxOpacityChanged(float opacity)
         {
-            SettingsValues.BoxOpacity = opacity;
+            _settings.SetBoxOpacity(opacity);
             ApplyBoxOpacity();
             SettingsValues.Store();
         }
 
         private void HandleAutoDelayChanged(float seconds)
         {
-            SettingsValues.AutoDelay = seconds;
+            _settings.SetAutoDelay(seconds);
             ApplyPlaybackSettings();
             SettingsValues.Store();
         }
 
         private void HandleSpeedChoiceClicked(float multiplier)
         {
-            SettingsValues.SpeedUpMultiplier = multiplier;
+            if (!_settings.SetSpeedUp(multiplier))
+                return;
+
             ApplyPlaybackSettings();
             SettingsValues.Store();
             _playbackPage.Present(_settings.PlaybackModel());
@@ -292,9 +277,19 @@ namespace Ked.Samples.UI
 
         private AudioVolumeSettings Volume => _playback?.Audio != null ? _playback.Audio.Volume : null;
 
+        // 지금 값을 엔진 · 본체에 모두 적용한다. 같은 값을 다시 적용해도 그대로다.
+        private void ApplySettings()
+        {
+            ApplyMasterVolume();
+            ApplyTextScale();
+            ApplyTypeSpeed();
+            ApplyBoxOpacity();
+            ApplyPlaybackSettings();
+        }
+
         private void ApplyMasterVolume()
         {
-            AudioListener.volume = SettingsValues.Muted ? 0f : Mathf.Clamp01(SettingsValues.MasterVolume);
+            AudioListener.volume = SettingsValues.Muted ? 0f : SettingsValues.MasterVolume;
         }
 
         // 글자 크기는 UIPF의 사용자 문맥(UIContext.TextScale)이다. 바꾸면 보이는 화면에 바로 다시 적용된다.
@@ -317,6 +312,7 @@ namespace Ked.Samples.UI
         }
 
         // 배속은 다음에 빠르게 재생을 켤 때부터 적용된다(본체가 켤 때 배속을 읽는다).
+        // 배속은 상태가 본체 범위 안의 보기로만 둔다.
         private void ApplyPlaybackSettings()
         {
             PlaybackSettings playback = _playback.PlaybackState?.PlaybackSettings;
@@ -324,10 +320,7 @@ namespace Ked.Samples.UI
                 return;
 
             playback.autoModeDelaySeconds = SettingsValues.AutoDelay;
-            playback.speedupModeMultiplier = Mathf.Clamp(
-                SettingsValues.SpeedUpMultiplier,
-                playback.speedupModeMinMultiplier,
-                playback.speedupModeMaxMultiplier);
+            playback.speedupModeMultiplier = SettingsValues.SpeedUpMultiplier;
         }
 
         #endregion

@@ -57,8 +57,8 @@ namespace Ked.Samples.UI
             _backlogPanel = Require<BacklogPanel>();
             _saveLoadPanel = Require<SaveLoadPanel>();
             _settingsPanel = Require<SettingsPanel>();
-            _audioPage = Require<AudioSettingsPage>();
-            _textPage = Require<TextSettingsPage>();
+            Require<AudioSettingsPage>();
+            Require<TextSettingsPage>();
             _playbackPage = Require<PlaybackSettingsPage>();
             _displayPage = Require<DisplaySettingsPage>();
             _confirmPanel = Require<ConfirmPanel>();

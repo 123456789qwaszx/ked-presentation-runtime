@@ -17,19 +17,11 @@ namespace Ked.Samples.UI
     /// | 화면 | 창 모드 · 전체 화면 | Screen.fullScreenMode — 엔진이 스스로 기억한다. 에디터에서는 바뀌지 않는다 |
     ///
     /// 기본값 중 둘(출력 속도·자동 대기·배속)은 씬·본체에 적힌 값을 시작할 때 읽어 쓴다 — 여기서 새 기본을 만들지 않는다.
+    /// 값 범위는 설정 상태(SettingsState)가 맞춘다. 여기는 값을 담고 읽고 쓰기만 한다.
     /// </summary>
     public sealed class KedSettings
     {
         private const string Prefix = "KedUI.";
-
-        // 범위는 설정 Page와 같이 쓴다(화면 묶음의 KedSettingRanges).
-        public const float MinTextScale = KedSettingRanges.MinTextScale;
-        public const float MaxTextScale = KedSettingRanges.MaxTextScale;
-        public const float MinTypeSpeed = KedSettingRanges.MinTypeSpeed;
-        public const float MaxTypeSpeed = KedSettingRanges.MaxTypeSpeed;
-        public const float MinBoxOpacity = KedSettingRanges.MinBoxOpacity;
-        public const float MinAutoDelay = KedSettingRanges.MinAutoDelay;
-        public const float MaxAutoDelay = KedSettingRanges.MaxAutoDelay;
 
         public float MasterVolume = 1f;
         public bool Muted;
@@ -43,19 +35,19 @@ namespace Ked.Samples.UI
 
         public KedSettings Clone() => (KedSettings)MemberwiseClone();
 
-        /// <summary>저장된 값을 읽는다. 없는 값은 defaults의 값.</summary>
+        /// <summary>저장된 값을 읽는다. 없는 값은 defaults의 값. 범위는 맞추지 않는다(SettingsState.Adopt가 맞춘다).</summary>
         public static KedSettings Load(KedSettings defaults)
         {
             KedSettings s = defaults.Clone();
 
-            s.MasterVolume = Mathf.Clamp01(PlayerPrefs.GetFloat(Prefix + "MasterVolume", defaults.MasterVolume));
+            s.MasterVolume = PlayerPrefs.GetFloat(Prefix + "MasterVolume", defaults.MasterVolume);
             s.Muted = PlayerPrefs.GetInt(Prefix + "Muted", defaults.Muted ? 1 : 0) != 0;
 
-            s.TextScale = Mathf.Clamp(PlayerPrefs.GetFloat(Prefix + "TextScale", defaults.TextScale), MinTextScale, MaxTextScale);
-            s.TypeSpeed = Mathf.Clamp(PlayerPrefs.GetFloat(Prefix + "TypeSpeed", defaults.TypeSpeed), MinTypeSpeed, MaxTypeSpeed);
-            s.BoxOpacity = Mathf.Clamp(PlayerPrefs.GetFloat(Prefix + "BoxOpacity", defaults.BoxOpacity), MinBoxOpacity, 1f);
+            s.TextScale = PlayerPrefs.GetFloat(Prefix + "TextScale", defaults.TextScale);
+            s.TypeSpeed = PlayerPrefs.GetFloat(Prefix + "TypeSpeed", defaults.TypeSpeed);
+            s.BoxOpacity = PlayerPrefs.GetFloat(Prefix + "BoxOpacity", defaults.BoxOpacity);
 
-            s.AutoDelay = Mathf.Clamp(PlayerPrefs.GetFloat(Prefix + "AutoDelay", defaults.AutoDelay), MinAutoDelay, MaxAutoDelay);
+            s.AutoDelay = PlayerPrefs.GetFloat(Prefix + "AutoDelay", defaults.AutoDelay);
             s.SpeedUpMultiplier = PlayerPrefs.GetFloat(Prefix + "SpeedUpMultiplier", defaults.SpeedUpMultiplier);
 
             return s;

@@ -10,7 +10,14 @@ namespace Ked.Samples.UI
     [UIViewKey("Ked.SettingsPanel")]
     public sealed class SettingsPanel : UIPanel<SettingsPanel.Refs>, IUIPageOwner
     {
-        public const int TabCount = 4;
+        // 탭 목록. 화면 상태(SettingsState)도 이것으로 탭을 고른다.
+        public enum Tab
+        {
+            Audio,
+            Text,
+            Playback,
+            Display,
+        }
 
         public enum Refs
         {
@@ -41,10 +48,13 @@ namespace Ked.Samples.UI
         }
 
         public event Action CloseClicked;
-        public event Action<int> TabClicked;
+        public event Action<Tab> TabClicked;
         public event Action ResetClicked;
 
-        private readonly KedButton[] _tabs = new KedButton[TabCount];
+        // Tab 순서.
+        private static readonly Refs[] TabRefs = { Refs.SettingsTab_0, Refs.SettingsTab_1, Refs.SettingsTab_2, Refs.SettingsTab_3 };
+
+        private readonly KedButton[] _tabs = new KedButton[TabRefs.Length];
 
         public RectTransform PageRoot => View.Rect(Refs.PageRoot);
 
@@ -53,23 +63,21 @@ namespace Ked.Samples.UI
             KedUIUtil.OnClick(View.Button(Refs.SettingsClose), () => CloseClicked?.Invoke());
             KedUIUtil.OnClick(View.Button(Refs.ResetSettings), () => ResetClicked?.Invoke());
 
-            Refs[] tabs = { Refs.SettingsTab_0, Refs.SettingsTab_1, Refs.SettingsTab_2, Refs.SettingsTab_3 };
-
-            for (int i = 0; i < tabs.Length; i++)
+            for (int i = 0; i < TabRefs.Length; i++)
             {
-                int index = i;
-                UnityEngine.UI.Button button = View.Button(tabs[i]);
-                KedUIUtil.OnClick(button, () => TabClicked?.Invoke(index));
+                var tab = (Tab)i;
+                UnityEngine.UI.Button button = View.Button(TabRefs[i]);
+                KedUIUtil.OnClick(button, () => TabClicked?.Invoke(tab));
 
                 if (button != null)
                     button.TryGetComponent(out _tabs[i]);
             }
         }
 
-        public void SetSelectedTab(int index)
+        public void SetSelectedTab(Tab tab)
         {
             for (int i = 0; i < _tabs.Length; i++)
-                _tabs[i]?.SetSelectedLook(i == index);
+                _tabs[i]?.SetSelectedLook(i == (int)tab);
         }
 
         /// <summary>기본값 복원이 지금 탭에 되돌릴 값을 갖는가.</summary>
@@ -78,8 +86,9 @@ namespace Ked.Samples.UI
             KedUIUtil.SetButton(View.Button(Refs.ResetSettings), true, available);
         }
 
-        public void FocusTab(int index)
+        public void FocusTab(Tab tab)
         {
+            int index = (int)tab;
             if (index >= 0 && index < _tabs.Length && _tabs[index] != null)
                 KedUIUtil.Focus(_tabs[index].Button);
         }

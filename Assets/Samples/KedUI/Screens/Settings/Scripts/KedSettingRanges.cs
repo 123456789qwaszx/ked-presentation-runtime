@@ -1,7 +1,7 @@
 namespace Ked.Samples.UI
 {
     /// <summary>
-    /// 설정 값의 범위 — 설정 Page의 슬라이더와 앱의 설정 값(ked: App의 KedSettings)이 같이 쓴다.
+    /// 설정 값의 범위 — 설정 Page의 슬라이더와 앱의 설정 상태(SettingsState)가 같이 쓴다.
     /// </summary>
     public static class KedSettingRanges
     {

@@ -4,40 +4,26 @@ using System.Collections.Generic;
 namespace Ked.Samples.UI
 {
     /// <summary>
-    /// 설정 화면의 상태와 규칙 — 기본값 · 배속 보기 · 지금 탭 · 탭 되돌리기. 각 탭의 화면 모델(값)을 낸다.
-    /// 값을 엔진 · 본체에 적용하고 저장하는 것은 흐름(KedUIFlow.Settings)이다. 글자는 각 Page가 정한다.
+    /// 설정 화면의 상태와 규칙 — 기본값 · 값 범위 · 배속 보기 · 지금 탭 · 탭 되돌리기. 각 탭의 화면 모델(값)을 낸다.
+    /// 값은 여기 Set*으로만 바꾼다(범위는 여기서 맞춘다). 엔진 · 본체에 적용하고 저장하는 것은 흐름(KedUIFlow.Settings)이다. 글자는 각 Page가 정한다.
     /// </summary>
     internal sealed class SettingsState
     {
-        public const int AudioTab = 0;
-        public const int TextTab = 1;
-        public const int PlaybackTab = 2;
-        public const int DisplayTab = 3;
-
         private readonly List<float> _speedChoices = new();
 
         public KedSettings Defaults { get; private set; } = new();
         public KedSettings Values { get; private set; } = new();
         public IReadOnlyList<float> SpeedChoices => _speedChoices;
-        public int Tab { get; private set; }
+        public SettingsPanel.Tab Tab { get; set; }
 
         // 화면 탭은 되돌릴 값이 없다(창 모드는 엔진이 기억한다).
-        public bool CanResetTab => Tab != DisplayTab;
+        public bool CanResetTab => Tab != SettingsPanel.Tab.Display;
 
         // 기본값은 씬 · 본체에 적힌 값(출력 속도 · 자동 대기 · 배속)이다 — 여기서 새 기본을 만들지 않는다.
         // 배속 보기는 본체가 허용하는 범위(하한 · 상한) 안의 셋. 마지막은 본체 기본값.
         public void SetDefaults(float typeSpeed, float autoDelay, float speedUp, float minMultiplier, float maxMultiplier)
         {
-            Defaults = new KedSettings
-            {
-                MasterVolume = 1f,
-                Muted = false,
-                TextScale = 1f,
-                TypeSpeed = Math.Clamp(typeSpeed, KedSettings.MinTypeSpeed, KedSettings.MaxTypeSpeed),
-                BoxOpacity = 1f,
-                AutoDelay = Math.Clamp(autoDelay, KedSettings.MinAutoDelay, KedSettings.MaxAutoDelay),
-                SpeedUpMultiplier = speedUp,
-            };
+            speedUp = Math.Clamp(speedUp, minMultiplier, maxMultiplier);
 
             _speedChoices.Clear();
 
@@ -49,41 +35,85 @@ namespace Ked.Samples.UI
             }
 
             _speedChoices.Sort();
+
+            Defaults = new KedSettings
+            {
+                MasterVolume = 1f,
+                Muted = false,
+                TextScale = 1f,
+                TypeSpeed = Math.Clamp(typeSpeed, KedSettingRanges.MinTypeSpeed, KedSettingRanges.MaxTypeSpeed),
+                BoxOpacity = 1f,
+                AutoDelay = Math.Clamp(autoDelay, KedSettingRanges.MinAutoDelay, KedSettingRanges.MaxAutoDelay),
+                SpeedUpMultiplier = speedUp,
+            };
+
             Values = Defaults.Clone();
         }
 
-        // 저장된 값을 받는다. 배속이 보기에 없으면(본체 범위가 바뀌었다) 기본 배속으로.
+        // 저장된 값을 받는다. 범위 밖 값은 범위 안으로, 배속이 보기에 없으면(본체 범위가 바뀌었다) 기본 배속 그대로.
         public void Adopt(KedSettings saved)
         {
-            Values = saved ?? Defaults.Clone();
+            Values = Defaults.Clone();
 
-            if (!_speedChoices.Contains(Values.SpeedUpMultiplier))
-                Values.SpeedUpMultiplier = Defaults.SpeedUpMultiplier;
+            if (saved == null)
+                return;
+
+            SetMasterVolume(saved.MasterVolume);
+            SetMuted(saved.Muted);
+            SetTextScale(saved.TextScale);
+            SetTypeSpeed(saved.TypeSpeed);
+            SetBoxOpacity(saved.BoxOpacity);
+            SetAutoDelay(saved.AutoDelay);
+            SetSpeedUp(saved.SpeedUpMultiplier);
         }
 
-        public int SelectTab(int tab)
+        #region 값 바꾸기
+
+        public void SetMasterVolume(float volume) => Values.MasterVolume = Math.Clamp(volume, 0f, 1f);
+
+        public void SetMuted(bool muted) => Values.Muted = muted;
+
+        public void SetTextScale(float scale) =>
+            Values.TextScale = Math.Clamp(scale, KedSettingRanges.MinTextScale, KedSettingRanges.MaxTextScale);
+
+        public void SetTypeSpeed(float speed) =>
+            Values.TypeSpeed = Math.Clamp(speed, KedSettingRanges.MinTypeSpeed, KedSettingRanges.MaxTypeSpeed);
+
+        public void SetBoxOpacity(float opacity) =>
+            Values.BoxOpacity = Math.Clamp(opacity, KedSettingRanges.MinBoxOpacity, 1f);
+
+        public void SetAutoDelay(float seconds) =>
+            Values.AutoDelay = Math.Clamp(seconds, KedSettingRanges.MinAutoDelay, KedSettingRanges.MaxAutoDelay);
+
+        // 배속은 보기 중 하나만 — 그래서 늘 본체 범위 안이다. 보기에 없으면 바꾸지 않는다.
+        public bool SetSpeedUp(float multiplier)
         {
-            Tab = Math.Clamp(tab, 0, SettingsPanel.TabCount - 1);
-            return Tab;
+            if (!_speedChoices.Contains(multiplier))
+                return false;
+
+            Values.SpeedUpMultiplier = multiplier;
+            return true;
         }
+
+        #endregion
 
         // 지금 탭의 값을 기본값으로. 음량 탭의 채널 음량(배경음 · 효과음 · 음성)은 본체가 저장하므로 흐름이 되돌린다.
         public void ResetTab()
         {
             switch (Tab)
             {
-                case AudioTab:
+                case SettingsPanel.Tab.Audio:
                     Values.MasterVolume = Defaults.MasterVolume;
                     Values.Muted = Defaults.Muted;
                     break;
 
-                case TextTab:
+                case SettingsPanel.Tab.Text:
                     Values.TextScale = Defaults.TextScale;
                     Values.TypeSpeed = Defaults.TypeSpeed;
                     Values.BoxOpacity = Defaults.BoxOpacity;
                     break;
 
-                case PlaybackTab:
+                case SettingsPanel.Tab.Playback:
                     Values.AutoDelay = Defaults.AutoDelay;
                     Values.SpeedUpMultiplier = Defaults.SpeedUpMultiplier;
                     break;
