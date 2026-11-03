@@ -49,8 +49,6 @@ public sealed class SetEmotionPortraitWipeCommandCharR : CommandBase
     private bool _resolveAttempted;
     private bool _hasResolvedTargetSprite;
 
-    private bool HasClaimedTarget { get; set; }
-
     public override bool WaitForCompletion => _spec.wait;
 
     private readonly PresentationStage _stage;
@@ -122,11 +120,8 @@ public sealed class SetEmotionPortraitWipeCommandCharR : CommandBase
 
         ResolveTargetSprite(scope);
 
-        if (!HasClaimedTarget)
-            ClaimTarget();
-        else
-            KillCurrentTween();
-
+        // OnSkip은 ExecuteInner 전에만 불린다 — 아직 잡은 것이 없다.
+        ClaimTarget();
         CommitFinalState();
     }
 
@@ -170,12 +165,7 @@ public sealed class SetEmotionPortraitWipeCommandCharR : CommandBase
         _hasResolvedTargetSprite = true;
     }
 
-    private void ClaimTarget()
-    {
-        CompleteInFlight(_overlayRoot);
-
-        HasClaimedTarget = true;
-    }
+    private void ClaimTarget() => CompleteInFlight(_overlayRoot);
 
     private void PrepareTransitionState()
     {
@@ -211,14 +201,6 @@ public sealed class SetEmotionPortraitWipeCommandCharR : CommandBase
             _overlayCanvasGroup.alpha = 0f;
             _overlayImage.enabled = false;
         }
-
-        HasClaimedTarget = false;
-    }
-
-    private void KillCurrentTween()
-    {
-        _seq?.Kill(false);
-        _seq = null;
     }
 
     private void ApplySizing(Image image, Sprite sprite)

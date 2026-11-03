@@ -1,15 +1,3 @@
-using System.Collections;
-
-/// <summary>
-/// Applies a UI theme/locale patch to whatever the host considers the current screen.
-/// The command system knows neither what the current screen is, nor how patching works —
-/// the host resolves both.
-/// </summary>
-public interface IUIThemePatchPort
-{
-    IEnumerator PatchCurrentScreen(string themeId, string localeId);
-}
-
 /// <summary>
 /// 실행기가 재생 정책에서 받는 것은 하나 — 실행을 압축할지(트윈을 즉시 확정).
 /// VN의 자동·속도·빨리 넘기기·시크 깃발은 여기로 오지 않는다: 재생 쪽이 이것으로 접어서 준다.

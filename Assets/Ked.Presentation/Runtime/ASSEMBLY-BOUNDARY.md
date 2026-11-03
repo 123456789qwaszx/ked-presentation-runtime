@@ -141,8 +141,7 @@ UI 타입이 기능 폴더의 계약을 구현하는 partial을 전부 여기 �
 인터페이스를 두고, 구현은 바깥 어셈블리(Playback 또는 예제)가 갖는다. 기존 예:
 
 - (`IInputSource` · `ITimeSource` · `ISignalBus` · `ISignalLatch`는 `hold_signal`·`raise_signal`과 함께 2026-11-03에 걷었다.)
-- (`IUIThemePatchPort`는 `ui_patch` 커맨드용이었다. 2026-11-03에 `ui_patch`를 걷어 무대·재생에 소비자가 없다 —
-  포트 선언은 실행기 원본 `ked-command-executor`에 남아 있으니 거기서 걷는다.)
+- (`IUIThemePatchPort`는 `ui_patch` 커맨드용이었다. 2026-11-03에 `ui_patch`와 함께 걷었다.)
 - `ICommandPacePolicy` — 실행기가 재생 정책에서 받는 하나: 실행을 압축할지(빨리 넘기기·시크).
   속도 올리기는 타자기만 빠르게 하므로 시간 배율은 없다(2026-11-03).
   구현은 Playback의 `PresentationSessionContext`가 VN 재생 상태를 접어서 준다. `CommandRunScope`는 이 정책과

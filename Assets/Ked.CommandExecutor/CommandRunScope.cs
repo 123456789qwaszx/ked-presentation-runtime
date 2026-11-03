@@ -8,8 +8,7 @@ public sealed class CommandRunScope
     public CancellationToken Token { get; set; }
 
     private LifetimeScope StepLifetime { get; } = new();
-    private LifetimeScope RunLifetime { get; } = new();
-    
+
     private bool _isCancelled;
 
     public CommandRunScope(ICommandPacePolicy pace)
@@ -30,15 +29,12 @@ public sealed class CommandRunScope
     public void ClearRuntimeState(CleanupPolicy policy = CleanupPolicy.Cancel)
     {
         CleanupStep(policy);
-        CleanupRun(policy);
 
         Token = CancellationToken.None;
         SetCommandIsPlaying(false);
     }
 
     public void TrackStep(Action cancel, Action finish = null) => StepLifetime.Track(cancel, finish);
-    public void TrackRun(Action cancel, Action finish = null) => RunLifetime.Track(cancel, finish);
-    
+
     public void CleanupStep(CleanupPolicy policy) => StepLifetime.Cleanup(policy);
-    public void CleanupRun(CleanupPolicy policy) => RunLifetime.Cleanup(policy);
 }

@@ -195,6 +195,13 @@ screen_blur는 이름과 달리 화면 포스트 이펙트가 아니라 리그�
 - `ui_patch` 커맨드는 지워졌는데(`bf42cdfe`) `IUIThemePatchPort` 인터페이스만 남아 있다. 구현도 사용처도 없다.
 - face_swap `OnSkip`의 else 가지(`KillCurrentTween`)는 닿지 않는다 — `OnSkip`은 `ExecuteInner` 전에만 불려 `HasClaimedTarget`이 늘 false다.
 - `StageMaskMotionCommand`: `_tween`은 대입만 되고 읽히지 않는다. `ExecuteInner` 안의 압축 검사는 `CommandBase`가 먼저 걸러 닿지 않는다.
+- **해결(2026-11-03):**
+  - sibling_* · char_to의 `OnSkip`을 지웠다. 압축 중에도 `ExecuteInner`가 같은 일을 한다.
+  - `IRunScopedCommand`와 Run 수명 부품(`RegisterRunLifetime`·`OnRunLifetimeFinished`·`TrackRun`·`CleanupRun`·`SequencePlayer` 분기)을 걷었다.
+    수명은 Step 하나다. 줄을 넘어 이어지는 것(BGM·장면 전역 의도)은 커맨드가 아니라 그것을 소유한 시스템이 든다.
+  - `IUIThemePatchPort`를 지웠다. 포트 파일에는 `ICommandPacePolicy`만 남는다.
+  - face_swap `OnSkip`은 `ClaimTarget()` 한 줄로. 더는 쓰이지 않는 `KillCurrentTween`·`HasClaimedTarget`도 지웠다.
+  - `StageMaskMotionCommand`의 두 건은 무대 마스크 의도화(`e2aba89e`)에서 이미 사라졌다.
 
 **E7. 오디오는 scope 밖이다.** 보이스는 줄을 넘겨도 멈추지 않고 다음 보이스가 덮을 뿐이다.
 정지(장면 경계·롤백)에서는 보이스·효과음을 끊는다(2026-11-03). 줄 경계에서 보이스를 끊을지는 따로 정할 일이다.
@@ -301,7 +308,8 @@ screen_blur는 이름과 달리 화면 포스트 이펙트가 아니라 리그�
 | S3 시간 배율 | 반영하는 트윈 0개 | 연출은 빠르게 하지 않기로 — 배율 포트 삭제, 정책은 압축 하나 |
 | S4 서두르기 | 전역 `unscaledTimeScale = 30` | 타자기만 — 전역 시간은 건드리지 않음 |
 | E7 보이스 | 줄을 넘어도 흐름 · 오토가 보이스를 모름 | 줄 소속 이벤트 — 줄 진입 때 앞 보이스 페이드아웃(1단계), 오토가 보이스 끝을 기다림(2단계), 백로그 다시 듣기(3단계) |
-| ui_patch | 포트가 경고만 냄 | 커맨드 삭제(`bf42cdfe`), 인터페이스만 남음 |
-| screen_blur | — | `reduction-boundary.md` 표가 "화면 효과(포스트 이펙트 축)"로 분류 — 지금은 리그 블러라 낡음 |
+| ui_patch | 포트가 경고만 냄 | 커맨드 삭제(`bf42cdfe`), 인터페이스도 삭제(E6) |
+| E6 잔재 | 불리지 않는 `OnSkip`, 구현 0개 Run 수명, 고아 포트 | 모두 걷음 — 실행기 수명은 Step 하나 |
+| screen_blur | — | `reduction-boundary.md` 표의 분류를 머티리얼 축으로 고침(E6) |
 | 샷 | `Kill(rig, true)` 클레임, 정지의 `Clear`가 진행 중 트윈을 남김 | **장면 전역 의도 시범.** 시스템이 Intent·Presented를 나눠 들고 전환을 소유한다. 커맨드는 `Reduce(Intent)`를 넘기기만 한다. `Clear`가 전환까지 멈춘다 |
 | 화면 효과 | 커맨드마다 자기 트윈, `KillTween(true)` 클레임, 장면 경계 초기화 없음 | vignette·noise = 장면 전역 의도(`IntentTransition`, 재조준), flash = 이벤트(컨트롤러가 재생 소유). 정지에서 기준으로 |

@@ -89,16 +89,11 @@ public sealed class SequencePlayer
         }
     }
     
-    // Binds a background routine to its cleanup lifetime.
-    // Run is matched first, so a command that opts into IRunScopedCommand overrides the step-scoped default.
+    // Binds a background routine to the step lifetime (cleaned at the next step boundary).
     private void BindBackgroundLifetime(ISequenceCommand command, CommandRunScope scope, IEnumerator routine)
     {
         switch (command)
         {
-            case IRunScopedCommand runScoped:
-                runScoped.RegisterRunLifetime(scope, _host, routine);
-                break;
-
             case IStepScopedCommand stepScoped:
                 stepScoped.RegisterStepLifetime(scope, _host, routine);
                 break;
@@ -106,8 +101,8 @@ public sealed class SequencePlayer
             default:
                 Debug.LogWarning(
                     $"[SequencePlayer] Background command '{command.GetType().Name}' implements no " +
-                    $"lifetime scope. Derive from CommandBase, or implement IStepScopedCommand / " +
-                    $"IRunScopedCommand. Binding to StepLifetime as a fallback.");
+                    $"lifetime scope. Derive from CommandBase, or implement IStepScopedCommand. " +
+                    $"Binding to StepLifetime as a fallback.");
 
                 scope.TrackStep(
                     cancel: () => _host.StopCoroutine(routine),
