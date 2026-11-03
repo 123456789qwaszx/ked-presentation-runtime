@@ -134,7 +134,7 @@ face_swap만 모델 안(폴드가 `ApplyFace`로 접음)이라 클레임을 맞�
 | 즉시 실행 | face · bg_sprite · set_anchor 계열 · ApplyTrackOffset · tx_stage_mask_clear · pose | OnSkip = 같은 적용 | 해당 없음 | face·bg_sprite는 `CompleteInFlight`, 나머지 대부분 `DOKill(true)` |
 | 구조 | slot · cast · actor · sibling_* · char_to | 그대로 실행 | 해당 없음 | — |
 | 시간 | pause · Nfr | OnSkip(기다리지 않음) | 전경 | — |
-| 오디오 — BGM (장면 전역 의도) | bgm · stop_bgm(Complete) | 시크 중에는 의도만 쌓음(`Hold`) | scope 밖 | AudioSystem 소유. 장면을 넘어 이어 감, 시크 끝에 `Release`로 실제와 맞춤 |
+| 오디오 — BGM (장면 전역 의도) | bgm · stop_bgm(Complete) | 장면을 연 뒤 첫 줄 머리까지는 의도만 쌓음(`Hold`) | scope 밖 | AudioSystem 소유. 장면 안에서 완결 — 무음에서 시작, 줄 머리에서 `Release`로 맞춤(같은 곡이면 이어 감) |
 | 오디오 — 이벤트 | sfx · voice(Ignore) · stop_voice · stop_all_sfx(EvenIfSkipping) | | scope 밖 | AudioSystem 소유. 정지에서 끊음 |
 
 screen_blur는 이름과 달리 화면 포스트 이펙트가 아니라 리그마다 거는 셰이더 블러다(`StageLayerBlurCommand` 머리 주석).
@@ -228,10 +228,16 @@ screen_blur는 이름과 달리 화면 포스트 이펙트가 아니라 리그�
   진행 중인 전환·플래시를 확정 없이 끊고 세기를 0으로 둔다. 리플레이가 화면 효과 커맨드를 다시 지나가며 표적 줄의 상태를 세운다.
 - **스테이지 마스크 — 해결.** 무대(s1·s2·s3)를 어디까지·어떻게 보여줄지는 장면 전역 의도다. tx 모션은 `StageMaskSlot`이 소유하고,
   정지가 `IStageMaskProvider.ResetAllToBaseline`으로 모션을 끊고 기준 모양(FullRect 마스크 켜짐·오프셋 0 + 씬에 저장된 테두리)으로 돌린다.
-- **오디오 — 해결.** BGM은 장면을 넘어 이어 가는 의도다(소유자 결정). `BeginScene`이 그때 흐르던 곡을 장면 머리 곡으로 기록하고,
-  시크(롤백·로드) 동안은 `BgmPlayer.Hold`로 의도만 쌓았다가 `SeekState.Ended`에서 `Release`로 맞춘다.
-  같은 곡이 흐르고 있으면 처음부터 다시 틀지 않는다. 보이스·효과음은 이벤트라 정지에서 끊는다.
-  - 한계: 로드는 저장에 장면 머리 곡이 없어서, 로드 시점에 흐르던 곡을 출발점으로 삼는다. 앞 장면에서 이어 온 곡에 기대는 장면을 로드하면 다를 수 있다.
+- **오디오 — 해결.** 보이스·효과음은 이벤트라 정지에서 끊는다.
+  - (처음 판, `b82fa24d`) BGM은 장면을 넘어 이어 가는 의도였다. `BeginScene`이 그때 흐르던 곡을 장면 머리 곡으로 적고 시크 끝(`SeekState.Ended`)에 맞췄다.
+    그러나 장면 루트의 BGM이 앞 장면에 달린 **바깥 입력**이라 "장면은 루트부터 다시 돌리면 같아진다"는 전제를 깼고,
+    장면을 다시 세우는 길(새 장면·되감기·로드·갈라지기)마다 따로 메꿔야 했다 — 로드·갈라지기는 그 곡을 알 길이 없었다.
+  - **다시 정함(2026-11-03 소유자):** "같은 곡이면 끊지 않는다. 장면이 곡을 정하지 않으면 그냥 끊는다 — 설정 안 했는데 재생되면 더 헷갈린다."
+    BGM도 장면 안에서 완결된다. 장면을 열 때(`BeginScene`·`PrepareReplay`) 의도를 무음으로 비우고(`Hold` — 소리는 그대로),
+    압축이 아닌 줄의 머리 커맨드가 다 돈 뒤 `Release`로 맞춘다(`SceneBgmController`, `LinePresentationFlow`).
+    같은 곡이면 이어 가고, 다르면 그 커맨드의 페이드로 바꾸고, 곡을 정하지 않았으면 페이드로 끊는다.
+    되감기·로드·갈라지기는 시크가 장면을 루트부터 다시 지나가며 의도를 쌓고 표적 줄 머리에서 맞춘다 — 같은 길이다.
+    장면 머리 곡 기록(`_sceneEntryBgm`)·`SeekState.Ended`·로드 한계가 사라졌고, 저장 형식은 그대로다.
 - 대사창 레이아웃(`surface_layout`의 `DialogueSurfaceState`)도 같은 부류였다 — 조립 때 한 번 만들어지고 `surface_reset`만 비웠다.
   **해결:** `BeginScene`·`PrepareReplay`가 무대와 함께 비운다. 리플레이 중에 Yarn이 `surface_*`를 다시 지나가며 표적 줄의 상태를 다시 세운다.
 - 대사창의 현재 상태(`DialogueBoxCurrentState` — 보이는가·어떤 종류인가)도 같은 부류였다. 비우는 곳이 시크 통과 줄의 `CloseAll`뿐이라,

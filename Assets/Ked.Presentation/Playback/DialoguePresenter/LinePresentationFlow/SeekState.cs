@@ -65,9 +65,6 @@ public sealed class SeekState : ISeekStateQuery
     // 지금 시크가 끝난 사유. 진행 중이면 None.
     public SeekEndReason LastEndReason { get; private set; }
 
-    // 시크가 실제로 끝났을 때 한 번(사유 무관). 시크 동안 의도만 쌓던 쪽(BGM)이 여기서 맞춘다.
-    public event Action Ended;
-
     public void Begin(SeekTarget target)
     {
         if (target.Kind == SeekKind.None)
@@ -108,7 +105,5 @@ public sealed class SeekState : ISeekStateQuery
         _target = default;
         _inFlight = default;
         LastEndReason = reason;
-
-        Ended?.Invoke();
     }
 }

@@ -14,8 +14,9 @@ public sealed class ScenePresentation : IPlaybackStage
     // 화면 효과(vignette·noise 의도, flash 이벤트)와 무대 마스크도 샷처럼 정지에서 기준으로 — 리플레이가 다시 건다.
     private readonly ScreenEffectRig _screenEffects;
     private readonly IStageMaskProvider _stageMasks;
-    // 오디오 — BGM은 장면을 넘어 이어 가는 의도, 보이스·효과음은 이벤트(정지에서 끊는다).
+    // 오디오 — BGM은 장면 안에서 완결(장면을 열 때 무음 의도로), 보이스·효과음은 이벤트(정지에서 끊는다).
     private readonly AudioSystem _audio;
+    private readonly SceneBgmController _sceneBgm;
     private readonly PresentationStage _presentationStage;
     // 대사창 레이아웃(surface_layout)도 무대처럼 단위마다 처음부터 — 리플레이가 다시 건다.
     private readonly DialogueSurfaceState _dialogueSurfaceState;
@@ -31,9 +32,6 @@ public sealed class ScenePresentation : IPlaybackStage
     private bool _stopRequested;
     private string _currentNodeName;
 
-    // 이 단위가 열릴 때 흐르던 곡 — 리플레이(시크)가 BGM 의도를 여기서부터 다시 쌓는다.
-    private AudioClip _sceneEntryBgm;
-
     public ScenePresentation(
         IEpisodeNodeRunner nodeRunner,
         IPresentationView presentationView,
@@ -43,6 +41,7 @@ public sealed class ScenePresentation : IPlaybackStage
         ScreenEffectRig screenEffects,
         IStageMaskProvider stageMasks,
         AudioSystem audio,
+        SceneBgmController sceneBgm,
         PresentationStage presentationStage,
         DialogueSurfaceState dialogueSurfaceState,
         DialogueBoxPresentationController dialogueBox,
@@ -60,6 +59,7 @@ public sealed class ScenePresentation : IPlaybackStage
         _screenEffects = screenEffects;
         _stageMasks = stageMasks;
         _audio = audio;
+        _sceneBgm = sceneBgm;
         _presentationStage = presentationStage;
         _dialogueSurfaceState = dialogueSurfaceState;
         _dialogueBox = dialogueBox;
@@ -68,9 +68,6 @@ public sealed class ScenePresentation : IPlaybackStage
         _episodeSkipController = episodeSkipController;
         _seekState = seekState;
         _playbackDriver = playbackDriver;
-
-        // 시크가 끝나면(도착·포기·불일치·새 장면) 쌓아 둔 BGM 의도를 실제와 맞춘다.
-        _seekState.Ended += ReleaseBgm;
     }
 
     public void BeginScene()
@@ -89,10 +86,8 @@ public sealed class ScenePresentation : IPlaybackStage
         _presentationStage.Clear();
         _dialogueSurfaceState.Reset();
         _dialogueBox?.CloseAll();
+        _sceneBgm?.BeginScene();
         _presentationScope.Start();
-
-        // BGM은 앞 장면에서 이어 간다 — 그 곡이 이 단위의 출발점이다.
-        _sceneEntryBgm = _audio != null ? _audio.Bgm.Intent : null;
     }
 
     public async Task PlayEpisodeAsync(string nodeName)
@@ -125,8 +120,6 @@ public sealed class ScenePresentation : IPlaybackStage
             SeekKind.Load,
             target.LineId,
             target.Occurrence));
-
-        HoldBgm();
     }
 
     bool IPlaybackStage.IsSeeking => _seekState.IsSeeking;
@@ -142,11 +135,8 @@ public sealed class ScenePresentation : IPlaybackStage
         _presentationStage.Clear();
         _dialogueSurfaceState.Reset();
         _dialogueBox?.CloseAll();
+        _sceneBgm?.BeginScene();
         _presentationScope.Start();
-
-        // 되감기 시크는 이미 걸려 있다(PlaybackFeatureController) — 표적까지 BGM은 의도만 쌓는다.
-        if (_seekState.IsSeeking)
-            HoldBgm();
     }
 
     public async Task StopAsync()
@@ -176,18 +166,6 @@ public sealed class ScenePresentation : IPlaybackStage
         }
 
         _presentationScope.End();
-    }
-
-    private void HoldBgm()
-    {
-        if (_audio != null)
-            _audio.Bgm.Hold(_sceneEntryBgm);
-    }
-
-    private void ReleaseBgm()
-    {
-        if (_audio != null)
-            _audio.Bgm.Release();
     }
 
     private void DiscardPendingCommands(bool warn)

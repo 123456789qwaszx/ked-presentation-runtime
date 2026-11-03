@@ -41,6 +41,7 @@ public sealed class PresentationAssembler
     private PlaybackFeatureController _playbackFeatureController;
     private LinePresentationFlow _linePresentationFlow;
     private LineVoiceController _lineVoice;
+    private SceneBgmController _sceneBgm;
     private DialogueBoxPresentationController _dialogueBoxPresentation;
     private ScenePresentation _scenePresentation;
     private YarnPlaybackDriver _yarnPlaybackDriver;
@@ -241,6 +242,7 @@ public sealed class PresentationAssembler
 
         LineHurrySpeedController lineHurrySpeed = new(_refs.EllipsisBreathTypewriter);
         _lineVoice = new LineVoiceController(_refs.AudioSystem.Voice);
+        _sceneBgm = new SceneBgmController(_refs.AudioSystem.Bgm);
 
         _linePresentationFlow = new LinePresentationFlow(
             yarnLineBoundary,
@@ -250,7 +252,8 @@ public sealed class PresentationAssembler
             _refs.EllipsisBreathTypewriter,
             yarnPlaybackDriver,
             lineHurrySpeed,
-            _lineVoice);
+            _lineVoice,
+            _sceneBgm);
 
         _refs.CustomLinePresenter.Initialize(
             _refs.DialogueRunner,
@@ -291,6 +294,7 @@ public sealed class PresentationAssembler
             _screenEffectRig,
             _presentationUIRoot,
             _refs.AudioSystem,
+            _sceneBgm,
             _presentationStage,
             _dialogueSurfaceState,
             _dialogueBoxPresentation,

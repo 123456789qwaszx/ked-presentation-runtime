@@ -14,6 +14,7 @@ public sealed class LinePresentationFlow
     private readonly YarnPlaybackDriver _playbackDriver;
     private readonly LineHurrySpeedController _lineHurrySpeed;
     private readonly LineVoiceController _lineVoice;
+    private readonly SceneBgmController _sceneBgm;
 
     public LinePresentationFlow(
         YarnLineBoundary yarnLineBoundary,
@@ -23,7 +24,8 @@ public sealed class LinePresentationFlow
         EllipsisBreathTypewriter typewriter,
         YarnPlaybackDriver playbackDriver,
         LineHurrySpeedController lineHurrySpeed,
-        LineVoiceController lineVoice)
+        LineVoiceController lineVoice,
+        SceneBgmController sceneBgm)
     {
         _yarnLineBoundary = yarnLineBoundary;
         _lineDisplayState = lineDisplayState;
@@ -33,6 +35,7 @@ public sealed class LinePresentationFlow
         _playbackDriver = playbackDriver;
         _lineHurrySpeed = lineHurrySpeed;
         _lineVoice = lineVoice;
+        _sceneBgm = sceneBgm;
     }
 
     public async YarnTask RunAsync(
@@ -65,6 +68,10 @@ public sealed class LinePresentationFlow
         // 앞 줄의 보이스는 여기서 끝난다. 이 줄의 보이스는 PlayCollected가 낸다.
         _lineVoice.EndPreviousLine();
         _playbackDriver.PlayCollected();
+
+        // 장면 BGM은 압축이 아닌 줄의 머리 커맨드가 다 돈 뒤에 맞춘다 — 시크 통과 줄은 의도만 쌓는다.
+        if (ctx.SeekDecision != SeekLineDecision.SkipVisualAndDispatchSeekNext)
+            _sceneBgm.SettleAfterLineHead();
         SetPhase(ctx, LinePresentationPhase.LineEnteredCommitted);
         
         if (ctx.SeekDecision == SeekLineDecision.SkipVisualAndDispatchSeekNext) {

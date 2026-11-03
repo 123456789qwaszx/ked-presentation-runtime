@@ -2,8 +2,9 @@ using System.Collections;
 using UnityEngine;
 
 // BGM policy: single active track; crossfade on replace; snap while skipping.
-// BGM은 장면 전역 의도다 — 장면을 넘어 이어 간다. 시크(롤백·로드) 중에는 의도만 쌓고(Hold),
-// 시크가 끝나면 실제와 맞춘다(Release). 같은 곡이 흐르고 있으면 처음부터 다시 틀지 않는다.
+// BGM은 장면 안에서 완결된다(2026-11-03 소유자 결정) — 장면마다 무음에서 시작하고, 장면이 곡을 정하지 않으면 끊는다.
+// 같은 곡이면 끊지 않는다: 장면을 열 때는 의도만 비우고(Hold) 소리는 그대로 두었다가, 장면이 곡을 정한 뒤 맞춘다(Release).
+// Hold 동안 들어온 곡·정지는 의도와 페이드만 적어 두고, Release가 그 페이드로 맞춘다.
 public sealed class BgmPlayer
 {
     private readonly AudioSource _sourceA;
@@ -16,6 +17,9 @@ public sealed class BgmPlayer
     private Coroutine _fadeRoutine;
 
     private bool _held;
+    private float _heldFade = DefaultSettleFade;
+
+    private const float DefaultSettleFade = 1f;
 
     public AudioClip CurrentClip => _current?.clip;
     public bool IsPlaying => _current != null && _current.isPlaying;
@@ -51,7 +55,10 @@ public sealed class BgmPlayer
         Intent = clip;
 
         if (_held)
+        {
+            _heldFade = isSkipping ? 0f : fadeDuration;
             return;
+        }
 
         if (_current.clip == clip && _current.isPlaying)
             return;
@@ -72,7 +79,10 @@ public sealed class BgmPlayer
         Intent = null;
 
         if (_held)
+        {
+            _heldFade = isSkipping ? 0f : fadeDuration;
             return;
+        }
 
         StopFade();
 
@@ -87,16 +97,18 @@ public sealed class BgmPlayer
         _fadeRoutine = _host.StartCoroutine(FadeOut(fadeDuration));
     }
 
-    // 시크 시작 — 의도를 출발점(장면 머리의 곡)으로 되돌리고, 실제 소리는 시크가 끝날 때까지 그대로 둔다.
-    public void Hold(AudioClip intent)
+    // 장면 입구 — 의도를 무음으로 비우고, 실제 소리는 Release까지 그대로 둔다.
+    public void Hold()
     {
         _held = true;
-        Intent = intent;
+        _heldFade = DefaultSettleFade;
+        Intent = null;
 
         StopFade();
     }
 
-    // 시크 끝 — 의도와 실제를 맞춘다. 의도한 곡이 이미 흐르고 있으면(페이드 도중이어도) 그 자리에서 이어 간다.
+    // 장면이 곡을 정한 뒤 — 의도와 실제를 맞춘다. 의도한 곡이 이미 흐르고 있으면(페이드 도중이어도) 그 자리에서 이어 가고,
+    // 다르면 적어 둔 페이드로 바꾸고, 의도가 없으면(장면이 곡을 정하지 않았다) 끊는다.
     public void Release()
     {
         if (!_held)
@@ -107,7 +119,7 @@ public sealed class BgmPlayer
 
         if (Intent == null)
         {
-            Stop(0f, isSkipping: true);
+            Stop(_heldFade, isSkipping: _heldFade <= 0f);
             return;
         }
 
@@ -124,7 +136,7 @@ public sealed class BgmPlayer
             return;
         }
 
-        SnapTo(Intent);
+        Play(Intent, _heldFade, isSkipping: _heldFade <= 0f);
     }
 
     private void SnapTo(AudioClip clip)
