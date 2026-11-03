@@ -150,10 +150,6 @@ public sealed class PresentationAssembler
 
     private void BootstrapPresentationSession()
     {
-        SignalLatch signalLatch = new();
-        UnitySignalBus unitySignalBus = new();
-        unitySignalBus.OnSignal += signalLatch.Latch;
-
         // Character Rig
         CharRigSlotResolver charRigSlotResolver = new(_presentationUIRoot);
         CharacterRigBuilder characterRigBuilder = new();
@@ -174,13 +170,7 @@ public sealed class PresentationAssembler
             _presentationStage, _presentationResponseRig, _refs.CharacterFocusTuningDb, _presentationUIRoot);
 
         // Presentation Control
-        UnityTimeSource unityTimeSource = new();
-
-        PresentationControlCommandFactory presentationControlFactory = new(
-            _presentationStage,
-            unityTimeSource,
-            unitySignalBus,
-            signalLatch);
+        PresentationControlCommandFactory presentationControlFactory = new(_presentationStage);
 
         // Audio
         AudioCommandFactory audioFactory = new(_refs.AudioSystem);

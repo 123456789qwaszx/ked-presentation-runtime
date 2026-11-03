@@ -21,19 +21,9 @@ public sealed class CommandRunScope
     public bool IsCancelled => _isCancelled;
     public void MarkCancelled() => _isCancelled = true;
 
-    public float TimeScale => _pace.TimeScale;
-    
     public bool CommandIsPlaying { get; set; }
 
     public bool ShouldCompressCommandExecution => _pace.CompressExecution;
-
-    public float ScalePresentationDuration(float duration)
-    {
-        if (duration <= 0f)
-            return duration;
-
-        return duration / Math.Max(1f, TimeScale);
-    }
 
     public void SetCommandIsPlaying(bool busy) => CommandIsPlaying = busy;
     

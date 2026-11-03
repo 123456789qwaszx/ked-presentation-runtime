@@ -10,8 +10,8 @@
 
 - **줄이 실행 단위다.** 커맨드는 쓰인 자리가 아니라 다음 줄 머리에서 한꺼번에 실행된다.
 - **뜻은 한 곳에만 둔다.** 이름 → 스펙은 `StageCommandParser`만 한다. 폴드(`StageReducer`)도 같은 `StageCommand`를 받는다.
-- **실행기는 VN을 모른다.** 재생 정책에서 받는 값은 `ICommandPacePolicy`의 둘(압축 여부, 시간 배율)뿐이다.
-  빨리 넘기기·시크는 "압축"으로, 속도 올리기는 "시간 배율"로 `PresentationSessionContext`가 접어서 넘긴다.
+- **실행기는 VN을 모른다.** 재생 정책에서 받는 값은 `ICommandPacePolicy`의 하나(압축 여부)뿐이다.
+  빨리 넘기기·시크를 `PresentationSessionContext`가 "압축"으로 접어서 넘긴다. 속도 올리기는 타자기만 빠르게 하고 실행기에 오지 않는다.
 
 ## 2. 구성 요소
 
@@ -22,7 +22,7 @@
 | `YarnPlaybackDriver` | 줄 경계까지 스펙을 모은다(`Enqueue`). `PlayCollected`로 실행, `TryDiscardPending`으로 버림 |
 | `CommandExecutor` | 스펙 → 커맨드(팩토리), 실행 세대 `_runId`, 토큰, `RunNode` 코루틴 |
 | `SequencePlayer` | 커맨드마다 첫 `MoveNext`를 돌리고 전경·배경을 가른다. 배경이면 수명에 묶는다 |
-| `CommandRunScope` | 토큰, `IsCancelled`, 압축, 시간 배율, Step·Run `LifetimeScope`, `CommandIsPlaying` |
+| `CommandRunScope` | 토큰, `IsCancelled`, 압축, Step·Run `LifetimeScope`, `CommandIsPlaying` |
 | `PresentationScopeSession` | scope의 생애. `Start`로 만들고 `End`로 `Executor.Stop(Cancel)` |
 | `CommandBase` 계열 | `CommandBase` → `ClaimTweenCommandBase` → `CanvasFadeCommandBase`·`SlideCommandBase`. 별도로 `ShotIntentCommandBase<T>` |
 
@@ -136,7 +136,6 @@ face_swap만 모델 안(폴드가 `ApplyFace`로 접음)이라 클레임을 맞�
 | 시간 | pause · Nfr | OnSkip(기다리지 않음) | 전경 | — |
 | 오디오 — BGM (장면 전역 의도) | bgm · stop_bgm(Complete) | 시크 중에는 의도만 쌓음(`Hold`) | scope 밖 | AudioSystem 소유. 장면을 넘어 이어 감, 시크 끝에 `Release`로 실제와 맞춤 |
 | 오디오 — 이벤트 | sfx · voice(Ignore) · stop_voice · stop_all_sfx(EvenIfSkipping) | | scope 밖 | AudioSystem 소유. 정지에서 끊음 |
-| 신호 | HoldSignal · RaiseSignal | | | 파서 표에 없음 |
 
 screen_blur는 이름과 달리 화면 포스트 이펙트가 아니라 리그마다 거는 셰이더 블러다(`StageLayerBlurCommand` 머리 주석).
 그래서 리그 상태를 쓰는 char_visual·focus_on과 같은 무리로 관리된다.
@@ -187,6 +186,8 @@ screen_blur는 이름과 달리 화면 포스트 이펙트가 아니라 리그�
 - 팩토리와 커맨드는 있지만 파서 표에 이름이 없다.
 - Hold는 `CompleteImmediately`인데 `OnSkip`이 없다 → 압축할 때 신호를 소비하지 않는다.
 - `SignalLatch.Clear`를 부르는 곳이 없다.
+- **해결(2026-11-03) — 지웠다.** 두 커맨드와 그것만 쓰던 실행기 포트(`ISignalBus`·`ISignalLatch`·`ITimeSource`·`IInputSource`)와 구현
+  (`SignalLatch`·`UnitySignalBus`·`UnityTimeSource`·`UnityInputSource`)을 걷었다. 팩토리는 무대만 받는다.
 
 **E6. 쓰이지 않는 코드와 끊긴 포트.**
 - sibling_* · char_to는 `ExecuteEvenIfSkipping`이라 `OnSkip`이 불리지 않는데 오버라이드하고 있다.
@@ -233,11 +234,17 @@ screen_blur는 이름과 달리 화면 포스트 이펙트가 아니라 리그�
 **S3. 시간 배율을 반영하는 트윈이 0개다.**
 - `ScalePresentationDuration`을 부르는 곳이 없다. `scope.TimeScale`을 읽는 곳은 HoldSignal(대본에서 못 씀) 하나다.
 - 속도 올리기가 실제로 빠르게 하는 것은 타자기뿐이다.
+- **결정(2026-11-03) — 연출은 빠르게 하지 않는다.** 속도 올리기는 타자기만 빠르게 한다(소유자 결정).
+  `ICommandPacePolicy.TimeScale`·`CommandRunScope.TimeScale`·`ScalePresentationDuration`을 걷어 정책에는 압축 하나만 남았다.
 
 **S4. 서두르기는 실행기 밖에서 전역 시간을 바꾼다.**
 - `LineHurrySpeedController.Enter`가 `DOTween.unscaledTimeScale = 30`을 걸고, 타자기가 끝나면 되돌린다.
-- 그동안 앱 전체의 unscaled 트윈(UI 포함)이 30배로 돈다. 연출 트윈과 `pause`도 포함이다.
+- 그동안 앱 전체의 unscaled 트윈이 30배로 돈다. 지금 이 저장소에서 `SetUpdate(true)`를 쓰는 것은 연출 트윈뿐이다(UI는 없음).
+  `pause`는 닿지 않는다 — pause 동안은 관문이 `cps_node_busy`로 클릭을 거절해 서두르기가 시작되지 않는다.
+- 30배로 도는 시간이 남은 글자 수·프레임에 달려 있어, 연출이 정해지지 않은 만큼 앞으로 튀었다가 평속으로 돌아온다.
 - 압축(R3)·스텝 경계(R6)와 별개인 네 번째 시간 경로다.
+- **해결(2026-11-03) — 서두르기는 타자기만.** S3과 같은 원칙(소유자 결정). `DOTween.unscaledTimeScale`을 건드리지 않는다.
+  연출은 다음 클릭(줄 넘김)에서 스텝 경계 규칙으로 가속·확정된다. 연출 시간 경로는 평속·압축·스텝 경계 셋이다.
 
 **S5. 해결 — 큐를 앞지르던 대사창 커맨드 셋(`box_hide` · `box_show` · `box_close`)을 지웠다.**
 - 이 셋은 Yarn이 만나는 자리에서 바로 돌았고(`box_hide/show`는 `YarnTask`로 Yarn을 기다리게 함), 큐 커맨드는 다음 줄 머리에서 돈다.
@@ -276,6 +283,9 @@ screen_blur는 이름과 달리 화면 포스트 이펙트가 아니라 리그�
 | S2 | Token·CommandIsPlaying을 덮음 | `_mainRoutine`도 null로 덮음 → **해결**: pause가 압축에 반응, 관문이 RapidSkip도 막음, 스텝 세대 가드 |
 | S5 | 즉시 실행 6개 | `debug_log` 삭제(`fc39ae36`), `box_hide/show/close` 삭제 — `surface_*` 둘만 남음(시점은 큐와 같음) |
 | tx | `tx_<이름>` 18개, 커맨드가 그래픽 트윈을 쥠, 장면 경계 초기화 없음 | `tx <preset> [stage]` 하나(`StageCommandParser.Transition.cs:8`). 무대 마스크 = 장면 전역 의도 — 슬롯이 모션 소유, 정지에서 기준 모양으로 |
+| E5 신호 | 대본에서 못 씀 | 커맨드·신호/시간/입력 포트 삭제 |
+| S3 시간 배율 | 반영하는 트윈 0개 | 연출은 빠르게 하지 않기로 — 배율 포트 삭제, 정책은 압축 하나 |
+| S4 서두르기 | 전역 `unscaledTimeScale = 30` | 타자기만 — 전역 시간은 건드리지 않음 |
 | ui_patch | 포트가 경고만 냄 | 커맨드 삭제(`bf42cdfe`), 인터페이스만 남음 |
 | screen_blur | — | `reduction-boundary.md` 표가 "화면 효과(포스트 이펙트 축)"로 분류 — 지금은 리그 블러라 낡음 |
 | 샷 | `Kill(rig, true)` 클레임, 정지의 `Clear`가 진행 중 트윈을 남김 | **장면 전역 의도 시범.** 시스템이 Intent·Presented를 나눠 들고 전환을 소유한다. 커맨드는 `Reduce(Intent)`를 넘기기만 한다. `Clear`가 전환까지 멈춘다 |

@@ -2,7 +2,8 @@ using System;
 
 /// <summary>
 /// VN 재생 상태를 실행기의 정책(ICommandPacePolicy)으로 접는 어댑터.
-/// 빨리 넘기기·시크는 "압축"으로, 속도 올리기는 "시간 배율"로 — 실행기는 그 둘만 본다.
+/// 빨리 넘기기·시크는 "압축"으로 — 실행기는 그것만 본다.
+/// 속도 올리기는 타자기만 빠르게 하고 연출은 건드리지 않으므로 여기로 오지 않는다(2026-11-03 소유자 결정).
 /// </summary>
 [Serializable]
 public sealed class PresentationSessionContext : ICommandPacePolicy
@@ -19,9 +20,4 @@ public sealed class PresentationSessionContext : ICommandPacePolicy
     public bool CompressExecution =>
         (_playback != null && _playback.IsRapidSkipMode) ||
         (_seek != null && _seek.IsSeekingActive);
-
-    // 속도 모드가 아닐 때 재생 상태의 TimeScale은 1로 되돌아가 있지만(PlaybackFeatureController.ApplySpeedUpModeState),
-    // 규약을 여기서도 못박는다 — 실행기는 "속도 모드"라는 말을 모른다.
-    public float TimeScale =>
-        _playback != null && _playback.IsSpeedUpMode ? _playback.TimeScale : 1f;
 }

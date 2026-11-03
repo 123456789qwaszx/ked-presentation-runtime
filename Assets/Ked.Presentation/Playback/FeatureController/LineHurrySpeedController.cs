@@ -1,5 +1,4 @@
-using DG.Tweening;
-
+// 서두르기는 타자기만 빠르게 한다. 연출은 줄 넘김(스텝 경계)에서 가속·확정된다(2026-11-03 소유자 결정).
 public sealed class LineHurrySpeedController
 {
     private const float HurrySpeedMultiplier = 30f;
@@ -8,7 +7,6 @@ public sealed class LineHurrySpeedController
 
     private bool _active;
     private float _restoreTypewriterMultiplier = 1f;
-    private float _restoreDotweenUnscaledTimeScale = 1f;
 
     public LineHurrySpeedController(EllipsisBreathTypewriter typewriter)
     {
@@ -21,12 +19,9 @@ public sealed class LineHurrySpeedController
             return;
 
         _restoreTypewriterMultiplier = _typewriter.SpeedMultiplier;
-        _restoreDotweenUnscaledTimeScale = DOTween.unscaledTimeScale;
 
         _typewriter.SetSpeedMultiplier(
             _restoreTypewriterMultiplier * HurrySpeedMultiplier);
-
-        DOTween.unscaledTimeScale = HurrySpeedMultiplier;
 
         _active = true;
     }
@@ -37,7 +32,6 @@ public sealed class LineHurrySpeedController
             return;
 
         _typewriter.SetSpeedMultiplier(_restoreTypewriterMultiplier);
-        DOTween.unscaledTimeScale = _restoreDotweenUnscaledTimeScale;
 
         _active = false;
     }
