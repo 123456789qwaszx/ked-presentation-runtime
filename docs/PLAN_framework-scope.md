@@ -59,7 +59,7 @@ SCOPE-BOUNDARY.md §1은 "여기 적힌 것은 전부 필요한 기능이고 주
 | 로컬 파일 저장 | `Ked.Progression/Save/{Persistence,Slots,Maintenance}` | 꽂힌 모듈 (기본 제공 구현) | D2. 연출 겹은 `PlaybackMemory`가 문자열로 싣는다 |
 | 익스포트 산출물·하네스 | `ExportedTuning/`, `tests/` (레포 루트) | 본체 | CI 게이트 3개 유지 (+ 원본의 ProgressionSave) |
 | 진행 어댑터 | `Samples/Scripts/ProgressionHost/` | 샘플 (진행·저장 예제) | 진행 코어를 연출에 꽂는 얇은 어댑터. `Unit`·`Memory`만 쓴다 |
-| 부트스트랩·세이브 플로우 | `Samples/Scripts/Game/` | 샘플 | `SampleBootstrap`(예제 고르기) · `PresentationAssembler`(조립) · `NodePlaythrough`(연출 단독 이어하기) · 저장 흐름. 학습 토글은 통합 샘플에만(D1) |
+| 부트스트랩·세이브 플로우 | `Samples/Scripts/Game/` | 샘플 | `SampleBootstrap`(예제 = 돌릴 챕터 고르기) · `PresentationAssembler`(조립) · 저장 흐름. (`NodePlaythrough`는 2026-11-03에 걷음) 학습 토글은 통합 샘플에만(D1) |
 | UI 프레임·화면·바인딩 | `Samples/Scripts/UI/` | 샘플 | 두 예제가 타이틀([처음부터]·[이어하기]·[다른 예제로])을 같이 쓴다 |
 | 예제 대본·진행 JSON·커브 | `Samples/Dialogue/` | 샘플 | `curves.json`은 작가 자산이라 대본 곁에 산다 |
 | 예제 에셋 | `Samples/{Prefabs,Resources,Scenes,Data,Portraits,Art,Editor}/` | 샘플 | 대사창 항목·선택지·저장 슬롯 프리팹 · 배경·음원·UI 이미지 · 씬 · 초상화 DB·대사창 배치·화자 정책 · 공개 초상화 · 이모지(참조 없음) · 폰트 교체 도구 |

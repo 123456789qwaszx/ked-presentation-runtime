@@ -8,24 +8,23 @@ using Yarn.Unity;
 using KedUI = Ked.Samples.UI;
 
 /// <summary>
-/// 예제 씬의 진입점. 연출 런타임을 세우고, 고른 예제에 맞는 재생 호스트를 하나 붙인다.
-/// 두 예제 모두 타이틀([처음부터] [이어하기])에서 시작한다. 예제는 인스펙터의 '예제' 칸이 기본이고,
-/// 타이틀의 [다른 예제로]를 누르면 그 예제로 씬을 다시 연다(SampleExampleSwitch).
+/// 예제 씬의 진입점. 연출 런타임을 세우고, 진행 호스트(ProgressionLauncher)를 붙인다.
+/// 재생은 언제나 챕터 → 장면 → 에피소드다. 예제는 어느 챕터 JSON을 돌릴지만 고른다 —
+/// 인스펙터의 '예제' 칸이 기본이고, 타이틀의 [다른 예제로]를 누르면 그 예제로 씬을 다시 연다(SampleExampleSwitch).
 ///
-/// - 연출 단독: 진행 없이 Yarn 노드 하나(NodePlaybackHost). 이어하기는 연출 기억만으로 —
-///   노드 이름과 PlaybackMemory의 문자열을 파일 하나에 둔다(NodePlaythrough).
-/// - 진행·저장: 챕터 진행 → 장면 경계 저장 → 슬롯·갈라지기(ProgressionLauncher).
-///   같은 연출 기억 문자열을 진행 저장의 HostState 칸에 둔다.
+/// - 진행·저장: 여러 장면·선택·스탯이 있는 챕터(qwer_scene).
+/// - 연출 데모: 챕터 하나 · 장면 하나 · 에피소드 하나(Demo_Presentation).
+/// 둘 다 장면 경계 저장 → 슬롯·갈라지기를 쓰고, 연출 기억 문자열을 진행 저장의 HostState 칸에 둔다.
+/// 저장 폴더만 예제마다 나눈다 — 슬롯이 섞이지 않게.
 ///
 /// 연출 런타임의 조립은 PresentationAssembler가 한다. 여기는 씬 참조를 넘기고,
-/// 그 위에 고른 예제의 호스트와 저장을 얹는다.
+/// 그 위에 진행 호스트와 저장을 얹는다.
 ///
 /// 화면은 새 예제 UI(Samples/KedUI, UIPresentationFlow 위)다. Resources/KedUI/KedUICanvas를 띄우고 호스트 계약(KedHostPorts)으로 잇는다.
 /// 캔버스가 없으면(빌더 Tools/Ked UI/Build Sample UI 실행 전) 아무것도 세우지 않고 알린다.
 /// 연출 무대(배경·인물·화면 효과)는 씬의 무대 캔버스에 놓인 PresentationUIRoot가 그리고, 새 UI는 그 위 캔버스에 얹힌다.
 ///
-/// 회차의 끝은 회차를 연 쪽이 정하고 끝 화면을 직접 부른다 — 연출 단독은 NodePlaythrough(IEpisodeEndView),
-/// 진행·저장은 SceneRunner(IChapterEndView). 둘 다 KedPlaythroughEndView가 UI의 끝 카드로 잇는다.
+/// 회차의 끝은 챕터의 끝이다 — SceneRunner가 IChapterEndView를 부르고, KedPlaythroughEndView가 UI의 끝 카드로 잇는다.
 ///
 /// 스크립트 GUID는 예전 VNAppBootstrap 그대로다 — 씬에 직렬화된 값이 유지된다.
 ///
@@ -38,7 +37,7 @@ public class SampleBootstrap : MonoBehaviour, IRigPrefabSource
     public enum SampleExample
     {
         ProgressionAndSave = 0,
-        PresentationOnly = 1,
+        PresentationDemo = 1,
     }
 
     private PresentationRuntime _runtime;
@@ -46,10 +45,6 @@ public class SampleBootstrap : MonoBehaviour, IRigPrefabSource
 
     // 새 예제 UI(화면 전부).
     private KedUI.KedUIHost _kedUI;
-
-    // 연출 단독
-    private NodePlaybackHost _nodePlaybackHost;
-    private NodePlaythrough _nodePlaythrough;
 
     // 진행·저장
     private IChapterOptionsView _progressionOptions;
@@ -70,13 +65,13 @@ public class SampleBootstrap : MonoBehaviour, IRigPrefabSource
     private ScenarioDefinition _scenarioDef;
 
     [Header("예제")]
-    [Tooltip("연출 단독: 진행 없이 아래 노드 하나를 재생한다. 이어하기는 연출 기억만으로.\n" +
-             "진행·저장: 챕터 진행 → 장면 경계 저장 → 슬롯·갈라지기.\n" +
-             "둘 다 타이틀에서 시작한다.")]
+    [Tooltip("어느 챕터를 돌릴지. 둘 다 진행 호스트로 돌고 타이틀에서 시작한다.\n" +
+             "진행·저장: 아래 '진행 층'의 챕터 JSON.\n" +
+             "연출 데모: 챕터 하나 · 장면 하나 · 에피소드 하나짜리 챕터 JSON.")]
     [SerializeField] private SampleExample example = SampleExample.ProgressionAndSave;
 
-    [Tooltip("연출 단독 예제가 재생할 Yarn 노드 이름(title:). 기본은 연출 데모(Assets/Samples/Dialogue/Demo_Presentation.yarn).")]
-    [SerializeField] private string presentationEntryNode = "Demo_Presentation";
+    [Tooltip("연출 데모 챕터 JSON — 에피소드 하나가 연출 데모 노드(Assets/Samples/Dialogue/Demo_Presentation.yarn)를 재생한다.")]
+    [SerializeField] private TextAsset presentationDemoChapterJson;
 
     [Header("무대")]
     [Tooltip("연출 무대(배경·인물·화면 효과). 씬의 무대 캔버스에 놓인 PresentationUIRoot. " +
@@ -167,14 +162,14 @@ public class SampleBootstrap : MonoBehaviour, IRigPrefabSource
     // 이번 조립의 예제. 인스펙터 값 또는 타이틀에서 고른 것(SampleExampleSwitch).
     private SampleExample _example;
 
-    private bool IsPresentationOnly => _example == SampleExample.PresentationOnly;
+    private bool IsPresentationDemo => _example == SampleExample.PresentationDemo;
 
     private void Awake()
     {
         _example = SampleExampleSwitch.Resolve(example);
 
-        // 진행·저장 예제는 진행 데이터를 먼저 확인한다 — 없으면 아무것도 세우지 않는다.
-        if (!IsPresentationOnly && !TryBootstrapProgressionData())
+        // 진행 데이터를 먼저 확인한다 — 없으면 아무것도 세우지 않는다.
+        if (!TryBootstrapProgressionData())
             return;
 
         _kedUI = CreateKedUI();
@@ -194,14 +189,10 @@ public class SampleBootstrap : MonoBehaviour, IRigPrefabSource
             _kedUI.PresentationView,
             out _internals);
 
-        IPlaybackHost host = IsPresentationOnly
-            ? InstallPresentationOnly()
-            : InstallProgression();
+        IPlaybackHost host = InstallProgression();
 
         _runtime.AttachHost(host);
-
-        if (!IsPresentationOnly)
-            InstallProgressionSaves();
+        InstallProgressionSaves();
 
         ConfigureKedUI(host);
     }
@@ -255,14 +246,12 @@ public class SampleBootstrap : MonoBehaviour, IRigPrefabSource
         SampleExample other = SampleExampleSwitch.Other(_example);
 
         var title = new KedTitlePort(
-            IsPresentationOnly ? _nodePlaythrough : _progressionLauncher,
-            IsPresentationOnly ? () => _nodePlaythrough.HasResumePoint : HasProgressionResumePoint,
+            _progressionLauncher,
+            HasProgressionResumePoint,
             ExampleCard(_example),
             () => SampleExampleSwitch.SwitchTo(other));
 
-        KedUI.IKedSaveSlotPort slots = IsPresentationOnly
-            ? null
-            : new KedSaveSlotPort(_manualSaveFlow, _saveSlotService);
+        KedUI.IKedSaveSlotPort slots = new KedSaveSlotPort(_manualSaveFlow, _saveSlotService);
 
         _kedUI.Configure(playback, title, slots, new StageForKedUI(stage));
     }
@@ -270,15 +259,15 @@ public class SampleBootstrap : MonoBehaviour, IRigPrefabSource
     // 타이틀 오른쪽 카드. 글자는 UI 글자 표의 키, 그림은 그 예제 대본이 실제로 쓰는 배경.
     private static KedUI.KedExampleCard ExampleCard(SampleExample example)
     {
-        bool presentationOnly = example == SampleExample.PresentationOnly;
-        string prefix = presentationOnly ? "example.presentationOnly" : "example.progression";
+        bool presentationDemo = example == SampleExample.PresentationDemo;
+        string prefix = presentationDemo ? "example.presentationDemo" : "example.progression";
 
         return new KedUI.KedExampleCard
         {
             NameKey = prefix + ".name",
             TitleKey = prefix + ".title",
             SummaryKey = prefix + ".summary",
-            Preview = Resources.Load<Sprite>(presentationOnly
+            Preview = Resources.Load<Sprite>(presentationDemo
                 ? "Backgrounds/class_day"
                 : "Backgrounds/class_lunch"),
         };
@@ -334,49 +323,31 @@ public class SampleBootstrap : MonoBehaviour, IRigPrefabSource
         };
     }
 
-    #region 연출 단독
-
-    // 진행도 진행 저장도 없다. 이어하기 파일은 예제가 직접 쓴다 — 저장 위치는 런타임이 정하지 않는다.
-    private IPlaybackHost InstallPresentationOnly()
-    {
-        _nodePlaybackHost = new NodePlaybackHost(_runtime.Unit);
-
-        _nodePlaythrough = new NodePlaythrough(
-            _nodePlaybackHost,
-            _runtime.Memory,
-            presentationEntryNode,
-            Path.Combine(Application.persistentDataPath, "presentation-only", "resume.json"),
-            new KedPlaythroughEndView(_kedUI));
-
-        _runtime.LineFlow.LineDisplayed += _nodePlaythrough.SaveCurrentLine;
-
-        return _nodePlaybackHost;
-    }
-
-    #endregion
-
     #region 진행·저장
 
     private bool TryBootstrapProgressionData()
     {
         // 실행 중 Inspector를 바꿔도 저장 경로와 기능 구성이 서로 엇갈리지 않는다.
-        _useLearningSaveData = useLearningSaveData;
+        // 학습용 데이터는 진행·저장 예제의 콘텐츠만 바꾼다 — 연출 데모는 언제나 같은 챕터다.
+        _useLearningSaveData = useLearningSaveData && !IsPresentationDemo;
 
         _saveRoot = Path.Combine(
             Application.persistentDataPath,
-            _useLearningSaveData ? "saves-learning" : "saves");
+            IsPresentationDemo ? "saves-presentation-demo"
+            : _useLearningSaveData ? "saves-learning"
+            : "saves");
 
         _chapterJson =
-            _useLearningSaveData
-                ? learningChapterJson
-                : progressionChapterJson;
+            IsPresentationDemo ? presentationDemoChapterJson
+            : _useLearningSaveData ? learningChapterJson
+            : progressionChapterJson;
 
         if (_chapterJson == null)
         {
             Debug.LogError(
-                _useLearningSaveData
-                    ? "[학습] Learning Chapter Json을 지정해야 한다."
-                    : "[진행] Progression Chapter Json을 지정해야 한다.");
+                IsPresentationDemo ? "[연출 데모] Presentation Demo Chapter Json을 지정해야 한다."
+                : _useLearningSaveData ? "[학습] Learning Chapter Json을 지정해야 한다."
+                : "[진행] Progression Chapter Json을 지정해야 한다.");
 
             enabled = false;
             return false;

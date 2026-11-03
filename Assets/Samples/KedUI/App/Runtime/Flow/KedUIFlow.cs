@@ -65,7 +65,7 @@ namespace Ked.Samples.UI
 
         /// <summary>
         /// 재생과 호스트를 잇는다. 조립이 끝난 뒤(재생 호스트가 정해진 뒤) 한 번.
-        /// slots는 저장 슬롯이 없는 예제(연출 단독)에서 null.
+        /// slots는 저장 슬롯이 없는 호스트에서 null — 저장·불러오기·갈라지기가 빠진다(예제는 늘 넘긴다).
         /// </summary>
         public void Configure(
             KedPlaybackBindings playback,

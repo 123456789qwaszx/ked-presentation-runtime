@@ -24,8 +24,7 @@ using UnityEngine;
 ///     ReadPastUnit               백로그 한 줄 → 그 단위가 물려받을 백로그 + 그 줄의 재개 지점.
 ///                                과거 단위의 루트를 보관하는 일은 진행의 몫이다(E3) — 여기는 줄을 세는 일만 한다
 ///
-/// 두 예제가 같은 문자열을 쓴다. 진행·저장 예제는 진행 저장의 HostState 칸에,
-/// 연출 단독 예제는 노드 이름과 함께 파일 하나에 둔다.
+/// 진행 저장이 이 문자열을 HostState 칸에 둔다.
 /// </summary>
 public sealed class PlaybackMemory
 {

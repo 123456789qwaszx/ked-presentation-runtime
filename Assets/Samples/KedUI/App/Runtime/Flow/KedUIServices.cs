@@ -12,7 +12,7 @@ namespace Ked.Samples.UI
         public KedPlaybackBindings Playback { get; private set; }
         public IKedTitlePort Title { get; private set; }
 
-        // 저장 슬롯이 없는 예제(연출 단독)에서 null.
+        // 저장 슬롯이 없는 호스트에서 null(예제는 늘 넘긴다).
         public IKedSaveSlotPort Slots { get; private set; }
         public IKedStagePort Stage { get; private set; }
 

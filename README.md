@@ -21,14 +21,16 @@ Yarn Spinner를 기반으로 제작한 **비주얼 노벨 화면 연출 런타�
 ## 사용법
 
 `Assets/Samples/Scenes/PresentationSample.unity`를 열고 재생한다. 두 예제 모두 타이틀의 **[처음부터] / [이어하기]**로 시작한다.
+재생은 언제나 **챕터 → 장면 → 에피소드**다 — 두 예제는 어느 챕터를 돌리는지만 다르고, 같은 진행 호스트·저장을 쓴다.
 시작 예제는 하이어라키 `[VNAppBootstrap]`(`SampleBootstrap`)의 **예제** 칸이고, 실행 중에는 타이틀의
-**[다른 예제로]**로 바꾼다 — 한 실행에 재생 호스트는 하나라서 씬을 다시 연다.
+**[다른 예제로]**로 바꾼다 — 챕터와 저장 폴더는 조립 때 정해지므로 씬을 다시 연다.
 
-- **연출 단독** — 진행 없이 Yarn 노드 하나(**Presentation Entry Node**, 기본 `Demo_Presentation`)를 재생한다.
-  줄이 다 보일 때마다 이어하기 지점을 파일 하나(`persistentDataPath/presentation-only/resume.json`)에 쓰고,
-  [이어하기]는 노드 처음부터 다시 달려 그 줄까지 보이지 않게 빨리 감는다. 노드 끝까지 보면 지운다.
-- **진행·저장** — **진행 층 › Progression Chapter Json**의 챕터(`Assets/Samples/Dialogue/ChapterProgression/`)를 진행한다.
-  장면 경계마다 확정해 저장하고, 슬롯 저장·불러오기와 백로그 줄에서 갈라지기가 있다.
+- **진행·저장** — **진행 층 › Progression Chapter Json**의 챕터(`Assets/Samples/Dialogue/ChapterProgression/qwer_scene.progression.json`).
+  여러 장면·선택·스탯이 있다.
+- **연출 데모** — **Presentation Demo Chapter Json**의 챕터(`Demo_Presentation.progression.json`).
+  챕터 하나 · 장면 하나 · 에피소드 하나가 `Demo_Presentation` 노드를 재생한다.
+
+둘 다 장면 경계마다 확정해 저장하고, 슬롯 저장·불러오기와 백로그 줄에서 갈라지기가 있다. 저장 폴더는 예제마다 나뉜다.
 
 | 키 | 동작 |
 |---|---|
@@ -48,7 +50,7 @@ Yarn Spinner를 기반으로 제작한 **비주얼 노벨 화면 연출 런타�
 
 ### 2. 연출 스크립트 예제
 
-`Assets/Samples/Dialogue/Demo_Presentation.yarn` — 연출 단독 예제가 재생하는 노드 하나
+`Assets/Samples/Dialogue/Demo_Presentation.yarn` — 연출 데모 챕터의 에피소드 하나가 재생하는 노드
 
 짧은 장면 하나에서 배경·BGM·등장, 배치·크기, 표정·포즈·모션, 포커스·카메라, 화면 효과·효과음,
 트랜지션·선택지를 한 번씩 지나갑니다. 공개된 예제 초상화(harin·sigure·kasmi)와 저장소에 있는 배경·음원만 씁니다.
@@ -118,7 +120,6 @@ SceneRunner의 실행 순서와 리플레이·롤백·로드·정지 규칙도 �
 저장도 같은 경계로 나뉩니다. 챕터·장면·경로·스탯과 슬롯·갈라지기는 반입본의 `Ked.Progression.Save`가,
 줄 위치·Yarn 선택·백로그는 저장이 없어도 연출이 늘 들고 있는 기억이고, 진행 저장에는 문자열 한 칸(`HostState`)으로 실립니다 —
 [PlaybackMemory.cs](Assets/Ked.Presentation/Playback/Memory/PlaybackMemory.cs)가 꺼내고 되돌립니다.
-연출 단독 예제는 같은 문자열을 노드 이름과 함께 파일 하나에 둡니다 — [NodePlaythrough.cs](Assets/Samples/Scripts/Game/NodePlaythrough.cs).
 `dotnet run --project tests/SaveLifecycle/SaveLifecycle.csproj`.
 
 ## 개발 환경

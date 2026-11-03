@@ -4,9 +4,7 @@ using UnityEngine;
 /// <summary>
 /// 연출 런타임 조립. 씬 참조를 받아 무대·명령·Yarn·대사 표시·재생 제어를 잇는다.
 ///
-/// 진행·저장을 모른다. 결과(PresentationRuntime)에 재생 호스트를 하나 붙이면 돈다.
-/// - 연출 단독: NodePlaybackHost
-/// - 진행·저장: ProgressionLauncher
+/// 진행·저장을 모른다. 결과(PresentationRuntime)에 재생 호스트(ProgressionLauncher)를 붙이면 돈다.
 ///
 /// 조립 순서와 내용은 VNAppBootstrap.Awake의 연출 쪽을 그대로 옮긴 것이다.
 /// </summary>

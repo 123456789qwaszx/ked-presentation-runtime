@@ -14,8 +14,7 @@ using Newtonsoft.Json.Serialization;
 ///   재개 지점        단위 루트에서 이 줄까지 — 줄 좌표 + 거기까지의 선택   LineTarget + ChoiceHistory
 ///
 /// 저장은 이것을 실어 나를 뿐이다. 진행 저장(ked-progression-runtime의 Ked.Progression.Save)은
-/// 호스트 상태를 문자열 한 칸으로 받으므로, 진행 호스트는 이 세 문자열을 그 칸들에 넣는다.
-/// 연출 단독 호스트도 같은 문자열로 저장한다. 이 타입은 진행을 모른다.
+/// 호스트 상태를 문자열 한 칸으로 받으므로, 진행 호스트는 이 세 문자열을 그 칸들에 넣는다. 이 타입은 진행을 모른다.
 ///
 /// 호스트는 이 형식을 직접 부르지 않는다 — 입구는 PlaybackMemory다(그래서 internal).
 ///

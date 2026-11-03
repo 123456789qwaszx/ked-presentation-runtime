@@ -73,16 +73,14 @@ EpisodeEndPanel.EndTitleReturnLabel,타이틀로,Return to title
 common.ok,확인,OK
 common.cancel,취소,Cancel
 title.currentExample,현재 예제  /  {0},Current example  /  {0}
-example.presentationOnly.name,연출 단독,Presentation only
-example.presentationOnly.title,연출 데모,Presentation demo
-example.presentationOnly.summary,대사 · 연출 · 선택 · 되감기 · 이어하기,Dialogue · Staging · Choices · Rewind · Continue
+example.presentationDemo.name,연출 데모,Presentation demo
+example.presentationDemo.title,연출 데모,Presentation demo
+example.presentationDemo.summary,대사 · 연출 · 선택 · 되감기 · 이어하기,Dialogue · Staging · Choices · Rewind · Continue
 example.progression.name,진행·저장,Progression & saves
 example.progression.title,챕터 진행,Chapter progression
 example.progression.summary,장면 저장 · 수동 슬롯 · 지난 장면에서 갈라지기,Scene saves · Manual slots · Branch from a past scene
 play.chapterTag,{0} · {1},{0} · {1}
-end.episode.kicker,에피소드 끝,END OF EPISODE
 end.chapter.kicker,챕터 끝,END OF CHAPTER
-end.episode.body,끝까지 보았습니다. 타이틀에서 처음부터 다시 볼 수 있습니다.,You reached the end. Start again from the title.
 end.chapter.body,챕터를 끝까지 진행했습니다.,You finished the chapter.
 end.lastEpisode,마지막 에피소드  /  {0},Last episode  /  {0}
 end.stat,{0} {1},{0} {1}

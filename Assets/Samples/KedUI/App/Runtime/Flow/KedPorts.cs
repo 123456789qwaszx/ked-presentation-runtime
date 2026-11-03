@@ -64,20 +64,11 @@ namespace Ked.Samples.UI
     }
 
     /// <summary>
-    /// 회차가 끝까지 갔다는 알림의 내용(끝 카드). 끝을 정하는 것은 호스트다 — 연출 단독은 노드가 끝났을 때(NodePlaythrough),
-    /// 진행 예제는 챕터가 끝났을 때(SceneRunner). 글자는 이미 사람이 읽을 것이다(콘텐츠의 이름) — UI 글자 표의 키가 아니다.
+    /// 회차가 끝까지 갔다는 알림의 내용(끝 카드). 회차의 끝은 챕터의 끝이다(SceneRunner가 정한다).
+    /// 글자는 이미 사람이 읽을 것이다(콘텐츠의 이름) — UI 글자 표의 키가 아니다.
     /// </summary>
     public sealed class KedPlaythroughEnd
     {
-        public enum EndKind
-        {
-            /// <summary>에피소드(연출 단독의 노드 하나).</summary>
-            Episode,
-
-            /// <summary>챕터(진행 예제).</summary>
-            Chapter,
-        }
-
         public readonly struct Stat
         {
             public readonly string Name;
@@ -89,8 +80,6 @@ namespace Ked.Samples.UI
                 Value = value;
             }
         }
-
-        public EndKind Kind;
 
         /// <summary>끝난 것의 이름. 비면 지금 예제의 제목(KedExampleCard.TitleKey).</summary>
         public string Title;

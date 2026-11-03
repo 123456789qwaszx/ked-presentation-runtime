@@ -4,7 +4,6 @@
   진행 저장(Ked.Progression.Save)은 호스트 상태를 문자열 한 칸으로만 받는다.
   그 문자열의 형식(PresentationMemory)과 입구(PlaybackMemory — 꺼내기·되돌리기·과거 단위 읽기),
   장면 경계에서 그것을 싣는 브리지, 이어하기 때 되돌려 재생을 세우는 런처를 본다.
-  같은 문자열을 진행 없이 파일 하나에 두는 연출 단독 회차(NodePlaythrough)도 여기서 본다.
 
   저장 정책 자체(세션·슬롯·갈라지기·검증)는 원본 ked-progression-runtime의 tests/ProgressionSave가 맡는다.
   진행 코어/저장은 순수 C#이라 그대로 컴파일한다. ProgressionDriver만 대역이다(실행 횟수와 Stop을 관찰).
@@ -25,12 +24,9 @@
     <Compile Include="../../Assets/Samples/Scripts/ProgressionHost/ProgressionLauncher.cs" />
     <Compile Include="../../Assets/Samples/Scripts/ProgressionHost/ProgressionSaveBridge.cs" />
     <Compile Include="../../Assets/Samples/Scripts/Game/IPlaythroughEntry.cs" />
-    <Compile Include="../../Assets/Samples/Scripts/Game/NodePlaythrough.cs" />
-    <Compile Include="../../Assets/Samples/Scripts/Game/IEpisodeEndView.cs" />
     <Compile Include="../../Assets/Ked.Presentation/Playback/Host/IPlaybackHost.cs" />
     <Compile Include="../../Assets/Ked.Presentation/Playback/Host/IPlaybackStage.cs" />
     <Compile Include="../../Assets/Ked.Presentation/Playback/Host/PlaybackUnit.cs" />
-    <Compile Include="../../Assets/Ked.Presentation/Playback/Host/NodePlaybackHost.cs" />
     <Compile Include="../../Assets/Ked.Presentation/Playback/Memory/**/*.cs" />
     <Compile Include="../../Assets/Ked.Presentation/Playback/FeatureController/BacklogRecorder.cs" />
     <Compile Include="../../Assets/Ked.Presentation/Playback/FeatureController/RollbackHistory.cs" />

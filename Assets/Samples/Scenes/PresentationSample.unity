@@ -1407,7 +1407,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::VnAppBootstrap
   example: 0
-  presentationEntryNode: Demo_Presentation
+  presentationDemoChapterJson: {fileID: 4900000, guid: 28f7bfc519ec417f90666484dd37705b, type: 3}
   stage: {fileID: 1739354825}
   audioSystem: {fileID: 32255926}
   speakerPolicyDb: {fileID: 11400000, guid: b3c354f8ae9671f47880c5bb9b74e4f9, type: 2}
