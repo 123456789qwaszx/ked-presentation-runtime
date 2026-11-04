@@ -26,9 +26,9 @@ Yarn Spinner를 기반으로 제작한 **비주얼 노벨 화면 연출 런타�
 시작 예제는 하이어라키 `[VNAppBootstrap]`(`SampleBootstrap`)의 **예제** 칸이고, 실행 중에는 타이틀의
 **[다른 예제로]**로 바꾼다 — 챕터와 저장 폴더는 조립 때 정해지므로 씬을 다시 연다.
 
-- **진행·저장** — **진행 층 › Progression Chapter Json**의 챕터(`Assets/Samples/Dialogue/ChapterProgression/FestivalEve.progression.json`).
+- **진행·저장** — **진행 층 › Progression Chapter Json**의 챕터(`Assets/Samples/Dialogue/ChapterProgression/festival_eve.progression.json`).
   여러 장면·선택·스탯이 있다.
-- **연출 데모** — **Presentation Demo Chapter Json**의 챕터(`Demo_Presentation.progression.json`).
+- **연출 데모** — **Presentation Demo Chapter Json**의 챕터(`presentation_demo.progression.json`).
   챕터 하나 · 장면 하나 · 에피소드 하나가 `Demo_Presentation` 노드를 재생한다.
 
 둘 다 장면 경계마다 확정해 저장하고, 슬롯 저장·불러오기와 백로그 줄에서 갈라지기가 있다. 저장 폴더는 예제마다 나뉜다.
@@ -65,14 +65,14 @@ Yarn Spinner를 기반으로 제작한 **비주얼 노벨 화면 연출 런타�
 하린: 배경이 들어오고, 음악이 깔리고, 내가 걸어 들어왔어.
 ```
 
-진행·저장 예제의 대본은 `Assets/Samples/Dialogue/ChapterProgression/festival_eve_*.yarn`(카드 하나에 파일 하나, 챕터 JSON은 곁의 `FestivalEve.progression.json`)입니다.
+진행·저장 예제의 대본은 `Assets/Samples/Dialogue/ChapterProgression/festival_eve_*.yarn`(카드 하나에 파일 하나, 챕터 JSON은 곁의 `festival_eve.progression.json`)입니다.
 챕터 하나(축제 전날)에 장면 둘 — 진행 선택지와 스탯, 대사 선택지와의 차이, 숨는 · 잠기는 선택지, 자동 간선,
 조건 분기(`<<detour>>`로 다녀가는 카드가 제 첫머리에서 스탯을 본다), 장면 확정과 지난 장면에서 갈라지기, 챕터 끝(끝 카드)을 한 번씩 지나갑니다.
 
 두 예제는 손으로 쓴 것이 아니라 **툴이 낸 것**입니다(2026-11-04) — 원고와 진행 JSON은
 [ked-story-director](https://github.com/123456789qwaszx/ked-story-director) `samples/RuntimeSamples`, 연출과 Yarn은
 [ked-story-compositor](https://github.com/123456789qwaszx/ked-story-compositor) `samples/RuntimeSamples`가 정본입니다.
-고칠 때는 툴에서 고쳐 다시 내고, 여기 파일을 덮어씁니다.
+두 툴은 프로젝트 폴더의 `runtime.target.json`이 가리키는 **게임 폴더**(이 폴더)에 저장할 때마다 산출물을 바로 씁니다 — 파일 이름은 `{챕터}.progression.json` · `{챕터}_{노드}.yarn`입니다. 손으로 덮어쓸 일이 없습니다.
 
 ### 3. 대사 실행 흐름
 
