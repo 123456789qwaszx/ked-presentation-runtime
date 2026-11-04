@@ -18,7 +18,7 @@ namespace Ked.Samples.UI
         private RecordPanel.Tab _recordTab;
         private int _recordTip;
 
-        // 불러오기를 기다리는 중 — 실행 버튼을 막는다.
+        // 불러오기를 기다리는 중 — 카드 누름을 막는다.
         private bool _saveLoadBusy;
 
         private void OpenSave() => OpenRecord(RecordPanel.Tab.Save);
@@ -115,16 +115,8 @@ namespace Ked.Samples.UI
                 p => p.NextClicked -= NextSlotPage);
 
             AddBinding(page,
-                p => p.CardClicked += SelectSlotCard,
-                p => p.CardClicked -= SelectSlotCard);
-
-            AddBinding(page,
-                p => p.CardDoubleClicked += ActOnSlotCard,
-                p => p.CardDoubleClicked -= ActOnSlotCard);
-
-            AddBinding(page,
-                p => p.ActionClicked += ActOnSelectedSlot,
-                p => p.ActionClicked -= ActOnSelectedSlot);
+                p => p.CardClicked += HandleSlotCardClicked,
+                p => p.CardClicked -= HandleSlotCardClicked);
         }
 
         private void ApplyBindings(TipsPage page)
@@ -184,55 +176,36 @@ namespace Ked.Samples.UI
                 RefreshSlots(focus: false);
         }
 
-        private void SelectSlotCard(int indexOnPage)
+        // 카드를 누르면 고르고 바로 묻는다 — 확인하면 그대로 저장 · 불러오기(실행 버튼은 없다, 2026-11-04 소유자).
+        private void HandleSlotCardClicked(int indexOnPage)
         {
-            if (_saveSlots.Select(indexOnPage))
-                RefreshSlots(focus: false);
-        }
-
-        private void ActOnSlotCard(int indexOnPage)
-        {
-            SelectSlotCard(indexOnPage);
-            ActOnSelectedSlot();
-        }
-
-        private void ActOnSelectedSlot()
-        {
-            if (_saveLoadBusy || !_saveSlots.HasTarget)
+            if (_saveLoadBusy || !_saveSlots.Select(indexOnPage))
                 return;
+
+            RefreshSlots(focus: false);
 
             if (_saveSlots.SaveMode)
             {
+                // 저장할 수 없는 순간(대사가 아직 표시되지 않음 등) — 묻지 않고 이유를 알린다.
                 if (!_saves.CanSave)
-                    return;
-
-                if (_saveSlots.SelectedIsNewSlot)
                 {
-                    SaveIntoSlot(null);
+                    OpenNotice(NoticePanel.Message.SaveFailed);
                     return;
                 }
 
-                string overwriteId = _saveSlots.SelectedEntry.Id;
+                string overwriteId = _saveSlots.SelectedIsNewSlot ? null : _saveSlots.SelectedEntry.Id;
                 OpenConfirm(
-                    ConfirmPanel.Question.Overwrite,
+                    overwriteId == null ? ConfirmPanel.Question.Save : ConfirmPanel.Question.Overwrite,
                     () => SaveIntoSlot(overwriteId),
                     _saveSlots.SelectedNumber);
                 return;
             }
 
             string loadId = _saveSlots.SelectedEntry.Id;
-
-            // 재생 중이면 지금 장면을 벗어난다는 것을 확인한다. 타이틀에서는 잃을 진행이 없다.
-            if (IsRunning)
-            {
-                OpenConfirm(
-                    ConfirmPanel.Question.Load,
-                    () => LoadFromSlot(loadId),
-                    _saveSlots.SelectedNumber);
-                return;
-            }
-
-            LoadFromSlot(loadId);
+            OpenConfirm(
+                ConfirmPanel.Question.Load,
+                () => LoadFromSlot(loadId),
+                _saveSlots.SelectedNumber);
         }
 
         // 저장 성공 알림은 실제로 끝난 저장에만. 실패하면 화면은 그대로 두고 이유를 알린다.
@@ -335,7 +308,7 @@ namespace Ked.Samples.UI
         private void RefreshSlots(bool focus)
         {
             SaveSlotsPage page = _saveSlots.SaveMode ? _ui.GetUI<SavePage>() : _ui.GetUI<LoadPage>();
-            page.Present(_saveSlots.ToModel(_saveLoadBusy, _saves.CanSave, focus));
+            page.Present(_saveSlots.ToModel(focus));
         }
 
         private void RefreshTips(TipsPage page)

@@ -27,7 +27,7 @@ namespace Ked.Samples.UI
         public int Page { get; private set; }
         public int Selected { get; private set; } = -1;
 
-        /// <summary>고른 칸이 지금 쪽에 있고 고를 수 있는 칸이다 — 실행 버튼이 걸릴 곳.</summary>
+        /// <summary>고른 칸이 지금 쪽에 있고 고를 수 있는 칸이다 — 확인 창이 물을 곳.</summary>
         public bool HasTarget => IsOnPage(Selected) && IsSelectable(Selected);
 
         public bool SelectedIsNewSlot => IsNewSlotCell(Selected);
@@ -36,7 +36,7 @@ namespace Ked.Samples.UI
         /// <summary>화면에 보이는 번호(01부터).</summary>
         public int SelectedNumber => Selected + 1;
 
-        // 저장은 "새로 저장" 칸을 먼저 고른다 — 열자마자 실행 버튼을 눌러도 기록을 덮어쓰지 않게.
+        // 저장은 "새로 저장" 칸을 먼저 고른다(포커스) — 열자마자 Enter를 눌러도 덮어쓰기가 아니라 새로 저장을 묻게.
         public void Open(bool saveMode, IReadOnlyList<SaveSlotEntry> slots, bool readable, Func<string, bool> canLoad)
         {
             SaveMode = saveMode;
@@ -102,7 +102,7 @@ namespace Ked.Samples.UI
             return true;
         }
 
-        public SaveSlotsPage.Model ToModel(bool busy, bool canSave, bool focus)
+        public SaveSlotsPage.Model ToModel(bool focus)
         {
             int first = Page * PerPage;
             var cards = new SaveSlotCard.Model[PerPage];
@@ -120,7 +120,6 @@ namespace Ked.Samples.UI
                 Hint = hint,
                 Page = Page,
                 PageCount = PageCount,
-                ActionEnabled = !busy && HasTarget && (!SaveMode || canSave),
                 CanPrevious = Page > 0,
                 CanNext = Page < PageCount - 1,
                 Cards = cards,

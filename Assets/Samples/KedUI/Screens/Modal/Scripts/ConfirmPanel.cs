@@ -33,6 +33,7 @@ namespace Ked.Samples.UI
         {
             SkipEpisode,
             ReturnToTitle,
+            Save,
             Overwrite,
             Load,
             Fork,
@@ -41,7 +42,7 @@ namespace Ked.Samples.UI
         public sealed class Model
         {
             public Question Question;
-            public int SlotNumber;      // 덮어쓰기 · 불러오기 본문의 번호(1부터)
+            public int SlotNumber;      // 저장 · 덮어쓰기 · 불러오기 본문의 번호(1부터)
         }
 
         /// <summary>요청이 끝났다(수락이면 true). 흐름이 이 Panel을 닫고 부른 쪽의 일을 한다.</summary>
@@ -78,7 +79,7 @@ namespace Ked.Samples.UI
                 return;
 
             string key = KeyOf(_model.Question);
-            bool numbered = _model.Question is Question.Overwrite or Question.Load;
+            bool numbered = _model.Question is Question.Save or Question.Overwrite or Question.Load;
 
             KedUIUtil.SetText(View.Text(Refs.ConfirmTitle), Text(key + ".title"));
             KedUIUtil.SetText(View.Text(Refs.ConfirmBody), numbered
@@ -95,6 +96,7 @@ namespace Ked.Samples.UI
         {
             Question.SkipEpisode => "confirm.skip",
             Question.ReturnToTitle => "confirm.title",
+            Question.Save => "confirm.save",
             Question.Overwrite => "confirm.overwrite",
             Question.Load => "confirm.load",
             _ => "confirm.fork",

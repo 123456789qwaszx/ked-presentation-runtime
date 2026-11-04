@@ -120,15 +120,16 @@ record.characters.subtitle,"이야기에 나오는 인물을 보고, 인물마�
 extra.album.subtitle,이야기에서 지나온 장소를 모아 둔 앨범입니다.,An album of the places the story has been.
 extra.cg.subtitle,이야기 속 특별한 장면을 다시 봅니다.,See the story's special scenes again.
 slots.pageInfo,PAGE  {0} / {1},PAGE  {0} / {1}
-slots.hint.save,선택한 슬롯에 현재 장면을 저장합니다. 최근 저장이 01번입니다.,Saves the current scene to the selected slot. The latest save is 01.
-slots.hint.load,선택한 기록에서 이야기를 이어갑니다.,Continues the story from the selected record.
+slots.hint.save,슬롯을 누르면 현재 장면을 저장합니다. 최근 저장이 01번입니다.,Choose a slot to save the current scene. The latest save is 01.
+slots.hint.load,기록을 누르면 그 장면에서 이야기를 이어갑니다.,Choose a record to continue the story from there.
 slots.hint.none,아직 저장한 기록이 없습니다.,There are no saves yet.
 slots.hint.unreadable,저장 목록을 읽지 못했습니다(옛 형식 또는 손상). 자세한 이유는 콘솔 기록에 있습니다.,The save list could not be read (old format or damaged). See the console for details.
-slots.save.action,이 슬롯에 저장,Save here
-slots.load.action,불러오기,Load
 slots.playTime,플레이 {0},Played {0}
 slots.empty,빈 슬롯,Empty slot
 slots.empty.hint,새 기록을 저장할 수 있습니다,A new save goes here
+confirm.save.title,저장,Save
+confirm.save.body,{0}번 슬롯에 지금 장면을 저장할까요?,Save the current scene to slot {0}?
+confirm.save.accept,저장,Save
 confirm.overwrite.title,덮어쓰기,Overwrite
 confirm.overwrite.body,"{0}번 슬롯의 기록을 지금 장면으로 덮어쓸까요?
 덮어쓴 기록은 되돌릴 수 없습니다.","Overwrite slot {0} with the current scene?

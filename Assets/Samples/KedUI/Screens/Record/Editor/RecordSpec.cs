@@ -99,13 +99,14 @@ namespace Ked.Samples.UI.Editor
         #region Pages
 
         public static GameObject SaveTab(KedUIKit kit) =>
-            SlotsTab<SavePage>(kit, "선택한 슬롯에 현재 장면을 저장합니다.", "이 슬롯에 저장");
+            SlotsTab<SavePage>(kit, "슬롯을 누르면 현재 장면을 저장합니다.");
 
         public static GameObject LoadTab(KedUIKit kit) =>
-            SlotsTab<LoadPage>(kit, "선택한 기록에서 이야기를 이어갑니다.", "불러오기");
+            SlotsTab<LoadPage>(kit, "기록을 누르면 그 장면에서 이야기를 이어갑니다.");
 
         // 05 · 06 — 슬롯 카드 여섯은 GridLayoutGroup(3열, 440×190, 간격 40×48)에 놓인 같은 카드(SaveSlotCard)다.
-        private static GameObject SlotsTab<TPage>(KedUIKit kit, string hint, string action) where TPage : SaveSlotsPage
+        // 실행 버튼은 두지 않는다 — 카드를 누르면 바로 확인 창(2026-11-04 소유자).
+        private static GameObject SlotsTab<TPage>(KedUIKit kit, string hint) where TPage : SaveSlotsPage
         {
             UINode page = kit.NewView<TPage>(typeof(TPage).Name, PageArea);
 
@@ -135,9 +136,6 @@ namespace Ked.Samples.UI.Editor
             kit.Label(page, nameof(S.CurrentPage), "1", 719, 816, 240, 30, 18, KedColors.Navy,
                 TextAlignmentOptions.Center, bold: true);
             kit.IconButton(page, nameof(S.NextPage), "next", new Rect(934, 807, 48, 48), padding: 12f);
-
-            kit.TextButton(page, nameof(S.SlotAction), nameof(S.SlotActionLabel), action,
-                new Rect(1180, 785, 320, 70), KedButtonStyle.Primary);
 
             return page.Go;
         }

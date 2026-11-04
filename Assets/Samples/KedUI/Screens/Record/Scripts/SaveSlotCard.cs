@@ -1,7 +1,6 @@
 using System;
 using System.Globalization;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace Ked.Samples.UI
@@ -45,18 +44,14 @@ namespace Ked.Samples.UI
             public bool Selected;
         }
 
+        // 누르면 흐름이 바로 확인 창을 연다.
         public event Action<SaveSlotCard> Clicked;
-        public event Action<SaveSlotCard> DoubleClicked;
 
         public int Index { get; set; }
 
         protected override void OnInitialize()
         {
-            Button button = View.Button(Refs.CardButton);
-            KedUIUtil.OnClick(button, () => Clicked?.Invoke(this));
-
-            // 두 번 누르면 바로 실행(선택 → 실행 버튼과 같은 길). 클릭 수는 포인터 사건에서만 알 수 있다.
-            UIEvents.Bind(button, OnPointerClicked);
+            KedUIUtil.OnClick(View.Button(Refs.CardButton), () => Clicked?.Invoke(this));
         }
 
         public void Present(Model model, Localizer texts)
@@ -96,12 +91,6 @@ namespace Ked.Samples.UI
         {
             TimeSpan time = TimeSpan.FromSeconds(Mathf.Max(0, seconds));
             return ((int)time.TotalHours).ToString("00") + ":" + time.Minutes.ToString("00") + ":" + time.Seconds.ToString("00");
-        }
-
-        private void OnPointerClicked(PointerEventData eventData)
-        {
-            if (eventData != null && eventData.clickCount >= 2)
-                DoubleClicked?.Invoke(this);
         }
     }
 }

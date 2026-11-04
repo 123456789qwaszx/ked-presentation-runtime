@@ -6,8 +6,8 @@ namespace Ked.Samples.UI
 {
     /// <summary>
     /// 기록의 저장 · 불러오기 탭이 함께 쓰는 몸. 슬롯 카드(SaveSlotCard) 6장을 격자로 보인다.
-    /// 무엇을 보일지(쪽 · 선택 · 막힘 · 카드)는 흐름이 정해 Present로 넘긴다. 탭마다 다른 글자(안내 · 실행 버튼)는
-    /// 두 Page(SavePage · LoadPage)가 제 글자 표 키로 정한다 — 모델에는 뜻만 온다.
+    /// 카드를 누르면 흐름이 바로 확인 창을 연다(실행 버튼은 두지 않는다). 무엇을 보일지(쪽 · 선택 · 카드)는 흐름이 정해
+    /// Present로 넘긴다. 탭마다 다른 글자(안내)는 두 Page(SavePage · LoadPage)가 제 글자 표 키로 정한다 — 모델에는 뜻만 온다.
     /// </summary>
     public abstract class SaveSlotsPage : UIPage<SaveSlotsPage.Refs>, ILocalizedView
     {
@@ -33,8 +33,6 @@ namespace Ked.Samples.UI
             NextPage,
             NextPageBase,
             NextPageIcon,
-            SlotAction,
-            SlotActionLabel,
         }
 
         // 아래 안내 줄이 무엇을 말할지.
@@ -50,7 +48,6 @@ namespace Ked.Samples.UI
             public Hint Hint;
             public int Page;        // 0부터
             public int PageCount;
-            public bool ActionEnabled;
             public bool CanPrevious;
             public bool CanNext;
             public SaveSlotCard.Model[] Cards;
@@ -59,9 +56,7 @@ namespace Ked.Samples.UI
 
         public event Action PreviousClicked;
         public event Action NextClicked;
-        public event Action ActionClicked;
         public event Action<int> CardClicked;
-        public event Action<int> CardDoubleClicked;
 
         private readonly List<SaveSlotCard> _cards = new(SlotsPerPage);
 
@@ -70,13 +65,11 @@ namespace Ked.Samples.UI
 
         // 탭마다 다른 글자 키.
         protected abstract string ReadyHintKey { get; }
-        protected abstract string ActionKey { get; }
 
         protected override void OnInitialize()
         {
             KedUIUtil.OnClick(View.Button(Refs.PreviousPage), () => PreviousClicked?.Invoke());
             KedUIUtil.OnClick(View.Button(Refs.NextPage), () => NextClicked?.Invoke());
-            KedUIUtil.OnClick(View.Button(Refs.SlotAction), () => ActionClicked?.Invoke());
 
             Refs[] slots = { Refs.Slot_1, Refs.Slot_2, Refs.Slot_3, Refs.Slot_4, Refs.Slot_5, Refs.Slot_6 };
 
@@ -89,7 +82,6 @@ namespace Ked.Samples.UI
                 card.EnsureInitialized();
                 card.Index = i;
                 card.Clicked += c => CardClicked?.Invoke(c.Index);
-                card.DoubleClicked += c => CardDoubleClicked?.Invoke(c.Index);
 
                 // 카드 글자는 사용자 글자 크기를 따르지 않는다 — 크기가 정해진 카드라 커지면 겹친다. 긴 이름은 말줄임.
                 _cards.Add(card);
@@ -120,9 +112,7 @@ namespace Ked.Samples.UI
                 KedUIUtil.Format(_texts, "slots.pageInfo", KedUIUtil.TwoDigits(_model.Page + 1), KedUIUtil.TwoDigits(_model.PageCount)));
             KedUIUtil.SetText(View.Text(Refs.CurrentPage), PageNumbers(_model.Page, _model.PageCount));
             KedUIUtil.SetText(View.Text(Refs.SlotHint), Text(HintKey(_model.Hint)));
-            KedUIUtil.SetText(View.Text(Refs.SlotActionLabel), Text(ActionKey));
 
-            KedUIUtil.SetButton(View.Button(Refs.SlotAction), true, _model.ActionEnabled);
             KedUIUtil.SetButton(View.Button(Refs.PreviousPage), true, _model.CanPrevious);
             KedUIUtil.SetButton(View.Button(Refs.NextPage), true, _model.CanNext);
 

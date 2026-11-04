@@ -5,6 +5,5 @@ namespace Ked.Samples.UI
     public sealed class SavePage : SaveSlotsPage
     {
         protected override string ReadyHintKey => "slots.hint.save";
-        protected override string ActionKey => "slots.save.action";
     }
 }
