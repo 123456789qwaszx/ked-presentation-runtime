@@ -41,7 +41,7 @@ namespace Ked.Samples.UI
 
             bool entering = !IsPlayRoot;
 
-            SwitchRoot<PlayScreen>(root =>
+            _ui.SwitchRoot<PlayScreen>(Presentation<PlayScreen>(), root =>
             {
                 BindView(root, ApplyPlayBindings);
 
@@ -49,7 +49,7 @@ namespace Ked.Samples.UI
                     root.SetHudHidden(false);
 
                 root.SetChapterLabel(ChapterLabel());
-            });
+            }, Unbind);
         }
 
         // 무대(PresentationUIRoot)는 씬의 무대 캔버스에 늘 놓여 있고 UI는 그 위 캔버스에 얹힌다 — 꺼져 있으면 켠다.
@@ -59,17 +59,9 @@ namespace Ked.Samples.UI
                 _stage.gameObject.SetActive(true);
         }
 
-        private void RestoreHud()
-        {
-            _playScreen.SetHudHidden(false);
-            SyncInput();
-        }
+        private void RestoreHud() => _playScreen.SetHudHidden(false);
 
-        private void HideHud()
-        {
-            _playScreen.SetHudHidden(true);
-            SyncInput();
-        }
+        private void HideHud() => _playScreen.SetHudHidden(true);
 
         private void ApplyPlayBindings(PlayScreen screen)
         {

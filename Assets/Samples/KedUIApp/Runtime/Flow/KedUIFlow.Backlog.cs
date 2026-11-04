@@ -13,7 +13,6 @@ namespace Ked.Samples.UI
     // 패널을 닫아도 보이스는 이어지고, 다음 줄에 들어가면 끝난다(줄 소속 이벤트).
     public sealed partial class KedUIFlow
     {
-        private readonly BacklogPanel _backlogPanel;
         private readonly List<DialogueLogEntry> _backlogEntries = new();
         private YarnSpeakerNames _backlogSpeakers;
 
@@ -35,7 +34,7 @@ namespace Ked.Samples.UI
                 return;
 
             _backlogVoiceSequence = -1;
-            _backlogPanel.ShowVoicePlaying(-1);
+            _ui.GetUI<BacklogPanel>().ShowVoicePlaying(-1);
         }
 
         private void OpenBacklog()
@@ -70,11 +69,11 @@ namespace Ked.Samples.UI
                 });
             }
 
-            PushPanel<BacklogPanel>(panel =>
+            _ui.PushPanel<BacklogPanel>(Presentation<BacklogPanel>(), panel =>
             {
                 BindView(panel, ApplyBacklogBindings);
                 panel.Present(rows);
-            });
+            }, Unbind);
         }
 
         private void ApplyBacklogBindings(BacklogPanel panel)
@@ -165,7 +164,7 @@ namespace Ked.Samples.UI
                 _backlogVoiceSequence = Features.ReplayVoice(entry) ? entry.lineSequence : -1;
             }
 
-            _backlogPanel.ShowVoicePlaying(_backlogVoiceSequence >= 0 ? index : -1);
+            _ui.GetUI<BacklogPanel>().ShowVoicePlaying(_backlogVoiceSequence >= 0 ? index : -1);
         }
 
         private async void ForkFromBacklog(DialogueLogEntry entry)

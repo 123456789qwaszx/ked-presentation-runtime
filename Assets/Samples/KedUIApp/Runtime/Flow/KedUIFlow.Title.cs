@@ -9,7 +9,7 @@ namespace Ked.Samples.UI
         // Root를 타이틀로. 열린 Panel은 GoToTitle이 먼저 닫았다.
         private void OpenTitle()
         {
-            SwitchRoot<TitleScreen>(root =>
+            _ui.SwitchRoot<TitleScreen>(Presentation<TitleScreen>(), root =>
             {
                 BindView(root, ApplyTitleBindings);
                 root.Present(new TitleScreen.Model
@@ -19,7 +19,7 @@ namespace Ked.Samples.UI
                     ShowLoad = _saves != null,
                     CanSwitchExample = _switchExample != null,
                 });
-            });
+            }, Unbind);
         }
 
         private void ApplyTitleBindings(TitleScreen screen)

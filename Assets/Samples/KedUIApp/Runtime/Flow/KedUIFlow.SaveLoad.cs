@@ -11,7 +11,6 @@ namespace Ked.Samples.UI
     // 자동 저장 탭은 만들지 않는다(서비스에 없다). 이어하기 기록은 타이틀의 이어하기가 쓴다.
     public sealed partial class KedUIFlow
     {
-        private readonly SaveLoadPanel _saveLoadPanel;
         private readonly SaveSlotsState _saveSlots = new();
 
         // 불러오기를 기다리는 중 — 실행 버튼을 막는다.
@@ -27,11 +26,11 @@ namespace Ked.Samples.UI
             bool readable = _saves.TryReadSlots(out IReadOnlyList<SaveSlotEntry> slots);
             _saveSlots.Open(save, slots, readable, _saves.CanLoad);
 
-            PushPanel<SaveLoadPanel>(panel =>
+            _ui.PushPanel<SaveLoadPanel>(Presentation<SaveLoadPanel>(), panel =>
             {
                 BindView(panel, ApplySaveLoadBindings);
                 PresentSlots(focus: true);
-            });
+            }, Unbind);
         }
 
         private void ApplySaveLoadBindings(SaveLoadPanel panel)
@@ -66,7 +65,7 @@ namespace Ked.Samples.UI
         }
 
         private void PresentSlots(bool focus) =>
-            _saveLoadPanel.Present(_saveSlots.ToModel(_saveLoadBusy, _saves.CanSave, focus));
+            _ui.GetUI<SaveLoadPanel>().Present(_saveSlots.ToModel(_saveLoadBusy, _saves.CanSave, focus));
 
         private void PreviousSlotPage()
         {
@@ -192,7 +191,7 @@ namespace Ked.Samples.UI
             }
 
             // 회차 전환까지 가지 못했다(본문을 읽지 못함 등) — 화면은 열린 채로 두고 알린다.
-            if (!transitionStarted && IsTop(_saveLoadPanel))
+            if (!transitionStarted && _ui.TopPanel is SaveLoadPanel)
             {
                 _saveSlots.ForgetLoadable(slotId);
                 PresentSlots(focus: true);

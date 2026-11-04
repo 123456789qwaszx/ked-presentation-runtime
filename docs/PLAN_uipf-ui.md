@@ -267,7 +267,7 @@ AI가 프리팹(Unity 직렬화 데이터)을 직접 쓰지 않는다. AI는 화
 |---|---|---|
 | A-1 끌기 | `UI_EventHandler`가 끌기를 받는 쪽이 없으면 가장 가까운 부모의 끌기 처리기(ScrollRect)로 넘긴다. 같은 오브젝트에 끌기를 받는 다른 컴포넌트(Slider 등)가 있으면 넘기지 않는다 | `Common/Scripts/KedDragToScroll.cs`(+ `.meta`)와 `BacklogSpec`의 붙이는 줄 |
 | A-2 Root 막기 | Panel이 하나라도 있으면 지금 Root의 `CanvasGroup.interactable`을 끈다. 기본 켬(`BlockRootUnderPanels`), `blocksRaycasts`는 그대로 | 흐름의 Root 막기는 `_exiting` 몫만 남았다(값은 UIPF와 같아 겹쳐도 무해) |
-| A-3 포커스 | Panel을 쌓을 때의 선택을 기억했다가 꺼낼 때 되돌린다. 전부 꺼내면 맨 처음 선택으로 | 흐름의 `_focusBeforePanel` 스택. 되돌리지 못했을 때 고르는 `EnsureFocus`만 남았다 |
+| A-3 포커스 | Panel을 쌓을 때의 선택을 기억했다가 꺼낼 때 되돌린다. 전부 꺼내면 맨 처음 선택으로 | 흐름의 `_focusBeforePanel` 스택. 되돌리지 못했을 때 고르던 `EnsureFocus`도 2026-11-04에 걷었다 |
 
 - 원본 문서도 이번에 더했다: `docs/AUTHORING.md`(위 "제작 원칙"을 게임에 매이지 않게 다시 쓴 것), README의 복사 안내(이 저장소에서 겪은 폴더 층 · `.meta` · asmdef · 에셋 내리지 않기)와 실사용 절.
 - 반입 대조(`vendoring.md`의 명령, `3a26d8b`): 0줄. UIPF `.meta` 108개(+ `UIManager.PanelInput.cs.meta`, GUID 겹침 0).
@@ -461,10 +461,11 @@ UIPF 저장소의 Adaptive UI 데모를 걷고, 그 자리에 이 VN UI를 샘�
 
 ### 3. 입력 소유권
 
-`VNAdvanceInputPoller`(재생 입력의 유일한 구동자)를 재생 화면에서 Panel 없이 대사를 볼 때만 켠다. 타이틀 · Panel이 열림 · UI 숨김에서는 끈다 — 같은 Space·Enter가 메뉴와 대사를 함께 넘기지 않고, 메뉴가 열린 동안 자동·빨리 넘기기가 멈춘다. 돌려줄 때는 프레임 끝(LateUpdate)에 켜서 창을 닫은 그 키를 폴러가 다시 읽지 않는다. 재생 단위·기억은 건드리지 않는다.
+`AdvanceInputPoller`(재생 입력의 유일한 구동자)는 재생 화면에서 Panel 없이 대사를 볼 때만 돈다. 타이틀 · Panel이 열림 · UI 숨김 · 타이틀로 나가는 중에는 막힌다 — 같은 Space·Enter가 메뉴와 대사를 함께 넘기지 않고, 메뉴가 열린 동안 자동·빨리 넘기기가 멈춘다. 재생 단위·기억은 건드리지 않는다.
+2026-11-04부터는 폴러가 매 프레임 `InputBlocked`로 흐름에 묻는다(전에는 흐름이 화면을 바꿀 때마다 폴러를 껐다 켰다 — `KedInputOwnership` · `SyncInput`). 흐름은 UI가 지금 갖거나 **바로 앞 프레임까지** 가졌으면 막는다 — 시작을 누르거나 창을 닫은 그 키를 폴러가 다시 읽지 않는다. 폴러는 UI보다 늦게 돈다(`DefaultExecutionOrder(100)`) — 같은 키로 UI가 메뉴를 연 프레임이면 이미 막혀 있다.
 Esc는 맨 위 한 층만: 확인 → 취소, 안내 → 확인, 그 밖의 Panel → 뒤로, UI 숨김 → 다시 보임.
 Panel이 열린 동안 Root(타이틀·재생 화면)의 CanvasGroup도 막는다 — 그러지 않으면 방향키·Enter가 아래 Root 버튼·선택지에 닿는다. 처음에는 흐름이 막았고, 10-27부터 UIPF가 막는다(`BlockRootUnderPanels`, 아래 "UIPF로 되돌림"). 타이틀로 나가는 동안(`ExitAsync`)은 Panel이 없어도 흐름이 막는다.
-키보드 포커스: Panel을 닫으면 연 순간의 포커스로 돌아간다. 처음에는 흐름이 쌓아 두었고, 10-27부터 UIPF가 되돌린다. 되돌리지 못하면(연 버튼이 사라졌거나 막혔으면) 흐름이 고른다 — 남은 Panel의 첫 버튼, 재생 화면이면 떠 있는 선택지. UI 숨김은 재생 화면이 따로 기억한다.
+키보드 포커스: Panel을 닫으면 연 순간의 포커스로 돌아간다. 처음에는 흐름이 쌓아 두었고, 10-27부터 UIPF가 되돌린다. 되돌리지 못하면(연 버튼이 사라졌거나 막혔으면) UIPF가 비워 둔다 — 흐름이 대신 고르던 `EnsureFocus`는 2026-11-04에 걷었다(Unity에서 키보드로만 닫아 보고 확인할 것). UI 숨김은 재생 화면이 따로 기억한다.
 빨리 넘기기는 버튼으로 켜면 스스로 꺼지지 않으므로 타이틀 복귀·불러오기·갈라지기 때 끈다.
 
 ### 4. 기능 연결 표
@@ -541,13 +542,14 @@ App(흐름 · 바인딩 · KedUIHost)을 asmdef(`Ked.Samples.UI.App` · `.App.Ed
 
 화면마다 바인딩 클래스(ScreenBinding 8개)로 나눴더니, 화면끼리 직접 부를 수 없어 중개(KedUIFlow의 넘겨주기 메서드 9개),
 꾸러미(KedUIServices), 화면→바인딩 장부(닫힘·Esc 돌려보내기), 가상 훅(OnConfigured · Tick · Back)이 생겼다.
-옛 `VNScreenBindings`처럼 `KedUIFlow` 하나로 합쳤다 — `KedUIFlow.cs`(호스트 · 스택 · Esc · 포커스 · 입력 소유권 · 이벤트 묶기/풀기)와
+옛 `VNScreenBindings`처럼 `KedUIFlow` 하나로 합쳤다 — `KedUIFlow.cs`(호스트 · Esc · 재생 입력 막기 · 이벤트 묶기/풀기)와
 화면별 부분 파일(`KedUIFlow.Title/Play/Menu/SaveLoad/Backlog/Settings/Modal/End.cs`).
 
 - 호스트는 필드로 직접 든다. 화면 이동은 메서드 직접 호출, 닫힘은 `afterClosed: Unbind`로 바로.
 - Esc는 맨 위 Panel로 고른다(확인 → 취소, 안내 → 확인, 끝 카드 → 닫지 않음, 설정 → 저장하고 닫기, 그 밖 → 한 층).
 - 한 클래스라 화면 것에는 화면 이름을 붙였다(`_saveLoadPage` · `_settingsTab` · `OpenSaveLoad` · `TickBacklog` …).
 - 지운 것: `ScreenBinding`, `KedUIServices`, `Bindings/` 폴더(바인딩 8개). 동작은 그대로다.
+- 2026-11-04 UIManager와 겹치던 겹을 걷었다(소유자 결정): 화면 전환 래퍼(`SwitchRoot` · `PushPanel` · `SwitchPage` — 이제 `_ui`를 바로 부르고 `Presentation<T>()`와 `Unbind`만 넘긴다. 닫기 둘은 옛 구조처럼 `Unbind`만 붙인 한 줄), `Require<T>`와 화면 필드 아홉(`_ui.GetUI<T>()` · `_ui.TopPanel is T`), `IsTop` · `EnsureFocus`, `SyncInput` · `KedInputOwnership` · `LateTick`(폴러가 묻는 `InputBlocked`로 — 위 "입력 소유권"). `KedUIFlow.cs` 359 → 288줄.
 
 ### 화면 상태 시범 — 저장/불러오기 (2026-11-03)
 

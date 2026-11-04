@@ -11,9 +11,6 @@ namespace Ked.Samples.UI
         // 본체 AudioVolumeSettings.DefaultVolume과 같은 값(그쪽은 상수를 내놓지 않는다).
         private const float DefaultChannelVolume = 0.8f;
 
-        private readonly SettingsPanel _settingsPanel;
-        private readonly PlaybackSettingsPage _playbackPage;
-        private readonly DisplaySettingsPage _displayPage;
         private readonly SettingsState _settings = new();
 
         private KedSettings SettingsValues => _settings.Values;
@@ -38,11 +35,11 @@ namespace Ked.Samples.UI
 
         private void OpenSettings()
         {
-            PushPanel<SettingsPanel>(panel =>
+            _ui.PushPanel<SettingsPanel>(Presentation<SettingsPanel>(), panel =>
             {
                 BindView(panel, ApplySettingsBindings);
                 SelectTab(_settings.Tab);
-            });
+            }, Unbind);
         }
 
         private void CloseSettings()
@@ -69,11 +66,13 @@ namespace Ked.Samples.UI
 
         private void SelectTab(SettingsPanel.Tab tab)
         {
+            SettingsPanel panel = _ui.GetUI<SettingsPanel>();
+
             _settings.Tab = tab;
-            _settingsPanel.SetSelectedTab(tab);
-            _settingsPanel.SetResetAvailable(_settings.CanResetTab);
+            panel.SetSelectedTab(tab);
+            panel.SetResetAvailable(_settings.CanResetTab);
             ShowTabPage();
-            _settingsPanel.FocusTab(tab);
+            panel.FocusTab(tab);
         }
 
         // 값은 상태가 기본값으로 되돌린다. 채널 음량만 본체가 들고 있어 여기서 되돌린다.
@@ -102,35 +101,37 @@ namespace Ked.Samples.UI
         // 탭마다 나뉘는 곳은 여기 하나다(되돌릴 값의 탭 나눔은 SettingsState.ResetTab).
         private void ShowTabPage()
         {
+            SettingsPanel owner = _ui.GetUI<SettingsPanel>();
+
             switch (_settings.Tab)
             {
                 case SettingsPanel.Tab.Audio:
-                    SwitchPage<AudioSettingsPage>(_settingsPanel, page =>
+                    _ui.SwitchPage<AudioSettingsPage>(owner, Presentation<AudioSettingsPage>(), page =>
                     {
                         BindView(page, ApplyAudioBindings);
                         PresentAudioPage(page);
-                    });
+                    }, Unbind);
                     break;
                 case SettingsPanel.Tab.Text:
-                    SwitchPage<TextSettingsPage>(_settingsPanel, page =>
+                    _ui.SwitchPage<TextSettingsPage>(owner, Presentation<TextSettingsPage>(), page =>
                     {
                         BindView(page, ApplyTextBindings);
                         page.Present(_settings.TextModel());
-                    });
+                    }, Unbind);
                     break;
                 case SettingsPanel.Tab.Playback:
-                    SwitchPage<PlaybackSettingsPage>(_settingsPanel, page =>
+                    _ui.SwitchPage<PlaybackSettingsPage>(owner, Presentation<PlaybackSettingsPage>(), page =>
                     {
                         BindView(page, ApplyPlaybackBindings);
                         page.Present(_settings.PlaybackModel());
-                    });
+                    }, Unbind);
                     break;
                 case SettingsPanel.Tab.Display:
-                    SwitchPage<DisplaySettingsPage>(_settingsPanel, page =>
+                    _ui.SwitchPage<DisplaySettingsPage>(owner, Presentation<DisplaySettingsPage>(), page =>
                     {
                         BindView(page, ApplyDisplayBindings);
                         page.Present(new DisplaySettingsPage.Model { Fullscreen = Screen.fullScreen });
-                    });
+                    }, Unbind);
                     break;
             }
         }
@@ -262,13 +263,13 @@ namespace Ked.Samples.UI
 
             ApplyPlaybackSettings();
             SettingsValues.Store();
-            _playbackPage.Present(_settings.PlaybackModel());
+            _ui.GetUI<PlaybackSettingsPage>().Present(_settings.PlaybackModel());
         }
 
         private void HandleWindowModeClicked(bool fullscreen)
         {
             Screen.fullScreenMode = fullscreen ? FullScreenMode.FullScreenWindow : FullScreenMode.Windowed;
-            _displayPage.Present(new DisplaySettingsPage.Model { Fullscreen = fullscreen });
+            _ui.GetUI<DisplaySettingsPage>().Present(new DisplaySettingsPage.Model { Fullscreen = fullscreen });
         }
 
         #endregion

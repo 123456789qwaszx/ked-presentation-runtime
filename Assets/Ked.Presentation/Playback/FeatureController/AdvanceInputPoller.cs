@@ -1,8 +1,14 @@
+using System;
 using UnityEngine;
 
 // VN 재생의 유일한 프레임 입력 구동자.
+// UI보다 늦게 돈다 — 같은 키로 UI가 메뉴를 연 프레임이면 InputBlocked가 이미 그것을 본다.
+[DefaultExecutionOrder(100)]
 public sealed class AdvanceInputPoller : MonoBehaviour
 {
+    // 화면(UI)이 입력을 가진 동안 true. 막힌 프레임은 폴링과 Tick(자동 · 빨리 넘기기)을 통째로 건너뛴다.
+    public Func<bool> InputBlocked { get; set; }
+
     [SerializeField] private AdvanceInputBindings _bindings = new();
 
     private DialogueAdvanceDispatcher _dialogueAdvanceDispatcher;
@@ -24,6 +30,9 @@ public sealed class AdvanceInputPoller : MonoBehaviour
 
     private void Update()
     {
+        if (InputBlocked != null && InputBlocked())
+            return;
+
         PollAdvance();
         PollRapidSkip();
         PollSpeedUpMode();

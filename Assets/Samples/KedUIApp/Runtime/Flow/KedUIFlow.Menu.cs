@@ -7,7 +7,7 @@ namespace Ked.Samples.UI
     {
         private void OpenMenu()
         {
-            PushPanel<SystemMenuPanel>(panel =>
+            _ui.PushPanel<SystemMenuPanel>(Presentation<SystemMenuPanel>(), panel =>
             {
                 BindView(panel, ApplyMenuBindings);
                 panel.Present(new SystemMenuPanel.Model
@@ -16,7 +16,7 @@ namespace Ked.Samples.UI
                     CanSave = _saves != null && _saves.CanSave,
                     CanSkipEpisode = IsRunning,
                 });
-            });
+            }, Unbind);
         }
 
         private void ApplyMenuBindings(SystemMenuPanel panel)

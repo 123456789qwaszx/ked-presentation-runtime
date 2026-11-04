@@ -123,11 +123,6 @@ namespace Ked.Samples.UI
             _flow?.Tick();
         }
 
-        private void LateUpdate()
-        {
-            _flow?.LateTick();
-        }
-
         private void OnDestroy()
         {
             _flow?.Dispose();

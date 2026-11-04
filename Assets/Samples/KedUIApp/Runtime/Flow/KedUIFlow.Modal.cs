@@ -7,29 +7,26 @@ namespace Ked.Samples.UI
     // 먼저 팝업을 닫고 그다음 그 일을 한다 — 그 일이 새 Panel을 열 수 있게.
     public sealed partial class KedUIFlow
     {
-        private readonly ConfirmPanel _confirmPanel;
-        private readonly NoticePanel _noticePanel;
-
         private Action _confirmAccepted;
 
         private void Confirm(ConfirmPanel.Question question, Action onAccept, int slotNumber = 0)
         {
             _confirmAccepted = onAccept;
 
-            PushPanel<ConfirmPanel>(panel =>
+            _ui.PushPanel<ConfirmPanel>(Presentation<ConfirmPanel>(), panel =>
             {
                 BindView(panel, ApplyConfirmBindings);
                 panel.Present(new ConfirmPanel.Model { Question = question, SlotNumber = slotNumber });
-            });
+            }, Unbind);
         }
 
         private void Notice(NoticePanel.Message message, int slotNumber = 0)
         {
-            PushPanel<NoticePanel>(panel =>
+            _ui.PushPanel<NoticePanel>(Presentation<NoticePanel>(), panel =>
             {
                 BindView(panel, ApplyNoticeBindings);
                 panel.Present(new NoticePanel.Model { Message = message, SlotNumber = slotNumber });
-            });
+            }, Unbind);
         }
 
         private void ApplyConfirmBindings(ConfirmPanel panel)
@@ -51,7 +48,7 @@ namespace Ked.Samples.UI
             Action accept = _confirmAccepted;
             _confirmAccepted = null;
 
-            if (IsTop(_confirmPanel))
+            if (_ui.TopPanel is ConfirmPanel)
                 ClosePanel();
 
             if (accepted)
@@ -60,7 +57,7 @@ namespace Ked.Samples.UI
 
         private void HandleNoticeResolved()
         {
-            if (IsTop(_noticePanel))
+            if (_ui.TopPanel is NoticePanel)
                 ClosePanel();
         }
     }
