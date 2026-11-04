@@ -51,7 +51,7 @@ Yarn Spinner를 기반으로 제작한 **비주얼 노벨 화면 연출 런타�
 
 ### 2. 연출 스크립트 예제
 
-`Assets/Samples/Dialogue/ChapterProgression/Demo_Presentation.yarn` — 연출 데모 챕터의 에피소드 하나가 재생하는 노드
+`Assets/Samples/Dialogue/ChapterProgression/presentation_demo_Demo_Presentation.yarn` — 연출 데모 챕터의 에피소드 하나가 재생하는 노드 `Demo_Presentation`
 
 짧은 장면 하나에서 배경·BGM·등장, 배치·크기, 표정·포즈·모션, 포커스·카메라, 화면 효과·효과음,
 트랜지션·선택지를 한 번씩 지나갑니다. 공개된 예제 초상화(harin·sigure·kasmi)와 저장소에 있는 배경·음원만 씁니다.
@@ -65,9 +65,14 @@ Yarn Spinner를 기반으로 제작한 **비주얼 노벨 화면 연출 런타�
 하린: 배경이 들어오고, 음악이 깔리고, 내가 걸어 들어왔어.
 ```
 
-진행·저장 예제의 대본은 `Assets/Samples/Dialogue/ChapterProgression/FestivalEve.yarn`(챕터 JSON은 곁의 `FestivalEve.progression.json`)입니다.
+진행·저장 예제의 대본은 `Assets/Samples/Dialogue/ChapterProgression/festival_eve_*.yarn`(카드 하나에 파일 하나, 챕터 JSON은 곁의 `FestivalEve.progression.json`)입니다.
 챕터 하나(축제 전날)에 장면 둘 — 진행 선택지와 스탯, 대사 선택지와의 차이, 숨는 · 잠기는 선택지, 자동 간선,
-장면 확정과 지난 장면에서 갈라지기, 챕터 끝(끝 카드)을 한 번씩 지나갑니다.
+조건 분기(`<<detour>>`로 다녀가는 카드가 제 첫머리에서 스탯을 본다), 장면 확정과 지난 장면에서 갈라지기, 챕터 끝(끝 카드)을 한 번씩 지나갑니다.
+
+두 예제는 손으로 쓴 것이 아니라 **툴이 낸 것**입니다(2026-11-04) — 원고와 진행 JSON은
+[ked-story-director](https://github.com/123456789qwaszx/ked-story-director) `samples/RuntimeSamples`, 연출과 Yarn은
+[ked-story-compositor](https://github.com/123456789qwaszx/ked-story-compositor) `samples/RuntimeSamples`가 정본입니다.
+고칠 때는 툴에서 고쳐 다시 내고, 여기 파일을 덮어씁니다.
 
 ### 3. 대사 실행 흐름
 

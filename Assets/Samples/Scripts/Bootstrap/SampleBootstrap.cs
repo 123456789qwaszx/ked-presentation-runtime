@@ -71,7 +71,7 @@ public partial class SampleBootstrap : MonoBehaviour, IRigPrefabSource
              "연출 데모: 챕터 하나 · 장면 하나 · 에피소드 하나짜리 챕터 JSON.")]
     [SerializeField] private SampleExample example = SampleExample.ProgressionAndSave;
 
-    [Tooltip("연출 데모 챕터 JSON — 에피소드 하나가 연출 데모 노드(Assets/Samples/Dialogue/ChapterProgression/Demo_Presentation.yarn)를 재생한다.")]
+    [Tooltip("연출 데모 챕터 JSON — 에피소드 하나가 연출 데모 노드 Demo_Presentation(Assets/Samples/Dialogue/ChapterProgression/presentation_demo_Demo_Presentation.yarn — ked-story-compositor가 낸 것)을 재생한다.")]
     [SerializeField] private TextAsset presentationDemoChapterJson;
 
     [Header("무대")]
@@ -119,8 +119,9 @@ public partial class SampleBootstrap : MonoBehaviour, IRigPrefabSource
     [SerializeField] private bool useLearningSaveData;
     [SerializeField] private TextAsset learningChapterJson;
     [Tooltip("저장과 현재 대본의 호환성을 판별한다. 복원에 영향을 주는 대본 변경 시 값을 올린다.\n" +
-             "2 — Yarn 변수 층 제거(2026-09-17). 1로 저장된 회차는 대사가 $작가변수를 읽던 대본이라 재개할 수 없다.")]
-    [SerializeField] private string saveContentVersion = "2";
+             "2 — Yarn 변수 층 제거(2026-09-17). 1로 저장된 회차는 대사가 $작가변수를 읽던 대본이라 재개할 수 없다.\n" +
+             "3 — 예제를 두 툴로 다시 냄(2026-11-04). 줄 신원(#line:)과 에피소드 Id(EP01 → Festival_Classroom)가 바뀌었다.")]
+    [SerializeField] private string saveContentVersion = "3";
 
     [Header("VNAdvanceGate")]
     [SerializeField] private AdvanceInputPoller vnAdvanceInputPoller;

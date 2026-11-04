@@ -1,16 +1,24 @@
 {
   "ChapterId": "presentation_demo",
   "DisplayName": "연출 데모",
-  "StartEpisodeId": "EP01",
+  "StartEpisodeId": "Demo_Presentation",
   "Stats": [],
   "Nodes": [
     {
-      "EpisodeId": "EP01",
+      "EpisodeId": "Demo_Presentation",
       "Title": "연출 데모",
+      "IndexText": "",
       "DialogueEntryId": "Demo_Presentation",
-      "SceneId": "연출 데모",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [],
       "EventKey": "",
-      "NextOptions": []
+      "SceneId": "연출 데모",
+      "DesignerNote": "",
+      "Position": {
+        "X": 0,
+        "Y": 0
+      }
     }
   ]
 }
