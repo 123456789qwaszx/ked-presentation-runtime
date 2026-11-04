@@ -19,7 +19,10 @@ public sealed class CustomOptionItem : Selectable, ISubmitHandler, IPointerClick
     [SerializeField] private float _normalAlpha = 0.75f;
     [SerializeField] private float _hoveredAlpha = 1.0f;
 
-    private OptionViewModel _viewModel;
+    // 진행 층의 에피소드 선택지(ChapterOptionsView)가 묶는 값 — 문구와 고를 수 있는지.
+    // ⛔ Yarn 옵션 뷰모델(OptionViewModel)은 대사 안 선택지와 함께 2026-11-05에 걷혔다.
+    private bool _isBound;
+    private bool _isAvailable;
     private bool _hasSubmitted;
 
     private float _revealAlpha;
@@ -27,18 +30,7 @@ public sealed class CustomOptionItem : Selectable, ISubmitHandler, IPointerClick
 
     public event Action<CustomOptionItem> Submitted;
 
-    public bool HasViewModel => _viewModel != null;
-
-    public OptionViewModel ViewModel
-    {
-        get
-        {
-            if (_viewModel == null)
-                throw new InvalidOperationException("CustomOptionItem has no bound view model.");
-
-            return _viewModel;
-        }
-    }
+    public bool IsBound => _isBound;
 
     protected override void Awake()
     {
@@ -46,42 +38,26 @@ public sealed class CustomOptionItem : Selectable, ISubmitHandler, IPointerClick
         ResetView();
     }
 
-    public void Bind(OptionViewModel viewModel)
+    // 진행 층의 에피소드 선택지(ChapterOptionsView)가 묶는다.
+    public void Bind(string label, bool isAvailable, string effectText = null)
     {
-        if (viewModel == null)
-        {
-            ResetView();
-            return;
-        }
-
-        _viewModel = viewModel;
+        _isBound = true;
+        _isAvailable = isAvailable;
         _hasSubmitted = false;
 
-        SetText(_label, viewModel.Label);
+        SetText(_label, label ?? string.Empty);
+        SetText(_effectText, effectText);
 
-        interactable = viewModel.IsAvailable;
+        interactable = isAvailable;
 
         _revealAlpha = 1f;
         SetHighlighted(false);
     }
 
-    // Yarn 옵션이 아닌 곳에서 바인드:
-    // 진행 층의 에피소드 선택지(ChapterOptionsView).
-    public void Bind(string label, bool isAvailable, string effectText = null)
-    {
-        Bind(new OptionViewModel(
-            sourceOption: null,
-            sourceOptionIndex: -1,
-            choiceSequence: -1,
-            label: label,
-            isAvailable: isAvailable));
-
-        SetText(_effectText, effectText);
-    }
-
     public void ResetView()
     {
-        _viewModel = null;
+        _isBound = false;
+        _isAvailable = false;
         _hasSubmitted = false;
 
         interactable = false;
@@ -153,14 +129,14 @@ public sealed class CustomOptionItem : Selectable, ISubmitHandler, IPointerClick
 
     private bool CanInteract()
     {
-        return _viewModel != null &&
-               _viewModel.IsAvailable &&
+        return _isBound &&
+               _isAvailable &&
                IsInteractable();
     }
 
     private void SetHighlighted(bool highlighted)
     {
-        bool canShowSelection = _viewModel != null && _viewModel.IsAvailable;
+        bool canShowSelection = _isBound && _isAvailable;
 
         SetSelectionIndicator(highlighted && canShowSelection);
 
@@ -173,10 +149,10 @@ public sealed class CustomOptionItem : Selectable, ISubmitHandler, IPointerClick
 
     private float GetRestingStateAlpha()
     {
-        if (_viewModel == null)
+        if (!_isBound)
             return 0f;
 
-        return _viewModel.IsAvailable
+        return _isAvailable
             ? _normalAlpha
             : _disabledAlpha;
     }

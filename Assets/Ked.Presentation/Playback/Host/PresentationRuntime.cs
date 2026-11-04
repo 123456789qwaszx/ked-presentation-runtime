@@ -33,12 +33,11 @@ public sealed class PresentationRuntime
         DialogueAdvanceDispatcher advanceDispatcher,
         LinePresentationFlow lineFlow,
         RollbackHistory rollbackHistory,
-        ChoiceHistory choiceHistory,
         BacklogRecorder backlog,
         AdvanceInputPoller inputPoller)
     {
         Unit = new PlaybackUnit(scenePresentation, backlog, rollbackHistory);
-        Memory = new PlaybackMemory(Unit, backlog, choiceHistory, rollbackHistory);
+        Memory = new PlaybackMemory(Unit, backlog, rollbackHistory);
         Features = features;
         AdvanceDispatcher = advanceDispatcher;
         LineFlow = lineFlow;

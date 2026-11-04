@@ -45,7 +45,7 @@ internal sealed class FakePresentation : IPlaybackStage
 
     public int ResumeCount;
     public int AbandonSeekCount;
-    public PresentationResumePoint LastResume;
+    public LineTarget LastResume;
     public bool IsSeeking { get; private set; }
     public string SeekUntilNode;
 
@@ -71,11 +71,11 @@ internal sealed class FakePresentation : IPlaybackStage
         SeekUntilNode = null;
     }
 
-    public void BeginResume(PresentationResumePoint resume)
+    public void BeginResume(LineTarget resume)
     {
         ResumeCount++;
         LastResume = resume;
-        string untilNode = NodeOf(resume.Target.LineId);
+        string untilNode = NodeOf(resume.LineId);
         _log.Add("resume:" + untilNode);
 
         IsSeeking = true;
@@ -324,9 +324,7 @@ internal sealed class Rig
     // 진짜로는 PlaybackMemory.Restore가 저장된 문자열을 되읽어 건다. 여기서는 표적 노드의 첫 줄을 정한다.
     public void StageResume(string untilNode)
     {
-        Unit.StageResume(new PresentationResumePoint(
-            new LineTarget { LineId = untilNode + "#0", Occurrence = 1 },
-            Array.Empty<ChoiceRecord>()));
+        Unit.StageResume(new LineTarget { LineId = untilNode + "#0", Occurrence = 1 });
     }
 }
 

@@ -155,7 +155,6 @@ public sealed class ManualSaveFlow
         _memory.ReadPastUnit(
             entry,
             origin.Checkpoint.HostSerialStart,
-            origin.HostState,
             out string inheritedHostState,
             out string loadHostState);
 

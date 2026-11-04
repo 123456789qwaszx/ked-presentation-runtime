@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Ked.Samples.UI
 {
     /// <summary>
-    /// 남이 자식을 붙이는 칸(선택지 항목 칸 — 재생 쪽 CustomOptionsPresenter가 항목을 만든다)에서
+    /// 남이 자식을 붙이는 칸(선택지 항목 칸 — 진행 예제의 ChapterOptionsView가 항목을 만든다)에서
     /// 자식이 바뀐 것을 화면에 알린다. 화면은 새 항목의 글자를 테마(글자 크기)에 등록한다.
     /// </summary>
     [DisallowMultipleComponent]
