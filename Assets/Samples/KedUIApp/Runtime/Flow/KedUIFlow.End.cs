@@ -29,6 +29,26 @@ namespace Ked.Samples.UI
                 p => p.TitleClicked -= ReturnToTitle);
         }
 
+        #region Handlers
+
+        // 챕터가 끝까지 갔다(SceneRunner → IChapterEndView). 끝은 재생 화면에서만 온다 —
+        // 타이틀로 나가는 중이거나 이미 타이틀이면 띄울 자리가 없다.
+        private void HandleChapterEnd(ChapterDefinition chapter, EpisodeNode lastEpisode, ChapterState state)
+        {
+            if (!_configured || chapter == null)
+                return;
+
+            if (_exiting || !IsPlayRoot)
+            {
+                UnityEngine.Debug.Log("[Ked UI] 재생 화면이 아니라 끝 카드를 띄우지 않는다.");
+                return;
+            }
+
+            OpenEnd(chapter, lastEpisode, state);
+        }
+
+        #endregion
+
         #region Refresh
 
         private static void RefreshEnd(

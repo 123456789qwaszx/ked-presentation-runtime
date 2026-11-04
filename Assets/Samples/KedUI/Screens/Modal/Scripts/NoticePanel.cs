@@ -3,7 +3,8 @@ using System;
 namespace Ked.Samples.UI
 {
     /// <summary>
-    /// 10 안내 팝업 — 확인 버튼 하나. 확인 팝업과 같은 Panel 규칙(모달·한 번만 처리).
+    /// 10 안내 팝업 — 확인 버튼 하나. 확인 팝업과 같은 Panel 규칙(모달). 버튼은 Resolved로 알리기만 하고,
+    /// 닫기와 Esc의 뜻은 흐름이 정한다(KedUIFlow.HandleNoticeResolved · HandleCancel).
     /// 무엇을 알리는지(Message)와 번호만 받는다. 글자와 표시는 이 창이 정한다(ILocalizedView).
     /// 성공 표시(체크)는 실제로 끝난 일에만 쓴다(저장 완료). 실패는 체크 대신 경고 표시와 실제 이유.
     /// </summary>
@@ -41,14 +42,11 @@ namespace Ked.Samples.UI
         public event Action Resolved;
 
         private Model _model;
-        private bool _pending;
         private Localizer _texts;
-
-        public bool IsPending => _pending;
 
         protected override void OnInitialize()
         {
-            KedUIUtil.OnClick(View.Button(Refs.NoticeAccept), Accept);
+            KedUIUtil.OnClick(View.Button(Refs.NoticeAccept), () => Resolved?.Invoke());
 
             Styled.AddText(View.Text(Refs.NoticeBody), UITextRole.Body, UITextSizePolicy.Prefab);
         }
@@ -56,10 +54,8 @@ namespace Ked.Samples.UI
         public void Present(Model model)
         {
             _model = model ?? throw new ArgumentNullException(nameof(model));
-            _pending = true;
             Redraw();
 
-            KedUIUtil.SetButton(View.Button(Refs.NoticeAccept), true, true);
             KedUIUtil.Focus(View.Button(Refs.NoticeAccept));
         }
 
@@ -67,18 +63,6 @@ namespace Ked.Samples.UI
         {
             _texts = localizer;
             Redraw();
-        }
-
-        /// <summary>확인 버튼 · Esc · Enter.</summary>
-        public void Accept()
-        {
-            if (!_pending)
-                return;
-
-            _pending = false;
-            KedUIUtil.SetButton(View.Button(Refs.NoticeAccept), true, false);
-
-            Resolved?.Invoke();
         }
 
         private void Redraw()
@@ -109,10 +93,5 @@ namespace Ked.Samples.UI
         };
 
         private string Text(string key) => KedUIUtil.Text(_texts, key);
-
-        private void OnDisable()
-        {
-            _pending = false;
-        }
     }
 }

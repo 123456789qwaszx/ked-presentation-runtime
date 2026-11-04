@@ -94,8 +94,12 @@ namespace Ked.Samples.UI
                 driver.Initialize(_ui);
         }
 
+        // Unity 입력은 여기서 읽고 흐름에는 이벤트로 넘긴다. 무엇을 닫을지는 흐름이 정한다.
         private void Update()
         {
+            if (Input.GetKeyDown(KeyCode.Escape))
+                Flow?.OnCancelPressed();
+
             Flow?.Tick();
         }
 

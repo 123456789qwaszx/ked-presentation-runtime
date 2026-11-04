@@ -83,47 +83,23 @@ namespace Ked.Samples.UI
             ConfigureSettings();
         }
 
-        // 매 프레임 — KedUIHost가 부른다. Esc와 HUD 되살리기, 이벤트가 없는 재생 상태를 화면에 옮기기.
+        // 매 프레임 — KedUIHost가 부른다. 이벤트가 없는 재생 상태를 화면에 옮긴다.
         public void Tick()
         {
             if (!_configured)
                 return;
 
-            if (Input.GetKeyDown(KeyCode.Escape))
-                HandleCancel();
-            else if (IsPlayRoot && _playScreen.IsHudHidden && !_ui.HasPanel && AnyRestoreKey())
-                RestoreHud();
-
             TickPlay();
             TickBacklog();
         }
 
-        #region 목적지 — 호스트가 부르는 것
+        #region 목적지
 
-        /// <summary>타이틀로. 열린 Panel을 모두 닫고 Root를 타이틀로 바꾼다. 재생은 호스트가 이미 끝냈다(ExitAsync).</summary>
-        public void GoToTitle()
+        // 타이틀로. 열린 Panel을 모두 닫고 Root를 타이틀로 바꾼다. 재생은 호스트가 이미 끝냈다(ExitAsync).
+        private void HandleGoToTitle()
         {
             CloseAllPanels();
             OpenTitle();
-        }
-
-        /// <summary>IPresentationView — 재생이 시작될 때 본체가 부른다. Root를 재생 화면으로 바꾼다.</summary>
-        public void GoToPresentationView() => OpenPlay();
-
-        /// <summary>IChapterEndView — 챕터가 끝까지 갔을 때 SceneRunner가 부른다. 재생 화면 위에 끝 카드를 연다.</summary>
-        void IChapterEndView.Show(ChapterDefinition chapter, EpisodeNode lastEpisode, ChapterState state)
-        {
-            if (!_configured || chapter == null)
-                return;
-
-            // 끝은 재생 화면에서만 온다. 타이틀로 나가는 중이거나 이미 타이틀이면 띄울 자리가 없다.
-            if (_exiting || !IsPlayRoot)
-            {
-                Debug.Log("[Ked UI] 재생 화면이 아니라 끝 카드를 띄우지 않는다.");
-                return;
-            }
-
-            OpenEnd(chapter, lastEpisode, state);
         }
 
         // 나가는 동안(ExitAsync)은 Root를 막는다.
@@ -151,7 +127,7 @@ namespace Ked.Samples.UI
             finally
             {
                 _exiting = false;
-                GoToTitle();
+                HandleGoToTitle();
             }
         }
 
@@ -212,11 +188,11 @@ namespace Ked.Samples.UI
                     if (IsPlayRoot && _playScreen.IsHudHidden)
                         RestoreHud();
                     break;
-                case ConfirmPanel confirm:
-                    confirm.Cancel();
+                case ConfirmPanel:
+                    HandleConfirmResolved(false);
                     break;
-                case NoticePanel notice:
-                    notice.Accept();
+                case NoticePanel:
+                    HandleNoticeResolved();
                     break;
                 case EpisodeEndPanel:
                     break;
@@ -228,11 +204,6 @@ namespace Ked.Samples.UI
                     break;
             }
         }
-
-        private static bool AnyRestoreKey() =>
-            Input.GetKeyDown(KeyCode.Space) ||
-            Input.GetKeyDown(KeyCode.Return) ||
-            Input.GetKeyDown(KeyCode.KeypadEnter);
 
         #endregion
 

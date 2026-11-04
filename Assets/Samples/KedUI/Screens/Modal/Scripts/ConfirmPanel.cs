@@ -9,8 +9,8 @@ namespace Ked.Samples.UI
     /// (UIPF의 Overlay는 아래 화면을 막지 않는 층이라 모달에 쓰지 않는다.)
     ///
     /// 무엇을 묻는지(Question)와 번호만 받는다. 글자는 이 창이 제 글자 표 키로 고른다(ILocalizedView).
-    /// 수락하면 무엇을 할지는 부른 쪽(흐름)이 든다.
-    /// 수락·취소·닫기·Esc 중 무엇이든 처음 하나만 처리한다 — 두 번 누르거나 Esc와 겹쳐도 사건은 한 번이다.
+    /// 수락하면 무엇을 할지는 부른 쪽(흐름)이 든다. 버튼은 누른 쪽을 Resolved로 알리기만 한다 —
+    /// 한 번만 처리하는 것과 Esc의 뜻은 흐름이 정한다(KedUIFlow.HandleConfirmResolved · HandleCancel).
     /// 버튼은 OnInitialize에서 한 번만 묶는다. 다시 열어도 리스너가 늘지 않는다.
     /// </summary>
     [UIViewKey("Ked.ConfirmPanel")]
@@ -51,16 +51,13 @@ namespace Ked.Samples.UI
         public event Action<bool> Resolved;
 
         private Model _model;
-        private bool _pending;
         private Localizer _texts;
-
-        public bool IsPending => _pending;
 
         protected override void OnInitialize()
         {
-            KedUIUtil.OnClick(View.Button(Refs.ConfirmAccept), () => Resolve(true));
-            KedUIUtil.OnClick(View.Button(Refs.ConfirmCancel), () => Resolve(false));
-            KedUIUtil.OnClick(View.Button(Refs.ConfirmClose), () => Resolve(false));
+            KedUIUtil.OnClick(View.Button(Refs.ConfirmAccept), () => Resolved?.Invoke(true));
+            KedUIUtil.OnClick(View.Button(Refs.ConfirmCancel), () => Resolved?.Invoke(false));
+            KedUIUtil.OnClick(View.Button(Refs.ConfirmClose), () => Resolved?.Invoke(false));
 
             Styled.AddText(View.Text(Refs.ConfirmBody), UITextRole.Body, UITextSizePolicy.Prefab);
         }
@@ -68,10 +65,7 @@ namespace Ked.Samples.UI
         public void Present(Model model)
         {
             _model = model;
-            _pending = true;
             Redraw();
-
-            SetButtonsInteractable(true);
 
             KedUIUtil.Focus(View.Button(Refs.ConfirmCancel));
         }
@@ -81,9 +75,6 @@ namespace Ked.Samples.UI
             _texts = localizer;
             Redraw();
         }
-
-        /// <summary>Esc. 취소와 같다.</summary>
-        public void Cancel() => Resolve(false);
 
         private void Redraw()
         {
@@ -113,30 +104,6 @@ namespace Ked.Samples.UI
             _ => "confirm.fork",
         };
 
-        private void Resolve(bool accepted)
-        {
-            if (!_pending)
-                return;
-
-            _pending = false;
-            SetButtonsInteractable(false);
-
-            Resolved?.Invoke(accepted);
-        }
-
-        private void SetButtonsInteractable(bool interactable)
-        {
-            KedUIUtil.SetButton(View.Button(Refs.ConfirmAccept), true, interactable);
-            KedUIUtil.SetButton(View.Button(Refs.ConfirmCancel), true, interactable);
-            KedUIUtil.SetButton(View.Button(Refs.ConfirmClose), true, interactable);
-        }
-
         private string Text(string key) => KedUIUtil.Text(_texts, key);
-
-        private void OnDisable()
-        {
-            // 다른 길(전체 닫기)로 닫혀도 남은 요청을 사건 없이 버린다 — 나중에 늦게 불리지 않게.
-            _pending = false;
-        }
     }
 }

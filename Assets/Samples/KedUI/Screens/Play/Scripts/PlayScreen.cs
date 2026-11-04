@@ -186,9 +186,10 @@ namespace Ked.Samples.UI
             if (restore != null)
                 KedUIUtil.SetActive(restore, hidden);
 
+            // 숨긴 동안은 되살리기 영역을 고른다 — Space · Enter(Submit)도 클릭과 같은 RestoreClicked로 온다.
             if (hidden)
             {
-                KedUIUtil.ClearFocus();
+                KedUIUtil.Focus(restore);
             }
             else if (changed)
             {
