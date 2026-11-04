@@ -8,6 +8,9 @@ namespace Ked.Samples.UI
         // KedUIHost가 Esc를 읽어 부른다.
         public void OnCancelPressed() => HandleCancel();
 
+        // KedUIHost가 매 프레임 부른다 — 재생 상태에 바뀜을 알리는 이벤트가 없다.
+        public void SyncPlaybackState() => RefreshPlaybackState();
+
         // 시작 · 타이틀 복귀.
         public void GoToTitle() => HandleGoToTitle();
 

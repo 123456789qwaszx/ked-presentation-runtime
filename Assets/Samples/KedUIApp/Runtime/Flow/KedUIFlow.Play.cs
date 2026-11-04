@@ -145,7 +145,7 @@ namespace Ked.Samples.UI
         #region Refresh
 
         // 퀵메뉴의 켜짐 표시(자동 진행 · 빨리 넘기기). 키(A · Ctrl)로도 바뀌는데 알리는 이벤트가 없어 매 프레임 옮긴다.
-        private void TickPlay()
+        private void RefreshQuickMenuModes()
         {
             if (!IsPlayRoot)
                 return;

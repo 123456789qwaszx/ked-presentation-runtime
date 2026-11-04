@@ -83,14 +83,14 @@ namespace Ked.Samples.UI
             ConfigureSettings();
         }
 
-        // 매 프레임 — KedUIHost가 부른다. 이벤트가 없는 재생 상태를 화면에 옮긴다.
-        public void Tick()
+        // 이벤트가 없는 재생 상태(퀵메뉴 켜짐 · 다시 듣기 보이스)를 화면에 맞춘다.
+        private void RefreshPlaybackState()
         {
             if (!_configured)
                 return;
 
-            TickPlay();
-            TickBacklog();
+            RefreshQuickMenuModes();
+            RefreshBacklogVoice();
         }
 
         #region 목적지

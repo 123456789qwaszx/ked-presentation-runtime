@@ -100,7 +100,8 @@ namespace Ked.Samples.UI
             if (Input.GetKeyDown(KeyCode.Escape))
                 Flow?.OnCancelPressed();
 
-            Flow?.Tick();
+            // 재생 상태에는 바뀜을 알리는 이벤트가 없어 매 프레임 맞춘다.
+            Flow?.SyncPlaybackState();
         }
 
         private void OnDestroy()

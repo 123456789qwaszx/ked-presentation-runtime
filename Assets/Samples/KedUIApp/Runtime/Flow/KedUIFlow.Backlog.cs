@@ -154,7 +154,7 @@ namespace Ked.Samples.UI
 
         // 다시 듣던 보이스가 저절로 끝났거나(다음 줄 · 롤백 포함) 다른 보이스가 덮었으면 그림을 끈다.
         // 보이스가 끝났다는 이벤트가 없어 매 프레임 본다.
-        private void TickBacklog()
+        private void RefreshBacklogVoice()
         {
             if (_backlogVoiceSequence < 0)
                 return;
