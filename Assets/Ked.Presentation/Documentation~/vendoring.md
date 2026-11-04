@@ -17,7 +17,7 @@
 
 | | |
 |---|---|
-| 분리본 | `ked-stage-runtime` · `refactor/canonical-commands` @ `3ab6b2e` (분리본 `dev`에는 아직 합치지 않았다) |
+| 분리본 | `ked-stage-runtime` · `dev` @ `2463021` (`ASSEMBLY-BOUNDARY.md` 87행 — 예제 조립부를 합친 기록. 그 전 판 `3ab6b2e`) |
 | 마지막으로 맞춘 날 | 2026-11-04 · 이 저장소 → 분리본 (11-03~04에 여기서 고친 것 전부 — face_swap · 샷 의도 · 화면 효과 의도 · 블러 의도 · BGM · 보이스 · 무대 마스크 · S2~S6 · `Shaders/`를 `Resources/VisualEffects/`로. 분리본 안의 `Ked.CommandExecutor`도 함께). 그 전: 2026-11-03 분리본 쪽에서 먼저 한 정본 커맨드 정리를 들여옴, 2026-10-29 배경 리그 제거, 2026-10-28 `dev` @ `640ac60`, 2026-10-27 처음 떼어 냄 |
 | 맞춘 것 | 위 폴더 전부 + `ExportedTuning/` |
 | 일치 | `diff -r` 0건 (아래 "대조" 명령) |

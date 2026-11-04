@@ -15,7 +15,7 @@
 
 | | |
 |---|---|
-| 분리본 | `ked-command-executor` · `claude/fervent-thompson-1cqiis` @ `284dac9` (LinePlayback 예제를 지금 재생 계층으로 다시 옮긴 것도 같은 커밋) · 무대 분리본은 그쪽 `Assets/Ked.Presentation/Documentation~/vendoring.md`의 판과 같다 |
+| 분리본 | `ked-command-executor` · `dev` @ `bcc4f6b` (실행기 폴더는 `284dac9`부터 그대로. 그 뒤는 LinePlayback 예제의 입력 폴러를 Playback과 맞춘 것) · 무대 분리본은 그쪽 `Assets/Ked.Presentation/Documentation~/vendoring.md`의 판과 같다 |
 | 마지막으로 맞춘 날 | 2026-11-04 · 이 저장소 → 분리본 둘 (S2 스텝 세대 가드 · S3/E5 신호·시간·입력 포트와 시간 배율 삭제 · E6 Run 수명 삭제 · S6 첫 진입 try). 그 전: 2026-10-27 처음 떼어 냄(분리본 `main` @ `d12e098`) |
 | 맞춘 것 | `Assets/Ked.CommandExecutor/` 전체 |
 | 일치 | `.cs`·`.meta`·`.asmdef` 기준 `diff -r` 0건 (아래 "대조" 명령) |
