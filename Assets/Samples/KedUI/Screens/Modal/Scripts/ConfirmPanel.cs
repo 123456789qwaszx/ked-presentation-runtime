@@ -67,13 +67,12 @@ namespace Ked.Samples.UI
 
         public void Present(Model model)
         {
-            _model = model ?? throw new ArgumentNullException(nameof(model));
+            _model = model;
             _pending = true;
             Redraw();
 
             SetButtonsInteractable(true);
 
-            // 되돌릴 수 없는 쪽을 기본으로 두지 않는다 — Enter 한 번에 수락되지 않게 취소에 포커스.
             KedUIUtil.Focus(View.Button(Refs.ConfirmCancel));
         }
 

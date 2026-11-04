@@ -1,8 +1,5 @@
-using UnityEngine;
-
 namespace Ked.Samples.UI
 {
-    // 04 시스템 메뉴 — 여닫는 것만 UI가. 일시 정지·복귀 정책(입력 소유권)은 흐름이, 재생 단위는 그대로.
     public sealed partial class KedUIFlow
     {
         private void OpenMenu()
@@ -45,22 +42,20 @@ namespace Ked.Samples.UI
 
         private void HandleSkipEpisodeClicked()
         {
-            Confirm(ConfirmPanel.Question.SkipEpisode, () =>
+            OpenConfirm(ConfirmPanel.Question.SkipEpisode, () =>
             {
                 CloseAllPanels();
 
                 if (Features.RequestSkipCurrentEpisode())
                     return;
 
-                Debug.Log("[Ked UI] 지금 건너뛸 수 있는 에피소드가 없다.");
-                Notice(NoticePanel.Message.SkipUnavailable);
+                OpenNotice(NoticePanel.Message.SkipUnavailable);
             });
         }
 
-        // 타이틀 복귀는 확인한 뒤에만 호스트를 부른다. 재생 단위를 끝내는 것은 호스트(ExitAsync)다.
         private void HandleTitleClicked()
         {
-            Confirm(ConfirmPanel.Question.ReturnToTitle, ReturnToTitle);
+            OpenConfirm(ConfirmPanel.Question.ReturnToTitle, ReturnToTitle);
         }
 
         #endregion

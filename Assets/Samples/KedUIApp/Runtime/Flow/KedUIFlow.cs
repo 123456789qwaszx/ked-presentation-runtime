@@ -126,7 +126,9 @@ namespace Ked.Samples.UI
             OpenEnd(chapter, lastEpisode, state);
         }
 
-        // 나가는 동안(ExitAsync)은 Root를 막는다 — 되감기·퀵메뉴가 정지와 겹치지 않게. 다음 SwitchRoot에서 UIPF가 다시 푼다.
+        // 나가는 동안(ExitAsync)은 Root를 막는다.
+        // 되감기, 퀵메뉴가 정지와 겹치지 않게.
+        // 다음 SwitchRoot에서 다시 품.
         private async void ReturnToTitle()
         {
             _exiting = true;
@@ -159,7 +161,7 @@ namespace Ked.Samples.UI
 
         private PlaybackFeatureController Features => _runtime?.Features;
 
-        private bool IsRunning => _launcher != null && _launcher.IsRunning;
+        private bool IsRunning => _launcher.IsRunning;
 
         private bool IsPlayRoot => _ui.CurrentRoot == _playScreen;
 
@@ -167,8 +169,8 @@ namespace Ked.Samples.UI
         // 그러지 않으면 다음 회차의 첫 줄부터 넘어간다. 자동 진행은 옛 UI와 같이 둔다.
         private void StopFastForward()
         {
-            if (_playbackState != null && _playbackState.IsRapidSkipMode)
-                Features?.EndRapidSkip();
+            if (_playbackState.IsRapidSkipMode)
+                Features.EndRapidSkip();
         }
 
         private string Text(string key) => KedUIUtil.Text(_texts, key);

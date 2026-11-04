@@ -57,7 +57,7 @@ public sealed class LineVoiceController
     // 백로그 다시 듣기. 같은 채널이라 지금 흐르는 보이스를 덮는다.
     public bool Replay(string voiceKey)
     {
-        if (_voice == null || string.IsNullOrWhiteSpace(voiceKey))
+        if (string.IsNullOrWhiteSpace(voiceKey))
             return false;
 
         if (!ResourcesAudioClipResolver.TryResolve(voiceKey, out AudioClip clip))

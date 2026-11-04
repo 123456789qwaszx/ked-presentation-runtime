@@ -138,15 +138,17 @@ public sealed class PlaybackFeatureController
         !_seekState.IsSeeking && !string.IsNullOrWhiteSpace(entry.voiceKey);
 
     public bool ReplayVoice(in DialogueLogEntry entry) =>
-        CanReplayVoice(entry) && _lineVoice != null && _lineVoice.Replay(entry.voiceKey);
+        CanReplayVoice(entry)
+        && _lineVoice.Replay(entry.voiceKey);
 
-    public bool IsVoiceReplaying => _lineVoice != null && _lineVoice.IsReplaying;
+    public bool IsVoiceReplaying => _lineVoice.IsReplaying;
 
-    public void StopVoiceReplay() => _lineVoice?.StopReplay();
+    public void StopVoiceReplay() => _lineVoice.StopReplay();
 
-    // 백점프 — 백로그 항목의 라인으로 되돌아간다. 현재 장면 항목만.
-    // 이전 장면 항목은 그 장면의 루트에서만 시작할 수 있는데, 그것은 되감기가 아니라 확정된
-    // 장면을 다시 여는 일이라 여기 기전이 아니다(후속 — scene-future-plan §1).
+    // 백점프
+    // 현재 장면 항목만.
+    // 이전 장면 항목은 그 장면의 루트에서만 시작할 수 있는데,
+    // 그것은 되감기가 아니라 확정된(Committed) 장면을 다시 여는 일이라 여기 기전이 아님. (false 반환 및 다른 곳에서 처리.)
     public bool CanJumpTo(in DialogueLogEntry entry) =>
         !_seekState.IsSeeking && TryResolveJumpTarget(entry, out _);
 
@@ -250,7 +252,6 @@ public sealed class PlaybackFeatureController
     
     public bool RequestSkipCurrentEpisode()
     {
-        // Load / Rollback replay 중에는 별도 Skip을 열지 않는다.
         if (_seekState.IsSeeking)
             return false;
 

@@ -3,15 +3,14 @@ using UnityEngine;
 
 namespace Ked.Samples.UI
 {
-    // 02 대화 · 03 선택지 — 퀵메뉴와 진행 클릭.
-    // 재생 쪽 대사창·선택지 상자 계약의 어댑터(DialogueBox · OptionsBox)도 이 화면 것이다 — 화면 묶음은 재생 런타임을 모른다.
     public sealed partial class KedUIFlow
     {
         private readonly PlayScreen _playScreen;
         private KedDialogueBoxView _dialogueBoxView;
         private KedOptionsBoxView _optionsBoxView;
 
-        // 무대를 앞으로 가져오고 Root를 재생 화면으로 바꾼다. 이미 재생 화면이면 Presentation만 다시 적용된다(되감기·장면 전환).
+        // 무대를 앞으로 가져오고 Root를 재생 화면으로 바꾼다.
+        // 이미 재생 화면이면 Presentation만 다시 적용된다(되감기·장면 전환).
         private void OpenPlay()
         {
             ShowStage();
