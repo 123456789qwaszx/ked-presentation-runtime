@@ -30,7 +30,6 @@ namespace Ked.Samples.UI.Editor
             kit.Image(surface, "panel_settings", raycast: true);
 
             kit.Label(frame, nameof(R.SettingsTitle), "설정", 115, 78, 800, 45, 30, KedColors.White, bold: true);
-            kit.IconButton(frame, nameof(R.SettingsClose), "close", new Rect(1430, 72, 44, 44), padding: 11f);
 
             UINode tabs = kit.Node(frame, nameof(R.SettingsTabs), 114, 181, 256, 305);
             for (int i = 0; i < TabLabels.Length; i++)
@@ -52,9 +51,12 @@ namespace Ked.Samples.UI.Editor
                 page.SetActive(false);
             }
 
-            kit.Label(frame, nameof(R.ApplyNote), "변경한 설정은 즉시 적용되고 저장됩니다.", 445, 770, 680, 32, 17, KedColors.Muted);
+            // 나가는 버튼은 아래 닫기 하나(Esc와 같다). 위 오른쪽의 ×는 두지 않는다 — 나가는 길이 둘이면 헷갈린다.
+            kit.Label(frame, nameof(R.ApplyNote), "변경한 설정은 즉시 적용되고 저장됩니다.", 445, 770, 420, 32, 17, KedColors.Muted);
             kit.TextButton(frame, nameof(R.ResetSettings), nameof(R.ResetSettingsLabel), "기본값 복원",
-                new Rect(1160, 769, 260, 55), KedButtonStyle.Secondary, fontSize: 21f);
+                new Rect(880, 769, 260, 55), KedButtonStyle.Secondary, fontSize: 21f);
+            kit.TextButton(frame, nameof(R.SettingsClose), nameof(R.SettingsCloseLabel), "닫기",
+                new Rect(1160, 769, 260, 55), KedButtonStyle.Primary, fontSize: 21f);
 
             return view.Go;
         }

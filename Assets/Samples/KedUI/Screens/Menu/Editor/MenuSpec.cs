@@ -22,7 +22,6 @@ namespace Ked.Samples.UI.Editor
             kit.Image(panel, "panel_menu", raycast: true);
 
             kit.Label(frame, nameof(R.MenuTitle), "메뉴", 602, 116, 320, 44, 28, KedColors.Navy, bold: true);
-            kit.IconButton(frame, nameof(R.CloseMenu), "close", new Rect(964, 85, 46, 46), padding: 12f);
 
             UINode actions = kit.Node(frame, nameof(R.MenuActions), 616, 170, 368, 600);
             VerticalLayoutGroup layout = actions.Go.AddComponent<VerticalLayoutGroup>();

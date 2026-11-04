@@ -26,7 +26,6 @@ namespace Ked.Samples.UI.Editor
             kit.Image(panel, "panel_backlog", raycast: true);
 
             kit.Label(frame, nameof(R.BacklogTitle), "대화 기록", 118, 77, 900, 46, 30, KedColors.White, bold: true);
-            kit.IconButton(frame, nameof(R.BacklogClose), "close", new Rect(1430, 76, 44, 44), padding: 11f);
 
             UINode scroll = kit.Node(frame, nameof(R.LogScroll), 110, 150, 1340, 605);
             kit.Clear(scroll);
@@ -64,8 +63,11 @@ namespace Ked.Samples.UI.Editor
             BuildRow(kit, content);
 
             kit.Label(frame, nameof(R.LogEmpty), "아직 기록이 없습니다.", 145, 180, 1100, 40, 21, KedColors.Muted);
+            // 나가는 버튼은 아래 닫기 하나(Esc와 같다) — 설정과 같은 자리.
             kit.Label(frame, nameof(R.BacklogHint), "되감기 버튼으로 그 대사로 돌아갑니다. 이미 지난 장면에서는 그 지점부터 새 회차가 시작됩니다.",
-                143, 774, 1200, 34, 18, KedColors.Muted);
+                143, 786, 990, 34, 17, KedColors.Muted);
+            kit.TextButton(frame, nameof(R.BacklogClose), nameof(R.BacklogCloseLabel), "닫기",
+                new Rect(1160, 776, 260, 55), KedButtonStyle.Primary, fontSize: 21f);
 
             return view.Go;
         }

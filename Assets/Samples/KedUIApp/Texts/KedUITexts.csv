@@ -27,6 +27,7 @@ SystemMenuPanel.MenuSkipEpisodeLabel,이 에피소드 건너뛰기,Skip this epi
 SystemMenuPanel.MenuTitleReturnLabel,타이틀로,Return to title
 BacklogPanel.BacklogTitle,대화 기록,Dialogue Log
 BacklogPanel.LogEmpty,아직 기록이 없습니다.,Nothing has been said yet.
+BacklogPanel.BacklogCloseLabel,닫기,Close
 BacklogPanel.BacklogHint,되감기 버튼으로 그 대사로 돌아갑니다. 이미 지난 장면에서는 그 지점부터 새 회차가 시작됩니다.,"Rewind returns to that line. In a finished scene, a new playthrough starts from that point."
 RecordPanel.RecordTitle,기록,Records
 RecordPanel.RecordTabText_0,저장,Save
@@ -44,6 +45,7 @@ SettingsPanel.SettingsTabText_2,재생,Playback
 SettingsPanel.SettingsTabText_3,화면 · 조작,Display & Keys
 SettingsPanel.ApplyNote,변경한 설정은 즉시 적용되고 저장됩니다.,Changes apply immediately and are saved.
 SettingsPanel.ResetSettingsLabel,기본값 복원,Restore defaults
+SettingsPanel.SettingsCloseLabel,닫기,Close
 AudioSettingsPage.AudioHeading,음량,Sound
 AudioSettingsPage.AudioDescription,이야기에 집중할 수 있도록 소리를 조절하세요.,Adjust the sound so you can focus on the story.
 AudioSettingsPage.AudioLabel_0,전체 음량,Master

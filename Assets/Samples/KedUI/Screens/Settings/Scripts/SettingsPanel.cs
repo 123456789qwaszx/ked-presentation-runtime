@@ -26,9 +26,6 @@ namespace Ked.Samples.UI
             Frame,
             SettingsSurface,
             SettingsTitle,
-            SettingsClose,
-            SettingsCloseBase,
-            SettingsCloseIcon,
 
             SettingsTabs,
             SettingsTab_0,
@@ -45,6 +42,8 @@ namespace Ked.Samples.UI
             ApplyNote,
             ResetSettings,
             ResetSettingsLabel,
+            SettingsClose,
+            SettingsCloseLabel,
         }
 
         public event Action CloseClicked;

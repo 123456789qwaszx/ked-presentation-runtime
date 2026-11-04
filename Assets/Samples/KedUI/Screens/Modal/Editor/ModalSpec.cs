@@ -23,7 +23,6 @@ namespace Ked.Samples.UI.Editor
 
             kit.Label(frame, nameof(C.ConfirmTitle), "", 440, 257, 650, 48, 28, KedColors.White, bold: true,
                 overflow: TextOverflowModes.Ellipsis);
-            kit.IconButton(frame, nameof(C.ConfirmClose), "close", new Rect(1128, 249, 42, 42), padding: 11f);
 
             // 두 줄 이상의 본문도 버튼에 닿지 않게 시안(116)보다 높게 둔다.
             UINode body = kit.Node(frame, nameof(C.ConfirmBody), 452, 335, 696, 190);

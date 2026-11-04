@@ -36,10 +36,6 @@ namespace Ked.Samples.UI
                 p => p.BackClicked -= ClosePanel);
 
             AddBinding(panel,
-                p => p.CloseClicked += CloseAllPanels,
-                p => p.CloseClicked -= CloseAllPanels);
-
-            AddBinding(panel,
                 p => p.TabClicked += SelectExtraTab,
                 p => p.TabClicked -= SelectExtraTab);
         }

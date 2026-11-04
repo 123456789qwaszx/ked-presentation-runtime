@@ -6,7 +6,7 @@ namespace Ked.Samples.UI
     /// <summary>
     /// 감상 — 타이틀에서 여는 Panel. UIPF Page Owner — 탭 둘(앨범 · CG)이 PageRoot 아래 Page 둘을 바꿔 낀다.
     /// 해금은 프레임워크 범위 밖이라 판정하지 않는다 — 잠김 · 열림은 빌드 명세가 정한 그대로 보인다.
-    /// 뒤로(←) · 닫기(×) · Esc 모두 타이틀로.
+    /// 나가는 버튼은 뒤로(←) 하나 — 타이틀로. Esc도 같다.
     /// </summary>
     [UIViewKey("Ked.ExtraPanel")]
     public sealed class ExtraPanel : UIPanel<ExtraPanel.Refs>, IUIPageOwner, ILocalizedView
@@ -28,9 +28,6 @@ namespace Ked.Samples.UI
             BackIcon,
             ExtraTitle,
             ExtraSubtitle,
-            Close,
-            CloseBase,
-            CloseIcon,
 
             ExtraTab_0,
             ExtraTabText_0,
@@ -41,7 +38,6 @@ namespace Ked.Samples.UI
         }
 
         public event Action BackClicked;
-        public event Action CloseClicked;
         public event Action<Tab> TabClicked;
 
         // Tab 순서.
@@ -57,7 +53,6 @@ namespace Ked.Samples.UI
         protected override void OnInitialize()
         {
             KedUIUtil.OnClick(View.Button(Refs.Back), () => BackClicked?.Invoke());
-            KedUIUtil.OnClick(View.Button(Refs.Close), () => CloseClicked?.Invoke());
 
             for (int i = 0; i < TabRefs.Length; i++)
             {

@@ -5,9 +5,9 @@ namespace Ked.Samples.UI
 {
     /// <summary>
     /// 기록 — 플레이 중에 자주 여는 Panel. UIPF Page Owner — 탭 넷(저장 · 불러오기 · 팁 · 캐릭터)이 PageRoot 아래 Page 넷을
-    /// UIManager.SwitchPage로 바꿔 낀다. 바깥(제목 · 탭마다 바뀌는 설명 · 뒤로 · 닫기)은 이 Panel이, 탭 안은 각 Page가 그린다.
+    /// UIManager.SwitchPage로 바꿔 낀다. 바깥(제목 · 탭마다 바뀌는 설명 · 뒤로)은 이 Panel이, 탭 안은 각 Page가 그린다.
     ///
-    /// 뒤로(←)는 한 층 위로(메뉴 · 타이틀), 닫기(×)는 메뉴까지 모두 닫는다. Esc는 뒤로와 같다.
+    /// 나가는 버튼은 뒤로(←) 하나 — 한 층 위로(메뉴 · 타이틀). Esc도 같다.
     /// </summary>
     [UIViewKey("Ked.RecordPanel")]
     public sealed class RecordPanel : UIPanel<RecordPanel.Refs>, IUIPageOwner, ILocalizedView
@@ -32,9 +32,6 @@ namespace Ked.Samples.UI
             BackIcon,
             RecordTitle,
             RecordSubtitle,
-            Close,
-            CloseBase,
-            CloseIcon,
 
             RecordTab_0,
             RecordTabText_0,
@@ -49,7 +46,6 @@ namespace Ked.Samples.UI
         }
 
         public event Action BackClicked;
-        public event Action CloseClicked;
         public event Action<Tab> TabClicked;
 
         // Tab 순서.
@@ -65,7 +61,6 @@ namespace Ked.Samples.UI
         protected override void OnInitialize()
         {
             KedUIUtil.OnClick(View.Button(Refs.Back), () => BackClicked?.Invoke());
-            KedUIUtil.OnClick(View.Button(Refs.Close), () => CloseClicked?.Invoke());
 
             for (int i = 0; i < TabRefs.Length; i++)
             {

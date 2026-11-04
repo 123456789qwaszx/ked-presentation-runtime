@@ -20,9 +20,6 @@ namespace Ked.Samples.UI
             Dim,
             MenuPanel,
             MenuTitle,
-            CloseMenu,
-            CloseMenuBase,
-            CloseMenuIcon,
 
             MenuActions,
             MenuContinue,
@@ -55,7 +52,6 @@ namespace Ked.Samples.UI
 
         protected override void OnInitialize()
         {
-            KedUIUtil.OnClick(View.Button(Refs.CloseMenu), () => CloseClicked?.Invoke());
             KedUIUtil.OnClick(View.Button(Refs.MenuContinue), () => CloseClicked?.Invoke());
             KedUIUtil.OnClick(View.Button(Refs.MenuSave), () => SaveClicked?.Invoke());
             KedUIUtil.OnClick(View.Button(Refs.MenuLoad), () => LoadClicked?.Invoke());

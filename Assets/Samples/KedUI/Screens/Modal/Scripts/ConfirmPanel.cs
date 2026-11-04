@@ -22,9 +22,6 @@ namespace Ked.Samples.UI
             ConfirmDim,
             ConfirmPopup,
             ConfirmTitle,
-            ConfirmClose,
-            ConfirmCloseBase,
-            ConfirmCloseIcon,
             ConfirmBody,
             ConfirmCancel,
             ConfirmCancelLabel,
@@ -57,7 +54,6 @@ namespace Ked.Samples.UI
         {
             KedUIUtil.OnClick(View.Button(Refs.ConfirmAccept), () => Resolved?.Invoke(true));
             KedUIUtil.OnClick(View.Button(Refs.ConfirmCancel), () => Resolved?.Invoke(false));
-            KedUIUtil.OnClick(View.Button(Refs.ConfirmClose), () => Resolved?.Invoke(false));
 
             Styled.AddText(View.Text(Refs.ConfirmBody), UITextRole.Body, UITextSizePolicy.Prefab);
         }

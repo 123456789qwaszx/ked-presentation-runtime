@@ -19,9 +19,6 @@ namespace Ked.Samples.UI
             LogDim,
             LogPanel,
             BacklogTitle,
-            BacklogClose,
-            BacklogCloseBase,
-            BacklogCloseIcon,
 
             LogScroll,
             LogViewport,
@@ -30,6 +27,8 @@ namespace Ked.Samples.UI
             LogEmpty,
 
             BacklogHint,
+            BacklogClose,
+            BacklogCloseLabel,
         }
 
         public event Action CloseClicked;

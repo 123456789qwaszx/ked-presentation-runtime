@@ -72,7 +72,6 @@ namespace Ked.Samples.UI.Editor
             kit.IconButton(frame, nameof(R.Back), "back", new Rect(64, 38, 58, 58), padding: 15f);
             kit.Label(frame, nameof(R.RecordTitle), "기록", 144, 37, 700, 56, 36, KedColors.Navy, bold: true);
             kit.Label(frame, nameof(R.RecordSubtitle), "", 146, 96, 1100, 32, 17, KedColors.Muted);
-            kit.IconButton(frame, nameof(R.Close), "close", new Rect(1478, 38, 58, 58), padding: 16f);
 
             for (int i = 0; i < TabLabels.Length; i++)
             {
