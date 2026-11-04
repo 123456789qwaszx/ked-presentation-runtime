@@ -30,15 +30,17 @@ namespace Ked.Samples.UI
             ChapterTag,
             ChapterTagText,
 
+            // 퀵메뉴: 접고 펴는 판(QuickBar — 자동 ~ 숨기기) + 늘 보이는 원 둘(접기 · 메뉴).
             QuickMenu,
+            QuickBar,
             Quick_auto,
             Quick_autoBase,
             Quick_autoIcon,
             QuickLabel_auto,
-            Quick_fast_forward,
-            Quick_fast_forwardBase,
-            Quick_fast_forwardIcon,
-            QuickLabel_fast_forward,
+            Quick_speed,
+            Quick_speedBase,
+            Quick_speedIcon,
+            QuickLabel_speed,
             Quick_rollback,
             Quick_rollbackBase,
             Quick_rollbackIcon,
@@ -51,10 +53,12 @@ namespace Ked.Samples.UI
             Quick_hide_uiBase,
             Quick_hide_uiIcon,
             QuickLabel_hide_ui,
+            QuickFold,
+            QuickFoldBase,
+            QuickFoldIcon,
             Quick_menu,
             Quick_menuBase,
             Quick_menuIcon,
-            QuickLabel_menu,
 
             DialogueFrame,
             DialogueBox,
@@ -74,17 +78,19 @@ namespace Ked.Samples.UI
 
         public event Action AdvanceClicked;
         public event Action AutoClicked;
-        public event Action FastForwardClicked;
+        public event Action SpeedClicked;
         public event Action RollbackClicked;
         public event Action BacklogClicked;
         public event Action HideClicked;
+        public event Action FoldClicked;
         public event Action MenuClicked;
         public event Action RestoreClicked;
 
         private PlayDialogueBox _dialogueBox;
         private PlayOptionsBox _optionsBox;
         private KedButton _autoButton;
-        private KedButton _fastForwardButton;
+        private KedButton _speedButton;
+        private float _shownSpeed = -1f;     // 이름에 보인 배속(0 = 끔). 매 프레임 같은 글자를 다시 쓰지 않게.
         private bool _hudHidden;
         private GameObject _focusBeforeHide;
         private string _chapterLabel;
@@ -127,14 +133,15 @@ namespace Ked.Samples.UI
                 View.Rect(Refs.OptionsContainer));
 
             _autoButton = Look(Refs.Quick_auto);
-            _fastForwardButton = Look(Refs.Quick_fast_forward);
+            _speedButton = Look(Refs.Quick_speed);
 
             KedUIUtil.OnClick(View.Button(Refs.AdvanceArea), () => AdvanceClicked?.Invoke());
             BindQuick(Refs.Quick_auto, () => AutoClicked?.Invoke());
-            BindQuick(Refs.Quick_fast_forward, () => FastForwardClicked?.Invoke());
+            BindQuick(Refs.Quick_speed, () => SpeedClicked?.Invoke());
             BindQuick(Refs.Quick_rollback, () => RollbackClicked?.Invoke());
             BindQuick(Refs.Quick_backlog, () => BacklogClicked?.Invoke());
             BindQuick(Refs.Quick_hide_ui, () => HideClicked?.Invoke());
+            BindQuick(Refs.QuickFold, () => FoldClicked?.Invoke());
             BindQuick(Refs.Quick_menu, () => MenuClicked?.Invoke());
             KedUIUtil.OnClick(View.Button(Refs.RestoreArea), () => RestoreClicked?.Invoke());
 
@@ -162,13 +169,31 @@ namespace Ked.Samples.UI
         {
             _texts = localizer;
             RedrawChapterTag();
+            RedrawSpeed();
         }
 
-        /// <summary>자동 진행·빨리 넘기기의 켜짐 표시.</summary>
-        public void SetModes(bool auto, bool fastForward)
+        // 자동 진행 · 빠르게 재생의 켜짐 표시. 배속 버튼 이름은 켜졌을 때 "2배속"처럼 지금 배속.
+        public void SetModes(bool auto, bool speedUp, float multiplier)
         {
             _autoButton?.SetSelectedLook(auto);
-            _fastForwardButton?.SetSelectedLook(fastForward);
+            _speedButton?.SetSelectedLook(speedUp);
+
+            float shown = speedUp ? multiplier : 0f;
+            if (!Mathf.Approximately(shown, _shownSpeed))
+            {
+                _shownSpeed = shown;
+                RedrawSpeed();
+            }
+        }
+
+        // 접으면 판(자동 ~ 숨기기)을 감추고 접기 원의 화살표를 뒤집는다(› 접기 · ‹ 펴기).
+        public void SetQuickFolded(bool folded)
+        {
+            KedUIUtil.SetActive(View.Rect(Refs.QuickBar), !folded);
+
+            RectTransform icon = View.Rect(Refs.QuickFoldIcon);
+            if (icon != null)
+                icon.localScale = new Vector3(folded ? -1f : 1f, 1f, 1f);
         }
 
         public void SetHudHidden(bool hidden)
@@ -237,6 +262,15 @@ namespace Ked.Samples.UI
                 KedUIUtil.SetActive(tag, has);
 
             KedUIUtil.SetText(View.Text(Refs.ChapterTagText), _chapterLabel);
+        }
+
+        private void RedrawSpeed()
+        {
+            string label = _shownSpeed > 0f
+                ? KedUIUtil.Format(_texts, "play.speed.on", _shownSpeed.ToString("0", System.Globalization.CultureInfo.InvariantCulture))
+                : KedUIUtil.Text(_texts, "play.speed.off");
+
+            KedUIUtil.SetText(View.Text(Refs.QuickLabel_speed), label);
         }
 
         private void BindQuick(Refs key, Action action)

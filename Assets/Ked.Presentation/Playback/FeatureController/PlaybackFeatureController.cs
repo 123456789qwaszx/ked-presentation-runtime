@@ -110,6 +110,13 @@ public sealed class PlaybackFeatureController
         ApplySpeedUpModeState();
     }
 
+    // 빠르게 재생 배속을 바꾼다. 켜져 있으면 바로 적용된다(범위는 ApplySpeedUpModeState가 맞춘다).
+    public void SetSpeedUpMultiplier(float multiplier)
+    {
+        _playbackState.PlaybackSettings.speedupModeMultiplier = multiplier;
+        ApplySpeedUpModeState();
+    }
+
     public void BeginRapidSkip()
     {
         _rapidSkipHeld = true;

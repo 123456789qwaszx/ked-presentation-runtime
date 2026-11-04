@@ -177,7 +177,7 @@ namespace Ked.Samples.UI.Editor
             }
 
             kit.Label(page, "PlaybackHelp",
-                "빠르게 재생은 S 키로 켜고 끕니다. 배속은 다음에 켤 때부터 적용됩니다.\n" +
+                "빠르게 재생은 S 키나 재생 화면의 배속 버튼으로 켜고 끕니다. 배속을 바꾸면 바로 적용됩니다.\n" +
                 "읽은 대사만 넘기기는 재생 기록에 읽음 표시가 없어 제공하지 않습니다.",
                 448, 560, 960, 110, 20, KedColors.Muted, wrap: true);
 

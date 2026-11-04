@@ -16,14 +16,14 @@ namespace Ked.Samples.UI.Editor
     {
         public const string UltraWideVariant = "UltraWide_HudInBoard";
 
-        private static readonly (string key, string label)[] Quick =
+        // 접고 펴는 판의 버튼(자동 ~ 숨기기). 배속은 빨리 넘기기 자리 — 누를 때마다 2 · 4 · 8배 · 끔(이름은 화면이 쓴다).
+        private static readonly (string key, string icon, string label)[] Quick =
         {
-            ("auto", "자동"),
-            ("fast_forward", "빨리 넘기기"),
-            ("rollback", "되감기"),
-            ("backlog", "기록"),
-            ("hide_ui", "숨기기"),
-            ("menu", "메뉴"),
+            ("auto", "auto", "자동"),
+            ("speed", "fast_forward", "배속"),
+            ("rollback", "rollback", "되감기"),
+            ("backlog", "backlog", "기록"),
+            ("hide_ui", "hide_ui", "숨기기"),
         };
 
         public static GameObject Build(KedUIKit kit)
@@ -105,18 +105,34 @@ namespace Ked.Samples.UI.Editor
             UINode tagText = kit.Node(tag, nameof(R.ChapterTagText), 82, 46, 264, 30);
             kit.Text(tagText, "—", 16, KedColors.White, TextAlignmentOptions.Left);
 
-            // 퀵메뉴: 상아색 판 위에 아이콘 여섯과 이름.
-            UINode quick = kit.Node(hud, nameof(R.QuickMenu), 1000, 26, 548, 96, UIAnchor.TopRight);
-            kit.Surface(quick, KedColors.QuickSurface, radius: 18f, raycast: true);
+            // 퀵메뉴: 접고 펴는 상아색 판(자동 ~ 숨기기) + 오른쪽의 원 둘(접기 · 메뉴). 판의 오른쪽 끝은 접기 원 밑으로 들어간다.
+            // 접으면 원 둘만 남는다. 묶음(QuickMenu)의 오른쪽 위가 기준점이라 초광폭 Variant는 이것만 옮긴다.
+            UINode quick = kit.Node(hud, nameof(R.QuickMenu), 920, 26, 628, 100, UIAnchor.TopRight);
+
+            UINode bar = kit.Node(quick, nameof(R.QuickBar), 920, 30, 520, 92);
+            kit.Surface(bar, KedColors.QuickSurface, radius: 18f, raycast: true);
 
             for (int i = 0; i < Quick.Length; i++)
             {
-                (string key, string label) = Quick[i];
+                (string key, string icon, string label) = Quick[i];
 
-                kit.IconButton(quick, "Quick_" + key, key, new Rect(1021 + i * 86, 34, 52, 52), padding: 13f);
-                kit.Label(quick, "QuickLabel_" + key, label, 1007 + i * 86, 88, 80, 24, 13, KedColors.Navy,
+                kit.IconButton(bar, "Quick_" + key, icon, new Rect(941 + i * 86, 36, 52, 52), padding: 13f);
+                kit.Label(bar, "QuickLabel_" + key, label, 927 + i * 86, 90, 80, 24, 13, KedColors.Navy,
                     TextAlignmentOptions.Center);
             }
+
+            Circle(kit, quick, nameof(R.QuickFold), "next", new Rect(1396, 40, 72, 72));
+            Circle(kit, quick, nameof(R.Quick_menu), "menu", new Rect(1476, 40, 72, 72));
+        }
+
+        // 남색 테두리의 원 버튼(시안 예시의 원). 테두리는 바깥 원, 누르는 칸은 안쪽 원.
+        private static void Circle(KedUIKit kit, UINode parent, string name, string icon, Rect d)
+        {
+            const float ring = 3f;
+            kit.Surface(kit.Node(parent, name + "Ring", d), KedColors.Navy, radius: d.width * 0.5f);
+            kit.IconButton(parent, name, icon,
+                new Rect(d.x + ring, d.y + ring, d.width - ring * 2, d.height - ring * 2),
+                padding: 19f, radius: d.width * 0.5f - ring);
         }
 
         private static void BuildDialogue(KedUIKit kit, UINode hud)

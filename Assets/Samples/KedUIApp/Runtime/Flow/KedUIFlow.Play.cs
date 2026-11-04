@@ -7,6 +7,9 @@ namespace Ked.Samples.UI
     {
         private readonly PlayScreen _playScreen;
 
+        // 퀵메뉴 판(자동 ~ 숨기기)을 접었는가. 저장하지 않는다.
+        private bool _quickFolded;
+
         // 무대를 앞으로 가져오고 Root를 재생 화면으로 바꾼다.
         // 이미 재생 화면이면 Presentation만 다시 적용된다(되감기·장면 전환).
         private void OpenPlay()
@@ -24,6 +27,7 @@ namespace Ked.Samples.UI
                     if (entering)
                         root.SetHudHidden(false);
 
+                    root.SetQuickFolded(_quickFolded);
                     root.SetChapterLabel(ChapterLabel());
                 },
                 afterClosed: Unbind);
@@ -47,8 +51,8 @@ namespace Ked.Samples.UI
                 r => r.AutoClicked -= HandleAuto);
 
             AddBinding(root,
-                r => r.FastForwardClicked += HandleFastForward,
-                r => r.FastForwardClicked -= HandleFastForward);
+                r => r.SpeedClicked += HandleSpeed,
+                r => r.SpeedClicked -= HandleSpeed);
 
             AddBinding(root,
                 r => r.RollbackClicked += HandleRollback,
@@ -61,6 +65,10 @@ namespace Ked.Samples.UI
             AddBinding(root,
                 r => r.HideClicked += HideHud,
                 r => r.HideClicked -= HideHud);
+
+            AddBinding(root,
+                r => r.FoldClicked += HandleQuickFold,
+                r => r.FoldClicked -= HandleQuickFold);
 
             AddBinding(root,
                 r => r.MenuClicked += OpenMenu,
@@ -91,18 +99,35 @@ namespace Ked.Samples.UI
             Features?.ToggleAuto();
         }
 
-        // 빨리 넘기기 = Ctrl을 누르고 있는 것과 같은 기능(rapid skip). 버튼은 눌러서 켜고 다시 눌러 끈다.
-        private void HandleFastForward()
+        // 배속 = 빠르게 재생(S 키와 같은 기능). 누를 때마다 끔 → 2 → 4 → 8배 → 끔.
+        // 고른 배속은 설정의 빠르게 재생 배속과 같은 값이라 저장한다. 빨리 넘기기(Ctrl)는 키로만.
+        private void HandleSpeed()
         {
             PlaybackFeatureController features = Features;
-            if (features == null)
+            PlaybackRuntimeState state = _playbackState;
+            if (features == null || state == null)
                 return;
 
-            PlaybackRuntimeState state = _playbackState;
-            if (state != null && state.IsRapidSkipMode)
-                features.EndRapidSkip();
-            else
-                features.BeginRapidSkip();
+            bool on = state.IsSpeedUpMode;
+
+            if (!_settings.TryNextSpeed(on, out float next))
+            {
+                features.ToggleSpeedUpMode();
+                return;
+            }
+
+            _settings.SetSpeedUp(next);
+            SettingsValues.Store();
+            features.SetSpeedUpMultiplier(next);
+
+            if (!on)
+                features.ToggleSpeedUpMode();
+        }
+
+        private void HandleQuickFold()
+        {
+            _quickFolded = !_quickFolded;
+            _playScreen.SetQuickFolded(_quickFolded);
         }
 
         // 한 줄 되감기 — R 키와 같은 길(표적 정하기 → 호스트가 같은 단위를 처음부터 다시).
@@ -144,7 +169,7 @@ namespace Ked.Samples.UI
 
         #region Refresh
 
-        // 퀵메뉴의 켜짐 표시(자동 진행 · 빨리 넘기기). 키(A · Ctrl)로도 바뀌는데 알리는 이벤트가 없어 매 프레임 옮긴다.
+        // 퀵메뉴의 켜짐 표시(자동 진행 · 배속). 키(A · S)로도 바뀌는데 알리는 이벤트가 없어 매 프레임 옮긴다.
         private void RefreshQuickMenuModes()
         {
             if (!IsPlayRoot)
@@ -152,7 +177,7 @@ namespace Ked.Samples.UI
 
             PlaybackRuntimeState state = _playbackState;
             if (state != null)
-                _playScreen.SetModes(state.IsAutoMode, state.IsRapidSkipMode);
+                _playScreen.SetModes(state.IsAutoMode, state.IsSpeedUpMode, SettingsValues.SpeedUpMultiplier);
         }
 
         // 대사창 위 꼬리표: 예제 이름.

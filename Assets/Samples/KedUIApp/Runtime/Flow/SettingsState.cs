@@ -23,14 +23,13 @@ namespace Ked.Samples.UI
         public bool CanResetTab => Tab != SettingsPanel.Tab.Display;
 
         // 기본값은 씬 · 본체에 적힌 값(출력 속도 · 자동 대기 · 배속)이다 — 여기서 새 기본을 만들지 않는다.
-        // 배속 보기는 본체가 허용하는 범위(하한 · 상한) 안의 셋. 마지막은 본체 기본값.
+        // 배속 보기는 2 · 4 · 8배(재생 화면의 배속 버튼과 같은 셋, 2026-11-04 소유자), 본체가 허용하는 범위(하한 · 상한) 안으로.
+        // 기본 배속은 본체 기본값에 가장 가까운 보기.
         public void SetDefaults(float typeSpeed, float autoDelay, float speedUp, float minMultiplier, float maxMultiplier)
         {
-            speedUp = Math.Clamp(speedUp, minMultiplier, maxMultiplier);
-
             _speedChoices.Clear();
 
-            foreach (float candidate in new[] { 2f, 4f, speedUp })
+            foreach (float candidate in new[] { 2f, 4f, 8f })
             {
                 float value = Math.Clamp(candidate, minMultiplier, maxMultiplier);
                 if (!_speedChoices.Contains(value))
@@ -38,6 +37,7 @@ namespace Ked.Samples.UI
             }
 
             _speedChoices.Sort();
+            speedUp = Nearest(_speedChoices, Math.Clamp(speedUp, minMultiplier, maxMultiplier));
 
             Defaults = new KedSettings
             {
@@ -102,6 +102,34 @@ namespace Ked.Samples.UI
 
             Values.SpeedUpMultiplier = multiplier;
             return true;
+        }
+
+        // 배속 버튼의 다음 배속 — 끔 → 2 → 4 → 8 → 끔. 마지막 배속에서 누르면 false(끈다).
+        public bool TryNextSpeed(bool on, out float next)
+        {
+            int index = on ? _speedChoices.IndexOf(Values.SpeedUpMultiplier) + 1 : 0;
+
+            if (index >= _speedChoices.Count)
+            {
+                next = 0f;
+                return false;
+            }
+
+            next = _speedChoices[index];
+            return true;
+        }
+
+        private static float Nearest(List<float> choices, float value)
+        {
+            float best = choices[0];
+
+            foreach (float choice in choices)
+            {
+                if (Math.Abs(choice - value) < Math.Abs(best - value))
+                    best = choice;
+            }
+
+            return best;
         }
 
         public void SetCharacterVolume(string id, float volume) => VoiceFor(id).Volume = Math.Clamp(volume, 0f, 1f);

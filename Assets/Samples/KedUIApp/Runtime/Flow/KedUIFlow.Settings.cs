@@ -373,8 +373,7 @@ namespace Ked.Samples.UI
             _playScreen.SetDialogueOpacity(SettingsValues.BoxOpacity);
         }
 
-        // 배속은 다음에 빠르게 재생을 켤 때부터 적용된다(본체가 켤 때 배속을 읽는다).
-        // 배속은 상태가 본체 범위 안의 보기로만 둔다.
+        // 배속은 켜져 있어도 바로 바뀐다(SetSpeedUpMultiplier). 배속은 상태가 본체 범위 안의 보기로만 둔다.
         private void ApplyPlaybackSettings()
         {
             PlaybackSettings playback = _playbackState?.PlaybackSettings;
@@ -382,7 +381,11 @@ namespace Ked.Samples.UI
                 return;
 
             playback.autoModeDelaySeconds = SettingsValues.AutoDelay;
-            playback.speedupModeMultiplier = SettingsValues.SpeedUpMultiplier;
+
+            if (Features != null)
+                Features.SetSpeedUpMultiplier(SettingsValues.SpeedUpMultiplier);
+            else
+                playback.speedupModeMultiplier = SettingsValues.SpeedUpMultiplier;
         }
 
         #endregion

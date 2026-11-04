@@ -315,14 +315,15 @@ namespace Ked.Samples.UI.Editor
             Rect design,
             float padding = 14f,
             Vector2? anchor = null,
-            bool withBase = true)
+            bool withBase = true,
+            float radius = 16f)
         {
             UINode node = Node(parent, name, design, anchor ?? UIAnchor.TopLeft);
             CenterPivot(node.Rect);
 
             UINode baseNode = Fill(node, name + "Base");
             Image hit = withBase
-                ? Surface(baseNode, KedColors.QuickSurface, radius: 16f, raycast: true)
+                ? Surface(baseNode, KedColors.QuickSurface, radius: radius, raycast: true)
                 : Clear(baseNode);
 
             UINode iconNode = Fill(node, name + "Icon", padding, padding, padding, padding);

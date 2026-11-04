@@ -11,11 +11,9 @@ TitleScreen.OpenSettingsLabel,설정,Settings
 TitleScreen.QuitLabel,종료,Quit
 TitleScreen.BuildLabel,Ked Presentation Runtime · UI 샘플,Ked Presentation Runtime · UI sample
 PlayScreen.QuickLabel_auto,자동,Auto
-PlayScreen.QuickLabel_fast_forward,빨리 넘기기,Skip
 PlayScreen.QuickLabel_rollback,되감기,Rewind
 PlayScreen.QuickLabel_backlog,기록,Log
 PlayScreen.QuickLabel_hide_ui,숨기기,Hide
-PlayScreen.QuickLabel_menu,메뉴,Menu
 PlayScreen.AdvanceHint,Space  다음,Space  Next
 PlayScreen.RestoreHint,누르거나 Space · Esc로 다시 보입니다,Click or press Space / Esc to show the UI
 SystemMenuPanel.MenuTitle,메뉴,Menu
@@ -65,8 +63,8 @@ PlaybackSettingsPage.PlaybackHeading,재생,Playback
 PlaybackSettingsPage.PlaybackDescription,자동 진행과 빠르게 재생할 때의 동작을 설정합니다.,Set how auto mode and fast playback behave.
 PlaybackSettingsPage.AutoDelayLabel,자동 진행 대기,Auto delay
 PlaybackSettingsPage.SpeedLabel,빠르게 재생,Fast playback
-PlaybackSettingsPage.PlaybackHelp,"빠르게 재생은 S 키로 켜고 끕니다. 배속은 다음에 켤 때부터 적용됩니다.
-읽은 대사만 넘기기는 재생 기록에 읽음 표시가 없어 제공하지 않습니다.","Press S to toggle fast playback. A new speed applies the next time it is turned on.
+PlaybackSettingsPage.PlaybackHelp,"빠르게 재생은 S 키나 재생 화면의 배속 버튼으로 켜고 끕니다. 배속을 바꾸면 바로 적용됩니다.
+읽은 대사만 넘기기는 재생 기록에 읽음 표시가 없어 제공하지 않습니다.","Press S or the speed button on the play screen to toggle fast playback. A new speed applies right away.
 Skipping only read lines is not offered: playback keeps no read markers."
 DisplaySettingsPage.DisplayHeading,화면 · 조작,Display & Keys
 DisplaySettingsPage.DisplayDescription,실행 환경에 맞는 화면 모드와 조작 방법을 확인합니다.,Choose a window mode and check the keyboard controls.
@@ -86,6 +84,8 @@ ExtraPanel.ExtraTitle,감상,Extras
 ExtraPanel.ExtraTabText_0,앨범,Album
 ExtraPanel.ExtraTabText_1,CG,CG
 # 코드가 쓰는 글자 — 소문자로 시작. {0}은 값,,
+play.speed.off,배속,Speed
+play.speed.on,{0}배속,{0}×
 common.ok,확인,OK
 common.cancel,취소,Cancel
 title.currentExample,현재 예제  /  {0},Current example  /  {0}
