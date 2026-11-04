@@ -1119,7 +1119,7 @@
     },
     {
       "name": "portrait_harin",
-      "file": "Common/Sprites/portrait_harin.png",
+      "file": "Art/portrait_harin.png",
       "width": 621,
       "height": 474,
       "role": "캐릭터 카드 상반신",
@@ -1138,7 +1138,7 @@
     },
     {
       "name": "portrait_sigure",
-      "file": "Common/Sprites/portrait_sigure.png",
+      "file": "Art/portrait_sigure.png",
       "width": 621,
       "height": 474,
       "role": "캐릭터 카드 상반신",
@@ -1157,7 +1157,7 @@
     },
     {
       "name": "portrait_kasmi",
-      "file": "Common/Sprites/portrait_kasmi.png",
+      "file": "Art/portrait_kasmi.png",
       "width": 621,
       "height": 474,
       "role": "캐릭터 카드 상반신",
@@ -1176,7 +1176,7 @@
     },
     {
       "name": "face_harin",
-      "file": "Common/Sprites/face_harin.png",
+      "file": "Art/face_harin.png",
       "width": 192,
       "height": 192,
       "role": "캐릭터별 음성 얼굴",
@@ -1195,7 +1195,7 @@
     },
     {
       "name": "face_sigure",
-      "file": "Common/Sprites/face_sigure.png",
+      "file": "Art/face_sigure.png",
       "width": 192,
       "height": 192,
       "role": "캐릭터별 음성 얼굴",
@@ -1214,7 +1214,7 @@
     },
     {
       "name": "face_kasmi",
-      "file": "Common/Sprites/face_kasmi.png",
+      "file": "Art/face_kasmi.png",
       "width": 192,
       "height": 192,
       "role": "캐릭터별 음성 얼굴",
@@ -1233,7 +1233,7 @@
     },
     {
       "name": "album_shop",
-      "file": "Screens/Extra/Sprites/album_shop.png",
+      "file": "Art/album_shop.png",
       "width": 640,
       "height": 360,
       "role": "앨범 · CG 자리 그림",
@@ -1252,7 +1252,7 @@
     },
     {
       "name": "album_hanok",
-      "file": "Screens/Extra/Sprites/album_hanok.png",
+      "file": "Art/album_hanok.png",
       "width": 640,
       "height": 360,
       "role": "앨범 · CG 자리 그림",
@@ -1271,7 +1271,7 @@
     },
     {
       "name": "album_class_day",
-      "file": "Screens/Extra/Sprites/album_class_day.png",
+      "file": "Art/album_class_day.png",
       "width": 640,
       "height": 360,
       "role": "앨범 · CG 자리 그림",
@@ -1290,7 +1290,7 @@
     },
     {
       "name": "album_class_lunch",
-      "file": "Screens/Extra/Sprites/album_class_lunch.png",
+      "file": "Art/album_class_lunch.png",
       "width": 640,
       "height": 360,
       "role": "앨범 · CG 자리 그림",
@@ -1309,7 +1309,7 @@
     },
     {
       "name": "album_festival",
-      "file": "Screens/Extra/Sprites/album_festival.png",
+      "file": "Art/album_festival.png",
       "width": 640,
       "height": 360,
       "role": "앨범 · CG 자리 그림",
@@ -1328,7 +1328,7 @@
     },
     {
       "name": "album_staffroom",
-      "file": "Screens/Extra/Sprites/album_staffroom.png",
+      "file": "Art/album_staffroom.png",
       "width": 640,
       "height": 360,
       "role": "앨범 · CG 자리 그림",
@@ -1347,7 +1347,7 @@
     },
     {
       "name": "album_studio",
-      "file": "Screens/Extra/Sprites/album_studio.png",
+      "file": "Art/album_studio.png",
       "width": 640,
       "height": 360,
       "role": "앨범 · CG 자리 그림",
@@ -1366,7 +1366,7 @@
     },
     {
       "name": "icon_lock",
-      "file": "Screens/Extra/Sprites/icon_lock.png",
+      "file": "Art/icon_lock.png",
       "width": 96,
       "height": 96,
       "role": "잠금 아이콘",
