@@ -12,8 +12,6 @@ namespace Ked.Samples.UI
         private readonly Func<Type, UIPresentationSpec> _presentationOf;
         private readonly Localizer _texts;
 
-        private readonly Dictionary<UIBase, List<Action>> _cleanupByView = new();
-
         // 재생 쪽 — 조립 결과(runtime) · 재생 모드(playbackState) · 씬 부품(scene: 무대 · 입력 폴러 · 타자기 · 오디오 · Yarn 러너).
         private PresentationRuntime _runtime;
         private PlaybackRuntimeState _playbackState;
@@ -82,22 +80,8 @@ namespace Ked.Samples.UI
             if (scene.InputPoller != null)
                 scene.InputPoller.InputBlocked = IsPlaybackInputBlocked;
 
-            ConfigurePlay();
             ConfigureBacklog();
             ConfigureSettings();
-        }
-
-        public void Dispose()
-        {
-            if (_scene?.InputPoller != null)
-                _scene.InputPoller.InputBlocked = null;
-
-            DisposePlay();
-
-            foreach (List<Action> cleanups in _cleanupByView.Values)
-                RunCleanups(cleanups);
-
-            _cleanupByView.Clear();
         }
 
         // 매 프레임 — KedUIHost가 부른다. Esc와 HUD 되살리기, 이벤트가 없는 재생 상태를 화면에 옮기기.
@@ -250,44 +234,63 @@ namespace Ked.Samples.UI
 
         #endregion
 
-        #region View 이벤트 묶기 · 풀기
-
-        // 다시 열려도(같은 Root로 전환 · 쌓인 Panel로 돌아가기) 한 벌만 묶이게 먼저 푼다.
-        private void BindView<T>(T view, Action<T> apply) where T : UIBase
+        #region UIContext
+        
+        private readonly Dictionary<UIBase, List<Action>> _cleanupByOwner = new();
+        
+        private void BindView<T>(T owner, Action<T> apply)
+            where T : UIBase
         {
-            Unbind(view);
-            apply(view);
+            Unbind(owner);
+            apply(owner);
         }
-
-        private void AddBinding<T>(T view, Action<T> attach, Action<T> detach) where T : UIBase
+    
+        private void AddBinding<T>(T owner, Action<T> attach, Action<T> detach)
+            where T : UIBase
         {
-            attach(view);
-
-            if (!_cleanupByView.TryGetValue(view, out List<Action> cleanups))
+            attach(owner);
+            AddCleanup(owner, () => detach(owner));
+        }
+    
+        private void AddCleanup(UIBase owner, Action cleanup)
+        {
+            if (!_cleanupByOwner.TryGetValue(owner, out List<Action> cleanups))
             {
                 cleanups = new List<Action>();
-                _cleanupByView[view] = cleanups;
+                _cleanupByOwner[owner] = cleanups;
             }
-
-            cleanups.Add(() => detach(view));
+    
+            cleanups.Add(cleanup);
         }
-
-        // UIPF 닫힘 콜백 — 닫힌 화면의 View 이벤트를 푼다.
-        private void Unbind(UIBase view)
+    
+        private void Unbind(UIBase owner)
         {
-            if (view == null || !_cleanupByView.TryGetValue(view, out List<Action> cleanups))
+            if (!_cleanupByOwner.TryGetValue(owner, out List<Action> cleanups))
                 return;
-
-            _cleanupByView.Remove(view);
+    
             RunCleanups(cleanups);
+            _cleanupByOwner.Remove(owner);
         }
-
+    
+        private void UnbindAll()
+        {
+            foreach (var kv in _cleanupByOwner)
+                RunCleanups(kv.Value);
+    
+            _cleanupByOwner.Clear();
+        }
+    
         private static void RunCleanups(List<Action> cleanups)
         {
             for (int i = cleanups.Count - 1; i >= 0; i--)
                 cleanups[i]?.Invoke();
         }
-
+    
+        public void Dispose()
+        {
+            UnbindAll();
+        }
+        
         #endregion
     }
 }

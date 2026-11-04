@@ -24,59 +24,16 @@ namespace Ked.Samples.UI
             _backlogSpeakers = new YarnSpeakerNames(_scene.DialogueRunner);
         }
 
-        // 다시 듣던 보이스가 저절로 끝났거나(다음 줄 · 롤백 포함) 다른 보이스가 덮었으면 그림을 끈다.
-        private void TickBacklog()
-        {
-            if (_backlogVoiceSequence < 0)
-                return;
-
-            if (IsRunning && Features.IsVoiceReplaying)
-                return;
-
-            _backlogVoiceSequence = -1;
-            _ui.GetUI<BacklogPanel>().ShowVoicePlaying(-1);
-        }
-
         private void OpenBacklog()
         {
-            _backlogEntries.Clear();
-
-            IReadOnlyList<DialogueLogEntry> entries = Features?.Backlogs;
-            if (entries != null)
-            {
-                for (int i = 0; i < entries.Count; i++)
-                    _backlogEntries.Add(entries[i]);
-            }
-
-            var rows = new List<BacklogRow.Model>(_backlogEntries.Count);
-            int last = _backlogEntries.Count - 1;
-            bool running = IsRunning;
-            bool replaying = running && Features.IsVoiceReplaying;
-
-            for (int i = 0; i < _backlogEntries.Count; i++)
-            {
-                DialogueLogEntry entry = _backlogEntries[i];
-
-                rows.Add(new BacklogRow.Model
-                {
-                    Speaker = _backlogSpeakers?.Find(entry.lineId),
-                    Text = entry.rawText,
-                    CanJump = CanActOnBacklogLine(entry),
-                    HasVoice = running && Features.CanReplayVoice(entry),
-                    VoicePlaying = replaying && entry.lineSequence == _backlogVoiceSequence,
-                    IsCurrent = i == last,
-                    ShowDivider = i < last,
-                });
-            }
-
             _ui.PushPanel<BacklogPanel>(Presentation<BacklogPanel>(), panel =>
             {
-                BindView(panel, ApplyBacklogBindings);
-                panel.Present(rows);
-            }, Unbind);
+                BindView(panel, ApplyBindings);
+                RefreshBacklog(panel);
+            });
         }
 
-        private void ApplyBacklogBindings(BacklogPanel panel)
+        private void ApplyBindings(BacklogPanel panel)
         {
             AddBinding(panel,
                 p => p.CloseClicked += ClosePanel,
@@ -91,29 +48,7 @@ namespace Ked.Samples.UI
                 p => p.VoiceClicked -= HandleBacklogVoice);
         }
 
-        private bool CanActOnBacklogLine(DialogueLogEntry entry)
-        {
-            if (!IsRunning)
-                return false;
-
-            if (Features.CanJumpTo(entry))
-                return true;
-
-            return SafeCanFork(entry);
-        }
-
-        private bool SafeCanFork(DialogueLogEntry entry)
-        {
-            try
-            {
-                return _saves.CanForkFrom(entry);
-            }
-            catch (Exception error)
-            {
-                Debug.LogWarning($"[Ked UI] 갈라지기 가능 여부를 읽지 못했다 — {error.Message}");
-                return false;
-            }
-        }
+        #region Handlers
 
         private async void HandleBacklogJump(int index)
         {
@@ -183,5 +118,84 @@ namespace Ked.Samples.UI
                 Notice(NoticePanel.Message.ForkFailed);
             }
         }
+
+        #endregion
+
+        #region Refresh
+
+        private void RefreshBacklog(BacklogPanel panel)
+        {
+            _backlogEntries.Clear();
+
+            IReadOnlyList<DialogueLogEntry> entries = Features?.Backlogs;
+            if (entries != null)
+            {
+                for (int i = 0; i < entries.Count; i++)
+                    _backlogEntries.Add(entries[i]);
+            }
+
+            var rows = new List<BacklogRow.Model>(_backlogEntries.Count);
+            int last = _backlogEntries.Count - 1;
+            bool running = IsRunning;
+            bool replaying = running && Features.IsVoiceReplaying;
+
+            for (int i = 0; i < _backlogEntries.Count; i++)
+            {
+                DialogueLogEntry entry = _backlogEntries[i];
+
+                rows.Add(new BacklogRow.Model
+                {
+                    Speaker = _backlogSpeakers?.Find(entry.lineId),
+                    Text = entry.rawText,
+                    CanJump = CanActOnBacklogLine(entry),
+                    HasVoice = running && Features.CanReplayVoice(entry),
+                    VoicePlaying = replaying && entry.lineSequence == _backlogVoiceSequence,
+                    IsCurrent = i == last,
+                    ShowDivider = i < last,
+                });
+            }
+
+            panel.Present(rows);
+        }
+
+        // 다시 듣던 보이스가 저절로 끝났거나(다음 줄 · 롤백 포함) 다른 보이스가 덮었으면 그림을 끈다.
+        // 보이스가 끝났다는 이벤트가 없어 매 프레임 본다.
+        private void TickBacklog()
+        {
+            if (_backlogVoiceSequence < 0)
+                return;
+
+            if (IsRunning && Features.IsVoiceReplaying)
+                return;
+
+            _backlogVoiceSequence = -1;
+            _ui.GetUI<BacklogPanel>().ShowVoicePlaying(-1);
+        }
+
+        private bool CanActOnBacklogLine(DialogueLogEntry entry)
+        {
+            if (!IsRunning)
+                return false;
+
+            if (Features.CanJumpTo(entry))
+                return true;
+
+            return SafeCanFork(entry);
+        }
+
+        private bool SafeCanFork(DialogueLogEntry entry)
+        {
+            try
+            {
+                return _saves.CanForkFrom(entry);
+            }
+            catch (Exception error)
+            {
+                Debug.LogWarning($"[Ked UI] 갈라지기 가능 여부를 읽지 못했다 — {error.Message}");
+                return false;
+            }
+        }
+
+        #endregion
     }
 }

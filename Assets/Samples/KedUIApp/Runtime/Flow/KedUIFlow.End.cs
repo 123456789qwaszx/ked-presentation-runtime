@@ -24,25 +24,30 @@ namespace Ked.Samples.UI
             if (_playScreen.IsHudHidden)
                 RestoreHud();
 
-            var model = new EpisodeEndPanel.Model
-            {
-                Title = string.IsNullOrWhiteSpace(chapter.DisplayName) ? chapter.ChapterId : chapter.DisplayName,
-                LastEpisode = lastEpisode?.Title,
-                Stats = EndStats(chapter, state),
-            };
-
             _ui.PushPanel<EpisodeEndPanel>(Presentation<EpisodeEndPanel>(), panel =>
             {
-                BindView(panel, ApplyEndBindings);
-                panel.Present(model);
-            }, Unbind);
+                BindView(panel, ApplyBindings);
+                RefreshEnd(panel, chapter, lastEpisode, state);
+            });
         }
 
-        private void ApplyEndBindings(EpisodeEndPanel panel)
+        private void ApplyBindings(EpisodeEndPanel panel)
         {
             AddBinding(panel,
                 p => p.TitleClicked += ReturnToTitle,
                 p => p.TitleClicked -= ReturnToTitle);
+        }
+
+        #region Refresh
+
+        private static void RefreshEnd(EpisodeEndPanel panel, ChapterDefinition chapter, EpisodeNode lastEpisode, ChapterState state)
+        {
+            panel.Present(new EpisodeEndPanel.Model
+            {
+                Title = string.IsNullOrWhiteSpace(chapter.DisplayName) ? chapter.ChapterId : chapter.DisplayName,
+                LastEpisode = lastEpisode?.Title,
+                Stats = EndStats(chapter, state),
+            });
         }
 
         // 정의 순서로, 값이 있는 스탯만. 이름이 없으면 키.
@@ -61,5 +66,7 @@ namespace Ked.Samples.UI
 
             return stats;
         }
+
+        #endregion
     }
 }

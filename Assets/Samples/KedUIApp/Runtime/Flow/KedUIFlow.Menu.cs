@@ -9,17 +9,12 @@ namespace Ked.Samples.UI
         {
             _ui.PushPanel<SystemMenuPanel>(Presentation<SystemMenuPanel>(), panel =>
             {
-                BindView(panel, ApplyMenuBindings);
-                panel.Present(new SystemMenuPanel.Model
-                {
-                    HasSaveSlots = _saves != null,
-                    CanSave = _saves != null && _saves.CanSave,
-                    CanSkipEpisode = IsRunning,
-                });
-            }, Unbind);
+                BindView(panel, ApplyBindings);
+                RefreshMenu(panel);
+            });
         }
 
-        private void ApplyMenuBindings(SystemMenuPanel panel)
+        private void ApplyBindings(SystemMenuPanel panel)
         {
             AddBinding(panel,
                 p => p.CloseClicked += ClosePanel,
@@ -38,15 +33,17 @@ namespace Ked.Samples.UI
                 p => p.SettingsClicked -= OpenSettings);
 
             AddBinding(panel,
-                p => p.SkipEpisodeClicked += ConfirmSkipEpisode,
-                p => p.SkipEpisodeClicked -= ConfirmSkipEpisode);
+                p => p.SkipEpisodeClicked += HandleSkipEpisodeClicked,
+                p => p.SkipEpisodeClicked -= HandleSkipEpisodeClicked);
 
             AddBinding(panel,
-                p => p.TitleClicked += ConfirmReturnToTitle,
-                p => p.TitleClicked -= ConfirmReturnToTitle);
+                p => p.TitleClicked += HandleTitleClicked,
+                p => p.TitleClicked -= HandleTitleClicked);
         }
 
-        private void ConfirmSkipEpisode()
+        #region Handlers
+
+        private void HandleSkipEpisodeClicked()
         {
             Confirm(ConfirmPanel.Question.SkipEpisode, () =>
             {
@@ -61,9 +58,25 @@ namespace Ked.Samples.UI
         }
 
         // 타이틀 복귀는 확인한 뒤에만 호스트를 부른다. 재생 단위를 끝내는 것은 호스트(ExitAsync)다.
-        private void ConfirmReturnToTitle()
+        private void HandleTitleClicked()
         {
             Confirm(ConfirmPanel.Question.ReturnToTitle, ReturnToTitle);
         }
+
+        #endregion
+
+        #region Refresh
+
+        private void RefreshMenu(SystemMenuPanel panel)
+        {
+            panel.Present(new SystemMenuPanel.Model
+            {
+                HasSaveSlots = _saves != null,
+                CanSave = _saves != null && _saves.CanSave,
+                CanSkipEpisode = IsRunning,
+            });
+        }
+
+        #endregion
     }
 }

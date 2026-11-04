@@ -28,12 +28,12 @@ namespace Ked.Samples.UI
 
             _ui.PushPanel<SaveLoadPanel>(Presentation<SaveLoadPanel>(), panel =>
             {
-                BindView(panel, ApplySaveLoadBindings);
-                PresentSlots(focus: true);
-            }, Unbind);
+                BindView(panel, ApplyBindings);
+                RefreshSlots(focus: true);
+            });
         }
 
-        private void ApplySaveLoadBindings(SaveLoadPanel panel)
+        private void ApplyBindings(SaveLoadPanel panel)
         {
             AddBinding(panel,
                 p => p.BackClicked += ClosePanel,
@@ -64,25 +64,24 @@ namespace Ked.Samples.UI
                 p => p.ActionClicked -= ActOnSelectedSlot);
         }
 
-        private void PresentSlots(bool focus) =>
-            _ui.GetUI<SaveLoadPanel>().Present(_saveSlots.ToModel(_saveLoadBusy, _saves.CanSave, focus));
+        #region Handlers
 
         private void PreviousSlotPage()
         {
             if (_saveSlots.TurnPage(-1))
-                PresentSlots(focus: false);
+                RefreshSlots(focus: false);
         }
 
         private void NextSlotPage()
         {
             if (_saveSlots.TurnPage(+1))
-                PresentSlots(focus: false);
+                RefreshSlots(focus: false);
         }
 
         private void SelectSlotCard(int indexOnPage)
         {
             if (_saveSlots.Select(indexOnPage))
-                PresentSlots(focus: false);
+                RefreshSlots(focus: false);
         }
 
         private void ActOnSlotCard(int indexOnPage)
@@ -147,7 +146,7 @@ namespace Ked.Samples.UI
             if (saved)
             {
                 _saveSlots.SelectLatest();
-                PresentSlots(focus: true);
+                RefreshSlots(focus: true);
 
                 // 방금 저장한 기록은 언제나 01이다.
                 Notice(NoticePanel.Message.Saved, slotNumber: 1);
@@ -155,7 +154,7 @@ namespace Ked.Samples.UI
             }
 
             _saveSlots.ClampSelection();
-            PresentSlots(focus: true);
+            RefreshSlots(focus: true);
 
             Notice(NoticePanel.Message.SaveFailed);
         }
@@ -166,7 +165,7 @@ namespace Ked.Samples.UI
                 return;
 
             _saveLoadBusy = true;
-            PresentSlots(focus: false);
+            RefreshSlots(focus: false);
 
             bool transitionStarted = false;
 
@@ -194,10 +193,19 @@ namespace Ked.Samples.UI
             if (!transitionStarted && _ui.TopPanel is SaveLoadPanel)
             {
                 _saveSlots.ForgetLoadable(slotId);
-                PresentSlots(focus: true);
+                RefreshSlots(focus: true);
 
                 Notice(NoticePanel.Message.LoadFailed);
             }
         }
+
+        #endregion
+
+        #region Refresh
+
+        private void RefreshSlots(bool focus) =>
+            _ui.GetUI<SaveLoadPanel>().Present(_saveSlots.ToModel(_saveLoadBusy, _saves.CanSave, focus));
+
+        #endregion
     }
 }

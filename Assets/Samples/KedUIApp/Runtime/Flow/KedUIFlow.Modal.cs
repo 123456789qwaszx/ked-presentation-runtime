@@ -15,33 +15,35 @@ namespace Ked.Samples.UI
 
             _ui.PushPanel<ConfirmPanel>(Presentation<ConfirmPanel>(), panel =>
             {
-                BindView(panel, ApplyConfirmBindings);
+                BindView(panel, ApplyBindings);
                 panel.Present(new ConfirmPanel.Model { Question = question, SlotNumber = slotNumber });
-            }, Unbind);
+            });
         }
 
         private void Notice(NoticePanel.Message message, int slotNumber = 0)
         {
             _ui.PushPanel<NoticePanel>(Presentation<NoticePanel>(), panel =>
             {
-                BindView(panel, ApplyNoticeBindings);
+                BindView(panel, ApplyBindings);
                 panel.Present(new NoticePanel.Model { Message = message, SlotNumber = slotNumber });
-            }, Unbind);
+            });
         }
 
-        private void ApplyConfirmBindings(ConfirmPanel panel)
+        private void ApplyBindings(ConfirmPanel panel)
         {
             AddBinding(panel,
                 p => p.Resolved += HandleConfirmResolved,
                 p => p.Resolved -= HandleConfirmResolved);
         }
 
-        private void ApplyNoticeBindings(NoticePanel panel)
+        private void ApplyBindings(NoticePanel panel)
         {
             AddBinding(panel,
                 p => p.Resolved += HandleNoticeResolved,
                 p => p.Resolved -= HandleNoticeResolved);
         }
+
+        #region Handlers
 
         private void HandleConfirmResolved(bool accepted)
         {
@@ -60,5 +62,7 @@ namespace Ked.Samples.UI
             if (_ui.TopPanel is NoticePanel)
                 ClosePanel();
         }
+
+        #endregion
     }
 }

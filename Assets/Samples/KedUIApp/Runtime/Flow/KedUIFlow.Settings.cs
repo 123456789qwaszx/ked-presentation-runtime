@@ -31,25 +31,71 @@ namespace Ked.Samples.UI
             ApplySettings();
         }
 
-        #region 열고 닫기 · 탭
-
         private void OpenSettings()
         {
             _ui.PushPanel<SettingsPanel>(Presentation<SettingsPanel>(), panel =>
             {
-                BindView(panel, ApplySettingsBindings);
+                BindView(panel, ApplyBindings);
                 SelectTab(_settings.Tab);
-            }, Unbind);
+            });
         }
 
-        private void CloseSettings()
+        // 지금 탭의 Page를 열고 그린다. 이미 열린 Page면 다시 그리기만 한다(UIPF는 같은 Page를 닫지 않고, 묶기는 한 벌만 남는다).
+        // 탭마다 나뉘는 곳은 여기 하나다(되돌릴 값의 탭 나눔은 SettingsState.ResetTab).
+        private void ShowTabPage()
         {
-            SettingsValues.Store();
-            PlayerPrefs.Save();
-            ClosePanel();
+            SettingsPanel owner = _ui.GetUI<SettingsPanel>();
+
+            switch (_settings.Tab)
+            {
+                case SettingsPanel.Tab.Audio:
+                    _ui.SwitchPage<AudioSettingsPage>(
+                        owner,
+                        Presentation<AudioSettingsPage>(),
+                        afterPresented: page =>
+                        {
+                            BindView(page, ApplyBindings);
+                            RefreshAudioPage(page);
+                        },
+                        afterClosed: Unbind);
+                    break;
+                case SettingsPanel.Tab.Text:
+                    _ui.SwitchPage<TextSettingsPage>(
+                        owner,
+                        Presentation<TextSettingsPage>(),
+                        afterPresented: page =>
+                        {
+                            BindView(page, ApplyBindings);
+                            RefreshTextPage(page);
+                        },
+                        afterClosed: Unbind);
+                    break;
+                case SettingsPanel.Tab.Playback:
+                    _ui.SwitchPage<PlaybackSettingsPage>(
+                        owner,
+                        Presentation<PlaybackSettingsPage>(),
+                        afterPresented: page =>
+                        {
+                            BindView(page, ApplyBindings);
+                            RefreshPlaybackPage(page);
+                        },
+                        afterClosed: Unbind);
+                    break;
+                case SettingsPanel.Tab.Display:
+                    _ui.SwitchPage<DisplaySettingsPage>(
+                        owner,
+                        Presentation<DisplaySettingsPage>(),
+                        afterPresented: page =>
+                        {
+                            BindView(page, ApplyBindings);
+                            RefreshDisplayPage(page, Screen.fullScreen);
+                        },
+                        afterClosed: Unbind);
+                    break;
+            }
         }
 
-        private void ApplySettingsBindings(SettingsPanel panel)
+        private void ApplyBindings(SettingsPanel panel)
         {
             AddBinding(panel,
                 p => p.CloseClicked += CloseSettings,
@@ -62,6 +108,59 @@ namespace Ked.Samples.UI
             AddBinding(panel,
                 p => p.ResetClicked += ResetTab,
                 p => p.ResetClicked -= ResetTab);
+        }
+
+        private void ApplyBindings(AudioSettingsPage page)
+        {
+            AddBinding(page,
+                p => p.VolumeChanged += HandleVolumeChanged,
+                p => p.VolumeChanged -= HandleVolumeChanged);
+
+            AddBinding(page,
+                p => p.MuteChanged += HandleMuteChanged,
+                p => p.MuteChanged -= HandleMuteChanged);
+        }
+
+        private void ApplyBindings(TextSettingsPage page)
+        {
+            AddBinding(page,
+                p => p.TextScaleChanged += HandleTextScaleChanged,
+                p => p.TextScaleChanged -= HandleTextScaleChanged);
+
+            AddBinding(page,
+                p => p.TypeSpeedChanged += HandleTypeSpeedChanged,
+                p => p.TypeSpeedChanged -= HandleTypeSpeedChanged);
+
+            AddBinding(page,
+                p => p.BoxOpacityChanged += HandleBoxOpacityChanged,
+                p => p.BoxOpacityChanged -= HandleBoxOpacityChanged);
+        }
+
+        private void ApplyBindings(PlaybackSettingsPage page)
+        {
+            AddBinding(page,
+                p => p.AutoDelayChanged += HandleAutoDelayChanged,
+                p => p.AutoDelayChanged -= HandleAutoDelayChanged);
+
+            AddBinding(page,
+                p => p.SpeedChoiceClicked += HandleSpeedChoiceClicked,
+                p => p.SpeedChoiceClicked -= HandleSpeedChoiceClicked);
+        }
+
+        private void ApplyBindings(DisplaySettingsPage page)
+        {
+            AddBinding(page,
+                p => p.WindowModeClicked += HandleWindowModeClicked,
+                p => p.WindowModeClicked -= HandleWindowModeClicked);
+        }
+
+        #region Handlers
+
+        private void CloseSettings()
+        {
+            SettingsValues.Store();
+            PlayerPrefs.Save();
+            ClosePanel();
         }
 
         private void SelectTab(SettingsPanel.Tab tab)
@@ -96,107 +195,6 @@ namespace Ked.Samples.UI
             SettingsValues.Store();
             ShowTabPage();
         }
-
-        // 지금 탭의 Page를 열고 그린다. 이미 열린 Page면 다시 그리기만 한다(UIPF는 같은 Page를 닫지 않고, 묶기는 한 벌만 남는다).
-        // 탭마다 나뉘는 곳은 여기 하나다(되돌릴 값의 탭 나눔은 SettingsState.ResetTab).
-        private void ShowTabPage()
-        {
-            SettingsPanel owner = _ui.GetUI<SettingsPanel>();
-
-            switch (_settings.Tab)
-            {
-                case SettingsPanel.Tab.Audio:
-                    _ui.SwitchPage<AudioSettingsPage>(owner, Presentation<AudioSettingsPage>(), page =>
-                    {
-                        BindView(page, ApplyAudioBindings);
-                        PresentAudioPage(page);
-                    }, Unbind);
-                    break;
-                case SettingsPanel.Tab.Text:
-                    _ui.SwitchPage<TextSettingsPage>(owner, Presentation<TextSettingsPage>(), page =>
-                    {
-                        BindView(page, ApplyTextBindings);
-                        page.Present(_settings.TextModel());
-                    }, Unbind);
-                    break;
-                case SettingsPanel.Tab.Playback:
-                    _ui.SwitchPage<PlaybackSettingsPage>(owner, Presentation<PlaybackSettingsPage>(), page =>
-                    {
-                        BindView(page, ApplyPlaybackBindings);
-                        page.Present(_settings.PlaybackModel());
-                    }, Unbind);
-                    break;
-                case SettingsPanel.Tab.Display:
-                    _ui.SwitchPage<DisplaySettingsPage>(owner, Presentation<DisplaySettingsPage>(), page =>
-                    {
-                        BindView(page, ApplyDisplayBindings);
-                        page.Present(new DisplaySettingsPage.Model { Fullscreen = Screen.fullScreen });
-                    }, Unbind);
-                    break;
-            }
-        }
-
-        private void PresentAudioPage(AudioSettingsPage page)
-        {
-            AudioVolumeSettings volume = Volume;
-
-            page.Present(_settings.AudioModel(
-                volume != null ? volume.BgmVolume : DefaultChannelVolume,
-                volume != null ? volume.SfxVolume : DefaultChannelVolume,
-                volume != null ? volume.VoiceVolume : DefaultChannelVolume));
-        }
-
-        #endregion
-
-        #region 탭 묶기
-
-        private void ApplyAudioBindings(AudioSettingsPage page)
-        {
-            AddBinding(page,
-                p => p.VolumeChanged += HandleVolumeChanged,
-                p => p.VolumeChanged -= HandleVolumeChanged);
-
-            AddBinding(page,
-                p => p.MuteChanged += HandleMuteChanged,
-                p => p.MuteChanged -= HandleMuteChanged);
-        }
-
-        private void ApplyTextBindings(TextSettingsPage page)
-        {
-            AddBinding(page,
-                p => p.TextScaleChanged += HandleTextScaleChanged,
-                p => p.TextScaleChanged -= HandleTextScaleChanged);
-
-            AddBinding(page,
-                p => p.TypeSpeedChanged += HandleTypeSpeedChanged,
-                p => p.TypeSpeedChanged -= HandleTypeSpeedChanged);
-
-            AddBinding(page,
-                p => p.BoxOpacityChanged += HandleBoxOpacityChanged,
-                p => p.BoxOpacityChanged -= HandleBoxOpacityChanged);
-        }
-
-        private void ApplyPlaybackBindings(PlaybackSettingsPage page)
-        {
-            AddBinding(page,
-                p => p.AutoDelayChanged += HandleAutoDelayChanged,
-                p => p.AutoDelayChanged -= HandleAutoDelayChanged);
-
-            AddBinding(page,
-                p => p.SpeedChoiceClicked += HandleSpeedChoiceClicked,
-                p => p.SpeedChoiceClicked -= HandleSpeedChoiceClicked);
-        }
-
-        private void ApplyDisplayBindings(DisplaySettingsPage page)
-        {
-            AddBinding(page,
-                p => p.WindowModeClicked += HandleWindowModeClicked,
-                p => p.WindowModeClicked -= HandleWindowModeClicked);
-        }
-
-        #endregion
-
-        #region 바뀜 → 적용 · 저장
 
         private void HandleVolumeChanged(AudioSettingsPage.Channel channel, float value)
         {
@@ -263,13 +261,43 @@ namespace Ked.Samples.UI
 
             ApplyPlaybackSettings();
             SettingsValues.Store();
-            _ui.GetUI<PlaybackSettingsPage>().Present(_settings.PlaybackModel());
+            RefreshPlaybackPage(_ui.GetUI<PlaybackSettingsPage>());
         }
 
         private void HandleWindowModeClicked(bool fullscreen)
         {
             Screen.fullScreenMode = fullscreen ? FullScreenMode.FullScreenWindow : FullScreenMode.Windowed;
-            _ui.GetUI<DisplaySettingsPage>().Present(new DisplaySettingsPage.Model { Fullscreen = fullscreen });
+            RefreshDisplayPage(_ui.GetUI<DisplaySettingsPage>(), fullscreen);
+        }
+
+        #endregion
+
+        #region Refresh
+
+        private void RefreshAudioPage(AudioSettingsPage page)
+        {
+            AudioVolumeSettings volume = Volume;
+
+            page.Present(_settings.AudioModel(
+                volume != null ? volume.BgmVolume : DefaultChannelVolume,
+                volume != null ? volume.SfxVolume : DefaultChannelVolume,
+                volume != null ? volume.VoiceVolume : DefaultChannelVolume));
+        }
+
+        private void RefreshTextPage(TextSettingsPage page)
+        {
+            page.Present(_settings.TextModel());
+        }
+
+        private void RefreshPlaybackPage(PlaybackSettingsPage page)
+        {
+            page.Present(_settings.PlaybackModel());
+        }
+
+        // 창 모드는 바꾼 그 프레임에 Screen.fullScreen이 아직 옛 값일 수 있어 값을 받아 그린다.
+        private static void RefreshDisplayPage(DisplaySettingsPage page, bool fullscreen)
+        {
+            page.Present(new DisplaySettingsPage.Model { Fullscreen = fullscreen });
         }
 
         #endregion
