@@ -1,23 +1,17 @@
 using System;
 using System.Collections.Generic;
-using Ked.Progression;
 using UnityEngine;
 
 namespace Ked.Samples.UI
 {
     /// <summary>
     /// 새 예제 UI의 캔버스 루트. 빌더(Tools/Ked UI/Build Sample UI)가 만든 KedUICanvas 프리팹에 붙어 있다.
-    /// UIPF를 세우는 일 — 층 셋(Root · Panel · Overlay), UIResolver(문맥·글꼴), UIManager, 화면 등록,
-    /// UI 글자 표(Localizer · ViewTexts) — 과 흐름(KedUIFlow)의 수명을 갖는다.
-    ///
-    /// 호스트(SampleBootstrap)가 쓰는 길:
-    ///   Prepare()     조립 전: 화면을 세우고 대사창·선택지 상자 계약을 내준다.
-    ///   Configure()   조립 후: 재생과 호스트(회차 입구 · 수동 저장 · 무대)를 잇는다.
-    ///   OpenTitle()   시작.
-    /// 챕터 끝 화면(IChapterEndView)이기도 하다 — 챕터가 끝나면 SceneRunner가 부르고, 끝 카드를 연다.
+    /// Prepare()가 UIPF(층 · 문맥 · UIManager · 화면 등록 · UI 글자 표)와 흐름(KedUIFlow)을 세우고,
+    /// 재생 조립에 건넬 것(대사창 · 선택지 상자 어댑터, 선택지 항목 프리팹, 대사창 레이아웃 DB)을 내준다.
+    /// 흐름에는 Unity 수명(Update · OnDestroy)만 이어 준다.
     /// </summary>
     [DisallowMultipleComponent]
-    public sealed class KedUIHost : MonoBehaviour, IChapterEndView
+    public sealed class KedUIHost : MonoBehaviour
     {
         public const string ResourcePath = "KedUI/KedUICanvas";
 
@@ -46,23 +40,22 @@ namespace Ked.Samples.UI
         private UIManager _ui;
         private Localizer _localizer;
         private ViewTexts _viewTexts;
-        private KedUIFlow _flow;
         private readonly Dictionary<string, UIPresentationSpec> _presentationById = new(StringComparer.Ordinal);
         private readonly Dictionary<Type, UIPresentationSpec> _presentationByType = new();
 
-        public bool IsPrepared => _flow != null;
+        public KedUIFlow Flow { get; private set; }
+
+        // 재생 쪽 대사창 · 선택지 상자 계약의 구현. 화면 묶음은 재생 런타임을 모르므로 앱 쪽 어댑터로 잇는다.
+        public IPresentationDialogueBoxView DialogueBox { get; private set; }
+        public IPresentationOptionsBoxView OptionsBox { get; private set; }
 
         public CustomOptionItem OptionItemPrefab => optionItemPrefab;
         public DialogueSurfaceLayoutPresetDBSO SurfaceLayoutDb => surfaceLayoutDb;
 
-        public IPresentationDialogueBoxView DialogueBox => RequireFlow().DialogueBox;
-        public IPresentationOptionsBoxView OptionsBox => RequireFlow().OptionsBox;
-        public IPresentationView PresentationView => RequireFlow();
-
         /// <summary>화면을 세운다. 조립(PresentationAssembler)보다 먼저.</summary>
         public void Prepare()
         {
-            if (_flow != null)
+            if (Flow != null)
                 return;
 
             foreach (UIPresentationSpec spec in presentations)
@@ -85,48 +78,30 @@ namespace Ked.Samples.UI
 
             List<UIBase> views = RegisterViews();
 
+            PlayScreen play = _ui.GetUI<PlayScreen>();
+            if (play == null)
+                throw new InvalidOperationException("[Ked UI] 재생 화면(PlayScreen)이 등록되지 않았다. 빌더(Tools/Ked UI/Build Sample UI)를 다시 실행한다.");
+
+            DialogueBox = new KedDialogueBoxView(play.Dialogue);
+            OptionsBox = new KedOptionsBoxView(play.Options);
+
             _localizer = new Localizer(texts != null ? texts.text : string.Empty, localeId);
             _viewTexts = new ViewTexts(views, _localizer);
 
-            _flow = new KedUIFlow(_ui, _localizer, PresentationOf);
+            Flow = new KedUIFlow(_ui, _localizer, PresentationOf);
 
             if (TryGetComponent(out UIDisplayRefreshDriver driver))
                 driver.Initialize(_ui);
         }
 
-        /// <summary>재생과 호스트를 잇는다.</summary>
-        public void Configure(
-            PresentationRuntime runtime,
-            PlaybackRuntimeState playbackState,
-            PresentationSceneRefs scene,
-            ProgressionLauncher launcher,
-            ManualSaveFlow saves,
-            KedExampleCard example,
-            Func<bool> hasResumePoint,
-            Action switchExample)
-        {
-            RequireFlow().Configure(runtime, playbackState, scene, launcher, saves, example, hasResumePoint, switchExample);
-        }
-
-        public void OpenTitle()
-        {
-            RequireFlow().GoToTitle();
-        }
-
-        /// <summary>챕터가 끝까지 갔다 — 재생 화면 위에 끝 카드를 연다. 갈 곳은 타이틀 하나다.</summary>
-        public void Show(ChapterDefinition chapter, EpisodeNode lastEpisode, ChapterState state)
-        {
-            RequireFlow().ShowChapterEnd(chapter, lastEpisode, state);
-        }
-
         private void Update()
         {
-            _flow?.Tick();
+            Flow?.Tick();
         }
 
         private void OnDestroy()
         {
-            _flow?.Dispose();
+            Flow?.Dispose();
             _viewTexts?.Dispose();
         }
 
@@ -167,14 +142,6 @@ namespace Ked.Samples.UI
 
             _presentationByType[viewType] = spec;
             return spec;
-        }
-
-        private KedUIFlow RequireFlow()
-        {
-            if (_flow == null)
-                throw new InvalidOperationException("[Ked UI] Prepare()를 먼저 부른다.");
-
-            return _flow;
         }
     }
 }

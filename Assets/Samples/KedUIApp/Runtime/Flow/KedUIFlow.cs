@@ -6,7 +6,7 @@ using UnityEngine;
 namespace Ked.Samples.UI
 {
     // 화면 이벤트를 재생 · 호스트에 잇는다. 화면 전환 · 스택 · 포커스 되돌리기 · Root 막기는 UIManager(UIPF)가 한다.
-    public sealed partial class KedUIFlow : IPresentationView, IDisposable
+    public sealed partial class KedUIFlow : IPresentationView, IChapterEndView, IDisposable
     {
         private readonly UIManager _ui;
         private readonly Func<Type, UIPresentationSpec> _presentationOf;
@@ -39,20 +39,8 @@ namespace Ked.Samples.UI
             _ui = ui;
             _texts = texts;
             _presentationOf = presentationOf;
-
-            // 대사창 · 선택지 상자는 조립이 화면 전환보다 먼저 꺼낸다.
             _playScreen = ui.GetUI<PlayScreen>();
-            if (_playScreen == null)
-                throw new InvalidOperationException("[Ked UI] 재생 화면(PlayScreen)이 등록되지 않았다. 빌더(Tools/Ked UI/Build Sample UI)를 다시 실행한다.");
         }
-
-        /// <summary>재생 본체 쪽 대사창 계약의 구현. 조립(PresentationAssembler)에 넘긴다.</summary>
-        public IPresentationDialogueBoxView DialogueBox =>
-            _dialogueBoxView ??= new KedDialogueBoxView(_playScreen.Dialogue);
-
-        /// <summary>재생 본체 쪽 선택지 상자 계약의 구현. 조립과 진행 예제의 선택지 화면에 넘긴다.</summary>
-        public IPresentationOptionsBoxView OptionsBox =>
-            _optionsBoxView ??= new KedOptionsBoxView(_playScreen.Options);
 
         public void Configure(
             PresentationRuntime runtime,
@@ -111,7 +99,8 @@ namespace Ked.Samples.UI
         /// <summary>IPresentationView — 재생이 시작될 때 본체가 부른다. Root를 재생 화면으로 바꾼다.</summary>
         public void GoToPresentationView() => OpenPlay();
 
-        public void ShowChapterEnd(ChapterDefinition chapter, EpisodeNode lastEpisode, ChapterState state)
+        /// <summary>IChapterEndView — 챕터가 끝까지 갔을 때 SceneRunner가 부른다. 재생 화면 위에 끝 카드를 연다.</summary>
+        void IChapterEndView.Show(ChapterDefinition chapter, EpisodeNode lastEpisode, ChapterState state)
         {
             if (!_configured || chapter == null)
                 return;

@@ -551,6 +551,7 @@ App(흐름 · 바인딩 · KedUIHost)을 asmdef(`Ked.Samples.UI.App` · `.App.Ed
 - 지운 것: `ScreenBinding`, `KedUIServices`, `Bindings/` 폴더(바인딩 8개). 동작은 그대로다.
 - 2026-11-04 UIManager와 겹치던 겹을 걷었다(소유자 결정): 화면 전환 래퍼(`SwitchRoot` · `PushPanel` · `SwitchPage` — 이제 `_ui`를 바로 부르고 `Presentation<T>()`와 `Unbind`만 넘긴다. 닫기 둘은 옛 구조처럼 `Unbind`만 붙인 한 줄), `Require<T>`와 화면 필드 아홉(`_ui.GetUI<T>()` · `_ui.TopPanel is T`), `IsTop` · `EnsureFocus`, `SyncInput` · `KedInputOwnership` · `LateTick`(폴러가 묻는 `InputBlocked`로 — 위 "입력 소유권"). `KedUIFlow.cs` 359 → 288줄.
 - 2026-11-04 `KedPlaybackBindings`(10-27 `KedPorts.cs`부터 있던 재생 쪽 꾸러미)와 `PresentationInternals`(칸 하나)를 걷었다(소유자 결정). 여덟 칸이 이미 `PresentationRuntime`(전진 · 기능 · 줄 흐름) · `PresentationSceneRefs`(무대 · 입력 폴러 · 타자기 · 오디오 · Yarn 러너)에 묶여 있었다. 흐름은 `Configure(runtime, playbackState, scene, …)`로 그대로 받고, `Build`는 `out PlaybackRuntimeState`를 내준다.
+- 2026-11-04 `KedUIHost`를 Unity 쪽 입구로 줄였다(소유자 결정): 프리팹 값 · `Prepare()`(UIPF 세우기 · 어댑터 둘 · 흐름) · `Update`/`OnDestroy`만. 넘겨주기(`Configure` · `OpenTitle` · `Show` · `PresentationView` · 흐름 거친 `DialogueBox`/`OptionsBox`)와 `RequireFlow` · `IsPrepared`를 걷고, 부트스트랩이 `Flow`를 직접 부른다. 챕터 끝(`IChapterEndView`)은 흐름이 구현한다(위 "챕터 끝" 줄은 그 전 기록).
 
 ### 화면 상태 시범 — 저장/불러오기 (2026-11-03)
 

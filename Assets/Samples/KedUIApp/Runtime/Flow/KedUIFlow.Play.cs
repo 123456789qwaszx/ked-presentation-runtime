@@ -6,8 +6,6 @@ namespace Ked.Samples.UI
     public sealed partial class KedUIFlow
     {
         private readonly PlayScreen _playScreen;
-        private KedDialogueBoxView _dialogueBoxView;
-        private KedOptionsBoxView _optionsBoxView;
 
         // 무대를 앞으로 가져오고 Root를 재생 화면으로 바꾼다.
         // 이미 재생 화면이면 Presentation만 다시 적용된다(되감기·장면 전환).

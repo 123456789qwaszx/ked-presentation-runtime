@@ -6,7 +6,7 @@ using Ked.Progression;
 /// 진행 런타임(ProgressionDriver)은 끝을 알리지 않으므로 사본을 고치지 않고 여기서 연다.
 ///
 /// 받는 것: 챕터 정의 · 마지막으로 본 에피소드 · 끝난 상태(확정된 스탯).
-/// 예제에서는 UI 캔버스 루트(KedUIHost)가 구현한다. 계약으로 두는 것은 SceneRunner를 유니티 없이 시험하기 때문이다(tests/ProgressionHost).
+/// 예제에서는 UI 흐름(KedUIFlow)이 구현한다. 계약으로 두는 것은 SceneRunner를 유니티 없이 시험하기 때문이다(tests/ProgressionHost).
 /// </summary>
 public interface IChapterEndView
 {
