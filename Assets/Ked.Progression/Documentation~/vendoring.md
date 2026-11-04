@@ -9,9 +9,9 @@
 ```
 
 `Assets/Ked.Presentation/Core`가 저작 도구(VnTool)에 `src/Ked.Presentation.Core`로
-복사 반입돼 있는 것과 같은 방식이다. 2026-10-27부터는 실행기(`Assets/Ked.CommandExecutor/`)와
-무대(`Assets/Ked.Presentation/`의 Playback을 뺀 전부)도 같은 방식의 사본이다 — 각 폴더의 `Documentation~/vendoring.md`.
-이 저장소가 원본인 것은 재생(`Playback/`)과 예제뿐이다.
+복사 반입돼 있는 것과 같은 방식이다. 실행기(`Assets/Ked.CommandExecutor/`)와 무대(`Assets/Ked.Presentation/`의
+Playback을 뺀 전부)는 반대다 — 이 저장소가 원본이고 ked-command-executor · ked-stage-runtime이 포트폴리오용 분리본이다
+(각 폴더의 `Documentation~/vendoring.md`).
 
 사본에서 먼저 고치는 일은 생긴다. 그때는 **원본에도 같은 손을 대서** 두 벌을 다시 맞춘다.
 2026-10-26의 동기화가 그 경우다.
@@ -20,16 +20,16 @@
 
 | | |
 |---|---|
-| 원본 | `ked-progression-runtime` · `sync/from-presentation` @ `fb5c4cb` (코어 코드는 `99677cb`, 저장은 `fb5c4cb`에서 맞춤) |
+| 원본 | `ked-progression-runtime` · `dev` @ `7cc2703` (2026-11-04 `Save/` 배치). 코어 코드는 `99677cb`, 저장은 `fb5c4cb`에서 맞춤 |
 | 마지막 동기화 | 2026-10-26 · **사본 → 원본** (역반입) |
 | 맞춘 것 | `Runtime/` 전체(Spec · State · Transition · Vocabulary · Loading · Scene · Contracts · Response · `ProgressionDriver` · `ISceneRunner`) + `Save/`(`Ked.Progression.Save`) + EditMode 테스트 |
-| 코드 일치 | `.cs` 기준 `diff -r` 0건 (아래 "대조" 명령) — 단 아래 "사본에서 먼저"의 배치 차이는 뺀다 |
-| 사본에서 먼저 (2026-11-04) | **`Save/` 배치만** 갈렸다. `Coordinator/` · `Fork/` · `Maintenance/` · `Slots/`를 걷고 밖에서 부르는 다섯 파일(`SaveCoordinator` · `PlaythroughSaveSnapshot` · `SaveSlotService` · `PlaythroughForkService` · `LocalSaveMaintenance`)을 `Save/` 바로 아래로 옮겼다. `Model/` · `Persistence/`는 그대로. 파일 내용은 같아서 `diff -r`에는 "Only in"으로만 뜬다. 원본도 같은 배치로 옮기면 이 줄을 지운다 |
+| 코드 일치 | `.cs` 기준 `diff -r` 0건 (아래 "대조" 명령) |
+| 2026-11-04 | **사본 → 원본, `Save/` 배치.** 사본에서 먼저 `Coordinator/` · `Fork/` · `Maintenance/` · `Slots/`를 걷고 다섯 파일(`SaveCoordinator` · `PlaythroughSaveSnapshot` · `SaveSlotService` · `PlaythroughForkService` · `LocalSaveMaintenance`)을 `Save/` 바로 아래로 옮겼고, 원본도 같게 옮겼다(.meta 그대로). 원본 `tests/ProgressionSave` 25/25 |
 | 원본 쪽 정리 | 옛 `SceneRunner`·`SceneRunContext`·`ProgressionState`·디버그 호스트 삭제, `Assets/Progression/Samples/` 최소 샘플 추가, README 갱신 |
 | 그 뒤 원본에만 | 결정 E3 테스트(`tests/ProgressionSave`), 샘플의 저장·이어하기·대사 기록 갈라지기, README — **코드(`Runtime/`)는 그대로**라 사본에 가져올 것이 없다 |
 | 같은 날 두 번째 | 이 저장소의 `Assets/Scripts/Save/`에서 **진행 겹을 떼어** `Save/`로 반입본에 넣고 원본에 보냈다. 연출 겹(줄 좌표·Yarn 선택·백로그)은 연출 어셈블리 `Ked.Presentation.Playback`의 `PlaybackMemory`가 `HostState` 문자열로 꺼내고 되돌린다(진행을 모른다) |
 
-원본 브랜치 `sync/from-presentation`은 아직 원본 `dev`에 합치지 않았다. 합치면 이 표의 브랜치를 고친다.
+원본 `sync/from-presentation`(`8857ead`)은 `dev`에 합쳐졌다.
 
 **갈리면 이 표를 고친다.** 표가 낡으면 사본이 어디서 왔는지 아무도 모른다.
 

@@ -2,8 +2,8 @@
 
 | | |
 |---|---|
-| 무대(원본) | `ked-stage-runtime` · `refactor/background-as-slot` @ `dc690c1` ← `dev` @ `640ac60` |
-| 재생(이 저장소) | `ked-presentation-runtime` · `refactor/background-as-slot` ← `dev` @ `0020943` (무대 반입본 = 위 브랜치, `diff -r` 0) |
+| 무대(분리본) | `ked-stage-runtime` · `refactor/background-as-slot` @ `dc690c1` ← `dev` @ `640ac60` |
+| 재생(이 저장소) | `ked-presentation-runtime` · `refactor/background-as-slot` ← `dev` @ `0020943` (무대 한 벌 = 위 브랜치, `diff -r` 0) |
 | 분석 | 프로젝트 문서 `claude/analysis-2026-10-28-bgrig.md` — 노드 대응표 · 이력 · 발견한 고장 |
 
 **현재 위치(2026-10-29):** 코드·문서·손 덤프 끝. 오프라인 컴파일(Unity 6000.3 참조) 18개 어셈블리 오류 0,
@@ -61,7 +61,7 @@ Core 순수 테스트 414/414. **Unity 확인이 남았다**(아래 목록). 두
 
 ## 한 것
 
-### 무대 `ked-stage-runtime` (원본)
+### 무대 `ked-stage-runtime` (분리본)
 
 | 커밋 | 내용 |
 |---|---|
@@ -72,7 +72,7 @@ Core 순수 테스트 414/414. **Unity 확인이 남았다**(아래 목록). 두
 
 ### 재생 `ked-presentation-runtime` (이 저장소)
 
-- 무대 반입(`Assets/Ked.Presentation/` Playback 밖 전부 + `ExportedTuning/`), `Documentation~/vendoring.md` 스냅샷 표.
+- 무대 한 벌(`Assets/Ked.Presentation/` Playback 밖 전부 + `ExportedTuning/`), `Documentation~/vendoring.md` 스냅샷 표.
 - `Playback/YarnBridge`: `bg_place`·`bg_size` 등록 삭제, `bg_sprite` 2인자, 이름 `BindBackground`·`Enqueue…Background…`.
 - `Playback/Host/StageEquivalenceHarness`: `LoadBackgroundDimensions`(없거나 비면 경고).
 - 예제 배선: `PresentationAssembler`(배경 팩토리·빌더·해석기, 파서 인자) · `PresentationSceneRefs` · `SampleBootstrap`(필드·`IRigPrefabSource`).
@@ -100,7 +100,7 @@ Core 순수 테스트 414/414. **Unity 확인이 남았다**(아래 목록). 두
 1. 두 저장소에서 `refactor/background-as-slot`을 받는다. Unity를 닫고 바꾼다(프리팹 삭제·씬 수정).
 2. 컴파일 — 새 경고 0, 누락 스크립트·참조 0. 씬을 한 번 저장했을 때 diff가 없어야 한다(죽은 줄은 이미 뺐다).
 3. `Ked / U12 / Export Presentation Tuning Dump` → `rig-schemas.json`이 바이트 그대로인지, `background-dimensions.json`이 손 덤프와 같은지, `export-report.json` 경고 0.
-   다르면 Unity 덤프가 진실이다 — 무대 저장소에 커밋하고 반입한다.
+   다르면 Unity 덤프가 진실이다 — 고친 것은 무대 분리본에도 맞춘다.
 4. EditMode 테스트 전부(Unity 대조 포함).
 5. 연출 데모: S1 배경이 **24fr 페이드로 들어온다**(처음 보는 모습). S4 `screen_blur`가 배경을 흐리고 `focus_on`은 배경을 흐리지 않는다. S6 트랜지션 아래 배경 교체. S7 `bg_fade_out`.
 6. 진행 예제: 두 장면 모두 배경이 페이드로 들어온다. 장면 경계·이어하기·되감기에서 배경이 다시 선다.
@@ -112,7 +112,7 @@ Core 순수 테스트 414/414. **Unity 확인이 남았다**(아래 목록). 두
 
 ## 하지 않은 것 · 남은 것
 
-- `Assets/Ked.CommandExecutor/Base/CanvasFadeCommandBase.cs` 주석 "Char/Bg 4종" — 실행기는 또 다른 원본(`ked-command-executor`)이라 손대지 않았다. 다음에 실행기를 만질 때 함께.
+- `Assets/Ked.CommandExecutor/Base/CanvasFadeCommandBase.cs` 주석 "Char/Bg 4종" — 실행기는 이번 범위 밖이라 손대지 않았다(분리본 `ked-command-executor`도 같이 맞춰야 한다). 다음에 실행기를 만질 때 함께.
 - 생성된 ysls(`ProjectSettings/Packages/dev.yarnspinner/*.ysls.json`)의 `bg_size`·`bg_place` 항목 — Yarn Spinner가 Unity 컴파일 때 다시 만든다.
 - VnTool: `rig-schemas.json`의 `background` 항목이나 `bg_size`·`bg_place`를 읽고 있다면 그쪽을 고친다.
 - `CharacterRig` 이름 바꾸기(D6), 마스크·클립 복원, `bg_*` 어휘 확장 — 하지 않는다.

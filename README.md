@@ -12,9 +12,10 @@ Yarn Spinner를 기반으로 제작한 **비주얼 노벨 화면 연출 런타�
 - **꽂혀 있는 것** — 다음에 무엇을 재생할지(챕터 진행)와 확정·저장 정책은 형제 저장소 `ked-progression-runtime`의
   순수 C# 코어가 맡습니다. 이 저장소에는 복사 반입돼 있고(`Assets/Ked.Progression/`), 진행·저장 예제가 그것을 꽂아 씁니다.
 - **밖에 있는 것** — 저작. 외부 툴(VnTool)이 만든 `.yarn` 텍스트와 챕터 JSON(`*.progression.json`)을 이 런타임이 재생합니다.
-- **반입된 것(2026-10-27)** — 연출 커맨드의 **실행기**는 [ked-command-executor](https://github.com/123456789qwaszx/ked-command-executor)(→ `Assets/Ked.CommandExecutor/`),
-  리그·철도·커맨드·파서·정지 프레임 코어인 **무대**는 [ked-stage-runtime](https://github.com/123456789qwaszx/ked-stage-runtime)(→ `Assets/Ked.Presentation/`의 Playback을 뺀 전부와 `ExportedTuning/`)이 원본입니다.
-  이 저장소가 원본인 것은 **재생**(`Assets/Ked.Presentation/Playback/`)과 예제뿐입니다. 가른 근거는 [docs/PLAN_stage-seam.md](docs/PLAN_stage-seam.md), 반입 기록은 각 폴더의 `Documentation~/vendoring.md`.
+- **떼어 둔 것(2026-10-27)** — 이 저장소가 원본입니다. 포트폴리오에서 따로 보이려고 연출 커맨드의 **실행기**(`Assets/Ked.CommandExecutor/`)를
+  [ked-command-executor](https://github.com/123456789qwaszx/ked-command-executor)에, 리그·철도·커맨드·파서·정지 프레임 코어인 **무대**(`Assets/Ked.Presentation/`의 Playback을 뺀 전부와 `ExportedTuning/`)를
+  [ked-stage-runtime](https://github.com/123456789qwaszx/ked-stage-runtime)에 떼어 두었습니다(분리본). 고치는 곳은 이 저장소이고 분리본이 따라갑니다.
+  가른 근거는 [docs/PLAN_stage-seam.md](docs/PLAN_stage-seam.md), 분리본의 판은 각 폴더의 `Documentation~/vendoring.md`.
 
 결정의 근거는 [docs/PLAN_playback-unit.md](docs/PLAN_playback-unit.md)(E1–E5)와 [SCOPE-BOUNDARY.md](SCOPE-BOUNDARY.md)에 있습니다.
 
@@ -87,7 +88,7 @@ Yarn Spinner를 기반으로 제작한 **비주얼 노벨 화면 연출 런타�
 
 ### 4. 연출 명령과 실행 구조
 
-* `Assets/Ked.CommandExecutor/` — 실행기(커맨드 수명 · 스텝/런 스코프 · 포트). 반입본
+* `Assets/Ked.CommandExecutor/` — 실행기(커맨드 수명 · 스텝 스코프 · 압축 정책 포트). 분리본 ked-command-executor가 따라간다
 * `Assets/Ked.Presentation/Runtime/Commands/` — 커맨드 · 팩토리 · 대본 커맨드 파서(`StageCommandParser/`)
 * `Assets/Ked.Presentation/Runtime/Stage/` — 무대 상태(리그·배경·cast 레지스트리)와 무대 키
 

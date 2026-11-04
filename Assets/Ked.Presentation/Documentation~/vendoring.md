@@ -1,34 +1,32 @@
-# 이 폴더는 복사 반입본이다 — Playback만 빼고
+# 분리본 — ked-stage-runtime
 
-`Assets/Ked.Presentation/`의 **Playback을 뺀 전부**(Core · Runtime · Editor · Audio · Data · Prefabs · Resources)와
-루트의 `ExportedTuning/`은 **다른 저장소가 원본**이다. 여기 있는 것은 그 저장소와 같은 내용을 담은 한 벌이다(.meta GUID까지).
+이 저장소가 원본이다. `Assets/Ked.Presentation/`의 **Playback을 뺀 전부**(Core · Runtime · Editor · Audio · Data · Prefabs · Resources)와
+루트의 `ExportedTuning/`을 포트폴리오에서 따로 보이려고 **ked-stage-runtime**에 떼어 두었다. 그쪽은 이것과 같은 한 벌이다(.meta GUID까지).
 
 ```
-원본   ked-stage-runtime        (형제 폴더 · Unity 프로젝트 · 무대의 집)
-반입   Assets/Ked.Presentation/{Core, Runtime, Editor, Audio, Data, Prefabs, Resources} · ExportedTuning/   ← 이 저장소
-원본   Assets/Ked.Presentation/Playback/   ← 재생은 여기가 원본이다. 무대 저장소에는 없다
+원본     Assets/Ked.Presentation/{Core, Runtime, Editor, Audio, Data, Prefabs, Resources} · ExportedTuning/   ← 이 저장소
+분리본   ked-stage-runtime   (형제 폴더 · Unity 프로젝트) — Playback과 예제는 없다
 ```
 
-실행기(`Assets/Ked.CommandExecutor/`)는 또 다른 원본(ked-command-executor)의 반입본이다 — 그쪽 `Documentation~/vendoring.md`.
-진행(`Assets/Ked.Progression/`)과 같은 방식이다. 세 저장소 구도는 [`Runtime/ASSEMBLY-BOUNDARY.md`](../Runtime/ASSEMBLY-BOUNDARY.md) 머리말.
+실행기(`Assets/Ked.CommandExecutor/`)도 같은 방식으로 ked-command-executor에 떼어 두었다 — 그 폴더의 `Documentation~/vendoring.md`.
+진행(`Assets/Ked.Progression/`)은 다르다 — 그 폴더의 `Documentation~/vendoring.md`.
 
-사본에서 먼저 고치는 일은 생긴다. 그때는 **원본에도 같은 손을 대서** 두 벌을 다시 맞춘다.
+고치는 곳은 여기다. 고친 뒤 분리본을 이쪽에 맞춘다.
 
 ## 스냅샷
 
 | | |
 |---|---|
-| 원본 | `ked-stage-runtime` · `refactor/canonical-commands` @ `316602e` (`dev` @ `7aeef7f` 위 2커밋 — 대본 커맨드 정본만, 프레임 대기 · char_visual_<효과>는 되살림) |
-| 마지막 동기화 | 2026-11-03 · 원본 → 사본 (별칭 · `<<Nfr>>` · `ui_patch`를 걷고 정본만 남김. 함께 `dev`의 `ToolExportMotionParityTests`(M6)도 들어왔다 — 그 전에는 사본에 없었다). 그 전: 2026-10-29 배경 리그 제거, 2026-10-28 `dev` @ `640ac60`, 2026-10-27 첫 분리 |
+| 분리본 | `ked-stage-runtime` · `refactor/canonical-commands` @ `3ab6b2e` (분리본 `dev`에는 아직 합치지 않았다) |
+| 마지막으로 맞춘 날 | 2026-11-04 · 이 저장소 → 분리본 (11-03~04에 여기서 고친 것 전부 — face_swap · 샷 의도 · 화면 효과 의도 · 블러 의도 · BGM · 보이스 · 무대 마스크 · S2~S6 · `Shaders/`를 `Resources/VisualEffects/`로. 분리본 안의 `Ked.CommandExecutor`도 함께). 그 전: 2026-11-03 분리본 쪽에서 먼저 한 정본 커맨드 정리를 들여옴, 2026-10-29 배경 리그 제거, 2026-10-28 `dev` @ `640ac60`, 2026-10-27 처음 떼어 냄 |
 | 맞춘 것 | 위 폴더 전부 + `ExportedTuning/` |
-| 코드 일치 | `diff -r` 0건 (아래 "대조" 명령) |
-| 사본에서 먼저 (2026-11-04) | **`Shaders/`를 걷었다.** 셰이더 그래프 넷과 `CharacterBlur.hlsl`은 짝 재질 곁 `Resources/VisualEffects/`로(.meta 그대로), `BLUR-DECISIONS.md`는 `Documentation~/`로. 쓰이지 않던 `M_UISeparableBlur.mat`(셰이더가 없는 블러 v2 잔재)은 지웠다. 같이 `ScreenEffectRigBuilder`가 프리팹 컨트롤러의 원본 재질을 먼저 쓰고 없을 때만 Resources에서 읽는다(`IScreenEffectController.SourceMaterial`). 원본도 같게 하면 이 줄을 지운다 |
+| 일치 | `diff -r` 0건 (아래 "대조" 명령) |
 
-**갈리면 이 표를 고친다.** 표가 낡으면 사본이 어디서 왔는지 아무도 모른다.
+**갈리면 이 표를 고친다.** 표가 낡으면 분리본이 어느 판인지 아무도 모른다.
 
 ## 대조
 
 ```
-diff -r ../ked-stage-runtime/Assets/Ked.Presentation Assets/Ked.Presentation --exclude=Playback --exclude=Playback.meta --exclude=Documentation~
+diff -r ../ked-stage-runtime/Assets/Ked.Presentation Assets/Ked.Presentation --exclude=Playback --exclude=Playback.meta --exclude=vendoring.md
 diff -r ../ked-stage-runtime/ExportedTuning ExportedTuning
 ```

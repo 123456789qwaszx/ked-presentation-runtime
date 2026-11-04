@@ -61,13 +61,14 @@ VN 쪽은 `PresentationSessionContext`(Playback/Host)가 재생 상태를 그 �
 
 ## 4. 리포지토리 분리 — 끝 (2026-10-27)
 
-패키지(UPM)는 만들지 않는다. `Ked.Progression`과 같은 **복사 반입**이다([vendoring.md](../Assets/Ked.Progression/Documentation~/vendoring.md)).
+패키지(UPM)는 만들지 않는다. 같은 한 벌을 복사해 둔다(각 폴더의 `Documentation~/vendoring.md`).
+원본은 이 저장소 하나다 — 실행기와 무대는 포트폴리오에서 따로 보이려고 떼어 둔 분리본이다(2026-11-04 소유자 확인).
 
-| 저장소 | 내용 | 원본/사본 |
+| 저장소 | 내용 | 원본/분리본 |
 |---|---|---|
-| `ked-command-executor` | 실행기 — `CommandBase` · `ClaimTweenCommandBase` · `CommandRunScope` · `LifetimeScope` · `CommandExecutor` · `SequencePlayer` · 포트 | 원본. 무대·재생 둘 다 반입 |
-| `ked-stage-runtime` | 무대 — `Core/` 전부 · 리그·철도·커맨드·파서 · 무대 계약(`IShotResponseStageProvider` 등) · 등가성 캡처 | 원본. 재생이 반입 |
-| `ked-presentation-runtime` | 재생 — 지금 저장소. Playback · 예제 · 철도 구현(`PresentationUIRoot`) | 실행기·무대·진행을 반입 |
+| `ked-command-executor` | 실행기 — `CommandBase` · `ClaimTweenCommandBase` · `CommandRunScope` · `LifetimeScope` · `CommandExecutor` · `SequencePlayer` · 포트 | 분리본(`Assets/Ked.CommandExecutor/`) |
+| `ked-stage-runtime` | 무대 — `Core/` 전부 · 리그·철도·커맨드·파서 · 무대 계약(`IShotResponseStageProvider` 등) · 등가성 캡처 | 분리본(`Assets/Ked.Presentation/`의 Playback 밖 + 실행기 한 벌) |
+| `ked-presentation-runtime` | 지금 저장소. 실행기 · 무대 · 재생(Playback) · 예제 · 철도 구현(`PresentationUIRoot`) | 원본. 진행만 반입(`Ked.Progression`) |
 
 ### ④ 스코프에서 무대를 뺀다 — 끝
 
@@ -84,8 +85,8 @@ VN 쪽은 `PresentationSessionContext`(Playback/Host)가 재생 상태를 그 �
 ### 한 것
 
 - [ked-command-executor](https://github.com/123456789qwaszx/ked-command-executor) `main` @ `d12e098` — `Runtime/PresentationCore/` → `Assets/Ked.CommandExecutor/`(어셈블리 `Ked.CommandExecutor`, 참조 DOTween.Modules). 뼈대는 이 저장소의 ProjectSettings·Packages(Yarn 제외)·DOTween·URP 설정.
-- [ked-stage-runtime](https://github.com/123456789qwaszx/ked-stage-runtime) `main` @ `1f40501` — `Assets/Ked.Presentation/`(Playback 제외) + `ExportedTuning/` + 실행기 반입본. asmdef: Runtime·Editor·Core.Tests가 `Ked.CommandExecutor`를 참조, 쓰지 않던 `Unity.TextMeshPro` 참조는 걷음. 무대 에셋이 재생 저장소 파일을 가리키는 GUID 0건.
-- 이 저장소: `PresentationCore/`를 `Assets/Ked.CommandExecutor/`로 옮기고(GUID 그대로), Playback asmdef가 실행기를 참조. 공유 파일(asmdef 셋·ASSEMBLY-BOUNDARY.md)은 무대 원본의 것. `diff -r` 0건 — 각 `Documentation~/vendoring.md`의 대조 명령.
+- [ked-stage-runtime](https://github.com/123456789qwaszx/ked-stage-runtime) `main` @ `1f40501` — `Assets/Ked.Presentation/`(Playback 제외) + `ExportedTuning/` + 실행기 한 벌. asmdef: Runtime·Editor·Core.Tests가 `Ked.CommandExecutor`를 참조, 쓰지 않던 `Unity.TextMeshPro` 참조는 걷음. 무대 에셋이 재생 저장소 파일을 가리키는 GUID 0건.
+- 이 저장소: `PresentationCore/`를 `Assets/Ked.CommandExecutor/`로 옮기고(GUID 그대로), Playback asmdef가 실행기를 참조. 공유 파일(asmdef 셋·ASSEMBLY-BOUNDARY.md)은 두 벌이 같다. `diff -r` 0건 — 각 `Documentation~/vendoring.md`의 대조 명령.
 - 세 저장소 모두 `main`·`dev`. 어셈블리·네임스페이스 이름(`Ked.Presentation.*`)은 그대로다 — VnTool 반입과 스크립트 GUID가 매달려 있어서, 바꿀 날이 오면 셋을 한 번에.
 
 ## 5. 모션 (가른 뒤, 무대 저장소에서)
@@ -124,11 +125,11 @@ relative의 전 구간 중립값 성분은 싣지 않는다. 규약은 무대 �
 연출 데모 S3에서 `<<motion s1 nod>>` · `<<motion s1 bow>>` → `place_center`(숙인 채로 이동, 장부) → `char_rotate_to 0`(같은 노드를 다른 명령이 이어받음) → `place_right`.
 재생·스킵·롤백 모두 기대대로. 씬의 `SampleBootstrap › 작가 자산`에 `curves.json`·`motions.json`이 꽂혀 있다.
 
-**motions/2 (2026-10-28, 소유자 결정 — 무대 반입본 @ `40d19d7`, 브랜치 `motion/motions-2`).** 모션은 값만 갖고 relative/absolute는
+**motions/2 (2026-10-28, 소유자 결정 — 무대 분리본 @ `40d19d7`, 브랜치 `motion/motions-2`).** 모션은 값만 갖고 relative/absolute는
 `<<motion slot 이름 [relative|absolute]>>`의 세 번째 인자(생략 relative)가 정한다. 채널 `mode`와 중립값 규칙(relative 첫 키 0 ·
 restore 마지막 키 0 · restore는 relative만)이 규약에서 빠졌다. restore는 재생이 끝·스킵·스텝 경계에서 **시작값을 되써서** 지킨다.
 이 저장소: Yarn 등록 `motion`이 인자 셋, 견본 `motions.json`은 motions/2, 데모 S3는 `<<motion s1 bow absolute>>`. 규약은 무대 저장소 `docs/motion-contract.md`.
-⚠ 유니티에서 아직 돌려 보지 않았다 — 반입본 테스트(코어·로더·리듀서·파서·Unity 대조)를 한 번 돌릴 것.
+⚠ 유니티에서 아직 돌려 보지 않았다 — 무대 테스트(코어·로더·리듀서·파서·Unity 대조)를 한 번 돌릴 것.
 
 남은 것: VnTool이 `motions.json`의 이름·길이·`end`를 읽어 `<<motion>>` 자동완성 · 2단계(카메라·의도 채널) · 전용 모션 툴 여부(`PLAN_motion-tool.md`, 무대 저장소).
 

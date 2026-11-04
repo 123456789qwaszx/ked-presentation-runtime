@@ -1,7 +1,7 @@
 # 연출 커맨드 시스템 — 목적 · 흐름 · 규칙, 그리고 예외 (2026-11-03 개정)
 
 기준: `dev` @ `00534410` (face_swap 수정 포함). 앞 판(`ec1a5d2` 기준)에서 바뀐 곳은 §7에 모았다.
-실행기(`Assets/Ked.CommandExecutor`)는 `ked-command-executor`에서 들여온 반입본이다(`Documentation~/vendoring.md`).
+실행기(`Assets/Ked.CommandExecutor`)의 원본은 이 저장소다 — `ked-command-executor`는 포트폴리오용 분리본(`Documentation~/vendoring.md`).
 코드로 닫지 못한 항목은 [추론]으로 표시했다.
 
 ## 1. 목적
