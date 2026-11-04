@@ -14,7 +14,6 @@ public partial class SampleBootstrap
     private readonly PlaybackRuntimeState _playbackState = new();
 
     private readonly RollbackHistory _rollbackHistory = new();
-    private readonly ChoiceHistory _choiceHistory = new();
     private readonly SeekState _seekState = new();
     private readonly LineDisplayState _lineDisplayState = new();
 
@@ -62,7 +61,6 @@ public partial class SampleBootstrap
             _dialogueAdvanceDispatcher,
             _linePresentationFlow,
             _rollbackHistory,
-            _choiceHistory,
             _backlogRecorder,
             vnAdvanceInputPoller);
     }
@@ -230,23 +228,9 @@ public partial class SampleBootstrap
             ellipsisBreathTypewriter,
             _playbackState);
 
-        ChoiceBoundary choiceBoundary = new(
-            _choiceHistory,
-            _rollbackHistory);
 
-        IPresentationOptionsBoxView optionsBox = _kedUI.OptionsBox
-            ?? throw new InvalidOperationException("[연출 조립] 선택지 상자(OptionsBox)가 없다.");
-
-        OptionsBoxPresentationController optionsBoxPresentation = new(optionsBox);
-
-        OptionsPresentationFlow optionsPresentationFlow = new(
-            optionsBoxPresentation,
-            choiceBoundary,
-            _seekState);
-
-        vnOptionsPresenter.Initialize(
-            optionsPresentationFlow,
-            _kedUI.OptionItemPrefab);
+        // ⛔ Yarn 선택지 흐름(ChoiceBoundary · OptionsPresentationFlow · CustomOptionsPresenter)의 조립은 2026-11-05에 걷혔다.
+        //    선택지 상자(_kedUI.OptionsBox)와 항목 프리팹은 진행 층의 ChapterOptionsView가 쓴다(InstallProgression).
     }
 
     private void CreateScenePresentation()
@@ -269,7 +253,6 @@ public partial class SampleBootstrap
             _dialogueSurfaceState,
             _dialogueBoxPresentation,
             _presentationScopeSession,
-            _choiceHistory,
             _episodeSkipController,
             _seekState,
             _yarnPlaybackDriver);
@@ -300,7 +283,6 @@ public partial class SampleBootstrap
             rapidSkipController,
             _episodeSkipController,
             _rollbackHistory,
-            _choiceHistory,
             _lineVoice);
 
         AdvanceGate advanceGate = new(

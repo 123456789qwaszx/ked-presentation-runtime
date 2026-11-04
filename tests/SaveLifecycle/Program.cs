@@ -32,8 +32,8 @@ internal static class Program
         }
     }
 
-    private static PresentationResumePoint SomeResume() =>
-        new(new LineTarget { LineId = "stale", Occurrence = 1 }, Array.Empty<ChoiceRecord>());
+    private static LineTarget SomeResume() =>
+        new() { LineId = "stale", Occurrence = 1 };
 
     private static async Task Test(string name, Func<Task> body)
     {
@@ -84,18 +84,21 @@ internal static class Program
 
             await Test("코덱: 장면·회차·재생 계획이 왕복한다", () => Run(() =>
             {
-                var choices = new[] { new ChoiceRecord(0, 0, 1, "choice-line") };
-                List<ChoiceRecord> scene = PresentationMemory.ReadUnitChoices(PresentationMemory.UnitChoices(choices));
-                Check(scene.Single().selectedOptionLineId == "choice-line", "장면 Yarn 선택이 왕복하지 않았다");
-
                 var backlog = new[] { Line(0), Line(1, "other") };
                 List<DialogueLogEntry> read = PresentationMemory.ReadBacklog(PresentationMemory.Backlog(backlog));
                 Check(read.Count == 2 && read[1].lineId == "other" && read[1].lineSequence == 1, "백로그가 왕복하지 않았다");
 
-                PresentationResumePoint plan = PresentationMemory.ReadResumePoint(PresentationMemory.ResumePoint(Target("L", 2), choices));
-                Check(plan.Target.LineId == "L" && plan.Target.Occurrence == 2 && plan.YarnChoices.Single().selectedOptionIndex == 1, "재생 계획이 왕복하지 않았다");
+                string written = PresentationMemory.ResumePoint(Target("L", 2));
+                Check(!written.Contains("yarnChoices"), "재개 지점에 걷힌 선택 기록 칸이 실렸다");
+                LineTarget plan = PresentationMemory.ReadResumePoint(written);
+                Check(plan.LineId == "L" && plan.Occurrence == 2, "재생 계획이 왕복하지 않았다");
 
-                Check(PresentationMemory.ReadUnitChoices("").Count == 0 && PresentationMemory.ReadBacklog("").Count == 0, "빈 문자열은 빈 기록이어야 한다");
+                // 저장 호환 — 대사 안 선택지가 걷히기 전(2026-11-05 이전)의 재개 지점은 yarnChoices 칸을 들고 있다. 읽을 때 무시한다.
+                LineTarget legacy = PresentationMemory.ReadResumePoint(
+                    "{\"target\":{\"lineId\":\"old\",\"occurrence\":3},\"yarnChoices\":[{\"lineIndex\":0,\"optionCount\":0,\"selectedOptionIndex\":1,\"selectedOptionLineId\":\"x\"}]}");
+                Check(legacy.LineId == "old" && legacy.Occurrence == 3, "옛 재개 지점(yarnChoices 포함)을 읽지 못했다");
+
+                Check(PresentationMemory.ReadBacklog("").Count == 0, "빈 문자열은 빈 기록이어야 한다");
             }));
 
             await Test("코덱: 깨진 문자열과 잘못된 백로그 순번은 거부된다", () => Run(() =>
@@ -121,7 +124,6 @@ internal static class Program
 
                 presentation.Show("old-line");
                 presentation.OpenAndTakeResume();
-                presentation.Choices.RestoreChoices(new[] { new ChoiceRecord(0, 0, 2, "picked") });
 
                 save.BeginNewPlaythrough();
                 bridge.EnterScene("chapter", State());
@@ -133,7 +135,7 @@ internal static class Program
 
                 Check(scene.Checkpoint.HostSerialStart == 1, "진입 경계가 백로그 순번으로 실리지 않았다");
                 Check(scene.HostSerialEnd == 2, "확정 경계가 백로그 순번으로 실리지 않았다");
-                Check(PresentationMemory.ReadUnitChoices(scene.HostState).Single().selectedOptionLineId == "picked", "장면의 Yarn 선택이 실리지 않았다");
+                Check(scene.HostState == "", "장면 HostState 칸은 비어야 한다(단위의 Yarn 선택 기록은 걷혔다)");
                 List<DialogueLogEntry> saved = PresentationMemory.ReadBacklog(snapshot.HostState);
                 Check(saved.Count == 2 && saved[0].lineId == "old-line" && saved[1].lineId == "new-line", "회차 백로그가 실리지 않았다");
             }));
@@ -164,7 +166,7 @@ internal static class Program
             {
                 var store = new LocalFileSaveStore(Dir());
                 PlaythroughSave file = Save("A");
-                file.PendingLoad = new SavedLoadPlan { HostState = PresentationMemory.ResumePoint(Target("line", 2), Array.Empty<ChoiceRecord>()) };
+                file.PendingLoad = new SavedLoadPlan { HostState = PresentationMemory.ResumePoint(Target("line", 2)) };
                 store.Create(file);
                 store.SetActive("A");
 
@@ -173,7 +175,7 @@ internal static class Program
                 Launcher(store, driver, presentation).Resume();
 
                 Check(driver.LastRestorePath != null && driver.LastRestorePath.Count == 0, "빈 경로가 루트 이어하기로 뭉개졌다");
-                Check(presentation.OpenAndTakeResume()?.Target.Occurrence == 2, "줄 좌표가 올라가지 않았다");
+                Check(presentation.OpenAndTakeResume()?.Occurrence == 2, "줄 좌표가 올라가지 않았다");
             }));
 
             await Test("런처: 저장 경로는 진행 좌표로 잘려 들어간다", () => Run(() =>
@@ -183,7 +185,7 @@ internal static class Program
                 file.PendingLoad = new SavedLoadPlan
                 {
                     Path = new List<SavedChoice> { new() { FromEpisodeId = "scene1", OptionIndex = 3 } },
-                    HostState = PresentationMemory.ResumePoint(Target(), Array.Empty<ChoiceRecord>()),
+                    HostState = PresentationMemory.ResumePoint(Target()),
                 };
                 store.Create(file);
                 store.SetActive("A");
@@ -273,7 +275,7 @@ internal static class Program
 
                 // ManualSaveFlow.ForkFromBacklogAsync가 하는 일 — 줄 세기는 연출 기억의 몫이다.
                 SceneRecord origin = playthrough.Scenes[sceneIndex];
-                presentation.Memory.ReadPastUnit(second, origin.Checkpoint.HostSerialStart, origin.HostState,
+                presentation.Memory.ReadPastUnit(second, origin.Checkpoint.HostSerialStart,
                     out string inherited, out string resumePoint);
                 Check(resumePoint != null, "줄 좌표를 만들지 못했다");
 
@@ -285,8 +287,8 @@ internal static class Program
 
                 Check(driver.LastRestorePath != null && driver.LastRestorePath.Count == 0, "갈라진 회차가 경로 복원으로 열리지 않았다");
                 Check(restored.Backlog.Entries.Count == 0 && restored.Backlog.NextLineSequence == 0, "장면 앞 백로그만 물려받아야 한다(여기선 없음)");
-                PresentationResumePoint resume = restored.OpenAndTakeResume();
-                Check(resume?.Target.Occurrence == 2 && resume.Target.LineId == "line", "줄 좌표가 전달되지 않았다");
+                LineTarget resume = restored.OpenAndTakeResume();
+                Check(resume?.Occurrence == 2 && resume.LineId == "line", "줄 좌표가 전달되지 않았다");
             }));
 
             #endregion
@@ -301,7 +303,6 @@ internal static class Program
                 before.Show("a");
                 before.Show("b");
                 before.Show("a");
-                before.Choices.RestoreChoices(new[] { new ChoiceRecord(1, 0, 1, "picked") });
 
                 before.Stage.IsSeeking = true;
                 Check(!before.Memory.TryCaptureResumePoint(out _, out _), "시크 중에 재개 지점을 꺼냈다");
@@ -316,9 +317,8 @@ internal static class Program
                 after.Memory.Restore(backlog, resumePoint);
 
                 Check(after.Backlog.Entries.Single().lineId == "prev", "단위 앞 백로그만 되돌아와야 한다");
-                PresentationResumePoint resume = after.OpenAndTakeResume();
-                Check(resume != null && resume.Target.LineId == "a" && resume.Target.Occurrence == 2, "줄 좌표(두 번째 a)가 아니다");
-                Check(resume.YarnChoices.Single().selectedOptionLineId == "picked", "선택 기록이 실리지 않았다");
+                LineTarget resume = after.OpenAndTakeResume();
+                Check(resume != null && resume.LineId == "a" && resume.Occurrence == 2, "줄 좌표(두 번째 a)가 아니다");
                 Check(after.OpenAndTakeResume() == null, "재개 예약이 두 번째 단위에도 걸렸다");
             }));
 
@@ -337,18 +337,18 @@ internal static class Program
                 Check(presentation.Backlog.Entries.Count == 0, "빈 백로그 문자열은 빈 백로그다");
             }));
 
-            await Test("연출 기억: 과거 단위의 선택 기록이 깨졌으면 그 단위의 루트에서 시작한다", () => Run(() =>
+            await Test("연출 기억: 과거 단위의 줄을 셀 수 없으면 그 단위의 루트에서 시작한다", () => Run(() =>
             {
                 var presentation = new PresentationRig();
                 presentation.Show("before");
                 presentation.Show("line");
 
-                presentation.Memory.ReadPastUnit(presentation.Backlog.Entries[1], 1, "{garbage",
+                // 단위 시작 순번이 그 줄보다 뒤다 — 기록이 잘려 나간 꼴. 줄 좌표를 만들 수 없다.
+                presentation.Memory.ReadPastUnit(presentation.Backlog.Entries[0], 1,
                     out string inherited, out string resumePoint);
 
-                Check(resumePoint == null, "깨진 선택 기록으로 재개 지점을 만들었다");
+                Check(resumePoint == null, "셀 수 없는 줄로 재개 지점을 만들었다");
                 Check(PresentationMemory.ReadBacklog(inherited).Single().lineId == "before", "물려받는 백로그가 단위 앞까지가 아니다");
-                Check(UnityEngine.Debug.Warnings.Any(w => w.Contains("선택 기록")), "경고가 없다");
             }));
 
             #endregion

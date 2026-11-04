@@ -6,7 +6,7 @@ namespace Ked.Samples.UI
 {
     /// <summary>
     /// 본체의 선택지 상자 계약(IPresentationOptionsBoxView)을 재생 화면의 선택지 상자(PlayOptionsBox) 위에 구현한다.
-    /// 항목은 재생 쪽(CustomOptionsPresenter · 진행 예제의 ChapterOptionsView)이 ItemContainer에 만든다 —
+    /// 항목은 진행 예제의 ChapterOptionsView가 ItemContainer에 만든다(⛔ 재생 쪽 CustomOptionsPresenter는 대사 안 선택지와 함께 2026-11-05에 걷혔다) —
     /// 선택 가능·불가 조건도 그쪽이 정한다.
     /// </summary>
     internal sealed class KedOptionsBoxView : IPresentationOptionsBoxView

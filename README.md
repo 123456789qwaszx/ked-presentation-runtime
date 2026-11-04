@@ -54,7 +54,7 @@ Yarn Spinner를 기반으로 제작한 **비주얼 노벨 화면 연출 런타�
 `Assets/Samples/Dialogue/ChapterProgression/presentation_demo_Demo_Presentation.yarn` — 연출 데모 챕터의 에피소드 하나가 재생하는 노드 `Demo_Presentation`
 
 짧은 장면 하나에서 배경·BGM·등장, 배치·크기, 표정·포즈·모션, 포커스·카메라, 화면 효과·효과음,
-트랜지션·선택지를 한 번씩 지나갑니다. 공개된 예제 초상화(harin·sigure·kasmi)와 저장소에 있는 배경·음원만 씁니다.
+트랜지션을 한 번씩 지나갑니다. 공개된 예제 초상화(harin·sigure·kasmi)와 저장소에 있는 배경·음원만 씁니다.
 
 ```yarn
 <<bg_sprite bg_main class_day>>
@@ -66,13 +66,15 @@ Yarn Spinner를 기반으로 제작한 **비주얼 노벨 화면 연출 런타�
 ```
 
 진행·저장 예제의 대본은 `Assets/Samples/Dialogue/ChapterProgression/festival_eve_*.yarn`(카드 하나에 파일 하나, 챕터 JSON은 곁의 `festival_eve.progression.json`)입니다.
-챕터 하나(축제 전날)에 장면 둘 — 진행 선택지와 스탯, 대사 선택지와의 차이, 숨는 · 잠기는 선택지, 자동 간선,
+챕터 하나(축제 전날)에 장면 둘 — 진행 선택지와 스탯, 숨는 · 잠기는 선택지, 자동 간선,
 조건 분기(`<<detour>>`로 다녀가는 카드가 제 첫머리에서 스탯을 본다), 장면 확정과 지난 장면에서 갈라지기, 챕터 끝(끝 카드)을 한 번씩 지나갑니다.
 
 두 예제는 손으로 쓴 것이 아니라 **툴이 낸 것**입니다(2026-11-04) — 원고와 진행 JSON은
 [ked-story-director](https://github.com/123456789qwaszx/ked-story-director) `samples/RuntimeSamples`, 연출과 Yarn은
 [ked-story-compositor](https://github.com/123456789qwaszx/ked-story-compositor) `samples/RuntimeSamples`가 정본입니다.
 두 툴은 프로젝트 폴더의 `runtime.target.json`이 가리키는 **게임 폴더**(이 폴더)에 저장할 때마다 산출물을 바로 씁니다 — 파일 이름은 `{챕터}.progression.json` · `{챕터}_{노드}.yarn`입니다. 손으로 덮어쓸 일이 없습니다.
+
+선택지는 **에피소드 끝의 진행 선택지**(챕터 JSON의 `NextOptions`) 하나뿐입니다 — 두 툴은 대사 안 선택지(`->`)를 만들지 않습니다(2026-11-04). 런타임의 `->` 연출도 2026-11-05에 걷었습니다 — Yarn 대본에 `->`가 남아 있으면 `UnsupportedOptionsPresenter`가 오류 로그를 남기고 고르지 않은 채 지나갑니다(`allowOptionFallthrough`). 그래서 단위 루트부터의 재생(되감기 · 이어하기 · 갈라지기)은 줄 좌표 하나로 결정됩니다.
 
 ### 3. 대사 실행 흐름
 

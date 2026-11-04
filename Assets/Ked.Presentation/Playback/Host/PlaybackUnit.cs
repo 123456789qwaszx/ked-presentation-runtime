@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 /// 재생 단위 하나의 수명 — 열기, 재생, 정지, 루트부터 다시 달리기.
 ///
 /// 이 저장소는 재생 단위의 루트를 하나만 둔다(PLAN_playback-unit E3·E4).
-/// 롤백 기록·Yarn 선택 기록·백로그의 장면 경계·줄 시크는 전부 "지금 단위의 루트"를 기준으로 움직이고,
+/// 롤백 기록·백로그의 장면 경계·줄 시크는 전부 "지금 단위의 루트"를 기준으로 움직이고,
 /// 그 기준이 서고 무너지는 순서를 이 타입 하나가 갖는다.
 ///
 /// 호스트가 말하는 것은 둘뿐이다.
@@ -33,7 +33,7 @@ public sealed class PlaybackUnit
     private Task _stopTask = Task.CompletedTask;
     private bool _stopIssued;
 
-    private PresentationResumePoint _pendingResume;
+    private LineTarget _pendingResume;
 
     internal PlaybackUnit(
         IPlaybackStage stage,
@@ -64,7 +64,7 @@ public sealed class PlaybackUnit
     public void AbandonSeek() => _stage.AbandonSeek();
 
     /// <summary>다음에 열리는 단위가 이 재개 지점까지 시크한다. null이면 예약을 지운다.</summary>
-    internal void StageResume(PresentationResumePoint resume) => _pendingResume = resume;
+    internal void StageResume(LineTarget resume) => _pendingResume = resume;
 
     /// <summary>새 단위를 연다. 이전 단위가 남긴 무대를 먼저 정리한다.</summary>
     public async Task OpenAsync(CancellationToken cancellationToken = default)
@@ -80,7 +80,7 @@ public sealed class PlaybackUnit
         _stage.BeginScene();
         _backlog.MarkSceneBoundary();
 
-        PresentationResumePoint resume = _pendingResume;
+        LineTarget resume = _pendingResume;
         _pendingResume = null;
 
         if (resume != null)

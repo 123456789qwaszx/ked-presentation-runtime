@@ -9,14 +9,14 @@ using System.Threading.Tasks;
 /// </summary>
 internal interface IPlaybackStage
 {
-    /// <summary>단위를 연다 — 선택 기록과 남은 시크를 비우고 무대·스코프를 새로 시작한다.</summary>
+    /// <summary>단위를 연다 — 남은 시크를 비우고 무대·스코프를 새로 시작한다.</summary>
     void BeginScene();
 
     /// <summary>
-    /// 재개 지점으로 시크를 연다 — 단위의 Yarn 선택 기록을 되돌리고 표적 줄까지 빨리 감는다.
-    /// BeginScene 바로 뒤에만 부른다.
+    /// 재개 지점으로 시크를 연다 — 표적 줄까지 빨리 감는다. BeginScene 바로 뒤에만 부른다.
+    /// (⛔ 전에는 단위의 Yarn 선택 기록도 함께 되돌렸다 — 대사 안 선택지와 함께 2026-11-05에 걷혔다.)
     /// </summary>
-    void BeginResume(PresentationResumePoint resume);
+    void BeginResume(LineTarget target);
 
     /// <summary>지금 줄 시크(되감기 또는 재개) 중인가.</summary>
     bool IsSeeking { get; }
@@ -27,7 +27,7 @@ internal interface IPlaybackStage
     /// <summary>Yarn 노드 하나를 끝까지(또는 정지까지) 재생한다.</summary>
     Task PlayEpisodeAsync(string nodeName);
 
-    /// <summary>같은 단위를 루트부터 다시 달리기 직전 — 무대를 비우고 스코프를 다시 연다. 선택 기록은 지우지 않는다.</summary>
+    /// <summary>같은 단위를 루트부터 다시 달리기 직전 — 무대를 비우고 스코프를 다시 연다.</summary>
     void PrepareReplay();
 
     /// <summary>재생을 멈추고 무대를 정리한다. 롤백 기록도 여기서 비워진다.</summary>

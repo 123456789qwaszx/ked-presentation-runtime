@@ -1,5 +1,7 @@
 # PLAN — 재생 단위와 연출 기억의 경계
 
+> ⛔ **2026-11-05 — 대사 안 선택지(Yarn `->`) 연출을 걷었다.** `ChoiceHistory` · `ChoiceRecord` · `ChoiceBoundary` · `OptionsPresentationFlow` · `CustomOptionsPresenter` · `PresentationResumePoint`와 재개 지점의 `yarnChoices`, 장면 HostState의 선택 기록(`CaptureUnitChoices`), `SeekEndReason.ReplayChoiceMismatch`는 더 없다. 선택지는 에피소드 끝의 진행 선택지뿐이고 그 기록은 진행(`Ked.Progression`)의 몫이라, 단위 루트부터의 재생은 줄 좌표(`LineTarget`)만으로 결정된다. 아래에서 그 이름들이 나오는 대목은 이력이다.
+
 2026-10-26. `PLAN_framework-scope.md` 3단계(재생 계약)와 저장 분할(`d3d7ecfb`) 뒤에 이어지는 계획.
 4단계(연출 데모 대본 등)보다 먼저 한다 — 이 레포가 무엇을 소유하는지가 여기서 정해진다.
 

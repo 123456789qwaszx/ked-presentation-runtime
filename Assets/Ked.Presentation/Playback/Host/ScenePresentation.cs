@@ -25,7 +25,6 @@ public sealed class ScenePresentation : IPlaybackStage
     // 대사창도 닫힌 채로 시작한다 — 장면 첫 줄·되감기 표적 줄이 언제나 페이드인한다(표적이 장면 첫 줄이어도).
     private readonly DialogueBoxPresentationController _dialogueBox;
     private readonly PresentationScopeSession _presentationScope;
-    private readonly ChoiceHistory _choiceHistory;
     private readonly EpisodeSkipController _episodeSkipController;
     private readonly SeekState _seekState;
     private readonly YarnPlaybackDriver _playbackDriver;
@@ -49,7 +48,6 @@ public sealed class ScenePresentation : IPlaybackStage
         DialogueSurfaceState dialogueSurfaceState,
         DialogueBoxPresentationController dialogueBox,
         PresentationScopeSession presentationScope,
-        ChoiceHistory choiceHistory,
         EpisodeSkipController episodeSkipController,
         SeekState seekState,
         YarnPlaybackDriver playbackDriver)
@@ -81,8 +79,6 @@ public sealed class ScenePresentation : IPlaybackStage
         // 앞 단위가 남긴 명령은 이 단위의 것이 아님.
         DiscardPendingCommands(warn: false); 
         
-        _choiceHistory.ClearChoiceRecords();
-        
         // 앞 단위가 시크 도중에 끝났다면 그 표적은 이 단위의 것이 아님.
         _seekState.End(SeekEndReason.SceneReset); 
 
@@ -113,13 +109,10 @@ public sealed class ScenePresentation : IPlaybackStage
         }
     }
     
-    // 단위의 Yarn 선택 기록을 되돌리고 표적 줄까지 시크한다. 로드 시크는 백로그를 다시 적는다(LineRecordPolicy).
-    void IPlaybackStage.BeginResume(PresentationResumePoint resume)
+    // 표적 줄까지 시크한다. 로드 시크는 백로그를 다시 적는다(LineRecordPolicy).
+    // ⛔ 단위의 Yarn 선택 기록 복원은 대사 안 선택지와 함께 2026-11-05에 걷혔다 — 루트부터의 재생은 줄 좌표만으로 결정된다.
+    void IPlaybackStage.BeginResume(LineTarget target)
     {
-        _choiceHistory.RestoreChoices(resume.YarnChoices);
-
-        LineTarget target = resume.Target;
-
         _seekState.Begin(new SeekTarget(
             SeekKind.Load,
             target.LineId,

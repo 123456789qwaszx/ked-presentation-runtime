@@ -41,7 +41,7 @@ internal sealed class FakeStage : IPlaybackStage
 {
     private TaskCompletionSource<bool> _playing;
 
-    public PresentationResumePoint Resumed;
+    public LineTarget Resumed;
     public int Resumes;
     public int Plays;
 
@@ -52,7 +52,7 @@ internal sealed class FakeStage : IPlaybackStage
 
     public void BeginScene() => IsSeeking = false;
 
-    public void BeginResume(PresentationResumePoint resume)
+    public void BeginResume(LineTarget resume)
     {
         Resumes++;
         Resumed = resume;
@@ -89,7 +89,6 @@ internal sealed class PresentationRig
 {
     public readonly FakeStage Stage = new();
     public readonly BacklogRecorder Backlog = new();
-    public readonly ChoiceHistory Choices = new();
     public readonly RollbackHistory Rollback = new();
     public readonly PlaybackUnit Unit;
     public readonly PlaybackMemory Memory;
@@ -97,7 +96,7 @@ internal sealed class PresentationRig
     public PresentationRig()
     {
         Unit = new PlaybackUnit(Stage, Backlog, Rollback);
-        Memory = new PlaybackMemory(Unit, Backlog, Choices, Rollback);
+        Memory = new PlaybackMemory(Unit, Backlog, Rollback);
     }
 
     // 줄 하나가 보였다 — YarnLineBoundary가 하는 두 기록.
@@ -109,7 +108,7 @@ internal sealed class PresentationRig
     }
 
     // 단위를 열고, 그때 걸린 재개 시크를 돌려준다(없으면 null).
-    public PresentationResumePoint OpenAndTakeResume()
+    public LineTarget OpenAndTakeResume()
     {
         Stage.Resumed = null;
         Unit.OpenAsync().GetAwaiter().GetResult();

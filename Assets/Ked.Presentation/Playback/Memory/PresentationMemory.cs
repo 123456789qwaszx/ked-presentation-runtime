@@ -7,14 +7,17 @@ using Newtonsoft.Json.Serialization;
 /// <summary>
 /// 연출 기억의 문자열 형식 — 싣고 되읽는 법.
 ///
-/// 연출은 저장이 없어도 세 가지를 늘 들고 있다(PLAN_playback-unit E1).
+/// 연출은 저장이 없어도 두 가지를 늘 들고 있다(PLAN_playback-unit E1).
 ///
 ///   백로그          재생 단위를 넘어 이어지는 대사 기록              BacklogRecorder
-///   단위의 선택 기록 이 단위를 루트부터 다시 달릴 때 자동 응답할 Yarn 선택 ChoiceHistory
-///   재개 지점        단위 루트에서 이 줄까지 — 줄 좌표 + 거기까지의 선택   LineTarget + ChoiceHistory
+///   재개 지점        단위 루트에서 이 줄까지 — 줄 좌표                  LineTarget
+///
+/// ⛔ 전에는 셋이었다 — "단위의 선택 기록"(루트부터 다시 달릴 때 자동 응답할 Yarn 선택, ChoiceHistory)은
+/// 대사 안 선택지와 함께 2026-11-05에 걷혔다. 선택지는 에피소드 끝의 진행 선택지뿐이고 그 기록은 진행(Ked.Progression)의 몫이라,
+/// 단위 루트부터의 재생은 줄 좌표만으로 결정된다. 옛 재개 지점의 yarnChoices 칸은 읽을 때 무시한다(저장 호환).
 ///
 /// 저장은 이것을 실어 나를 뿐이다. 진행 저장(ked-progression-runtime의 Ked.Progression.Save)은
-/// 호스트 상태를 문자열 한 칸으로 받으므로, 진행 호스트는 이 세 문자열을 그 칸들에 넣는다. 이 타입은 진행을 모른다.
+/// 호스트 상태를 문자열 한 칸으로 받으므로, 진행 호스트는 이 문자열들을 그 칸들에 넣는다. 이 타입은 진행을 모른다.
 ///
 /// 호스트는 이 형식을 직접 부르지 않는다 — 입구는 PlaybackMemory다(그래서 internal).
 ///
@@ -36,20 +39,15 @@ internal static class PresentationMemory
     };
 
     // 필드 이름이 곧 저장 형식이다.
-    private sealed class UnitChoicesDto
-    {
-        public List<ChoiceRecord> YarnChoices = new();
-    }
-
     private sealed class BacklogDto
     {
         public List<DialogueLogEntry> Backlog = new();
     }
 
+    // 옛 저장의 yarnChoices 칸은 모르는 필드로 흘려보낸다(역직렬화는 모르는 필드를 무시한다).
     private sealed class ResumePointDto
     {
         public LineTarget Target;
-        public List<ChoiceRecord> YarnChoices = new();
     }
 
     #region 백로그
@@ -78,24 +76,9 @@ internal static class PresentationMemory
 
     #endregion
 
-    #region 단위의 선택 기록
-
-    public static string UnitChoices(IReadOnlyList<ChoiceRecord> yarnChoices) =>
-        Write(new UnitChoicesDto { YarnChoices = new List<ChoiceRecord>(yarnChoices) });
-
-    public static List<ChoiceRecord> ReadUnitChoices(string memory)
-    {
-        if (string.IsNullOrEmpty(memory))
-            return new List<ChoiceRecord>();
-
-        return Read<UnitChoicesDto>(memory, "선택 기록").YarnChoices ?? new List<ChoiceRecord>();
-    }
-
-    #endregion
-
     #region 재개 지점
 
-    public static string ResumePoint(LineTarget target, IReadOnlyList<ChoiceRecord> yarnChoices)
+    public static string ResumePoint(LineTarget target)
     {
         if (target == null)
             throw new ArgumentNullException(nameof(target));
@@ -107,11 +90,10 @@ internal static class PresentationMemory
                 LineId = target.LineId,
                 Occurrence = target.Occurrence,
             },
-            YarnChoices = new List<ChoiceRecord>(yarnChoices),
         });
     }
 
-    public static PresentationResumePoint ReadResumePoint(string memory)
+    public static LineTarget ReadResumePoint(string memory)
     {
         ResumePointDto dto = Read<ResumePointDto>(memory, "재개 지점");
 
@@ -121,7 +103,7 @@ internal static class PresentationMemory
             || target.Occurrence < 1)
             throw new InvalidDataException("저장된 줄 좌표가 잘못됐다.");
 
-        return new PresentationResumePoint(target, dto.YarnChoices ?? new List<ChoiceRecord>());
+        return target;
     }
 
     #endregion
