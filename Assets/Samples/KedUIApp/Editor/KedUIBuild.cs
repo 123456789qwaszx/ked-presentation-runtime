@@ -119,12 +119,26 @@ namespace Ked.Samples.UI.Editor
 
                 GameObject optionItem = Save(OptionItemSpec.Build(kit), OptionItemPath, built);
 
-                GameObject[] pages =
+                GameObject[] settingsPages =
                 {
                     SaveScreen(SettingsSpec.AudioPage(kit), built),
                     SaveScreen(SettingsSpec.TextPage(kit), built),
                     SaveScreen(SettingsSpec.PlaybackPage(kit), built),
                     SaveScreen(SettingsSpec.DisplayPage(kit), built),
+                };
+
+                GameObject[] recordPages =
+                {
+                    SaveScreen(RecordSpec.SaveTab(kit), built),
+                    SaveScreen(RecordSpec.LoadTab(kit), built),
+                    SaveScreen(RecordSpec.TipsTab(kit), built),
+                    SaveScreen(RecordSpec.CharactersTab(kit), built),
+                };
+
+                GameObject[] extraPages =
+                {
+                    SaveScreen(ExtraSpec.AlbumTab(kit), built),
+                    SaveScreen(ExtraSpec.CGTab(kit), built),
                 };
 
                 GameObject[] roots =
@@ -136,9 +150,10 @@ namespace Ked.Samples.UI.Editor
                 GameObject[] panels =
                 {
                     SaveScreen(MenuSpec.Build(kit), built),
-                    SaveScreen(SaveLoadSpec.Build(kit), built),
+                    SaveScreen(RecordSpec.Build(kit, recordPages), built),
                     SaveScreen(BacklogSpec.Build(kit), built),
-                    SaveScreen(SettingsSpec.Build(kit, pages), built),
+                    SaveScreen(SettingsSpec.Build(kit, settingsPages), built),
+                    SaveScreen(ExtraSpec.Build(kit, extraPages), built),
                     SaveScreen(ModalSpec.Confirm(kit), built),
                     SaveScreen(ModalSpec.Notice(kit), built),
                     SaveScreen(EpisodeEndSpec.Build(kit), built),

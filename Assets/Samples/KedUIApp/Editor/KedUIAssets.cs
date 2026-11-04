@@ -28,7 +28,11 @@ namespace Ked.Samples.UI.Editor
             typeof(TitleScreen),
             typeof(PlayScreen),
             typeof(SystemMenuPanel),
-            typeof(SaveLoadPanel),
+            typeof(RecordPanel),
+            typeof(SavePage),
+            typeof(LoadPage),
+            typeof(TipsPage),
+            typeof(CharactersPage),
             typeof(BacklogPanel),
             typeof(SettingsPanel),
             typeof(AudioSettingsPage),
@@ -38,6 +42,9 @@ namespace Ked.Samples.UI.Editor
             typeof(ConfirmPanel),
             typeof(NoticePanel),
             typeof(EpisodeEndPanel),
+            typeof(ExtraPanel),
+            typeof(AlbumPage),
+            typeof(CGPage),
         };
 
         /// <summary>UIPF 공용 글꼴 묶음(UIThemeAssets.Fonts). 언어 줄마다 같은 글꼴 — Noto Sans KR은 라틴 글자도 갖는다.</summary>

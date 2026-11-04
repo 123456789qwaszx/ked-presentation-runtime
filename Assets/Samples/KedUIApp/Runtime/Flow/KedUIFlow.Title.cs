@@ -34,6 +34,10 @@ namespace Ked.Samples.UI
                 r => r.LoadClicked -= OpenLoad);
 
             AddBinding(root,
+                r => r.ExtraClicked += OpenExtra,
+                r => r.ExtraClicked -= OpenExtra);
+
+            AddBinding(root,
                 r => r.SwitchExampleClicked += HandleSwitchExampleClicked,
                 r => r.SwitchExampleClicked -= HandleSwitchExampleClicked);
 

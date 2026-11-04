@@ -1116,6 +1116,272 @@
       "pixelsPerUnit": 100,
       "source": "imagegen original scene for handoff",
       "notes": "Optional sample background. Never overwrite actual Stage scene."
+    },
+    {
+      "name": "portrait_harin",
+      "file": "Common/Sprites/portrait_harin.png",
+      "width": 621,
+      "height": 474,
+      "role": "캐릭터 카드 상반신",
+      "imageType": "Simple",
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "pixelsPerUnit": 100,
+      "padding": 0,
+      "source": "Samples/Portraits/*/a/01.png (잘라 냄)",
+      "sourceCrop": "none",
+      "notes": "Placeholder until real art arrives."
+    },
+    {
+      "name": "portrait_sigure",
+      "file": "Common/Sprites/portrait_sigure.png",
+      "width": 621,
+      "height": 474,
+      "role": "캐릭터 카드 상반신",
+      "imageType": "Simple",
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "pixelsPerUnit": 100,
+      "padding": 0,
+      "source": "Samples/Portraits/*/a/01.png (잘라 냄)",
+      "sourceCrop": "none",
+      "notes": "Placeholder until real art arrives."
+    },
+    {
+      "name": "portrait_kasmi",
+      "file": "Common/Sprites/portrait_kasmi.png",
+      "width": 621,
+      "height": 474,
+      "role": "캐릭터 카드 상반신",
+      "imageType": "Simple",
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "pixelsPerUnit": 100,
+      "padding": 0,
+      "source": "Samples/Portraits/*/a/01.png (잘라 냄)",
+      "sourceCrop": "none",
+      "notes": "Placeholder until real art arrives."
+    },
+    {
+      "name": "face_harin",
+      "file": "Common/Sprites/face_harin.png",
+      "width": 192,
+      "height": 192,
+      "role": "캐릭터별 음성 얼굴",
+      "imageType": "Simple",
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "pixelsPerUnit": 100,
+      "padding": 0,
+      "source": "Samples/Portraits/*/a/01.png (잘라 냄)",
+      "sourceCrop": "none",
+      "notes": "Placeholder until real art arrives."
+    },
+    {
+      "name": "face_sigure",
+      "file": "Common/Sprites/face_sigure.png",
+      "width": 192,
+      "height": 192,
+      "role": "캐릭터별 음성 얼굴",
+      "imageType": "Simple",
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "pixelsPerUnit": 100,
+      "padding": 0,
+      "source": "Samples/Portraits/*/a/01.png (잘라 냄)",
+      "sourceCrop": "none",
+      "notes": "Placeholder until real art arrives."
+    },
+    {
+      "name": "face_kasmi",
+      "file": "Common/Sprites/face_kasmi.png",
+      "width": 192,
+      "height": 192,
+      "role": "캐릭터별 음성 얼굴",
+      "imageType": "Simple",
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "pixelsPerUnit": 100,
+      "padding": 0,
+      "source": "Samples/Portraits/*/a/01.png (잘라 냄)",
+      "sourceCrop": "none",
+      "notes": "Placeholder until real art arrives."
+    },
+    {
+      "name": "album_shop",
+      "file": "Screens/Extra/Sprites/album_shop.png",
+      "width": 640,
+      "height": 360,
+      "role": "앨범 · CG 자리 그림",
+      "imageType": "Simple",
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "pixelsPerUnit": 100,
+      "padding": 0,
+      "source": "Samples/Resources/Backgrounds (예제 배경 축소)",
+      "sourceCrop": "none",
+      "notes": "Placeholder until real art arrives."
+    },
+    {
+      "name": "album_hanok",
+      "file": "Screens/Extra/Sprites/album_hanok.png",
+      "width": 640,
+      "height": 360,
+      "role": "앨범 · CG 자리 그림",
+      "imageType": "Simple",
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "pixelsPerUnit": 100,
+      "padding": 0,
+      "source": "Samples/Resources/Backgrounds (예제 배경 축소)",
+      "sourceCrop": "none",
+      "notes": "Placeholder until real art arrives."
+    },
+    {
+      "name": "album_class_day",
+      "file": "Screens/Extra/Sprites/album_class_day.png",
+      "width": 640,
+      "height": 360,
+      "role": "앨범 · CG 자리 그림",
+      "imageType": "Simple",
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "pixelsPerUnit": 100,
+      "padding": 0,
+      "source": "Samples/Resources/Backgrounds (예제 배경 축소)",
+      "sourceCrop": "none",
+      "notes": "Placeholder until real art arrives."
+    },
+    {
+      "name": "album_class_lunch",
+      "file": "Screens/Extra/Sprites/album_class_lunch.png",
+      "width": 640,
+      "height": 360,
+      "role": "앨범 · CG 자리 그림",
+      "imageType": "Simple",
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "pixelsPerUnit": 100,
+      "padding": 0,
+      "source": "Samples/Resources/Backgrounds (예제 배경 축소)",
+      "sourceCrop": "none",
+      "notes": "Placeholder until real art arrives."
+    },
+    {
+      "name": "album_festival",
+      "file": "Screens/Extra/Sprites/album_festival.png",
+      "width": 640,
+      "height": 360,
+      "role": "앨범 · CG 자리 그림",
+      "imageType": "Simple",
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "pixelsPerUnit": 100,
+      "padding": 0,
+      "source": "Samples/Resources/Backgrounds (예제 배경 축소)",
+      "sourceCrop": "none",
+      "notes": "Placeholder until real art arrives."
+    },
+    {
+      "name": "album_staffroom",
+      "file": "Screens/Extra/Sprites/album_staffroom.png",
+      "width": 640,
+      "height": 360,
+      "role": "앨범 · CG 자리 그림",
+      "imageType": "Simple",
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "pixelsPerUnit": 100,
+      "padding": 0,
+      "source": "Samples/Resources/Backgrounds (예제 배경 축소)",
+      "sourceCrop": "none",
+      "notes": "Placeholder until real art arrives."
+    },
+    {
+      "name": "album_studio",
+      "file": "Screens/Extra/Sprites/album_studio.png",
+      "width": 640,
+      "height": 360,
+      "role": "앨범 · CG 자리 그림",
+      "imageType": "Simple",
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "pixelsPerUnit": 100,
+      "padding": 0,
+      "source": "Samples/Resources/Backgrounds (예제 배경 축소)",
+      "sourceCrop": "none",
+      "notes": "Placeholder until real art arrives."
+    },
+    {
+      "name": "icon_lock",
+      "file": "Screens/Extra/Sprites/icon_lock.png",
+      "width": 96,
+      "height": 96,
+      "role": "잠금 아이콘",
+      "imageType": "Simple",
+      "border": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "pixelsPerUnit": 100,
+      "padding": 0,
+      "source": "시안 SVG",
+      "sourceCrop": "none",
+      "notes": "Placeholder until real art arrives."
     }
   ]
 }

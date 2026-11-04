@@ -69,14 +69,64 @@ namespace Ked.Samples.UI.Editor
             string[] labels = { "전체 음량", "배경음", "효과음", "음성" };
             for (int i = 0; i < labels.Length; i++)
             {
-                float y = 295 + i * 93;
+                float y = 272 + i * 64;
                 kit.Label(page, "AudioLabel_" + i, labels[i], 448, y, 230, 42, 23, KedColors.Navy, bold: true);
-                kit.Slider(page, "AudioSlider_" + i, "Audio" + i, new Rect(716, y + 15, 550, 16));
+                kit.Slider(page, "AudioSlider_" + i, "Audio" + i, new Rect(716, y + 13, 550, 16));
                 kit.Label(page, "AudioValue_" + i, "0", 1322, y, 90, 42, 23, KedColors.Navy, TextAlignmentOptions.Right, bold: true);
             }
 
-            kit.Label(page, "MuteLabel", "음소거", 449, 686, 300, 42, 23, KedColors.Navy, bold: true);
-            kit.Switch(page, "MuteToggle", "Mute", new Rect(1320, 685, 90, 40));
+            // 음성 줄 아래로 캐릭터별 음성을 펼친다. 인물은 기록 › 캐릭터와 같은 목록(RecordSpec.Characters).
+            const float voiceRow = 272 + 3 * 64;
+            UINode toggle = kit.RowButton(page, "CharactersToggle", new Rect(514, voiceRow + 6, 132, 30), radius: 15f);
+            kit.Surface(kit.Fill(toggle, "CharactersToggleBase"), KedColors.CurrentRow, radius: 15f);
+            kit.Label(toggle, "CharactersToggleLabel", "캐릭터별", 528, voiceRow + 6, 80, 30, 15, KedColors.Navy,
+                TextAlignmentOptions.Center, bold: true);
+            kit.Label(toggle, "CharactersToggleArrow", "▲", 606, voiceRow + 6, 26, 30, 13, KedColors.Navy,
+                TextAlignmentOptions.Center, bold: true);
+
+            const float listTop = voiceRow + 52;
+            const float rowHeight = 48;
+            int count = Mathf.Min(AudioSettingsPage.CharacterCount, RecordSpec.Characters.Length);
+
+            UINode list = kit.Node(page, "CharacterVoices", 448, listTop, 970, 10 + count * rowHeight);
+            kit.Surface(list, KedColors.WithAlpha(KedColors.White, 0.7f), radius: 14f);
+            kit.Outline(kit.Fill(list, "CharacterVoicesLine"), KedColors.SurfaceLine, 1f);
+
+            for (int i = 0; i < count; i++)
+            {
+                var c = RecordSpec.Characters[i];
+                float y = listTop + 6 + i * rowHeight;
+
+                if (i > 0)
+                    kit.Solid(kit.Node(list, "CharacterLine_" + i, 470, y - 2, 926, 1), KedColors.Divider);
+
+                UINode body = kit.Node(list, "CharacterRowBody_" + i, 460, y, 790, 46);
+                body.Go.AddComponent<CanvasGroup>();
+
+                UINode face = kit.Node(body, "CharacterFace_" + i, 470, y + 5, 36, 36);
+                kit.Surface(face, KedColors.CurrentRow, radius: 18f);
+                face.Go.AddComponent<Mask>().showMaskGraphic = true;
+                kit.Image(kit.Fill(face, "CharacterFaceImage_" + i), "face_" + c.Id);
+
+                kit.Label(body, "CharacterName_" + i, c.Name, 520, y, 180, 46, 19, KedColors.Navy, bold: true);
+                kit.Slider(body, "CharacterSlider_" + i, "Character" + i, new Rect(716, y + 15, 450, 16));
+                kit.Label(body, "CharacterValue_" + i, "0", 1180, y, 60, 46, 19, KedColors.Navy, TextAlignmentOptions.Right, bold: true);
+
+                kit.Switch(list, "CharacterVoice_" + i, "CharacterVoice" + i, new Rect(1322, y + 6, 76, 34), thumbSize: 28f);
+            }
+
+            const float muteExpanded = 698;
+            kit.Label(page, "MuteLabel", "음소거", 449, muteExpanded, 300, 42, 23, KedColors.Navy, bold: true);
+            kit.Switch(page, "MuteToggle", "Mute", new Rect(1320, muteExpanded + 1, 90, 40));
+
+            // 접으면 음소거 줄이 목록 자리(listTop + 12)로 올라간다.
+            var so = new SerializedObject(page.Go.GetComponent<AudioSettingsPage>());
+            SerializedProperty ids = so.FindProperty("characterIds");
+            ids.arraySize = count;
+            for (int i = 0; i < count; i++)
+                ids.GetArrayElementAtIndex(i).stringValue = RecordSpec.Characters[i].Id;
+            so.FindProperty("collapsedShift").floatValue = muteExpanded - (listTop + 12);
+            so.ApplyModifiedPropertiesWithoutUndo();
 
             return page.Go;
         }

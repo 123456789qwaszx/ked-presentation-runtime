@@ -26,21 +26,23 @@ namespace Ked.Samples.UI.Editor
             kit.Label(frame, nameof(R.CurrentExample), "현재 예제  /  —", 116, 345, 600, 36, 20, KedColors.Muted);
 
             // 버튼 열: 예제에 따라 불러오기가 빠진다 — 세로 레이아웃이 자리를 메운다.
-            UINode column = kit.Node(frame, nameof(R.MenuColumn), 110, 422, 390, 444);
+            // 버튼 여섯(감상이 더해짐) — 높이 60 · 간격 12로 줄여 종료까지 판 안에 든다.
+            UINode column = kit.Node(frame, nameof(R.MenuColumn), 110, 404, 390, 464);
             VerticalLayoutGroup layout = column.Go.AddComponent<VerticalLayoutGroup>();
-            layout.spacing = 14f;
+            layout.spacing = 12f;
             layout.childAlignment = TextAnchor.UpperLeft;
             layout.childControlWidth = false;
             layout.childControlHeight = false;
             layout.childForceExpandWidth = false;
             layout.childForceExpandHeight = false;
 
-            kit.TextButton(column, nameof(R.NewGame), nameof(R.NewGameLabel), "처음부터", new Rect(110, 422, 390, 68), KedButtonStyle.Primary);
-            kit.TextButton(column, nameof(R.Continue), nameof(R.ContinueLabel), "이어하기", new Rect(110, 504, 390, 68), KedButtonStyle.Secondary);
-            kit.TextButton(column, nameof(R.Load), nameof(R.LoadLabel), "불러오기", new Rect(110, 586, 390, 68), KedButtonStyle.Secondary);
-            kit.TextButton(column, nameof(R.SwitchExample), nameof(R.SwitchExampleLabel), "다른 예제로", new Rect(110, 668, 390, 68), KedButtonStyle.Secondary);
-            kit.TextButton(column, nameof(R.OpenSettings), nameof(R.OpenSettingsLabel), "설정", new Rect(110, 750, 390, 68), KedButtonStyle.Secondary);
-            kit.LinkButton(column, nameof(R.Quit), nameof(R.QuitLabel), "종료", new Rect(110, 832, 140, 32), 19, KedColors.Muted);
+            kit.TextButton(column, nameof(R.NewGame), nameof(R.NewGameLabel), "처음부터", new Rect(110, 404, 390, 60), KedButtonStyle.Primary, fontSize: 22f);
+            kit.TextButton(column, nameof(R.Continue), nameof(R.ContinueLabel), "이어하기", new Rect(110, 476, 390, 60), KedButtonStyle.Secondary, fontSize: 22f);
+            kit.TextButton(column, nameof(R.Load), nameof(R.LoadLabel), "불러오기", new Rect(110, 548, 390, 60), KedButtonStyle.Secondary, fontSize: 22f);
+            kit.TextButton(column, nameof(R.OpenExtra), nameof(R.OpenExtraLabel), "감상", new Rect(110, 620, 390, 60), KedButtonStyle.Secondary, fontSize: 22f);
+            kit.TextButton(column, nameof(R.SwitchExample), nameof(R.SwitchExampleLabel), "다른 예제로", new Rect(110, 692, 390, 60), KedButtonStyle.Secondary, fontSize: 22f);
+            kit.TextButton(column, nameof(R.OpenSettings), nameof(R.OpenSettingsLabel), "설정", new Rect(110, 764, 390, 60), KedButtonStyle.Secondary, fontSize: 22f);
+            kit.LinkButton(column, nameof(R.Quit), nameof(R.QuitLabel), "종료", new Rect(110, 836, 140, 32), 19, KedColors.Muted);
 
             // 예제 카드: 둥근 틀 안에 실제 예제 배경(런타임에 호스트가 준다)과 이름 띠.
             UINode preview = kit.Node(frame, nameof(R.ScenePreview), 700, 169, 780, 486);

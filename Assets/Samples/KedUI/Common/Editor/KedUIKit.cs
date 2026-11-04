@@ -408,6 +408,28 @@ namespace Ked.Samples.UI.Editor
                 labelSelected: color);
         }
 
+        // 목록의 한 줄(팁 목록). 고르면 옅은 청록 바탕. 안의 그림 · 글자는 명세가 이 노드 아래에 둔다.
+        public UINode RowButton(UINode parent, string name, Rect design, float radius = 12f)
+        {
+            UINode node = Node(parent, name, design, UIAnchor.TopLeft);
+            CenterPivot(node.Rect);
+            Image background = Surface(node, Color.white, radius, raycast: true);
+
+            Button button = AddButton(node, background);
+            GameObject ring = FocusRing(node, name + "Focus");
+
+            AddLook(node, button, background, ring, null,
+                normalSprite: null,
+                hoverSprite: null,
+                selectedSprite: null,
+                backgroundNormal: new Color(1f, 1f, 1f, 0f),
+                backgroundSelected: KedColors.CurrentRow,
+                labelNormal: KedColors.Navy,
+                labelSelected: KedColors.Navy);
+
+            return node;
+        }
+
         // 버튼은 가운데를 기준점으로 — 누름 연출(ButtonAnimation, localScale)이 가운데로 줄어들게. 자리는 그대로 둔다.
         private static void CenterPivot(RectTransform rect) => UINodes.CenterPivot(rect);
 

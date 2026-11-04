@@ -209,7 +209,8 @@ Samples/KedUI/
 │   ├─ Title/              TitleScreen
 │   ├─ Play/               PlayScreen(+ 대사창 · 선택지 상자 어댑터) · 선택지 항목 KedOptionItem · Data/ 대사창 배치 DB
 │   ├─ Menu/               SystemMenuPanel
-│   ├─ SaveLoad/           SaveLoadPanel(+ 위젯 SaveSlotCard)
+│   ├─ Record/             RecordPanel + Page 넷(저장 · 불러오기 · 팁 · 캐릭터, + 위젯 SaveSlotCard) — 11-04 SaveLoad/를 바꿈(맨 아래 "기록 · 감상")
+│   ├─ Extra/              ExtraPanel + Page 둘(앨범 · CG) — 11-04
 │   ├─ Backlog/            BacklogPanel(+ 위젯 BacklogRow)
 │   ├─ Settings/           SettingsPanel + Page 넷(Page는 주인 Panel의 묶음)
 │   └─ Modal/              ConfirmPanel · NoticePanel(명세 하나가 둘을 만든다)
@@ -596,3 +597,21 @@ App(흐름 · 바인딩 · KedUIHost)을 asmdef(`Ked.Samples.UI.App` · `.App.Ed
     그 일은 `Confirm(question, onAccept, …)`의 인자로 받아 흐름이 든다(`_confirmAccepted`, 모달이라 하나). 창은 콜백을 받지 않고 `Resolved(bool)`만 낸다.
   - 쓰이지 않던 `OnCancel` · `OnClosed` · `NoticePanel.Kind`와 흐름의 `Format` 도우미를 지웠다.
 
+
+### 기록 · 감상 Panel — UI 세 계층 (2026-11-04, 소유자 결정)
+
+- 세 계층: 사전 세팅(`SettingsPanel`) · 플레이 중 조작(`RecordPanel`) · 감상(`ExtraPanel`, 타이틀에서). 시안 8장(타이틀 · 기록 넷 · 감상 둘 · 설정 음량 탭)을 먼저 받고 그대로 지었다.
+- 기록(`Screens/Record/`, 옛 `SaveLoad/`를 바꿈): Page 넷 — `SavePage` · `LoadPage`(몸은 추상 `SaveSlotsPage` 하나, 탭 글자만 다르다) · `TipsPage` · `CharactersPage`. 틀은 옛 저장 화면 그대로, 탭 한 칸이 넷으로.
+  - 여는 길은 흐름의 `OpenRecord(탭)` 하나 — 메뉴의 저장 · 불러오기, 타이틀의 불러오기(LoadPage), 차후 알림(toast)도 이 입구로.
+  - 저장 탭은 재생 중에만, 저장 · 불러오기 탭은 저장 슬롯이 있는 예제에서만 누를 수 있다. 슬롯 탭을 열 때마다 목록을 다시 읽는다.
+  - `KedUIFlow.SaveLoad.cs` → `KedUIFlow.Record.cs`. `SaveSlotsState`는 그대로(모델만 `SaveSlotsPage.Model`, 안내는 `Ready · NoSaves · Unreadable`).
+- 감상(`Screens/Extra/`): `AlbumPage` · `CGPage`. 해금은 판정하지 않는다(프레임워크 범위 밖) — 잠김 · 열림은 명세 상수 그대로라 Page에 묶을 것이 없다. 크게 보기는 아직 없다.
+- 설정 음량 탭: 음성 줄 아래 캐릭터별 음성(음량 · 켜기/끄기, "캐릭터별 ▲" 단추로 접고 편다). 줄 간격 93 → 64.
+  값은 `KedSettings.CharacterVoices`(PlayerPrefs `KedUI.CharacterVoices`)에 저장하고 재생(VoicePlayer)에는 반영하지 않는다. 기록 › 캐릭터의 켜기/끄기도 같은 값, 기본값 복원이 함께 지운다.
+- 고정 내용(팁 일곱 · 인물 셋 · 앨범 여덟 · CG 열다섯)은 `RecordSpec` · `ExtraSpec` 상수다. 글자 표에는 넣지 않았다(영어 화면에서도 한국어로 보인다).
+  인물 id는 Page에 직렬화해 두고(명세가 넣는다) 흐름은 id로만 값을 다룬다. 인물 목록은 `RecordSpec.Characters` 하나를 설정 명세도 쓴다.
+- 그림: 여러 묶음이 쓰게 된 아이콘(back · next · voice · auto · backlog · fast_forward · hide_ui · save · settings)을 `Common/Sprites`로 옮겼다(.meta 그대로 — GUID 유지).
+  새 자리 그림 — `portrait_*` · `face_*`(Common, 예제 초상에서 잘라 냄) · `album_*` · `icon_lock`(Extra). 모두 `asset-manifest.json`에 적었다.
+- 시안과 다른 것: 캐릭터 · 앨범 · CG의 쪽 넘김 없음(내용이 프리팹에 고정이라 한 쪽에 다 든다), 팁 그림 자리는 아이콘만, 감상 칸의 선택 테두리 없음(누를 것이 없다).
+- 타이틀: 불러오기 아래 "감상". 버튼 여섯이 되어 높이 68 → 60, 간격 14 → 12.
+- Unity에서 할 일: `Tools/Ked UI/Build Sample UI` → `Validate Sample UI`. 옛 `SaveLoadPanel.prefab` · Presentation은 지웠다 — 빌드가 새 프리팹 · Presentation을 만든다.

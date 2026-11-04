@@ -119,6 +119,18 @@ namespace Ked.Samples.UI
             AddBinding(page,
                 p => p.MuteChanged += HandleMuteChanged,
                 p => p.MuteChanged -= HandleMuteChanged);
+
+            AddBinding(page,
+                p => p.CharactersToggleClicked += HandleCharactersToggleClicked,
+                p => p.CharactersToggleClicked -= HandleCharactersToggleClicked);
+
+            AddBinding(page,
+                p => p.CharacterVolumeChanged += HandleCharacterVolumeChanged,
+                p => p.CharacterVolumeChanged -= HandleCharacterVolumeChanged);
+
+            AddBinding(page,
+                p => p.CharacterVoiceToggled += HandleCharacterVoiceToggled,
+                p => p.CharacterVoiceToggled -= HandleCharacterVoiceToggled);
         }
 
         private void ApplyBindings(TextSettingsPage page)
@@ -226,6 +238,26 @@ namespace Ked.Samples.UI
             SettingsValues.Store();
         }
 
+        private void HandleCharactersToggleClicked()
+        {
+            _settings.CharacterVoicesExpanded = !_settings.CharacterVoicesExpanded;
+            RefreshAudioPage(_ui.GetUI<AudioSettingsPage>());
+        }
+
+        // 캐릭터별 음성은 화면만 — 값은 저장하고 재생(VoicePlayer)에는 아직 반영하지 않는다.
+        private void HandleCharacterVolumeChanged(string characterId, float volume)
+        {
+            _settings.SetCharacterVolume(characterId, volume);
+            SettingsValues.Store();
+        }
+
+        private void HandleCharacterVoiceToggled(string characterId, bool on)
+        {
+            _settings.SetCharacterVoiceOn(characterId, on);
+            SettingsValues.Store();
+            RefreshAudioPage(_ui.GetUI<AudioSettingsPage>());
+        }
+
         private void HandleTextScaleChanged(float scale)
         {
             _settings.SetTextScale(scale);
@@ -281,7 +313,8 @@ namespace Ked.Samples.UI
             page.Present(_settings.AudioModel(
                 volume != null ? volume.BgmVolume : DefaultChannelVolume,
                 volume != null ? volume.SfxVolume : DefaultChannelVolume,
-                volume != null ? volume.VoiceVolume : DefaultChannelVolume));
+                volume != null ? volume.VoiceVolume : DefaultChannelVolume,
+                page.CharacterIds));
         }
 
         private void RefreshTextPage(TextSettingsPage page)

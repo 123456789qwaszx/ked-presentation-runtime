@@ -16,6 +16,9 @@ namespace Ked.Samples.UI
         public IReadOnlyList<float> SpeedChoices => _speedChoices;
         public SettingsPanel.Tab Tab { get; set; }
 
+        // 음량 탭의 캐릭터별 음성을 펼쳤는가. 저장하지 않는다.
+        public bool CharacterVoicesExpanded { get; set; } = true;
+
         // 화면 탭은 되돌릴 값이 없다(창 모드는 엔진이 기억한다).
         public bool CanResetTab => Tab != SettingsPanel.Tab.Display;
 
@@ -65,6 +68,12 @@ namespace Ked.Samples.UI
             SetBoxOpacity(saved.BoxOpacity);
             SetAutoDelay(saved.AutoDelay);
             SetSpeedUp(saved.SpeedUpMultiplier);
+
+            foreach (KeyValuePair<string, KedSettings.CharacterVoice> pair in saved.CharacterVoices)
+            {
+                SetCharacterVolume(pair.Key, pair.Value.Volume);
+                SetCharacterVoiceOn(pair.Key, pair.Value.On);
+            }
         }
 
         #region 값 바꾸기
@@ -95,6 +104,22 @@ namespace Ked.Samples.UI
             return true;
         }
 
+        public void SetCharacterVolume(string id, float volume) => VoiceFor(id).Volume = Math.Clamp(volume, 0f, 1f);
+
+        public void SetCharacterVoiceOn(string id, bool on) => VoiceFor(id).On = on;
+
+        private KedSettings.CharacterVoice VoiceFor(string id)
+        {
+            if (!Values.CharacterVoices.TryGetValue(id, out KedSettings.CharacterVoice voice))
+                Values.CharacterVoices[id] = voice = new KedSettings.CharacterVoice();
+
+            return voice;
+        }
+
+        // 읽기만 — 없는 인물은 기본값.
+        private KedSettings.CharacterVoice VoiceOf(string id) =>
+            Values.CharacterVoices.TryGetValue(id, out KedSettings.CharacterVoice voice) ? voice : new KedSettings.CharacterVoice();
+
         #endregion
 
         // 지금 탭의 값을 기본값으로. 음량 탭의 채널 음량(배경음 · 효과음 · 음성)은 본체가 저장하므로 흐름이 되돌린다.
@@ -105,6 +130,7 @@ namespace Ked.Samples.UI
                 case SettingsPanel.Tab.Audio:
                     Values.MasterVolume = Defaults.MasterVolume;
                     Values.Muted = Defaults.Muted;
+                    Values.CharacterVoices.Clear();
                     break;
 
                 case SettingsPanel.Tab.Text:
@@ -120,15 +146,39 @@ namespace Ked.Samples.UI
             }
         }
 
-        // 채널 음량은 본체가 들고 있어 흐름이 넘긴다.
-        public AudioSettingsPage.Model AudioModel(float bgm, float sfx, float voice) => new()
+        // 채널 음량은 본체가 들고 있어 흐름이 넘긴다. 인물은 Page가 보이는 순서(characterIds)대로.
+        public AudioSettingsPage.Model AudioModel(float bgm, float sfx, float voice, IReadOnlyList<string> characterIds)
         {
-            Master = Values.MasterVolume,
-            Bgm = bgm,
-            Sfx = sfx,
-            Voice = voice,
-            Muted = Values.Muted,
-        };
+            var characters = new AudioSettingsPage.CharacterVoice[characterIds.Count];
+
+            for (int i = 0; i < characters.Length; i++)
+            {
+                KedSettings.CharacterVoice v = VoiceOf(characterIds[i]);
+                characters[i] = new AudioSettingsPage.CharacterVoice { Volume = v.Volume, On = v.On };
+            }
+
+            return new AudioSettingsPage.Model
+            {
+                Master = Values.MasterVolume,
+                Bgm = bgm,
+                Sfx = sfx,
+                Voice = voice,
+                Muted = Values.Muted,
+                CharactersExpanded = CharacterVoicesExpanded,
+                Characters = characters,
+            };
+        }
+
+        // 기록 › 캐릭터의 켜기/끄기. 같은 값을 쓴다.
+        public CharactersPage.Model CharactersModel(IReadOnlyList<string> characterIds)
+        {
+            var on = new bool[characterIds.Count];
+
+            for (int i = 0; i < on.Length; i++)
+                on[i] = VoiceOf(characterIds[i]).On;
+
+            return new CharactersPage.Model { VoiceOn = on };
+        }
 
         public TextSettingsPage.Model TextModel() => new()
         {

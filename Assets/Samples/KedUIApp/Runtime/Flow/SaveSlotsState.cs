@@ -8,7 +8,7 @@ namespace Ked.Samples.UI
     /// <summary>
     /// 저장 · 불러오기 화면의 상태와 규칙 — 어느 기록이 몇 쪽 몇째 칸인지, 무엇을 고를 수 있는지, 무엇을 보일지.
     /// 슬롯 목록과 불러오기 가능 판정을 받아 화면 모델(뜻)을 낸다. 호스트 · UIPF · 화면 동작을 모르고,
-    /// 글자와 형식은 화면(SaveLoadPanel · SaveSlotCard)이 정한다. 저장 · 불러오기를 부르는 것은 흐름(KedUIFlow.SaveLoad)이다.
+    /// 글자와 형식은 화면(SavePage · LoadPage · SaveSlotCard)이 정한다. 저장 · 불러오기를 부르는 것은 흐름(KedUIFlow.Record)이다.
     ///
     /// 칸: 저장 서비스의 슬롯은 번호 칸이 아니라 목록이고, 덮어쓰면 그 항목이 목록 끝으로 간다.
     /// 그래서 최근 저장이 01이다(SavedAtUtc 내림차순). 저장 모드에서는 목록 다음 칸 하나가 "새로 저장" 칸이고,
@@ -16,7 +16,7 @@ namespace Ked.Samples.UI
     /// </summary>
     internal sealed class SaveSlotsState
     {
-        private const int PerPage = SaveLoadPanel.SlotsPerPage;
+        private const int PerPage = SaveSlotsPage.SlotsPerPage;
 
         private readonly List<SaveSlotEntry> _entries = new();
         private readonly Dictionary<string, bool> _loadable = new(StringComparer.Ordinal);
@@ -102,7 +102,7 @@ namespace Ked.Samples.UI
             return true;
         }
 
-        public SaveLoadPanel.Model ToModel(bool busy, bool canSave, bool focus)
+        public SaveSlotsPage.Model ToModel(bool busy, bool canSave, bool focus)
         {
             int first = Page * PerPage;
             var cards = new SaveSlotCard.Model[PerPage];
@@ -110,15 +110,13 @@ namespace Ked.Samples.UI
             for (int i = 0; i < cards.Length; i++)
                 cards[i] = CardFor(first + i);
 
-            SaveLoadPanel.Hint hint =
-                !Readable ? SaveLoadPanel.Hint.Unreadable
-                : !SaveMode && _entries.Count == 0 ? SaveLoadPanel.Hint.NoSaves
-                : SaveMode ? SaveLoadPanel.Hint.Save
-                : SaveLoadPanel.Hint.Load;
+            SaveSlotsPage.Hint hint =
+                !Readable ? SaveSlotsPage.Hint.Unreadable
+                : !SaveMode && _entries.Count == 0 ? SaveSlotsPage.Hint.NoSaves
+                : SaveSlotsPage.Hint.Ready;
 
-            return new SaveLoadPanel.Model
+            return new SaveSlotsPage.Model
             {
-                SaveMode = SaveMode,
                 Hint = hint,
                 Page = Page,
                 PageCount = PageCount,

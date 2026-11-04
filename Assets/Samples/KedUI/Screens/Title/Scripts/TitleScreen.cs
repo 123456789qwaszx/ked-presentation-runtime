@@ -7,7 +7,7 @@ namespace Ked.Samples.UI
 {
     /// <summary>
     /// 01 타이틀. UIPF Root — 타이틀과 재생 화면(PlayScreen)이 Root 층을 번갈아 차지한다.
-    /// 처음부터 · 이어하기 · 불러오기(저장 슬롯이 있는 예제) · 다른 예제로 · 설정 · 종료.
+    /// 처음부터 · 이어하기 · 불러오기(저장 슬롯이 있는 예제) · 감상 · 다른 예제로 · 설정 · 종료.
     /// 예제 이름·소개는 호스트가 준 키로 표에서 읽는다. 이어할 기록이 없으면 이어하기를 막는다.
     /// </summary>
     [UIViewKey("Ked.TitleScreen")]
@@ -31,6 +31,8 @@ namespace Ked.Samples.UI
             ContinueLabel,
             Load,
             LoadLabel,
+            OpenExtra,
+            OpenExtraLabel,
             SwitchExample,
             SwitchExampleLabel,
             OpenSettings,
@@ -49,6 +51,7 @@ namespace Ked.Samples.UI
         public event Action StartClicked;
         public event Action ContinueClicked;
         public event Action LoadClicked;
+        public event Action ExtraClicked;
         public event Action SwitchExampleClicked;
         public event Action SettingsClicked;
         public event Action QuitClicked;
@@ -69,6 +72,7 @@ namespace Ked.Samples.UI
             KedUIUtil.OnClick(View.Button(Refs.NewGame), () => StartClicked?.Invoke());
             KedUIUtil.OnClick(View.Button(Refs.Continue), () => ContinueClicked?.Invoke());
             KedUIUtil.OnClick(View.Button(Refs.Load), () => LoadClicked?.Invoke());
+            KedUIUtil.OnClick(View.Button(Refs.OpenExtra), () => ExtraClicked?.Invoke());
             KedUIUtil.OnClick(View.Button(Refs.SwitchExample), () => SwitchExampleClicked?.Invoke());
             KedUIUtil.OnClick(View.Button(Refs.OpenSettings), () => SettingsClicked?.Invoke());
             KedUIUtil.OnClick(View.Button(Refs.Quit), () => QuitClicked?.Invoke());
