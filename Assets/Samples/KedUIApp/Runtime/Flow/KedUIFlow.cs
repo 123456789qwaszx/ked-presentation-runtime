@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Ked.Progression;
 using UnityEngine;
 using Yarn.Unity;
 
@@ -99,6 +98,12 @@ namespace Ked.Samples.UI
         private void HandleGoToTitle()
         {
             CloseAllPanels();
+
+            // 의도를 비우고(Hold) 맞추면(Release) 흐르던 곡이 끊김.
+            BgmPlayer bgm = _audio.Bgm;
+            bgm?.Hold();
+            bgm?.Release();
+
             OpenTitle();
         }
 
