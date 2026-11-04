@@ -21,7 +21,7 @@ namespace Ked.Samples.UI
 
         private void ConfigureBacklog()
         {
-            _backlogSpeakers = new YarnSpeakerNames(_playback.DialogueRunner);
+            _backlogSpeakers = new YarnSpeakerNames(_scene.DialogueRunner);
         }
 
         // 다시 듣던 보이스가 저절로 끝났거나(다음 줄 · 롤백 포함) 다른 보이스가 덮었으면 그림을 끈다.

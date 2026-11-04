@@ -42,8 +42,9 @@ public class SampleBootstrap : MonoBehaviour, IRigPrefabSource
         PresentationDemo = 1,
     }
 
+    private PresentationSceneRefs _sceneRefs;
     private PresentationRuntime _runtime;
-    private PresentationInternals _internals;
+    private PlaybackRuntimeState _playbackState;
 
     // 새 예제 UI(화면 전부).
     private KedUI.KedUIHost _kedUI;
@@ -186,10 +187,11 @@ public class SampleBootstrap : MonoBehaviour, IRigPrefabSource
             return;
         }
 
+        _sceneRefs = CreatePresentationSceneRefs();
         _runtime = PresentationAssembler.Build(
-            CreatePresentationSceneRefs(),
+            _sceneRefs,
             _kedUI.PresentationView,
-            out _internals);
+            out _playbackState);
 
         _runtime.AttachHost(InstallProgression());
         InstallProgressionSaves();
@@ -230,25 +232,14 @@ public class SampleBootstrap : MonoBehaviour, IRigPrefabSource
 
     private void ConfigureKedUI()
     {
-        var playback = new KedUI.KedPlaybackBindings
-        {
-            Features = _runtime.Features,
-            AdvanceDispatcher = _runtime.AdvanceDispatcher,
-            LineFlow = _runtime.LineFlow,
-            InputPoller = vnAdvanceInputPoller,
-            PlaybackState = _internals.PlaybackState,
-            Typewriter = ellipsisBreathTypewriter,
-            Audio = audioSystem,
-            DialogueRunner = dialogueRunner,
-        };
-
         SampleExample other = SampleExampleSwitch.Other(_example);
 
         _kedUI.Configure(
-            playback,
+            _runtime,
+            _playbackState,
+            _sceneRefs,
             _progressionLauncher,
             _manualSaveFlow,
-            stage,
             ExampleCard(_example),
             HasProgressionResumePoint,
             () => SampleExampleSwitch.SwitchTo(other));

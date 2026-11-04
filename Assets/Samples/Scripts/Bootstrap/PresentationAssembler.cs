@@ -63,16 +63,16 @@ public sealed class PresentationAssembler
         return Build(refs, presentationView, out _);
     }
 
-    /// <param name="internals">예제 UI가 읽는 조립 안쪽 상태(재생 모드). 연출 런타임은 내놓지 않는 것이라 여기서 건넨다.</param>
+    /// <param name="playbackState">예제 UI가 읽는 재생 모드(자동·빨리 넘기기 켜짐, 재생 설정). 연출 런타임은 내놓지 않는 것이라 여기서 건넨다.</param>
     public static PresentationRuntime Build(
         PresentationSceneRefs refs,
         IPresentationView presentationView,
-        out PresentationInternals internals)
+        out PlaybackRuntimeState playbackState)
     {
         var assembler = new PresentationAssembler(refs, presentationView);
         PresentationRuntime runtime = assembler.Assemble();
 
-        internals = new PresentationInternals(assembler._playbackState);
+        playbackState = assembler._playbackState;
 
         return runtime;
     }
@@ -415,20 +415,5 @@ public sealed class PresentationAssembler
 #else
         return null;
 #endif
-    }
-}
-
-/// <summary>
-/// 조립 안쪽에서 예제 UI(KedUI)가 읽는 것.
-/// - PlaybackState: 자동·빨리 넘기기의 켜짐(퀵메뉴 표시)과 재생 설정(자동 대기·빠르게 재생 배속).
-/// 연출 런타임(PresentationRuntime)의 공개 면을 넓히지 않으려고 예제 조립이 예제 층 안에서만 건넨다.
-/// </summary>
-public sealed class PresentationInternals
-{
-    public PlaybackRuntimeState PlaybackState { get; }
-
-    public PresentationInternals(PlaybackRuntimeState playbackState)
-    {
-        PlaybackState = playbackState;
     }
 }

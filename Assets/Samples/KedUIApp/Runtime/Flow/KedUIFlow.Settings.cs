@@ -18,10 +18,10 @@ namespace Ked.Samples.UI
         // 기본값은 씬 · 본체에 적힌 값(출력 속도 · 자동 대기 · 배속)을 읽어 쓴다. 저장된 값이 있으면 그것을 적용한다.
         private void ConfigureSettings()
         {
-            PlaybackSettings playback = _playback.PlaybackState?.PlaybackSettings;
+            PlaybackSettings playback = _playbackState?.PlaybackSettings;
 
             _settings.SetDefaults(
-                typeSpeed: _playback.Typewriter != null ? _playback.Typewriter.unitsPerSecond : 30f,
+                typeSpeed: _scene.EllipsisBreathTypewriter != null ? _scene.EllipsisBreathTypewriter.unitsPerSecond : 30f,
                 autoDelay: playback != null ? playback.autoModeDelaySeconds : 1.5f,
                 speedUp: playback != null ? playback.speedupModeMultiplier : 12f,
                 minMultiplier: playback != null ? playback.speedupModeMinMultiplier : 2f,
@@ -276,7 +276,7 @@ namespace Ked.Samples.UI
 
         #region 적용 — 엔진 · 본체
 
-        private AudioVolumeSettings Volume => _playback?.Audio != null ? _playback.Audio.Volume : null;
+        private AudioVolumeSettings Volume => _scene?.AudioSystem != null ? _scene.AudioSystem.Volume : null;
 
         // 지금 값을 엔진 · 본체에 모두 적용한다. 같은 값을 다시 적용해도 그대로다.
         private void ApplySettings()
@@ -302,8 +302,8 @@ namespace Ked.Samples.UI
 
         private void ApplyTypeSpeed()
         {
-            if (_playback.Typewriter != null)
-                _playback.Typewriter.unitsPerSecond = SettingsValues.TypeSpeed;
+            if (_scene.EllipsisBreathTypewriter != null)
+                _scene.EllipsisBreathTypewriter.unitsPerSecond = SettingsValues.TypeSpeed;
         }
 
         // 대사창 불투명도는 재생 화면에 그린다.
@@ -316,7 +316,7 @@ namespace Ked.Samples.UI
         // 배속은 상태가 본체 범위 안의 보기로만 둔다.
         private void ApplyPlaybackSettings()
         {
-            PlaybackSettings playback = _playback.PlaybackState?.PlaybackSettings;
+            PlaybackSettings playback = _playbackState?.PlaybackSettings;
             if (playback == null)
                 return;
 

@@ -14,10 +14,13 @@ namespace Ked.Samples.UI
 
         private readonly Dictionary<UIBase, List<Action>> _cleanupByView = new();
 
-        private KedPlaybackBindings _playback;
+        // 재생 쪽 — 조립 결과(runtime) · 재생 모드(playbackState) · 씬 부품(scene: 무대 · 입력 폴러 · 타자기 · 오디오 · Yarn 러너).
+        private PresentationRuntime _runtime;
+        private PlaybackRuntimeState _playbackState;
+        private PresentationSceneRefs _scene;
+
         private ProgressionLauncher _launcher;
         private ManualSaveFlow _saves;
-        private PresentationUIRoot _stage;
         private KedExampleCard _example;
         private Func<bool> _hasResumePoint;
         private Action _switchExample;
@@ -54,10 +57,11 @@ namespace Ked.Samples.UI
             _optionsBoxView ??= new KedOptionsBoxView(_playScreen.Options);
 
         public void Configure(
-            KedPlaybackBindings playback,
+            PresentationRuntime runtime,
+            PlaybackRuntimeState playbackState,
+            PresentationSceneRefs scene,
             ProgressionLauncher launcher,
             ManualSaveFlow saves,
-            PresentationUIRoot stage,
             KedExampleCard example,
             Func<bool> hasResumePoint,
             Action switchExample)
@@ -65,17 +69,18 @@ namespace Ked.Samples.UI
             if (_configured)
                 throw new InvalidOperationException("[Ked UI] 흐름은 한 번만 잇는다.");
 
-            _playback = playback;
+            _runtime = runtime;
+            _playbackState = playbackState;
+            _scene = scene;
             _launcher = launcher;
             _saves = saves;
-            _stage = stage;
             _example = example;
             _hasResumePoint = hasResumePoint;
             _switchExample = switchExample;
             _configured = true;
 
-            if (playback.InputPoller != null)
-                playback.InputPoller.InputBlocked = IsPlaybackInputBlocked;
+            if (scene.InputPoller != null)
+                scene.InputPoller.InputBlocked = IsPlaybackInputBlocked;
 
             ConfigurePlay();
             ConfigureBacklog();
@@ -84,8 +89,8 @@ namespace Ked.Samples.UI
 
         public void Dispose()
         {
-            if (_playback?.InputPoller != null)
-                _playback.InputPoller.InputBlocked = null;
+            if (_scene?.InputPoller != null)
+                _scene.InputPoller.InputBlocked = null;
 
             DisposePlay();
 
@@ -168,7 +173,7 @@ namespace Ked.Samples.UI
 
         #region 호스트
 
-        private PlaybackFeatureController Features => _playback?.Features;
+        private PlaybackFeatureController Features => _runtime?.Features;
 
         private bool IsRunning => _launcher != null && _launcher.IsRunning;
 
@@ -178,7 +183,7 @@ namespace Ked.Samples.UI
         // 그러지 않으면 다음 회차의 첫 줄부터 넘어간다. 자동 진행은 옛 UI와 같이 둔다.
         private void StopFastForward()
         {
-            if (_playback?.PlaybackState != null && _playback.PlaybackState.IsRapidSkipMode)
+            if (_playbackState != null && _playbackState.IsRapidSkipMode)
                 Features?.EndRapidSkip();
         }
 

@@ -96,15 +96,16 @@ namespace Ked.Samples.UI
 
         /// <summary>재생과 호스트를 잇는다.</summary>
         public void Configure(
-            KedPlaybackBindings playback,
+            PresentationRuntime runtime,
+            PlaybackRuntimeState playbackState,
+            PresentationSceneRefs scene,
             ProgressionLauncher launcher,
             ManualSaveFlow saves,
-            PresentationUIRoot stage,
             KedExampleCard example,
             Func<bool> hasResumePoint,
             Action switchExample)
         {
-            RequireFlow().Configure(playback, launcher, saves, stage, example, hasResumePoint, switchExample);
+            RequireFlow().Configure(runtime, playbackState, scene, launcher, saves, example, hasResumePoint, switchExample);
         }
 
         public void OpenTitle()

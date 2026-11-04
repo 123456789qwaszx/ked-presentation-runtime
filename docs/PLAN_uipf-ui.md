@@ -452,7 +452,7 @@ UIPF 저장소의 Adaptive UI 데모를 걷고, 그 자리에 이 VN UI를 샘�
 - 본체(`Ked.Presentation/`)는 한 줄도 바꾸지 않았다. 새 UI는 본체의 계약(`IPresentationDialogueBoxView` · `IPresentationOptionsBoxView` · `IPresentationView`)과 공개 API(`VNFeatureController` · `IPlaybackHost` · `DialogueAdvanceDispatcher` · `VNLinePresentationFlow.LineDisplayed`)만 쓴다.
 - 예제 층에서 바꾼 것:
   - `PresentationSceneRefs` — 대사창·선택지 상자 칸 둘(비우면 옛 UI).
-  - `PresentationAssembler` — 위 칸을 쓰고, `Build(…, out PresentationInternals)`로 재생 모드 상태와 지금 장면 이름을 예제 UI에 건넨다.
+  - `PresentationAssembler` — 위 칸을 쓰고, `Build(…, out PresentationInternals)`로 재생 모드 상태와 지금 장면 이름을 예제 UI에 건넨다(2026-11-04부터 `out PlaybackRuntimeState` — 아래).
   - `SampleBootstrap` — `useKedUI` 스위치, 화면과 무관한 진행 저장 설치를 화면 설정에서 떼어 냄(`InstallProgressionSaves`), 이어하기 가능 여부(`HasProgressionResumePoint` — 부수 효과 없는 읽기).
   - `NodePlaythrough.HasResumePoint` — 읽기만 하는 확인.
   - `PresentationUIRoot.SetLegacyHudVisible` — 옛 HUD 층만 감춘다(무대 층은 그대로).
@@ -550,6 +550,7 @@ App(흐름 · 바인딩 · KedUIHost)을 asmdef(`Ked.Samples.UI.App` · `.App.Ed
 - 한 클래스라 화면 것에는 화면 이름을 붙였다(`_saveLoadPage` · `_settingsTab` · `OpenSaveLoad` · `TickBacklog` …).
 - 지운 것: `ScreenBinding`, `KedUIServices`, `Bindings/` 폴더(바인딩 8개). 동작은 그대로다.
 - 2026-11-04 UIManager와 겹치던 겹을 걷었다(소유자 결정): 화면 전환 래퍼(`SwitchRoot` · `PushPanel` · `SwitchPage` — 이제 `_ui`를 바로 부르고 `Presentation<T>()`와 `Unbind`만 넘긴다. 닫기 둘은 옛 구조처럼 `Unbind`만 붙인 한 줄), `Require<T>`와 화면 필드 아홉(`_ui.GetUI<T>()` · `_ui.TopPanel is T`), `IsTop` · `EnsureFocus`, `SyncInput` · `KedInputOwnership` · `LateTick`(폴러가 묻는 `InputBlocked`로 — 위 "입력 소유권"). `KedUIFlow.cs` 359 → 288줄.
+- 2026-11-04 `KedPlaybackBindings`(10-27 `KedPorts.cs`부터 있던 재생 쪽 꾸러미)와 `PresentationInternals`(칸 하나)를 걷었다(소유자 결정). 여덟 칸이 이미 `PresentationRuntime`(전진 · 기능 · 줄 흐름) · `PresentationSceneRefs`(무대 · 입력 폴러 · 타자기 · 오디오 · Yarn 러너)에 묶여 있었다. 흐름은 `Configure(runtime, playbackState, scene, …)`로 그대로 받고, `Build`는 `out PlaybackRuntimeState`를 내준다.
 
 ### 화면 상태 시범 — 저장/불러오기 (2026-11-03)
 

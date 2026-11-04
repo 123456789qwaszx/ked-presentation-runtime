@@ -13,14 +13,14 @@ namespace Ked.Samples.UI
 
         private void ConfigurePlay()
         {
-            if (_playback.LineFlow != null)
-                _playback.LineFlow.LineDisplayed += HandleLineDisplayed;
+            if (_runtime.LineFlow != null)
+                _runtime.LineFlow.LineDisplayed += HandleLineDisplayed;
         }
 
         private void DisposePlay()
         {
-            if (_playback?.LineFlow != null)
-                _playback.LineFlow.LineDisplayed -= HandleLineDisplayed;
+            if (_runtime?.LineFlow != null)
+                _runtime.LineFlow.LineDisplayed -= HandleLineDisplayed;
         }
 
         // 퀵메뉴의 켜짐 표시(자동 진행 · 빨리 넘기기).
@@ -29,7 +29,7 @@ namespace Ked.Samples.UI
             if (!IsPlayRoot)
                 return;
 
-            PlaybackRuntimeState state = _playback.PlaybackState;
+            PlaybackRuntimeState state = _playbackState;
             if (state != null)
                 _playScreen.SetModes(state.IsAutoMode, state.IsRapidSkipMode);
         }
@@ -55,8 +55,9 @@ namespace Ked.Samples.UI
         // 무대(PresentationUIRoot)는 씬의 무대 캔버스에 늘 놓여 있고 UI는 그 위 캔버스에 얹힌다 — 꺼져 있으면 켠다.
         private void ShowStage()
         {
-            if (_stage != null && !_stage.gameObject.activeSelf)
-                _stage.gameObject.SetActive(true);
+            PresentationUIRoot stage = _scene?.Stage;
+            if (stage != null && !stage.gameObject.activeSelf)
+                stage.gameObject.SetActive(true);
         }
 
         private void RestoreHud() => _playScreen.SetHudHidden(false);
@@ -100,7 +101,7 @@ namespace Ked.Samples.UI
 
         private void HandleAdvance()
         {
-            _playback?.AdvanceDispatcher?.DispatchAdvance();
+            _runtime?.AdvanceDispatcher?.DispatchAdvance();
         }
 
         private void HandleAuto()
@@ -115,7 +116,7 @@ namespace Ked.Samples.UI
             if (features == null)
                 return;
 
-            PlaybackRuntimeState state = _playback.PlaybackState;
+            PlaybackRuntimeState state = _playbackState;
             if (state != null && state.IsRapidSkipMode)
                 features.EndRapidSkip();
             else
