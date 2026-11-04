@@ -107,7 +107,10 @@ namespace Ked.Samples.UI
                 }
 
                 string overwriteId = _saveSlots.SelectedEntry.Id;
-                OpenConfirm(ConfirmPanel.Question.Overwrite, () => SaveIntoSlot(overwriteId), _saveSlots.SelectedNumber);
+                OpenConfirm(
+                    ConfirmPanel.Question.Overwrite, 
+                    () => SaveIntoSlot(overwriteId),
+                    _saveSlots.SelectedNumber);
                 return;
             }
 
@@ -116,7 +119,10 @@ namespace Ked.Samples.UI
             // 재생 중이면 지금 장면을 벗어난다는 것을 확인한다. 타이틀에서는 잃을 진행이 없다.
             if (IsRunning)
             {
-                OpenConfirm(ConfirmPanel.Question.Load, () => LoadFromSlot(loadId), _saveSlots.SelectedNumber);
+                OpenConfirm(
+                    ConfirmPanel.Question.Load, 
+                    () => LoadFromSlot(loadId), 
+                    _saveSlots.SelectedNumber);
                 return;
             }
 

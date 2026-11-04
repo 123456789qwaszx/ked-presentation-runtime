@@ -10,7 +10,7 @@ namespace Ked.Samples.UI
     ///
     /// 무엇을 묻는지(Question)와 번호만 받는다. 글자는 이 창이 제 글자 표 키로 고른다(ILocalizedView).
     /// 수락하면 무엇을 할지는 부른 쪽(흐름)이 든다. 버튼은 누른 쪽을 Resolved로 알리기만 한다 —
-    /// 한 번만 처리하는 것과 Esc의 뜻은 흐름이 정한다(KedUIFlow.HandleConfirmResolved · HandleCancel).
+    /// 한 번만 처리하는 것과 Esc의 뜻은 흐름이 정한다(KedUIFlow.OpenConfirm · HandleCancel).
     /// 버튼은 OnInitialize에서 한 번만 묶는다. 다시 열어도 리스너가 늘지 않는다.
     /// </summary>
     [UIViewKey("Ked.ConfirmPanel")]

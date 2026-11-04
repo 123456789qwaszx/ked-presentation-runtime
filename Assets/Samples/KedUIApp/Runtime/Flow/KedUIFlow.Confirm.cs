@@ -4,15 +4,12 @@ namespace Ked.Samples.UI
 {
     public sealed partial class KedUIFlow
     {
-        private Action _confirmAccepted;
-
+        // 수락하면 할 일은 부르는 자리가 넘기고, 이 창의 묶음에 건다 — 창이 닫히면 묶음과 함께 사라진다.
         private void OpenConfirm(ConfirmPanel.Question question, Action onAccept, int slotNumber = 0)
         {
-            _confirmAccepted = onAccept;
-
             _ui.PushPanel<ConfirmPanel>(Presentation<ConfirmPanel>(), panel =>
             {
-                BindView(panel, ApplyBindings);
+                BindView(panel, p => ApplyBindings(p, onAccept));
                 panel.Present(
                     new ConfirmPanel.Model
                     {
@@ -22,27 +19,20 @@ namespace Ked.Samples.UI
             });
         }
 
-        private void ApplyBindings(ConfirmPanel panel)
+        private void ApplyBindings(ConfirmPanel panel, Action onAccept)
         {
-            AddBinding(panel,
-                p => p.Resolved += HandleConfirmResolved,
-                p => p.Resolved -= HandleConfirmResolved);
-        }
-
-        #region Handlers
-
-        private void HandleConfirmResolved(bool accepted)
-        {
-            Action accept = _confirmAccepted;
-            _confirmAccepted = null;
-
-            if (_ui.TopPanel is ConfirmPanel)
+            // 먼저 닫고 그다음 할 일 진행. 그 일이 새 Panel을 열 수 있게.
+            Action<bool> handleResolved = accepted =>
+            {
                 ClosePanel();
 
-            if (accepted)
-                accept?.Invoke();
-        }
+                if (accepted)
+                    onAccept();
+            };
 
-        #endregion
+            AddBinding(panel,
+                p => p.Resolved += handleResolved,
+                p => p.Resolved -= handleResolved);
+        }
     }
 }

@@ -178,8 +178,8 @@ namespace Ked.Samples.UI
 
         private void CloseAllPanels() => _ui.PopAllPanels(Unbind);
 
-        // Esc 한 번에 맨 위 한 층만 — 확인 → 취소, 안내 → 확인, 끝 카드 → 닫지 않음(닫으면 끝난 재생 화면에 남는다),
-        // 설정 → 저장하고 닫기, 그 밖 → 한 층 닫기. Panel이 없고 UI를 숨겼으면 다시 보인다.
+        // Esc 한 번에 맨 위 한 층만 — 안내 → 확인, 끝 카드 → 닫지 않음(닫으면 끝난 재생 화면에 남는다),
+        // 설정 → 저장하고 닫기, 그 밖(확인창의 취소 포함) → 한 층 닫기. Panel이 없고 UI를 숨겼으면 다시 보인다.
         private void HandleCancel()
         {
             switch (_ui.TopPanel)
@@ -187,9 +187,6 @@ namespace Ked.Samples.UI
                 case null:
                     if (IsPlayRoot && _playScreen.IsHudHidden)
                         RestoreHud();
-                    break;
-                case ConfirmPanel:
-                    HandleConfirmResolved(false);
                     break;
                 case NoticePanel:
                     HandleNoticeResolved();
