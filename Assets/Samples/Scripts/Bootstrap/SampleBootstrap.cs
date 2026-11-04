@@ -17,7 +17,7 @@ using KedUI = Ked.Samples.UI;
 /// 둘 다 장면 경계 저장 → 슬롯·갈라지기를 쓰고, 연출 기억 문자열을 진행 저장의 HostState 칸에 둔다.
 /// 저장 폴더만 예제마다 나눈다 — 슬롯이 섞이지 않게.
 ///
-/// 연출 런타임의 조립은 PresentationAssembler가 한다. 여기는 씬 참조를 넘기고,
+/// 연출 런타임의 조립은 부분 파일 SampleBootstrap.Presentation.cs(AssemblePresentation)가 직렬화 필드를 바로 읽어 한다.
 /// 그 위에 진행 호스트와 저장을 얹는다.
 ///
 /// 화면은 새 예제 UI(화면 묶음 Samples/KedUI + 흐름·바인딩 Samples/KedUIApp, UIPresentationFlow 위)다.
@@ -32,7 +32,7 @@ using KedUI = Ked.Samples.UI;
 ///
 /// 리그 프리팹은 IRigPrefabSource로도 내준다 — 본체의 튜닝 덤프 도구가 이 계약으로 찾는다.
 /// </summary>
-public class SampleBootstrap : MonoBehaviour, IRigPrefabSource
+public partial class SampleBootstrap : MonoBehaviour, IRigPrefabSource
 {
     RectTransform IRigPrefabSource.CharacterRigPrefab => rigPrefab;
 
@@ -42,9 +42,7 @@ public class SampleBootstrap : MonoBehaviour, IRigPrefabSource
         PresentationDemo = 1,
     }
 
-    private PresentationSceneRefs _sceneRefs;
     private PresentationRuntime _runtime;
-    private PlaybackRuntimeState _playbackState;
 
     // 새 예제 UI(화면 전부).
     private KedUI.KedUIHost _kedUI;
@@ -187,11 +185,7 @@ public class SampleBootstrap : MonoBehaviour, IRigPrefabSource
             return;
         }
 
-        _sceneRefs = CreatePresentationSceneRefs();
-        _runtime = PresentationAssembler.Build(
-            _sceneRefs,
-            _kedUI.Flow,
-            out _playbackState);
+        _runtime = AssemblePresentation();
 
         _runtime.AttachHost(InstallProgression());
         InstallProgressionSaves();
@@ -237,7 +231,11 @@ public class SampleBootstrap : MonoBehaviour, IRigPrefabSource
         _kedUI.Flow.Configure(
             _runtime,
             _playbackState,
-            _sceneRefs,
+            vnAdvanceInputPoller,
+            ellipsisBreathTypewriter,
+            audioSystem,
+            dialogueRunner,
+            stage,
             _progressionLauncher,
             _manualSaveFlow,
             ExampleCard(_example),
@@ -263,54 +261,6 @@ public class SampleBootstrap : MonoBehaviour, IRigPrefabSource
     }
 
     #endregion
-
-    private PresentationSceneRefs CreatePresentationSceneRefs()
-    {
-        return new PresentationSceneRefs
-        {
-            Stage = stage,
-            AudioSystem = audioSystem,
-
-            SurfaceLayoutPresetDb = _kedUI.SurfaceLayoutDb,
-            SpeakerPolicyDb = speakerPolicyDb,
-
-            RoleTuningDb = roleTuningDb,
-            PortraitGeneratedDb = portraitGeneratedDb,
-            CharacterFocusTuningDb = characterFocusTuningDb,
-            CharacterVisualFocusPresetDb = characterVisualFocusPresetDb,
-            CharacterDepthTuning = characterDepthTuning,
-
-            CommandExecutor = commandExecutor,
-
-            DialogueRunner = dialogueRunner,
-            CustomLinePresenter = customLinePresenter,
-            EllipsisBreathTypewriter = ellipsisBreathTypewriter,
-            AutoAdvanceScheduler = autoAdvanceScheduler,
-            OptionsPresenter = vnOptionsPresenter,
-            OptionItem = _kedUI.OptionItemPrefab,
-
-            InputPoller = vnAdvanceInputPoller,
-
-            DialogueBoxView = _kedUI.DialogueBox,
-            OptionsBoxView = _kedUI.OptionsBox,
-
-            CharacterRigPrefab = rigPrefab,
-
-            EaseCurvesJson = easeCurvesJson,
-            MotionsJson = motionsJson,
-
-            ScreenNoisePresetDb = screenNoisePresetDb,
-            ScreenVignettePresetDb = screenVignettePresetDb,
-            ScreenFlashPresetDb = screenFlashPresetDb,
-            StageMaskMotionPresetDb = stageMaskMotionPresetDb,
-            ScreenEffectRigMount = screenEffectRigMount,
-            ScreenEffectRigPrefab = screenEffectRigPrefab,
-
-            CharacterFocusDebugView = characterFocusDebugView,
-            EnableEquivalenceHarness = enableEquivalenceHarness,
-            HarnessParent = transform,
-        };
-    }
 
     #region 진행·저장
 

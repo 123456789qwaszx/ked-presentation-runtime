@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Ked.Progression;
 using UnityEngine;
+using Yarn.Unity;
 
 namespace Ked.Samples.UI
 {
@@ -12,10 +13,13 @@ namespace Ked.Samples.UI
         private readonly Func<Type, UIPresentationSpec> _presentationOf;
         private readonly Localizer _texts;
 
-        // 재생 쪽 — 조립 결과(runtime) · 재생 모드(playbackState) · 씬 부품(scene: 무대 · 입력 폴러 · 타자기 · 오디오 · Yarn 러너).
+        // 재생 쪽 — 조립 결과 · 재생 모드 · 씬 부품(타자기 · 오디오 · Yarn 러너 · 무대).
         private PresentationRuntime _runtime;
         private PlaybackRuntimeState _playbackState;
-        private PresentationSceneRefs _scene;
+        private EllipsisBreathTypewriter _typewriter;
+        private AudioSystem _audio;
+        private DialogueRunner _dialogueRunner;
+        private PresentationUIRoot _stage;
 
         private ProgressionLauncher _launcher;
         private ManualSaveFlow _saves;
@@ -45,7 +49,11 @@ namespace Ked.Samples.UI
         public void Configure(
             PresentationRuntime runtime,
             PlaybackRuntimeState playbackState,
-            PresentationSceneRefs scene,
+            AdvanceInputPoller inputPoller,
+            EllipsisBreathTypewriter typewriter,
+            AudioSystem audio,
+            DialogueRunner dialogueRunner,
+            PresentationUIRoot stage,
             ProgressionLauncher launcher,
             ManualSaveFlow saves,
             KedExampleCard example,
@@ -57,7 +65,10 @@ namespace Ked.Samples.UI
 
             _runtime = runtime;
             _playbackState = playbackState;
-            _scene = scene;
+            _typewriter = typewriter;
+            _audio = audio;
+            _dialogueRunner = dialogueRunner;
+            _stage = stage;
             _launcher = launcher;
             _saves = saves;
             _example = example;
@@ -65,8 +76,8 @@ namespace Ked.Samples.UI
             _switchExample = switchExample;
             _configured = true;
 
-            if (scene.InputPoller != null)
-                scene.InputPoller.InputBlocked = IsPlaybackInputBlocked;
+            if (inputPoller != null)
+                inputPoller.InputBlocked = IsPlaybackInputBlocked;
 
             ConfigureBacklog();
             ConfigureSettings();

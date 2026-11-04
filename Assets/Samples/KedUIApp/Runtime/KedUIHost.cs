@@ -52,7 +52,7 @@ namespace Ked.Samples.UI
         public CustomOptionItem OptionItemPrefab => optionItemPrefab;
         public DialogueSurfaceLayoutPresetDBSO SurfaceLayoutDb => surfaceLayoutDb;
 
-        /// <summary>화면을 세운다. 조립(PresentationAssembler)보다 먼저.</summary>
+        /// <summary>화면을 세운다. 연출 조립(SampleBootstrap.AssemblePresentation)보다 먼저.</summary>
         public void Prepare()
         {
             if (Flow != null)

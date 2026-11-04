@@ -32,9 +32,8 @@ namespace Ked.Samples.UI
         // 무대(PresentationUIRoot)는 씬의 무대 캔버스에 늘 놓여 있고 UI는 그 위 캔버스에 얹힌다 — 꺼져 있으면 켠다.
         private void ShowStage()
         {
-            PresentationUIRoot stage = _scene?.Stage;
-            if (stage != null && !stage.gameObject.activeSelf)
-                stage.gameObject.SetActive(true);
+            if (_stage != null && !_stage.gameObject.activeSelf)
+                _stage.gameObject.SetActive(true);
         }
 
         private void ApplyBindings(PlayScreen root)

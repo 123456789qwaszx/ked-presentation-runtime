@@ -21,7 +21,7 @@ namespace Ked.Samples.UI
             PlaybackSettings playback = _playbackState?.PlaybackSettings;
 
             _settings.SetDefaults(
-                typeSpeed: _scene.EllipsisBreathTypewriter != null ? _scene.EllipsisBreathTypewriter.unitsPerSecond : 30f,
+                typeSpeed: _typewriter != null ? _typewriter.unitsPerSecond : 30f,
                 autoDelay: playback != null ? playback.autoModeDelaySeconds : 1.5f,
                 speedUp: playback != null ? playback.speedupModeMultiplier : 12f,
                 minMultiplier: playback != null ? playback.speedupModeMinMultiplier : 2f,
@@ -304,7 +304,7 @@ namespace Ked.Samples.UI
 
         #region 적용 — 엔진 · 본체
 
-        private AudioVolumeSettings Volume => _scene?.AudioSystem != null ? _scene.AudioSystem.Volume : null;
+        private AudioVolumeSettings Volume => _audio != null ? _audio.Volume : null;
 
         // 지금 값을 엔진 · 본체에 모두 적용한다. 같은 값을 다시 적용해도 그대로다.
         private void ApplySettings()
@@ -330,8 +330,8 @@ namespace Ked.Samples.UI
 
         private void ApplyTypeSpeed()
         {
-            if (_scene.EllipsisBreathTypewriter != null)
-                _scene.EllipsisBreathTypewriter.unitsPerSecond = SettingsValues.TypeSpeed;
+            if (_typewriter != null)
+                _typewriter.unitsPerSecond = SettingsValues.TypeSpeed;
         }
 
         // 대사창 불투명도는 재생 화면에 그린다.

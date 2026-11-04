@@ -1,23 +1,15 @@
 using System;
 using UnityEngine;
 
-/// <summary>
-/// 연출 런타임 조립. 씬 참조를 받아 무대·명령·Yarn·대사 표시·재생 제어를 잇는다.
-///
-/// 진행·저장을 모른다. 결과(PresentationRuntime)에 재생 호스트(ProgressionLauncher)를 붙이면 돈다.
-///
-/// 조립 순서와 내용은 VNAppBootstrap.Awake의 연출 쪽을 그대로 옮긴 것이다.
-/// </summary>
-public sealed class PresentationAssembler
+// 연출 런타임 조립 — 무대 · 명령 · Yarn · 대사 표시 · 재생 제어를 잇는다(옛 VNAppBootstrap.Awake의 연출 쪽).
+// 진행 · 저장을 모른다. 결과(PresentationRuntime)에 재생 호스트를 붙이면 돈다(Awake → InstallProgression).
+public partial class SampleBootstrap
 {
     /// <summary>예제 대본 번들 폴더(Assets/Samples/Dialogue). 커브(curves.json)·모션(motions.json)도 대본 곁에 산다.</summary>
     private static string DialogueFolder =>
         System.IO.Path.Combine(Application.dataPath, "Samples", "Dialogue");
 
     private MotionLibrary _motions = MotionLibrary.Empty;
-
-    private readonly PresentationSceneRefs _refs;
-    private readonly IPresentationView _presentationView;
 
     private readonly PlaybackRuntimeState _playbackState = new();
 
@@ -47,37 +39,8 @@ public sealed class PresentationAssembler
     private ScenePresentation _scenePresentation;
     private YarnPlaybackDriver _yarnPlaybackDriver;
 
-    private PresentationAssembler(
-        PresentationSceneRefs refs,
-        IPresentationView presentationView)
-    {
-        _refs = refs;
-        _presentationView = presentationView;
-    }
-
-    /// <param name="presentationView">재생을 시작할 때 무대 화면을 앞으로 가져올 자리.</param>
-    public static PresentationRuntime Build(
-        PresentationSceneRefs refs,
-        IPresentationView presentationView)
-    {
-        return Build(refs, presentationView, out _);
-    }
-
-    /// <param name="playbackState">예제 UI가 읽는 재생 모드(자동·빨리 넘기기 켜짐, 재생 설정). 연출 런타임은 내놓지 않는 것이라 여기서 건넨다.</param>
-    public static PresentationRuntime Build(
-        PresentationSceneRefs refs,
-        IPresentationView presentationView,
-        out PlaybackRuntimeState playbackState)
-    {
-        var assembler = new PresentationAssembler(refs, presentationView);
-        PresentationRuntime runtime = assembler.Assemble();
-
-        playbackState = assembler._playbackState;
-
-        return runtime;
-    }
-
-    private PresentationRuntime Assemble()
+    // 화면(_kedUI)이 먼저 서 있어야 한다 — 대사창 · 선택지 상자 · 재생 화면 전환을 화면 쪽에서 받는다.
+    private PresentationRuntime AssemblePresentation()
     {
         BootstrapPresentationRoots();
 
@@ -101,13 +64,13 @@ public sealed class PresentationAssembler
             _rollbackHistory,
             _choiceHistory,
             _backlogRecorder,
-            _refs.InputPoller);
+            vnAdvanceInputPoller);
     }
 
     private void BootstrapPresentationRoots()
     {
-        _presentationUIRoot = _refs.Stage
-            ? _refs.Stage
+        _presentationUIRoot = stage
+            ? stage
             : throw new InvalidOperationException("[연출 조립] 무대(PresentationUIRoot)가 없다 — 부트스트랩의 '무대' 칸을 채운다.");
 
         _presentationUIRoot.Initialize();
@@ -117,24 +80,24 @@ public sealed class PresentationAssembler
         _presentationResponseRig = new PresentationShotResponseSystem(shotResponseStageProvider);
         _screenEffectRig = EnsureScreenEffectRig();
 
-        _refs.CharacterFocusDebugView.Initialize(
+        characterFocusDebugView.Initialize(
             _presentationStage,
             shotResponseStageProvider,
-            _refs.CharacterFocusTuningDb);
+            characterFocusTuningDb);
     }
 
     private ScreenEffectRig EnsureScreenEffectRig()
     {
-        ScreenEffectRig screenEffectRig = _refs.ScreenEffectRigMount.GetComponentInChildren<ScreenEffectRig>(true);
+        ScreenEffectRig screenEffectRig = screenEffectRigMount.GetComponentInChildren<ScreenEffectRig>(true);
 
         if (screenEffectRig == null)
         {
             ScreenEffectRigBuilder screenEffectRigBuilder = new();
 
             RectTransform rigRoot = screenEffectRigBuilder.BuildRigRoot(
-                _refs.ScreenEffectRigPrefab);
+                screenEffectRigPrefab);
 
-            rigRoot.SetParent(_refs.ScreenEffectRigMount, false);
+            rigRoot.SetParent(screenEffectRigMount, false);
 
             if (!rigRoot.TryGetComponent(out screenEffectRig))
                 screenEffectRig = rigRoot.gameObject.AddComponent<ScreenEffectRig>();
@@ -147,7 +110,7 @@ public sealed class PresentationAssembler
 
     private void BootstrapAudioSystem()
     {
-        _refs.AudioSystem.Initialize();
+        audioSystem.Initialize();
     }
 
     private void BootstrapPresentationSession()
@@ -158,36 +121,36 @@ public sealed class PresentationAssembler
         // Character Rig
         CharRigSlotResolver charRigSlotResolver = new(_presentationUIRoot);
         CharacterRigBuilder characterRigBuilder = new();
-        PortraitResolver portraitResolver = new(_refs.PortraitGeneratedDb);
+        PortraitResolver portraitResolver = new(portraitGeneratedDb);
 
         CharacterRigCommandFactory charRigFactory = new(
             _presentationStage,
             charRigSlotResolver,
             characterRigBuilder,
             portraitResolver,
-            _refs.RoleTuningDb,
-            _refs.CharacterFocusTuningDb,
-            _refs.CharacterVisualFocusPresetDb,
-            _refs.CharacterDepthTuning,
+            roleTuningDb,
+            characterFocusTuningDb,
+            characterVisualFocusPresetDb,
+            characterDepthTuning,
             _presentationUIRoot,
             _rigBlur);
 
         ShotResponseCommandFactory presentationShotFactory = new(
-            _presentationStage, _presentationResponseRig, _refs.CharacterFocusTuningDb, _presentationUIRoot);
+            _presentationStage, _presentationResponseRig, characterFocusTuningDb, _presentationUIRoot);
 
         // Presentation Control
         PresentationControlCommandFactory presentationControlFactory = new(_presentationStage);
 
         // Audio
-        AudioCommandFactory audioFactory = new(_refs.AudioSystem);
+        AudioCommandFactory audioFactory = new(audioSystem);
 
         ScreenEffectCommandFactory screenEffectFactory = new(
             _presentationStage,
             _screenEffectRig,
-            _refs.ScreenFlashPresetDb,
-            _refs.ScreenNoisePresetDb,
-            _refs.ScreenVignettePresetDb,
-            _refs.StageMaskMotionPresetDb,
+            screenFlashPresetDb,
+            screenNoisePresetDb,
+            screenVignettePresetDb,
+            stageMaskMotionPresetDb,
             _presentationUIRoot,
             _rigBlur);
 
@@ -198,24 +161,24 @@ public sealed class PresentationAssembler
             audioFactory,
             screenEffectFactory);
 
-        _refs.CommandExecutor.Initialize(factory);
+        commandExecutor.Initialize(factory);
 
         PresentationSessionContext pacePolicy = new(_playbackState, _seekState);
 
         _presentationScopeSession = new(
-            _refs.CommandExecutor,
+            commandExecutor,
             pacePolicy);
     }
 
     private void BootstrapYarn()
     {
-        YarnPlaybackDriver yarnPlaybackDriver = new(_refs.CommandExecutor, _presentationScopeSession);
+        YarnPlaybackDriver yarnPlaybackDriver = new(commandExecutor, _presentationScopeSession);
         _yarnPlaybackDriver = yarnPlaybackDriver;
         yarnPlaybackDriver.LineHeadPlayed += _rigBlur.Reconcile;
 
         // 대사창 · 선택지 상자는 화면 쪽(새 예제 UI)이 넘긴다.
-        IPresentationDialogueBoxView dialogueSurfaceBox = _refs.DialogueBoxView
-            ?? throw new InvalidOperationException("[연출 조립] 대사창(DialogueBoxView)이 없다.");
+        IPresentationDialogueBoxView dialogueSurfaceBox = _kedUI.DialogueBox
+            ?? throw new InvalidOperationException("[연출 조립] 대사창(DialogueBox)이 없다.");
 
         DialogueBoxCurrentState dialogueBoxState = new();
 
@@ -223,8 +186,8 @@ public sealed class PresentationAssembler
             dialogueBoxState,
             dialogueSurfaceBox,
             _dialogueSurfaceState,
-            _refs.SurfaceLayoutPresetDb,
-            _refs.SpeakerPolicyDb);
+            _kedUI.SurfaceLayoutDb,
+            speakerPolicyDb);
         _dialogueBoxPresentation = dialogueBoxPresentationController;
 
         EaseCurveLibrary easeCurves = LoadEaseCurves();
@@ -232,12 +195,12 @@ public sealed class PresentationAssembler
 
         // 배경(bg_*)도 캐릭터 리그로 선다 — 캐스팅하지 않은 슬롯. 리그 프리팹은 하나다.
         StageCommandParser stageCommandParser = new(
-            _refs.CharacterRigPrefab,
+            rigPrefab,
             easeCurves,
             _motions);
 
         _ = new YarnCommandBridge(
-            _refs.DialogueRunner,
+            dialogueRunner,
             yarnPlaybackDriver,
             stageCommandParser,
             dialogueBoxPresentationController);
@@ -246,33 +209,33 @@ public sealed class PresentationAssembler
             _backlogRecorder,
             _rollbackHistory);
 
-        LineHurrySpeedController lineHurrySpeed = new(_refs.EllipsisBreathTypewriter);
-        _lineVoice = new LineVoiceController(_refs.AudioSystem.Voice);
-        _sceneBgm = new SceneBgmController(_refs.AudioSystem.Bgm);
+        LineHurrySpeedController lineHurrySpeed = new(ellipsisBreathTypewriter);
+        _lineVoice = new LineVoiceController(audioSystem.Voice);
+        _sceneBgm = new SceneBgmController(audioSystem.Bgm);
 
         _linePresentationFlow = new LinePresentationFlow(
             yarnLineBoundary,
             _lineDisplayState,
             _seekState,
             dialogueBoxPresentationController,
-            _refs.EllipsisBreathTypewriter,
+            ellipsisBreathTypewriter,
             yarnPlaybackDriver,
             lineHurrySpeed,
             _lineVoice,
             _sceneBgm);
 
-        _refs.CustomLinePresenter.Initialize(
-            _refs.DialogueRunner,
+        customLinePresenter.Initialize(
+            dialogueRunner,
             _linePresentationFlow,
-            _refs.EllipsisBreathTypewriter,
+            ellipsisBreathTypewriter,
             _playbackState);
 
         ChoiceBoundary choiceBoundary = new(
             _choiceHistory,
             _rollbackHistory);
 
-        IPresentationOptionsBoxView optionsBox = _refs.OptionsBoxView
-            ?? throw new InvalidOperationException("[연출 조립] 선택지 상자(OptionsBoxView)가 없다.");
+        IPresentationOptionsBoxView optionsBox = _kedUI.OptionsBox
+            ?? throw new InvalidOperationException("[연출 조립] 선택지 상자(OptionsBox)가 없다.");
 
         OptionsBoxPresentationController optionsBoxPresentation = new(optionsBox);
 
@@ -281,26 +244,26 @@ public sealed class PresentationAssembler
             choiceBoundary,
             _seekState);
 
-        _refs.OptionsPresenter.Initialize(
+        vnOptionsPresenter.Initialize(
             optionsPresentationFlow,
-            _refs.OptionItem);
+            _kedUI.OptionItemPrefab);
     }
 
     private void CreateScenePresentation()
     {
         IEpisodeNodeRunner nodeRunner =
-            new YarnEpisodeNodeRunner(_refs.DialogueRunner);
+            new YarnEpisodeNodeRunner(dialogueRunner);
 
         _scenePresentation = new ScenePresentation(
             nodeRunner,
-            _presentationView,
+            _kedUI.Flow,
             _rollbackHistory,
-            _refs.CustomLinePresenter,
+            customLinePresenter,
             _presentationResponseRig,
             _rigBlur,
             _screenEffectRig,
             _presentationUIRoot,
-            _refs.AudioSystem,
+            audioSystem,
             _sceneBgm,
             _presentationStage,
             _dialogueSurfaceState,
@@ -315,7 +278,7 @@ public sealed class PresentationAssembler
     // 입력 폴러의 연결은 여기서 하지 않는다 — 재생 호스트가 정해진 뒤 PresentationRuntime.AttachHost가 한다.
     private void BootstrapPlaybackControls()
     {
-        _refs.AutoAdvanceScheduler.Initialize(
+        autoAdvanceScheduler.Initialize(
             _playbackState,
             _dialogueAdvanceDispatcher,
             _lineVoice,
@@ -331,9 +294,9 @@ public sealed class PresentationAssembler
             _playbackState,
             _lineDisplayState,
             _seekState,
-            _refs.EllipsisBreathTypewriter,
+            ellipsisBreathTypewriter,
             _backlogRecorder,
-            _refs.AutoAdvanceScheduler,
+            autoAdvanceScheduler,
             rapidSkipController,
             _episodeSkipController,
             _rollbackHistory,
@@ -347,23 +310,23 @@ public sealed class PresentationAssembler
 
         _dialogueAdvanceDispatcher.Initialize(
             advanceGate,
-            _refs.DialogueRunner,
+            dialogueRunner,
             _lineDisplayState);
     }
 
     private void BootstrapEquivalenceHarness()
     {
-        if (!_refs.EnableEquivalenceHarness)
+        if (!enableEquivalenceHarness)
             return;
 
         GameObject harnessGo = new("StageEquivalenceHarness");
-        harnessGo.transform.SetParent(_refs.HarnessParent, false);
+        harnessGo.transform.SetParent(transform, false);
 
         StageEquivalenceHarness harness = harnessGo.AddComponent<StageEquivalenceHarness>();
 
         harness.Initialize(
             _rollbackHistory,
-            _refs.DialogueRunner,
+            dialogueRunner,
             _presentationScopeSession,
             _presentationStage,
             _presentationResponseRig,
@@ -376,8 +339,8 @@ public sealed class PresentationAssembler
 
     private EaseCurveLibrary LoadEaseCurves()
     {
-        if (_refs.EaseCurvesJson != null)
-            return EaseCurveLibrary.Parse(_refs.EaseCurvesJson.text, _refs.EaseCurvesJson.name);
+        if (easeCurvesJson != null)
+            return EaseCurveLibrary.Parse(easeCurvesJson.text, easeCurvesJson.name);
 
         string json = ReadBundleFileEditorOnly(EaseCurveLibrary.BundleFileName);
         return json == null ? EaseCurveLibrary.Empty : EaseCurveLibrary.Parse(json, EaseCurveLibrary.BundleFileName);
@@ -387,8 +350,8 @@ public sealed class PresentationAssembler
     {
         string[] nodeIds = CharacterRigSchema.NodeIds();
 
-        if (_refs.MotionsJson != null)
-            return MotionLibrary.Parse(_refs.MotionsJson.text, _refs.MotionsJson.name, nodeIds);
+        if (motionsJson != null)
+            return MotionLibrary.Parse(motionsJson.text, motionsJson.name, nodeIds);
 
         string json = ReadBundleFileEditorOnly(MotionLibrary.BundleFileName);
         return json == null ? MotionLibrary.Empty : MotionLibrary.Parse(json, MotionLibrary.BundleFileName, nodeIds);

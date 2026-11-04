@@ -14,7 +14,7 @@ namespace Ked.Samples.UI
 
         private void ConfigureBacklog()
         {
-            _backlogSpeakers = new YarnSpeakerNames(_scene.DialogueRunner);
+            _backlogSpeakers = new YarnSpeakerNames(_dialogueRunner);
         }
 
         private void OpenBacklog()

@@ -144,7 +144,7 @@ public sealed partial class PresentationUIRoot : MonoBehaviour
     }
 
     /// <summary>
-    /// 칸을 찾아 둔다. 조립(PresentationAssembler)이 무대를 쓰기 전에 부른다. 여러 번 불러도 한 번만 한다.
+    /// 칸을 찾아 둔다. 조립(SampleBootstrap.AssemblePresentation)이 무대를 쓰기 전에 부른다. 여러 번 불러도 한 번만 한다.
     /// </summary>
     public void Initialize()
     {
