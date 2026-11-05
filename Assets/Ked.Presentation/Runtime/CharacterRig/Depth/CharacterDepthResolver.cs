@@ -92,8 +92,9 @@ public static class CharacterDepthResolver
             return;
         }
 
+        // 초점 고정도 무대 좌표로 푼다 — 샷이 움직이는 무대 노드는 중립값.
         RectNodeState[] chain = rigRefs.PlacementTargets.CaptureSettledChain(
-            measureRect, rigSpaceRoot, ChainRects);
+            measureRect, rigSpaceRoot, ChainRects, stage.StageView);
 
         int depthYIndex = ChainRects.IndexOf(depthYRect);
         int depthScaleIndex = ChainRects.IndexOf(depthScaleRect);

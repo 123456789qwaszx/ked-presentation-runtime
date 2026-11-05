@@ -22,9 +22,6 @@ title: Demo_Presentation
 <<fade_in s1 18fr>>
 하린: 배경이 들어오고, 음악이 깔리고, 내가 걸어 들어왔어. #line:ln_7u3jtu6n
 
-<<screen_blur far 1>>
-하린: 지금부터 보이는 건 전부 이 대본 한 장에 적힌 명령이야. #line:ln_2jfcj5dr
-
 <<screen_blur front 0.5>>
 <<char_visual_dim s1 2 6fr>>
 <<shot_to 12 24u 0u 0.45s>>
@@ -33,20 +30,8 @@ title: Demo_Presentation
 <<place_left sigure bust 0fr>>
 하린: 지금부터 보이는 건 전부 이 대본 한 장에 적힌 명령이야. #line:ln_cydaj9ym
 
-<<screen_blur_reset>>
-하린: 지금부터 보이는 건 전부 이 대본 한 장에 적힌 명령이야. #line:ln_80fvnx4u
+문제지점.
 
-그녀의 편지에는 이렇게 적혀 있었다. #letterbox #line:ln_a7r9k13x
-
-<<place_left s1 bust 33fr>>
-<<24fr>>
-<<place_right s1 bust 33fr>>
-<<24fr>>
-<<place_center s1 bust 33fr>>
-<<24fr>>
-(하린 이리저리) #boxhide #auto #line:ln_nf0ieq41
-
-연출 컷신 앞뒤로 대사창 치우기. #line:ln_k2xwcsb9
 
 <<place_left s2 bust 0fr>>
 <<size s2 mid bust 0fr>>

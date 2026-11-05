@@ -76,6 +76,8 @@ public partial class SampleBootstrap
         IShotResponseStageProvider shotResponseStageProvider = _presentationUIRoot;
 
         _presentationResponseRig = new PresentationShotResponseSystem(shotResponseStageProvider);
+        // 배치는 무대 좌표 — 배치 계산이 샷이 움직이는 무대 노드를 지날 때 샷 시스템의 중립값을 쓴다.
+        _presentationStage.AttachStageView(_presentationResponseRig);
         _screenEffectRig = EnsureScreenEffectRig();
 
         characterFocusDebugView.Initialize(

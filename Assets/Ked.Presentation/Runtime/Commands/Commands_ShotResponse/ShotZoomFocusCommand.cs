@@ -49,7 +49,7 @@ public sealed class ShotZoomFocusCommand : ShotIntentCommandBase<ShotZoomFocusCo
         CommandRunScope scope)
     {
         // 입력 수집
-        // 정착 focus 측정("현재 카메라가 적용된 채로 보이는 위치")과 화면 지점 해석.
+        // 정착 focus 측정과 화면 지점 해석. 측정은 무대 좌표(카메라 중립)로 한다 — 캐릭터의 무대 위 자리.
         CharacterFocusPointResolver.TryResolve(
             _stage,
             _stageProvider,
@@ -63,14 +63,24 @@ public sealed class ShotZoomFocusCommand : ShotIntentCommandBase<ShotZoomFocusCo
         Vector2 desiredPoint =
             ScreenFocusPointResolver.Resolve(focus.RigSpaceRoot, spec.screenPoint) + spec.screenOffset;
 
-        // 논리 focus 복원 -> 목표 배율에서 pan 역산
-        // 측정은 지금 화면에 적용된 카메라로 했으므로, 카메라를 벗기는 기준도 의도가 아니라 Presented다
-        // (전환 중이 아니면 둘은 같다).
+        // 논리 focus 복원 -> 목표 배율에서 pan 역산.
+        // 코어 폴드(StageReducer.Shot)와 같은 경로: 무대 좌표 focus에 지금 카메라를 씌워 "보이는 위치"를 만들고,
+        // 리덕션이 같은 카메라를 벗긴다. 결과는 무대 위 자리만으로 정해진다 — 샷의 진행도 · 깊이 층 시차와 무관.
+        // 무대 중립을 모르면(조립 밖) 화면에서 잰 값을 그대로 넘긴다 — 지금 적용된 카메라(Presented)로 벗긴다.
+        PresentationIntentState presented = rig.Presented;
+        Vector2 measuredFocus = focus.FocusPointInRigSpace;
+
+        if (focus.InStageSpace)
+        {
+            float presentedScale = PresentationShotIntentMath.EvaluateCameraScale(presented.zoom);
+            measuredFocus = measuredFocus * presentedScale + presented.panInRigSpace;
+        }
+
         return Ked.Presentation.Core.ShotZoomFocusReduction
             .Reduce(
-                rig.Presented.ToCore(),
+                presented.ToCore(),
                 spec.zoom,
-                focus.FocusPointInRigSpace.ToCore(),
+                measuredFocus.ToCore(),
                 desiredPoint.ToCore())
             .ToUnity();
     }

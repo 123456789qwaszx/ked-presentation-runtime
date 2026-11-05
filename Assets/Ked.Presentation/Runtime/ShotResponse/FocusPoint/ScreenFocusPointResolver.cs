@@ -22,6 +22,13 @@ public enum ScreenFocusPoint
     ThirdsLowerRight
 }
 
+/// <summary>
+/// 지점 이름 → 기준 프레임(StageShot_Root) 안의 좌표. 프레임 크기 × 비율만 읽는다 — 카메라와 무관하다.
+///
+/// 같은 표를 두 언어가 쓴다.
+/// - 배치(place*): **무대 지점** — 카메라가 중립일 때 그 화면 지점과 겹치는 무대 위 자리.
+/// - 프레이밍(shot_focus 류): **화면 지점** — 지금 카메라로 본 화면의 그 자리.
+/// </summary>
 public static class ScreenFocusPointResolver
 {
     private const float OuterXRatio = 0.24f;

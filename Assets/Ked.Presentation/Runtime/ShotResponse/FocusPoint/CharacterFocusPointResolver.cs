@@ -9,6 +9,10 @@ public struct CharacterFocusPointResult
 
     // Final focus estimate in RigSpaceRoot local space.
     public Vector2 FocusPointInRigSpace;
+
+    // true면 FocusPointInRigSpace는 카메라 중립의 무대 좌표다(샷이 움직이는 무대 노드를 중립으로 잼).
+    // false면 지금 화면에 적용된 카메라가 들어간 값이다.
+    public bool InStageSpace;
 }
 
 public static class CharacterFocusPointResolver
@@ -40,6 +44,8 @@ public static class CharacterFocusPointResolver
             tuningDb,
             useSettledPlacementTargets,
             facing,
+            mirrorCommandOffset: true,
+            useSettledPlacementTargets ? stage.StageView : null,
             out result);
     }
 
@@ -64,6 +70,7 @@ public static class CharacterFocusPointResolver
             useSettledPlacementTargets,
             facing,
             mirrorCommandOffset: true,
+            null,
             out result);
     }
 
@@ -77,6 +84,7 @@ public static class CharacterFocusPointResolver
         bool useSettledPlacementTargets,
         CharacterFacing facing,
         bool mirrorCommandOffset,
+        IStageViewNeutral stageView,
         out CharacterFocusPointResult result)
     {
         result = default;
@@ -106,7 +114,8 @@ public static class CharacterFocusPointResolver
                 ? rigRefs.PlacementTargets.MeasureSettledWorldPoint(
                     measureRect,
                     focusLocalOffset,
-                    rigSpaceRoot)
+                    rigSpaceRoot,
+                    stageView)
                 : measureRect.TransformPoint(focusLocalOffset);
 
         Vector3 focusInRigSpace =
@@ -118,6 +127,7 @@ public static class CharacterFocusPointResolver
             FocusPointInRigSpace = new Vector2(
                 focusInRigSpace.x,
                 focusInRigSpace.y),
+            InStageSpace = useSettledPlacementTargets && stageView != null && rigRefs.PlacementTargets != null,
         };
 
         return true;
