@@ -47,6 +47,12 @@ namespace Ked.Presentation.Core
 
         /// <summary>background-dimensions.json — 배경(bg_*) 사이징의 종횡비. 없으면 그 축만 Unhandled.</summary>
         public BackgroundDimensionsFileDto BackgroundDimensions;
+
+        /// <summary>
+        /// presets/layer-profile.json — 깊이 층이 샷에 반응하는 곡선(ShotLayoutMath). 없으면(null) 코어 기본
+        /// 표본(LayerProfileCurve.Default = 종전 다섯 층 값)을 쓴다. 폴드가 층 반응을 접는 것은 P4부터다.
+        /// </summary>
+        public LayerProfileFileDto LayerProfile;
     }
 
     /// <summary>

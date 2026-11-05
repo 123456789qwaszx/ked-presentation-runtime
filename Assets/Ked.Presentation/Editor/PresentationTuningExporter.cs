@@ -80,6 +80,7 @@ public static class PresentationTuningExporter
         BaseResolutionDto baseResolution = ExportBaseResolution(outDir, warnings);
         ExportRigSchemas(outDir, baseResolution, warnings);
         ExportPresets(outDir, warnings);
+        ExportLayerProfile(outDir);
         ExportPortraitDimensions(outDir, warnings);
         ExportBackgroundDimensions(outDir, warnings);
         WriteReport(outDir, warnings);
@@ -362,6 +363,16 @@ public static class PresentationTuningExporter
 
             File.WriteAllText(Path.Combine(outDir, "presets", $"{group}.json"), json);
         }
+    }
+
+    // ── 층 프로필 ────────────────────────────────────────────────────
+    //
+    // 깊이 층이 샷에 반응하는 곡선. 아직 에셋이 아니라 코어 기본 표본(종전 다섯 층 값)이 원천이다 —
+    // 값은 지금 값 그대로 낸다. 에셋으로 옮기면 이 함수가 그 에셋을 읽게 바꾼다.
+    private static void ExportLayerProfile(string outDir)
+    {
+        string json = JsonUtility.ToJson(Ked.Presentation.Core.LayerProfileCurve.Default.ToDto(), true);
+        File.WriteAllText(Path.Combine(outDir, "presets", "layer-profile.json"), json);
     }
 
     // ── 초상 치수 ────────────────────────────────────────────────────
