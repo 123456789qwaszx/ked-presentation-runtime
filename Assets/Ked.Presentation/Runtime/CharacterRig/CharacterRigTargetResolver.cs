@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public static class CharacterRigTargetResolver
@@ -5,10 +6,10 @@ public static class CharacterRigTargetResolver
     public static CharacterRigRefs ResolveCharRigFromTargetKey(PresentationStage stage, string targetKey)
     {
         string resolvedRigKey = ResolveRigKeyByPolicy(stage, targetKey);
-        
+
         if (!stage.characterRigs.TryGetRig(resolvedRigKey, out CharacterRigRefs rig))
         {
-            Debug.LogWarning(
+            throw new InvalidOperationException(
                 $"[CharacterRigTargetResolver] Failed to resolve CharacterRigRefs. " +
                 $"targetKey='{targetKey}', resolvedRigKey='{resolvedRigKey}'.");
         }

@@ -24,14 +24,10 @@ public sealed class CharacterRigRegistry
     public bool TryGetRig(string rigKey, out CharacterRigRefs rigRefs)
     {
         if (!_rigs.TryGetValue(rigKey, out rigRefs))
-        {
-            Debug.LogWarning($"[CharacterRigRegistry] Rig not found. rigKey='{rigKey}'.");
             return false;
-        }
 
         if (rigRefs?.RigRoot == null)
         {
-            Debug.LogWarning($"[CharacterRigRegistry] Rig is registered but invalid or destroyed. rigKey='{rigKey}'.");
             rigRefs = null;
             return false;
         }

@@ -50,9 +50,7 @@ public abstract class RigClaimTweenCommandBase : ClaimTweenCommandBase
 
     protected sealed override void ResolveTargets(CommandRunScope scope)
     {
-        RigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(_stage, _slotKey)
-            ?? throw new System.InvalidOperationException(
-                $"[{GetType().Name}] '{_slotKey}'의 리그가 없다. 리그 커맨드는 슬롯 선언 뒤에만 온다.");
+        RigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(_stage, _slotKey);
 
         ResolveRects();
     }
