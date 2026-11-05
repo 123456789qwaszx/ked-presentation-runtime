@@ -32,11 +32,10 @@ public class MoveByCommandSpecCharR : CharacterRigCommandSpecBase
     public CurveKey[] customCurveKeys;
 }
 
-public sealed class MoveByCommandCharR : ClaimTweenCommandBase
+public sealed class MoveByCommandCharR : RigClaimTweenCommandBase
 {
     private readonly MoveByCommandSpecCharR _spec;
 
-    private CharacterRigRefs _rigRefs;
     private RectTransform _rect;
 
     private Vector2 _startPos;
@@ -46,21 +45,16 @@ public sealed class MoveByCommandCharR : ClaimTweenCommandBase
 
     protected override float TweenDuration => _spec.duration;
 
-    private readonly PresentationStage _stage;
-
     public MoveByCommandCharR(PresentationStage stage, MoveByCommandSpecCharR spec)
+        : base(stage, spec.slotKey)
     {
-        _stage = stage;
         _spec = spec;
     }
 
-    protected override void ResolveTargets(CommandRunScope scope)
-    {
-        _rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(_stage, _spec.slotKey);
-        _rect = _rigRefs?.GetRect(_spec.target);
-    }
+    protected override void ResolveRects()
+        => _rect = RigRefs.GetRect(_spec.target);
 
-    protected override void ClaimTarget(CommandRunScope scope)
+    protected override void ClaimTarget()
     {
         _rect.DOKill(true);
         _startPos = _rect.anchoredPosition;
@@ -71,7 +65,7 @@ public sealed class MoveByCommandCharR : ClaimTweenCommandBase
             _startPos.ToCore());
 
         _destPos = claim.Value.XY.ToUnity();
-        _rigRefs.PlacementTargets.PublishAnchoredPosition(_rect, _destPos);
+        Claim(_rect, claim);
     }
 
     protected override Tween CreateTween(float duration)
@@ -80,11 +74,8 @@ public sealed class MoveByCommandCharR : ClaimTweenCommandBase
             .ApplyEase(_spec.ease, _spec.customCurveKeys)
             .SetTarget(_rect);
 
-    protected override void OnCommitFinalState()
-    {
-        _rect.anchoredPosition = _destPos;
-        _rigRefs.PlacementTargets.Clear(_rect);
-    }
+    protected override void WriteFinalState()
+        => _rect.anchoredPosition = _destPos;
 
     protected override float MeasureRemainingRatio()
         => RemainingRatio(

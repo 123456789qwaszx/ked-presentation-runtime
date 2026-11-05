@@ -28,7 +28,7 @@ public class RotateToCommandSpecCharR : CharacterRigCommandSpecBase
     public CurveKey[] customCurveKeys;
 }
 
-public sealed class RotateToCommandCharR : ClaimTweenCommandBase
+public sealed class RotateToCommandCharR : RigClaimTweenCommandBase
 {
     private readonly RotateToCommandSpecCharR _spec;
 
@@ -41,21 +41,16 @@ public sealed class RotateToCommandCharR : ClaimTweenCommandBase
 
     protected override float TweenDuration => _spec.duration;
 
-    private readonly PresentationStage _stage;
-
     public RotateToCommandCharR(PresentationStage stage, RotateToCommandSpecCharR spec)
+        : base(stage, spec.slotKey)
     {
-        _stage = stage;
         _spec = spec;
     }
 
-    protected override void ResolveTargets(CommandRunScope scope)
-    {
-        CharacterRigRefs rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(_stage, _spec.slotKey);
-        _rect = rig?.GetRect(_spec.target);
-    }
+    protected override void ResolveRects()
+        => _rect = RigRefs.GetRect(_spec.target);
 
-    protected override void ClaimTarget(CommandRunScope scope)
+    protected override void ClaimTarget()
     {
         _rect.DOKill(true);
 
@@ -65,13 +60,15 @@ public sealed class RotateToCommandCharR : ClaimTweenCommandBase
         _startEuler = _rect.localEulerAngles;
 
         // ── 코어: 스펙 → 목표 상태 ──
-        // 회전은 장부에 게시하지 않는다 — 오일러를 읽는 실호출부가 없다.
+        // 회전도 게시한다. SwayPivot은 측정 체인 위라 RectChainMath가 euler를 읽는다 —
+        // 같은 줄의 place가 회전 중간값을 보면 일반 재생과 롤백이 다른 자리를 낸다.
         StageNodeClaim claim = RotateToReduction.Reduce(
             _rect.name,
             new RotateToReduction.Args(_spec.relativeToCurrent, _spec.toEuler.ToCore()),
             _startEuler.ToCore());
 
         _targetEuler = claim.Value.ToUnity();
+        Claim(_rect, claim);
     }
 
     protected override Tween CreateTween(float duration)
@@ -80,10 +77,8 @@ public sealed class RotateToCommandCharR : ClaimTweenCommandBase
             .ApplyEase(_spec.ease, _spec.customCurveKeys)
             .SetTarget(_rect);
 
-    protected override void OnCommitFinalState()
-    {
-        _rect.localEulerAngles = _targetEuler;
-    }
+    protected override void WriteFinalState()
+        => _rect.localEulerAngles = _targetEuler;
 
     protected override float MeasureRemainingRatio()
         => RemainingRatio(

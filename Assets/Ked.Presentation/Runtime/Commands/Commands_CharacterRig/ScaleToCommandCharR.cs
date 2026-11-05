@@ -30,11 +30,10 @@ public class ScaleToCommandSpecCharR : CharacterRigCommandSpecBase
     public CurveKey[] customCurveKeys;
 }
 
-public sealed class ScaleToCommandCharR : ClaimTweenCommandBase
+public sealed class ScaleToCommandCharR : RigClaimTweenCommandBase
 {
     private readonly ScaleToCommandSpecCharR _spec;
 
-    private CharacterRigRefs _rigRefs;
     private RectTransform _rect;
 
     private Vector2 _startScale;
@@ -45,21 +44,16 @@ public sealed class ScaleToCommandCharR : ClaimTweenCommandBase
 
     protected override float TweenDuration => _spec.duration;
 
-    private readonly PresentationStage _stage;
-
     public ScaleToCommandCharR(PresentationStage stage, ScaleToCommandSpecCharR spec)
+        : base(stage, spec.slotKey)
     {
-        _stage = stage;
         _spec = spec;
     }
 
-    protected override void ResolveTargets(CommandRunScope scope)
-    {
-        _rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(_stage, _spec.slotKey);
-        _rect = _rigRefs?.GetRect(_spec.target);
-    }
+    protected override void ResolveRects()
+        => _rect = RigRefs.GetRect(_spec.target);
 
-    protected override void ClaimTarget(CommandRunScope scope)
+    protected override void ClaimTarget()
     {
         _rect.DOKill(true);
 
@@ -81,9 +75,7 @@ public sealed class ScaleToCommandCharR : ClaimTweenCommandBase
         _endScale.x = _targetScale.x;
         _endScale.y = _targetScale.y;
 
-        // 이 커맨드는 duration 동안 localScale을 바꾸는 placement(scale) writer다.
-        // FocusPoint solver가 라이브 scale이 아니라 "정착 scale"을 알 수 있도록 게시한다.
-        _rigRefs.PlacementTargets.PublishLocalScale(_rect, _targetScale);
+        Claim(_rect, claim);
     }
 
     protected override Tween CreateTween(float duration)
@@ -92,11 +84,8 @@ public sealed class ScaleToCommandCharR : ClaimTweenCommandBase
             .ApplyEase(_spec.ease, _spec.customCurveKeys)
             .SetTarget(_rect);
 
-    protected override void OnCommitFinalState()
-    {
-        ApplyScaleXY(_rect, _targetScale);
-        _rigRefs.PlacementTargets.Clear(_rect);
-    }
+    protected override void WriteFinalState()
+        => ApplyScaleXY(_rect, _targetScale);
 
     protected override float MeasureRemainingRatio()
     {

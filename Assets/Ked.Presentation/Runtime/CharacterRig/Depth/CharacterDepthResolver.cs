@@ -62,15 +62,22 @@ public static class CharacterDepthResolver
         CharacterFocusTuningDBSO focusTuningDb,
         out Vector2 finalDepthY)
     {
+        // 실패하면 raw Y로 떨어진다 — 크기는 바뀌고 초점만 보정 안 된다. 어느 경로든 반드시 경고한다.
         finalDepthY = rawDepthY;
 
         if (stageProvider == null || depthYRect == null || depthScaleRect == null)
+        {
+            WarnFallback(roleKey, "무대 제공자나 깊이 축 rect가 없다");
             return;
+        }
 
         RectTransform rigSpaceRoot = stageProvider.RigSpaceRoot;
 
         if (rigSpaceRoot == null)
+        {
+            WarnFallback(roleKey, "RigSpaceRoot가 없다");
             return;
+        }
 
         string resolvedRigKey = CharacterRigTargetResolver.ResolveRigKeyByPolicy(stage, roleKey);
         stage.characterRigs.TryGetRig(resolvedRigKey, out CharacterRigRefs rigRefs);
@@ -89,6 +96,7 @@ public static class CharacterDepthResolver
                 out RectTransform measureRect,
                 out Vector3 focusLocalOffset))
         {
+            WarnFallback(roleKey, $"초점 측정 입력을 못 구했다(리그 · focus 튜닝 '{tuningKey}' · VisualOffset 중 하나가 없다)");
             return;
         }
 
@@ -101,11 +109,7 @@ public static class CharacterDepthResolver
 
         if (depthYIndex < 0 || depthScaleIndex < 0)
         {
-            Debug.LogWarning(
-                $"[CharacterDepthResolver] depth 축이 focus 측정 체인에 없다 " +
-                $"(depthY={depthYIndex}, depthScale={depthScaleIndex}). " +
-                $"보정 없이 raw depthY를 쓴다. role='{roleKey}'");
-
+            WarnFallback(roleKey, $"깊이 축이 초점 측정 체인에 없다(depthY={depthYIndex}, depthScale={depthScaleIndex})");
             return;
         }
 
@@ -120,4 +124,7 @@ public static class CharacterDepthResolver
 
         finalDepthY = solved.ToUnity();
     }
+
+    private static void WarnFallback(string roleKey, string reason)
+        => Debug.LogWarning($"[CharacterDepthResolver] 초점 보존 없이 raw depthY를 쓴다 — {reason}. role='{roleKey}'");
 }

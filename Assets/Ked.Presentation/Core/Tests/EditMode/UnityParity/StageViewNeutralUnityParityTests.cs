@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using NUnit.Framework;
+using Ked.Presentation.Core;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -233,7 +234,8 @@ namespace Ked.Presentation.Core.Tests.UnityParity
         {
             // 같은 줄의 size가 깊이 크기를 예약한 상태 — 예약은 끝값으로, 카메라는 중립으로.
             CharacterPlacementTargetLedger ledger = new();
-            ledger.PublishLocalScale(_refs.GetRect(CharacterRigTarget.CharSlot_DepthScale), new Vector2(1.58f, 1.58f));
+            RectTransform depthScale = _refs.GetRect(CharacterRigTarget.CharSlot_DepthScale);
+            ledger.Publish(depthScale, StageNodeClaim.LocalScaleXY(depthScale.name, new Vector2(1.58f, 1.58f).ToCore()));
 
             Vector2 atNeutralCamera = SolvePlace(ledger, _refs, _shotRoot, _view);
 
@@ -245,6 +247,55 @@ namespace Ked.Presentation.Core.Tests.UnityParity
             Vector2 withoutReservation = SolvePlace(new CharacterPlacementTargetLedger(), _refs, _shotRoot, _view);
             Assert.That(Vector2.Distance(atMovedCamera, withoutReservation), Is.GreaterThan(1f),
                 "예약 끝값이 무시됐다");
+        }
+
+        // ── 같은 줄의 다른 트윈이 체인 위에 있을 때 ───────────────────
+        // 2026-08에 손으로 게시를 넣을 때 빠졌던 둘(슬라이드 · 회전). 기반이 게시하므로 이제 빠질 수 없지만,
+        // "끝값을 게시하면 place가 트윈 중간값을 읽지 않는다"는 성질은 여기서 고정한다.
+
+        [Test]
+        public void 슬라이드_끝값을_게시하면_place는_화면_밖_출발점을_읽지_않는다()
+        {
+            // slide_in: 끝값 = 현재 위치. CreateTween이 rect를 출발점(화면 밖)으로 밀어 둔다.
+            RectTransform track = _refs.GetRect(CharacterRigTarget.CharSlot_Track);
+            Vector2 settled = track.anchoredPosition;
+
+            Vector2 expected = SolvePlace(new CharacterPlacementTargetLedger(), _refs, _shotRoot, _view);
+
+            CharacterPlacementTargetLedger ledger = new();
+            ledger.Publish(track, StageNodeClaim.AnchoredPosition(track.name, settled.ToCore()));
+            track.anchoredPosition = settled + new Vector2(-960f, 0f);
+
+            Vector2 actual = SolvePlace(ledger, _refs, _shotRoot, _view);
+
+            AssertClose(expected, actual, "슬라이드 출발점에 있을 때 place의 해");
+
+            Vector2 unreserved = SolvePlace(new CharacterPlacementTargetLedger(), _refs, _shotRoot, _view);
+            Assert.That(Vector2.Distance(expected, unreserved), Is.GreaterThan(1f),
+                "게시가 없으면 출발점을 읽어 해가 달라져야 한다(재현 실패 — 픽스처를 확인)");
+
+            track.anchoredPosition = settled;
+        }
+
+        [Test]
+        public void 회전_끝값을_게시하면_place는_회전_중간값을_읽지_않는다()
+        {
+            // rotate_by: SwayPivot은 발 피벗이라 각도에 따라 얼굴이 원호를 그린다.
+            RectTransform sway = _refs.GetRect(CharacterRigTarget.CharSlot_SwayPivot);
+            Vector3 endEuler = new(0f, 0f, 24f);
+
+            sway.localEulerAngles = endEuler;
+            Vector2 expected = SolvePlace(new CharacterPlacementTargetLedger(), _refs, _shotRoot, _view);
+
+            CharacterPlacementTargetLedger ledger = new();
+            ledger.Publish(sway, StageNodeClaim.LocalEuler(sway.name, endEuler.ToCore()));
+            sway.localEulerAngles = new Vector3(0f, 0f, 8f);
+
+            Vector2 actual = SolvePlace(ledger, _refs, _shotRoot, _view);
+
+            AssertClose(expected, actual, "회전 중간값에 있을 때 place의 해");
+
+            sway.localEulerAngles = Vector3.zero;
         }
 
         // ── 초점 측정(shot_focus) ───────────────────────────────────

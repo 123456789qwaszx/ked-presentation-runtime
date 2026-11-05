@@ -11,7 +11,7 @@ using UnityEngine;
 /// 등장/퇴장의 차이는 "현재 위치가 도착점이냐 출발점이냐" 하나로 환원된다
 /// (등장은 화면 밖에서 제자리로, 퇴장은 제자리에서 화면 밖으로).
 /// </summary>
-public abstract class SlideCommandBase : ClaimTweenCommandBase
+public abstract class SlideCommandBase : RigClaimTweenCommandBase
 {
     private RectTransform _rect;
 
@@ -32,15 +32,18 @@ public abstract class SlideCommandBase : ClaimTweenCommandBase
     /// <summary>진행률(ease 적용 후)에 대한 튐의 세기. 등장은 끝에서, 퇴장은 출발에서 튄다.</summary>
     protected abstract float Bump(float easedProgress);
 
-    /// <summary>슬라이드할 rect. 리그 종류별 해석은 파생이 안다.</summary>
-    protected abstract RectTransform ResolveSlideRect(CommandRunScope scope);
+    /// <summary>슬라이드할 rect. 어느 축인지는 파생의 스펙이 안다.</summary>
+    protected abstract RectTransform SlideRectOf(CharacterRigRefs rig);
 
-    protected override void ResolveTargets(CommandRunScope scope)
+    protected SlideCommandBase(PresentationStage stage, string slotKey)
+        : base(stage, slotKey)
     {
-        _rect = ResolveSlideRect(scope);
     }
 
-    protected override void ClaimTarget(CommandRunScope scope)
+    protected override void ResolveRects()
+        => _rect = SlideRectOf(RigRefs);
+
+    protected override void ClaimTarget()
     {
         _rect.DOKill(true);
 
@@ -64,6 +67,10 @@ public abstract class SlideCommandBase : ClaimTweenCommandBase
         _slideDir = travel.sqrMagnitude > 0f
             ? travel.normalized
             : (CurrentPositionIsDestination ? -DirectionToVector(SlideDirection) : DirectionToVector(SlideDirection));
+
+        // 끝값은 리덕션이 아니라 여기서 정한 값이다(등장은 현재 위치, 퇴장은 현재 + 거리).
+        // 등장은 CreateTween이 rect를 출발점으로 밀어 두므로, 게시가 없으면 같은 줄의 place가 화면 밖 값을 읽는다.
+        Claim(_rect, StageNodeClaim.AnchoredPosition(_rect.name, _endPos.ToCore()));
     }
 
     protected override Tween CreateTween(float duration)
@@ -84,10 +91,8 @@ public abstract class SlideCommandBase : ClaimTweenCommandBase
             .SetEase(SlideEase)
             .SetTarget(_rect);
 
-    protected override void OnCommitFinalState()
-    {
-        _rect.anchoredPosition = _endPos;
-    }
+    protected override void WriteFinalState()
+        => _rect.anchoredPosition = _endPos;
 
     protected override float MeasureRemainingRatio()
         => RemainingRatio(

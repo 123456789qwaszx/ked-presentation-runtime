@@ -12,9 +12,10 @@ using UnityEngine;
 ///
 /// 파생이 채우는 것 (변형점):
 ///   ResolveTargets    — 유니티 참조 해석 (한 번만 불린다)
-///   ClaimTarget       — DOKill → (from-override) → 목표 계산(코어 리덕션) → (게시)
+///   ClaimTarget       — DOKill → (from-override) → 목표 계산(코어 리덕션). 목표를 내지 못하면 false —
+///                       그러면 트윈도 확정도 없다. 실패가 (0,0) 같은 기본값으로 조용히 흐르지 않게 하기 위해서다
 ///   CreateTween       — 목표를 향한 트윈 (ease·target 포함. SetUpdate/OnComplete는 여기서 건다)
-///   OnCommitFinalState— 최종 쓰기 + 장부 Clear
+///   OnCommitFinalState— 최종 쓰기
 ///   MeasureRemainingRatio — 가속 잔여시간 계산용 남은 비율 (계량은 커맨드마다 다르다)
 ///
 /// 적용 범위: 목표값이 있는 클레임-트윈 부류만이다. 절차적 연기(Tremble·Sway 등)는
@@ -35,13 +36,14 @@ public abstract class ClaimTweenCommandBase : CommandBase
 
     protected abstract void ResolveTargets(CommandRunScope scope);
 
-    // DOKill -> (from-override) -> 목표 계산 및 확정(코어 리덕션) -> (장부 게시).
-    protected abstract void ClaimTarget(CommandRunScope scope);
+    // DOKill -> (from-override) -> 목표 계산 및 확정(코어 리덕션).
+    // false = 목표를 낼 수 없다(대상 없음 · 계산 실패). 기반이 경고하고 이 run을 건너뛴다.
+    protected abstract bool ClaimTarget(CommandRunScope scope);
 
     // ease, SetTarget은 구현 커맨드가 직접. (SetUpdate,OnComplete는 Base측 정책)
     protected abstract Tween CreateTween(float duration);
 
-    // 최종 쓰기 + 장부 Clear. (수명 플래그 정리는 Base측 정책)
+    // 최종 쓰기. (수명 플래그 정리는 Base측 정책)
     protected abstract void OnCommitFinalState();
 
     // 목표까지 남은 진행 비율 [0,1]. 0이면 가속할 것이 없다는 뜻이라 즉시 확정.
@@ -68,7 +70,12 @@ public abstract class ClaimTweenCommandBase : CommandBase
             ResolveTargets(scope);
         }
         
-        ClaimTarget(scope);
+        if (!ClaimTarget(scope))
+        {
+            WarnClaimFailed();
+            yield break;
+        }
+
         HasClaimedTarget = true;
 
         float duration = TweenDuration;
@@ -97,7 +104,12 @@ public abstract class ClaimTweenCommandBase : CommandBase
 
         if (!HasClaimedTarget)
         {
-            ClaimTarget(scope);
+            if (!ClaimTarget(scope))
+            {
+                WarnClaimFailed();
+                return;
+            }
+
             HasClaimedTarget = true;
         }
 
@@ -137,6 +149,10 @@ public abstract class ClaimTweenCommandBase : CommandBase
         HasClaimedTarget = false;
         _tween = null;
     }
+
+    // 목표를 못 낸 run은 움직이지 않는다 — 대신 반드시 소리를 낸다.
+    private void WarnClaimFailed()
+        => Debug.LogWarning($"[{GetType().Name}] 목표를 낼 수 없어 이 run을 건너뛴다.");
 
     private float CalculateAcceleratedRemainingDuration()
     {

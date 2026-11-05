@@ -216,12 +216,15 @@ public sealed class MotionCommandCharR : CommandBase
 
     private void Publish(in Bound b)
     {
-        switch (b.Channel.Kind)
+        StageNodeClaim claim = b.Channel.Kind switch
         {
-            case MotionChannelKind.Position: _rigRefs.PlacementTargets.PublishAnchoredPosition(b.Rect, b.End); break;
-            case MotionChannelKind.Scale: _rigRefs.PlacementTargets.PublishLocalScale(b.Rect, b.End); break;
-            case MotionChannelKind.Euler: _rigRefs.PlacementTargets.PublishLocalEuler(b.Rect, b.End); break;
-        }
+            MotionChannelKind.Position => StageNodeClaim.AnchoredPosition(b.Rect.name, new Vec2(b.End.x, b.End.y)),
+            MotionChannelKind.Scale => StageNodeClaim.LocalScaleXY(b.Rect.name, new Vec2(b.End.x, b.End.y)),
+            MotionChannelKind.Euler => StageNodeClaim.LocalEuler(b.Rect.name, b.End.ToCore()),
+            _ => throw new ArgumentOutOfRangeException(nameof(b.Channel.Kind), b.Channel.Kind, "모르는 채널 종류"),
+        };
+
+        _rigRefs.PlacementTargets.Publish(b.Rect, claim);
     }
 
     private static Vector3 ReadStart(RectTransform rect, MotionChannelKind kind)

@@ -1,5 +1,6 @@
 using System;
 using DG.Tweening;
+using Ked.Presentation.Core;
 using UnityEngine;
 
 public enum CharacterMirrorMode
@@ -23,7 +24,7 @@ public sealed class MirrorCharacterCommandSpecCharR : CharacterRigCommandSpecBas
     public Ease ease = Ease.OutCubic;
 }
 
-public sealed class MirrorCharacterCommandCharR : ClaimTweenCommandBase
+public sealed class MirrorCharacterCommandCharR : RigClaimTweenCommandBase
 {
     private readonly MirrorCharacterCommandSpecCharR _spec;
 
@@ -41,6 +42,7 @@ public sealed class MirrorCharacterCommandCharR : ClaimTweenCommandBase
     private readonly PresentationStage _stage;
 
     public MirrorCharacterCommandCharR(PresentationStage stage, MirrorCharacterCommandSpecCharR spec)
+        : base(stage, spec.slotKey)
     {
         _stage = stage;
         _spec = spec;
@@ -50,17 +52,14 @@ public sealed class MirrorCharacterCommandCharR : ClaimTweenCommandBase
     /// 해석과 동시에 방향을 정해 대장에 기록한다 — 대장이 곧 다음 Toggle의 입력이라
     /// 커맨드가 여러 번 불려도 방향이 한 번만 뒤집히도록 여기(1회 호출)에 둔다.
     /// </summary>
-    protected override void ResolveTargets(CommandRunScope scope)
+    protected override void ResolveRects()
     {
         string resolvedRigKey =
             CharacterRigTargetResolver.ResolveRigKeyByPolicy(_stage, _spec.slotKey);
 
-        CharacterRigRefs rigRefs =
-            CharacterRigTargetResolver.ResolveCharRigFromTargetKey(_stage, _spec.slotKey);
+        _rect = RigRefs.GetRect(_spec.target);
 
-        _rect = rigRefs?.GetRect(_spec.target);
-
-        CharacterFacing facing = ResolveTargetFacing(scope, resolvedRigKey);
+        CharacterFacing facing = ResolveTargetFacing(resolvedRigKey);
 
         _stage.castRegistry.SetFacing(resolvedRigKey, facing);
 
@@ -70,9 +69,7 @@ public sealed class MirrorCharacterCommandCharR : ClaimTweenCommandBase
         _targetScale.x = Mathf.Abs(baseScale.x) * facing.Sign();
     }
 
-    private CharacterFacing ResolveTargetFacing(
-        CommandRunScope scope,
-        string resolvedRigKey)
+    private CharacterFacing ResolveTargetFacing(string resolvedRigKey)
     {
         switch (_spec.mode)
         {
@@ -93,9 +90,11 @@ public sealed class MirrorCharacterCommandCharR : ClaimTweenCommandBase
         }
     }
 
-    protected override void ClaimTarget(CommandRunScope scope)
+    protected override void ClaimTarget()
     {
         _rect.DOKill(true);
+
+        Claim(_rect, StageNodeClaim.LocalScaleXY(_rect.name, new Vec2(_targetScale.x, _targetScale.y)));
     }
 
     protected override Tween CreateTween(float duration)
@@ -104,10 +103,8 @@ public sealed class MirrorCharacterCommandCharR : ClaimTweenCommandBase
             .SetEase(_spec.ease)
             .SetTarget(_rect);
 
-    protected override void OnCommitFinalState()
-    {
-        _rect.localScale = _targetScale;
-    }
+    protected override void WriteFinalState()
+        => _rect.localScale = _targetScale;
 
     // AccelerateOnStepFinish = false라 불리지 않지만, 계약은 정직하게 채운다.
     protected override float MeasureRemainingRatio()
