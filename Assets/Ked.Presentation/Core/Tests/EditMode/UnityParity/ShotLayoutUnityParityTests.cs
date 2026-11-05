@@ -141,6 +141,66 @@ namespace Ked.Presentation.Core.Tests.UnityParity
             Assert.That(_system.TryGetNeutral(_mount, out _, out _), Is.False);
         }
 
+        // ── 하네스 경로 — 캡처한 무대 뷰가 접힌 샷과 등가다 ─────────────
+
+        [Test]
+        public void 캡처한_무대_뷰는_같은_의도를_코어로_푼_값과_등가다()
+        {
+            foreach (ShotIntentState intent in Intents)
+            {
+                _system.Snap(intent.ToUnity());
+
+                StageViewSnapshot view = StageStateCapture.CaptureStageView(_stages);
+
+                StageStateComparer.Result result = new();
+                StageStateComparer.CompareStageView(in intent, view, LayerProfileCurve.Default, result);
+
+                Assert.That(result.IsEquivalent, Is.True,
+                    $"zoom {intent.Zoom}, pan {intent.PanInRigSpace}, focus {intent.FocusPointInRigSpace}\n" +
+                    string.Join("\n", result.Mismatches));
+                Assert.That(result.ComparedLayers, Is.EqualTo(StageKeys.Length * StageLayerLabels.Depths.Length));
+            }
+        }
+
+        [Test]
+        public void 층을_손으로_흔들면_하네스가_잡는다()
+        {
+            ShotIntentState intent = Intents[4];
+            _system.Snap(intent.ToUnity());
+
+            _stages.Get("stage01").GetLayer(StageLayerLabels.Close).Rect.anchoredPosition += new Vector2(5f, 0f);
+
+            StageStateComparer.Result result = new();
+            StageStateComparer.CompareStageView(in intent, StageStateCapture.CaptureStageView(_stages), LayerProfileCurve.Default, result);
+
+            Assert.That(result.IsEquivalent, Is.False);
+            Assert.That(result.Mismatches.Count, Is.EqualTo(1), string.Join("\n", result.Mismatches));
+            Assert.That(result.Mismatches[0], Does.StartWith("stage:stage01/layer:1.center"));
+        }
+
+        [Test]
+        public void 층_안의_점이_보이는_자리는_코어_합성식과_같다()
+        {
+            // 리그가 Content 아래에 서 있을 때 그 점이 무대 루트의 어디에 보이는가 — 툴 프리뷰가 쓰는 식.
+            ShotIntentState intent = Intents[4];
+            _system.Snap(intent.ToUnity());
+
+            StageRigRefs stage = _stages.Get("stage00");
+
+            foreach (StageLayerRefs layer in stage.Layers)
+            {
+                Vector3 p = new(120f, -260f, 0f);
+                Vector3 seen = stage.Root.InverseTransformPoint(layer.Content.TransformPoint(p));
+
+                LayerResponse response = ShotLayoutMath.SolveLayer(in intent, layer.Depth, LayerProfileCurve.Default);
+                ShotLayoutMath.SolveCamera(in intent, out float cameraScale, out Vec2 pan);
+                Vec2 expected = ShotLayoutMath.ProjectToRigSpace(new Vec2(p.x, p.y), cameraScale, pan, in response);
+
+                Assert.That(seen.x, Is.EqualTo(expected.X).Within(1e-3f), StageLayerLabels.NameOf(layer.Depth));
+                Assert.That(seen.y, Is.EqualTo(expected.Y).Within(1e-3f), StageLayerLabels.NameOf(layer.Depth));
+            }
+        }
+
         [Test]
         public void 나중에_선_층도_다음_적용부터_샷을_받는다()
         {

@@ -385,6 +385,53 @@ namespace Ked.Presentation.Core.Tests
             };
         }
 
+        // ── 비교기: 무대 뷰(샷이 무대에 쓴 것) ─────────────────────────
+
+        private static StageViewSnapshot ViewSolvedFrom(in ShotIntentState intent, string stageKey, float[] depths)
+        {
+            StageViewSnapshot view = new();
+            ShotLayoutMath.SolveCamera(in intent, out float scale, out Vec2 pan);
+            view.Cameras.Add(new StageViewSnapshot.CameraEntry(stageKey, pan, scale));
+
+            foreach (float d in depths)
+            {
+                LayerResponse r = ShotLayoutMath.SolveLayer(in intent, d, LayerProfileCurve.Default);
+                view.Layers.Add(new StageViewSnapshot.LayerEntry(
+                    stageKey, d, ShotLayoutMath.ProjectToRigSpace(Vec2.Zero, scale, pan, in r), r.Scale * scale));
+            }
+
+            return view;
+        }
+
+        [Test]
+        public void 무대_뷰는_접힌_샷_의도를_코어_식으로_푼_값과_비교한다()
+        {
+            ShotIntentState intent = new(6f, new Vec2(250f, -30f), new Vec2(100f, 0f));
+            StageViewSnapshot view = ViewSolvedFrom(in intent, "stage00", StageLayerLabels.Depths);
+
+            StageStateComparer.Result result = new();
+            StageStateComparer.CompareStageView(in intent, view, LayerProfileCurve.Default, result);
+
+            Assert.That(result.IsEquivalent, Is.True, string.Join("\n", result.Mismatches));
+            Assert.That(result.ComparedLayers, Is.EqualTo(5));
+        }
+
+        [Test]
+        public void 무대_뷰가_다른_의도로_풀렸으면_층마다_불일치로_남는다()
+        {
+            ShotIntentState folded = new(6f, new Vec2(250f, 0f), Vec2.Zero);
+            ShotIntentState live = new(6f, new Vec2(200f, 0f), Vec2.Zero);   // 팬 50 차이
+
+            StageStateComparer.Result result = new();
+            StageStateComparer.CompareStageView(
+                in folded, ViewSolvedFrom(in live, "stage00", new[] { StageLayerLabels.Far, StageLayerLabels.Close }),
+                LayerProfileCurve.Default, result);
+
+            Assert.That(result.IsEquivalent, Is.False);
+            Assert.That(result.Mismatches.Any(m => m.StartsWith("stage:stage00.cameraPan")), Is.True);
+            Assert.That(result.Mismatches.Any(m => m.Contains("layer:1") && m.Contains("center")), Is.True, "Close 층 중심");
+        }
+
         private static RigSchemaNodeDto NodeDto(string id, string parent) => new()
         {
             id = id,

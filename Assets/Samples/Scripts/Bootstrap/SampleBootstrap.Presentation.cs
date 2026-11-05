@@ -322,6 +322,7 @@ public partial class SampleBootstrap
             _presentationScopeSession,
             _presentationStage,
             _presentationResponseRig,
+            _stageRigs,
             _dialogueAdvanceDispatcher,
             _motions,
             DialogueFolder);

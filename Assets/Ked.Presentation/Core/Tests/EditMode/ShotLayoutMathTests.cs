@@ -128,6 +128,28 @@ namespace Ked.Presentation.Core.Tests
             AssertVec2(close.OffsetInRigSpace, new Vec2(45.2f, 0f), "Close");
         }
 
+        // ── 합성 — 층 안의 점이 무대 루트의 어디에 보이나 ─────────────
+
+        [Test]
+        public void 층_안의_점은_팬_더하기_오프셋_더하기_두_배율의_곱이다()
+        {
+            // 줌 6(1.3) · 팬 (250, −30) · 초점 +100 — Close: 오프셋 (45.2, 0), 배율 1.3^0.16.
+            ShotIntentState intent = new(6f, new Vec2(250f, -30f), new Vec2(100f, 0f));
+            LayerResponse close = ShotLayoutMath.SolveLayer(in intent, StageLayerLabels.Close, Curve);
+            ShotLayoutMath.SolveCamera(in intent, out float cameraScale, out Vec2 pan);
+
+            Vec2 p = new(100f, 200f);
+            Vec2 actual = ShotLayoutMath.ProjectToRigSpace(p, cameraScale, pan, in close);
+
+            float k = (float)Math.Pow(1.3, 0.16);
+            AssertVec2(actual, new Vec2(250f + 45.2f + 1.3f * k * 100f, -30f + 0f + 1.3f * k * 200f), "Close의 (100, 200)");
+
+            // 중립에서는 항등이다.
+            ShotLayoutMath.SolveCamera(ShotIntentState.Default, out float s0, out Vec2 pan0);
+            LayerResponse mid0 = ShotLayoutMath.SolveLayer(ShotIntentState.Default, StageLayerLabels.Mid, Curve);
+            AssertVec2(ShotLayoutMath.ProjectToRigSpace(p, s0, pan0, in mid0), p, "중립");
+        }
+
         // ── 곡선 ─────────────────────────────────────────────────────
 
         [Test]

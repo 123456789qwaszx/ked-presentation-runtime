@@ -48,17 +48,23 @@ namespace Ked.Presentation.Core
         public override string ToString() => $"{Command} — {Reason}";
     }
 
-    // 슬롯 리그의 구조 부착 상태
-    // 스테이지·레이어 어휘는 게임 데이터라 문자열로 담는다 (코어는 뜻을 모름)
+    // 슬롯 리그의 구조 부착 상태 — 어느 무대의 어느 깊이 층에 섰나.
+    // 무대 키는 게임 데이터라 문자열로 담는다(어떤 무대가 있는지는 호스트가 정한다).
+    // 층은 깊이 값 d다. 라벨 → d는 StageLayerLabels의 눈금이고, 모르는 라벨은 mid로 간다 —
+    // 런타임 StageKeyParser와 같다(그쪽은 경고한다). 원문 라벨은 진단용으로 남긴다.
     public readonly struct SlotAttachment
     {
         public readonly string StageKey;
         public readonly string LayerKey;
+        public readonly float LayerDepth;
 
         public SlotAttachment(string stageKey, string layerKey)
         {
-            StageKey = stageKey;
+            string stage = (stageKey ?? "").Trim().ToLowerInvariant();
+
+            StageKey = stage.Length == 0 ? "stage00" : stage;
             LayerKey = layerKey;
+            LayerDepth = StageLayerLabels.TryGetDepth(layerKey, out float depth) ? depth : StageLayerLabels.Mid;
         }
 
         public override string ToString() => $"{StageKey}/{LayerKey}";
@@ -291,6 +297,31 @@ namespace Ked.Presentation.Core
                 throw new ArgumentException("슬롯 키가 비어 있다.", nameof(slotKey));
 
             _attachments[slotKey] = attachment;
+        }
+
+        /// <summary>리그가 하나라도 선 무대 키. 순서는 사전순(결정적).</summary>
+        public List<string> AttachedStages()
+        {
+            SortedSet<string> stages = new(StringComparer.Ordinal);
+
+            foreach (SlotAttachment attachment in _attachments.Values)
+                stages.Add(attachment.StageKey);
+
+            return new List<string>(stages);
+        }
+
+        /// <summary>이 무대에서 리그가 선 깊이 층의 d. 오름차순(먼 층부터) — 무대 리그의 형제 순서와 같다.</summary>
+        public List<float> AttachedLayerDepths(string stageKey)
+        {
+            SortedSet<float> depths = new();
+
+            foreach (SlotAttachment attachment in _attachments.Values)
+            {
+                if (string.Equals(attachment.StageKey, stageKey, StringComparison.Ordinal))
+                    depths.Add(attachment.LayerDepth);
+            }
+
+            return new List<float>(depths);
         }
 
         // ── 클레임 라우팅 ────────────────────────────────────────────

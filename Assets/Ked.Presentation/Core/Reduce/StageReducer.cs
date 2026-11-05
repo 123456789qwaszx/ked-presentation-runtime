@@ -50,9 +50,14 @@ namespace Ked.Presentation.Core
 
         /// <summary>
         /// presets/layer-profile.json — 깊이 층이 샷에 반응하는 곡선(ShotLayoutMath). 없으면(null) 코어 기본
-        /// 표본(LayerProfileCurve.Default = 종전 다섯 층 값)을 쓴다. 폴드가 층 반응을 접는 것은 P4부터다.
+        /// 표본(LayerProfileCurve.Default = 종전 다섯 층 값)을 쓴다. 층 반응은 상태에 저장하지 않고
+        /// 샷 의도 + 부착된 층 d에서 푼다(StageState.AttachedLayerDepths, StageStateComparer.CompareStageView).
         /// </summary>
         public LayerProfileFileDto LayerProfile;
+
+        /// <summary>LayerProfile이 있으면 그 곡선, 없으면 코어 기본(= 런타임 조립이 쓰는 값).</summary>
+        public LayerProfileCurve ResolveLayerProfileCurve()
+            => LayerProfile != null ? LayerProfileCurve.FromDto(LayerProfile) : LayerProfileCurve.Default;
     }
 
     /// <summary>

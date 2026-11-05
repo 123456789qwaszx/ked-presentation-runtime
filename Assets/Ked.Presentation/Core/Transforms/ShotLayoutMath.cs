@@ -206,6 +206,18 @@ namespace Ked.Presentation.Core
             return new LayerResponse(focusSpread + panFollow, new Vec2(scale, scale));
         }
 
+        /// <summary>
+        /// 층 안의 한 점이 무대 루트(rig space)의 어디에 보이는가 — 계층 Pan → Zoom → Layer를 합성한 결과.
+        ///
+        /// 화면 = pan + offset + cameraScale × layerScale × p
+        ///
+        /// 무대 노드가 전부 stretch · 피벗 중앙이라 각 노드의 원점이 부모의 중심이고, 층 위치는 부모(줌) 공간에
+        /// offset / cameraScale로 쓰이므로 줌을 지나면 offset이 된다. 정지 프레임을 그리는 쪽(툴 프리뷰)과
+        /// 하네스가 이 한 줄을 공유한다.
+        /// </summary>
+        public static Vec2 ProjectToRigSpace(Vec2 pointInLayer, float cameraScale, Vec2 pan, in LayerResponse layer)
+            => pan + layer.OffsetInRigSpace + Vec2.Scale(pointInLayer, layer.Scale) * cameraScale;
+
         /// <summary>무대 전체. 층 배열은 depths와 같은 순서.</summary>
         public static ShotLayout Solve(in ShotIntentState intent, ReadOnlySpan<float> depths, LayerProfileCurve curve)
         {
