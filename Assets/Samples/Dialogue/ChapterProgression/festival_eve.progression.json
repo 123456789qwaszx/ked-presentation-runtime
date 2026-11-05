@@ -9,7 +9,7 @@
       "Type": "Number",
       "Initial": 0,
       "Minimum": 0,
-      "Maximum": 5
+      "Maximum": 1
     },
     {
       "Key": "요령",

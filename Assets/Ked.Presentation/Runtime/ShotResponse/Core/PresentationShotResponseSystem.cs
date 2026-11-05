@@ -35,6 +35,9 @@ public sealed class PresentationShotResponseSystem : IStageViewNeutral
 
     public bool IsTransitioning => _transition != null;
 
+    // 층이 샷에 반응하는 곡선 — Apply가 쓰는 것과 같다. shot_focus_to가 팬을 풀 때 같은 곡선을 본다.
+    public LayerProfileCurve LayerProfile => _profile;
+
     public PresentationShotResponseSystem(StageRigRegistry stages, LayerProfileCurve profile)
     {
         _stages = stages;

@@ -46,6 +46,10 @@ namespace Ked.Presentation.Core
     /// d → LayerProfile. 표본 사이는 선형, 바깥은 끝 표본으로 고정.
     /// 기본 표본 다섯(Default)은 종전 PresentationResponseProfile의 Far…Close 값 그대로라,
     /// 눈금 위에서는 종전과 정확히 같은 값이 나온다.
+    ///
+    /// panResponse는 축마다 −1보다 커야 한다. 층이 화면에서 움직이는 양은 pan × (1 + panResponse)라,
+    /// −1이면 팬을 전혀 따라가지 않고(무한히 먼 층) 그보다 작으면 거꾸로 간다. 그런 층의 점은 팬으로
+    /// 화면 지점에 놓을 수 없다(SolvePanToPlace). 표본이 모두 −1보다 크면 선형 보간도 그렇다.
     /// </summary>
     public sealed class LayerProfileCurve
     {
@@ -62,6 +66,10 @@ namespace Ked.Presentation.Core
             for (int i = 1; i < depths.Length; i++)
                 if (!(depths[i] > depths[i - 1]))
                     throw new ArgumentException($"층 프로필 표본은 d 오름차순이어야 한다 — [{i - 1}]={depths[i - 1]}, [{i}]={depths[i]}");
+
+            for (int i = 0; i < profiles.Length; i++)
+                if (!(profiles[i].PanResponse.X > -1f) || !(profiles[i].PanResponse.Y > -1f))
+                    throw new ArgumentException($"층 프로필 panResponse는 축마다 −1보다 커야 한다 — [{i}] d={depths[i]} panResponse={profiles[i].PanResponse}");
 
             _depths = depths;
             _profiles = profiles;
@@ -217,6 +225,36 @@ namespace Ked.Presentation.Core
         /// </summary>
         public static Vec2 ProjectToRigSpace(Vec2 pointInLayer, float cameraScale, Vec2 pan, in LayerResponse layer)
             => pan + layer.OffsetInRigSpace + Vec2.Scale(pointInLayer, layer.Scale) * cameraScale;
+
+        /// <summary>
+        /// 층 d 안의 점이 화면(rig space)의 desired에 보이게 하는 팬 — ProjectToRigSpace의 팬에 대한 역.
+        ///
+        /// 줌과 초점이 정해지면 층 반응이 팬에 기대는 항은 pan × panResponse 하나라, 보이는 자리는 팬에 대해 선형이다.
+        ///
+        /// 보이는 자리 = pan × (1 + panResponse) + [팬 0일 때 보이는 자리]
+        ///
+        /// 그래서 축별로 닫힌 꼴로 풀린다. 산개 · 배율 항은 정방향 식(SolveLayer)을 팬 0으로 불러 얻는다 — 식을 다시 적지 않는다.
+        /// mid(반응 항등)에서는 desired − p × cameraScale이 된다(종전 shot_focus_to의 식).
+        /// </summary>
+        public static Vec2 SolvePanToPlace(
+            float zoom,
+            Vec2 focusPointInRigSpace,
+            Vec2 pointInLayer,
+            Vec2 desiredInRigSpace,
+            float depth,
+            LayerProfileCurve curve)
+        {
+            ShotIntentState unpanned = new(zoom, Vec2.Zero, focusPointInRigSpace);
+
+            SolveCamera(in unpanned, out float cameraScale, out _);
+            LayerResponse layer = SolveLayer(in unpanned, depth, curve);
+
+            Vec2 seenUnpanned = ProjectToRigSpace(pointInLayer, cameraScale, Vec2.Zero, in layer);
+            Vec2 follow = Vec2.One + curve.Evaluate(depth).PanResponse;
+            Vec2 remaining = desiredInRigSpace - seenUnpanned;
+
+            return new Vec2(remaining.X / follow.X, remaining.Y / follow.Y);
+        }
 
         /// <summary>무대 전체. 층 배열은 depths와 같은 순서.</summary>
         public static ShotLayout Solve(in ShotIntentState intent, ReadOnlySpan<float> depths, LayerProfileCurve curve)

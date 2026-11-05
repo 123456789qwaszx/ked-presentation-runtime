@@ -112,6 +112,7 @@ public sealed class SetupCharRigCommand : CommandBase
 
         _rigBuilder.BindRefsFromRoot(rigRoot, rolePrefix, out CharacterRigRefs refs);
         refs.Stage = stageRefs;
+        refs.Layer = layer;
 
         // 배경은 화면 전체를 덮는다 — 리그 안의 그래픽 전부(본 그림·위 겹)가 클릭을 받지 않게 한다.
         // 위 겹(CharacterPortraitSpriteOverlay_Image)은 스프라이트 없이 화면 크기로 늘어나 있어 그대로면 레이캐스트를 받는다.

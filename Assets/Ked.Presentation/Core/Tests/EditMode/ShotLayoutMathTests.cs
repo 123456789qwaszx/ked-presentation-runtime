@@ -150,6 +150,36 @@ namespace Ked.Presentation.Core.Tests
             AssertVec2(ShotLayoutMath.ProjectToRigSpace(p, s0, pan0, in mid0), p, "중립");
         }
 
+        // ── 역 — 그 점을 화면 지점에 놓는 팬 ───────────────────────────
+
+        [Test]
+        public void 팬_역산은_합성식의_역이다()
+        {
+            // 두 축 모두 반응이 있는 곡선이어야 축별 독립까지 본다. 기본 곡선은 y 반응이 0이다.
+            LayerProfileCurve both = new(
+                new[] { 0f },
+                new[] { new LayerProfile(new Vec2(6f, 3f), new Vec2(0.3f, -0.5f), 0.1f) });
+
+            Vec2 focus = new(-180f, 420f);
+            Vec2 desired = new(300f, -150f);
+
+            foreach (LayerProfileCurve curve in new[] { Curve, both })
+            foreach (float depth in new[] { StageLayerLabels.Far, StageLayerLabels.Mid, StageLayerLabels.Close, 0.25f })
+            foreach (float zoom in new[] { 0f, 2.5f, -4f })
+            {
+                Vec2 pan = ShotLayoutMath.SolvePanToPlace(zoom, focus, focus, desired, depth, curve);
+
+                ShotIntentState placed = new(zoom, pan, focus);
+                ShotLayoutMath.SolveCamera(in placed, out float cameraScale, out Vec2 cameraPan);
+                LayerResponse layer = ShotLayoutMath.SolveLayer(in placed, depth, curve);
+
+                Vec2 seen = ShotLayoutMath.ProjectToRigSpace(focus, cameraScale, cameraPan, in layer);
+
+                Assert.That(seen.X, Is.EqualTo(desired.X).Within(1e-3f), $"d={depth} zoom={zoom} X — seen={seen}");
+                Assert.That(seen.Y, Is.EqualTo(desired.Y).Within(1e-3f), $"d={depth} zoom={zoom} Y — seen={seen}");
+            }
+        }
+
         // ── 곡선 ─────────────────────────────────────────────────────
 
         [Test]
@@ -194,6 +224,23 @@ namespace Ked.Presentation.Core.Tests
             Assert.Throws<ArgumentException>(() => new LayerProfileCurve(
                 new[] { 0f, 0f },
                 new[] { LayerProfile.Identity, LayerProfile.Identity }));
+        }
+
+        [Test]
+        public void panResponse는_축마다_마이너스_1보다_커야_한다()
+        {
+            // −1이면 그 층은 팬을 전혀 따라가지 않는다 — 팬으로 그 층의 점을 화면 지점에 놓을 수 없다.
+            Assert.Throws<ArgumentException>(() => new LayerProfileCurve(
+                new[] { 0f },
+                new[] { new LayerProfile(Vec2.Zero, new Vec2(-1f, 0f), 0f) }));
+
+            Assert.Throws<ArgumentException>(() => new LayerProfileCurve(
+                new[] { 0f },
+                new[] { new LayerProfile(Vec2.Zero, new Vec2(0f, -1.5f), 0f) }));
+
+            Assert.DoesNotThrow(() => new LayerProfileCurve(
+                new[] { 0f },
+                new[] { new LayerProfile(Vec2.Zero, new Vec2(-0.99f, 0f), 0f) }));
         }
 
         [Test]

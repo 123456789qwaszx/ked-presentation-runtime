@@ -291,6 +291,12 @@ namespace Ked.Presentation.Core
             return false;
         }
 
+        /// <summary>스폰된 슬롯의 부착. SpawnSlot이 언제나 남기므로, 없으면 폴드 배선의 잘못이다.</summary>
+        public SlotAttachment GetAttachment(string slotKey)
+            => _attachments.TryGetValue(slotKey, out SlotAttachment attachment)
+                ? attachment
+                : throw new InvalidOperationException($"슬롯 '{slotKey}'의 부착이 없다 — 스폰(SpawnSlot)을 거치지 않은 슬롯이다.");
+
         public void SetAttachment(string slotKey, in SlotAttachment attachment)
         {
             if (string.IsNullOrEmpty(slotKey))
