@@ -524,5 +524,21 @@ namespace Ked.Presentation.Core.Tests
             Assert.That(seen.X, Is.EqualTo(0f).Within(Eps), $"{layer} center에 명중 — seen={seen}");
             Assert.That(seen.Y, Is.EqualTo(0f).Within(Eps), $"{layer} center에 명중 — seen={seen}");
         }
+
+        [Test]
+        public void 덮는_무대에_선_슬롯에는_shot_focus_to를_걸_수_없다()
+        {
+            // 샷은 본 무대만 움직인다(StageRoles). 런타임은 경고하고 건너뛰고, 폴드는 Unhandled로 남긴다.
+            StageReducerTuning tuning = NewTuning();
+
+            StageState state = Fold(tuning,
+                Cmd("slot", "c1", "stage01", "mid"),
+                Cmd("shot_to", "3", "1u", "0u"),
+                Cmd("shot_focus_to", "c1", "bust", "center", "2.5"));
+
+            Assert.That(state.Unhandled.Count, Is.EqualTo(1));
+            Assert.That(state.Unhandled[0].Reason, Does.Contain("덮는 무대"));
+            Assert.That(state.Shot.Zoom, Is.EqualTo(3f), "샷은 앞 커맨드 그대로");
+        }
     }
 }

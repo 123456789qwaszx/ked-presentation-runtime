@@ -432,6 +432,28 @@ namespace Ked.Presentation.Core.Tests
             Assert.That(result.Mismatches.Any(m => m.Contains("layer:1") && m.Contains("center")), Is.True, "Close 층 중심");
         }
 
+        [Test]
+        public void 덮는_무대의_기대값은_중립이다()
+        {
+            // 샷은 본 무대만 움직인다(StageRoles). 덮는 무대가 샷을 따랐으면 불일치다.
+            ShotIntentState folded = new(6f, new Vec2(250f, -30f), new Vec2(100f, 0f));
+
+            StageStateComparer.Result fixedOverlay = new();
+            StageStateComparer.CompareStageView(
+                in folded, ViewSolvedFrom(ShotIntentState.Default, "stage01", StageLayerLabels.Depths),
+                LayerProfileCurve.Default, fixedOverlay);
+
+            Assert.That(fixedOverlay.IsEquivalent, Is.True, string.Join("\n", fixedOverlay.Mismatches));
+
+            StageStateComparer.Result followingOverlay = new();
+            StageStateComparer.CompareStageView(
+                in folded, ViewSolvedFrom(in folded, "stage01", StageLayerLabels.Depths),
+                LayerProfileCurve.Default, followingOverlay);
+
+            Assert.That(followingOverlay.IsEquivalent, Is.False);
+            Assert.That(followingOverlay.Mismatches.Any(m => m.StartsWith("stage:stage01.cameraScale")), Is.True);
+        }
+
         private static RigSchemaNodeDto NodeDto(string id, string parent) => new()
         {
             id = id,

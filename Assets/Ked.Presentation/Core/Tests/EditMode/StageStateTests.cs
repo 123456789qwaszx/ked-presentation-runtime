@@ -261,6 +261,15 @@ namespace Ked.Presentation.Core.Tests
         }
 
         [Test]
+        public void 무대를_생략하면_본_무대고_그_밖은_덮는_무대다()
+        {
+            Assert.That(StageRoles.MainStageKey, Is.EqualTo("stage00"));
+            Assert.That(StageRoles.Of(new SlotAttachment("", "mid").StageKey), Is.EqualTo(StageRole.Main));
+            Assert.That(StageRoles.Of("stage01"), Is.EqualTo(StageRole.Overlay));
+            Assert.That(StageRoles.Of("stage02"), Is.EqualTo(StageRole.Overlay));
+        }
+
+        [Test]
         public void 무대별로_리그가_선_층을_먼_층부터_낸다()
         {
             StageState state = NewState();

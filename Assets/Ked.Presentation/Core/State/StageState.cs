@@ -63,7 +63,7 @@ namespace Ked.Presentation.Core
         {
             string stage = (stageKey ?? "").Trim().ToLowerInvariant();
 
-            StageKey = stage.Length == 0 ? "stage00" : stage;
+            StageKey = stage.Length == 0 ? StageRoles.MainStageKey : stage;
             LayerKey = layerKey;
             LayerDepth = StageLayerLabels.TryGetDepth(layerKey, out float depth) ? depth : StageLayerLabels.Mid;
         }

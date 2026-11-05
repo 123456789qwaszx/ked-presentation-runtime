@@ -8,7 +8,7 @@ namespace Ked.Presentation.Core.Tests.UnityParity
 {
     /// <summary>
     /// 무대 리그 리팩터의 오라클 — 런타임 샷 시스템이 무대에 쓰는 트랜스폼 전부(무대마다 카메라 2 + 층 5)가
-    /// 코어 ShotLayoutMath.Solve의 출력과 같아야 한다.
+    /// 코어 ShotLayoutMath.Solve의 출력과 같아야 한다. 본 무대는 Solve(intent), 덮는 무대는 Solve(Default)다(2026-11-06 역할).
     ///
     /// P1에서는 종전 런타임 식(PresentationResponseMath)과 코어 식이 같음을 고정했고,
     /// P2/P3(런타임이 코어 식을 쓰고 무대를 스키마가 세운 뒤)에도 같은 판정이 그대로 통과한다 — 동작 불변의 증명이다.
@@ -86,7 +86,8 @@ namespace Ked.Presentation.Core.Tests.UnityParity
 
                 foreach (StageRigRefs stage in _stages.All)
                 {
-                    ShotLayout layout = ShotLayoutMath.Solve(in intent, stage.LayerDepths, LayerProfileCurve.Default);
+                    ShotIntentState followed = stage.Role == StageRole.Main ? intent : ShotIntentState.Default;
+                    ShotLayout layout = ShotLayoutMath.Solve(in followed, stage.LayerDepths, LayerProfileCurve.Default);
 
                     Assert.That(stage.CameraZoom.localScale.x, Is.EqualTo(layout.CameraScale).Within(Eps), $"{tag} {stage.StageKey} 줌 배율 x");
                     Assert.That(stage.CameraZoom.localScale.y, Is.EqualTo(layout.CameraScale).Within(Eps), $"{tag} {stage.StageKey} 줌 배율 y");
@@ -108,6 +109,37 @@ namespace Ked.Presentation.Core.Tests.UnityParity
                     }
                 }
             }
+        }
+
+        [Test]
+        public void 샷은_본_무대만_움직이고_덮는_무대는_중립에_고정이다()
+        {
+            _system.Snap(Intents[4].ToUnity());
+
+            Assert.That(_stages.Get(StageRoles.MainStageKey).CameraZoom.localScale.x, Is.Not.EqualTo(1f), "본 무대는 따른다");
+
+            foreach (StageRigRefs stage in _stages.All)
+            {
+                if (stage.Role == StageRole.Main)
+                    continue;
+
+                Assert.That(stage.CameraZoom.localScale, Is.EqualTo(Vector3.one), $"{stage.StageKey} 줌");
+                Assert.That(stage.CameraPan.anchoredPosition, Is.EqualTo(Vector2.zero), $"{stage.StageKey} 팬");
+
+                foreach (StageLayerRefs layer in stage.Layers)
+                {
+                    Assert.That(layer.Rect.anchoredPosition, Is.EqualTo(Vector2.zero), $"{stage.StageKey}/{StageLayerLabels.NameOf(layer.Depth)} 위치");
+                    Assert.That(layer.Rect.localScale, Is.EqualTo(Vector3.one), $"{stage.StageKey}/{StageLayerLabels.NameOf(layer.Depth)} 배율");
+                }
+            }
+        }
+
+        [Test]
+        public void 역할은_무대_키로_정한다()
+        {
+            Assert.That(_stages.Get("stage00").Role, Is.EqualTo(StageRole.Main));
+            Assert.That(_stages.Get("stage01").Role, Is.EqualTo(StageRole.Overlay));
+            Assert.That(_stages.Get("stage02").Role, Is.EqualTo(StageRole.Overlay));
         }
 
         [Test]

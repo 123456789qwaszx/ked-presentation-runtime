@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Ked.Presentation.Core;
 using UnityEngine;
 
 /// <summary>한 깊이 층. Rect에 샷 반응(위치 · 배율)을 쓰고, Content에 리그를 붙인다.</summary>
@@ -24,6 +25,9 @@ public sealed class StageLayerRefs
 public sealed class StageRigRefs
 {
     public string StageKey { get; }
+
+    /// <summary>본 무대만 샷을 따른다. 덮는 무대의 카메라 · 층은 빌더가 세운 항등 그대로다.</summary>
+    public StageRole Role => StageRoles.Of(StageKey);
 
     public RectTransform Root { get; }
     public RectTransform MaskRoot { get; internal set; }

@@ -92,7 +92,8 @@ public partial class SampleBootstrap
             characterFocusTuningDb);
     }
 
-    // 무대 키 — 대본의 slot · bg_spawn · tx · screen_blur가 부르는 이름. 코어 폴드의 생략값(stage00)과 같다.
+    // 무대 키 — 대본의 slot · bg_spawn · tx · screen_blur가 부르는 이름. 역할은 키로 정한다(StageRoles):
+    // stage00은 본 무대(샷이 움직인다, 생략값), stage01 · stage02는 덮는 무대(컷인 · 인서트 · 커튼, 카메라 고정).
     private static readonly string[] StageKeys = { "stage00", "stage01", "stage02" };
 
     private ScreenEffectRig EnsureScreenEffectRig()

@@ -186,7 +186,7 @@ yarn 4묶음 기준. "이관 안 함"은 **조용히 버린 것이 아니라 판
 |---|---|
 | 런타임 `PresentationShotResponseSystem` | 식의 출력을 노드에 쓴다(applier). 중립 = `Solve(Default)` |
 | 폴드 `StageReducer.Shot` | 의도만 접는다. 층 반응은 상태에 저장하지 않는다 — 의도 + 부착 d에서 언제든 풀린다 |
-| 하네스 `StageStateComparer.CompareStageView` | 같은 식으로 기대값(카메라 · 층마다 중심 · 전체 배율)을 풀어 캡처와 비교한다 |
+| 하네스 `StageStateComparer.CompareStageView` | 같은 식으로 기대값(카메라 · 층마다 중심 · 전체 배율)을 풀어 캡처와 비교한다. 샷은 본 무대만 움직이므로(`StageRoles`, 2026-11-06) 덮는 무대의 기대값은 `Solve(Default)` |
 
 `shot_focus_to`는 정방향 식의 역으로 팬을 푼다(`ShotLayoutMath.SolvePanToPlace`). 입력은 무대 좌표의 focus와 그 슬롯이 선 층 d다.
 팬 1px당 그 점이 화면에서 움직이는 양이 층마다 일정(`1 + panResponse`)해서 축마다 나눗셈 한 번이다.
@@ -202,13 +202,13 @@ yarn 4묶음 기준. "이관 안 함"은 **조용히 버린 것이 아니라 판
 | `scale_by` · `scale_reset` | `ScaleToCommandSpecCharR` | 동일 |
 | `rotate_by` · `rotate_reset` | `RotateToCommandSpecCharR` | `RotateToReduction` |
 | `sibling_front` · `sibling_back` | — | **이관 안 함** (아래) |
-| `char_to` | — | **이관 안 함** (아래) — 무대를 이름에 박은 `char_to_s0/s1/s2`는 2026-11-03에 걷었다 |
+| `char_to` | — | **어휘에서 걷었다 (2026-11-06)** — 리그는 무대 · 층을 옮기지 않는다. 다른 자리는 fade_out 뒤 새 slot([stage-rig.md](../../Runtime/StageRig/Documentation~/stage-rig.md) §2.4). 무대를 이름에 박은 `char_to_s0/s1/s2`는 그 전 2026-11-03에 걷었다 |
 
-**구조 커맨드(`sibling_front` · `sibling_back` · `char_to`)를 이관하지 않는 이유: 변환부가 항등이다.**
+**구조 커맨드(`sibling_front` · `sibling_back`, 그리고 걷기 전의 `char_to`)를 이관하지 않는 이유: 변환부가 항등이다.**
 스펙 값(stage·layer·순서 모드)이 곧 목표이고 본문은 유니티 구조 조작(`SetParent` ·
 `SetSiblingIndex`)뿐이라 **코어로 옮길 계산이 없다.**
 이 구조 축(리그가 어느 스테이지/레이어에 어떤 순서로 붙는가) 중 **부착은 데이터 모델에 들어갔다** —
-`StageState`의 `SlotAttachment`(무대 키 · 층 라벨 · 깊이 d)를 slot · bg_spawn · char_to가 접는다.
+`StageState`의 `SlotAttachment`(무대 키 · 층 라벨 · 깊이 d)를 slot · bg_spawn이 스폰 때 한 번 접는다.
 층 d는 2026-11-05부터 하네스의 층 판정과 `shot_focus_to`의 팬 역산이 읽는다. 형제 순서(`sibling_*`)는 아직 모델 밖이다.
 
 ### 이관 대상이 아닌 부류 — 절차적 커맨드
