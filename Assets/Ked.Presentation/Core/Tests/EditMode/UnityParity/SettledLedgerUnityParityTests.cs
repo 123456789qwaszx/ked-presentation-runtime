@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using NUnit.Framework;
+using Ked.Presentation.Core;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -232,8 +233,8 @@ namespace Ked.Presentation.Core.Tests.UnityParity
             Vector2 depthScaleTarget = new(1.38f, 1.38f);
 
             CharacterPlacementTargetLedger fresh = new();
-            fresh.PublishAnchoredPosition(depthY, depthYTarget);
-            fresh.PublishLocalScale(depthScale, depthScaleTarget);
+            fresh.Publish(depthY, StageNodeClaim.AnchoredPosition(depthY.name, depthYTarget.ToCore()));
+            fresh.Publish(depthScale, StageNodeClaim.LocalScaleXY(depthScale.name, depthScaleTarget.ToCore()));
 
             LegacyLedger legacy = new();
             legacy.PublishAnchoredPosition(depthY, depthYTarget);
@@ -265,9 +266,9 @@ namespace Ked.Presentation.Core.Tests.UnityParity
             CharacterPlacementTargetLedger fresh = new();
             LegacyLedger legacy = new();
 
-            fresh.PublishAnchoredPosition(track, new Vector2(260f, -15f));
-            fresh.PublishAnchoredPosition(depthY, new Vector2(0f, 240f));
-            fresh.PublishLocalScale(depthScale, new Vector2(1.14f, 1.14f));
+            fresh.Publish(track, StageNodeClaim.AnchoredPosition(track.name, new Vector2(260f, -15f).ToCore()));
+            fresh.Publish(depthY, StageNodeClaim.AnchoredPosition(depthY.name, new Vector2(0f, 240f).ToCore()));
+            fresh.Publish(depthScale, StageNodeClaim.LocalScaleXY(depthScale.name, new Vector2(1.14f, 1.14f).ToCore()));
 
             legacy.PublishAnchoredPosition(track, new Vector2(260f, -15f));
             legacy.PublishAnchoredPosition(depthY, new Vector2(0f, 240f));
@@ -288,7 +289,7 @@ namespace Ked.Presentation.Core.Tests.UnityParity
             RectTransform sway = Rect(CharacterRigTarget.CharSlot_SwayPivot);
 
             CharacterPlacementTargetLedger fresh = new();
-            fresh.PublishLocalEuler(sway, new Vector3(0f, 0f, 24f));
+            fresh.Publish(sway, StageNodeClaim.LocalEuler(sway.name, new Vector3(0f, 0f, 24f).ToCore()));
 
             LegacyLedger legacy = new();
             legacy.PublishLocalEuler(sway, new Vector3(0f, 0f, 24f));
@@ -308,8 +309,8 @@ namespace Ked.Presentation.Core.Tests.UnityParity
             RectTransform depthScale = Rect(CharacterRigTarget.CharSlot_DepthScale);
 
             CharacterPlacementTargetLedger fresh = new();
-            fresh.PublishAnchoredPosition(depthY, new Vector2(0f, 440f));
-            fresh.PublishLocalScale(depthScale, new Vector2(1.58f, 1.58f));
+            fresh.Publish(depthY, StageNodeClaim.AnchoredPosition(depthY.name, new Vector2(0f, 440f).ToCore()));
+            fresh.Publish(depthScale, StageNodeClaim.LocalScaleXY(depthScale.name, new Vector2(1.58f, 1.58f).ToCore()));
 
             LegacyLedger legacy = new();
             legacy.PublishAnchoredPosition(depthY, new Vector2(0f, 440f));
@@ -335,9 +336,9 @@ namespace Ked.Presentation.Core.Tests.UnityParity
             RectTransform track = Rect(CharacterRigTarget.CharSlot_Track);
 
             CharacterPlacementTargetLedger ledger = new();
-            ledger.PublishAnchoredPosition(depthY, new Vector2(0f, -320f));
-            ledger.PublishLocalScale(depthScale, new Vector2(1.38f, 1.38f));
-            ledger.PublishAnchoredPosition(track, new Vector2(90f, 12f));
+            ledger.Publish(depthY, StageNodeClaim.AnchoredPosition(depthY.name, new Vector2(0f, -320f).ToCore()));
+            ledger.Publish(depthScale, StageNodeClaim.LocalScaleXY(depthScale.name, new Vector2(1.38f, 1.38f).ToCore()));
+            ledger.Publish(track, StageNodeClaim.AnchoredPosition(track.name, new Vector2(90f, 12f).ToCore()));
 
             Dictionary<RectTransform, string> before = Snapshot();
 
@@ -366,7 +367,7 @@ namespace Ked.Presentation.Core.Tests.UnityParity
                 "오라클(종전 구현)은 측정 도중 실제로 트랜스폼에 쓴다");
 
             CharacterPlacementTargetLedger fresh = new();
-            fresh.PublishAnchoredPosition(depthY, target);
+            fresh.Publish(depthY, StageNodeClaim.AnchoredPosition(depthY.name, target.ToCore()));
 
             ClearHasChanged();
             fresh.MeasureSettledWorldPoint(MeasureRect, Vector3.zero, _stage);
@@ -392,7 +393,7 @@ namespace Ked.Presentation.Core.Tests.UnityParity
             RectTransform stranger = (RectTransform)strangerGo.transform;
 
             CharacterPlacementTargetLedger ledger = new();
-            ledger.PublishAnchoredPosition(Rect(CharacterRigTarget.CharSlot_DepthY), new Vector2(0f, -320f));
+            ledger.Publish(Rect(CharacterRigTarget.CharSlot_DepthY), StageNodeClaim.AnchoredPosition(Rect(CharacterRigTarget.CharSlot_DepthY).name, new Vector2(0f, -320f).ToCore()));
 
             Dictionary<RectTransform, string> before = Snapshot();
 
@@ -413,8 +414,8 @@ namespace Ked.Presentation.Core.Tests.UnityParity
             RectTransform node = Rect(CharacterRigTarget.CharSlot_Track);
 
             CharacterPlacementTargetLedger fresh = new();
-            fresh.PublishAnchoredPosition(node, new Vector2(300f, 0f));
-            fresh.PublishLocalScale(node, new Vector2(2f, 2f));
+            fresh.Publish(node, StageNodeClaim.AnchoredPosition(node.name, new Vector2(300f, 0f).ToCore()));
+            fresh.Publish(node, StageNodeClaim.LocalScaleXY(node.name, new Vector2(2f, 2f).ToCore()));
 
             LegacyLedger legacy = new();
             legacy.PublishAnchoredPosition(node, new Vector2(300f, 0f));

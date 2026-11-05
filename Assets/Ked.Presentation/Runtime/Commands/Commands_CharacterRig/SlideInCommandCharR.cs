@@ -36,20 +36,14 @@ public sealed class SlideInCommandCharR : SlideCommandBase
 
     protected override bool CurrentPositionIsDestination => true;
 
-    private readonly PresentationStage _stage;
-
     public SlideInCommandCharR(PresentationStage stage, SlideInCommandSpecCharR spec)
+        : base(stage, spec.slotKey)
     {
-        _stage = stage;
         _spec = spec;
     }
 
     protected override float Bump(float easedProgress) => BumpTowardEnd(easedProgress);
 
-    protected override RectTransform ResolveSlideRect(CommandRunScope scope)
-    {
-        CharacterRigRefs rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(_stage, _spec.slotKey);
-
-        return rig?.GetRect(_spec.target);
-    }
+    protected override RectTransform SlideRectOf(CharacterRigRefs rig)
+        => rig.GetRect(_spec.target);
 }

@@ -50,10 +50,8 @@ private void ClaimTarget()
         _startPos.ToCore());
 
     _destPos = claim.Value.XY.ToUnity();                   // 호스트: 트윈 종점
-    _rigRefs.PlacementTargets.PublishAnchoredPosition(_rect, _destPos); // 호스트: 게시
-
-    HasClaimedTarget = true;
-}
+    Claim(_rect, claim);                                   // 기반(RigClaimTweenCommandBase)이 게시·Clear
+}                                                          // 클레임을 안 내면 움직이지 않는다(place의 해 실패) — 무음 실패 금지
 ```
 
 **동작 불변이 규약이다**: 어댑터는 계산의 **자리만** 바꾸고 값·순서·부작용을 바꾸지 않는다.
@@ -108,9 +106,13 @@ sizeDelta(Overlay) · 마스크(StageMaskMotion).
 
 ### 축 ③ — 게시 여부
 
-57곳 중 **4곳만** 장부에 게시한다: MoveBy · ScaleTo · PlaceCharacterFocus · SetDepth.
-나머지는 트윈 종점으로만 쓴다. 이건 편차가 아니라 **의미 차이**다 —
-"이 노드가 정착 후 어디 있을지 남이 알아야 하는가"의 문제다.
+> **2026-11-05 갱신.** 처음(2026-08)엔 "남이 알아야 하는 노드"만 골라 4곳(MoveBy · ScaleTo ·
+> PlaceCharacterFocus · SetDepth)에 손으로 게시를 넣었다. 그 판정에서 **회전(SwayPivot)과
+> 슬라이드(Track)가 빠졌다** — 둘 다 측정 체인 위라 같은 줄의 place가 트윈 중간값을 읽었다.
+> 지금은 판정하지 않는다. `RigClaimTweenCommandBase`가 파생이 기록한 클레임을 **전부** 게시하고
+> 확정 때 Clear한다. 체인 아래 노드도 게시된다 — 아무도 안 읽을 뿐 틀리지 않는다.
+> 게시를 잊는 상태는 구조적으로 없다. 리덕션 없이 끝값을 정하는 커맨드(Slide · RotateBy ·
+> Gesture · Mirror)는 호스트가 클레임을 만든다 — "클레임 = 리덕션 출력"의 유일한 예외다.
 
 ## 두 가지 주의 (표본 정독에서 드러난 것)
 

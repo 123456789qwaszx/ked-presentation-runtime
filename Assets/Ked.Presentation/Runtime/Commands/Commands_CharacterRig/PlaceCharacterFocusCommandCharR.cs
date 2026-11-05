@@ -1,5 +1,6 @@
 using System;
 using DG.Tweening;
+using Ked.Presentation.Core;
 using UnityEngine;
 
 [Serializable]
@@ -26,7 +27,7 @@ public sealed class PlaceCharacterFocusCommandSpecCharR : CharacterRigCommandSpe
     public Ease ease = Ease.OutCubic;
 
     [Tooltip("커스텀 이징 곡선 키(@이름 인자에서). null/빈 배열이면 ease를 쓴다.")]
-    public Ked.Presentation.Core.CurveKey[] customCurveKeys;
+    public CurveKey[] customCurveKeys;
 }
 
 /// <summary>
@@ -35,13 +36,12 @@ public sealed class PlaceCharacterFocusCommandSpecCharR : CharacterRigCommandSpe
 /// 같은 줄의 예약(size · move_by 등)은 끝값으로, 샷이 움직이는 무대 노드는 중립값으로 풀어서
 /// 일반 재생 · 롤백 · 코어 폴드가 같은 자리를 낸다(CharacterFocusPlacementSolver).
 /// </summary>
-public sealed class PlaceCharacterFocusCommandCharR : ClaimTweenCommandBase
+public sealed class PlaceCharacterFocusCommandCharR : RigClaimTweenCommandBase
 {
     private readonly PlaceCharacterFocusCommandSpecCharR _spec;
     private readonly CharacterFocusTuningDBSO _focusTuningDb;
     private readonly IShotResponseStageProvider _stageProvider;
 
-    private CharacterRigRefs _rigRefs;
     private RectTransform _moveRect;
 
     private Vector2 _startPosition;
@@ -58,6 +58,7 @@ public sealed class PlaceCharacterFocusCommandCharR : ClaimTweenCommandBase
         PlaceCharacterFocusCommandSpecCharR spec,
         CharacterFocusTuningDBSO focusTuningDb,
         IShotResponseStageProvider stageProvider)
+        : base(stage, spec.slotKey)
     {
         _stage = stage;
         _spec = spec;
@@ -65,19 +66,17 @@ public sealed class PlaceCharacterFocusCommandCharR : ClaimTweenCommandBase
         _stageProvider = stageProvider;
     }
 
-    protected override void ResolveTargets(CommandRunScope scope)
-    {
-        _rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(_stage, _spec.slotKey);
-        _moveRect = _rigRefs?.GetRect(_spec.moveTarget);
-    }
+    protected override void ResolveRects()
+        => _moveRect = RigRefs.GetRect(_spec.moveTarget);
 
-    protected override void ClaimTarget(CommandRunScope scope)
+    protected override void ClaimTarget()
     {
         _moveRect.DOKill(true);
 
         _startPosition = _moveRect.anchoredPosition;
 
-        CharacterFocusPlacementSolver.TryCalculateFocusPlacement(
+        // 해를 못 구하면 클레임을 내지 않는다 = 움직이지 않는다. 종전엔 반환값을 버려 (0,0)으로 트윈했다 — 무음 실패.
+        if (!CharacterFocusPlacementSolver.TryCalculateFocusPlacement(
             _stage,
             _stageProvider,
             _spec.slotKey,
@@ -87,11 +86,13 @@ public sealed class PlaceCharacterFocusCommandCharR : ClaimTweenCommandBase
             _focusTuningDb,
             _spec.screenPoint,
             _spec.screenOffset,
-            out Vector2 destination);
+            out Vector2 destination))
+        {
+            return;
+        }
 
         _destination = destination;
-
-        _rigRefs.PlacementTargets.PublishAnchoredPosition(_moveRect, _destination);
+        Claim(_moveRect, StageNodeClaim.AnchoredPosition(_moveRect.name, _destination.ToCore()));
     }
 
     protected override Tween CreateTween(float duration)
@@ -100,11 +101,8 @@ public sealed class PlaceCharacterFocusCommandCharR : ClaimTweenCommandBase
             .ApplyEase(_spec.ease, _spec.customCurveKeys)
             .SetTarget(_moveRect);
 
-    protected override void OnCommitFinalState()
-    {
-        _moveRect.anchoredPosition = _destination;
-        _rigRefs.PlacementTargets.Clear(_moveRect);
-    }
+    protected override void WriteFinalState()
+        => _moveRect.anchoredPosition = _destination;
 
     protected override float MeasureRemainingRatio()
         => RemainingRatio(

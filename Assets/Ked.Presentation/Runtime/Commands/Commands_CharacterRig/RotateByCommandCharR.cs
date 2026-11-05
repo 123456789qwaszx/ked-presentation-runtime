@@ -20,7 +20,7 @@ public sealed class RotateByCommandSpecCharR : CharacterRigCommandSpecBase
     public CurveKey[] customCurveKeys;
 }
 
-public sealed class RotateByCommandCharR : ClaimTweenCommandBase
+public sealed class RotateByCommandCharR : RigClaimTweenCommandBase
 {
     private readonly RotateByCommandSpecCharR _spec;
 
@@ -37,26 +37,23 @@ public sealed class RotateByCommandCharR : ClaimTweenCommandBase
     // 스텝 경계에서는 종전대로 즉시 확정한다.
     protected override bool AccelerateOnStepFinish => false;
 
-    private readonly PresentationStage _stage;
-
     public RotateByCommandCharR(PresentationStage stage, RotateByCommandSpecCharR spec)
+        : base(stage, spec.slotKey)
     {
-        _stage = stage;
         _spec = spec;
     }
 
-    protected override void ResolveTargets(CommandRunScope scope)
-    {
-        CharacterRigRefs rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(_stage, _spec.slotKey);
-        _rect = rigRefs?.GetRect(_spec.target);
-    }
+    protected override void ResolveRects()
+        => _rect = RigRefs.GetRect(_spec.target);
 
-    protected override void ClaimTarget(CommandRunScope scope)
+    protected override void ClaimTarget()
     {
         _rect.DOKill(true);
 
         _startEuler = _rect.localEulerAngles;
         _destEuler = _startEuler + _spec.deltaEuler;
+
+        Claim(_rect, StageNodeClaim.LocalEuler(_rect.name, _destEuler.ToCore()));
     }
 
     protected override Tween CreateTween(float duration)
@@ -65,10 +62,8 @@ public sealed class RotateByCommandCharR : ClaimTweenCommandBase
             .ApplyEase(_spec.ease, _spec.customCurveKeys)
             .SetTarget(_rect);
 
-    protected override void OnCommitFinalState()
-    {
-        _rect.localRotation = Quaternion.Euler(_destEuler);
-    }
+    protected override void WriteFinalState()
+        => _rect.localRotation = Quaternion.Euler(_destEuler);
 
     // AccelerateOnStepFinish = false라 불리지 않지만, 계약은 정직하게 채운다.
     protected override float MeasureRemainingRatio()

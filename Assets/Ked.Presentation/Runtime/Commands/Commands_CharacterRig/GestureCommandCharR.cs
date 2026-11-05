@@ -43,7 +43,7 @@ public sealed class GestureCommandSpecCharR : CharacterRigCommandSpecBase
 // 트윈은 하나다: 0→1을 Linear로 흘리고 콜백에서 두 축을 각각 평가한다 —
 // 축별 이징을 트윈 두 개 없이 얻는다(shot의 Interpolate 콜백과 같은 패턴).
 // ─────────────────────────────────────────────────────────────────────────────
-public sealed class GestureCommandCharR : ClaimTweenCommandBase
+public sealed class GestureCommandCharR : RigClaimTweenCommandBase
 {
     private readonly GestureCommandSpecCharR _spec;
 
@@ -57,25 +57,21 @@ public sealed class GestureCommandCharR : ClaimTweenCommandBase
     // 게다가 도착이 곧 출발 자리(0,0)라 가속할 거리 자체가 없다 — 즉시 확정이 맞다.
     protected override bool AccelerateOnStepFinish => false;
 
-    private readonly PresentationStage _stage;
-
     public GestureCommandCharR(PresentationStage stage, GestureCommandSpecCharR spec)
+        : base(stage, spec.slotKey)
     {
-        _stage = stage;
         _spec = spec;
     }
 
-    protected override void ResolveTargets(CommandRunScope scope)
-    {
-        CharacterRigRefs rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(_stage, _spec.slotKey);
-        _rect = rigRefs?.GetRect(_spec.target);
-    }
+    protected override void ResolveRects()
+        => _rect = RigRefs.GetRect(_spec.target);
 
-    protected override void ClaimTarget(CommandRunScope scope)
+    protected override void ClaimTarget()
     {
-        // 앞 gesture를 완주(=제자리)시키고 시작한다. 장부 게시는 없다 —
-        // 이 축의 정착값은 언제나 (0,0)이라 남이 알아야 할 것이 없다.
+        // 앞 gesture를 완주(=제자리)시키고 시작한다. 이 축의 정착값은 언제나 (0,0)이다.
         _rect.DOKill(true);
+
+        Claim(_rect, StageNodeClaim.AnchoredPosition(_rect.name, Vec2.Zero));
     }
 
     protected override Tween CreateTween(float duration)
@@ -84,10 +80,8 @@ public sealed class GestureCommandCharR : ClaimTweenCommandBase
             .SetEase(Ease.Linear)
             .SetTarget(_rect);
 
-    protected override void OnCommitFinalState()
-    {
-        _rect.anchoredPosition = Vector2.zero;
-    }
+    protected override void WriteFinalState()
+        => _rect.anchoredPosition = Vector2.zero;
 
     // AccelerateOnStepFinish = false라 불리지 않지만, 계약은 정직하게 채운다.
     protected override float MeasureRemainingRatio() => 0f;

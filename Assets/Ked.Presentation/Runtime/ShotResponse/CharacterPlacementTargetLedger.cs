@@ -8,9 +8,11 @@ using UnityEngine;
 // RectChainMath로 직접 계산.
 //
 // 이제 하는 일은 유니티 경계뿐이다:
-// - RectTransform ↔ 논리 키 대응 (참조 기반. 이름은 읽기 좋으라고 쓴다)
-// - 라이브 체인 캡처
+// - RectTransform → 논리 키 대응 (참조 기반. 이름은 읽기 좋으라고 쓴다)
+// - 라이브 체인 캡처 (+ 샷이 움직이는 무대 노드는 중립값으로 치환)
 // - stopRoot 로컬 ↔ 월드 변환
+//
+// 게시는 StageNodeClaim으로만 받는다 — 게시하는 쪽은 RigClaimTweenCommandBase와 MotionCommandCharR 둘이다.
 
 // stopRoot는 측정 대상 leaf의 상위 RectTransform 중, Core가 변환 체인을 계산할 범위를 끊는 경계
 // 실질적으로 stopRoot의 로컬 좌표계 = Core가 말하는 rig space
@@ -19,37 +21,25 @@ public sealed class CharacterPlacementTargetLedger
 {
     private readonly PlacementTargetLedger _core = new();
 
-    // 참조 → 키. 이름이 같은 rect가 둘 있어도 참조가 다르면 키를 나눈다.
+    // 참조 → 키. 장부는 리그마다 하나이고 리그 노드 이름은 스키마가 정하므로 키는 리그 안에서 유일하다.
     private readonly Dictionary<RectTransform, string> _keyByRect = new();
-    private readonly Dictionary<string, RectTransform> _rectByKey = new();
 
     private readonly List<RectTransform> _scratchRects = new(48);
     private readonly List<RectNodeState> _scratchChain = new(48);
 
     // ── 게시 ─────────────────────────────────────────────────────────
 
-    public void PublishAnchoredPosition(RectTransform node, Vector2 targetAnchoredPosition)
+    /// <summary>
+    /// 리덕션 출력을 그대로 예약으로 받는다. 키는 클레임의 NodeKey가 아니라 참조에서 정한다 —
+    /// 호스트에서 노드의 정체는 참조이고 NodeKey는 진단용 이름이다(reduction-boundary.md).
+    /// 장부 대상이 아닌 종류(SizeDelta · CanvasAlpha)는 코어가 거부한다.
+    /// </summary>
+    public void Publish(RectTransform node, in StageNodeClaim claim)
     {
         if (node == null)
             return;
 
-        _core.PublishAnchoredPosition(KeyOf(node), targetAnchoredPosition.ToCore());
-    }
-
-    public void PublishLocalScale(RectTransform node, Vector2 targetLocalScaleXY)
-    {
-        if (node == null)
-            return;
-
-        _core.PublishLocalScale(KeyOf(node), targetLocalScaleXY.ToCore());
-    }
-
-    public void PublishLocalEuler(RectTransform node, Vector3 targetLocalEuler)
-    {
-        if (node == null)
-            return;
-
-        _core.PublishLocalEuler(KeyOf(node), targetLocalEuler.ToCore());
+        _core.Publish(claim.WithNodeKey(KeyOf(node)));
     }
 
     public void Clear(RectTransform node)
@@ -213,7 +203,8 @@ public sealed class CharacterPlacementTargetLedger
         => new(rect.rect.size.ToCore(), rect.pivot.ToCore());
 
     /// <summary>
-    /// 참조 → 논리 키. 이름을 키로 쓰되 대응은 참조 기반이라, 이름이 겹쳐도 섞이지 않는다.
+    /// 참조 → 논리 키. 이름이 키다. 같은 이름의 다른 참조가 들어오면 스키마의 이름 계약이 깨진 것이라 예외다 —
+    /// 종전엔 접미사를 붙여 넘겼는데, 도달 불가 상태를 방어하면 깨졌을 때 조용히 지나간다.
     /// </summary>
     private string KeyOf(RectTransform rect)
     {
@@ -222,19 +213,17 @@ public sealed class CharacterPlacementTargetLedger
 
         string key = rect.name;
 
-        if (_rectByKey.TryGetValue(key, out RectTransform other) && other != null && other != rect)
+        foreach (KeyValuePair<RectTransform, string> pair in _keyByRect)
         {
-            // 같은 이름의 다른 rect. 종전 구현은 참조를 키로 써서 안 섞였다 —
-            // 그 성질을 유지하되, 조용히 넘어가지 않고 알린다.
-            key = $"{rect.name}#{rect.GetInstanceID()}";
-
-            Debug.LogWarning(
-                $"[CharacterPlacementTargetLedger] 이름이 겹치는 노드가 있다: '{rect.name}'. " +
-                $"참조로 구분해 '{key}'로 다룬다.", rect);
+            if (pair.Value == key && pair.Key != null && pair.Key != rect)
+            {
+                throw new System.InvalidOperationException(
+                    $"[CharacterPlacementTargetLedger] 한 리그 안에 이름이 겹치는 노드가 있다: '{key}'. " +
+                    "리그 노드 이름은 스키마가 유일하게 정한다.");
+            }
         }
 
         _keyByRect[rect] = key;
-        _rectByKey[key] = rect;
 
         return key;
     }

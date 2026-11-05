@@ -36,20 +36,14 @@ public sealed class SlideOutCommandCharR : SlideCommandBase
 
     protected override bool CurrentPositionIsDestination => false;
 
-    private readonly PresentationStage _stage;
-
     public SlideOutCommandCharR(PresentationStage stage, SlideOutCommandSpecCharR spec)
+        : base(stage, spec.slotKey)
     {
-        _stage = stage;
         _spec = spec;
     }
 
     protected override float Bump(float easedProgress) => BumpFromStart(easedProgress);
 
-    protected override RectTransform ResolveSlideRect(CommandRunScope scope)
-    {
-        CharacterRigRefs rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(_stage, _spec.slotKey);
-
-        return rig?.GetRect(_spec.target);
-    }
+    protected override RectTransform SlideRectOf(CharacterRigRefs rig)
+        => rig.GetRect(_spec.target);
 }
