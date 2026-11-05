@@ -48,7 +48,8 @@ namespace Ked.Presentation.Core
         public override string ToString() => $"{Command} — {Reason}";
     }
 
-    // 슬롯 리그의 구조 부착 상태 — 어느 무대의 어느 깊이 층에 섰나.
+    // 슬롯 리그의 구조 부착 상태 — 어느 무대의 어느 깊이 층에 섰나. 스폰 때 한 번 정해진다 —
+    // 리그는 무대 · 층을 옮기지 않는다(char_to는 2026-11-06에 걷었다. 다른 자리에 서려면 fade_out 뒤 새 slot).
     // 무대 키는 게임 데이터라 문자열로 담는다(어떤 무대가 있는지는 호스트가 정한다).
     // 층은 깊이 값 d다. 라벨 → d는 StageLayerLabels의 눈금이고, 모르는 라벨은 mid로 간다 —
     // 런타임 StageKeyParser와 같다(그쪽은 경고한다). 원문 라벨은 진단용으로 남긴다.

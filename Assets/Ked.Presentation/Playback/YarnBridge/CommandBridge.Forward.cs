@@ -56,9 +56,6 @@ public sealed partial class YarnCommandBridge
     private void EnqueueCharacterSiblingBackSpec(string roleKey = null)
         => Forward("sibling_back", roleKey);
 
-    private void EnqueueMoveCharacterRigToStageLayerSpec(string roleKey = null, string stageKey = null, string layerKey = null)
-        => Forward("char_to", roleKey, stageKey, layerKey);
-
     private void EnqueueShotZoomFocusSpec(string roleKey = null, string focusName = null, string screenPointName = null, string zoom = null, string durationToken = null, string easeToken = null)
         => Forward("shot_focus_to", roleKey, focusName, screenPointName, zoom, durationToken, easeToken);
 

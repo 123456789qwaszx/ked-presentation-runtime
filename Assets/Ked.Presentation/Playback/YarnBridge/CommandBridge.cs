@@ -119,9 +119,6 @@ public sealed partial class YarnCommandBridge
 
         runner.AddCommandHandler<string>(
             "sibling_back", EnqueueCharacterSiblingBackSpec);
-
-        runner.AddCommandHandler<string, string, string>(
-            "char_to", EnqueueMoveCharacterRigToStageLayerSpec);
     }
     
     private void BindShotStaging(DialogueRunner runner)

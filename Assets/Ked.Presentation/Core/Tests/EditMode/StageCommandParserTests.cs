@@ -37,7 +37,6 @@ public class StageCommandParserTests
     // 인자 하나를 이름에 박아 다시 부르는 이름은 없다.
     // 예외: place_left·center·right 셋, 프레임 대기 <<1fr>>~<<48fr>>, char_visual_<효과> 일곱.
     [TestCase("slot01")]
-    [TestCase("char_to_s1")]
     [TestCase("bg_slot01")]
     [TestCase("screen_blur_s1")]
     [TestCase("place_tl")]
@@ -49,6 +48,14 @@ public class StageCommandParserTests
     public void 걷은_별칭은_모른다(string name)
     {
         Assert.IsFalse(StageCommandParser.Knows(name));
+    }
+
+    [Test]
+    public void 리그를_다른_무대_층으로_옮기는_커맨드는_없다()
+    {
+        // 리그는 slot이 세운 무대 · 층에 산다. 다른 자리에 서려면 fade_out 뒤 새 slot(2026-11-06).
+        Assert.IsFalse(StageCommandParser.Knows("char_to"));
+        Assert.IsFalse(StageCommandParser.Knows("char_to_s1"));
     }
 
     [TestCase("place_left")]

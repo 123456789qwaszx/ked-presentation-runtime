@@ -31,7 +31,7 @@ public sealed class StageLayerBlurCommandSpec : CommandSpecBase
 /// 배경도 캐릭터 리그다(캐스팅하지 않은 슬롯) — 그 레이어에 있으면 같이 흐려진다.
 ///
 /// 레이어 블러는 장면 전역 의도다 — 의도만 RigBlurIntentSystem에 넘기고, 줄 머리에서 다시 맞추는 것은 시스템이 한다.
-/// 그래서 뒤늦게 그 레이어에 붙은 리그도 흐려지고, char_to로 빠져나간 리그는 선명해진다.
+/// 그래서 뒤늦게 그 레이어에 붙은 리그도 흐려진다.
 /// 모양(char_visual)·초점(focus_on) 블러와는 리그 컨트롤러에서 가장 큰 값으로 합쳐진다.
 /// </summary>
 public sealed class StageLayerBlurCommand : CommandBase

@@ -72,8 +72,7 @@ namespace Ked.Presentation.Core.Tests.UnityParity
             rigRoot.SetParent(layer.Content, false);
 
             builder.BindRefsFromRoot(rigRoot, "", out CharacterRigRefs refs);
-            refs.Stage = _stage;
-            refs.Layer = layer;
+            refs.StandOn(_stage, layer);
 
             refs.CharSlot_Track_Focus.anchoredPosition = trackPosition;
             return refs;
