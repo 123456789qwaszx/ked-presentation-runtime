@@ -10,7 +10,7 @@ public sealed partial class StageCommandParser
     // 생략값은 핸들러 시그니처가 아니라 이 표가 갖는다(한 곳). 브리지의 Yarn 등록은
     // 이름과 인자 수만 안다 — 뜻은 여기서 정해진다.
     //
-    // 정본만 둔다. 같은 일을 인자 하나만 고정해 다시 부르는 이름(slotNN · char_to_sN · bg_slotNN ·
+    // 정본만 둔다. 같은 일을 인자 하나만 고정해 다시 부르는 이름(slotNN · bg_slotNN ·
     // screen_blur_sN · place_* · size_<라벨> · tx_<프리셋>)은 두지 않는다 —
     // 대본은 저작 툴(ked-story-compositor)이 내고, 툴은 정본만 낸다. 변형은 이름이 아니라 인자로 받는다.
     // 예외: place_left · place_center · place_right, 프레임 대기 <<1fr>>~<<48fr>>(아래 정적 생성자),
@@ -35,7 +35,6 @@ public sealed partial class StageCommandParser
         ["motion"] = (p, c) => p.EnqueueMotionSpec(c.Arg(0), c.Arg(1), c.Arg(2, MotionModeToken.Relative)),
         ["sibling_front"] = (p, c) => p.EnqueueCharacterSiblingFrontSpec(c.Arg(0)),
         ["sibling_back"] = (p, c) => p.EnqueueCharacterSiblingBackSpec(c.Arg(0)),
-        ["char_to"] = (p, c) => p.EnqueueMoveCharacterRigToStageLayerSpec(c.Arg(0), c.Arg(1, "stage00"), c.Arg(2, "mid")),
         ["shot_focus_to"] = (p, c) => p.EnqueueShotZoomFocusSpec(c.Arg(0), c.Arg(1, "body"), c.Arg(2, "center"), Float(c, 3, 2.5f), c.Arg(4, "1.2s"), c.Arg(5, "")),
         ["shot_to"] = (p, c) => p.EnqueueShotToSpec(Float(c, 0, 1f), c.Arg(1, "2.5u"), c.Arg(2, "0u"), c.Arg(3, "0.45s"), c.Arg(4, "")),
         ["shot_zoom"] = (p, c) => p.EnqueueShotZoomSpec(Float(c, 0, 1f), c.Arg(1, "0.45s"), c.Arg(2, "")),

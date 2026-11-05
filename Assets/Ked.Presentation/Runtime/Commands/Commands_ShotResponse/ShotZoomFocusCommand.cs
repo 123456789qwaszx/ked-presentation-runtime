@@ -54,6 +54,17 @@ public sealed class ShotZoomFocusCommand : ShotIntentCommandBase<ShotZoomFocusCo
             _focusTuningDB,
             useSettledPlacementTargets: true);
 
+        // 샷은 본 무대만 움직인다. 덮는 무대에 선 리그로는 본 무대의 카메라를 풀 수 없다 — 대본의 잘못이다.
+        // 코어 폴드도 같은 줄을 Unhandled로 남긴다.
+        if (focus.Stage.Role != Ked.Presentation.Core.StageRole.Main)
+        {
+            Debug.LogWarning(
+                $"[ShotZoomFocusCommand] '{spec.focusRoleKey}'는 덮는 무대 '{focus.Stage.StageKey}'에 서 있다. " +
+                "샷은 본 무대만 움직이므로 건너뛴다.");
+
+            return from;
+        }
+
         Vector2 desiredPoint =
             ScreenFocusPointResolver.Resolve(focus.RigSpaceRoot, spec.screenPoint) + spec.screenOffset;
 

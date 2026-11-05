@@ -331,16 +331,4 @@ public sealed partial class StageCommandParser
             slotKey = roleKey,
             mode = CharacterRigSiblingOrderMode.Back
         });
-
-    private void EnqueueMoveCharacterRigToStageLayerSpec(string roleKey, string stageKey, string layerKey)
-        => Emit(new MoveCharacterRigToStageLayerCommandSpecCharR
-        {
-            slotKey = roleKey,
-
-            stage = StageKeyParser.ParseStage(stageKey),
-            layerDepth = StageKeyParser.ParseLayerDepth(layerKey),
-
-            siblingMode = CharacterRigReparentSiblingMode.Front
-        });
-
 }

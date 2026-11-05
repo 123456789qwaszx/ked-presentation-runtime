@@ -82,6 +82,7 @@ namespace Ked.Presentation.Core
         /// <summary>
         /// 노드 · 샷 의도에 더해, 샷이 무대에 쓴 것(카메라 · 층)까지 본다.
         /// 기대값은 접힌 샷 의도를 ShotLayoutMath로 푼 값이다 — 폴드가 층 반응을 "접는다"는 것은 이 뜻이다.
+        /// 샷은 본 무대만 움직이므로(StageRoles) 덮는 무대의 기대값은 Solve(Default), 곧 항등이다.
         /// </summary>
         public static Result Compare(StageState folded, StageState captured, StageViewSnapshot capturedView, LayerProfileCurve curve)
         {
@@ -93,13 +94,11 @@ namespace Ked.Presentation.Core
         public static void CompareStageView(
             in ShotIntentState foldedShot, StageViewSnapshot captured, LayerProfileCurve curve, Result result)
         {
-            if (captured == null) throw new ArgumentNullException(nameof(captured));
-            if (curve == null) throw new ArgumentNullException(nameof(curve));
-
-            ShotLayoutMath.SolveCamera(in foldedShot, out float cameraScale, out Vec2 pan);
-
             foreach (StageViewSnapshot.CameraEntry camera in captured.Cameras)
             {
+                ShotIntentState shot = ShotOf(camera.StageKey, in foldedShot);
+                ShotLayoutMath.SolveCamera(in shot, out float cameraScale, out Vec2 pan);
+
                 string key = $"stage:{camera.StageKey}";
 
                 if (Math.Abs(camera.Scale - cameraScale) > ScalarEpsilon)
@@ -112,7 +111,9 @@ namespace Ked.Presentation.Core
             {
                 result.ComparedLayers++;
 
-                LayerResponse response = ShotLayoutMath.SolveLayer(in foldedShot, layer.Depth, curve);
+                ShotIntentState shot = ShotOf(layer.StageKey, in foldedShot);
+                ShotLayoutMath.SolveCamera(in shot, out float cameraScale, out Vec2 pan);
+                LayerResponse response = ShotLayoutMath.SolveLayer(in shot, layer.Depth, curve);
 
                 Vec2 expectedCenter = ShotLayoutMath.ProjectToRigSpace(Vec2.Zero, cameraScale, pan, in response);
                 Vec2 expectedScale = response.Scale * cameraScale;
@@ -123,6 +124,10 @@ namespace Ked.Presentation.Core
                 CompareVec2(key, "totalScale", expectedScale, layer.TotalScale, ScalarEpsilon, result);
             }
         }
+
+        // 그 무대가 따르는 샷 — 본 무대는 접힌 샷, 덮는 무대는 Default(중립에 고정).
+        private static ShotIntentState ShotOf(string stageKey, in ShotIntentState foldedShot)
+            => StageRoles.Of(stageKey) == StageRole.Main ? foldedShot : ShotIntentState.Default;
 
         private static void CompareNode(
             string key, in RectNodeState folded, in RectNodeState captured, Result result)

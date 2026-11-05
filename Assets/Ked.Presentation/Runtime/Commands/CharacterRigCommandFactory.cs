@@ -54,7 +54,6 @@ public sealed class CharacterRigCommandFactory : INodeCommandFactory
             MirrorCharacterCommandSpecCharR s => new MirrorCharacterCommandCharR(_stage, s),
 
             SetCharacterSiblingOrderCommandSpecCharR s => new SetCharacterSiblingOrderCommandCharR(_stage, s),
-            MoveCharacterRigToStageLayerCommandSpecCharR s => new MoveCharacterRigToStageLayerCommandCharR(_stage, s, _rigSlotResolver),
             
             SetDepthCommandSpecCharR s => new SetDepthCommandCharR(_stage, s, _characterDepthTuning, _characterFocusTuningDb),
 

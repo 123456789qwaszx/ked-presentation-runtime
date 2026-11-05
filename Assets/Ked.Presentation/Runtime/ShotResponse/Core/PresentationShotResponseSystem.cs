@@ -10,11 +10,12 @@ using UnityEngine;
 // 중립(IStageViewNeutral)은 같은 식에 Default를 넣은 값이다 — 따로 적은 정의가 없다.
 // 어느 노드가 샷 소유인지는 StageRigRefs(빌더 출력)가 안다. 참조 비교 분기를 따로 두지 않는다.
 //
-// 카메라는 무대마다 있다(StageRigSchema). 하나의 intent를 모든 무대에 쓰는 것은 정책이다 — 무대별 intent가 필요해지면
-// 이 클래스가 무대 키를 받으면 된다(2026-11-05 D2).
+// 카메라는 무대마다 있다(StageRigSchema). 샷은 본 무대만 움직인다(StageRoles) — 덮는 무대(컷인 · 인서트 · 커튼)의
+// 카메라와 층은 빌더가 세운 항등, 곧 중립에 고정이다(2026-11-06 D2). 무대별 intent가 필요해지면 이 클래스가 무대 키를 받으면 된다.
 public sealed class PresentationShotResponseSystem : IStageViewNeutral
 {
     private readonly StageRigRegistry _stages;
+    private readonly StageRigRefs _main;
     private readonly LayerProfileCurve _profile;
 
     private PresentationIntentState _intent = PresentationIntentState.Default;
@@ -41,6 +42,7 @@ public sealed class PresentationShotResponseSystem : IStageViewNeutral
     public PresentationShotResponseSystem(StageRigRegistry stages, LayerProfileCurve profile)
     {
         _stages = stages;
+        _main = stages.Get(StageRoles.MainStageKey);
         _profile = profile;
     }
 
@@ -165,10 +167,7 @@ public sealed class PresentationShotResponseSystem : IStageViewNeutral
         _presented = state;
 
         ShotIntentState intent = state.ToCore();
-        IReadOnlyList<StageRigRefs> stages = _stages.All;
-
-        for (int i = 0; i < stages.Count; i++)
-            ApplyToStage(in intent, stages[i]);
+        ApplyToStage(in intent, _main);
     }
 
     private void ApplyToStage(in ShotIntentState intent, StageRigRefs stage)
@@ -199,6 +198,7 @@ public sealed class PresentationShotResponseSystem : IStageViewNeutral
             (RectTransform)layer.Rect.parent);
 
     // ── 중립 = Solve(Default) ────────────────────────────────────────
+    // 샷 소유는 구조다(무대마다 카메라 둘 · 층 전부). 덮는 무대의 것도 중립을 답한다 — 샷이 쓰지 않으니 라이브도 같은 항등이다.
 
     public bool TryGetNeutral(RectTransform rect, out Vector2 anchoredPosition, out Vector3 localScale)
     {

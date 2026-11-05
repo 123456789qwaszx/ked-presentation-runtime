@@ -10,7 +10,8 @@ using UnityEngine;
 /// </summary>
 public static class StageKeyParser
 {
-    public const string DefaultStage = "stage00";
+    // 무대를 생략하면 본 무대(StageRoles).
+    public const string DefaultStage = StageRoles.MainStageKey;
 
     public static string ParseStage(string raw)
     {

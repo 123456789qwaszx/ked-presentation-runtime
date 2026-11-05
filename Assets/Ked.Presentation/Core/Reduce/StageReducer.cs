@@ -73,7 +73,7 @@ namespace Ked.Presentation.Core
     ///
     /// 현재 어휘(v1): slot 계열(리그 스폰) · cast/actor(배역·별칭) ·
     ///   show(리셋+앵커+사이징+가시성) · fade_in/out · slide_in/out · place/size 계열 ·
-    ///   nudge/move/scale/rotate 계열 · shot 5종 · char_to 계열 ·
+    ///   nudge/move/scale/rotate 계열 · shot 5종 ·
     ///   초상 축(pose/face/face_swap) · motion(채널마다 마지막 키) · 시간 커맨드(pause·Nfr — 접을 것이 없다) ·
     ///   배경 bg_*(캐스팅하지 않은 슬롯 — spawn/sprite/fade/move/scale).
     /// 명시적 한계: 오버레이/이펙트/오디오/트랜지션 리그, 대사창,
@@ -217,9 +217,6 @@ namespace Ked.Presentation.Core
                     return true;
 
                 case "shot_focus_to": return ApplyShotFocusTo(state, cmd, tuning, out reason);
-
-                // 구조 축 (v1: 부착 기록만 — 컨테이너 항등 가정으로 좌표 영향 없음)
-                case "char_to": return ApplyCharTo(state, cmd, cmd.Arg(1, "stage00"), cmd.Arg(2, "mid"), out reason);
 
                 // 배경 — 캐스팅하지 않은 슬롯. StageCommandParser.Background가 캐릭터 Spec으로 펼치는 것을 그대로 접는다.
                 // 인자 자리·생략값은 파서 표(StageCommandParser.Table)와 같다:

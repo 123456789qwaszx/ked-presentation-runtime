@@ -19,6 +19,15 @@ namespace Ked.Presentation.Core
             if (!TryGetSpawnedSlot(state, cmd, out string slotKey, out reason))
                 return false;
 
+            // 샷은 본 무대만 움직인다(StageRoles). 덮는 무대의 리그로는 본 무대의 카메라를 풀 수 없다 — 런타임은 경고하고 건너뛴다.
+            SlotAttachment attachment = state.GetAttachment(slotKey);
+
+            if (StageRoles.Of(attachment.StageKey) != StageRole.Main)
+            {
+                reason = $"슬롯 '{slotKey}'은 덮는 무대 '{attachment.StageKey}'에 서 있다 — 샷은 본 무대만 움직인다";
+                return false;
+            }
+
             if (!FocusPresetName.TryNormalizeToken(cmd.Arg(1, "body"), out string focusName))
             {
                 reason = $"focus 프리셋 토큰 '{cmd.Arg(1)}'을 모른다";
@@ -53,7 +62,7 @@ namespace Ked.Presentation.Core
                 zoom,
                 focus,
                 desired,
-                state.GetAttachment(slotKey).LayerDepth,
+                attachment.LayerDepth,
                 tuning.ResolveLayerProfileCurve());
 
             return true;
