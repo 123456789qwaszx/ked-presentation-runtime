@@ -83,6 +83,10 @@
 (`refactor: screen effects를 schema기반 rig로 분리`). 한때 네 리그가 전부 같은 네 이름을
 썼다 — `Definition` · `Builder` · `Registry` · `Resolver`. 지금은 둘(캐릭터 · 화면 효과)이다 — 아래 1.5.
 
+2026-11-05에는 **무대(샷 계층)가 같은 길을 밟았다** — 씬에 놓여 있던 카메라 · 깊이 층 76노드를
+`StageRigSchema` · `StageRigBuilder` · `StageRigRegistry`가 세운다. 이유도 같다: 노드의 존재와 항등을
+코드가 보장하면 기준값을 잴 필요가 없다. [stage-rig.md](../../StageRig/Documentation~/stage-rig.md).
+
 ### 1.5 그리고 배경 리그가 캐릭터 리그로 합쳐졌다 — 2026-10-29
 
 같은 계약이 **거꾸로도** 작동했다. 배경 리그(2026-05-21 `f8fca379`)는 캐릭터 리그를 본떠 만든
