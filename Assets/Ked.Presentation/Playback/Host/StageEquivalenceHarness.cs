@@ -55,6 +55,8 @@ public sealed class StageEquivalenceHarness : MonoBehaviour
     private PresentationStage _stage;
     private MotionLibrary _motions = MotionLibrary.Empty;
     private PresentationShotResponseSystem _shotSystem;
+    private StageRigRegistry _stageRigs;
+    private LayerProfileCurve _layerProfile;
     private DialogueAdvanceDispatcher _dispatcher;
     private DialogueRunner _dialogueRunner;
 
@@ -112,6 +114,7 @@ public sealed class StageEquivalenceHarness : MonoBehaviour
         PresentationScopeSession session,
         PresentationStage stage,
         PresentationShotResponseSystem shotSystem,
+        StageRigRegistry stageRigs,
         DialogueAdvanceDispatcher dispatcher,
         MotionLibrary motions,
         string dialogueFolder)
@@ -122,6 +125,7 @@ public sealed class StageEquivalenceHarness : MonoBehaviour
         _session = session;
         _stage = stage;
         _shotSystem = shotSystem;
+        _stageRigs = stageRigs;
         _dispatcher = dispatcher;
         _dialogueFolder = dialogueFolder;
 
@@ -196,7 +200,21 @@ public sealed class StageEquivalenceHarness : MonoBehaviour
             Motions = _motions.Clips,
 
             BackgroundDimensions = LoadBackgroundDimensions(tuningDir),
+
+            // 층 반응 곡선. 없으면 코어 기본 — 런타임 조립이 쓰는 값과 같다.
+            LayerProfile = LoadLayerProfile(tuningDir),
         };
+
+        _layerProfile = _tuning.ResolveLayerProfileCurve();
+    }
+
+    private static LayerProfileFileDto LoadLayerProfile(string tuningDir)
+    {
+        string path = Path.Combine(tuningDir, "presets", "layer-profile.json");
+
+        return File.Exists(path)
+            ? JsonUtility.FromJson<LayerProfileFileDto>(File.ReadAllText(path))
+            : null;
     }
 
     /// <summary>
@@ -397,7 +415,10 @@ public sealed class StageEquivalenceHarness : MonoBehaviour
             StageState captured = StageStateCapture.Capture(
                 _stage.characterRigs, _shotSystem, _tuning.BaseResolution);
 
-            StageStateComparer.Result result = StageStateComparer.Compare(folded, captured);
+            // 샷이 무대에 쓴 것(카메라 · 층)까지 판정한다 — 기대값은 접힌 샷 의도를 코어 식으로 푼 값이다.
+            StageViewSnapshot capturedView = StageStateCapture.CaptureStageView(_stageRigs);
+
+            StageStateComparer.Result result = StageStateComparer.Compare(folded, captured, capturedView, _layerProfile);
 
             LineVerdict verdict = new()
             {

@@ -35,7 +35,6 @@ public sealed class SetDepthCommandCharR : RigClaimTweenCommandBase
     private readonly SetDepthCommandSpecCharR _spec;
     private readonly CharacterDepthTuningSO _globalTuning;
     private readonly CharacterFocusTuningDBSO _focusTuningDb;
-    private readonly IShotResponseStageProvider _stageProvider;
 
     private RectTransform _depthYRect;
     private RectTransform _depthScaleRect;
@@ -57,15 +56,13 @@ public sealed class SetDepthCommandCharR : RigClaimTweenCommandBase
         PresentationStage stage,
         SetDepthCommandSpecCharR spec,
         CharacterDepthTuningSO globalTuning,
-        CharacterFocusTuningDBSO focusTuningDb,
-        IShotResponseStageProvider stageProvider)
+        CharacterFocusTuningDBSO focusTuningDb)
         : base(stage, spec.slotKey)
     {
         _stage = stage;
         _spec = spec;
         _globalTuning = globalTuning;
         _focusTuningDb = focusTuningDb;
-        _stageProvider = stageProvider;
     }
 
     protected override void ResolveRects()
@@ -99,7 +96,6 @@ public sealed class SetDepthCommandCharR : RigClaimTweenCommandBase
         
         CharacterDepthResolver.CalculateDepthYThatPreservesCurrentFocus(
             _stage,
-            _stageProvider,
             _spec.slotKey,
             _depthYRect,
             _depthScaleRect,

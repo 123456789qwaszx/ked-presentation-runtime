@@ -1,4 +1,5 @@
 using System;
+using Ked.Presentation.Core;
 using UnityEngine;
 
 // 연출 런타임 조립 — 무대 · 명령 · Yarn · 대사 표시 · 재생 제어를 잇는다(옛 VNAppBootstrap.Awake의 연출 쪽).
@@ -25,6 +26,7 @@ public partial class SampleBootstrap
     private readonly EpisodeSkipController _episodeSkipController = new();
 
     private PresentationUIRoot _presentationUIRoot;
+    private StageRigRegistry _stageRigs;
     private PresentationShotResponseSystem _presentationResponseRig;
     private ScreenEffectRig _screenEffectRig;
 
@@ -73,18 +75,25 @@ public partial class SampleBootstrap
 
         _presentationUIRoot.Initialize();
 
-        IShotResponseStageProvider shotResponseStageProvider = _presentationUIRoot;
+        // 무대 셋은 스키마가 세운다(StageRigSchema). 씬에는 뷰포트 층만 있다. 깊이 층 다섯은 미리 세운다 —
+        // 그려지는 순서(먼 층이 뒤)를 처음부터 고정하기 위해서다. 그 밖의 깊이는 참조될 때 선다.
+        _stageRigs = new StageRigRegistry(new StageRigBuilder());
 
-        _presentationResponseRig = new PresentationShotResponseSystem(shotResponseStageProvider);
+        foreach (string stageKey in StageKeys)
+            _stageRigs.Build(_presentationUIRoot.StageMount, stageKey, StageLayerLabels.Depths);
+
+        _presentationResponseRig = new PresentationShotResponseSystem(_stageRigs, LayerProfileCurve.Default);
         // 배치는 무대 좌표 — 배치 계산이 샷이 움직이는 무대 노드를 지날 때 샷 시스템의 중립값을 쓴다.
         _presentationStage.AttachStageView(_presentationResponseRig);
         _screenEffectRig = EnsureScreenEffectRig();
 
         characterFocusDebugView.Initialize(
             _presentationStage,
-            shotResponseStageProvider,
             characterFocusTuningDb);
     }
+
+    // 무대 키 — 대본의 slot · bg_spawn · tx · screen_blur가 부르는 이름. 코어 폴드의 생략값(stage00)과 같다.
+    private static readonly string[] StageKeys = { "stage00", "stage01", "stage02" };
 
     private ScreenEffectRig EnsureScreenEffectRig()
     {
@@ -116,10 +125,10 @@ public partial class SampleBootstrap
     private void BootstrapPresentationSession()
     {
         // 블러 의도(focus_on·screen_blur) — 커맨드는 의도만 넘기고, 줄 머리에서 시스템이 리그를 다시 맞춘다.
-        _rigBlur = new RigBlurIntentSystem(_presentationStage, _presentationUIRoot);
+        _rigBlur = new RigBlurIntentSystem(_presentationStage, _stageRigs);
 
         // Character Rig
-        CharRigSlotResolver charRigSlotResolver = new(_presentationUIRoot);
+        CharRigSlotResolver charRigSlotResolver = new(_stageRigs);
         CharacterRigBuilder characterRigBuilder = new();
         PortraitResolver portraitResolver = new(portraitGeneratedDb);
 
@@ -132,11 +141,10 @@ public partial class SampleBootstrap
             characterFocusTuningDb,
             characterVisualFocusPresetDb,
             characterDepthTuning,
-            _presentationUIRoot,
             _rigBlur);
 
         ShotResponseCommandFactory presentationShotFactory = new(
-            _presentationStage, _presentationResponseRig, characterFocusTuningDb, _presentationUIRoot);
+            _presentationStage, _presentationResponseRig, characterFocusTuningDb);
 
         // Presentation Control
         PresentationControlCommandFactory presentationControlFactory = new(_presentationStage);
@@ -151,7 +159,7 @@ public partial class SampleBootstrap
             screenNoisePresetDb,
             screenVignettePresetDb,
             stageMaskMotionPresetDb,
-            _presentationUIRoot,
+            _stageRigs,
             _rigBlur);
 
         CompositeCommandFactory factory = new(
@@ -248,7 +256,7 @@ public partial class SampleBootstrap
             _presentationResponseRig,
             _rigBlur,
             _screenEffectRig,
-            _presentationUIRoot,
+            _stageRigs,
             audioSystem,
             _sceneBgm,
             _presentationStage,
@@ -314,6 +322,7 @@ public partial class SampleBootstrap
             _presentationScopeSession,
             _presentationStage,
             _presentationResponseRig,
+            _stageRigs,
             _dialogueAdvanceDispatcher,
             _motions,
             DialogueFolder);

@@ -1,57 +1,8 @@
 using UnityEngine;
 
-public sealed class PresentationResponseCoordinateMapper
-{
-    private readonly IShotResponseStageProvider _stageRootProvider;
-
-    public PresentationResponseCoordinateMapper(IShotResponseStageProvider stageRootProvider)
-    {
-        _stageRootProvider = stageRootProvider;
-    }
-
-    public PresentationResponseMeasure CaptureBaseMeasure(IResponseTarget target)
-    {
-        RectTransform rigSpaceRoot = GetRigSpaceRoot();
-
-        Vector2 basePositionInRigSpace =
-            PresentationCoordinateMath.CaptureNeutralPivotInRigSpace(
-                target.MeasureRect,
-                rigSpaceRoot);
-
-        // 적용 기준은 PositionRect 자신의 중립 anchoredPosition.
-        // 이 중립값에 offset만 더함.
-        Vector2 baseAnchoredPosition = target.PositionRect.anchoredPosition;
-        Vector2 baseLocalScale = new(target.ScaleRect.localScale.x, target.ScaleRect.localScale.y);
-
-        return new PresentationResponseMeasure(
-            basePositionInRigSpace,
-            baseAnchoredPosition,
-            baseLocalScale);
-    }
-
-    // rig-space "오프셋(벡터)"을 target PositionRect 부모 공간의 벡터로 변환한다.
-    // 점(point)이 아니라 벡터라 translation이 빠진다 -> rigSpaceRoot와 targetParent가
-    // 같은 카메라 아래 있으면 카메라 zoom/pan이 상쇄되어 변환이 흔들리지 않는다.
-    public Vector2 ConvertOffsetFromRigSpaceToTargetParentSpace(
-        Vector2 offsetInRigSpace,
-        IResponseTarget target)
-    {
-        return PresentationCoordinateMath.ConvertVectorFromRigSpaceToTargetPositionParentSpace(
-            offsetInRigSpace,
-            GetRigSpaceRoot(),
-            target.PositionRect.parent as RectTransform);
-    }
-
-    private RectTransform GetRigSpaceRoot()
-    {
-        return _stageRootProvider.RigSpaceRoot;
-    }
-}
-
 // “계산 좌표계”와 “실제 적용 좌표계” 연결 어댑터
-// rigSpaceRoot = PresentationResponseMath가 결과를 계산하는 공통 기준 좌표계
-// targetParent = 실제 Target.PositionRect.anchoredPosition을 적용할 때 필요한 부모 좌표계
-// neutralPivotSource = target의 현재 중립 기준 위치를 캡처하기 위한 측정용 RectTransform
+// rigSpaceRoot = 무대 루트(StageRigRefs.Root). 코어 ShotLayoutMath · 배치 계산이 결과를 내는 공통 기준 좌표계
+// targetParent = 실제 anchoredPosition을 쓰는 노드의 부모 좌표계(예: 깊이 층의 부모 = 카메라 줌 루트)
 public static class PresentationCoordinateMath
 {
     public static Vector2 CaptureNeutralPivotInRigSpace(

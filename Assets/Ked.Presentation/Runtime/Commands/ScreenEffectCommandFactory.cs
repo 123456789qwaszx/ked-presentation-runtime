@@ -9,7 +9,7 @@ public sealed class ScreenEffectCommandFactory : INodeCommandFactory
     private readonly ScreenVignettePresetDBSO _vignettePresetDb;
     
     private readonly StageMaskMotionPresetDBSO _stageMaskMotionPresetDb;
-    private readonly IStageMaskProvider _stageMaskProvider;
+    private readonly StageRigRegistry _stages;
     private readonly RigBlurIntentSystem _rigBlur;
 
     public ScreenEffectCommandFactory(
@@ -19,7 +19,7 @@ public sealed class ScreenEffectCommandFactory : INodeCommandFactory
         ScreenNoisePresetDBSO noisePresetDb,
         ScreenVignettePresetDBSO vignettePresetDb,
         StageMaskMotionPresetDBSO stageMaskMotionPresetDb,
-        IStageMaskProvider stageMaskProvider,
+        StageRigRegistry stages,
         RigBlurIntentSystem rigBlur)
     {
         _stage = stage ?? throw new ArgumentNullException(nameof(stage));
@@ -28,7 +28,7 @@ public sealed class ScreenEffectCommandFactory : INodeCommandFactory
         _noisePresetDb = noisePresetDb ? noisePresetDb : throw new ArgumentNullException(nameof(noisePresetDb));
         _vignettePresetDb = vignettePresetDb ? vignettePresetDb : throw new ArgumentNullException(nameof(vignettePresetDb));
         _stageMaskMotionPresetDb = stageMaskMotionPresetDb ? stageMaskMotionPresetDb : throw new ArgumentNullException(nameof(stageMaskMotionPresetDb));
-        _stageMaskProvider = stageMaskProvider ?? throw new ArgumentNullException(nameof(stageMaskProvider));
+        _stages = stages ?? throw new ArgumentNullException(nameof(stages));
         _rigBlur = rigBlur ?? throw new ArgumentNullException(nameof(rigBlur));
     }
 
@@ -43,8 +43,8 @@ public sealed class ScreenEffectCommandFactory : INodeCommandFactory
             StageLayerBlurCommandSpec s => new StageLayerBlurCommand(_rigBlur, s),
             
             // Stage-local Mask
-            StageMaskMotionCommandSpec s => new StageMaskMotionCommand(s, _stageMaskMotionPresetDb, _stageMaskProvider),
-            StageMaskClearCommandSpec s => new StageMaskClearCommand(s, _stageMaskProvider),
+            StageMaskMotionCommandSpec s => new StageMaskMotionCommand(s, _stageMaskMotionPresetDb, _stages),
+            StageMaskClearCommandSpec s => new StageMaskClearCommand(s, _stages),
             
             _ => null
         };

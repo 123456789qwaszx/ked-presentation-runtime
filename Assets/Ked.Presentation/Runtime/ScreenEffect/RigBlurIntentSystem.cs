@@ -16,7 +16,7 @@ using UnityEngine;
 public sealed class RigBlurIntentSystem
 {
     private readonly PresentationStage _stage;
-    private readonly IStageDepthContentSlotProvider _slots;
+    private readonly StageRigRegistry _stages;
 
     // 초점 의도. 대상 키는 줄마다 다시 푼다 — 배역 키면 슬롯을 옮겨도 따라간다.
     private bool _hasFocus;
@@ -27,7 +27,7 @@ public sealed class RigBlurIntentSystem
     private Ease _focusEase = Ease.OutCubic;
 
     // 레이어 의도. 양이 0인 레이어는 두지 않는다.
-    private readonly Dictionary<(PresentationStageKey Stage, PresentationDepthLayerKey Layer), float> _layerBlur = new();
+    private readonly Dictionary<(string Stage, float Depth), float> _layerBlur = new();
     private float _layerDuration = 0.8f;
     private Ease _layerEase = Ease.OutCubic;
 
@@ -37,10 +37,10 @@ public sealed class RigBlurIntentSystem
 
     private readonly List<KeyValuePair<string, CharacterRigRefs>> _rigs = new();
 
-    public RigBlurIntentSystem(PresentationStage stage, IStageDepthContentSlotProvider slots)
+    public RigBlurIntentSystem(PresentationStage stage, StageRigRegistry stages)
     {
         _stage = stage;
-        _slots = slots;
+        _stages = stages;
     }
 
     public bool IsFocusTransitioning => AnyTransitioning(focus: true);
@@ -74,8 +74,8 @@ public sealed class RigBlurIntentSystem
     }
 
     public void SetLayerBlur(
-        PresentationStageKey stage,
-        PresentationDepthLayerKey layer,
+        string stage,
+        float layerDepth,
         float amount,
         float duration,
         Ease ease,
@@ -84,9 +84,20 @@ public sealed class RigBlurIntentSystem
         amount = Mathf.Clamp01(amount);
 
         if (amount > 0f)
-            _layerBlur[(stage, layer)] = amount;
+            _layerBlur[(stage, layerDepth)] = amount;
         else
-            _layerBlur.Remove((stage, layer));
+            _layerBlur.Remove((stage, layerDepth));
+
+        _layerDuration = duration;
+        _layerEase = ease;
+
+        Apply(snap);
+    }
+
+    /// <summary>무대 · 층 전부의 레이어 블러를 걷는다(screen_blur_reset).</summary>
+    public void ClearLayerBlur(float duration, Ease ease, bool snap)
+    {
+        _layerBlur.Clear();
 
         _layerDuration = duration;
         _layerEase = ease;
@@ -184,11 +195,13 @@ public sealed class RigBlurIntentSystem
     {
         float blur = 0f;
 
-        foreach (KeyValuePair<(PresentationStageKey Stage, PresentationDepthLayerKey Layer), float> pair in _layerBlur)
+        foreach (KeyValuePair<(string Stage, float Depth), float> pair in _layerBlur)
         {
-            RectTransform contentRoot = _slots?.GetDepthContent(pair.Key.Stage, pair.Key.Layer);
+            // 블러 의도는 아직 서지 않은 층에도 걸 수 있다 — 그 층에 리그가 없으니 흐릴 것도 없다.
+            if (!_stages.Get(pair.Key.Stage).TryGetLayer(pair.Key.Depth, out StageLayerRefs layer))
+                continue;
 
-            if (IsDescendantOf(rigRoot, contentRoot))
+            if (IsDescendantOf(rigRoot, layer.Content))
                 blur = Mathf.Max(blur, pair.Value);
         }
 

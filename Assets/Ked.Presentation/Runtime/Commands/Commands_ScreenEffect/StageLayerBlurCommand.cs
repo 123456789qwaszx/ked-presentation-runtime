@@ -7,8 +7,11 @@ using UnityEngine;
 public sealed class StageLayerBlurCommandSpec : CommandSpecBase
 {
     [Header("Target")]
-    public PresentationStageKey stage = PresentationStageKey.Stage00;
-    public PresentationDepthLayerKey layer = PresentationDepthLayerKey.Far;
+    public string stage = StageKeyParser.DefaultStage;
+    public float layerDepth = Ked.Presentation.Core.StageLayerLabels.Far;
+
+    [Tooltip("true면 무대 · 층 전부의 레이어 블러를 걷는다(screen_blur_reset). stage · layerDepth는 무시.")]
+    public bool clearAll;
 
     [Header("Blur")]
     [Tooltip("0=선명, 1=최대. 셰이더의 MaxLod를 0~2로 스케일한다.")]
@@ -64,5 +67,10 @@ public sealed class StageLayerBlurCommand : CommandBase
         => _blur.AccelerateLayer(StepFinishSpeedUpMultiplier);
 
     private void Apply(bool snap)
-        => _blur.SetLayerBlur(_spec.stage, _spec.layer, _spec.amount, _spec.duration, _spec.ease, snap);
+    {
+        if (_spec.clearAll)
+            _blur.ClearLayerBlur(_spec.duration, _spec.ease, snap);
+        else
+            _blur.SetLayerBlur(_spec.stage, _spec.layerDepth, _spec.amount, _spec.duration, _spec.ease, snap);
+    }
 }

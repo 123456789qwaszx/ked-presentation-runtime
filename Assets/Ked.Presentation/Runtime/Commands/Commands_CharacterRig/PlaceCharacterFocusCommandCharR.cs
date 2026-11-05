@@ -40,7 +40,6 @@ public sealed class PlaceCharacterFocusCommandCharR : RigClaimTweenCommandBase
 {
     private readonly PlaceCharacterFocusCommandSpecCharR _spec;
     private readonly CharacterFocusTuningDBSO _focusTuningDb;
-    private readonly IShotResponseStageProvider _stageProvider;
 
     private RectTransform _moveRect;
 
@@ -56,14 +55,12 @@ public sealed class PlaceCharacterFocusCommandCharR : RigClaimTweenCommandBase
     public PlaceCharacterFocusCommandCharR(
         PresentationStage stage,
         PlaceCharacterFocusCommandSpecCharR spec,
-        CharacterFocusTuningDBSO focusTuningDb,
-        IShotResponseStageProvider stageProvider)
+        CharacterFocusTuningDBSO focusTuningDb)
         : base(stage, spec.slotKey)
     {
         _stage = stage;
         _spec = spec;
         _focusTuningDb = focusTuningDb;
-        _stageProvider = stageProvider;
     }
 
     protected override void ResolveRects()
@@ -78,7 +75,6 @@ public sealed class PlaceCharacterFocusCommandCharR : RigClaimTweenCommandBase
         // 해를 못 구하면 클레임을 내지 않는다 = 움직이지 않는다. 종전엔 반환값을 버려 (0,0)으로 트윈했다 — 무음 실패.
         if (!CharacterFocusPlacementSolver.TryCalculateFocusPlacement(
             _stage,
-            _stageProvider,
             _spec.slotKey,
             _moveRect,
             _spec.focusPreset,

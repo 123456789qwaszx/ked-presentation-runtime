@@ -20,7 +20,7 @@ public sealed partial class StageCommandParser
 
         Emit(new StageMaskMotionCommandSpec
         {
-            stage = PresentationStageKeyParser.Parse(stage),
+            stage = StageKeyParser.ParseStage(stage),
             presetKey = StageMaskMotionPresetDBSO.NormalizeKey(presetKey),
             durationOverride = string.IsNullOrEmpty(durationToken)
                 ? -1f
@@ -30,21 +30,10 @@ public sealed partial class StageCommandParser
 
     private void EnqueueStageMaskClearSpec()
     {
+        // 무대 전부 — 무대 집합은 조립이 정하므로 파서가 열거하지 않는다.
         Emit(new StageMaskClearCommandSpec
         {
-            stage = PresentationStageKey.Stage00,
-            mode = StageMaskClearMode.UnmaskedFullVisible,
-            hideEdge = true
-        });
-        Emit(new StageMaskClearCommandSpec
-        {
-            stage = PresentationStageKey.Stage01,
-            mode = StageMaskClearMode.UnmaskedFullVisible,
-            hideEdge = true
-        });
-        Emit(new StageMaskClearCommandSpec
-        {
-            stage = PresentationStageKey.Stage02,
+            allStages = true,
             mode = StageMaskClearMode.UnmaskedFullVisible,
             hideEdge = true
         });

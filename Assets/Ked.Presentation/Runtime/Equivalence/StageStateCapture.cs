@@ -39,6 +39,38 @@ public static class StageStateCapture
         return state;
     }
 
+    /// <summary>
+    /// 샷이 무대에 쓴 것 — 무대마다 카메라 둘, 층마다 무대 루트에서 본 중심과 전체 배율.
+    /// 런타임이 값을 카메라와 층에 어떻게 나눠 썼는지는 보지 않는다. 보이는 결과만 읽는다.
+    /// </summary>
+    public static StageViewSnapshot CaptureStageView(StageRigRegistry stages)
+    {
+        StageViewSnapshot snapshot = new();
+
+        foreach (StageRigRefs stage in stages.All)
+        {
+            snapshot.Cameras.Add(new StageViewSnapshot.CameraEntry(
+                stage.StageKey,
+                stage.CameraPan.anchoredPosition.ToCore(),
+                stage.CameraZoom.localScale.x));
+
+            foreach (StageLayerRefs layer in stage.Layers)
+            {
+                Vector3 center = stage.Root.InverseTransformPoint(layer.Rect.TransformPoint(Vector3.zero));
+                Vector3 right = stage.Root.InverseTransformVector(layer.Rect.TransformVector(Vector3.right));
+                Vector3 up = stage.Root.InverseTransformVector(layer.Rect.TransformVector(Vector3.up));
+
+                snapshot.Layers.Add(new StageViewSnapshot.LayerEntry(
+                    stage.StageKey,
+                    layer.Depth,
+                    new Vec2(center.x, center.y),
+                    new Vec2(right.x, up.y)));
+            }
+        }
+
+        return snapshot;
+    }
+
     private static void CaptureRig(StageState state, string slotKey, CharacterRigRefs refs)
     {
         state.RegisterSlot(slotKey);

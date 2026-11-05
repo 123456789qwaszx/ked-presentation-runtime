@@ -6,7 +6,7 @@ using UnityEngine;
 public sealed class StageMaskMotionCommandSpec : CommandSpecBase
 {
     [Header("Target")]
-    public PresentationStageKey stage = PresentationStageKey.Stage01;
+    public string stage = "stage01";
 
     [Header("Preset")]
     [Tooltip("StageMaskMotionPresetDBSO entry key. ex) hstrip_open, hstrip_in, iris_in")]
@@ -22,7 +22,7 @@ public sealed class StageMaskMotionCommand : CommandBase
 {
     private readonly StageMaskMotionCommandSpec _spec;
     private readonly StageMaskMotionPresetDBSO _presetDb;
-    private readonly IStageMaskProvider _stageMaskProvider;
+    private readonly StageRigRegistry _stages;
 
     private StageMaskMotionPresetDBSO.Entry _entry;
     private float _duration;
@@ -35,11 +35,11 @@ public sealed class StageMaskMotionCommand : CommandBase
     public StageMaskMotionCommand(
         StageMaskMotionCommandSpec spec,
         StageMaskMotionPresetDBSO presetDb,
-        IStageMaskProvider stageMaskProvider)
+        StageRigRegistry stages)
     {
         _spec = spec;
         _presetDb = presetDb;
-        _stageMaskProvider = stageMaskProvider;
+        _stages = stages;
     }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
@@ -73,7 +73,7 @@ public sealed class StageMaskMotionCommand : CommandBase
             ? _spec.durationOverride
             : _entry.duration;
 
-        _slot = _stageMaskProvider.GetStageMaskSlot(_spec.stage);
+        _slot = _stages.Get(_spec.stage).Mask;
     }
 
     private StageMaskMotionPresetDBSO.Entry ResolvePresetEntry()

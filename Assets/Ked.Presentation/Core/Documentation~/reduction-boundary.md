@@ -179,6 +179,21 @@ yarn 4묶음 기준. "이관 안 함"은 **조용히 버린 것이 아니라 판
 `shot_zoom` · `shot_track` · `shot_to` · `shot_reset` · `shot_focus_to` 5종 전부.
 `ShotIntentMath`가 zoom→배율 규약(0.05)의 유일한 자리다 — 커맨드와 적용측이 같이 본다.
 
+샷 리덕션의 출력은 노드 클레임이 아니라 **샷 의도 `ShotIntentState`(zoom · pan · focus) 하나**다.
+그 셋이 무대 노드(무대마다 카메라 둘 · 층마다 하나)에 무엇을 쓰는지는 **`Transforms/ShotLayoutMath`가 유일한 자리**다(2026-11-05).
+
+| 누가 | 무엇을 |
+|---|---|
+| 런타임 `PresentationShotResponseSystem` | 식의 출력을 노드에 쓴다(applier). 중립 = `Solve(Default)` |
+| 폴드 `StageReducer.Shot` | 의도만 접는다. 층 반응은 상태에 저장하지 않는다 — 의도 + 부착 d에서 언제든 풀린다 |
+| 하네스 `StageStateComparer.CompareStageView` | 같은 식으로 기대값(카메라 · 층마다 중심 · 전체 배율)을 풀어 캡처와 비교한다 |
+
+`shot_focus_to`는 정방향 식의 역으로 팬을 푼다(`ShotLayoutMath.SolvePanToPlace`). 입력은 무대 좌표의 focus와 그 슬롯이 선 층 d다.
+팬 1px당 그 점이 화면에서 움직이는 양이 층마다 일정(`1 + panResponse`)해서 축마다 나눗셈 한 번이다.
+종전에는 "지금 카메라를 씌웠다 벗기는" 왕복 뒤 카메라만 본 식(`desired − p × 배율`)이었고, mid가 아닌 층에서 층 반응만큼 빗나갔다
+(close에서 약 96px). 런타임과 코어가 똑같이 틀려 하네스가 잡지 못했다(`a7974fa2`에서 고침).
+식 · 계층 · 결정은 [stage-rig.md](../../Runtime/StageRig/Documentation~/stage-rig.md).
+
 ### staging (12커맨드)
 
 | 커맨드 | 스펙 클래스 | 처리 |
@@ -192,8 +207,9 @@ yarn 4묶음 기준. "이관 안 함"은 **조용히 버린 것이 아니라 판
 **구조 커맨드(`sibling_front` · `sibling_back` · `char_to`)를 이관하지 않는 이유: 변환부가 항등이다.**
 스펙 값(stage·layer·순서 모드)이 곧 목표이고 본문은 유니티 구조 조작(`SetParent` ·
 `SetSiblingIndex`)뿐이라 **코어로 옮길 계산이 없다.**
-이 구조 축(리그가 어느 스테이지/레이어에 어떤 순서로 붙는가)은 무대 상태 조립 때
-데이터 모델로 들어간다.
+이 구조 축(리그가 어느 스테이지/레이어에 어떤 순서로 붙는가) 중 **부착은 데이터 모델에 들어갔다** —
+`StageState`의 `SlotAttachment`(무대 키 · 층 라벨 · 깊이 d)를 slot · bg_spawn · char_to가 접는다.
+층 d는 2026-11-05부터 하네스의 층 판정과 `shot_focus_to`의 팬 역산이 읽는다. 형제 순서(`sibling_*`)는 아직 모델 밖이다.
 
 ### 이관 대상이 아닌 부류 — 절차적 커맨드
 
@@ -266,7 +282,7 @@ fade·move·scale을 **같은 노드, 같은 리덕션**으로 접고, 종횡비
 
 ### 백로그
 
-- 구조 축 상태 모델 (stage/layer 부착 + 형제 순서)
+- 구조 축 상태 모델의 형제 순서(`sibling_*`). 부착(stage/layer)은 `SlotAttachment`로 들어갔다
 - `SetPortraitSprite` (초상 축)
 - `ScreenFocusPoint` 비율표 — 게임별 값이므로 코어 코드가 아니라 **tuning 데이터**가 맞다.
   지금은 호스트 `ScreenFocusPointResolver`에 있다. U12 덤프 추가 후보.

@@ -22,7 +22,7 @@
 |---|---|---|
 | `Ked.CommandExecutor` | `Assets/Ked.CommandExecutor/` | **실행기** — 커맨드 수명(`CommandBase` · `ClaimTweenCommandBase`) · `CommandRunScope` · `CommandExecutor` · `SequencePlayer` · 포트 (참조: DOTween.Modules. **무대·재생·Yarn을 모른다**) |
 | `Ked.Presentation.Core` | `Assets/Ked.Presentation/Core/` | 순수 상태 계산 — 정지 프레임 리듀스·이징·튜닝 (**엔진 의존 0**, 참조 0) |
-| `Ked.Presentation.Runtime` | `Assets/Ked.Presentation/Runtime/` | **무대** 실행 계층 — Stage(무대 상태·무대 키·깊이 칸 계약) · Commands(커맨드 · 팩토리 · 토큰 파서 · **StageCommandParser**) · CharacterRig(배경 = 캐스팅하지 않은 슬롯) · ShotResponse · ScreenEffect · StageMask · Audio (참조: Core · CommandExecutor · DOTween.Modules) |
+| `Ked.Presentation.Runtime` | `Assets/Ked.Presentation/Runtime/` | **무대** 실행 계층 — Stage(무대 상태) · StageRig(무대 리그 스키마·빌더·레지스트리) · Commands(커맨드 · 팩토리 · 토큰 파서 · **StageCommandParser**) · CharacterRig(배경 = 캐스팅하지 않은 슬롯) · ShotResponse · ScreenEffect · StageMask · Audio (참조: Core · CommandExecutor · DOTween.Modules) |
 | `Ked.Presentation.Playback` | `Assets/Ked.Presentation/Playback/` | 대사 재생 루프와 연출 기억 — 줄 진행·선택지(DialoguePresenter) · 재생 제어·롤백 기록·백로그·VN 재생 상태(FeatureController) · Yarn 등록·전달(YarnBridge) · 재생 호스트 계약·재생 단위(Host) · 연출 기억과 그 입구 `PlaybackMemory`(Memory) · 등가성 하네스(Diagnostics) (참조: Core · Runtime · CommandExecutor · YarnSpinner.Unity · TextMeshPro · UnityEngine.UI · DOTween.Modules) |
 | `Ked.Progression` · `Ked.Progression.Save` | `Assets/Ked.Progression/` | 진행 판정 코어와 진행 저장 (**엔진 의존 0**. 원본은 형제 저장소 `ked-progression-runtime`, [vendoring.md](../../Ked.Progression/Documentation~/vendoring.md)) |
 | `Ked.Presentation.Editor` (에디터 전용) | `Assets/Ked.Presentation/Editor/` | 무대 에디터 도구 — 초상 DB 빌더 · 튜닝 덤프 익스포터 · 이징 골든 (참조: Core · Runtime · CommandExecutor · UnityEngine.UI · DOTween.Modules) |
@@ -34,7 +34,7 @@
 > 어셈블리가 하나 더 있었으나, 그러면 폴더를 읽는 사람이 매번 "이건 빌드에 들어가나"를
 > 확인해야 한다. 본체 뿌리의 `Assets/Ked.Presentation/Editor/`로 모으면 **위치가 곧 답이다.**
 > 그 폴더는 에디터 전용 어셈블리라 예제 타입을 쓰면 컴파일이 깨진다 — 씬에서는 본체 계약
-> (`IStageMaskProvider` · `IRigPrefabSource`)으로만 찾는다.
+> (`IStageMount` · `IRigPrefabSource`)으로만 찾는다.
 
 **의존 방향은 한쪽뿐이다.**
 
@@ -128,10 +128,11 @@ UI 타입이 기능 폴더의 계약을 구현하는 partial을 전부 여기 �
 
 | UI/Providers/ | 구현하는 계약 | 계약의 위치 |
 |---|---|---|
-| `PresentationUIRoot.ShotResponseStage.cs` | `IShotResponseStageProvider` | `Runtime/ShotResponse/` |
-| `PresentationUIRoot.StageDepthContentSlot.cs` | `IStageDepthContentSlotProvider` | `Runtime/Stage/` |
-| `PresentationUIRoot.StageMask.cs` | `IStageMaskProvider` | `Runtime/StageMask/` |
-| `PresentationUIRoot.StageCounts.cs` | (계약 아님 — enum을 세는 private const) | enum은 `Runtime/Stage/` |
+| `PresentationUIRoot.cs` | `IStageMount` — 무대가 서는 자리 하나 | `Runtime/StageRig/` |
+
+> 2026-11-05: 무대 계약 셋(`IShotResponseStageProvider` · `IStageDepthContentSlotProvider` · `IStageMaskProvider`)과
+> 그 구현 partial 넷을 걷었다. 무대는 `StageRigBuilder`가 `IStageMount` 아래에 세우고, 참조는 `StageRigRegistry`가 내준다.
+> 씬이 무대 노드 76개를 이름으로 들고 있던 것이 곧 두 번째 스키마였다.
 
 > **새 provider를 만들 때**: 계약(interface)은 그것을 필요로 하는 기능 폴더에,
 > 구현 partial은 `UI/Providers/`에. **한 파일에 같이 두지 말 것.**
@@ -208,7 +209,7 @@ Playback이 예제에게 요구할 때도 같다. 계약은 Playback에, 구현�
 - 스코프는 `ICommandPacePolicy`뿐이다 — 실행기가 VN도 무대도 모른다(②·④).
 - 대본 커맨드의 뜻은 `StageCommandParser`가 갖는다 — 재생은 `StageCommand`만 만든다(③).
 - 무대가 필요한 커맨드는 생성자로 받고, 팩토리가 들고 넘긴다(④). `PresentationCore/`에는 실행기만 남았다 —
-  무대 상태(`PresentationStage`·`PresentationStageKey`·`IStageDepthContentSlotProvider`)는 `Stage/`로, 토큰 파서는 `Commands/Parser/`로.
+  무대 상태(`PresentationStage`)는 `Stage/`로(무대 키 enum · 깊이 칸 계약은 2026-11-05 `StageRig/`로 대체), 토큰 파서는 `Commands/Parser/`로.
 
 실행기는 그대로 떼어 낼 수 있는 조각이 됐다 — `Assets/Ked.CommandExecutor/`(어셈블리 `Ked.CommandExecutor`, 분리본 ked-command-executor).
 `Ked.Presentation.Runtime`은 `PresentationCore/`가 빠지고 실행기를 참조한다. 무대(`Core` · `Runtime` · `Editor` · 데이터·프리팹·셰이더)의 분리본은 ked-stage-runtime이다.

@@ -8,18 +8,17 @@ public struct CharacterFocusPointResult
     public RectTransform RigSpaceRoot;
 
     // Final focus estimate in RigSpaceRoot local space.
+    // 정착 측정(useSettledPlacementTargets)이면 카메라 중립의 무대 좌표다 — 샷이 움직이는 무대 노드를 중립으로 잰다.
     public Vector2 FocusPointInRigSpace;
 
-    // true면 FocusPointInRigSpace는 카메라 중립의 무대 좌표다(샷이 움직이는 무대 노드를 중립으로 잼).
-    // false면 지금 화면에 적용된 카메라가 들어간 값이다.
-    public bool InStageSpace;
+    // 그 점이 선 층(리그의 층). 샷이 이 층에 주는 반응으로 화면 위치가 정해진다.
+    public StageLayerRefs Layer;
 }
 
 public static class CharacterFocusPointResolver
 {
     public static CharacterFocusPointResult Resolve(
         PresentationStage stage,
-        IShotResponseStageProvider stageProvider,
         string roleKey,
         CharacterFocusPreset preset,
         Vector2 commandOffset,
@@ -33,7 +32,7 @@ public static class CharacterFocusPointResolver
 
         return ResolveFromRigRefs(
             rigRefs,
-            stageProvider.RigSpaceRoot,
+            rigRefs.Stage.Root,
             tuningKey,
             preset,
             commandOffset,
@@ -119,7 +118,7 @@ public static class CharacterFocusPointResolver
             FocusPointInRigSpace = new Vector2(
                 focusInRigSpace.x,
                 focusInRigSpace.y),
-            InStageSpace = useSettledPlacementTargets && stageView != null,
+            Layer = rigRefs.Layer,
         };
     }
 

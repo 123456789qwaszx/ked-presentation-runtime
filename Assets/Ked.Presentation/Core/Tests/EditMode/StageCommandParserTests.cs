@@ -122,13 +122,13 @@ public class StageCommandParserTests
     [Test]
     public void tx는_프리셋과_무대와_시간을_받는다()
     {
-        StageMaskMotionCommandSpec a = (StageMaskMotionCommandSpec)Parse(NewParser(), Cmd("tx", "daze_close", "00"))[0];
+        StageMaskMotionCommandSpec a = (StageMaskMotionCommandSpec)Parse(NewParser(), Cmd("tx", "daze_close", "stage00"))[0];
         Assert.AreEqual("daze_close", a.presetKey);
-        Assert.AreEqual(PresentationStageKey.Stage00, a.stage);
+        Assert.AreEqual("stage00", a.stage);
         Assert.AreEqual(-1f, a.durationOverride, "시간이 비면 프리셋 자체 시간");
 
         StageMaskMotionCommandSpec b = (StageMaskMotionCommandSpec)Parse(NewParser(), Cmd("tx", "iris_in", "", "12fr"))[0];
-        Assert.AreEqual(PresentationStageKey.Stage01, b.stage, "무대 생략값은 01");
+        Assert.AreEqual("stage01", b.stage, "무대 생략값은 stage01");
         Assert.AreEqual(0.5f, b.durationOverride, 1e-6f);
     }
 
@@ -146,12 +146,12 @@ public class StageCommandParserTests
     public void screen_blur는_셋째_인자로_무대를_받는다()
     {
         StageLayerBlurCommandSpec a = (StageLayerBlurCommandSpec)Parse(NewParser(), Cmd("screen_blur", "back", "0.5"))[0];
-        Assert.AreEqual(PresentationStageKey.Stage00, a.stage, "무대 생략값은 stage00");
-        Assert.AreEqual(PresentationDepthLayerKey.Back, a.layer);
+        Assert.AreEqual("stage00", a.stage, "무대 생략값은 stage00");
+        Assert.AreEqual(StageLayerLabels.Back, a.layerDepth);
         Assert.AreEqual(0.5f, a.amount, 1e-6f);
 
         StageLayerBlurCommandSpec b = (StageLayerBlurCommandSpec)Parse(NewParser(), Cmd("screen_blur", "mid", "1", "stage02"))[0];
-        Assert.AreEqual(PresentationStageKey.Stage02, b.stage);
+        Assert.AreEqual("stage02", b.stage);
     }
 
     [Test]
@@ -241,8 +241,8 @@ public class StageCommandParserTests
 
         SetupCharRigCommandSpec setup = (SetupCharRigCommandSpec)specs[0];
         Assert.AreEqual("bg_main", setup.roleKey);
-        Assert.AreEqual(PresentationStageKey.Stage00, setup.stage);
-        Assert.AreEqual(PresentationDepthLayerKey.Far, setup.layer);
+        Assert.AreEqual("stage00", setup.stage);
+        Assert.AreEqual(StageLayerLabels.Far, setup.layerDepth);
         Assert.IsTrue(setup.asBackground, "배역 있는 슬롯을 덮으면 배역을 푸는 경로");
 
         SetSpriteCommandSpecCharR sprite = (SetSpriteCommandSpecCharR)specs[1];
@@ -258,12 +258,12 @@ public class StageCommandParserTests
     public void bg_spawn은_셋째_넷째_인자로_무대와_층을_받는다()
     {
         SetupCharRigCommandSpec a = (SetupCharRigCommandSpec)Parse(NewParser(), Cmd("bg_spawn", "bg_a", "class_day", "stage01"))[0];
-        Assert.AreEqual(PresentationStageKey.Stage01, a.stage);
-        Assert.AreEqual(PresentationDepthLayerKey.Far, a.layer, "층 생략값은 far");
+        Assert.AreEqual("stage01", a.stage);
+        Assert.AreEqual(StageLayerLabels.Far, a.layerDepth, "층 생략값은 far");
 
         SetupCharRigCommandSpec b = (SetupCharRigCommandSpec)Parse(NewParser(), Cmd("bg_spawn", "bg_b", "class_day", "stage02", "mid"))[0];
-        Assert.AreEqual(PresentationStageKey.Stage02, b.stage);
-        Assert.AreEqual(PresentationDepthLayerKey.Mid, b.layer);
+        Assert.AreEqual("stage02", b.stage);
+        Assert.AreEqual(StageLayerLabels.Mid, b.layerDepth);
     }
 
     [Test]
