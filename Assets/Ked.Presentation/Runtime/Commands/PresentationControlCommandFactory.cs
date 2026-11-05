@@ -1,10 +1,12 @@
+using System;
+
 public sealed class PresentationControlCommandFactory : INodeCommandFactory
 {
     private readonly PresentationStage _stage;
 
     public PresentationControlCommandFactory(PresentationStage stage)
     {
-        _stage = stage;
+        _stage = stage ?? throw new ArgumentNullException(nameof(stage));
     }
 
     public bool TryCreate(CommandSpecBase spec, out ISequenceCommand command)

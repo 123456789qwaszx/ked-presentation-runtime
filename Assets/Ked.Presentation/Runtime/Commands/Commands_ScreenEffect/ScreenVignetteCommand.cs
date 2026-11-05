@@ -59,8 +59,7 @@ public sealed class ScreenVignetteCommand : CommandBase
     {
         float intensity = Mathf.Clamp01(_spec.intensity);
 
-        if (_presetDb != null &&
-            _presetDb.TryGet(_spec.presetKey, out ScreenVignettePresetDBSO.Entry e))
+        if (_presetDb.TryGet(_spec.presetKey, out ScreenVignettePresetDBSO.Entry e))
         {
             return new ScreenVignetteEffectController.State(
                 e.amount * intensity,
@@ -75,8 +74,7 @@ public sealed class ScreenVignetteCommand : CommandBase
             $"presetKey='{_spec.presetKey}'. Using fallback.",
             controller);
 
-        if (_presetDb != null &&
-            _presetDb.TryGet(ScreenVignettePresetDBSO.DefaultPresetKey, out e))
+        if (_presetDb.TryGet(ScreenVignettePresetDBSO.DefaultPresetKey, out e))
         {
             return new ScreenVignetteEffectController.State(
                 e.amount * intensity,

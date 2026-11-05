@@ -59,8 +59,7 @@ public sealed class ScreenNoiseCommand : CommandBase
     {
         float intensity = Mathf.Clamp01(_spec.intensity);
 
-        if (_presetDb != null &&
-            _presetDb.TryGet(_spec.presetKey, out ScreenNoisePresetDBSO.Entry e))
+        if (_presetDb.TryGet(_spec.presetKey, out ScreenNoisePresetDBSO.Entry e))
         {
             return new ScreenNoiseEffectController.State(
                 e.amount * intensity,
@@ -76,8 +75,7 @@ public sealed class ScreenNoiseCommand : CommandBase
             $"presetKey='{_spec.presetKey}'. Using fallback.",
             controller);
 
-        if (_presetDb != null &&
-            _presetDb.TryGet(ScreenNoisePresetDBSO.DefaultPresetKey, out e))
+        if (_presetDb.TryGet(ScreenNoisePresetDBSO.DefaultPresetKey, out e))
         {
             return new ScreenNoiseEffectController.State(
                 e.amount * intensity,

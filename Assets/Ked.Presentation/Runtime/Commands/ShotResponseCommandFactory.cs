@@ -1,3 +1,5 @@
+using System;
+
 public sealed class ShotResponseCommandFactory : INodeCommandFactory
 {
     private readonly PresentationStage _stage;
@@ -11,10 +13,10 @@ public sealed class ShotResponseCommandFactory : INodeCommandFactory
         CharacterFocusTuningDBSO focusTuningDB,
         IShotResponseStageProvider stageProvider)
     {
-        _stage = stage;
-        _presentationResponseRig = presentationResponseRig;
-        _focusTuningDB = focusTuningDB;
-        _stageProvider = stageProvider;
+        _stage = stage ?? throw new ArgumentNullException(nameof(stage));
+        _presentationResponseRig = presentationResponseRig ?? throw new ArgumentNullException(nameof(presentationResponseRig));
+        _focusTuningDB = focusTuningDB ? focusTuningDB : throw new ArgumentNullException(nameof(focusTuningDB));
+        _stageProvider = stageProvider ?? throw new ArgumentNullException(nameof(stageProvider));
     }
 
     public bool TryCreate(CommandSpecBase spec, out ISequenceCommand command)

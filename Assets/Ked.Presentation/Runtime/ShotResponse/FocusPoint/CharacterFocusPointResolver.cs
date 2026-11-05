@@ -17,25 +17,21 @@ public struct CharacterFocusPointResult
 
 public static class CharacterFocusPointResolver
 {
-    public static void TryResolve(
+    public static CharacterFocusPointResult Resolve(
         PresentationStage stage,
         IShotResponseStageProvider stageProvider,
         string roleKey,
         CharacterFocusPreset preset,
         Vector2 commandOffset,
         CharacterFocusTuningDBSO tuningDb,
-        bool useSettledPlacementTargets,
-        out CharacterFocusPointResult result)
+        bool useSettledPlacementTargets)
     {
-        result = default;
-
-        string resolvedRigKey = CharacterRigTargetResolver.ResolveRigKeyByPolicy(stage, roleKey);
-        stage.characterRigs.TryGetRig(resolvedRigKey, out CharacterRigRefs rigRefs);
+        CharacterRigRefs rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(stage, roleKey);
         string tuningKey = CharacterRigTargetResolver.ResolveCharacterKeyFromTargetKey(stage, roleKey);
 
         CharacterFacing facing = ResolveFacing(stage, roleKey);
 
-        TryResolveFromRigRefs(
+        return ResolveFromRigRefs(
             rigRefs,
             stageProvider.RigSpaceRoot,
             tuningKey,
@@ -45,8 +41,7 @@ public static class CharacterFocusPointResolver
             useSettledPlacementTargets,
             facing,
             mirrorCommandOffset: true,
-            useSettledPlacementTargets ? stage.StageView : null,
-            out result);
+            useSettledPlacementTargets ? stage.StageView : null);
     }
 
     public static bool TryResolveFromRigRefs(
@@ -60,7 +55,12 @@ public static class CharacterFocusPointResolver
         CharacterFacing facing,
         out CharacterFocusPointResult result)
     {
-        return TryResolveFromRigRefs(
+        result = default;
+
+        if (rigSpaceRoot == null || rigRefs == null || tuningDb == null || rigRefs.CharacterPortrait_VisualOffset == null)
+            return false;
+
+        result = ResolveFromRigRefs(
             rigRefs,
             rigSpaceRoot,
             tuningKey,
@@ -70,11 +70,12 @@ public static class CharacterFocusPointResolver
             useSettledPlacementTargets,
             facing,
             mirrorCommandOffset: true,
-            null,
-            out result);
+            null);
+
+        return true;
     }
 
-    public static bool TryResolveFromRigRefs(
+    public static CharacterFocusPointResult ResolveFromRigRefs(
         CharacterRigRefs rigRefs,
         RectTransform rigSpaceRoot,
         string tuningKey,
@@ -84,33 +85,24 @@ public static class CharacterFocusPointResolver
         bool useSettledPlacementTargets,
         CharacterFacing facing,
         bool mirrorCommandOffset,
-        IStageViewNeutral stageView,
-        out CharacterFocusPointResult result)
+        IStageViewNeutral stageView)
     {
-        result = default;
-
-        if (rigSpaceRoot == null)
-            return false;
-
-        if (!TryResolveFocusMeasureInputs(
-                rigRefs,
-                tuningKey,
-                preset,
-                commandOffset,
-                tuningDb,
-                facing,
-                mirrorCommandOffset,
-                out RectTransform measureRect,
-                out Vector3 focusLocalOffset))
-        {
-            return false;
-        }
+        ResolveFocusMeasureInputs(
+            rigRefs,
+            tuningKey,
+            preset,
+            commandOffset,
+            tuningDb,
+            facing,
+            mirrorCommandOffset,
+            out RectTransform measureRect,
+            out Vector3 focusLocalOffset);
 
         // 움직이는 placement 조상(translation/scale/rotation)이 있으면,
         // 그들이 settled target에 도착했을 때의 focusWorld로 보정해 측정한다.
         // 아무도 안 움직이면 라이브 측정과 동일하다.
         Vector3 focusWorld =
-            useSettledPlacementTargets && rigRefs.PlacementTargets != null
+            useSettledPlacementTargets
                 ? rigRefs.PlacementTargets.MeasureSettledWorldPoint(
                     measureRect,
                     focusLocalOffset,
@@ -121,16 +113,14 @@ public static class CharacterFocusPointResolver
         Vector3 focusInRigSpace =
             rigSpaceRoot.InverseTransformPoint(focusWorld);
 
-        result = new CharacterFocusPointResult
+        return new CharacterFocusPointResult
         {
             RigSpaceRoot = rigSpaceRoot,
             FocusPointInRigSpace = new Vector2(
                 focusInRigSpace.x,
                 focusInRigSpace.y),
-            InStageSpace = useSettledPlacementTargets && stageView != null && rigRefs.PlacementTargets != null,
+            InStageSpace = useSettledPlacementTargets && stageView != null,
         };
-
-        return true;
     }
 
     /// <summary>
@@ -139,7 +129,7 @@ public static class CharacterFocusPointResolver
     /// 이 수식이 사는 유일한 자리다 — depth 보정(CharacterDepthResolver)과
     /// 배치 해(CharacterFocusPlacementSolver)도 여기를 부른다. 사본을 만들지 말 것.
     /// </summary>
-    public static bool TryResolveFocusMeasureInputs(
+    public static void ResolveFocusMeasureInputs(
         CharacterRigRefs rigRefs,
         string tuningKey,
         CharacterFocusPreset preset,
@@ -150,18 +140,9 @@ public static class CharacterFocusPointResolver
         out RectTransform measureRect,
         out Vector3 focusLocalOffset)
     {
-        measureRect = null;
-        focusLocalOffset = default;
-
-        if (rigRefs == null || tuningDb == null)
-            return false;
-
         // Focus는 "캐릭터의 논리적 위치"를 가리켜야 한다.
         // 즉 CharacterPortrait_VisualOffset를 사용한다.
         measureRect = rigRefs.CharacterPortrait_VisualOffset;
-
-        if (measureRect == null)
-            return false;
 
         // FocusPoint 자체는 캐릭터 facing을 따른다.
         // 하지만 commandOffset은 용도에 따라 mirror 여부가 달라진다.
@@ -177,18 +158,12 @@ public static class CharacterFocusPointResolver
         focusOffset += effectiveCommandOffset;
 
         focusLocalOffset = new Vector3(focusOffset.x, focusOffset.y, 0f);
-
-        return true;
     }
 
     public static CharacterFacing ResolveFacing(PresentationStage stage, string roleKey)
     {
-        if (stage != null &&
-            stage.castRegistry != null &&
-            stage.castRegistry.TryGetFacing(roleKey, out CharacterFacing facing))
-        {
+        if (stage.castRegistry.TryGetFacing(roleKey, out CharacterFacing facing))
             return facing;
-        }
 
         return CharacterFacing.Right;
     }

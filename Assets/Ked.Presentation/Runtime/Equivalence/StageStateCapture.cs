@@ -55,17 +55,11 @@ public static class StageStateCapture
 
             RectTransform rect = refs.GetRect(target);
 
-            if (rect == null)
-                continue; // 없는 노드는 캡처가 안 된다 — 비교기가 "접힘 전용"으로 센다
-
             string key = StageState.NodeKeyOf(slotKey, def.Id.ToString());
 
             string parentKey = def.Parent.HasValue
                 ? StageState.NodeKeyOf(slotKey, def.Parent.Value.ToString())
                 : rootKey;
-
-            if (!state.Nodes.Contains(parentKey))
-                continue; // 부모가 캡처 안 됐으면 자식도 잇지 않는다 — 비교기가 잡는다
 
             state.Nodes.Add(key, parentKey, CaptureNode(rect));
             CaptureAlpha(state, key, rect);

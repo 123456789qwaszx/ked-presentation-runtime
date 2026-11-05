@@ -48,9 +48,6 @@ public sealed class StageMaskClearCommand : CommandBase
         if (!_resolveAttempted)
             ResolveRefs();
 
-        if (_slot == null)
-            return;
-
         _slot.Clear(_spec.mode, _spec.hideEdge);
     }
 
@@ -58,11 +55,6 @@ public sealed class StageMaskClearCommand : CommandBase
     {
         _resolveAttempted = true;
 
-        if (!_stageMaskProvider.TryGetStageMaskSlot(_spec.stage, out _slot) || _slot == null)
-        {
-            Debug.LogWarning(
-                $"[StageMaskClearCommand] StageMaskSlot is missing. " +
-                $"stage='{_spec.stage}'.");
-        }
+        _slot = _stageMaskProvider.GetStageMaskSlot(_spec.stage);
     }
 }

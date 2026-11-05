@@ -66,16 +66,10 @@ public sealed class SetEmotionPortraitWipeCommandCharR : CommandBase
     // 밑장(스프라이트·사이징)에 쓰는 커맨드는 쓰기 전에 부른다.
     // 진행 중인 face_swap을 완주시켜(OnComplete가 제 표정을 확정) 나중 쓰기가 이기게 한다.
     public static void CompleteInFlight(CharacterRigRefs rig)
-    {
-        if (rig != null)
-            CompleteInFlight(rig.CharacterPortraitSpriteOverlay_Root);
-    }
+        => CompleteInFlight(rig.CharacterPortraitSpriteOverlay_Root);
 
     private static void CompleteInFlight(RectTransform overlayRoot)
-    {
-        if (overlayRoot != null)
-            overlayRoot.DOKill(true);
-    }
+        => overlayRoot.DOKill(true);
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
@@ -87,7 +81,7 @@ public sealed class SetEmotionPortraitWipeCommandCharR : CommandBase
         ClaimTarget();
         PrepareTransitionState();
 
-        if (!HasOverlayLayer || _spec.duration <= 0f)
+        if (_spec.duration <= 0f)
         {
             CommitFinalState();
             yield break;
@@ -125,30 +119,18 @@ public sealed class SetEmotionPortraitWipeCommandCharR : CommandBase
         CommitFinalState();
     }
 
-    // 위 겹이 없는 리그(구 프리팹)에서는 밑장 즉시 교체로 굴러간다 — 연출만 빠진다.
-    private bool HasOverlayLayer =>
-        _overlayRoot != null && _overlayImage != null && _overlayCanvasGroup != null;
-
     private void ResolveRefs(CommandRunScope scope)
     {
         _resolveAttempted = true;
 
         CharacterRigRefs rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(_stage, _spec.slotKey);
 
-        RectTransform portraitRoot = rigRefs.CharacterPortraitSprite_Root;
         _overlayRoot = rigRefs.CharacterPortraitSpriteOverlay_Root;
         _portraitImage = rigRefs.CharacterPortraitSprite_Image;
         _overlayImage = rigRefs.CharacterPortraitSpriteOverlay_Image;
 
-        _portraitCanvasGroup = portraitRoot != null ? portraitRoot.GetComponent<CanvasGroup>() : null;
-        _overlayCanvasGroup = _overlayRoot != null ? _overlayRoot.GetComponent<CanvasGroup>() : null;
-
-        if (_overlayRoot == null || _overlayImage == null)
-        {
-            Debug.LogWarning(
-                $"[{nameof(SetEmotionPortraitWipeCommandCharR)}] Missing portrait overlay layer on " +
-                $"slotKey='{_spec.slotKey}'. Falling back to an instant sprite swap.");
-        }
+        _portraitCanvasGroup = rigRefs.CharacterPortraitSprite_Root.GetComponent<CanvasGroup>();
+        _overlayCanvasGroup = _overlayRoot.GetComponent<CanvasGroup>();
     }
 
     private void ResolveTargetSprite(CommandRunScope scope)
@@ -169,9 +151,6 @@ public sealed class SetEmotionPortraitWipeCommandCharR : CommandBase
 
     private void PrepareTransitionState()
     {
-        if (!HasOverlayLayer)
-            return;
-
         _overlayCanvasGroup.alpha = 0f;
 
         _overlayImage.enabled = true;
@@ -186,21 +165,15 @@ public sealed class SetEmotionPortraitWipeCommandCharR : CommandBase
             .SetEase(_spec.ease);
 
     private void ApplyOverlayCoverage(float coverage)
-    {
-        float portraitAlpha = _portraitCanvasGroup != null ? _portraitCanvasGroup.alpha : 1f;
-        _overlayCanvasGroup.alpha = coverage * portraitAlpha;
-    }
+        => _overlayCanvasGroup.alpha = coverage * _portraitCanvasGroup.alpha;
 
     private void CommitFinalState()
     {
         _portraitImage.sprite = _targetSprite;
         ApplySizing(_portraitImage, _targetSprite);
 
-        if (HasOverlayLayer)
-        {
-            _overlayCanvasGroup.alpha = 0f;
-            _overlayImage.enabled = false;
-        }
+        _overlayCanvasGroup.alpha = 0f;
+        _overlayImage.enabled = false;
     }
 
     private void ApplySizing(Image image, Sprite sprite)

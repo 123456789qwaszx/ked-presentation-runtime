@@ -47,9 +47,6 @@ public sealed class StageMaskMotionCommand : CommandBase
         if (!_resolveAttempted)
             ResolveRefs();
 
-        if (_slot == null || !_slot.HasMask)
-            yield break;
-
         _slot.PlayMotion(_entry, _duration);
 
         if (!_spec.wait)
@@ -64,9 +61,6 @@ public sealed class StageMaskMotionCommand : CommandBase
         if (!_resolveAttempted)
             ResolveRefs();
 
-        if (_slot == null || !_slot.HasMask)
-            return;
-
         _slot.SnapMotionEnd(_entry);
     }
 
@@ -79,26 +73,12 @@ public sealed class StageMaskMotionCommand : CommandBase
             ? _spec.durationOverride
             : _entry.duration;
 
-        if (!_stageMaskProvider.TryGetStageMaskSlot(_spec.stage, out _slot) || _slot == null)
-        {
-            Debug.LogWarning(
-                $"[StageMaskMotionCommand] StageMaskSlot is missing. " +
-                $"stage='{_spec.stage}'.");
-            return;
-        }
-
-        if (_slot.Graphic == null)
-        {
-            Debug.LogWarning(
-                $"[StageMaskMotionCommand] StageMaskGraphic is missing. " +
-                $"stage='{_spec.stage}'.");
-        }
+        _slot = _stageMaskProvider.GetStageMaskSlot(_spec.stage);
     }
 
     private StageMaskMotionPresetDBSO.Entry ResolvePresetEntry()
     {
-        if (_presetDb != null &&
-            _presetDb.TryGet(_spec.presetKey, out StageMaskMotionPresetDBSO.Entry entry))
+        if (_presetDb.TryGet(_spec.presetKey, out StageMaskMotionPresetDBSO.Entry entry))
         {
             return entry;
         }
@@ -107,8 +87,7 @@ public sealed class StageMaskMotionCommand : CommandBase
             $"[StageMaskMotionCommand] Stage mask preset not found. " +
             $"presetKey='{_spec.presetKey}'. Using fallback.");
 
-        if (_presetDb != null &&
-            _presetDb.TryGet(StageMaskMotionPresetDBSO.DefaultPresetKey, out entry))
+        if (_presetDb.TryGet(StageMaskMotionPresetDBSO.DefaultPresetKey, out entry))
         {
             return entry;
         }

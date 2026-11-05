@@ -65,40 +65,23 @@ public static class CharacterDepthResolver
         // 실패하면 raw Y로 떨어진다 — 크기는 바뀌고 초점만 보정 안 된다. 어느 경로든 반드시 경고한다.
         finalDepthY = rawDepthY;
 
-        if (stageProvider == null || depthYRect == null || depthScaleRect == null)
-        {
-            WarnFallback(roleKey, "무대 제공자나 깊이 축 rect가 없다");
-            return;
-        }
-
         RectTransform rigSpaceRoot = stageProvider.RigSpaceRoot;
 
-        if (rigSpaceRoot == null)
-        {
-            WarnFallback(roleKey, "RigSpaceRoot가 없다");
-            return;
-        }
-
-        string resolvedRigKey = CharacterRigTargetResolver.ResolveRigKeyByPolicy(stage, roleKey);
-        stage.characterRigs.TryGetRig(resolvedRigKey, out CharacterRigRefs rigRefs);
+        CharacterRigRefs rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(stage, roleKey);
 
         string tuningKey = CharacterRigTargetResolver.ResolveCharacterKeyFromTargetKey(stage, roleKey);
         CharacterFacing facing = CharacterFocusPointResolver.ResolveFacing(stage, roleKey);
 
-        if (!CharacterFocusPointResolver.TryResolveFocusMeasureInputs(
-                rigRefs,
-                tuningKey,
-                preserveFocusPreset,
-                preserveFocusOffset,
-                focusTuningDb,
-                facing,
-                mirrorCommandOffset: true,
-                out RectTransform measureRect,
-                out Vector3 focusLocalOffset))
-        {
-            WarnFallback(roleKey, $"초점 측정 입력을 못 구했다(리그 · focus 튜닝 '{tuningKey}' · VisualOffset 중 하나가 없다)");
-            return;
-        }
+        CharacterFocusPointResolver.ResolveFocusMeasureInputs(
+            rigRefs,
+            tuningKey,
+            preserveFocusPreset,
+            preserveFocusOffset,
+            focusTuningDb,
+            facing,
+            mirrorCommandOffset: true,
+            out RectTransform measureRect,
+            out Vector3 focusLocalOffset);
 
         // 초점 고정도 무대 좌표로 푼다 — 샷이 움직이는 무대 노드는 중립값.
         RectNodeState[] chain = rigRefs.PlacementTargets.CaptureSettledChain(

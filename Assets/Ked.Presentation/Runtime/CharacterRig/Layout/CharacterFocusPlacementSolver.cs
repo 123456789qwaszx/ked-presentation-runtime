@@ -31,33 +31,23 @@ public static class CharacterFocusPlacementSolver
     {
         destinationAnchoredPosition = default;
 
-        if (moveRect == null || stageProvider == null)
-            return false;
-
         RectTransform rigSpaceRoot = stageProvider.RigSpaceRoot;
 
-        if (rigSpaceRoot == null)
-            return false;
-
-        string resolvedRigKey = CharacterRigTargetResolver.ResolveRigKeyByPolicy(stage, roleKey);
-        stage.characterRigs.TryGetRig(resolvedRigKey, out CharacterRigRefs rigRefs);
+        CharacterRigRefs rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(stage, roleKey);
 
         string tuningKey = CharacterRigTargetResolver.ResolveCharacterKeyFromTargetKey(stage, roleKey);
         CharacterFacing facing = CharacterFocusPointResolver.ResolveFacing(stage, roleKey);
 
-        if (!CharacterFocusPointResolver.TryResolveFocusMeasureInputs(
-                rigRefs,
-                tuningKey,
-                focusPreset,
-                focusOffset,
-                focusTuningDb,
-                facing,
-                mirrorCommandOffset: true,
-                out RectTransform measureRect,
-                out Vector3 focusLocalOffset))
-        {
-            return false;
-        }
+        CharacterFocusPointResolver.ResolveFocusMeasureInputs(
+            rigRefs,
+            tuningKey,
+            focusPreset,
+            focusOffset,
+            focusTuningDb,
+            facing,
+            mirrorCommandOffset: true,
+            out RectTransform measureRect,
+            out Vector3 focusLocalOffset);
 
         RectNodeState[] chain = rigRefs.PlacementTargets.CaptureSettledChain(
             measureRect, rigSpaceRoot, ChainRects, stage.StageView);

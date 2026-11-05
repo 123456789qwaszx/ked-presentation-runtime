@@ -30,7 +30,7 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
     private readonly PresentationStage _stage;
 
     private RigVisualEffectController _controller;
-    private bool _resolved;
+    private bool _resolveAttempted;
 
     public override bool WaitForCompletion => _spec.wait;
 
@@ -46,8 +46,8 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
-        if (!TryResolve())
-            yield break;
+        if (!_resolveAttempted)
+            ResolveRefs(scope);
 
         _controller.FollowStyle(BuildDestState(), _spec.duration, _spec.ease);
 
@@ -60,34 +60,25 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
 
     protected override void OnSkip(CommandRunScope scope)
     {
-        if (TryResolve())
-            _controller.SnapStyle(BuildDestState());
+        if (!_resolveAttempted)
+            ResolveRefs(scope);
+
+        _controller.SnapStyle(BuildDestState());
     }
 
     protected override void OnStepLifetimeFinished(CommandRunScope scope)
     {
-        _controller?.AccelerateStyle(StepFinishSpeedUpMultiplier);
+        _controller.AccelerateStyle(StepFinishSpeedUpMultiplier);
     }
 
-    private bool TryResolve()
+    private void ResolveRefs(CommandRunScope scope)
     {
-        if (_resolved)
-            return _controller != null;
-
-        _resolved = true;
+        _resolveAttempted = true;
 
         CharacterRigRefs rigRefs =
             CharacterRigTargetResolver.ResolveCharRigFromTargetKey(_stage, _spec.slotKey);
 
-        _controller = rigRefs?.VisualEffect;
-
-        if (_controller == null)
-            Debug.LogWarning(
-                $"[CharVisualFocusCommandCharR] VisualEffect controller is missing. " +
-                $"SetupCharRig가 컨트롤러를 생성했는지, source material 경로가 맞는지 확인하세요. " +
-                $"slotKey='{_spec.slotKey}'.");
-
-        return _controller != null;
+        _controller = rigRefs.VisualEffect;
     }
 
     private RigVisualEffectController.Style BuildDestState()
@@ -98,8 +89,7 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
 
     private RigVisualEffectController.Style BuildPresetState(string presetKey, float intensity)
     {
-        if (_presetDb != null &&
-            _presetDb.TryGet(presetKey, out CharacterVisualFocusPresetDBSO.Entry entry))
+        if (_presetDb.TryGet(presetKey, out CharacterVisualFocusPresetDBSO.Entry entry))
         {
             return EntryToState(entry, intensity);
         }
@@ -108,8 +98,7 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
             $"[CharVisualFocusCommandCharR] Visual focus preset not found. " +
             $"presetKey='{presetKey}'. Using fallback.");
 
-        if (_presetDb != null &&
-            _presetDb.TryGet(CharacterVisualFocusPresetDBSO.DefaultPresetKey, out entry))
+        if (_presetDb.TryGet(CharacterVisualFocusPresetDBSO.DefaultPresetKey, out entry))
         {
             return EntryToState(entry, intensity);
         }

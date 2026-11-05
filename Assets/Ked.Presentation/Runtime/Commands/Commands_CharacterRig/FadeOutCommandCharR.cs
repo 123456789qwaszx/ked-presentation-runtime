@@ -37,5 +37,5 @@ public sealed class FadeOutCommandCharR : CanvasFadeCommandBase
     protected override bool InteractableAfterCommit => false;
 
     protected override RectTransform ResolveFadeRect(CommandRunScope scope)
-        => CharacterRigTargetResolver.ResolveCharRigFromTargetKey(_stage, _spec.slotKey)?.GetRect(_spec.target);
+        => CharacterRigTargetResolver.ResolveCharRigFromTargetKey(_stage, _spec.slotKey).GetRect(_spec.target);
 }

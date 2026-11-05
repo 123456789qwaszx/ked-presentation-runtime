@@ -48,8 +48,8 @@ public sealed class SetAnchorCommandCharR : CommandBase
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
-        if (!TryResolveRefs(scope))
-            yield break;
+        if (!_resolveAttempted)
+            ResolveRefs(scope);
 
         Apply(scope);
         yield break;
@@ -57,29 +57,21 @@ public sealed class SetAnchorCommandCharR : CommandBase
 
     protected override void OnSkip(CommandRunScope scope)
     {
-        if (!TryResolveRefs(scope))
-            return;
+        if (!_resolveAttempted)
+            ResolveRefs(scope);
 
         Apply(scope);
     }
 
-    private bool TryResolveRefs(CommandRunScope scope)
+    private void ResolveRefs(CommandRunScope scope)
     {
-        if (_resolveAttempted)
-            return _rigRefs != null && _rect != null;
-
         _resolveAttempted = true;
 
         _rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(
             _stage,
             _spec.slotKey);
 
-        if (_rigRefs == null)
-            return false;
-
         _rect = _rigRefs.GetRect(_spec.target);
-
-        return _rect != null;
     }
 
     private void Apply(CommandRunScope scope)
@@ -123,7 +115,6 @@ public sealed class SetAnchorCommandCharR : CommandBase
 
     /// <summary>
     /// 리셋 대상을 축별로 모은다. 순서가 리덕션의 클레임 순서와 대응하므로 바꾸지 말 것.
-    /// 없는 노드(null)는 목록에 넣지 않는다 — 키 목록과 rect 목록의 길이가 어긋나면 안 된다.
     /// </summary>
     private void CollectResetTargets()
     {
@@ -133,40 +124,40 @@ public sealed class SetAnchorCommandCharR : CommandBase
 
         if (_spec.resetSlotPos)
         {
-            AddIfPresent(_resetPositionRects, _rigRefs.CharSlot_Track);
-            AddIfPresent(_resetPositionRects, _rigRefs.CharSlot_Track_X);
-            AddIfPresent(_resetPositionRects, _rigRefs.CharSlot_Track_Y);
+            _resetPositionRects.Add(_rigRefs.CharSlot_Track);
+            _resetPositionRects.Add(_rigRefs.CharSlot_Track_X);
+            _resetPositionRects.Add(_rigRefs.CharSlot_Track_Y);
 
-            AddIfPresent(_resetEulerRects, _rigRefs.CharSlot_Rotation);
+            _resetEulerRects.Add(_rigRefs.CharSlot_Rotation);
 
-            AddIfPresent(_resetScaleRects, _rigRefs.CharSlot_Scale);
+            _resetScaleRects.Add(_rigRefs.CharSlot_Scale);
         }
 
         if (_spec.resetCharacterPos)
         {
-            AddIfPresent(_resetPositionRects, _rigRefs.CharacterPortrait_Track);
-            AddIfPresent(_resetPositionRects, _rigRefs.CharacterPortrait_Track_Move);
-            AddIfPresent(_resetPositionRects, _rigRefs.CharacterPortrait_Track_Move_X);
-            AddIfPresent(_resetPositionRects, _rigRefs.CharacterPortrait_Track_Move_Y);
-            AddIfPresent(_resetPositionRects, _rigRefs.CharacterPortrait_SwayPivot);
-            AddIfPresent(_resetPositionRects, _rigRefs.CharacterPortrait_Shake);
+            _resetPositionRects.Add(_rigRefs.CharacterPortrait_Track);
+            _resetPositionRects.Add(_rigRefs.CharacterPortrait_Track_Move);
+            _resetPositionRects.Add(_rigRefs.CharacterPortrait_Track_Move_X);
+            _resetPositionRects.Add(_rigRefs.CharacterPortrait_Track_Move_Y);
+            _resetPositionRects.Add(_rigRefs.CharacterPortrait_SwayPivot);
+            _resetPositionRects.Add(_rigRefs.CharacterPortrait_Shake);
 
-            AddIfPresent(_resetEulerRects, _rigRefs.CharacterPortrait_Rotation);
-            AddIfPresent(_resetEulerRects, _rigRefs.CharacterPortrait_SwayPivot);
-            AddIfPresent(_resetEulerRects, _rigRefs.CharacterPortrait_Shake);
+            _resetEulerRects.Add(_rigRefs.CharacterPortrait_Rotation);
+            _resetEulerRects.Add(_rigRefs.CharacterPortrait_SwayPivot);
+            _resetEulerRects.Add(_rigRefs.CharacterPortrait_Shake);
 
-            AddIfPresent(_resetScaleRects, _rigRefs.CharacterPortrait_SwayPivot);
-            AddIfPresent(_resetScaleRects, _rigRefs.CharacterPortrait_Shake);
-            AddIfPresent(_resetScaleRects, _rigRefs.CharacterPortrait_ActingScale);
-            AddIfPresent(_resetScaleRects, _rigRefs.CharacterPortrait_ActingScale_X);
-            AddIfPresent(_resetScaleRects, _rigRefs.CharacterPortrait_ActingScale_Y);
+            _resetScaleRects.Add(_rigRefs.CharacterPortrait_SwayPivot);
+            _resetScaleRects.Add(_rigRefs.CharacterPortrait_Shake);
+            _resetScaleRects.Add(_rigRefs.CharacterPortrait_ActingScale);
+            _resetScaleRects.Add(_rigRefs.CharacterPortrait_ActingScale_X);
+            _resetScaleRects.Add(_rigRefs.CharacterPortrait_ActingScale_Y);
         }
     }
 
     private SetAnchorReduction.RoleAnchorTuning ResolveRoleAnchorTuning(string tuningKey)
     {
         // 하한 클램프는 리덕션이 한다 — 규약이 사는 자리를 하나로 둔다.
-        if (_roleTuningDb != null && _roleTuningDb.TryGet(tuningKey, out var entry))
+        if (_roleTuningDb.TryGet(tuningKey, out var entry))
             return new SetAnchorReduction.RoleAnchorTuning(entry.offset.ToCore(), entry.visualScale);
 
         return SetAnchorReduction.RoleAnchorTuning.Default;
@@ -198,12 +189,6 @@ public sealed class SetAnchorCommandCharR : CommandBase
         }
     }
 
-    private static void AddIfPresent(List<RectTransform> list, RectTransform rect)
-    {
-        if (rect != null)
-            list.Add(rect);
-    }
-
     private static string[] NamesOf(List<RectTransform> rects)
     {
         string[] names = new string[rects.Count];
@@ -216,19 +201,11 @@ public sealed class SetAnchorCommandCharR : CommandBase
 
     private void KillTweenAndClearPlacementTarget(RectTransform rect)
     {
-        if (rect == null)
-            return;
-
         rect.DOKill(true);
 
         ClearPlacementTarget(rect);
     }
 
     private void ClearPlacementTarget(RectTransform rect)
-    {
-        if (_rigRefs == null || rect == null)
-            return;
-
-        _rigRefs.PlacementTargets.Clear(rect);
-    }
+        => _rigRefs.PlacementTargets.Clear(rect);
 }

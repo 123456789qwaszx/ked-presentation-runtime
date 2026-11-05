@@ -23,7 +23,7 @@ public static class CharRigImageSizingPolicy
     
     public static void Apply(Image image, Sprite sprite, CharRigImageSizingMode mode, HorizontalAlign align = HorizontalAlign.Center)
     {
-        if (image == null || sprite == null)
+        if (sprite == null)
             return;
 
         image.preserveAspect = true;
@@ -46,9 +46,6 @@ public static class CharRigImageSizingPolicy
     
     private static void ApplyHeightFitPreserveAspect(RectTransform imageRect, RectTransform parent, Sprite sprite, HorizontalAlign align)
     {
-        if (parent == null)
-            return;
-        
         float parentHeight = parent.rect.height;
         float aspect = sprite.rect.width / sprite.rect.height;
         

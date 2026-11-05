@@ -1,3 +1,5 @@
+using System;
+
 public sealed class CharacterRigCommandFactory : INodeCommandFactory
 {
     private readonly PresentationStage _stage;
@@ -26,16 +28,16 @@ public sealed class CharacterRigCommandFactory : INodeCommandFactory
         IShotResponseStageProvider stageProvider,
         RigBlurIntentSystem rigBlur)
     {
-        _stage = stage;
-        _rigSlotResolver = charRigSlotResolver;
-        _rigBuilder = charRigBuilder;
-        _portraitResolver = portraitResolver;
-        _roleTuningDb = roleTuningDb;
-        _characterFocusTuningDb = characterFocusTuningDb;
-        _characterVisualFocusPresetDb = characterVisualFocusPresetDb;
-        _characterDepthTuning = characterDepthTuning;
-        _stageProvider = stageProvider;
-        _rigBlur = rigBlur;
+        _stage = stage ?? throw new ArgumentNullException(nameof(stage));
+        _rigSlotResolver = charRigSlotResolver ?? throw new ArgumentNullException(nameof(charRigSlotResolver));
+        _rigBuilder = charRigBuilder ?? throw new ArgumentNullException(nameof(charRigBuilder));
+        _portraitResolver = portraitResolver ?? throw new ArgumentNullException(nameof(portraitResolver));
+        _roleTuningDb = roleTuningDb ? roleTuningDb : throw new ArgumentNullException(nameof(roleTuningDb));
+        _characterFocusTuningDb = characterFocusTuningDb ? characterFocusTuningDb : throw new ArgumentNullException(nameof(characterFocusTuningDb));
+        _characterVisualFocusPresetDb = characterVisualFocusPresetDb ? characterVisualFocusPresetDb : throw new ArgumentNullException(nameof(characterVisualFocusPresetDb));
+        _characterDepthTuning = characterDepthTuning ? characterDepthTuning : throw new ArgumentNullException(nameof(characterDepthTuning));
+        _stageProvider = stageProvider ?? throw new ArgumentNullException(nameof(stageProvider));
+        _rigBlur = rigBlur ?? throw new ArgumentNullException(nameof(rigBlur));
     }
 
     public bool TryCreate(CommandSpecBase spec, out ISequenceCommand command)

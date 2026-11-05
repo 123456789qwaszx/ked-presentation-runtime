@@ -123,22 +123,10 @@ public sealed class MotionCommandCharR : CommandBase
         _resolved = true;
         _rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(_stage, _spec.slotKey);
 
-        if (_rigRefs == null || _spec.clip?.Channels == null)
-            return;
-
         foreach (MotionChannel channel in _spec.clip.Channels)
         {
             // 채널의 노드 id는 스키마 id이고, CharacterRigTarget의 이름과 같다.
-            RectTransform rect = Enum.TryParse(channel.Node, out CharacterRigTarget target)
-                ? _rigRefs.GetRect(target)
-                : null;
-
-            if (rect == null)
-            {
-                Debug.LogWarning(
-                    $"[MotionCommandCharR] 모션 '{_spec.clip.Name}': 리그에 노드 '{channel.Node}'가 없다. 그 채널은 건너뛴다.");
-                continue;
-            }
+            RectTransform rect = _rigRefs.GetRect(Enum.Parse<CharacterRigTarget>(channel.Node));
 
             _bound.Add(new Bound { Channel = channel, Rect = rect });
 
@@ -176,7 +164,7 @@ public sealed class MotionCommandCharR : CommandBase
         for (int i = 0; i < _bound.Count; i++)
         {
             Write(_bound[i].Rect, _bound[i].Channel.Kind, _bound[i].End);
-            _rigRefs?.PlacementTargets.Clear(_bound[i].Rect);
+            _rigRefs.PlacementTargets.Clear(_bound[i].Rect);
         }
 
         _tweens.Clear();

@@ -50,15 +50,14 @@ public sealed class ShotZoomFocusCommand : ShotIntentCommandBase<ShotZoomFocusCo
     {
         // 입력 수집
         // 정착 focus 측정과 화면 지점 해석. 측정은 무대 좌표(카메라 중립)로 한다 — 캐릭터의 무대 위 자리.
-        CharacterFocusPointResolver.TryResolve(
+        CharacterFocusPointResult focus = CharacterFocusPointResolver.Resolve(
             _stage,
             _stageProvider,
             spec.focusRoleKey,
             spec.focusPreset,
             spec.focusOffset,
             _focusTuningDB,
-            useSettledPlacementTargets: true,
-            out CharacterFocusPointResult focus);
+            useSettledPlacementTargets: true);
 
         Vector2 desiredPoint =
             ScreenFocusPointResolver.Resolve(focus.RigSpaceRoot, spec.screenPoint) + spec.screenOffset;

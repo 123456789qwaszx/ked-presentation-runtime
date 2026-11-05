@@ -150,7 +150,8 @@ CharacterRigSchema.Nodes            코드      ← 유일한 소유자
 `CharacterRigBuilder`는 프리팹을 받아도 **믿지 않는다.** 그래프를 검사한다:
 
 ```
-노드 수가 맞나 → 각 노드가 존재하나 → 부모가 스키마와 일치하나
+루트에 CanvasGroup이 있나 → 각 노드가 존재하나 → 부모가 스키마와 일치하나
+  → 노드가 요구하는 컴포넌트(Image · CanvasGroup)가 붙었나
      하나라도 틀리면 → 자식 전체 파괴 → 스키마로 재구축
 ```
 

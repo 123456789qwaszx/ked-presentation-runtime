@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -10,7 +11,7 @@ public sealed class AudioCommandFactory : INodeCommandFactory
 
     public AudioCommandFactory(AudioSystem audio)
     {
-        _audio = audio;
+        _audio = audio ? audio : throw new ArgumentNullException(nameof(audio));
     }
 
     public bool TryCreate(CommandSpecBase spec, out ISequenceCommand command)

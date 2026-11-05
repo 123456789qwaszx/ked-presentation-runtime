@@ -70,25 +70,20 @@ public sealed class CharacterRigBuilder
         RectTransform rigRoot,
         Dictionary<CharacterRigSchema.Refs, RectTransform> map)
     {
-        int expectedCount = Enum.GetValues(typeof(CharacterRigSchema.Refs)).Length;
-
-        if (map.Count < expectedCount)
+        if (!rigRoot.TryGetComponent(out CanvasGroup _))
             return false;
 
         foreach (CharacterRigSchema.NodeDef node in CharacterRigSchema.Nodes)
         {
-            if (!map.TryGetValue(node.Id, out RectTransform rect) || rect == null)
+            if (!map.TryGetValue(node.Id, out RectTransform rect))
                 return false;
 
             Transform expectedParent;
 
             if (node.Parent.HasValue)
             {
-                if (!map.TryGetValue(node.Parent.Value, out RectTransform parentRect) ||
-                    parentRect == null)
-                {
+                if (!map.TryGetValue(node.Parent.Value, out RectTransform parentRect))
                     return false;
-                }
 
                 expectedParent = parentRect;
             }
@@ -99,18 +94,34 @@ public sealed class CharacterRigBuilder
 
             if (rect.parent != expectedParent)
                 return false;
+
+            if (node.NeedsCanvasGroup && !rect.TryGetComponent(out CanvasGroup _))
+                return false;
+
+            if (node.NeedsImage && !rect.TryGetComponent(out Image _))
+                return false;
         }
 
         return true;
     }
-    
+
     #endregion
 
     #region Auto Create Graph
     private void EnsureGraph(RectTransform root, string rolePrefix)
     {
+        EnsureCanvasGroup(root, 1f);
+
         foreach (CharacterRigSchema.NodeDef node in CharacterRigSchema.Nodes)
             EnsureNode(root, rolePrefix, node);
+    }
+
+    private static void EnsureCanvasGroup(RectTransform rt, float alpha)
+    {
+        if (!rt.TryGetComponent(out CanvasGroup canvasGroup))
+            canvasGroup = rt.gameObject.AddComponent<CanvasGroup>();
+
+        canvasGroup.alpha = alpha;
     }
 
     private void EnsureNode(RectTransform root, string rolePrefix, CharacterRigSchema.NodeDef node)
@@ -125,12 +136,7 @@ public sealed class CharacterRigBuilder
             rt.pivot = new Vector2(0.5f, 0f);
 
         if (node.NeedsCanvasGroup)
-        {
-            if (!rt.TryGetComponent<CanvasGroup>(out CanvasGroup canvasGroup))
-                canvasGroup = rt.gameObject.AddComponent<CanvasGroup>();
-
-            canvasGroup.alpha = node.InitialCanvasGroupAlpha;
-        }
+            EnsureCanvasGroup(rt, node.InitialCanvasGroupAlpha);
 
         if (node.NeedsImage && !rt.TryGetComponent<Image>(out _))
             rt.gameObject.AddComponent<Image>();
@@ -172,32 +178,8 @@ public sealed class CharacterRigBuilder
     {
         CharacterRigRefs refs = new(rigRoot);
 
-        RectTransform GetRt(CharacterRigSchema.Refs key)
-        {
-            if (!map.TryGetValue(key, out RectTransform targetRect) || targetRect == null)
-            {
-                Debug.LogWarning($"[CharacterRigBuilder] Missing bound ref '{key}'.");
-                return null;
-            }
-
-            return targetRect;
-        }
-
-        Image GetImg(CharacterRigSchema.Refs key)
-        {
-            RectTransform rt = GetRt(key);
-            if (rt == null)
-                return null;
-
-            Image img = rt.GetComponent<Image>();
-            if (img == null)
-            {
-                Debug.LogWarning($"[CharacterRigBuilder] Missing Image on '{rt.name}'.");
-                return null;
-            }
-
-            return img;
-        }
+        RectTransform GetRt(CharacterRigSchema.Refs key) => map[key];
+        Image GetImg(CharacterRigSchema.Refs key) => map[key].GetComponent<Image>();
 
         // Slot axis - stage placement
         refs.CharSlot_Track_Focus = GetRt(CharacterRigSchema.Refs.CharSlot_Track_Focus);
@@ -241,9 +223,6 @@ public sealed class CharacterRigBuilder
     #region Helper
     private Transform FindByName(Transform root, string name)
     {
-        if (root == null)
-            return null;
-
         if (root.name == name)
             return root;
 
@@ -261,9 +240,6 @@ public sealed class CharacterRigBuilder
 
     private void PrefixAllChildren(Transform root, string rolePrefix)
     {
-        if (root == null || string.IsNullOrEmpty(rolePrefix))
-            return;
-
         void Walk(Transform t)
         {
             t.name = WithRole(rolePrefix, t.name);

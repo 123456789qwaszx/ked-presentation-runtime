@@ -19,9 +19,7 @@ public abstract class CanvasFadeCommandBase : ClaimTweenCommandBase
 
     protected override void ResolveTargets(CommandRunScope scope)
     {
-        RectTransform target = ResolveFadeRect(scope);
-
-        _canvasGroup = GetOrAddCanvasGroup(target);
+        _canvasGroup = ResolveFadeRect(scope).GetComponent<CanvasGroup>();
     }
 
     // 페이드는 목표(alpha)가 스펙에 있어 언제나 낸다.
@@ -50,13 +48,4 @@ public abstract class CanvasFadeCommandBase : ClaimTweenCommandBase
         => RemainingRatio(
             Mathf.Abs(TargetAlpha - _startAlpha),
             Mathf.Abs(TargetAlpha - _canvasGroup.alpha));
-
-    private CanvasGroup GetOrAddCanvasGroup(RectTransform rect)
-    {
-        if (rect.TryGetComponent(out CanvasGroup group))
-            return group;
-
-        Debug.LogWarning($"[{GetType().Name}] CanvasGroup missing. Added automatically: {rect.name}", rect);
-        return rect.gameObject.AddComponent<CanvasGroup>();
-    }
 }

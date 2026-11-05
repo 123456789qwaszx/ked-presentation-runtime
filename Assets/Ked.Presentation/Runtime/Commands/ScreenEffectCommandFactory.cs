@@ -1,3 +1,5 @@
+using System;
+
 public sealed class ScreenEffectCommandFactory : INodeCommandFactory
 {
     private readonly PresentationStage _stage;
@@ -20,14 +22,14 @@ public sealed class ScreenEffectCommandFactory : INodeCommandFactory
         IStageMaskProvider stageMaskProvider,
         RigBlurIntentSystem rigBlur)
     {
-        _stage = stage;
-        _screenEffects = screenEffects;
-        _flashPresetDb = flashPresetDb;
-        _noisePresetDb = noisePresetDb;
-        _vignettePresetDb = vignettePresetDb;
-        _stageMaskMotionPresetDb = stageMaskMotionPresetDb;
-        _stageMaskProvider = stageMaskProvider;
-        _rigBlur = rigBlur;
+        _stage = stage ?? throw new ArgumentNullException(nameof(stage));
+        _screenEffects = screenEffects ? screenEffects : throw new ArgumentNullException(nameof(screenEffects));
+        _flashPresetDb = flashPresetDb ? flashPresetDb : throw new ArgumentNullException(nameof(flashPresetDb));
+        _noisePresetDb = noisePresetDb ? noisePresetDb : throw new ArgumentNullException(nameof(noisePresetDb));
+        _vignettePresetDb = vignettePresetDb ? vignettePresetDb : throw new ArgumentNullException(nameof(vignettePresetDb));
+        _stageMaskMotionPresetDb = stageMaskMotionPresetDb ? stageMaskMotionPresetDb : throw new ArgumentNullException(nameof(stageMaskMotionPresetDb));
+        _stageMaskProvider = stageMaskProvider ?? throw new ArgumentNullException(nameof(stageMaskProvider));
+        _rigBlur = rigBlur ?? throw new ArgumentNullException(nameof(rigBlur));
     }
 
     public bool TryCreate(CommandSpecBase spec, out ISequenceCommand command)

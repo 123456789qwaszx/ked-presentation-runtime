@@ -151,8 +151,6 @@ public sealed partial class PresentationUIRoot : MonoBehaviour
         if (_initialized)
             return;
 
-        _initialized = true;
-
         BindRefObjects();
 
         CacheRefs();
@@ -161,6 +159,8 @@ public sealed partial class PresentationUIRoot : MonoBehaviour
         CacheShotResponseStageProviderRefs();
         CacheStageDepthContentSlotProviderRefs();
         CacheStageMaskProviderRefs();
+
+        _initialized = true;
     }
 
     private void BindRefObjects()

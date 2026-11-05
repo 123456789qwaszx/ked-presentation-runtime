@@ -36,17 +36,11 @@ public sealed class CharacterPlacementTargetLedger
     /// </summary>
     public void Publish(RectTransform node, in StageNodeClaim claim)
     {
-        if (node == null)
-            return;
-
         _core.Publish(claim.WithNodeKey(KeyOf(node)));
     }
 
     public void Clear(RectTransform node)
     {
-        if (node == null)
-            return;
-
         if (_keyByRect.TryGetValue(node, out string key))
             _core.Clear(key);
     }
@@ -62,10 +56,7 @@ public sealed class CharacterPlacementTargetLedger
         RectTransform stopRoot,
         IStageViewNeutral stageView = null)
     {
-        if (measureRect == null)
-            return Vector3.zero;
-
-        if (stopRoot == null || (_core.IsEmpty && stageView == null))
+        if (_core.IsEmpty && stageView == null)
             return measureRect.TransformPoint(localOffset);
 
         RectNodeState[] chain = CaptureSettledChain(measureRect, stopRoot, null, stageView);
@@ -84,10 +75,7 @@ public sealed class CharacterPlacementTargetLedger
         Vector3 worldPoint,
         RectTransform stopRoot)
     {
-        if (parentRect == null)
-            return Vector2.zero;
-
-        if (_core.IsEmpty || stopRoot == null)
+        if (_core.IsEmpty)
         {
             Vector3 liveLocal = parentRect.InverseTransformPoint(worldPoint);
             return new Vector2(liveLocal.x, liveLocal.y);
@@ -215,7 +203,7 @@ public sealed class CharacterPlacementTargetLedger
 
         foreach (KeyValuePair<RectTransform, string> pair in _keyByRect)
         {
-            if (pair.Value == key && pair.Key != null && pair.Key != rect)
+            if (pair.Value == key && pair.Key != rect)
             {
                 throw new System.InvalidOperationException(
                     $"[CharacterPlacementTargetLedger] 한 리그 안에 이름이 겹치는 노드가 있다: '{key}'. " +
