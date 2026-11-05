@@ -23,13 +23,13 @@ public sealed partial class StageCommandParser
 
     private void EnqueueSpawnBackgroundSpec(string rigKey, string spriteKey, string stageKey, string layerKey)
         => EnqueueSpawnBackgroundAtDepthSpec(
-            rigKey, spriteKey, PresentationStageKeyParser.Parse(stageKey), PresentationDepthLayerKeyParser.Parse(layerKey));
+            rigKey, spriteKey, StageKeyParser.ParseStage(stageKey), StageKeyParser.ParseLayerDepth(layerKey));
 
     private void EnqueueSpawnBackgroundAtDepthSpec(
         string rigKey,
         string spriteKey,
-        PresentationStageKey stage,
-        PresentationDepthLayerKey layer)
+        string stage,
+        float layerDepth)
     {
         Emit(new SetupCharRigCommandSpec
         {
@@ -37,7 +37,7 @@ public sealed partial class StageCommandParser
             rigPrefab = _charRigPrefab,
 
             stage = stage,
-            layer = layer,
+            layerDepth = layerDepth,
 
             asBackground = true
         });

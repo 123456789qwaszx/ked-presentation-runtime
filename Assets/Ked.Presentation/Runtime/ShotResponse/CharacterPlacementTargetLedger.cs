@@ -145,10 +145,23 @@ public sealed class CharacterPlacementTargetLedger
             RectTransform rect = _scratchRects[i];
             RectNodeState live = CaptureLive(rect);
 
-            // 예약이 있으면 입힌다. 없으면 무대 중립값, 그것도 아니면 라이브 그대로 — 아무것도 쓰지 않는다.
-            if (_keyByRect.TryGetValue(rect, out string key))
+            // 소유를 차례로 묻는다: 장부(리그 노드 — 트윈 끝값) → 샷(무대 노드 — 중립값) → 아무도 아니면 라이브.
+            // 한 노드를 둘이 소유하는 상태는 없다 — 장부는 리그 노드만, 샷은 무대 노드만 안다. 겹치면 구조가 깨진 것이라 예외.
+            Vector2 neutralPosition = default;
+            Vector3 neutralScale = default;
+
+            bool inLedger = _keyByRect.TryGetValue(rect, out string key);
+            bool inShot = stageView != null && stageView.TryGetNeutral(rect, out neutralPosition, out neutralScale);
+
+            if (inLedger && inShot)
+            {
+                throw new System.InvalidOperationException(
+                    $"[CharacterPlacementTargetLedger] '{rect.name}'을 장부와 샷이 둘 다 소유한다. 리그 노드와 무대 노드가 겹쳤다.");
+            }
+
+            if (inLedger)
                 _scratchChain.Add(_core.ApplyTo(key, live));
-            else if (stageView != null && stageView.TryGetNeutral(rect, out Vector2 neutralPosition, out Vector3 neutralScale))
+            else if (inShot)
                 _scratchChain.Add(WithView(live, neutralPosition, neutralScale));
             else
                 _scratchChain.Add(live);

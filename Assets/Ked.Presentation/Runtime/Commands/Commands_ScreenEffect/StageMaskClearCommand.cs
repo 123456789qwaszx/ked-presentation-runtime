@@ -6,7 +6,10 @@ using UnityEngine;
 public sealed class StageMaskClearCommandSpec : CommandSpecBase
 {
     [Header("Target")]
-    public PresentationStageKey stage = PresentationStageKey.Stage01;
+    public string stage = "stage01";
+
+    [Tooltip("true면 무대 전부(tx_stage_mask_clear). stage는 무시.")]
+    public bool allStages;
 
     [Header("Clear")]
     public StageMaskClearMode mode = StageMaskClearMode.UnmaskedFullVisible;
@@ -17,19 +20,16 @@ public sealed class StageMaskClearCommandSpec : CommandSpecBase
 public sealed class StageMaskClearCommand : CommandBase
 {
     private readonly StageMaskClearCommandSpec _spec;
-    private readonly IStageMaskProvider _stageMaskProvider;
-
-    private StageMaskSlot _slot;
-    private bool _resolveAttempted;
+    private readonly StageRigRegistry _stages;
 
     public override bool WaitForCompletion => false;
 
     public StageMaskClearCommand(
         StageMaskClearCommandSpec spec,
-        IStageMaskProvider stageMaskProvider)
+        StageRigRegistry stages)
     {
         _spec = spec;
-        _stageMaskProvider = stageMaskProvider;
+        _stages = stages;
     }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
@@ -45,16 +45,13 @@ public sealed class StageMaskClearCommand : CommandBase
 
     private void Apply()
     {
-        if (!_resolveAttempted)
-            ResolveRefs();
+        if (!_spec.allStages)
+        {
+            _stages.Get(_spec.stage).Mask.Clear(_spec.mode, _spec.hideEdge);
+            return;
+        }
 
-        _slot.Clear(_spec.mode, _spec.hideEdge);
-    }
-
-    private void ResolveRefs()
-    {
-        _resolveAttempted = true;
-
-        _slot = _stageMaskProvider.GetStageMaskSlot(_spec.stage);
+        for (int i = 0; i < _stages.All.Count; i++)
+            _stages.All[i].Mask.Clear(_spec.mode, _spec.hideEdge);
     }
 }

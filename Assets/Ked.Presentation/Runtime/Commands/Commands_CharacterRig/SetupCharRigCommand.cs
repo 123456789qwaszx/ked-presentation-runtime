@@ -16,8 +16,8 @@ public sealed class SetupCharRigCommandSpec : CommandSpecBase
     public RectTransform rigPrefab;
 
     [Header("Stage Depth Slot")]
-    public PresentationStageKey stage = PresentationStageKey.Stage00;
-    public PresentationDepthLayerKey layer = PresentationDepthLayerKey.Mid;
+    public string stage = StageKeyParser.DefaultStage;
+    public float layerDepth = Ked.Presentation.Core.StageLayerLabels.Mid;
 
     [Tooltip("Base root name. Final name is '{rolePrefix}{rigRootName}'.")]
     public string rigRootName = "CharacterRig";
@@ -107,15 +107,11 @@ public sealed class SetupCharRigCommand : CommandBase
             rolePrefix,
             spec.rigRootName);
 
-        bool resolved = _slotResolver.TryResolve(
-            spec.stage,
-            spec.layer,
-            out RectTransform parent);
-
-        if (resolved)
-            rigRoot.SetParent(parent, false);
+        StageLayerRefs layer = _slotResolver.Resolve(spec.stage, spec.layerDepth, out StageRigRefs stageRefs);
+        rigRoot.SetParent(layer.Content, false);
 
         _rigBuilder.BindRefsFromRoot(rigRoot, rolePrefix, out CharacterRigRefs refs);
+        refs.Stage = stageRefs;
 
         // 배경은 화면 전체를 덮는다 — 리그 안의 그래픽 전부(본 그림·위 겹)가 클릭을 받지 않게 한다.
         // 위 겹(CharacterPortraitSpriteOverlay_Image)은 스프라이트 없이 화면 크기로 늘어나 있어 그대로면 레이캐스트를 받는다.

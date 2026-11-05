@@ -19,7 +19,6 @@ public static class CharacterFocusPointResolver
 {
     public static CharacterFocusPointResult Resolve(
         PresentationStage stage,
-        IShotResponseStageProvider stageProvider,
         string roleKey,
         CharacterFocusPreset preset,
         Vector2 commandOffset,
@@ -33,7 +32,7 @@ public static class CharacterFocusPointResolver
 
         return ResolveFromRigRefs(
             rigRefs,
-            stageProvider.RigSpaceRoot,
+            rigRefs.Stage.Root,
             tuningKey,
             preset,
             commandOffset,

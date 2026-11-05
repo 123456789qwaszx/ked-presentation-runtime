@@ -21,7 +21,7 @@ using Object = UnityEngine.Object;
 // - 리그 스키마는 빌더 로직을 베껴 적지 않는다 — 실제 빌더로 리그를 세우고
 //   실물 RectTransform에서 읽는다(사본 금지). 프리팹도 부트스트랩이 쓰는
 //   바로 그 프리팹을 씬에서 꺼내 쓴다.
-// - 씬에서는 본체 계약으로만 찾는다(IStageMaskProvider · IRigPrefabSource).
+// - 씬에서는 본체 계약으로만 찾는다(IStageMount · IRigPrefabSource).
 //   이 도구는 본체 어셈블리(Ked.Presentation.Editor)라 예제 타입을 모른다.
 // - 내보낼 수 없는 항목은 건너뛰되 경고 목록에 남긴다. 조용히 빠뜨리지 않는다.
 //
@@ -91,13 +91,13 @@ public static class PresentationTuningExporter
     // ── 기준 해상도 ──────────────────────────────────────────────────
     //
     // 무대 루트 공간의 크기이자 1u 환산의 입력이다. CanvasScaler에서 실측한다.
-    // 무대는 무대 마스크를 내주는 쪽(IStageMaskProvider)이다 — 예제에서는 PresentationUIRoot.
+    // 무대는 무대가 서는 자리를 내주는 쪽(IStageMount)이다 — 예제에서는 PresentationUIRoot.
 
     private static BaseResolutionDto ExportBaseResolution(string outDir, List<string> warnings)
     {
         BaseResolutionDto dto = new();
 
-        IStageMaskProvider stage = FindInScene<IStageMaskProvider>();
+        IStageMount stage = FindInScene<IStageMount>();
         CanvasScaler scaler = stage is Component stageComponent
             ? stageComponent.GetComponentInParent<CanvasScaler>(true)
             : null;
@@ -105,7 +105,7 @@ public static class PresentationTuningExporter
         if (scaler == null)
         {
             warnings.Add(
-                "무대(IStageMaskProvider)의 CanvasScaler를 찾지 못했다. 폴백 1920x1080을 썼다 — 확인 필요.");
+                "무대(IStageMount)의 CanvasScaler를 찾지 못했다. 폴백 1920x1080을 썼다 — 확인 필요.");
 
             dto.canvasName = "(not found — fallback)";
             dto.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize.ToString();

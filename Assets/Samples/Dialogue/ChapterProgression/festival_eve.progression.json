@@ -370,6 +370,22 @@
         "X": 1019.12,
         "Y": 391.26
       }
+    },
+    {
+      "EpisodeId": "분기 1",
+      "Title": "분기 1",
+      "IndexText": "",
+      "DialogueEntryId": "분기_1",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [],
+      "EventKey": "",
+      "SceneId": "교무실 앞",
+      "DesignerNote": "",
+      "Position": {
+        "X": 104.24,
+        "Y": 1028.03
+      }
     }
   ]
 }

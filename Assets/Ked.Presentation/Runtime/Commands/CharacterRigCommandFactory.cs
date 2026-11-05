@@ -13,7 +13,6 @@ public sealed class CharacterRigCommandFactory : INodeCommandFactory
     private readonly CharacterVisualFocusPresetDBSO _characterVisualFocusPresetDb;
     
     private readonly CharacterDepthTuningSO _characterDepthTuning;
-    private readonly IShotResponseStageProvider _stageProvider;
     private readonly RigBlurIntentSystem _rigBlur;
 
     public CharacterRigCommandFactory(
@@ -25,7 +24,6 @@ public sealed class CharacterRigCommandFactory : INodeCommandFactory
         CharacterFocusTuningDBSO characterFocusTuningDb,
         CharacterVisualFocusPresetDBSO characterVisualFocusPresetDb,
         CharacterDepthTuningSO characterDepthTuning,
-        IShotResponseStageProvider stageProvider,
         RigBlurIntentSystem rigBlur)
     {
         _stage = stage ?? throw new ArgumentNullException(nameof(stage));
@@ -36,7 +34,6 @@ public sealed class CharacterRigCommandFactory : INodeCommandFactory
         _characterFocusTuningDb = characterFocusTuningDb ? characterFocusTuningDb : throw new ArgumentNullException(nameof(characterFocusTuningDb));
         _characterVisualFocusPresetDb = characterVisualFocusPresetDb ? characterVisualFocusPresetDb : throw new ArgumentNullException(nameof(characterVisualFocusPresetDb));
         _characterDepthTuning = characterDepthTuning ? characterDepthTuning : throw new ArgumentNullException(nameof(characterDepthTuning));
-        _stageProvider = stageProvider ?? throw new ArgumentNullException(nameof(stageProvider));
         _rigBlur = rigBlur ?? throw new ArgumentNullException(nameof(rigBlur));
     }
 
@@ -59,7 +56,7 @@ public sealed class CharacterRigCommandFactory : INodeCommandFactory
             SetCharacterSiblingOrderCommandSpecCharR s => new SetCharacterSiblingOrderCommandCharR(_stage, s),
             MoveCharacterRigToStageLayerCommandSpecCharR s => new MoveCharacterRigToStageLayerCommandCharR(_stage, s, _rigSlotResolver),
             
-            SetDepthCommandSpecCharR s => new SetDepthCommandCharR(_stage, s, _characterDepthTuning, _characterFocusTuningDb, _stageProvider),
+            SetDepthCommandSpecCharR s => new SetDepthCommandCharR(_stage, s, _characterDepthTuning, _characterFocusTuningDb),
 
             // Visibility / Root Layers
             FadeInCommandSpecCharR s => new FadeInCommandCharR(_stage, s),
@@ -78,7 +75,7 @@ public sealed class CharacterRigCommandFactory : INodeCommandFactory
             SetEmotionPortraitWipeCommandSpecCharR s => new SetEmotionPortraitWipeCommandCharR(_stage, s, _portraitResolver),
             
             // Composition / Focus-aware Placement
-            PlaceCharacterFocusCommandSpecCharR s => new PlaceCharacterFocusCommandCharR(_stage, s, _characterFocusTuningDb, _stageProvider),
+            PlaceCharacterFocusCommandSpecCharR s => new PlaceCharacterFocusCommandCharR(_stage, s, _characterFocusTuningDb),
 
             // Visual State
             SetSpriteCommandSpecCharR s => new SetSpriteCommandCharR(_stage, s),

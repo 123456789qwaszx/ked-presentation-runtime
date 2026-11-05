@@ -7,84 +7,37 @@ using Object = UnityEngine.Object;
 namespace Ked.Presentation.Core.Tests.UnityParity
 {
     /// <summary>
-    /// 무대 리그 리팩터의 오라클 — 런타임 샷 시스템이 무대에 쓰는 트랜스폼 전부(카메라 루트 2 + 층 30)가
+    /// 무대 리그 리팩터의 오라클 — 런타임 샷 시스템이 무대에 쓰는 트랜스폼 전부(무대마다 카메라 2 + 층 5)가
     /// 코어 ShotLayoutMath.Solve의 출력과 같아야 한다.
     ///
-    /// P1(지금)에서는 종전 런타임 식(PresentationResponseMath)이 코어 식과 같은지를 고정하고,
-    /// P3(런타임이 코어 식을 쓰게 된 뒤)에도 같은 테스트가 그대로 통과해야 한다 — 그게 동작 불변의 증명이다.
+    /// P1에서는 종전 런타임 식(PresentationResponseMath)과 코어 식이 같음을 고정했고,
+    /// P2/P3(런타임이 코어 식을 쓰고 무대를 스키마가 세운 뒤)에도 같은 판정이 그대로 통과한다 — 동작 불변의 증명이다.
     ///
-    /// 실제 씬과 같은 계층을 세운다: ShotRoot → Pan → Zoom → Stage × 3 → DepthSystem → 층 × 5 (Root → FramingTransform → FramingScale).
-    /// 씬 값은 전부 항등이다(2026-11-05 확인).
+    /// 무대는 StageRigBuilder가 세운다(씬과 같은 경로). 세 무대 × 층 다섯.
     /// </summary>
     public sealed class ShotLayoutUnityParityTests
     {
         private const float Eps = 1e-4f;
 
+        private static readonly string[] StageKeys = { "stage00", "stage01", "stage02" };
+
         private readonly List<GameObject> _spawned = new();
 
-        private RectTransform _shotRoot;
-        private RectTransform _pan;
-        private RectTransform _zoom;
-        private StageDepthLayerRects[][] _layers;   // [stage][layer]
-
-        private FakeStageProvider _provider;
+        private RectTransform _mount;
+        private StageRigRegistry _stages;
         private PresentationShotResponseSystem _system;
-
-        private sealed class FakeStageProvider : IShotResponseStageProvider
-        {
-            private readonly RectTransform _rigSpaceRoot;
-            private readonly RectTransform _pan;
-            private readonly RectTransform _zoom;
-            private readonly StageDepthLayerRects[][] _layers;
-
-            public FakeStageProvider(RectTransform rigSpaceRoot, RectTransform pan, RectTransform zoom, StageDepthLayerRects[][] layers)
-            {
-                _rigSpaceRoot = rigSpaceRoot;
-                _pan = pan;
-                _zoom = zoom;
-                _layers = layers;
-            }
-
-            public RectTransform RigSpaceRoot => _rigSpaceRoot;
-            public RectTransform StagePanRoot => _pan;
-            public RectTransform StageZoomRoot => _zoom;
-
-            public StageDepthLayerRects GetLayerRects(PresentationStageKey root, PresentationDepthLayerKey layer)
-                => _layers[(int)root][(int)layer];
-        }
 
         [SetUp]
         public void SetUp()
         {
-            _shotRoot = NewRoot("__ShotRoot");
-            _pan = NewStretchChild("__Pan", _shotRoot);
-            _zoom = NewStretchChild("__Zoom", _pan);
+            _mount = NewRoot("__StageViewportLayer");
 
-            int stageCount = (int)PresentationStageKey.Count;
-            int layerCount = (int)PresentationDepthLayerKey.Count;
+            _stages = new StageRigRegistry(new StageRigBuilder());
 
-            _layers = new StageDepthLayerRects[stageCount][];
+            foreach (string key in StageKeys)
+                _stages.Build(_mount, key, StageLayerLabels.Depths);
 
-            for (int s = 0; s < stageCount; s++)
-            {
-                RectTransform stage = NewStretchChild($"__Stage0{s}", _zoom);
-                RectTransform depthSystem = NewStretchChild("__DepthSystem", stage);
-
-                _layers[s] = new StageDepthLayerRects[layerCount];
-
-                for (int l = 0; l < layerCount; l++)
-                {
-                    string label = StageLayerLabels.Names[l];
-                    RectTransform root = NewStretchChild($"__Depth_{label}_Root", depthSystem);
-                    RectTransform framingTransform = NewStretchChild("__FramingTransform", root);
-                    RectTransform framingScale = NewStretchChild("__FramingScale", framingTransform);
-
-                    _layers[s][l] = new StageDepthLayerRects(root, framingTransform, framingScale);
-                }
-            }
-
-            _provider = new FakeStageProvider(_shotRoot, _pan, _zoom, _layers);
-            _system = new PresentationShotResponseSystem(_provider);
+            _system = new PresentationShotResponseSystem(_stages, LayerProfileCurve.Default);
         }
 
         [TearDown]
@@ -112,19 +65,6 @@ namespace Ked.Presentation.Core.Tests.UnityParity
             return rect;
         }
 
-        private static RectTransform NewStretchChild(string name, RectTransform parent)
-        {
-            GameObject go = new(name, typeof(RectTransform));
-            RectTransform rect = (RectTransform)go.transform;
-            rect.SetParent(parent, false);
-            rect.anchorMin = Vector2.zero;
-            rect.anchorMax = Vector2.one;
-            rect.pivot = new Vector2(0.5f, 0.5f);
-            rect.sizeDelta = Vector2.zero;
-            rect.anchoredPosition = Vector2.zero;
-            return rect;
-        }
-
         private static readonly ShotIntentState[] Intents =
         {
             ShotIntentState.Default,
@@ -135,81 +75,87 @@ namespace Ked.Presentation.Core.Tests.UnityParity
             new(-4f, new Vec2(-120f, 60f), new Vec2(0f, -200f)),         // 줌 아웃 + 초점 아래
         };
 
-        private static PresentationIntentState ToRuntime(in ShotIntentState s)
-            => new()
-            {
-                zoom = s.Zoom,
-                panInRigSpace = new Vector2(s.PanInRigSpace.X, s.PanInRigSpace.Y),
-                focusPointInRigSpace = new Vector2(s.FocusPointInRigSpace.X, s.FocusPointInRigSpace.Y),
-            };
-
         [Test]
         public void 런타임이_무대에_쓰는_트랜스폼_전부가_코어_Solve와_같다()
         {
             foreach (ShotIntentState intent in Intents)
             {
-                _system.Snap(ToRuntime(in intent));
-
-                ShotLayout layout = ShotLayoutMath.Solve(in intent, StageLayerLabels.Depths, LayerProfileCurve.Default);
+                _system.Snap(intent.ToUnity());
 
                 string tag = $"intent={{zoom {intent.Zoom}, pan {intent.PanInRigSpace}, focus {intent.FocusPointInRigSpace}}}";
 
-                // 카메라 루트 둘
-                Assert.That(_zoom.localScale.x, Is.EqualTo(layout.CameraScale).Within(Eps), $"{tag} Zoom_Root 배율 x");
-                Assert.That(_zoom.localScale.y, Is.EqualTo(layout.CameraScale).Within(Eps), $"{tag} Zoom_Root 배율 y");
-                Assert.That(_pan.anchoredPosition.x, Is.EqualTo(layout.Pan.X).Within(Eps), $"{tag} Pan_Root x");
-                Assert.That(_pan.anchoredPosition.y, Is.EqualTo(layout.Pan.Y).Within(Eps), $"{tag} Pan_Root y");
-
-                // 층 — 오프셋은 rig space 벡터를 층 부모 공간으로 옮긴 값이다. 부모는 Zoom_Root 아래라
-                // 배율이 cameraScale이고 그 밖은 항등이므로, 부모 공간 벡터 = rig space 벡터 / cameraScale.
-                for (int s = 0; s < _layers.Length; s++)
+                foreach (StageRigRefs stage in _stages.All)
                 {
-                    for (int l = 0; l < _layers[s].Length; l++)
+                    ShotLayout layout = ShotLayoutMath.Solve(in intent, stage.LayerDepths, LayerProfileCurve.Default);
+
+                    Assert.That(stage.CameraZoom.localScale.x, Is.EqualTo(layout.CameraScale).Within(Eps), $"{tag} {stage.StageKey} 줌 배율 x");
+                    Assert.That(stage.CameraZoom.localScale.y, Is.EqualTo(layout.CameraScale).Within(Eps), $"{tag} {stage.StageKey} 줌 배율 y");
+                    Assert.That(stage.CameraPan.anchoredPosition.x, Is.EqualTo(layout.Pan.X).Within(Eps), $"{tag} {stage.StageKey} 팬 x");
+                    Assert.That(stage.CameraPan.anchoredPosition.y, Is.EqualTo(layout.Pan.Y).Within(Eps), $"{tag} {stage.StageKey} 팬 y");
+
+                    // 층 오프셋은 rig space 벡터를 층 부모(줌 루트) 공간으로 옮긴 값이다. 줌 루트 배율이 cameraScale이고
+                    // 그 밖은 항등이므로 부모 공간 벡터 = rig space 벡터 / cameraScale.
+                    for (int l = 0; l < stage.Layers.Count; l++)
                     {
+                        StageLayerRefs layer = stage.Layers[l];
                         LayerResponse expected = layout.Layers[l];
-                        Vector2 expectedAnchored = new(
-                            expected.OffsetInRigSpace.X / layout.CameraScale,
-                            expected.OffsetInRigSpace.Y / layout.CameraScale);
+                        string where = $"{tag} {stage.StageKey}/{StageLayerLabels.NameOf(layer.Depth)}";
 
-                        string where = $"{tag} stage0{s}/{StageLayerLabels.Names[l]}";
-
-                        Vector2 actualAnchored = _layers[s][l].Position.anchoredPosition;
-                        Vector3 actualScale = _layers[s][l].Scale.localScale;
-
-                        Assert.That(actualAnchored.x, Is.EqualTo(expectedAnchored.x).Within(Eps), $"{where} 위치 x");
-                        Assert.That(actualAnchored.y, Is.EqualTo(expectedAnchored.y).Within(Eps), $"{where} 위치 y");
-                        Assert.That(actualScale.x, Is.EqualTo(expected.Scale.X).Within(Eps), $"{where} 배율 x");
-                        Assert.That(actualScale.y, Is.EqualTo(expected.Scale.Y).Within(Eps), $"{where} 배율 y");
+                        Assert.That(layer.Rect.anchoredPosition.x, Is.EqualTo(expected.OffsetInRigSpace.X / layout.CameraScale).Within(Eps), $"{where} 위치 x");
+                        Assert.That(layer.Rect.anchoredPosition.y, Is.EqualTo(expected.OffsetInRigSpace.Y / layout.CameraScale).Within(Eps), $"{where} 위치 y");
+                        Assert.That(layer.Rect.localScale.x, Is.EqualTo(expected.Scale.X).Within(Eps), $"{where} 배율 x");
+                        Assert.That(layer.Rect.localScale.y, Is.EqualTo(expected.Scale.Y).Within(Eps), $"{where} 배율 y");
                     }
                 }
             }
         }
 
         [Test]
-        public void 중립은_Solve_Default다_런타임_TryGetNeutral과_같다()
+        public void 중립은_Solve_Default다()
         {
             // 샷을 한 번 움직인 뒤에도 중립은 Default의 값이어야 한다.
-            _system.Snap(ToRuntime(Intents[4]));
+            _system.Snap(Intents[4].ToUnity());
 
-            ShotLayout neutral = ShotLayoutMath.Solve(ShotIntentState.Default, StageLayerLabels.Depths, LayerProfileCurve.Default);
+            StageRigRefs stage = _stages.Get("stage01");
+            ShotLayout neutral = ShotLayoutMath.Solve(ShotIntentState.Default, stage.LayerDepths, LayerProfileCurve.Default);
 
-            Assert.That(_system.TryGetNeutral(_pan, out Vector2 panPos, out _), Is.True);
+            Assert.That(_system.TryGetNeutral(stage.CameraPan, out Vector2 panPos, out _), Is.True);
             Assert.That(panPos.x, Is.EqualTo(neutral.Pan.X).Within(Eps));
 
-            Assert.That(_system.TryGetNeutral(_zoom, out _, out Vector3 zoomScale), Is.True);
+            Assert.That(_system.TryGetNeutral(stage.CameraZoom, out _, out Vector3 zoomScale), Is.True);
             Assert.That(zoomScale.x, Is.EqualTo(neutral.CameraScale).Within(Eps));
 
-            for (int l = 0; l < _layers[0].Length; l++)
+            for (int l = 0; l < stage.Layers.Count; l++)
             {
-                Assert.That(_system.TryGetNeutral(_layers[0][l].Position, out Vector2 pos, out _), Is.True, StageLayerLabels.Names[l]);
-                Assert.That(pos.x, Is.EqualTo(neutral.Layers[l].OffsetInRigSpace.X).Within(Eps));
+                StageLayerRefs layer = stage.Layers[l];
 
-                Assert.That(_system.TryGetNeutral(_layers[0][l].Scale, out _, out Vector3 scale), Is.True, StageLayerLabels.Names[l]);
+                Assert.That(_system.TryGetNeutral(layer.Rect, out Vector2 pos, out Vector3 scale), Is.True, StageLayerLabels.NameOf(layer.Depth));
+                Assert.That(pos.x, Is.EqualTo(neutral.Layers[l].OffsetInRigSpace.X).Within(Eps));
                 Assert.That(scale.x, Is.EqualTo(neutral.Layers[l].Scale.X).Within(Eps));
             }
 
-            // 리그 노드 · 무대 루트는 샷 소유가 아니다.
-            Assert.That(_system.TryGetNeutral(_shotRoot, out _, out _), Is.False);
+            // 무대 루트 · 마스크 · Content · 무대 밖은 샷 소유가 아니다.
+            Assert.That(_system.TryGetNeutral(stage.Root, out _, out _), Is.False);
+            Assert.That(_system.TryGetNeutral(stage.MaskRoot, out _, out _), Is.False);
+            Assert.That(_system.TryGetNeutral(stage.Layers[0].Content, out _, out _), Is.False);
+            Assert.That(_system.TryGetNeutral(_mount, out _, out _), Is.False);
+        }
+
+        [Test]
+        public void 나중에_선_층도_다음_적용부터_샷을_받는다()
+        {
+            ShotIntentState intent = Intents[4];
+            _system.Snap(intent.ToUnity());
+
+            StageLayerRefs late = _stages.EnsureLayer("stage00", 0.25f);
+
+            Assert.That(late.Rect.localScale.x, Is.EqualTo(1f).Within(Eps), "선 직후는 항등");
+
+            _system.Snap(intent.ToUnity());
+
+            LayerResponse expected = ShotLayoutMath.SolveLayer(in intent, 0.25f, LayerProfileCurve.Default);
+            Assert.That(late.Rect.localScale.x, Is.EqualTo(expected.Scale.X).Within(Eps));
+            Assert.That(_system.TryGetNeutral(late.Rect, out _, out _), Is.True, "소유 목록에 들어갔다");
         }
     }
 }

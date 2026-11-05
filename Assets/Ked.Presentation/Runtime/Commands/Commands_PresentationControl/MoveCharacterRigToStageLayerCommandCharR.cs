@@ -14,8 +14,8 @@ public sealed class MoveCharacterRigToStageLayerCommandSpecCharR
     : CharacterRigCommandSpecBase
 {
     [Header("Stage Depth Slot")]
-    public PresentationStageKey stage = PresentationStageKey.Stage00;
-    public PresentationDepthLayerKey layer = PresentationDepthLayerKey.Mid;
+    public string stage = StageKeyParser.DefaultStage;
+    public float layerDepth = Ked.Presentation.Core.StageLayerLabels.Mid;
 
     [Header("Sibling Order")]
     public CharacterRigReparentSiblingMode siblingMode = CharacterRigReparentSiblingMode.Front;
@@ -27,6 +27,7 @@ public sealed class MoveCharacterRigToStageLayerCommandCharR : CommandBase
     private readonly CharRigSlotResolver _slotResolver;
 
     private CharacterRigRefs _rigRefs;
+    private StageRigRefs _stageRefs;
     private RectTransform _parent;
 
     private bool _resolveAttempted;
@@ -60,8 +61,7 @@ public sealed class MoveCharacterRigToStageLayerCommandCharR : CommandBase
         _resolveAttempted = true;
 
         _rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(_stage, _spec.slotKey);
-        _slotResolver.TryResolve(_spec.stage, _spec.layer, out RectTransform parent);
-        _parent = parent;
+        _parent = _slotResolver.Resolve(_spec.stage, _spec.layerDepth, out _stageRefs).Content;
     }
 
     private void Apply()
@@ -69,6 +69,7 @@ public sealed class MoveCharacterRigToStageLayerCommandCharR : CommandBase
         RectTransform rigRoot = _rigRefs.RigRoot;
 
         rigRoot.SetParent(_parent, false);
+        _rigRefs.Stage = _stageRefs;
 
         switch (_spec.siblingMode)
         {

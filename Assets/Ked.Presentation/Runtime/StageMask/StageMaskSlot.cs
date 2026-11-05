@@ -426,6 +426,20 @@ public sealed class StageMaskSlot : MonoBehaviour
         _baselineCaptured = true;
     }
 
+    /// <summary>
+    /// 빌더(StageRigBuilder)가 컴포넌트를 세운 직후 묶는다. 씬 직렬화 대신 코드가 참조를 준다 —
+    /// 테두리는 형제 노드에 있어 GetComponent로는 찾을 수 없다.
+    /// </summary>
+    public void BindFromBuilder(StageMaskGraphic graphic, Mask mask, StageMaskEdgeGraphic edgeGraphic)
+    {
+        _graphic = graphic;
+        _mask = mask;
+        _edgeGraphic = edgeGraphic;
+
+        AutoBindEdgeSource();
+        CaptureBaseline();
+    }
+
     private void CacheRefs()
     {
         if (_graphic == null)

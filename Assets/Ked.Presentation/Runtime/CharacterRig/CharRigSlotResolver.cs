@@ -1,26 +1,18 @@
 using UnityEngine;
 
+/// <summary>리그가 설 자리 — 무대의 깊이 층 Content. 층은 없으면 세운다. 리그는 그 무대를 기억한다(CharacterRigRefs.Stage).</summary>
 public sealed class CharRigSlotResolver
 {
-    private readonly IStageDepthContentSlotProvider _stageSlots;
+    private readonly StageRigRegistry _stages;
 
-    public CharRigSlotResolver(IStageDepthContentSlotProvider stageSlots)
+    public CharRigSlotResolver(StageRigRegistry stages)
     {
-        _stageSlots = stageSlots;
+        _stages = stages;
     }
 
-    public bool TryResolve(
-        PresentationStageKey stage,
-        PresentationDepthLayerKey layer,
-        out RectTransform rect)
+    public StageLayerRefs Resolve(string stageKey, float layerDepth, out StageRigRefs stage)
     {
-        rect = null;
-
-        if (_stageSlots == null)
-            return false;
-
-        rect = _stageSlots.GetDepthContent(stage, layer);
-
-        return true;
+        stage = _stages.Get(stageKey);
+        return _stages.EnsureLayer(stageKey, layerDepth);
     }
 }

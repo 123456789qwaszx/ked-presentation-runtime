@@ -15,7 +15,7 @@ public sealed class ScenePresentation : IPlaybackStage
     private readonly RigBlurIntentSystem _rigBlur;
     // 화면 효과(vignette·noise 의도, flash 이벤트)와 무대 마스크도 샷처럼 정지에서 기준으로 — 리플레이가 다시 건다.
     private readonly ScreenEffectRig _screenEffects;
-    private readonly IStageMaskProvider _stageMasks;
+    private readonly StageRigRegistry _stages;
     // 오디오 — BGM은 장면 안에서 완결(장면을 열 때 무음 의도로), 보이스·효과음은 이벤트(정지에서 끊는다).
     private readonly AudioSystem _audio;
     private readonly SceneBgmController _sceneBgm;
@@ -41,7 +41,7 @@ public sealed class ScenePresentation : IPlaybackStage
         PresentationShotResponseSystem shotResponseSystem,
         RigBlurIntentSystem rigBlur,
         ScreenEffectRig screenEffects,
-        IStageMaskProvider stageMasks,
+        StageRigRegistry stages,
         AudioSystem audio,
         SceneBgmController sceneBgm,
         PresentationStage presentationStage,
@@ -59,7 +59,7 @@ public sealed class ScenePresentation : IPlaybackStage
         _shotResponseSystem = shotResponseSystem;
         _rigBlur = rigBlur;
         _screenEffects = screenEffects;
-        _stageMasks = stageMasks;
+        _stages = stages;
         _audio = audio;
         _sceneBgm = sceneBgm;
         _presentationStage = presentationStage;
@@ -154,7 +154,7 @@ public sealed class ScenePresentation : IPlaybackStage
         if (_screenEffects != null)
             _screenEffects.ResetToBaselineImmediate();
 
-        _stageMasks.ResetAllToBaseline();
+        _stages.ResetAllMasksToBaseline();
 
         if (_audio != null)
         {

@@ -19,7 +19,6 @@ public static class CharacterFocusPlacementSolver
 
     public static bool TryCalculateFocusPlacement(
         PresentationStage stage,
-        IShotResponseStageProvider stageProvider,
         string roleKey,
         RectTransform moveRect,
         CharacterFocusPreset focusPreset,
@@ -31,9 +30,10 @@ public static class CharacterFocusPlacementSolver
     {
         destinationAnchoredPosition = default;
 
-        RectTransform rigSpaceRoot = stageProvider.RigSpaceRoot;
-
         CharacterRigRefs rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(stage, roleKey);
+
+        // 리그 좌표 계산의 경계는 이 리그가 선 무대의 루트다.
+        RectTransform rigSpaceRoot = rigRefs.Stage.Root;
 
         string tuningKey = CharacterRigTargetResolver.ResolveCharacterKeyFromTargetKey(stage, roleKey);
         CharacterFacing facing = CharacterFocusPointResolver.ResolveFacing(stage, roleKey);

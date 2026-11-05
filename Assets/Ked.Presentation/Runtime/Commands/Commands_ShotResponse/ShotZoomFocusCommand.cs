@@ -29,19 +29,16 @@ public sealed class ShotZoomFocusCommand : ShotIntentCommandBase<ShotZoomFocusCo
 {
     private readonly PresentationStage _stage;
     CharacterFocusTuningDBSO _focusTuningDB;
-    private readonly IShotResponseStageProvider _stageProvider;
     
     public ShotZoomFocusCommand(
         PresentationStage stage,
         PresentationShotResponseSystem rig, 
         ShotZoomFocusCommandSpec spec, 
-        CharacterFocusTuningDBSO focusTuningDB,
-        IShotResponseStageProvider stageProvider)
+        CharacterFocusTuningDBSO focusTuningDB)
         : base(rig, spec)
     {
         _stage = stage;
         _focusTuningDB = focusTuningDB;
-        _stageProvider = stageProvider;
     }
 
     protected override PresentationIntentState BuildTargetState(
@@ -52,7 +49,6 @@ public sealed class ShotZoomFocusCommand : ShotIntentCommandBase<ShotZoomFocusCo
         // 정착 focus 측정과 화면 지점 해석. 측정은 무대 좌표(카메라 중립)로 한다 — 캐릭터의 무대 위 자리.
         CharacterFocusPointResult focus = CharacterFocusPointResolver.Resolve(
             _stage,
-            _stageProvider,
             spec.focusRoleKey,
             spec.focusPreset,
             spec.focusOffset,

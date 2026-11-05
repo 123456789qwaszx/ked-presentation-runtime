@@ -1,62 +1,21 @@
-using System;
 using System.Collections.Generic;
 using DG.Tweening;
+using Ked.Presentation.Core;
 using UnityEngine;
-
-public struct PresentationTargetResponse
-{
-    public Vector2 anchoredPosition;
-    public Vector2 scale;
-}
-
-public readonly struct PresentationResponseMeasure
-{
-    // focus-side 판정용. MeasureRect 기준으로 잰 rig-space 위치.
-    // (대상이 focusPoint의 좌/우, 위/아래 어느 쪽인지 부호를 보는 데만 사용.)
-    public readonly Vector2 basePositionInRigSpace;
-
-    // 적용 기준. PositionRect의 중립(bind 시점) anchoredPosition (부모 로컬 공간).
-    // 실제 위치 적용은, 이 값에 offset을 더하는 방식. 
-    public readonly Vector2 baseAnchoredPosition;
-
-    // ScaleRect의 중립(bind 시점) localScale.
-    public readonly Vector2 baseLocalScale;
-
-    public PresentationResponseMeasure(
-        Vector2 basePositionInRigSpace,
-        Vector2 baseAnchoredPosition,
-        Vector2 baseLocalScale)
-    {
-        this.basePositionInRigSpace = basePositionInRigSpace;
-        this.baseAnchoredPosition = baseAnchoredPosition;
-        this.baseLocalScale = baseLocalScale;
-    }
-}
 
 // 샷은 장면 전역 의도다 — 커맨드가 의도(Intent)를 쓰고, 화면(Presented)은 이 시스템이 따라간다.
 // 전환 트윈은 시스템이 하나만 갖는다. 새 의도가 오면 지금 보이는 값에서 다시 조준한다(앞 전환을 완주시키지 않는다).
+//
+// 무대에 쓰는 값은 전부 코어 ShotLayoutMath의 출력이다. 이 클래스는 그 출력을 노드에 쓰는 applier이고,
+// 중립(IStageViewNeutral)은 같은 식에 Default를 넣은 값이다 — 따로 적은 정의가 없다.
+// 어느 노드가 샷 소유인지는 StageRigRefs(빌더 출력)가 안다. 참조 비교 분기를 따로 두지 않는다.
+//
+// 카메라는 무대마다 있다(StageRigSchema). 하나의 intent를 모든 무대에 쓰는 것은 정책이다 — 무대별 intent가 필요해지면
+// 이 클래스가 무대 키를 받으면 된다(2026-11-05 D2).
 public sealed class PresentationShotResponseSystem : IStageViewNeutral
 {
-    private sealed class RuntimeBinding
-    {
-        public string key;
-        public IResponseTarget target;
-        public PresentationResponseProfile profile;
-        public PresentationResponseMeasure baseMeasure;
-
-        public bool IsAlive =>
-            target != null &&
-            target.MeasureRect != null &&
-            target.PositionRect != null &&
-            target.ScaleRect != null &&
-            profile != null;
-    }
-
-    private readonly List<RuntimeBinding> _bindings = new();
-    private readonly IShotResponseStageProvider _stageProvider;
-    private readonly PresentationCameraRootApplier _cameraRootApplier;
-    private readonly PresentationResponseCoordinateMapper _coordinateMapper;
-    private readonly StageDepthLayerBinder _stageDepthLayerBinder;
+    private readonly StageRigRegistry _stages;
+    private readonly LayerProfileCurve _profile;
 
     private PresentationIntentState _intent = PresentationIntentState.Default;
     private PresentationIntentState _presented = PresentationIntentState.Default;
@@ -65,7 +24,7 @@ public sealed class PresentationShotResponseSystem : IStageViewNeutral
     private PresentationIntentState _transitionFrom;
     private float _transitionDuration;
     private Ease _transitionEase;
-    private Ked.Presentation.Core.CurveKey[] _transitionCurveKeys;
+    private CurveKey[] _transitionCurveKeys;
     private bool _transitionAccelerated;
 
     // 저작된 의도 — 다음 샷 커맨드의 출발점이고, 폴드가 접는 값이다.
@@ -76,47 +35,24 @@ public sealed class PresentationShotResponseSystem : IStageViewNeutral
 
     public bool IsTransitioning => _transition != null;
 
-    public PresentationShotResponseSystem(IShotResponseStageProvider stageProvider)
+    public PresentationShotResponseSystem(StageRigRegistry stages, LayerProfileCurve profile)
     {
-        _stageProvider = stageProvider;
-        _cameraRootApplier = new PresentationCameraRootApplier(stageProvider);
-        _coordinateMapper = new PresentationResponseCoordinateMapper(stageProvider);
-        _stageDepthLayerBinder = new StageDepthLayerBinder(stageProvider);
-    }
-
-    public void RegisterRuntimeBinding(
-        string bindingKey,
-        IResponseTarget target,
-        PresentationResponseProfile presetProfile)
-    {
-        if (presetProfile == null)
-            return;
-
-        RuntimeBinding binding = new()
-        {
-            key = bindingKey,
-            target = target,
-            profile = presetProfile,
-
-            // 등록 시점에만 캡처.
-            baseMeasure = _coordinateMapper.CaptureBaseMeasure(target),
-        };
-
-        AddOrReplaceBinding(bindingKey, binding);
+        _stages = stages;
+        _profile = profile;
     }
 
     public void Follow(
         in PresentationIntentState intent,
         float duration,
         Ease ease,
-        Ked.Presentation.Core.CurveKey[] curveKeys)
+        CurveKey[] curveKeys)
     {
         _intent = intent;
         KillTransition();
 
         if (duration <= 0f || PresentationShotIntentMath.ApproximatelyEqual(_presented, intent))
         {
-            ApplyToAllBindings(intent);
+            Apply(intent);
             return;
         }
 
@@ -133,7 +69,7 @@ public sealed class PresentationShotResponseSystem : IStageViewNeutral
     {
         _intent = intent;
         KillTransition();
-        ApplyToAllBindings(intent);
+        Apply(intent);
     }
 
     // 스텝 경계 — 남은 비율만큼만 빨리 마저 간다. 한 전환은 한 번만 가속한다.
@@ -147,7 +83,7 @@ public sealed class PresentationShotResponseSystem : IStageViewNeutral
 
         if (remainingRatio <= 0f)
         {
-            ApplyToAllBindings(_intent);
+            Apply(_intent);
             return;
         }
 
@@ -171,7 +107,7 @@ public sealed class PresentationShotResponseSystem : IStageViewNeutral
         _transition = DOTween
             .To(
                 () => 0f,
-                t => ApplyToAllBindings(PresentationShotIntentMath.Interpolate(from, to, t)),
+                t => Apply(PresentationShotIntentMath.Interpolate(from, to, t)),
                 1f,
                 duration)
             .ApplyEase(_transitionEase, _transitionCurveKeys)
@@ -180,7 +116,7 @@ public sealed class PresentationShotResponseSystem : IStageViewNeutral
             .OnComplete(() =>
             {
                 _transition = null;
-                ApplyToAllBindings(to);
+                Apply(to);
             });
     }
 
@@ -219,130 +155,83 @@ public sealed class PresentationShotResponseSystem : IStageViewNeutral
         return Mathf.Clamp01(remainingDistance / originalDistance);
     }
 
-    private void ApplyToAllBindings(in PresentationIntentState state)
+    // ── 적용 — 숫자 셋 → 무대 노드 ───────────────────────────────────
+
+    private void Apply(in PresentationIntentState state)
     {
         _presented = state;
 
-        // 최초 1회와 Clear() 직후에만 실제로 바인딩한다. 그 외에는 bool 체크로 끝난다.
-        _stageDepthLayerBinder.EnsureBindings(this);
+        ShotIntentState intent = state.ToCore();
+        IReadOnlyList<StageRigRefs> stages = _stages.All;
 
-        _cameraRootApplier.Apply(in state);
+        for (int i = 0; i < stages.Count; i++)
+            ApplyToStage(in intent, stages[i]);
+    }
 
-        for (int i = _bindings.Count - 1; i >= 0; i--)
+    private void ApplyToStage(in ShotIntentState intent, StageRigRefs stage)
+    {
+        ShotLayoutMath.SolveCamera(in intent, out float cameraScale, out Vec2 pan);
+
+        stage.CameraZoom.localScale = new Vector3(cameraScale, cameraScale, 1f);
+        stage.CameraPan.anchoredPosition = pan.ToUnity();
+
+        IReadOnlyList<StageLayerRefs> layers = stage.Layers;
+
+        for (int i = 0; i < layers.Count; i++)
         {
-            RuntimeBinding binding = _bindings[i];
+            StageLayerRefs layer = layers[i];
+            LayerResponse response = ShotLayoutMath.SolveLayer(in intent, layer.Depth, _profile);
 
-            if (binding == null || !binding.IsAlive)
-            {
-                _bindings.RemoveAt(i);
-                continue;
-            }
-
-            PresentationTargetResponse responseForTarget =
-                BuildTargetSpaceResponse(in state, binding);
-
-            binding.target.ApplyResponse(in responseForTarget);
+            layer.Rect.anchoredPosition = OffsetInLayerParentSpace(stage, layer, response);
+            layer.Rect.localScale = new Vector3(response.Scale.X, response.Scale.Y, 1f);
         }
     }
 
-    // 중립 = 샷이 아무것도 하지 않은 무대. 카메라 루트는 기본 의도의 값(PresentationCameraRootApplier와 같은 식),
-    // 깊이 층 프레이밍은 바인드 때 잰 기준값. 바인딩은 샷이 처음 적용될 때 그 직전 값으로 잡히므로
-    // 아직 바인딩이 없으면 프레이밍 노드는 손대지 않은 그대로다 — false를 내 라이브 값을 쓰게 한다.
+    // 층 오프셋은 rig space(무대 루트) 벡터다. 층의 부모(줌 루트)는 그 아래라 배율이 다르다 —
+    // 점이 아니라 벡터로 옮겨 translation을 빼면 공통 카메라의 팬이 상쇄되고 배율만 남는다.
+    private static Vector2 OffsetInLayerParentSpace(StageRigRefs stage, StageLayerRefs layer, in LayerResponse response)
+        => PresentationCoordinateMath.ConvertVectorFromRigSpaceToTargetPositionParentSpace(
+            response.OffsetInRigSpace.ToUnity(),
+            stage.Root,
+            (RectTransform)layer.Rect.parent);
+
+    // ── 중립 = Solve(Default) ────────────────────────────────────────
+
     public bool TryGetNeutral(RectTransform rect, out Vector2 anchoredPosition, out Vector3 localScale)
     {
         anchoredPosition = default;
         localScale = Vector3.one;
 
-        if (rect == null)
-            return false;
+        IReadOnlyList<StageRigRefs> stages = _stages.All;
 
-        anchoredPosition = rect.anchoredPosition;
-        localScale = rect.localScale;
-
-        bool found = false;
-        PresentationIntentState neutral = PresentationIntentState.Default;
-
-        if (rect == _stageProvider.StagePanRoot)
+        for (int i = 0; i < stages.Count; i++)
         {
-            anchoredPosition = neutral.panInRigSpace;
-            found = true;
-        }
+            StageRigRefs stage = stages[i];
 
-        if (rect == _stageProvider.StageZoomRoot)
-        {
-            float scale = PresentationShotIntentMath.EvaluateCameraScale(neutral.zoom);
-            localScale = new Vector3(scale, scale, 1f);
-            found = true;
-        }
-
-        for (int i = 0; i < _bindings.Count; i++)
-        {
-            RuntimeBinding binding = _bindings[i];
-
-            if (binding == null || !binding.IsAlive)
+            if (!stage.IsShotOwned(rect, out bool isPan, out bool isZoom, out StageLayerRefs layer))
                 continue;
 
-            if (rect == binding.target.PositionRect)
+            ShotIntentState neutral = ShotIntentState.Default;
+
+            if (isPan || isZoom)
             {
-                anchoredPosition = binding.baseMeasure.baseAnchoredPosition;
-                found = true;
+                ShotLayoutMath.SolveCamera(in neutral, out float cameraScale, out Vec2 pan);
+
+                if (isPan)
+                    anchoredPosition = pan.ToUnity();
+                else
+                    localScale = new Vector3(cameraScale, cameraScale, 1f);
+
+                return true;
             }
 
-            if (rect == binding.target.ScaleRect)
-            {
-                Vector2 baseScale = binding.baseMeasure.baseLocalScale;
-                localScale = new Vector3(baseScale.x, baseScale.y, 1f);
-                found = true;
-            }
+            LayerResponse response = ShotLayoutMath.SolveLayer(in neutral, layer.Depth, _profile);
+            anchoredPosition = OffsetInLayerParentSpace(stage, layer, response);
+            localScale = new Vector3(response.Scale.X, response.Scale.Y, 1f);
+
+            return true;
         }
 
-        return found;
-    }
-
-    private PresentationTargetResponse BuildTargetSpaceResponse(
-        in PresentationIntentState state,
-        RuntimeBinding binding)
-    {
-        // bind 시점에 저장해둔 baseMeasure만 기준으로 계산.
-        PresentationTargetResponse responseInRigSpace =
-            PresentationResponseMath.CalculateTargetTransformResponseFromShotIntent(
-                in state,
-                binding.profile,
-                in binding.baseMeasure);
-
-        // 계산 결과는 rig space상의 "목표점" 형태로 나오지만, 직접 사용하는 대신,
-        // basePosition에서 얼마나 벗어났는지 offset만 추출해서 target parent space로 변환.
-        Vector2 offsetInRigSpace =
-            responseInRigSpace.anchoredPosition -
-            binding.baseMeasure.basePositionInRigSpace;
-
-        Vector2 offsetInParentSpace =
-            _coordinateMapper.ConvertOffsetFromRigSpaceToTargetParentSpace(
-                offsetInRigSpace,
-                binding.target);
-
-        responseInRigSpace.anchoredPosition =
-            binding.baseMeasure.baseAnchoredPosition + offsetInParentSpace;
-
-        return responseInRigSpace;
-    }
-
-    private void AddOrReplaceBinding(string key, RuntimeBinding newBinding)
-    {
-        for (int i = 0; i < _bindings.Count; i++)
-        {
-            RuntimeBinding binding = _bindings[i];
-
-            if (binding == null)
-                continue;
-
-            if (string.Equals(binding.key, key, StringComparison.Ordinal))
-            {
-                _bindings[i] = newBinding;
-                return;
-            }
-        }
-
-        _bindings.Add(newBinding);
+        return false;
     }
 }

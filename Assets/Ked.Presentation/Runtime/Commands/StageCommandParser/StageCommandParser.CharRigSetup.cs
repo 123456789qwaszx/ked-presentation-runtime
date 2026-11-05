@@ -11,8 +11,8 @@ public sealed partial class StageCommandParser
             roleKey = slotKey,
             rigPrefab = _charRigPrefab,
 
-            stage = PresentationStageKeyParser.Parse(stageKey),
-            layer = PresentationDepthLayerKeyParser.Parse(layerKey)
+            stage = StageKeyParser.ParseStage(stageKey),
+            layerDepth = StageKeyParser.ParseLayerDepth(layerKey)
         });
 
     private void EnqueueCastCharacterSpec(string slotKey, string characterKey, string variantKey, string emotionKey)
@@ -337,8 +337,8 @@ public sealed partial class StageCommandParser
         {
             slotKey = roleKey,
 
-            stage = PresentationStageKeyParser.Parse(stageKey),
-            layer = PresentationDepthLayerKeyParser.Parse(layerKey),
+            stage = StageKeyParser.ParseStage(stageKey),
+            layerDepth = StageKeyParser.ParseLayerDepth(layerKey),
 
             siblingMode = CharacterRigReparentSiblingMode.Front
         });

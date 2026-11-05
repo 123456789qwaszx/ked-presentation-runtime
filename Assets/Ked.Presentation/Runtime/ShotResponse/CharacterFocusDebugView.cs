@@ -118,7 +118,6 @@ public sealed class CharacterFocusDebugView : MonoBehaviour
     [SerializeField] private bool drawLabels = true;
 
     private PresentationStage _stage;
-    private IShotResponseStageProvider _stageProvider;
 
     private readonly Dictionary<string, RectTransform> _markerMap =
         new(StringComparer.Ordinal);
@@ -137,11 +136,9 @@ public sealed class CharacterFocusDebugView : MonoBehaviour
 
     public void Initialize(
         PresentationStage stage,
-        IShotResponseStageProvider stageProvider,
         CharacterFocusTuningDBSO tuningDb)
     {
         _stage = stage;
-        _stageProvider = stageProvider;
 
         if (tuningDb != null)
             focusTuningDb = tuningDb;
@@ -200,7 +197,7 @@ public sealed class CharacterFocusDebugView : MonoBehaviour
         _visibleMarkerKeysThisFrame.Clear();
         ClearScenePoints();
 
-        if (_stage == null || _stageProvider == null)
+        if (_stage == null)
         {
             HideAllMarkers();
             return;
@@ -209,14 +206,6 @@ public sealed class CharacterFocusDebugView : MonoBehaviour
         ResolveMarkerRoot();
 
         if (markerRoot == null)
-        {
-            HideAllMarkers();
-            return;
-        }
-
-        RectTransform rigSpaceRoot = _stageProvider.RigSpaceRoot;
-
-        if (rigSpaceRoot == null)
         {
             HideAllMarkers();
             return;
@@ -245,7 +234,7 @@ public sealed class CharacterFocusDebugView : MonoBehaviour
                 slotKey,
                 characterKey.Trim(),
                 rigRefs,
-                rigSpaceRoot,
+                rigRefs.Stage.Root,
                 facing);
         }
 

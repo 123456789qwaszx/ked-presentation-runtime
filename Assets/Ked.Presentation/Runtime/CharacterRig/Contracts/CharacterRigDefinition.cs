@@ -163,6 +163,10 @@ public sealed class CharacterRigRefs
 
     public CharacterPlacementTargetLedger PlacementTargets { get; } = new();
 
+    // 이 리그가 선 무대. 리그 좌표 계산의 경계(RigSpaceRoot)는 Stage.Root다.
+    // slot(SetupCharRig)이 정하고 char_to(MoveCharacterRigToStageLayer)가 바꾼다.
+    public StageRigRefs Stage;
+
     // 정지 프레임의 깊이 스케일. SetDepthCommandCharR가 목표값을 확정할 때 기록한다.
     // 트윈이 도는 중에도 "끝나면 어디인가"를 들고 있어야 착란원 계산이 흔들리지 않는다.
     // 열거형(CharacterDepthKey)이 아니라 스케일 값인 이유: useLevel=true 경로는 프리셋 키가 없고,
