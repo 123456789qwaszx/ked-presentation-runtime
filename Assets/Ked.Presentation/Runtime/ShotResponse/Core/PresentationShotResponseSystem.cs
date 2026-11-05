@@ -35,7 +35,7 @@ public readonly struct PresentationResponseMeasure
 
 // 샷은 장면 전역 의도다 — 커맨드가 의도(Intent)를 쓰고, 화면(Presented)은 이 시스템이 따라간다.
 // 전환 트윈은 시스템이 하나만 갖는다. 새 의도가 오면 지금 보이는 값에서 다시 조준한다(앞 전환을 완주시키지 않는다).
-public sealed class PresentationShotResponseSystem
+public sealed class PresentationShotResponseSystem : IStageViewNeutral
 {
     private sealed class RuntimeBinding
     {
@@ -53,6 +53,7 @@ public sealed class PresentationShotResponseSystem
     }
 
     private readonly List<RuntimeBinding> _bindings = new();
+    private readonly IShotResponseStageProvider _stageProvider;
     private readonly PresentationCameraRootApplier _cameraRootApplier;
     private readonly PresentationResponseCoordinateMapper _coordinateMapper;
     private readonly StageDepthLayerBinder _stageDepthLayerBinder;
@@ -77,6 +78,7 @@ public sealed class PresentationShotResponseSystem
 
     public PresentationShotResponseSystem(IShotResponseStageProvider stageProvider)
     {
+        _stageProvider = stageProvider;
         _cameraRootApplier = new PresentationCameraRootApplier(stageProvider);
         _coordinateMapper = new PresentationResponseCoordinateMapper(stageProvider);
         _stageDepthLayerBinder = new StageDepthLayerBinder(stageProvider);
@@ -241,6 +243,60 @@ public sealed class PresentationShotResponseSystem
 
             binding.target.ApplyResponse(in responseForTarget);
         }
+    }
+
+    // 중립 = 샷이 아무것도 하지 않은 무대. 카메라 루트는 기본 의도의 값(PresentationCameraRootApplier와 같은 식),
+    // 깊이 층 프레이밍은 바인드 때 잰 기준값. 바인딩은 샷이 처음 적용될 때 그 직전 값으로 잡히므로
+    // 아직 바인딩이 없으면 프레이밍 노드는 손대지 않은 그대로다 — false를 내 라이브 값을 쓰게 한다.
+    public bool TryGetNeutral(RectTransform rect, out Vector2 anchoredPosition, out Vector3 localScale)
+    {
+        anchoredPosition = default;
+        localScale = Vector3.one;
+
+        if (rect == null)
+            return false;
+
+        anchoredPosition = rect.anchoredPosition;
+        localScale = rect.localScale;
+
+        bool found = false;
+        PresentationIntentState neutral = PresentationIntentState.Default;
+
+        if (rect == _stageProvider.StagePanRoot)
+        {
+            anchoredPosition = neutral.panInRigSpace;
+            found = true;
+        }
+
+        if (rect == _stageProvider.StageZoomRoot)
+        {
+            float scale = PresentationShotIntentMath.EvaluateCameraScale(neutral.zoom);
+            localScale = new Vector3(scale, scale, 1f);
+            found = true;
+        }
+
+        for (int i = 0; i < _bindings.Count; i++)
+        {
+            RuntimeBinding binding = _bindings[i];
+
+            if (binding == null || !binding.IsAlive)
+                continue;
+
+            if (rect == binding.target.PositionRect)
+            {
+                anchoredPosition = binding.baseMeasure.baseAnchoredPosition;
+                found = true;
+            }
+
+            if (rect == binding.target.ScaleRect)
+            {
+                Vector2 baseScale = binding.baseMeasure.baseLocalScale;
+                localScale = new Vector3(baseScale.x, baseScale.y, 1f);
+                found = true;
+            }
+        }
+
+        return found;
     }
 
     private PresentationTargetResponse BuildTargetSpaceResponse(

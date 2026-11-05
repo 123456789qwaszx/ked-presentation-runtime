@@ -65,19 +65,20 @@ public sealed class CharacterPlacementTargetLedger
 
     // measureRect 로컬의 특정 점이,
     // 모든 예약 트윈이 끝났다고 가정하면 월드 좌표 상 어디에 위치하는 지 측정.
+    // stageView를 주면 샷이 움직이는 무대 노드는 중립값으로 잰다 — 결과는 카메라 중립의 무대 좌표다.
     public Vector3 MeasureSettledWorldPoint(
         RectTransform measureRect,
         Vector3 localOffset,
-        RectTransform stopRoot)
+        RectTransform stopRoot,
+        IStageViewNeutral stageView = null)
     {
         if (measureRect == null)
             return Vector3.zero;
 
-        if (_core.IsEmpty || stopRoot == null)
+        if (stopRoot == null || (_core.IsEmpty && stageView == null))
             return measureRect.TransformPoint(localOffset);
 
-        // 예약이 있다면 체인 생성.
-        RectNodeState[] chain = CaptureSettledChain(measureRect, stopRoot);
+        RectNodeState[] chain = CaptureSettledChain(measureRect, stopRoot, null, stageView);
 
         // Core 수학으로 root-space 좌표를 계산
         Vec3 inRootSpace = RectChainMath.TransformPoint(chain, SpaceOf(stopRoot), localOffset.ToCore());
@@ -121,13 +122,18 @@ public sealed class CharacterPlacementTargetLedger
     /// chainRects를 주면 같은 순서의 rect 목록을 채운다 — solver가 특정 노드의
     /// 체인 인덱스를 찾는 용도다(SettledFocusMath의 moveNodeIndex / depthYIndex).
     ///
+    /// stageView를 주면 예약이 없는 노드 중 샷이 움직이는 무대 노드(카메라 루트 · 깊이 층 프레이밍)는
+    /// 라이브 대신 중립값을 쓴다. 값의 우선순위: 리그 예약 끝값 → 무대 중립값 → 라이브.
+    /// 배치는 무대 좌표라서다 — 라이브 카메라를 읽으면 결과가 샷의 진행도에 따라 갈린다.
+    ///
     /// stopRoot가 조상이 아니거나 체인에 RectTransform이 아닌 노드가 있으면
     /// 조용히 어긋나는 대신 예외다 — 실경로에서는 발생하지 않는 방어선이다.
     /// </summary>
     public RectNodeState[] CaptureSettledChain(
         RectTransform leaf,
         RectTransform stopRoot,
-        List<RectTransform> chainRects = null)
+        List<RectTransform> chainRects = null,
+        IStageViewNeutral stageView = null)
     {
         _scratchRects.Clear();
         _scratchChain.Clear();
@@ -161,16 +167,30 @@ public sealed class CharacterPlacementTargetLedger
             RectTransform rect = _scratchRects[i];
             RectNodeState live = CaptureLive(rect);
 
-            // 예약이 있으면 입힌다. 없으면 라이브 그대로 — 아무것도 쓰지 않는다.
-            _scratchChain.Add(
-                _keyByRect.TryGetValue(rect, out string key)
-                    ? _core.ApplyTo(key, live)
-                    : live);
+            // 예약이 있으면 입힌다. 없으면 무대 중립값, 그것도 아니면 라이브 그대로 — 아무것도 쓰지 않는다.
+            if (_keyByRect.TryGetValue(rect, out string key))
+                _scratchChain.Add(_core.ApplyTo(key, live));
+            else if (stageView != null && stageView.TryGetNeutral(rect, out Vector2 neutralPosition, out Vector3 neutralScale))
+                _scratchChain.Add(WithView(live, neutralPosition, neutralScale));
+            else
+                _scratchChain.Add(live);
 
             chainRects?.Add(rect);
         }
 
         return _scratchChain.ToArray();
+    }
+
+    private static RectNodeState WithView(in RectNodeState live, Vector2 anchoredPosition, Vector3 localScale)
+    {
+        return new RectNodeState(
+            anchoredPosition: anchoredPosition.ToCore(),
+            anchorMin: live.AnchorMin,
+            anchorMax: live.AnchorMax,
+            pivot: live.Pivot,
+            sizeDelta: live.SizeDelta,
+            localScale: localScale.ToCore(),
+            localEulerAngles: live.LocalEulerAngles);
     }
 
     private static RectNodeState CaptureLive(RectTransform rect)
