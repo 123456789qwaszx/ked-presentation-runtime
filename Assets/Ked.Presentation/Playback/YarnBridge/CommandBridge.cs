@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Text;
 using Ked.Presentation.Core;
 using UnityEngine;
 using Yarn.Unity;
@@ -7,6 +8,7 @@ public sealed partial class YarnCommandBridge
 {
     private readonly YarnPlaybackDriver _playbackDriver;
     private readonly StageCommandParser _parser;
+    private readonly CommandTargetGate _targetGate;
     private readonly DialogueBoxPresentationController _dialogueBoxPresentation;
 
     // Forward가 쓰는 스크래치 — 커맨드 하나가 스펙 여럿을 낳는다(show·cast·bg_spawn).
@@ -16,10 +18,12 @@ public sealed partial class YarnCommandBridge
         DialogueRunner runner,
         YarnPlaybackDriver playbackDriver,
         StageCommandParser parser,
+        PresentationStage stage,
         DialogueBoxPresentationController dialogueBoxPresentation)
     {
         _playbackDriver = playbackDriver;
         _parser = parser;
+        _targetGate = new CommandTargetGate(stage);
         _dialogueBoxPresentation = dialogueBoxPresentation;
 
         BindRunnerCommands(runner);
@@ -337,7 +341,23 @@ public sealed partial class YarnCommandBridge
             return;
         }
 
+        if (!_targetGate.TryAccept(_playbackDriver.Collected, _parsed, out string reason))
+        {
+            Debug.LogError($"[YarnCommandBridge] {AuthoredText(commandName, args)} — {reason}. 실행하지 않는다.");
+            return;
+        }
+
         for (int i = 0; i < _parsed.Count; i++)
             _playbackDriver.Enqueue(_parsed[i]);
+    }
+
+    private static string AuthoredText(string commandName, string[] args)
+    {
+        var sb = new StringBuilder("<<").Append(commandName);
+
+        for (int i = 0; i < args.Length && args[i] != null; i++)
+            sb.Append(' ').Append(args[i]);
+
+        return sb.Append(">>").ToString();
     }
 }

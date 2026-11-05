@@ -24,13 +24,7 @@ title: Demo_Presentation
 
 <<screen_blur front 0.5>>
 <<char_visual_dim s1 2 6fr>>
-<<shot_to 12 24u 0u 0.45s>>
-<<show sigure e1 14fr>>
-<<size sigure 12 bust 10fr>>
-<<place_left sigure bust 0fr>>
 하린: 지금부터 보이는 건 전부 이 대본 한 장에 적힌 명령이야. #line:ln_cydaj9ym
-
-문제지점.
 
 
 <<place_left s2 bust 0fr>>

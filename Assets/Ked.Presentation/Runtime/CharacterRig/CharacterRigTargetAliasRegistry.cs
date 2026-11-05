@@ -40,6 +40,9 @@ public sealed class CharacterRigTargetAliasRegistry
         return raw;
     }
 
+    public bool TryPeekTarget(string aliasSymbol, out string targetKey)
+        => _aliases.TryGetValue(aliasSymbol, out targetKey);
+
     public void Clear()
     {
         _aliases.Clear();

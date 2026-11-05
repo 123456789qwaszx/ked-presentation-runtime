@@ -203,6 +203,7 @@ public partial class SampleBootstrap
             dialogueRunner,
             yarnPlaybackDriver,
             stageCommandParser,
+            _presentationStage,
             dialogueBoxPresentationController);
 
         YarnLineBoundary yarnLineBoundary = new(
