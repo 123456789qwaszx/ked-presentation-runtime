@@ -6,7 +6,7 @@
   리플레이·롤백·로드 시크·정지·저장 실패의 규칙을 Unity 없이 검증한다.
 
   진짜로 컴파일하는 것: 진행 코어 전체, SceneRunner, PlaybackUnit, RollbackHistory, BacklogRecorder,
-  재개 지점(LineTarget — ⛔ PresentationResumePoint · ChoiceRecord는 대사 안 선택지와 함께 2026-11-05에 걷혔다).
+  재개 지점(LineTarget — PresentationResumePoint · ChoiceRecord는 대사 안 선택지와 함께 2026-11-05에 걷혔다).
   대역(Stubs.cs): UnityEngine.Debug, YarnLineMeta.
   무대(IPlaybackStage — 줄 시크 포함)·선택 UI·저장·챕터 끝 화면은 계약이라 Fakes.cs가 구현한다.
 

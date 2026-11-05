@@ -229,7 +229,6 @@ public partial class SampleBootstrap
             _playbackState);
 
 
-        // ⛔ Yarn 선택지 흐름(ChoiceBoundary · OptionsPresentationFlow · CustomOptionsPresenter)의 조립은 2026-11-05에 걷혔다.
         //    선택지 상자(_kedUI.OptionsBox)와 항목 프리팹은 진행 층의 ChapterOptionsView가 쓴다(InstallProgression).
     }
 

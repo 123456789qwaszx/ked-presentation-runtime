@@ -1,4 +1,4 @@
-// 서두르기는 타자기만 빠르게 한다. 연출은 줄 넘김(스텝 경계)에서 가속·확정된다(2026-11-03 소유자 결정).
+// 서두르기는 타자기만 빠르게 한다. 연출은 줄 넘김(스텝 경계)에서 가속·확정된다.
 public sealed class LineHurrySpeedController
 {
     private const float HurrySpeedMultiplier = 30f;

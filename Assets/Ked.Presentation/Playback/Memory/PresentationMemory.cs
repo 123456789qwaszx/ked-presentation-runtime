@@ -7,13 +7,12 @@ using Newtonsoft.Json.Serialization;
 /// <summary>
 /// 연출 기억의 문자열 형식 — 싣고 되읽는 법.
 ///
-/// 연출은 저장이 없어도 두 가지를 늘 들고 있다(PLAN_playback-unit E1).
+/// 연출은 저장이 없어도 두 가지를 늘 들고 있다.
 ///
 ///   백로그          재생 단위를 넘어 이어지는 대사 기록              BacklogRecorder
 ///   재개 지점        단위 루트에서 이 줄까지 — 줄 좌표                  LineTarget
 ///
-/// ⛔ 전에는 셋이었다 — "단위의 선택 기록"(루트부터 다시 달릴 때 자동 응답할 Yarn 선택, ChoiceHistory)은
-/// 대사 안 선택지와 함께 2026-11-05에 걷혔다. 선택지는 에피소드 끝의 진행 선택지뿐이고 그 기록은 진행(Ked.Progression)의 몫이라,
+/// 선택지는 에피소드 끝의 진행 선택지뿐이고 그 기록은 진행(Ked.Progression)의 몫이라,
 /// 단위 루트부터의 재생은 줄 좌표만으로 결정된다. 옛 재개 지점의 yarnChoices 칸은 읽을 때 무시한다(저장 호환).
 ///
 /// 저장은 이것을 실어 나를 뿐이다. 진행 저장(ked-progression-runtime의 Ked.Progression.Save)은

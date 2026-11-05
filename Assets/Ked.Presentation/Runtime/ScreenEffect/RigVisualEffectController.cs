@@ -13,7 +13,7 @@ using Object = UnityEngine.Object;
 //   모양(Style)  char_visual_* — 어둡게·림·자체 블러
 //   초점 블러    focus_on / focus_clear — 깊이 차이만큼(CoC)
 //   레이어 블러  screen_blur — 이 리그가 선 레이어의 흐림
-// 셰이더의 _BlurAmount는 세 블러 중 가장 큰 값이다(소유자 결정 2026-11-03). 서로 덮어쓰지 않는다.
+// 셰이더의 _BlurAmount는 세 블러 중 가장 큰 값이다. 서로 덮어쓰지 않는다.
 public sealed class RigVisualEffectController : IDisposable
 {
     public readonly struct Style

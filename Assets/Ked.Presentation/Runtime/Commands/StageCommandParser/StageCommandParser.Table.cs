@@ -10,10 +10,10 @@ public sealed partial class StageCommandParser
     // 생략값은 핸들러 시그니처가 아니라 이 표가 갖는다(한 곳). 브리지의 Yarn 등록은
     // 이름과 인자 수만 안다 — 뜻은 여기서 정해진다.
     //
-    // 정본만 둔다(2026-11-03). 같은 일을 인자 하나만 고정해 다시 부르는 이름(slotNN · char_to_sN · bg_slotNN ·
-    // screen_blur_sN · place_* · size_<라벨> · tx_<프리셋>)은 걷었다 —
+    // 정본만 둔다. 같은 일을 인자 하나만 고정해 다시 부르는 이름(slotNN · char_to_sN · bg_slotNN ·
+    // screen_blur_sN · place_* · size_<라벨> · tx_<프리셋>)은 두지 않는다 —
     // 대본은 저작 툴(ked-story-compositor)이 내고, 툴은 정본만 낸다. 변형은 이름이 아니라 인자로 받는다.
-    // 예외(소유자 결정): place_left · place_center · place_right, 프레임 대기 <<1fr>>~<<48fr>>(아래 정적 생성자),
+    // 예외: place_left · place_center · place_right, 프레임 대기 <<1fr>>~<<48fr>>(아래 정적 생성자),
     // 그리고 char_visual_<효과> 일곱 — 캐릭터 비주얼은 커맨드 이름에서 어떤 효과인지 드러나야 한다(일반형 char_visual도 남김).
     private static readonly Dictionary<string, Handler> Table = new(StringComparer.Ordinal)
     {

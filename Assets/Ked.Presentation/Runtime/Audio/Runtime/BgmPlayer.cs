@@ -2,7 +2,7 @@ using System.Collections;
 using UnityEngine;
 
 // BGM policy: single active track; crossfade on replace; snap while skipping.
-// BGM은 장면 안에서 완결된다(2026-11-03 소유자 결정) — 장면마다 무음에서 시작하고, 장면이 곡을 정하지 않으면 끊는다.
+// BGM은 장면 안에서 완결된다 — 장면마다 무음에서 시작하고, 장면이 곡을 정하지 않으면 끊는다.
 // 같은 곡이면 끊지 않는다: 장면을 열 때는 의도만 비우고(Hold) 소리는 그대로 두었다가, 장면이 곡을 정한 뒤 맞춘다(Release).
 // Hold 동안 들어온 곡·정지는 의도와 페이드만 적어 두고, Release가 그 페이드로 맞춘다.
 public sealed class BgmPlayer

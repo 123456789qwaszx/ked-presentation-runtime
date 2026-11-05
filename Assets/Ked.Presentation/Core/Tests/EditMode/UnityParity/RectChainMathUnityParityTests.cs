@@ -19,7 +19,7 @@ namespace Ked.Presentation.Core.Tests.UnityParity
     /// (루트를_옮기고_돌려도_코어_결과는_같다가 그걸 판정한다).
     ///
     /// ε = 0.01px — 체인이 얕아(≤ 6단) 잡음 상한이 그 정도다.
-    /// 공식이 미묘하게 틀렸을 때 더 일찍 잡으려고 U14 판정(0.1px)보다 조인다.
+    /// 공식이 미묘하게 틀렸을 때 더 일찍 잡으려고 등가 판정(0.1px)보다 조인다.
     /// 근거는 Documentation~/transform-math-and-epsilon.md.
     /// </summary>
     public sealed class RectChainMathUnityParityTests

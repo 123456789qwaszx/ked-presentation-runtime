@@ -104,7 +104,7 @@ public abstract class SlideCommandBase : ClaimTweenCommandBase
         _rect.anchoredPosition = basePos + offset;
     }
 
-    // ⚠ 방향 표와 튐 모양의 <b>주인은 코어 SlideMotion 하나</b>다 (2026-08-24). 저작 도구의
+    // 방향 표와 튐 모양의 <b>주인은 코어 SlideMotion 하나</b>다. 저작 도구의
     //   프리뷰가 같은 값으로 궤적을 그리기 때문이다 — 여기 사본을 두면 둘이 갈리고, 그
     //   어긋남은 "프리뷰와 게임이 다르다"로만 드러난다. 열거형 → 낱말만 이쪽이 진다
     //   (코어는 CharRigDirection을 모른다). 사슬 전체는 SlideMotionParityTests가 잡는다.

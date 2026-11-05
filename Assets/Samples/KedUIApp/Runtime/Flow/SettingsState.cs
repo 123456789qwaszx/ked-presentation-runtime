@@ -23,7 +23,7 @@ namespace Ked.Samples.UI
         public bool CanResetTab => Tab != SettingsPanel.Tab.Display;
 
         // 기본값은 씬 · 본체에 적힌 값(출력 속도 · 자동 대기 · 배속)이다 — 여기서 새 기본을 만들지 않는다.
-        // 배속 보기는 2 · 4 · 8배(재생 화면의 배속 버튼과 같은 셋, 2026-11-04 소유자), 본체가 허용하는 범위(하한 · 상한) 안으로.
+        // 배속 보기는 2 · 4 · 8배(재생 화면의 배속 버튼과 같은 셋), 본체가 허용하는 범위(하한 · 상한) 안으로.
         // 기본 배속은 본체 기본값에 가장 가까운 보기.
         public void SetDefaults(float typeSpeed, float autoDelay, float speedUp, float minMultiplier, float maxMultiplier)
         {

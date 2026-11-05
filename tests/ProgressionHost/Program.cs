@@ -446,7 +446,7 @@ internal static class Program
             Check(rig.DriverLog.Has("I", "CANCELLED") && !rig.DriverLog.Has("E", "FAULTED"), "취소로 끝나지 않았다");
         });
 
-        // 아래 둘은 연출 단독 호스트(NodePlaybackHost)가 지던 보장을 챕터 경로로 옮긴 것이다(2026-11-03).
+        // 아래 둘은 연출 단독 호스트(NodePlaybackHost)가 지던 보장을 챕터 경로로 옮긴 것이다.
         // 호스트(ProgressionLauncher)는 리플레이를 Driver.RequestReplayAsync로, 끝내기를 Driver.StopAsync로 넘긴다.
         await Test("리플레이 요청과 끝내기가 겹쳐도 한 구간에 한 번만 멈춘다", async () =>
         {

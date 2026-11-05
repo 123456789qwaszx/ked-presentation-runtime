@@ -93,7 +93,7 @@ internal static class Program
                 LineTarget plan = PresentationMemory.ReadResumePoint(written);
                 Check(plan.LineId == "L" && plan.Occurrence == 2, "재생 계획이 왕복하지 않았다");
 
-                // 저장 호환 — 대사 안 선택지가 걷히기 전(2026-11-05 이전)의 재개 지점은 yarnChoices 칸을 들고 있다. 읽을 때 무시한다.
+                // 저장 호환 — 옛 재개 지점은 yarnChoices 칸을 들고 있을 수 있다. 읽을 때 무시한다.
                 LineTarget legacy = PresentationMemory.ReadResumePoint(
                     "{\"target\":{\"lineId\":\"old\",\"occurrence\":3},\"yarnChoices\":[{\"lineIndex\":0,\"optionCount\":0,\"selectedOptionIndex\":1,\"selectedOptionLineId\":\"x\"}]}");
                 Check(legacy.LineId == "old" && legacy.Occurrence == 3, "옛 재개 지점(yarnChoices 포함)을 읽지 못했다");

@@ -38,7 +38,7 @@ public sealed class ProgressionSaveBridge : IScenePersistence
         _saveCoordinator.CommitScene(
             chapterId,
             result,
-            // ⛔ 장면 HostState 칸은 비운다 — 단위의 Yarn 선택 기록은 대사 안 선택지와 함께 2026-11-05에 걷혔다.
+            // 장면 HostState 칸은 비운다 — 단위 안에 기록할 선택이 없다.
             sceneHostState: string.Empty,
             playthroughHostState: _memory.CaptureBacklog(),
             hostSerialEnd: _memory.NextSerial,

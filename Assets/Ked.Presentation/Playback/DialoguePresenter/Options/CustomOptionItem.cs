@@ -20,7 +20,6 @@ public sealed class CustomOptionItem : Selectable, ISubmitHandler, IPointerClick
     [SerializeField] private float _hoveredAlpha = 1.0f;
 
     // 진행 층의 에피소드 선택지(ChapterOptionsView)가 묶는 값 — 문구와 고를 수 있는지.
-    // ⛔ Yarn 옵션 뷰모델(OptionViewModel)은 대사 안 선택지와 함께 2026-11-05에 걷혔다.
     private bool _isBound;
     private bool _isAvailable;
     private bool _hasSubmitted;

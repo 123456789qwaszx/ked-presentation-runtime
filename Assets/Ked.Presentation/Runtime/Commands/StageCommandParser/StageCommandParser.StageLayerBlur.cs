@@ -21,7 +21,7 @@ public sealed partial class StageCommandParser
         PresentationDepthLayerKey.Close,
     };
 
-    // <<screen_blur [층=mid] [양=1] [무대=stage00]>> — 옛 screen_blur_s1/_s2는 무대 인자로 접혔다(2026-11-03).
+    // <<screen_blur [층=mid] [양=1] [무대=stage00]>>
     private void EnqueueLayerBlurSpec(
         string stageKey,
         string layerKey,

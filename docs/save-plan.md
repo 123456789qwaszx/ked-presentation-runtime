@@ -1,6 +1,6 @@
 > server_DB_Test의 최신 구현은 [save-lifecycle-v3.md](save-lifecycle-v3.md)를 따른다. 아래 문서는 이전 설계 이력이다.
 
-> ⛔ **2026-11-05 — 대사 안 선택지(Yarn `->`) 연출을 걷었다.** `ChoiceHistory` · `ChoiceRecord` · `ChoiceBoundary` · `OptionsPresentationFlow` · `CustomOptionsPresenter` · `PresentationResumePoint`와 재개 지점의 `yarnChoices`, 장면 HostState의 선택 기록(`CaptureUnitChoices`), `SeekEndReason.ReplayChoiceMismatch`는 더 없다. 선택지는 에피소드 끝의 진행 선택지뿐이고 그 기록은 진행(`Ked.Progression`)의 몫이라, 단위 루트부터의 재생은 줄 좌표(`LineTarget`)만으로 결정된다. 아래에서 그 이름들이 나오는 대목은 이력이다.
+> **2026-11-05 — 대사 안 선택지(Yarn `->`) 연출을 걷었다.** `ChoiceHistory` · `ChoiceRecord` · `ChoiceBoundary` · `OptionsPresentationFlow` · `CustomOptionsPresenter` · `PresentationResumePoint`와 재개 지점의 `yarnChoices`, 장면 HostState의 선택 기록(`CaptureUnitChoices`), `SeekEndReason.ReplayChoiceMismatch`는 더 없다. 선택지는 에피소드 끝의 진행 선택지뿐이고 그 기록은 진행(`Ked.Progression`)의 몫이라, 단위 루트부터의 재생은 줄 좌표(`LineTarget`)만으로 결정된다. 아래에서 그 이름들이 나오는 대목은 이력이다.
 
 # 세이브 확장 — 작업 계획 (정본, v2 갈래 모델)
 

@@ -3,7 +3,7 @@ using NUnit.Framework;
 using UnityEngine;
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 2026-08-24 — 코어 SlideMotion ↔ 런타임 슬라이드 실경로 등가.
+// 코어 SlideMotion ↔ 런타임 슬라이드 실경로 등가.
 //
 // 여기가 등가의 심판이다: 런타임 어셈블리(CharRigDirectionParser · SlideCommandBase ·
 // 커맨드 스펙)를 직접 참조할 수 있는 유일한 자리다. 저작 도구 쪽은 코어만 보므로
@@ -46,7 +46,7 @@ public class SlideMotionParityTests
     [Test]
     public void 모르는_낱말은_양쪽_모두_left로_물러선다()
     {
-        // ⚠ 이 폴백이 갈리면 오타 한 자에 캐릭터가 반대편에서 등장한다 — 오류는 안 난다.
+        // 이 폴백이 갈리면 오타 한 자에 캐릭터가 반대편에서 등장한다 — 오류는 안 난다.
         Assert.That(SlideMotion.DirectionVector("없는방향").X, Is.EqualTo(-1f).Within(Tolerance));
         Assert.That(RuntimeVector("없는방향").x, Is.EqualTo(-1f).Within(Tolerance));
     }

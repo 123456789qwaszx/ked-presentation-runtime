@@ -65,8 +65,7 @@ public sealed class RotateToCommandCharR : ClaimTweenCommandBase
         _startEuler = _rect.localEulerAngles;
 
         // ── 코어: 스펙 → 목표 상태 ──
-        // 회전은 장부에 게시하지 않는다 — 종전에도 하지 않았다
-        // (오일러를 게시하는 실호출부가 없다는 조사 결과와 일치).
+        // 회전은 장부에 게시하지 않는다 — 오일러를 읽는 실호출부가 없다.
         StageNodeClaim claim = RotateToReduction.Reduce(
             _rect.name,
             new RotateToReduction.Args(_spec.relativeToCurrent, _spec.toEuler.ToCore()),

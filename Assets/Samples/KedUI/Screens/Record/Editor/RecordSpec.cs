@@ -105,7 +105,7 @@ namespace Ked.Samples.UI.Editor
             SlotsTab<LoadPage>(kit, "기록을 누르면 그 장면에서 이야기를 이어갑니다.");
 
         // 05 · 06 — 슬롯 카드 여섯은 GridLayoutGroup(3열, 440×190, 간격 40×48)에 놓인 같은 카드(SaveSlotCard)다.
-        // 실행 버튼은 두지 않는다 — 카드를 누르면 바로 확인 창(2026-11-04 소유자).
+        // 실행 버튼은 두지 않는다 — 카드를 누르면 바로 확인 창.
         private static GameObject SlotsTab<TPage>(KedUIKit kit, string hint) where TPage : SaveSlotsPage
         {
             UINode page = kit.NewView<TPage>(typeof(TPage).Name, PageArea);

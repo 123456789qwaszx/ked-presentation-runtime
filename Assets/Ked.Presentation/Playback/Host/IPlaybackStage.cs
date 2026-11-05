@@ -14,7 +14,6 @@ internal interface IPlaybackStage
 
     /// <summary>
     /// 재개 지점으로 시크를 연다 — 표적 줄까지 빨리 감는다. BeginScene 바로 뒤에만 부른다.
-    /// (⛔ 전에는 단위의 Yarn 선택 기록도 함께 되돌렸다 — 대사 안 선택지와 함께 2026-11-05에 걷혔다.)
     /// </summary>
     void BeginResume(LineTarget target);
 

@@ -85,7 +85,7 @@ namespace Ked.Presentation.Core.Tests.UnityParity
         {
             Vector2 currentFocus = LegacyFocusInRigSpace(ledger, focusLocalOffset);
 
-            // ⚠ 적용 → 측정 → 복원. 이 사이에 예외가 나면 리그가 더럽게 남는다.
+            // 적용 → 측정 → 복원. 이 사이에 예외가 나면 리그가 더럽게 남는다.
             Vector2 savedDepthY = DepthY.anchoredPosition;
             Vector3 savedDepthScale = DepthScale.localScale;
 

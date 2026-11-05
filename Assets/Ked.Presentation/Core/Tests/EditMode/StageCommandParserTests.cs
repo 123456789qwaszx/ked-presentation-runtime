@@ -18,7 +18,7 @@ public class StageCommandParserTests
         return output;
     }
 
-    // (리그 프리팹, 이징 곡선). 배경 리그 프리팹 자리는 2026-10-29에 없어졌다 — 배경도 캐릭터 리그다.
+    // (리그 프리팹, 이징 곡선). 배경도 캐릭터 리그다.
     private static StageCommandParser NewParser() => new(null, null);
 
     [Test]
@@ -34,8 +34,8 @@ public class StageCommandParserTests
         Assert.IsFalse(StageCommandParser.Knows(null));
     }
 
-    // 2026-11-03: 인자 하나를 이름에 박아 다시 부르던 이름은 걷었다.
-    // 예외(소유자 결정): place_left·center·right 셋, 프레임 대기 <<1fr>>~<<48fr>>, char_visual_<효과> 일곱.
+    // 인자 하나를 이름에 박아 다시 부르는 이름은 없다.
+    // 예외: place_left·center·right 셋, 프레임 대기 <<1fr>>~<<48fr>>, char_visual_<효과> 일곱.
     [TestCase("slot01")]
     [TestCase("char_to_s1")]
     [TestCase("bg_slot01")]
@@ -101,7 +101,7 @@ public class StageCommandParserTests
     public void place는_셋째_인자로_화면_지점을_받는다_코어와_같은_이름(string point, ScreenFocusPoint expected)
     {
         // 옛 place_tl · place_inner_tl … 은 이 인자로 내려왔다. 코어 FocusStageReductions의 이름과 같아야
-        // 재생과 정지 프레임이 같은 자리를 본다(전에는 inner_tl을 런타임만 몰라 조용히 가운데로 갔다).
+        // 재생과 정지 프레임이 같은 자리를 본다(inner_tl을 런타임만 모르면 조용히 가운데로 간다).
         PlaceCharacterFocusCommandSpecCharR place =
             (PlaceCharacterFocusCommandSpecCharR)Parse(NewParser(), Cmd("place", "c1", "face", point))[0];
 

@@ -109,7 +109,7 @@ public sealed class ScenePresentation : IPlaybackStage
     }
     
     // 표적 줄까지 시크한다. 로드 시크는 백로그를 다시 적는다(LineRecordPolicy).
-    // ⛔ 단위의 Yarn 선택 기록 복원은 대사 안 선택지와 함께 2026-11-05에 걷혔다 — 루트부터의 재생은 줄 좌표만으로 결정된다.
+    // 루트부터의 재생은 줄 좌표만으로 결정된다.
     void IPlaybackStage.BeginResume(LineTarget target)
     {
         _seekState.Begin(new SeekTarget(

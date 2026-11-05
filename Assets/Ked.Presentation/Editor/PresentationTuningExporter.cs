@@ -9,7 +9,7 @@ using UnityEngine.UI;
 using Object = UnityEngine.Object;
 
 // ─────────────────────────────────────────────────────────────────────────────
-// U12 — 연출 기준값 덤프.
+// 연출 기준값 덤프.
 //
 // 코어(Ked.Presentation.Core)가 유니티 없이 무대를 재구성하려면 재료가 필요하다:
 // 리그가 어떤 노드 트리인지, 각 노드의 초기 트랜스폼이 무엇인지, 프리셋 값이 얼마인지.
@@ -288,7 +288,7 @@ public static class PresentationTuningExporter
     private static RigNodeDto CaptureNode(string id, string parent, RectTransform rect)
     {
         // 가시성 축: 스폰 직후의 alpha. 초상·이모지 루트는 0으로 태어난다.
-        // ⚠ canvasGroupAlpha만 두면 안 된다 — JsonUtility는 "없는 필드"를 0으로 채우므로
+        // canvasGroupAlpha만 두면 안 된다 — JsonUtility는 "없는 필드"를 0으로 채우므로
         // 구덤프를 읽을 때 "CanvasGroup이 없다"와 "alpha가 0이다"가 구분되지 않는다.
         // bool 게이트를 함께 두면 구덤프는 false로 안전하게 떨어진다.
         bool hasCanvasGroup = rect.TryGetComponent(out CanvasGroup canvasGroup);

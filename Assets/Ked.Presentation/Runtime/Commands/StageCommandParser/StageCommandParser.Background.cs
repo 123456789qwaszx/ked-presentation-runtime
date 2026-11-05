@@ -4,7 +4,7 @@ using UnityEngine;
 /// <summary>
 /// bg_* — 배경은 **캐스팅하지 않은 캐릭터 슬롯**이다.
 ///
-/// 별도 배경 리그(2026-05-21 ~ 10)를 지우고 어휘만 남겼다. 여기서 `bg_*`를 캐릭터 Spec으로 펼친다 —
+/// 배경 전용 리그는 없고 어휘만 있다. 여기서 `bg_*`를 캐릭터 Spec으로 펼친다 —
 /// 대본·문서·외부 도구는 그대로이고, "이건 배경"이라는 저작 의도가 대본에 남는다.
 /// 코어 `StageReducer.Background.cs`가 같은 대응으로 접는다. 표적 노드를 바꾸면 거기도 함께 바꾼다.
 ///
@@ -15,9 +15,7 @@ using UnityEngine;
 ///   bg_move               →  MoveBy      → CharSlot_Track            (move_by와 같은 축)
 ///   bg_scale              →  ScaleTo     → CharacterPortrait_ActingScale (가운데 피벗 — CharSlot_Scale은 발 피벗이다)
 ///
-/// 지운 어휘: bg_size(쓰임이 값 1 하나였고 bg_scale과 같은 노드를 잡았다) · bg_place(넉 달째 깨져 있었고 쓰임 0) ·
-/// bg_slot00/01/02(bg_spawn의 무대 · 층 인자로 접었다, 2026-11-03).
-/// bg_sprite가 받고 버리던 셋째 인자(layerKey)도 뺐다.
+/// bg_size · bg_place · bg_slot00/01/02는 두지 않는다 — 크기는 bg_scale, 무대 · 층은 bg_spawn의 인자다.
 /// </summary>
 public sealed partial class StageCommandParser
 {

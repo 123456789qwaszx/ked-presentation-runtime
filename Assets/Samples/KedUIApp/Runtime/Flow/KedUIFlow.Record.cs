@@ -176,7 +176,7 @@ namespace Ked.Samples.UI
                 RefreshSlots(focus: false);
         }
 
-        // 카드를 누르면 고르고 바로 묻는다 — 확인하면 그대로 저장 · 불러오기(실행 버튼은 없다, 2026-11-04 소유자).
+        // 카드를 누르면 고르고 바로 묻는다 — 확인하면 그대로 저장 · 불러오기(실행 버튼은 없다).
         private void HandleSlotCardClicked(int indexOnPage)
         {
             if (_saveLoadBusy || !_saveSlots.Select(indexOnPage))

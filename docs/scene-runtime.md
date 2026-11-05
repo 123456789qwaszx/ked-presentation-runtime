@@ -1,6 +1,6 @@
 # 장면(Scene) 런타임 — 설명서
 
-> ⛔ **2026-11-05 — 대사 안 선택지(Yarn `->`) 연출을 걷었다.** `ChoiceHistory` · `ChoiceRecord` · `ChoiceBoundary` · `OptionsPresentationFlow` · `CustomOptionsPresenter` · `PresentationResumePoint`와 재개 지점의 `yarnChoices`, 장면 HostState의 선택 기록(`CaptureUnitChoices`), `SeekEndReason.ReplayChoiceMismatch`는 더 없다. 선택지는 에피소드 끝의 진행 선택지뿐이고 그 기록은 진행(`Ked.Progression`)의 몫이라, 단위 루트부터의 재생은 줄 좌표(`LineTarget`)만으로 결정된다. 아래에서 그 이름들이 나오는 대목은 이력이다.
+> **2026-11-05 — 대사 안 선택지(Yarn `->`) 연출을 걷었다.** `ChoiceHistory` · `ChoiceRecord` · `ChoiceBoundary` · `OptionsPresentationFlow` · `CustomOptionsPresenter` · `PresentationResumePoint`와 재개 지점의 `yarnChoices`, 장면 HostState의 선택 기록(`CaptureUnitChoices`), `SeekEndReason.ReplayChoiceMismatch`는 더 없다. 선택지는 에피소드 끝의 진행 선택지뿐이고 그 기록은 진행(`Ked.Progression`)의 몫이라, 단위 루트부터의 재생은 줄 좌표(`LineTarget`)만으로 결정된다. 아래에서 그 이름들이 나오는 대목은 이력이다.
 
 2026-09-02. `docs/scene-boundary-plan.md`(G0~G5)의 결과를 "지금 시스템이 어떻게 도는가"로
 다시 쓴 것. 계획서는 과정이고, 이 문서는 현재 상태다. 아직 하지 않은 일은 `docs/scene-future-plan.md`.

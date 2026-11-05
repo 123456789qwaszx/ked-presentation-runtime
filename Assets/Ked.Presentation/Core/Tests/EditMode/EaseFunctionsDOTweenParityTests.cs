@@ -6,7 +6,7 @@ using Ked.Presentation.Core;
 using NUnit.Framework;
 
 // ─────────────────────────────────────────────────────────────────────────────
-// W66b — 코어 EaseFunctions ↔ DOTween EaseManager.Evaluate 등가.
+// 코어 EaseFunctions ↔ DOTween EaseManager.Evaluate 등가.
 //
 // 여기가 등가의 심판이다: DOTween을 직접 참조할 수 있는 유일한 자리.
 // VnTool 쪽은 ease-golden.json 대조만 한다(그쪽엔 DOTween이 없다).

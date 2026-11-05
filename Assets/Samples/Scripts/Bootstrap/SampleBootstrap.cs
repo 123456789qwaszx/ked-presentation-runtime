@@ -106,8 +106,8 @@ public partial class SampleBootstrap : MonoBehaviour, IRigPrefabSource
     [SerializeField] private EllipsisBreathTypewriter ellipsisBreathTypewriter;
     [SerializeField] private AutoAdvanceScheduler autoAdvanceScheduler;
 
-    // ⛔ 대사 안 선택지 프리젠터(CustomOptionsPresenter) 참조는 2026-11-05에 걷혔다 — 씬의 UnsupportedOptionsPresenter는
-    //    DialogueRunner의 프리젠터 목록에만 산다(조립할 것이 없다). 선택지는 진행 층(ChapterOptionsView)뿐이다.
+    // 씬의 UnsupportedOptionsPresenter는 DialogueRunner의 프리젠터 목록에만 산다(조립할 것이 없다).
+    // 선택지는 진행 층(ChapterOptionsView)뿐이다.
 
     [Header("진행 층")]
     [Tooltip("툴이 낸 챕터 JSON. Assets/Samples/Dialogue/ChapterProgression/ 아래의 .json 을 넣는다. " +

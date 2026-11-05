@@ -97,7 +97,7 @@ Ked.Presentation.Editor (에디터 전용) ────────────�
 | `Unit` (`PlaybackUnit`) | 재생 단위의 수명 | 열어라 · 이 노드를 재생해라 · 멈춰라 · 루트부터 다시(표적 색인을 돌려받는다) · 시크 중인가 |
 | `Memory` (`PlaybackMemory`) | 연출 기억의 입구 | 꺼내라(백로그 · 단위 선택 · 재개 지점) · 되돌려라 · 과거 단위의 이 줄을 읽어라 |
 
-문자열 형식(`PresentationMemory`), 재개 지점·줄 좌표(`LineTarget` — ⛔ `PresentationResumePoint`는 대사 안 선택지와 함께 2026-11-05에 걷혔다), 과거 단위 셈법(`BacklogForkPoints`),
+문자열 형식(`PresentationMemory`), 재개 지점·줄 좌표(`LineTarget` — `PresentationResumePoint`는 대사 안 선택지와 함께 2026-11-05에 걷혔다), 과거 단위 셈법(`BacklogForkPoints`),
 무대 계약(`IPlaybackStage`)은 `internal`이다 — 호스트가 백로그·선택 기록·줄 좌표의 생김새를 집으면 **컴파일러가 막는다**.
 이어하기도 따로 부르지 않는다. `Memory.Restore`가 재개 지점을 예약하면 다음에 열리는 단위가 그 줄까지 시크한다.
 
