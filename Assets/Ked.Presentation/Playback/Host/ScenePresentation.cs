@@ -66,7 +66,6 @@ public sealed class ScenePresentation : IPlaybackStage
         _dialogueSurfaceState = dialogueSurfaceState;
         _dialogueBox = dialogueBox;
         _presentationScope = presentationScope;
-        _choiceHistory = choiceHistory;
         _episodeSkipController = episodeSkipController;
         _seekState = seekState;
         _playbackDriver = playbackDriver;
