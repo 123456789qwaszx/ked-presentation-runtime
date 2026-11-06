@@ -37,11 +37,6 @@ public abstract class ClaimTweenCommandBase : CommandBase
     // 여러 축이면 축별 비율의 최댓값을 사용(가장 늦게 도착하는 축이 기준).
     protected abstract float MeasureRemainingRatio();
 
-    // 스텝 경계에서 가속 재트윈을 만들 것인가.
-    // 진행률(0->1) 트윈 커맨드는 (RotateBy 계열) = false(즉시확정)
-    // 처음부터 다시 도는 것이라 무의미하기 때문.
-    protected virtual bool AccelerateOnStepFinish => true;
-
     protected virtual float StepFinishSpeedUpMultiplier => 30f;
 
     // 스텝 경계 가속용 트윈. 기존 트윈을 다시 만드는 것.(잔여시간 기반 재계산)
@@ -100,12 +95,7 @@ public abstract class ClaimTweenCommandBase : CommandBase
 
         _tween?.Kill(false);
 
-        if (!AccelerateOnStepFinish)
-        {
-            Commit();
-            return;
-        }
-
+        // 스텝 경계 — 남은 만큼을 빠르게 마저 간다. 남은 것이 없으면(비율 0) 곧장 확정한다.
         float duration = CalculateAcceleratedRemainingDuration();
 
         if (duration <= 0f)

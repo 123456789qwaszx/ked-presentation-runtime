@@ -30,14 +30,11 @@ public sealed class MirrorCharacterCommandCharR : ClaimTweenCommandBase
 
     private RectTransform _rect;
     private Vector3 _targetScale;
+    private float _startScaleX;
 
     public override bool WaitForCompletion => _spec.wait;
 
     protected override float TweenDuration => _spec.duration;
-
-    // 좌우 반전은 0→1 진행이 아니라 배율 부호 뒤집기다 —
-    // 스텝 경계에서는 가속할 것 없이 곧장 확정한다.
-    protected override bool AccelerateOnStepFinish => false;
 
     private readonly PresentationStage _stage;
     private CharacterRigRefs _rig;
@@ -95,6 +92,7 @@ public sealed class MirrorCharacterCommandCharR : ClaimTweenCommandBase
     protected override void ClaimTarget()
     {
         _rect.DOKill(true);
+        _startScaleX = _rect.localScale.x;
 
         _rig.PlacementTargets.Claim(_rect, StageNodeClaim.LocalScaleXY(_rect.name, new Vec2(_targetScale.x, _targetScale.y)), Releases);
     }
@@ -108,9 +106,10 @@ public sealed class MirrorCharacterCommandCharR : ClaimTweenCommandBase
     protected override void OnCommitFinalState()
         => _rect.localScale = _targetScale;
 
-    // AccelerateOnStepFinish = false라 불리지 않지만, 계약은 정직하게 채운다.
+    // 반전은 x 배율의 부호를 뒤집는 것이라 x만 잰다(y는 그대로다).
+    // 대본의 mirror는 시간이 0이라 트윈이 없지만, 시간을 주면 스텝 경계에서 남은 만큼 가속한다.
     protected override float MeasureRemainingRatio()
         => RemainingRatio(
-            Mathf.Abs(_targetScale.x - _rect.localScale.x),
-            0f);
+            Mathf.Abs(_targetScale.x - _startScaleX),
+            Mathf.Abs(_targetScale.x - _rect.localScale.x));
 }

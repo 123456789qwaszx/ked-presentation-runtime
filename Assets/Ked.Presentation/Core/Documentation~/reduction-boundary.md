@@ -111,7 +111,7 @@ sizeDelta(Overlay) · 마스크(StageMaskMotion).
 > 슬라이드(Track)가 빠졌다** — 둘 다 측정 체인 위라 같은 줄의 place가 트윈 중간값을 읽었다.
 > 지금은 판정하지 않는다. 커맨드가 내는 클레임은 **전부** 장부의 `Claim`으로 게시되고
 > 확정 때 실행기의 `CommitReleases`가 푼다(2026-11-06 — 그 전엔 상속 층 `RigClaimTweenCommandBase`가 했다). 체인 아래 노드도 게시된다 — 아무도 안 읽을 뿐 틀리지 않는다.
-> 해제를 잊는 상태는 구조적으로 없다 — 게시하는 그 호출이 해제를 등록한다. 리덕션 없이 끝값을 정하는 커맨드(Slide · RotateBy ·
+> 해제를 잊는 상태는 구조적으로 없다 — 게시하는 그 호출이 해제를 등록한다. 리덕션 없이 끝값을 정하는 커맨드(Slide ·
 > Mirror)는 호스트가 클레임을 만든다 — "클레임 = 리덕션 출력"의 유일한 예외다.
 
 ## 두 가지 주의 (표본 정독에서 드러난 것)
@@ -286,7 +286,7 @@ fade·move·scale을 **같은 노드, 같은 리덕션**으로 접고, 종횡비
 - `SetPortraitSprite` (초상 축)
 - `ScreenFocusPoint` 비율표 — 게임별 값이므로 코어 코드가 아니라 **tuning 데이터**가 맞다.
   지금은 호스트 `ScreenFocusPointResolver`에 있다. U12 덤프 추가 후보.
-- `RotateByCommandCharR` 등 SO 저작 전용 스펙 — yarn 4묶음 밖. 필요하면 같은 규약으로.
+- SO 저작 전용 스펙 — yarn 4묶음 밖. 필요하면 같은 규약으로. (`RotateByCommandCharR`는 대본이 낸 적이 없어 2026-11-06에 지웠다 — `rotate_by`는 `RotateToCommandCharR`의 상대 모드다.)
 - **커맨드 수명 통합** — **완료** (`PresentationCore/Base/ClaimTweenCommandBase.cs`).
   `ShotIntentCommandBase`가 shot 계열에 했던 통합의 일반화. 하네스가 오라클이므로
   **이관 배치마다 랩드스킵 재판정으로 리포트가 리팩터 전과 같은지 확인했다.**
@@ -297,7 +297,7 @@ fade·move·scale을 **같은 노드, 같은 리덕션**으로 접고, 종횡비
     SetDepth(클레임 2장 + 시퀀스) · PlaceCharacterFocus(클레임 1장 + 게시) ·
     MirrorCharacter · CharVisualFocus · StageDepthDefocus
 
-  기반이 제공하는 변형점: `AccelerateOnStepFinish`(가속 여부) ·
+  기반이 제공하는 변형점(2026-11-06에 `AccelerateOnStepFinish`를 걷었다 — 끈 곳이 죽은 RotateBy와 시간 0인 Mirror뿐이었다) ·
   `CreateAcceleratedTween`(가속 트윈이 본 트윈과 다른 경우) ·
   `StepFinishSpeedUpMultiplier`(가속 배율) · `ResolvePlaybackDuration`(배속 축약).
   가속 잔여시간은 `MeasureRemainingRatio` 한 장으로 받는다 — 축이 여럿이면
