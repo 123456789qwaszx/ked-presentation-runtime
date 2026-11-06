@@ -26,7 +26,7 @@
 |---|---|---|
 | `Ked.CommandExecutor` | `Assets/Ked.CommandExecutor/` | **실행기** — 커맨드 수명(`CommandBase` · `ClaimTweenCommandBase`) · `CommandRunScope` · `CommandExecutor` · `SequencePlayer` · 포트 (참조: DOTween.Modules. **무대·재생·Yarn을 모른다**) |
 | `Ked.Presentation.Core` | `Assets/Ked.Presentation/Core/` | 순수 상태 계산 — 정지 프레임 리듀스·이징·튜닝 (**엔진 의존 0**, 참조 0) |
-| `Ked.Presentation.Stage` | `Assets/Ked.Presentation/Stage/` | **무대** 실행 계층 — Stage(무대 상태) · StageRig(무대 리그 스키마·빌더·레지스트리) · Commands(커맨드 · 팩토리 · 토큰 파서 · **StageCommandParser**) · CharacterRig(배경 = 캐스팅하지 않은 슬롯) · ShotResponse · ScreenEffect · StageMask · Audio (참조: Core · CommandExecutor · DOTween.Modules) |
+| `Ked.Presentation.Stage` | `Assets/Ked.Presentation/Stage/` | **무대** 실행 계층 — 기능 하나에 폴더 하나, 시스템과 그 커맨드가 같이 산다(2026-11-06): `PresentationStage`(무대 상태) · Grammar(**StageCommandParser** · 낱말 해석) · StageRig · Character(Rig · Portrait · Placement · Visual · Motion · Commands — 배경 = 캐스팅하지 않은 슬롯) · Shot · ScreenEffect(+ StageMask) · Audio · Control · Equivalence · Diagnostics (참조: Core · CommandExecutor · DOTween.Modules) |
 | `Ked.Presentation.Playback` | `Assets/Ked.Presentation/Playback/` | 대사 재생 루프와 연출 기억 — 줄 진행·선택지(DialoguePresenter) · 재생 제어·롤백 기록·백로그·VN 재생 상태(FeatureController) · Yarn 등록·전달(YarnBridge) · 재생 호스트 계약·재생 단위(Host) · 연출 기억과 그 입구 `PlaybackMemory`(Memory) · 등가성 하네스(Diagnostics) (참조: Core · Stage · CommandExecutor · YarnSpinner.Unity · TextMeshPro · UnityEngine.UI · DOTween.Modules) |
 | `Ked.Progression` · `Ked.Progression.Save` | `Assets/Ked.Progression/{Core,Save}/` | 진행 판정 코어와 진행 저장 (**엔진 의존 0**. 원본은 형제 저장소 `ked-progression-runtime`, [vendoring.md](../../Ked.Progression/Documentation~/vendoring.md)) |
 | `Ked.Presentation.Editor` (에디터 전용) | `Assets/Ked.Presentation/Editor/` | 무대 에디터 도구 — 초상 DB 빌더 · 튜닝 덤프 익스포터 · 이징 골든 (참조: Core · Stage · CommandExecutor · UnityEngine.UI · DOTween.Modules) |
@@ -67,6 +67,7 @@ Ked.Presentation.Editor (에디터 전용) ────────────�
    어셈블리 그래프는 비순환이어야 하므로 이들은 **한 어셈블리일 수밖에 없다.**
 
 그래서 한 부모 폴더(지금의 `Stage/`, 2026-11-06까지 이름은 `Runtime/`)에 모았다. 폴더를 나누고 싶으면 먼저 폴더 간 순환을 없애야 한다.
+(2026-11-06에 안의 폴더를 기능별로 다시 나눴다 — `CharacterRig`·`ShotResponse`의 캐릭터 쪽은 `Character/`로, 샷은 `Shot/`으로. 순환은 그대로라 어셈블리는 여전히 하나다.)
 
 > 2026-10-27 대조: 한때 적혀 있던 `ScreenEffect ↔ CharacterRig`·`ScreenEffect ↔ BackgroundRig` 순환은 지금 **0건**이다.
 > (BackgroundRig 폴더는 2026-10-29에 없어졌다 — 배경은 캐스팅하지 않은 캐릭터 슬롯이다.)
@@ -108,8 +109,8 @@ Ked.Presentation.Editor (에디터 전용) ────────────�
 ## 4. `YarnBridge`는 Stage가 아니라 Playback에 있다 — 그리고 뜻은 갖지 않는다 (2026-10-27)
 
 `YarnCommandBridge`는 Yarn 등록(이름·인자 수)과 **전달**뿐이다. Yarn이 나눠 준 토큰을 코어의
-`StageCommand`(이름 + 문자열 인자)로 묶어 `Stage/Commands/StageCommandParser/`에 넘기고, 파서가 인자 자리·생략값·
-단위·커브를 풀어 `CommandSpec`을 낸다. 실행은 `Stage/Commands/`의 커맨드와 팩토리가 한다.
+`StageCommand`(이름 + 문자열 인자)로 묶어 `Stage/Grammar/`의 `StageCommandParser`에 넘기고, 파서가 인자 자리·생략값·
+단위·커브를 풀어 `CommandSpec`을 낸다. 실행은 기능 폴더마다 있는 커맨드와 팩토리가 한다(`Stage/Character/Commands/` 등).
 
 대본 문법의 **뜻이 사는 곳은 파서 한 곳**이다. 등가성 하네스의 폴드(`StageReducer`)도 같은 `StageCommand`를 받으므로,
 같은 줄을 읽는 파서가 둘이던 때(브리지의 스펙 파싱 · 코어의 폴드 파싱)보다 하네스가 대조할 것이 줄었다.

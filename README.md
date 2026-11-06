@@ -96,7 +96,8 @@ Yarn Spinner를 기반으로 제작한 **비주얼 노벨 화면 연출 런타�
 ### 4. 연출 명령과 실행 구조
 
 * `Assets/Ked.CommandExecutor/` — 실행기(커맨드 수명 · 스텝 스코프 · 압축 정책 포트). 분리본 ked-command-executor가 따라간다
-* `Assets/Ked.Presentation/Stage/Commands/` — 커맨드 · 팩토리 · 대본 커맨드 파서(`StageCommandParser/`)
+* `Assets/Ked.Presentation/Stage/Grammar/` — 대본 커맨드 파서(`StageCommandParser`) · 낱말 해석
+* `Assets/Ked.Presentation/Stage/{Character,Shot,ScreenEffect,Audio,Control}/` — 기능마다 시스템과 그 커맨드 · 팩토리
 * `Assets/Ked.Presentation/Stage/` — 무대 실행 층(리그 · 샷 · 화면 효과 · 오디오, 뿌리의 `PresentationStage`가 무대 하나의 상태)
 
 연출 명령의 생성과 실행, 실행 수명 관리(스텝/런 스코프) 구조를 확인할 수 있습니다.

@@ -21,7 +21,7 @@
 | 마지막으로 맞춘 날 | 2026-11-04 · 이 저장소 → 분리본 (11-03~04에 여기서 고친 것 전부 — face_swap · 샷 의도 · 화면 효과 의도 · 블러 의도 · BGM · 보이스 · 무대 마스크 · S2~S6 · `Shaders/`를 `Resources/VisualEffects/`로. 분리본 안의 `Ked.CommandExecutor`도 함께). 그 전: 2026-11-03 분리본 쪽에서 먼저 한 정본 커맨드 정리를 들여옴, 2026-10-29 배경 리그 제거, 2026-10-28 `dev` @ `640ac60`, 2026-10-27 처음 떼어 냄 |
 | 맞춘 것 | 위 폴더 전부 + `ExportedTuning/` |
 | 일치 | `diff -r` 0건 (아래 "대조" 명령) |
-| 2026-11-06 | **원본만 재배치 — 분리본은 아직 옛 배치.** `Runtime/` → `Stage/`(어셈블리 `Ked.Presentation.Stage`), `Core/Tests/EditMode/` → `Tests/EditMode/`(어셈블리 `Ked.Presentation.Tests.EditMode`), 에셋은 `Stage/{Prefabs,Resources,Presets}`로, 믹서는 예제(`Samples/Audio`)로, 뿌리에 `README.md`. 다음 맞춤 때 분리본도 같은 배치로 옮긴다 |
+| 2026-11-06 | **원본만 재배치 — 분리본은 아직 옛 배치.** `Runtime/` → `Stage/`(어셈블리 `Ked.Presentation.Stage`), `Core/Tests/EditMode/` → `Tests/EditMode/`(어셈블리 `Ked.Presentation.Tests.EditMode`), 에셋은 `Stage/{Prefabs,Resources,Presets}`로, 믹서는 예제(`Samples/Audio`)로, 뿌리에 `README.md`. 같은 날 `Stage/` 안도 기능별 폴더로 다시 나눴다(Grammar · Character · Shot · ScreenEffect · Audio · Control · Diagnostics, `PortraitBuildSettings`는 Editor로). 다음 맞춤 때 분리본도 같은 배치로 옮긴다 |
 
 **갈리면 이 표를 고친다.** 표가 낡으면 분리본이 어느 판인지 아무도 모른다.
 

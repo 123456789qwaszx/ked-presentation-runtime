@@ -10,7 +10,7 @@
 
 | 폴더 | 어셈블리 | 하는 일 | 참조 |
 |---|---|---|---|
-| `Core/` | `Ked.Progression` | 진행 판정. 챕터 정의와 불변식, 선택지·조건·스탯, 챕터 JSON 로더, 장면 단위 진행과 커밋, 챕터 실행 경계(`ProgressionDriver`). 순수 C# | 없음 |
+| `Core/` | `Ked.Progression` | 진행 판정. 챕터 정의와 불변식, 선택지·조건·스탯, 챕터 JSON 로더, 장면 단위 진행과 커밋(`SceneRun/`), 챕터 실행 경계(`ProgressionDriver`). 순수 C# | 없음 |
 | `Save/` | `Ked.Progression.Save` | 진행 저장. 플레이스루(append-only, 갈라지기), 슬롯, 이어하기 지점, 로컬 파일 저장소. 순수 C# + Newtonsoft.Json | Core |
 | `Tests/EditMode/` | `Ked.Progression.Tests.EditMode` | 판정 규칙 테스트 | Core |
 

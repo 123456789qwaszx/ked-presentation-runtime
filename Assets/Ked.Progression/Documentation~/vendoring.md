@@ -27,7 +27,7 @@ Playback을 뺀 전부)는 반대다 — 이 저장소가 원본이고 ked-comma
 | 마지막 동기화 | 2026-10-26 · **사본 → 원본** (역반입) |
 | 맞춘 것 | `Runtime/` 전체(Spec · State · Transition · Vocabulary · Loading · Scene · Contracts · Response · `ProgressionDriver` · `ISceneRunner`) + `Save/`(`Ked.Progression.Save`) + EditMode 테스트 |
 | 코드 일치 | `.cs` 기준 `diff -r` 0건 (아래 "대조" 명령) |
-| 2026-11-06 | **사본 배치를 어셈블리 단위로.** 뿌리에 펼쳐 두던 코드를 `Core/`(코어 어셈블리)와 `Save/`(저장 어셈블리, 원본에선 `Runtime/Save/`)로 나눴다(.meta 그대로, `Core.meta`는 원본 `Runtime.meta`). 모든 Ked 모듈이 같은 규칙(폴더 = 어셈블리)을 따르게 한 것이다. **원본도 같은 배치로 바꿀 예정** — 그때까지 대조·반입 명령은 아래 대응표대로 경로를 바꿔 쓴다. 주석만 세 곳 갈려 있다(`ProgressionLoader` · `ProgressionStateFoldTests` · `SceneBoundaryTests` — 사본이 11-05에 결정 번호 표기를 지웠다) |
+| 2026-11-06 | **사본 배치를 어셈블리 단위로.** 뿌리에 펼쳐 두던 코드를 `Core/`(코어 어셈블리)와 `Save/`(저장 어셈블리, 원본에선 `Runtime/Save/`)로 나눴다(.meta 그대로, `Core.meta`는 원본 `Runtime.meta`). 모든 Ked 모듈이 같은 규칙(폴더 = 어셈블리)을 따르게 한 것이다. 같은 날 `Core/Scene/`은 `Core/SceneRun/`으로 이름을 바꿨다(Unity의 `Scenes`와 헷갈려서). **원본도 같은 배치로 바꿀 예정** — 그때까지 대조·반입 명령은 아래 대응표대로 경로를 바꿔 쓴다. 주석만 세 곳 갈려 있다(`ProgressionLoader` · `ProgressionStateFoldTests` · `SceneBoundaryTests` — 사본이 11-05에 결정 번호 표기를 지웠다) |
 | 2026-11-04 | **사본 → 원본, `Save/` 배치.** 사본에서 먼저 `Coordinator/` · `Fork/` · `Maintenance/` · `Slots/`를 걷고 다섯 파일(`SaveCoordinator` · `PlaythroughSaveSnapshot` · `SaveSlotService` · `PlaythroughForkService` · `LocalSaveMaintenance`)을 `Save/` 바로 아래로 옮겼고, 원본도 같게 옮겼다(.meta 그대로). 원본 `tests/ProgressionSave` 25/25 |
 | 원본 쪽 정리 | 옛 `SceneRunner`·`SceneRunContext`·`ProgressionState`·디버그 호스트 삭제, `Assets/Progression/Samples/` 최소 샘플 추가, README 갱신 |
 | 그 뒤 원본에만 | 결정 E3 테스트(`tests/ProgressionSave`), 샘플의 저장·이어하기·대사 기록 갈라지기, README — **코드(`Runtime/`)는 그대로**라 사본에 가져올 것이 없다 |
@@ -65,15 +65,20 @@ Playback을 뺀 전부)는 반대다 — 이 저장소가 원본이고 ked-comma
 
 | 원본 `ked-progression-runtime` | 사본 `Assets/Ked.Progression/` |
 |---|---|
-| `Assets/Progression/Runtime/` (Save 제외) | `Core/` |
+| `Assets/Progression/Runtime/` (Save · Scene 제외) | `Core/` |
+| `Assets/Progression/Runtime/Scene/` | `Core/SceneRun/` (Unity의 `Scenes`와 헷갈려 이름을 바꿨다) |
 | `Assets/Progression/Runtime/Save/` | `Save/` |
 | `Assets/Progression/Tests/EditMode/` | `Tests/EditMode/` |
 
 ```bash
 # 코어
-diff -r -q --strip-trailing-cr -x "*.meta" -x Save \
+diff -r -q --strip-trailing-cr -x "*.meta" -x Save -x Scene -x SceneRun \
   ../ked-progression-runtime/Assets/Progression/Runtime \
   Assets/Ked.Progression/Core
+# 장면 실행
+diff -r -q --strip-trailing-cr -x "*.meta" \
+  ../ked-progression-runtime/Assets/Progression/Runtime/Scene \
+  Assets/Ked.Progression/Core/SceneRun
 # 저장
 diff -r -q --strip-trailing-cr -x "*.meta" \
   ../ked-progression-runtime/Assets/Progression/Runtime/Save \
@@ -84,16 +89,18 @@ diff -r -q --strip-trailing-cr -x "*.meta" \
   Assets/Ked.Progression/Tests/EditMode
 ```
 
-2026-10-26 기준 세 명령의 출력은 **0줄**이었다. 2026-11-06 기준으로는 주석만 세 곳 갈려 있다(스냅샷 표).
+2026-10-26 기준 명령들의 출력은 **0줄**이었다. 2026-11-06 기준으로는 주석만 세 곳 갈려 있다(스냅샷 표).
 
 ## 반입 — 원본 → 사본
 
 ```bash
-rm -rf Assets/Ked.Progression/Core/{Contracts,Loading,Response,Scene,Spec,State,Transition,Vocabulary} \
+rm -rf Assets/Ked.Progression/Core/{Contracts,Loading,Response,SceneRun,Spec,State,Transition,Vocabulary} \
        Assets/Ked.Progression/Save
 cp -r ../ked-progression-runtime/Assets/Progression/Runtime/. Assets/Ked.Progression/Core/
-mv Assets/Ked.Progression/Core/Save      Assets/Ked.Progression/Save
-mv Assets/Ked.Progression/Core/Save.meta Assets/Ked.Progression/Save.meta
+mv Assets/Ked.Progression/Core/Save       Assets/Ked.Progression/Save
+mv Assets/Ked.Progression/Core/Save.meta  Assets/Ked.Progression/Save.meta
+mv Assets/Ked.Progression/Core/Scene      Assets/Ked.Progression/Core/SceneRun
+mv Assets/Ked.Progression/Core/Scene.meta Assets/Ked.Progression/Core/SceneRun.meta
 cp ../ked-progression-runtime/Assets/Progression/Tests/EditMode/*.cs* \
    Assets/Ked.Progression/Tests/EditMode/
 
@@ -114,8 +121,10 @@ asmdef는 양쪽 이름과 설정이 같다(`Ked.Progression` · `noEngineRefere
 ```bash
 cd ../ked-progression-runtime
 rm -rf Assets/Progression/Runtime/{Contracts,Loading,Response,Save,Scene,Spec,State,Transition,Vocabulary}
-cp -r ../ked-presentation-runtime/Assets/Ked.Progression/Core/{Contracts,Loading,Response,Scene,Spec,State,Transition,Vocabulary} \
+cp -r ../ked-presentation-runtime/Assets/Ked.Progression/Core/{Contracts,Loading,Response,Spec,State,Transition,Vocabulary} \
       Assets/Progression/Runtime/
+cp -r ../ked-presentation-runtime/Assets/Ked.Progression/Core/SceneRun      Assets/Progression/Runtime/Scene
+cp    ../ked-presentation-runtime/Assets/Ked.Progression/Core/SceneRun.meta Assets/Progression/Runtime/Scene.meta
 cp ../ked-presentation-runtime/Assets/Ked.Progression/Core/*.cs* Assets/Progression/Runtime/
 cp -r ../ked-presentation-runtime/Assets/Ked.Progression/Save Assets/Progression/Runtime/
 cp ../ked-presentation-runtime/Assets/Ked.Progression/Save.meta Assets/Progression/Runtime/

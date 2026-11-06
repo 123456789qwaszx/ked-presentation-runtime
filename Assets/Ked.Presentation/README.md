@@ -12,6 +12,23 @@
 | `Editor/` | `Ked.Presentation.Editor` | 에디터 도구. 튜닝·모션 내보내기, 초상 DB 빌더 | Core · Stage |
 | `Tests/EditMode/` | `Ked.Presentation.Tests.EditMode` | EditMode 테스트(Unity 계산과의 대조 포함) | Core · Stage · Editor |
 
+## Stage 안 — 기능 하나에 폴더 하나
+
+시스템과 그것을 움직이는 커맨드가 같은 폴더에 산다. 예외는 대본 문법의 뜻 하나(`Grammar/`)다.
+
+| 폴더 | 무엇 |
+|---|---|
+| `PresentationStage.cs` | 무대 하나의 상태 — 모든 기능의 입구 |
+| `Grammar/` | 대본 → 스펙. `StageCommandParser`(표 + 기능별 partial), `Tokens/` 낱말 해석 |
+| `StageRig/` | 무대 리그 — Stage00/01/02 · 깊이 층 · 마운트 |
+| `Character/` | 캐릭터 리그 — `Rig/` 스키마·빌더·레지스트리 · `Portrait/` 초상 · `Placement/` 정착 장부·초점·배치·깊이 계산 · `Visual/` 비주얼 · `Motion/` 모션 클립 · `Commands/` |
+| `Shot/` | 카메라 Pan·Zoom과 카메라 중립 계약, 샷 커맨드 |
+| `ScreenEffect/` | flash · noise · vignette · 블러 의도 · 전환 마스크(`StageMask/`), 그 커맨드 |
+| `Audio/` | BGM · SFX · 보이스, 그 커맨드 |
+| `Control/` | wait · actor 별칭 · 앞뒤 순서 |
+| `Equivalence/` · `CoreBridge/` · `Diagnostics/` | 실제 무대 캡처 · 유니티↔코어 변환 · 초점 디버그 뷰 |
+| `Prefabs/` · `Resources/` · `Presets/` | 리그 프리팹 · 셰이더와 재질 · 커맨드 프리셋과 튜닝 기본값 |
+
 ## 의존 방향
 
 ```
