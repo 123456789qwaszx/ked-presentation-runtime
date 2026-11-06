@@ -53,8 +53,9 @@ public sealed partial class StageCommandParser
         ["fade_in"] = (p, c) => p.EnqueueFadeInSpec(c.Arg(0), c.Arg(1, "14fr")),
         ["fade_out"] = (p, c) => p.EnqueueFadeOutSpec(c.Arg(0), c.Arg(1, "14fr")),
         ["fade"] = (p, c) => p.EnqueueFadeToSpec(c.Arg(0), Float(c, 1, 1f), c.Arg(2, "14fr")),
-        ["slide_in"] = (p, c) => p.EnqueueSlideInSpec(c.Arg(0), c.Arg(1, "left"), c.Arg(2, "12u"), c.Arg(3, "10fr")),
-        ["slide_out"] = (p, c) => p.EnqueueSlideOutSpec(c.Arg(0), c.Arg(1, "right"), c.Arg(2, "12u"), c.Arg(3, "10fr")),
+        // ease · punch를 생략하면 종류별 코어 기본값(SlideMotion) — 툴 프리뷰와 같은 값.
+        ["slide_in"] = (p, c) => p.EnqueueSlideSpec(SlideMotion.Kind.In, c.Arg(0), c.Arg(1, SlideMotion.DefaultInDirection), c.Arg(2, SlideMotion.DefaultDistanceToken), c.Arg(3, "10fr"), c.Arg(4), c.Arg(5)),
+        ["slide_out"] = (p, c) => p.EnqueueSlideSpec(SlideMotion.Kind.Out, c.Arg(0), c.Arg(1, SlideMotion.DefaultOutDirection), c.Arg(2, SlideMotion.DefaultDistanceToken), c.Arg(3, "10fr"), c.Arg(4), c.Arg(5)),
         ["char_move_to"] = (p, c) => p.EnqueueMoveByUnitCharSpec(c.Arg(0), c.Arg(1), c.Arg(2), c.Arg(3, "10fr")),
         ["char_scale_to"] = (p, c) => p.EnqueueScaleSpec(c.Arg(0), Float(c, 1, 0f), c.Arg(2, "10fr"), c.Arg(3, "")),
         ["char_rotate_to"] = (p, c) => p.EnqueuePortraitRotateToSpec(c.Arg(0), Float(c, 1, 0f), c.Arg(2, "10fr"), c.Arg(3, "")),

@@ -260,7 +260,7 @@ fade·move·scale을 **같은 노드, 같은 리덕션**으로 접고, 종횡비
 새 리그를 짓고 옛 리그를 부순다. 폴드는 "재사용한다 — 좌표도 유지"로 접고 있었다(사실이 아니었다).
 배경을 합치며 같은 키의 `bg_spawn` 재선언을 검토하다 드러났다(배경 그림만 바꾸는 것은 `bg_sprite`). 지금은 노드·α가 스키마로 돌아가고 배역만 남는다.
 
-**둘은 대칭이 아니다.** `SlideCommandBase`가 등장·퇴장의 차이를 "현재 위치가 도착점이냐
+**둘은 대칭이 아니다.** `SlideCommandCharR`(2026-11-06까지 `SlideCommandBase` + 파생 둘)가 등장·퇴장의 차이를 "현재 위치가 도착점이냐
 출발점이냐" 하나로 환원하기 때문이다:
 
 | | 정착 상태 | 표적 | 기본 방향·거리 |
@@ -292,7 +292,7 @@ fade·move·scale을 **같은 노드, 같은 리덕션**으로 접고, 종횡비
   **이관 배치마다 랩드스킵 재판정으로 리포트가 리팩터 전과 같은지 확인했다.**
   - 배치 1: MoveBy · ScaleTo · RotateTo (코어 배선이 끝난 셋)
   - 배치 2·3: Fade 4종(`CanvasFadeCommandBase` — 2026-11-06에 `FadeCommandCharR` 하나로 합쳤다) · BgR 트랜스폼 계열 · RotateBy 쌍
-  - 배치 4: PivotRotateTo · Slide 4종(`SlideCommandBase`) ·
+  - 배치 4: PivotRotateTo · Slide 4종(`SlideCommandBase` — 2026-11-06에 `SlideCommandCharR` 하나로 합쳤다) ·
     Overlay Move/Scale/Size · Overlay Show/Hide(`OverlayRootFadeCommandBase`) ·
     SetDepth(클레임 2장 + 시퀀스) · PlaceCharacterFocus(클레임 1장 + 게시) ·
     MirrorCharacter · CharVisualFocus · StageDepthDefocus

@@ -5,7 +5,7 @@ using UnityEngine;
 // ─────────────────────────────────────────────────────────────────────────────
 // 코어 SlideMotion ↔ 런타임 슬라이드 실경로 등가.
 //
-// 여기가 등가의 심판이다: 런타임 어셈블리(CharRigDirectionParser · SlideCommandBase ·
+// 여기가 등가의 심판이다: 런타임 어셈블리(CharRigDirectionParser · SlideCommandCharR ·
 // 커맨드 스펙)를 직접 참조할 수 있는 유일한 자리다. 저작 도구 쪽은 코어만 보므로
 // "프리뷰가 그리는 슬라이드 = 게임이 재생하는 슬라이드"의 근거가 이 파일이다.
 //
@@ -28,7 +28,7 @@ public class SlideMotionParityTests
 
     /// <summary>런타임 실경로: 낱말 → 열거형 → 벡터. 커맨드가 실제로 지나는 사슬이다.</summary>
     private static Vector2 RuntimeVector(string word)
-        => SlideCommandBase.DirectionToVector(CharRigDirectionParser.ParseSlideDirection(word));
+        => SlideCommandCharR.DirectionToVector(CharRigDirectionParser.ParseSlideDirection(word));
 
     [Test]
     public void 방향_낱말이_런타임_사슬과_같은_벡터를_낸다()
@@ -62,12 +62,12 @@ public class SlideMotionParityTests
 
             Assert.That(
                 SlideMotion.PunchTowardEnd(t),
-                Is.EqualTo(SlideCommandBase.BumpTowardEnd(t)).Within(Tolerance),
+                Is.EqualTo(SlideMotion.Punch(SlideMotion.Kind.In, t)).Within(Tolerance),
                 $"등장 튐 t={t}");
 
             Assert.That(
                 SlideMotion.PunchFromStart(t),
-                Is.EqualTo(SlideCommandBase.BumpFromStart(t)).Within(Tolerance),
+                Is.EqualTo(SlideMotion.Punch(SlideMotion.Kind.Out, t)).Within(Tolerance),
                 $"퇴장 튐 t={t}");
         }
     }
@@ -84,12 +84,14 @@ public class SlideMotionParityTests
     }
 
     [Test]
-    public void 스펙_기본값이_코어_상수와_같다()
+    public void ease와_punch를_생략하면_종류별_코어_값이다()
     {
-        // 브리지가 안 넘기는 축(ease·punch)은 스펙 필드값이 언제나 쓰인다 — 코어가 프리뷰에
-        // 쓰는 상수와 달라지면 흐르는 모양이 갈린다.
-        var slideIn = new SlideInCommandSpecCharR();
-        var slideOut = new SlideOutCommandSpecCharR();
+        // 대본이 ease · punch를 안 주면 파서가 코어 상수로 채운다 — 프리뷰가 그리는 모양과 같다.
+        SlideCommandSpecCharR slideIn = ParseSlide("slide_in", "c1");
+        SlideCommandSpecCharR slideOut = ParseSlide("slide_out", "c1");
+
+        Assert.That(slideIn.kind, Is.EqualTo(SlideMotion.Kind.In));
+        Assert.That(slideOut.kind, Is.EqualTo(SlideMotion.Kind.Out));
 
         Assert.That(slideIn.ease.ToString(), Is.EqualTo(SlideMotion.InEase.ToString()));
         Assert.That(slideOut.ease.ToString(), Is.EqualTo(SlideMotion.OutEase.ToString()));
@@ -108,5 +110,22 @@ public class SlideMotionParityTests
         Assert.That(
             SlideMotion.DirectionVector(SlideMotion.DefaultDirection(SlideMotion.Kind.Out)).X,
             Is.EqualTo(+1f).Within(Tolerance));
+    }
+
+    [Test]
+    public void 대본이_준_ease와_punch를_싣는다()
+    {
+        SlideCommandSpecCharR spec = ParseSlide("slide_in", "c1", "left", "12u", "10fr", "OutBack", "1u");
+
+        Assert.That(spec.ease.ToString(), Is.EqualTo("OutBack"));
+        Assert.That(spec.punch, Is.EqualTo(UnitToken.UnitsToPixels(1f, UnitToken.DefaultReferenceStageWidth)).Within(Tolerance));
+    }
+
+    private static SlideCommandSpecCharR ParseSlide(string name, params string[] args)
+    {
+        var output = new System.Collections.Generic.List<CommandSpecBase>();
+        Assert.IsTrue(new StageCommandParser(null).TryParse(new StageCommand(name, args, "test.yarn:1"), output));
+
+        return (SlideCommandSpecCharR)output[0];
     }
 }

@@ -1,54 +1,58 @@
+using System;
 using DG.Tweening;
 using Ked.Presentation.Core;
 using UnityEngine;
 
-/// <summary>
-/// 슬라이드(등장·퇴장)의 공통 수명 — SlideIn/SlideOut이 이것 하나다(만들 때는 Char/Bg 4종이었다. 배경 쪽 둘은 2026-08에 지웠다).
-///
-/// 네 커맨드의 본체는 원래 글자 단위로 같았고, 다른 건 다섯 가지뿐이었다:
-///   대상 해석(리그 종류) · 방향/거리 · ease · punch · 튐이 앞에 오나 뒤에 오나.
-///
-/// 등장/퇴장의 차이는 "현재 위치가 도착점이냐 출발점이냐" 하나로 환원된다
-/// (등장은 화면 밖에서 제자리로, 퇴장은 제자리에서 화면 밖으로).
-/// </summary>
-public abstract class SlideCommandBase : ClaimTweenCommandBase
+[Serializable]
+public sealed class SlideCommandSpecCharR : CharacterRigCommandSpecBase
 {
+    [Header("Target (Track)")]
+    public CharacterRigTarget target = CharacterRigTarget.CharSlot_Track;
+
+    [Header("Slide")]
+    [Tooltip("In = 지금 위치가 도착점(화면 밖에서 들어온다) · Out = 지금 위치가 출발점(화면 밖으로 나간다).")]
+    public SlideMotion.Kind kind;
+    public CharRigDirection direction;
+    public float distance;
+
+    [Header("Tween")]
+    public float duration;
+
+    [Tooltip("파서가 채운다. 대본에서 생략하면 종류별 코어 기본값(SlideMotion.EaseOf).")]
+    public Ease ease;
+
+    [Tooltip("경로를 벗어나 튀는 양(px). 0이면 직선. 파서가 채운다 — 생략하면 SlideMotion.PunchPixels.")]
+    public float punch;
+}
+
+public sealed class SlideCommandCharR : ClaimTweenCommandBase
+{
+    private readonly PresentationStage _stage;
+    private readonly SlideCommandSpecCharR _spec;
+
+    private CharacterRigRefs _rig;
     private RectTransform _rect;
 
     private Vector2 _startPos;
     private Vector2 _endPos;
     private Vector2 _slideDir;
 
-    protected abstract Ease SlideEase { get; }
-    protected abstract CharRigDirection SlideDirection { get; }
-    protected abstract float SlideDistance { get; }
+    public override bool WaitForCompletion => _spec.wait;
 
-    /// <summary>기본 경로를 벗어나 튀는 양(px). 0이면 밋밋한 직선 슬라이드다.</summary>
-    protected abstract float Punch { get; }
+    protected override float TweenDuration => _spec.duration;
 
-    /// <summary>등장이면 true(현재 위치 = 도착점), 퇴장이면 false(현재 위치 = 출발점).</summary>
-    protected abstract bool CurrentPositionIsDestination { get; }
+    private bool Entering => _spec.kind == SlideMotion.Kind.In;
 
-    /// <summary>진행률(ease 적용 후)에 대한 튐의 세기. 등장은 끝에서, 퇴장은 출발에서 튄다.</summary>
-    protected abstract float Bump(float easedProgress);
-
-    /// <summary>슬라이드할 rect. 어느 축인지는 파생의 스펙이 안다.</summary>
-    protected abstract RectTransform SlideRectOf(CharacterRigRefs rig);
-
-    private readonly PresentationStage _stage;
-    private readonly string _slotKey;
-    private CharacterRigRefs _rig;
-
-    protected SlideCommandBase(PresentationStage stage, string slotKey)
+    public SlideCommandCharR(PresentationStage stage, SlideCommandSpecCharR spec)
     {
         _stage = stage;
-        _slotKey = slotKey;
+        _spec = spec;
     }
 
     protected override void ResolveTargets()
     {
-        _rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(_stage, _slotKey);
-        _rect = SlideRectOf(_rig);
+        _rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(_stage, _spec.slotKey);
+        _rect = _rig.GetRect(_spec.target);
     }
 
     protected override void ClaimTarget()
@@ -56,9 +60,9 @@ public abstract class SlideCommandBase : ClaimTweenCommandBase
         _rect.DOKill(true);
 
         Vector2 current = _rect.anchoredPosition;
-        Vector2 offset = DirectionToVector(SlideDirection) * SlideDistance;
+        Vector2 offset = DirectionToVector(_spec.direction) * _spec.distance;
 
-        if (CurrentPositionIsDestination)
+        if (Entering)
         {
             _endPos = current;
             _startPos = current + offset;
@@ -74,7 +78,9 @@ public abstract class SlideCommandBase : ClaimTweenCommandBase
         // 거리가 0이면 진행 방향을 잃는다 — 등장은 들어오는 쪽, 퇴장은 나가는 쪽이 답이다.
         _slideDir = travel.sqrMagnitude > 0f
             ? travel.normalized
-            : (CurrentPositionIsDestination ? -DirectionToVector(SlideDirection) : DirectionToVector(SlideDirection));
+            : (Entering 
+                ? -DirectionToVector(_spec.direction) 
+                : DirectionToVector(_spec.direction));
 
         // 끝값은 리덕션이 아니라 여기서 정한 값이다(등장은 현재 위치, 퇴장은 현재 + 거리).
         // 등장은 CreateTween이 rect를 출발점으로 밀어 두므로, 게시가 없으면 같은 줄의 place가 화면 밖 값을 읽는다.
@@ -96,7 +102,7 @@ public abstract class SlideCommandBase : ClaimTweenCommandBase
     protected override Tween CreateAcceleratedTween(float duration)
         => _rect
             .DOAnchorPos(_endPos, duration)
-            .SetEase(SlideEase)
+            .SetEase(_spec.ease)
             .SetTarget(_rect);
 
     protected override void OnCommitFinalState()
@@ -109,18 +115,13 @@ public abstract class SlideCommandBase : ClaimTweenCommandBase
 
     private void ApplyProgress(float progress)
     {
-        float eased = DOVirtual.EasedValue(0f, 1f, progress, SlideEase);
+        float eased = DOVirtual.EasedValue(0f, 1f, progress, _spec.ease);
 
         Vector2 basePos = Vector2.LerpUnclamped(_startPos, _endPos, eased);
-        Vector2 offset = _slideDir * (Punch * Bump(eased));
+        Vector2 offset = _slideDir * (_spec.punch * SlideMotion.Punch(_spec.kind, eased));
 
         _rect.anchoredPosition = basePos + offset;
     }
-
-    // 방향 표와 튐 모양의 <b>주인은 코어 SlideMotion 하나</b>다. 저작 도구의
-    //   프리뷰가 같은 값으로 궤적을 그리기 때문이다 — 여기 사본을 두면 둘이 갈리고, 그
-    //   어긋남은 "프리뷰와 게임이 다르다"로만 드러난다. 열거형 → 낱말만 이쪽이 진다
-    //   (코어는 CharRigDirection을 모른다). 사슬 전체는 SlideMotionParityTests가 잡는다.
 
     // public인 이유: 순수 함수이고, 등가성 하네스가 <b>파서 → 열거형 → 벡터</b> 사슬을
     // 코어와 대조해야 한다(SlideMotionParityTests). 상태를 안 들므로 열어도 잃을 것이 없다.
@@ -139,10 +140,4 @@ public abstract class SlideCommandBase : ClaimTweenCommandBase
         CharRigDirection.Down => "down",
         _ => "left",
     };
-
-    /// <summary>도착 직전에 부풀었다 사그라드는 튐 — 등장용.</summary>
-    public static float BumpTowardEnd(float e) => SlideMotion.PunchTowardEnd(e);
-
-    /// <summary>출발 직후에 부풀었다 사그라드는 튐 — 퇴장용.</summary>
-    public static float BumpFromStart(float e) => SlideMotion.PunchFromStart(e);
 }

@@ -1,3 +1,5 @@
+using System;
+using DG.Tweening;
 using Ked.Presentation.Core;
 using UnityEngine;
 
@@ -13,4 +15,7 @@ public static class PresentationCoreConversions
     public static Vector2 ToUnity(this Vec2 v) => new(v.X, v.Y);
 
     public static Vector3 ToUnity(this Vec3 v) => new(v.X, v.Y, v.Z);
+
+    /// <summary>코어 이징 → DOTween. 둘은 이름이 일대일이다(EaseFunctionsDOTweenParityTests).</summary>
+    public static Ease ToDOTween(this EaseKind ease) => (Ease)Enum.Parse(typeof(Ease), ease.ToString());
 }
