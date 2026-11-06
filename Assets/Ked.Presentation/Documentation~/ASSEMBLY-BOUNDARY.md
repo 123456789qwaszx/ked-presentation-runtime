@@ -89,6 +89,8 @@ Ked.Presentation.Editor (에디터 전용) ────────────�
 
 - **대사창·선택지창 뷰 베이스**(`PresentationDialogueBoxViewBase`, `PresentationOptionsBoxViewBase`, `VNDefaultOptionsPanel`)는
   UI 프레임(`UIBase`)을 상속한다. `UI/DialogueBox/`에 남겼고, Playback은 그 계약(`IPresentationDialogueBoxView` · `IPresentationOptionsBoxView`)만 안다.
+  (2026-11-06) 선택지 상자 계약과 항목(`CustomOptionItem`)은 예제의 진행 호스트로 옮겼다(`IChapterOptionsBoxView`) —
+  대사 안 선택지를 지원하지 않게 된 뒤 본체에 쓰는 곳이 없었다. `->`를 알리던 `UnsupportedOptionsPresenter`도 같은 날 걷었다 — 본체 Playback에 선택지 코드는 없다.
 - **예제 조립부**(`PresentationAssembler`, `PresentationSceneRefs`)는 UI 매니저·패치 서비스를 세운다. `Game/`으로 옮겼다(2026-11-04 둘을 걷고 `SampleBootstrap`의 부분 파일 `SampleBootstrap.Presentation.cs`로 합침).
 - **연출 기억 코덱**(`PresentationMemory`, 예전 `ProgressionHost/PresentationSaveState`)은 진행 저장의 JSON 설정을 빌려 쓰고 있었다.
   자기 설정을 갖게 해 진행 참조를 끊었다. 형식(camelCase)은 그대로다.

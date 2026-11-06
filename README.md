@@ -74,7 +74,7 @@ Yarn Spinner를 기반으로 제작한 **비주얼 노벨 화면 연출 런타�
 [ked-story-compositor](https://github.com/123456789qwaszx/ked-story-compositor) `samples/RuntimeSamples`가 정본입니다.
 두 툴은 프로젝트 폴더의 `runtime.target.json`이 가리키는 **게임 폴더**(이 폴더)에 저장할 때마다 산출물을 바로 씁니다 — 파일 이름은 `{챕터}.progression.json` · `{챕터}_{노드}.yarn`입니다. 손으로 덮어쓸 일이 없습니다.
 
-선택지는 **에피소드 끝의 진행 선택지**(챕터 JSON의 `NextOptions`) 하나뿐입니다 — 두 툴은 대사 안 선택지(`->`)를 만들지 않습니다(2026-11-04). 런타임의 `->` 연출도 2026-11-05에 걷었습니다 — Yarn 대본에 `->`가 남아 있으면 `UnsupportedOptionsPresenter`가 오류 로그를 남기고 고르지 않은 채 지나갑니다(`allowOptionFallthrough`). 그래서 단위 루트부터의 재생(되감기 · 이어하기 · 갈라지기)은 줄 좌표 하나로 결정됩니다.
+선택지는 **에피소드 끝의 진행 선택지**(챕터 JSON의 `NextOptions`) 하나뿐입니다 — 두 툴은 대사 안 선택지(`->`)를 만들지 않습니다(2026-11-04). 런타임의 `->` 연출도 2026-11-05에 걷었습니다 — Yarn 대본에 `->`가 남아 있으면 받는 프리젠터가 없으므로 고르지 않은 채 조용히 지나갑니다(`allowOptionFallthrough`). 그래서 단위 루트부터의 재생(되감기 · 이어하기 · 갈라지기)은 줄 좌표 하나로 결정됩니다.
 
 ### 3. 대사 실행 흐름
 

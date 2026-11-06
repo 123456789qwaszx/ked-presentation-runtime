@@ -108,8 +108,7 @@ public partial class SampleBootstrap : MonoBehaviour, IRigPrefabSource
     [SerializeField] private EllipsisBreathTypewriter ellipsisBreathTypewriter;
     [SerializeField] private AutoAdvanceScheduler autoAdvanceScheduler;
 
-    // 씬의 UnsupportedOptionsPresenter는 DialogueRunner의 프리젠터 목록에만 산다(조립할 것이 없다).
-    // 선택지는 진행 층(ChapterOptionsView)뿐이다.
+    // 선택지는 진행 층(ChapterOptionsView)뿐이다 — 대사 안 선택지(->)를 받는 프리젠터는 없다.
 
     [Header("저장")]
     [Tooltip("저장과 현재 대본의 호환성을 판별한다. 복원에 영향을 주는 대본 변경 시 값을 올린다.\n" +

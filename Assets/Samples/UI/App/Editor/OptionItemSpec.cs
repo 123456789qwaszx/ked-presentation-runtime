@@ -6,7 +6,7 @@ using UnityEngine.UI;
 namespace Ked.Samples.UI.Editor
 {
     /// <summary>
-    /// 선택지 항목 — 본체의 CustomOptionItem을 새 그림(choice_normal, 760×74)으로 감싼 프리팹. 선택 가능·불가는 재생 쪽이
+    /// 선택지 항목 — 진행 예제의 CustomOptionItem을 새 그림(choice_normal, 760×74)으로 감싼 프리팹. 선택 가능·불가는 ChapterOptionsView가
     /// 정하고(CustomOptionItem.Bind), 이 프리팹은 그 상태를 그린다: 포커스 = 청록 테두리, 불가 = 투명도.
     /// </summary>
     internal static class OptionItemSpec
@@ -64,7 +64,7 @@ namespace Ked.Samples.UI.Editor
             SerializedProperty property = so.FindProperty(name);
             if (property == null)
             {
-                Debug.LogWarning($"[Ked UI 빌더] CustomOptionItem.{name} 칸이 없다 — 본체가 바뀌었는지 확인한다.");
+                Debug.LogWarning($"[Ked UI 빌더] CustomOptionItem.{name} 칸이 없다 — CustomOptionItem(ProgressionHost)이 바뀌었는지 확인한다.");
                 return;
             }
 
@@ -76,7 +76,7 @@ namespace Ked.Samples.UI.Editor
             SerializedProperty property = so.FindProperty(name);
             if (property == null)
             {
-                Debug.LogWarning($"[Ked UI 빌더] CustomOptionItem.{name} 칸이 없다 — 본체가 바뀌었는지 확인한다.");
+                Debug.LogWarning($"[Ked UI 빌더] CustomOptionItem.{name} 칸이 없다 — CustomOptionItem(ProgressionHost)이 바뀌었는지 확인한다.");
                 return;
             }
 

@@ -6,12 +6,11 @@ on:
     paths:
       - 'Assets/Ked.Progression/**'
       - 'Assets/Samples/Scripts/ProgressionHost/SceneRunner.cs'
+      - 'Assets/Samples/Scripts/ProgressionHost/IChapterEndView.cs'
       - 'Assets/Ked.Presentation/Playback/Host/**'
-      - 'Assets/Ked.Presentation/Playback/Memory/PresentationResumePoint.cs'
       - 'Assets/Ked.Presentation/Playback/Memory/RollbackHistory.cs'
       - 'Assets/Ked.Presentation/Playback/Memory/BacklogRecorder.cs'
       - 'Assets/Ked.Presentation/Playback/DialoguePresenter/Line/LineTarget.cs'
-      - 'Assets/Ked.Presentation/Playback/DialoguePresenter/Options/ChoiceRecord.cs'
       - 'tests/ProgressionHost/**'
       - '.github/workflows/progression-host.yml'
   workflow_dispatch:

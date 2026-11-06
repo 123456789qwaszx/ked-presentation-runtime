@@ -12,7 +12,7 @@ public sealed class ChapterOptionsView : IChapterOptionsView
 {
     private const float FadeInDuration = 0.12f;
 
-    private readonly IPresentationOptionsBoxView _box;
+    private readonly IChapterOptionsBoxView _box;
     private readonly CustomOptionItem _itemPrefab;
 
     private readonly List<CustomOptionItem> _activeItems = new();
@@ -21,7 +21,7 @@ public sealed class ChapterOptionsView : IChapterOptionsView
     private TaskCompletionSource<int> _pending;
 
     public ChapterOptionsView(
-        IPresentationOptionsBoxView box,
+        IChapterOptionsBoxView box,
         CustomOptionItem itemPrefab)
     {
         _box = box;

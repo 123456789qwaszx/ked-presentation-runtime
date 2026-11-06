@@ -32,7 +32,7 @@ namespace Ked.Samples.UI
         [SerializeField] private UIPresentationSpec[] presentations = Array.Empty<UIPresentationSpec>();
 
         [Header("재생 쪽에 넘기는 것")]
-        [Tooltip("선택지 항목 프리팹(본체 CustomOptionItem). 새 그림으로 빌더가 만든다.")]
+        [Tooltip("선택지 항목 프리팹(진행 예제의 CustomOptionItem). 새 그림으로 빌더가 만든다.")]
         [SerializeField] private CustomOptionItem optionItemPrefab;
         [Tooltip("새 대사창에 맞춘 연출 프리셋 DB. 대본의 surface_layout 키는 옛 DB와 같다.")]
         [SerializeField] private DialogueSurfaceLayoutPresetDBSO surfaceLayoutDb;
@@ -47,7 +47,7 @@ namespace Ked.Samples.UI
 
         // 재생 쪽 대사창 · 선택지 상자 계약의 구현. 화면 묶음은 재생 런타임을 모르므로 앱 쪽 어댑터로 잇는다.
         public IPresentationDialogueBoxView DialogueBox { get; private set; }
-        public IPresentationOptionsBoxView OptionsBox { get; private set; }
+        public IChapterOptionsBoxView OptionsBox { get; private set; }
 
         public CustomOptionItem OptionItemPrefab => optionItemPrefab;
         public DialogueSurfaceLayoutPresetDBSO SurfaceLayoutDb => surfaceLayoutDb;

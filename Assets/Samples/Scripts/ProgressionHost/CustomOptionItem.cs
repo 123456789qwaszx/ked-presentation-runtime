@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
+// 진행 예제의 선택지 항목 — ChapterOptionsView가 묶고(Bind), 상자(IChapterOptionsBoxView)의 ItemContainer 아래 선다.
 public sealed class CustomOptionItem : Selectable, ISubmitHandler, IPointerClickHandler
 {
     [Header("Text")]
