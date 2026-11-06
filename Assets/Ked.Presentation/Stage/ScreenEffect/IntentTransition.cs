@@ -11,8 +11,6 @@ public sealed class IntentTransition<TState>
     private readonly object _tweenTarget;
 
     private Tween _tween;
-    private Ease _ease;
-    private bool _accelerated;
 
     public IntentTransition(
         TState initial,
@@ -43,9 +41,7 @@ public sealed class IntentTransition<TState>
             return;
         }
 
-        _ease = ease;
-        _accelerated = false;
-        StartTween(duration);
+        StartTween(duration, ease);
     }
 
     // 압축·초기화 — 의도로 바로 맞춘다.
@@ -56,23 +52,14 @@ public sealed class IntentTransition<TState>
         _apply(intent);
     }
 
-    // 스텝 경계 — 남은 시간을 배율만큼 줄여 지금 값에서 마저 간다. 한 전환은 한 번만 가속한다.
-    public void Accelerate(float speedUpMultiplier)
+    // 스텝 경계 — 지금 전환을 배율만큼 빠르게 끝까지 돌린다. 같은 곡선을 이어 가고, 남은 시간은 트윈이 안다.
+    // 끝값은 Intent가 쥐고 있으니 가속은 보이는 연출일 뿐이다.
+    public void Accelerate(float speedUp)
     {
-        if (_tween == null || _accelerated)
+        if (_tween == null)
             return;
 
-        float remaining = _tween.Duration(false) - _tween.Elapsed(false);
-        Stop();
-
-        if (remaining <= 0f)
-        {
-            _apply(Intent);
-            return;
-        }
-
-        _accelerated = true;
-        StartTween(Math.Max(0.01f, remaining / speedUpMultiplier));
+        _tween.timeScale = speedUp;
     }
 
     // 확정 없이 지금 자리에서 멈춘다.
@@ -82,14 +69,14 @@ public sealed class IntentTransition<TState>
         _tween = null;
     }
 
-    private void StartTween(float duration)
+    private void StartTween(float duration, Ease ease)
     {
         TState from = _readPresented();
         TState to = Intent;
 
         _tween = DOTween
             .To(() => 0f, t => _apply(_lerp(from, to, t)), 1f, duration)
-            .SetEase(_ease)
+            .SetEase(ease)
             .SetUpdate(true)
             .SetTarget(_tweenTarget)
             .OnComplete(() =>

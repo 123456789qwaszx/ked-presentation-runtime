@@ -4,7 +4,7 @@ using Ked.Presentation.Core;
 using UnityEngine;
 
 // 샷은 장면 전역 의도다 — 커맨드가 의도(Intent)를 쓰고, 화면(Presented)은 이 시스템이 따라간다.
-// 전환 트윈은 시스템이 하나만 갖는다. 새 의도가 오면 지금 보이는 값에서 다시 조준한다(앞 전환을 완주시키지 않는다).
+// 전환은 IntentTransition 하나가 맡는다(화면 효과·블러와 같은 것). 새 의도가 오면 지금 보이는 값에서 다시 조준한다(앞 전환을 완주시키지 않는다).
 //
 // 무대에 쓰는 값은 전부 코어 ShotLayoutMath의 출력이다. 이 클래스는 그 출력을 노드에 쓰는 applier이고,
 // 중립(IStageViewNeutral)은 같은 식에 Default를 넣은 값이다 — 따로 적은 정의가 없다.
@@ -18,22 +18,16 @@ public sealed class PresentationShotResponseSystem : IStageViewNeutral
     private readonly StageRigRefs _main;
     private readonly LayerProfileCurve _profile;
 
-    private PresentationIntentState _intent = PresentationIntentState.Default;
+    private readonly IntentTransition<PresentationIntentState> _transition;
     private PresentationIntentState _presented = PresentationIntentState.Default;
 
-    private Tween _transition;
-    private PresentationIntentState _transitionFrom;
-    private float _transitionDuration;
-    private Ease _transitionEase;
-    private bool _transitionAccelerated;
-
     // 저작된 의도 — 다음 샷 커맨드의 출발점이고, 폴드가 접는 값이다.
-    public PresentationIntentState Intent => _intent;
+    public PresentationIntentState Intent => _transition.Intent;
 
     // 지금 화면에 적용된 값. 전환 중에만 Intent와 다르다.
     public PresentationIntentState Presented => _presented;
 
-    public bool IsTransitioning => _transition != null;
+    public bool IsTransitioning => _transition.IsTransitioning;
 
     // 층이 샷에 반응하는 곡선 — Apply가 쓰는 것과 같다. shot_focus_to가 팬을 풀 때 같은 곡선을 본다.
     public LayerProfileCurve LayerProfile => _profile;
@@ -43,6 +37,13 @@ public sealed class PresentationShotResponseSystem : IStageViewNeutral
         _stages = stages;
         _main = stages.Get(StageRoles.MainStageKey);
         _profile = profile;
+
+        _transition = new IntentTransition<PresentationIntentState>(
+            PresentationIntentState.Default,
+            () => _presented,
+            state => Apply(state),
+            (from, to, t) => PresentationShotIntentMath.Interpolate(from, to, t),
+            this);
     }
 
     public void Follow(
@@ -50,111 +51,26 @@ public sealed class PresentationShotResponseSystem : IStageViewNeutral
         float duration,
         Ease ease)
     {
-        _intent = intent;
-        KillTransition();
-
-        if (duration <= 0f || PresentationShotIntentMath.ApproximatelyEqual(_presented, intent))
+        // 이미 그 자리면 전환을 만들지 않는다 — 기다리는 커맨드가 빈 전환을 기다리지 않게.
+        if (PresentationShotIntentMath.ApproximatelyEqual(_presented, intent))
         {
-            Apply(intent);
+            Snap(intent);
             return;
         }
 
-        _transitionDuration = duration;
-        _transitionEase = ease;
-        _transitionAccelerated = false;
-
-        StartTransition(duration);
+        _transition.Follow(intent, duration, ease);
     }
 
     // 압축(빨리 넘기기·시크) — 의도로 바로 맞춘다.
-    public void Snap(in PresentationIntentState intent)
-    {
-        _intent = intent;
-        KillTransition();
-        Apply(intent);
-    }
+    public void Snap(in PresentationIntentState intent) => _transition.Snap(intent);
 
-    // 스텝 경계 — 남은 비율만큼만 빨리 마저 간다. 한 전환은 한 번만 가속한다.
-    public void AccelerateTransition(float speedUpMultiplier)
-    {
-        if (_transition == null || _transitionAccelerated)
-            return;
-
-        float remainingRatio = MeasureRemainingRatio();
-        KillTransition();
-
-        if (remainingRatio <= 0f)
-        {
-            Apply(_intent);
-            return;
-        }
-
-        _transitionAccelerated = true;
-        StartTransition(Mathf.Max(0.01f, _transitionDuration * remainingRatio / speedUpMultiplier));
-    }
+    // 스텝 경계 — 지금 전환을 배율만큼 빠르게 끝까지 돌린다.
+    public void AccelerateTransition(float speedUp) => _transition.Accelerate(speedUp);
 
     // 장면 경계 — 전환을 확정 없이 멈추고 의도·화면을 기본 샷으로.
     public void Clear()
     {
         Snap(PresentationIntentState.Default);
-    }
-
-    private void StartTransition(float duration)
-    {
-        PresentationIntentState from = _presented;
-        PresentationIntentState to = _intent;
-
-        _transitionFrom = from;
-
-        _transition = DOTween
-            .To(
-                () => 0f,
-                t => Apply(PresentationShotIntentMath.Interpolate(from, to, t)),
-                1f,
-                duration)
-            .SetEase(_transitionEase)
-            .SetUpdate(true)
-            .SetTarget(this)
-            .OnComplete(() =>
-            {
-                _transition = null;
-                Apply(to);
-            });
-    }
-
-    private void KillTransition()
-    {
-        _transition?.Kill(false);
-        _transition = null;
-    }
-
-    // 가장 늦게 도착하는 축이 기준.
-    private float MeasureRemainingRatio()
-        => Mathf.Max(
-            RemainingRatio(_transitionFrom.zoom, _intent.zoom, _presented.zoom),
-            RemainingRatio(_transitionFrom.panInRigSpace, _intent.panInRigSpace, _presented.panInRigSpace),
-            RemainingRatio(_transitionFrom.focusPointInRigSpace, _intent.focusPointInRigSpace, _presented.focusPointInRigSpace));
-
-    private static float RemainingRatio(float from, float to, float current)
-    {
-        float originalDistance = Mathf.Abs(to - from);
-        float remainingDistance = Mathf.Abs(to - current);
-
-        if (originalDistance <= 0.001f || remainingDistance <= 0.001f)
-            return 0f;
-
-        return Mathf.Clamp01(remainingDistance / originalDistance);
-    }
-
-    private static float RemainingRatio(Vector2 from, Vector2 to, Vector2 current)
-    {
-        float originalDistance = Vector2.Distance(from, to);
-        float remainingDistance = Vector2.Distance(current, to);
-
-        if (originalDistance <= 0.001f || remainingDistance <= 0.001f)
-            return 0f;
-
-        return Mathf.Clamp01(remainingDistance / originalDistance);
     }
 
     // ── 적용 — 숫자 셋 → 무대 노드 ───────────────────────────────────
