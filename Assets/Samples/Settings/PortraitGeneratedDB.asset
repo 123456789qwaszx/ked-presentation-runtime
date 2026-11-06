@@ -17,106 +17,106 @@ MonoBehaviour:
     variantKey: a
     emotionKey: 01
     sprite: {fileID: 21300000, guid: 691aea0c41f8e5449b29fa2b247b95e0, type: 3}
-    assetPath: Assets/Samples/Portraits/harin/a/01.png
+    assetPath: Assets/Samples/Content/Portraits/harin/a/01.png
   - characterId: harin
     variantKey: a
     emotionKey: 02
     sprite: {fileID: 21300000, guid: 149a279cc02c466588b226d24e5b1bb8, type: 3}
-    assetPath: Assets/Samples/Portraits/harin/a/02.png
+    assetPath: Assets/Samples/Content/Portraits/harin/a/02.png
   - characterId: harin
     variantKey: a
     emotionKey: 03
     sprite: {fileID: 21300000, guid: 196380c507444368bf6e369e9ef14c1c, type: 3}
-    assetPath: Assets/Samples/Portraits/harin/a/03.png
+    assetPath: Assets/Samples/Content/Portraits/harin/a/03.png
   - characterId: harin
     variantKey: a
     emotionKey: 04
     sprite: {fileID: 21300000, guid: 59638de6b0d44bbbbbf756b96bb07add, type: 3}
-    assetPath: Assets/Samples/Portraits/harin/a/04.png
+    assetPath: Assets/Samples/Content/Portraits/harin/a/04.png
   - characterId: harin
     variantKey: a
     emotionKey: 05
     sprite: {fileID: 21300000, guid: b8042f373c644380b8047210d41b6ccd, type: 3}
-    assetPath: Assets/Samples/Portraits/harin/a/05.png
+    assetPath: Assets/Samples/Content/Portraits/harin/a/05.png
   - characterId: harin
     variantKey: b
     emotionKey: 01
     sprite: {fileID: 21300000, guid: 0497688cfdf74ab6b5e9fa6dcf9e53a8, type: 3}
-    assetPath: Assets/Samples/Portraits/harin/b/01.png
+    assetPath: Assets/Samples/Content/Portraits/harin/b/01.png
   - characterId: harin
     variantKey: b
     emotionKey: 02
     sprite: {fileID: 21300000, guid: b604f3c631354a9197d1798d8f6ba171, type: 3}
-    assetPath: Assets/Samples/Portraits/harin/b/02.png
+    assetPath: Assets/Samples/Content/Portraits/harin/b/02.png
   - characterId: harin
     variantKey: b
     emotionKey: 03
     sprite: {fileID: 21300000, guid: b6f1d03beb02467ebfadd9f4e4d156f6, type: 3}
-    assetPath: Assets/Samples/Portraits/harin/b/03.png
+    assetPath: Assets/Samples/Content/Portraits/harin/b/03.png
   - characterId: harin
     variantKey: b
     emotionKey: 04
     sprite: {fileID: 21300000, guid: 611ed37af53a4ae095506250631af5a3, type: 3}
-    assetPath: Assets/Samples/Portraits/harin/b/04.png
+    assetPath: Assets/Samples/Content/Portraits/harin/b/04.png
   - characterId: harin
     variantKey: b
     emotionKey: 05
     sprite: {fileID: 21300000, guid: 56b2cd5d12454777a81c2f225aade1d8, type: 3}
-    assetPath: Assets/Samples/Portraits/harin/b/05.png
+    assetPath: Assets/Samples/Content/Portraits/harin/b/05.png
   - characterId: kasmi
     variantKey: a
     emotionKey: 01
     sprite: {fileID: 21300000, guid: 00cb073c882032c4f9748824d20620a3, type: 3}
-    assetPath: Assets/Samples/Portraits/kasmi/a/01.png
+    assetPath: Assets/Samples/Content/Portraits/kasmi/a/01.png
   - characterId: sigure
     variantKey: a
     emotionKey: 01
     sprite: {fileID: 21300000, guid: 5ec67e1c523911d479c2ce4b22a22830, type: 3}
-    assetPath: Assets/Samples/Portraits/sigure/a/01.png
+    assetPath: Assets/Samples/Content/Portraits/sigure/a/01.png
   - characterId: sigure
     variantKey: a
     emotionKey: 02
     sprite: {fileID: 21300000, guid: 7306e1e217d84352afe8f719dfafde87, type: 3}
-    assetPath: Assets/Samples/Portraits/sigure/a/02.png
+    assetPath: Assets/Samples/Content/Portraits/sigure/a/02.png
   - characterId: sigure
     variantKey: a
     emotionKey: 03
     sprite: {fileID: 21300000, guid: 882a24bf802f4f1ab112d7e7aafc40a7, type: 3}
-    assetPath: Assets/Samples/Portraits/sigure/a/03.png
+    assetPath: Assets/Samples/Content/Portraits/sigure/a/03.png
   - characterId: sigure
     variantKey: a
     emotionKey: 04
     sprite: {fileID: 21300000, guid: f1ea4d86d1a14c4c830d58bfc617ecc6, type: 3}
-    assetPath: Assets/Samples/Portraits/sigure/a/04.png
+    assetPath: Assets/Samples/Content/Portraits/sigure/a/04.png
   - characterId: sigure
     variantKey: a
     emotionKey: 05
     sprite: {fileID: 21300000, guid: 2b4af0f966c747848879a692ec4b91f4, type: 3}
-    assetPath: Assets/Samples/Portraits/sigure/a/05.png
+    assetPath: Assets/Samples/Content/Portraits/sigure/a/05.png
   - characterId: sigure
     variantKey: b
     emotionKey: 01
     sprite: {fileID: 21300000, guid: 8a8d0c203093493b9f9403072dbc86fc, type: 3}
-    assetPath: Assets/Samples/Portraits/sigure/b/01.png
+    assetPath: Assets/Samples/Content/Portraits/sigure/b/01.png
   - characterId: sigure
     variantKey: b
     emotionKey: 02
     sprite: {fileID: 21300000, guid: 0f1143a97a8c4b18b8862d95e999694b, type: 3}
-    assetPath: Assets/Samples/Portraits/sigure/b/02.png
+    assetPath: Assets/Samples/Content/Portraits/sigure/b/02.png
   - characterId: sigure
     variantKey: b
     emotionKey: 03
     sprite: {fileID: 21300000, guid: 47635105bcc6450bb0a2f9a19809ebd8, type: 3}
-    assetPath: Assets/Samples/Portraits/sigure/b/03.png
+    assetPath: Assets/Samples/Content/Portraits/sigure/b/03.png
   - characterId: sigure
     variantKey: b
     emotionKey: 04
     sprite: {fileID: 21300000, guid: 91346a2597c94bfd830ebc0ea805bcc4, type: 3}
-    assetPath: Assets/Samples/Portraits/sigure/b/04.png
+    assetPath: Assets/Samples/Content/Portraits/sigure/b/04.png
   - characterId: sigure
     variantKey: b
     emotionKey: 05
     sprite: {fileID: 21300000, guid: b196aab473514f4c92a750c46f10606a, type: 3}
-    assetPath: Assets/Samples/Portraits/sigure/b/05.png
+    assetPath: Assets/Samples/Content/Portraits/sigure/b/05.png
   generatedTicksUtc: 639285872249805491
   generatedTimeReadable: 2026-10-26 13:53:44

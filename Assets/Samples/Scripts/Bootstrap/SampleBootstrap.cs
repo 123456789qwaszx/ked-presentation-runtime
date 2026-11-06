@@ -20,13 +20,13 @@ using KedUI = Ked.Samples.UI;
 /// 연출 런타임의 조립은 부분 파일 SampleBootstrap.Presentation.cs(AssemblePresentation)가 직렬화 필드를 바로 읽어 한다.
 /// 그 위에 진행 호스트와 저장을 얹는다.
 ///
-/// 화면은 새 예제 UI(화면 묶음 Samples/KedUI + 흐름·바인딩 Samples/KedUIApp, UIPresentationFlow 위)다.
+/// 화면은 새 예제 UI(화면 묶음 Samples/UI/Kit + 흐름·바인딩 Samples/UI/App, UIPresentationFlow 위)다.
 /// Resources/KedUI/KedUICanvas를 띄우고(KedUIHost.Prepare) 흐름(KedUIHost.Flow)에 호스트를 직접 넘긴다.
 /// 캔버스가 없으면(빌더 Tools/Ked UI/Build Sample UI 실행 전) 아무것도 세우지 않고 알린다.
 /// 연출 무대(배경·인물·화면 효과)는 씬의 무대 캔버스에 놓인 PresentationUIRoot가 그리고, 새 UI는 그 위 캔버스에 얹힌다.
 ///
 /// 회차의 끝은 챕터의 끝이다 — SceneRunner가 IChapterEndView(= KedUIFlow)를 부르고, UI가 끝 카드를 연다.
-/// UI의 흐름·바인딩(Samples/KedUIApp)은 이 기본 어셈블리에 있어 호스트(ProgressionLauncher · ManualSaveFlow · 무대)를 직접 받는다.
+/// UI의 흐름·바인딩(Samples/UI/App)은 이 기본 어셈블리에 있어 호스트(ProgressionLauncher · ManualSaveFlow · 무대)를 직접 받는다.
 ///
 /// 스크립트 GUID는 예전 VNAppBootstrap 그대로다 — 씬에 직렬화된 값이 유지된다.
 ///
@@ -69,11 +69,11 @@ public partial class SampleBootstrap : MonoBehaviour, IRigPrefabSource
              "타이틀의 [다른 예제로]로 바꾸면 그 플레이 동안은 그쪽이 이 값보다 우선한다(SampleExampleSwitch).")]
     [SerializeField] private SampleExample example = SampleExample.FestivalEve;
 
-    [Tooltip("축제 전야 챕터 JSON — 여러 장면·선택·스탯. Assets/Samples/Dialogue/ChapterProgression/ 아래의 .json(툴이 낸 것).")]
+    [Tooltip("축제 전야 챕터 JSON — 여러 장면·선택·스탯. Assets/Dialogue/ChapterProgression/ 아래의 .json(툴이 낸 것).")]
     [SerializeField] private TextAsset festivalEveChapterJson;
 
     [Tooltip("연출 데모 챕터 JSON — 챕터·장면·에피소드 하나. 에피소드가 연출 데모 노드 Demo_Presentation" +
-             "(Assets/Samples/Dialogue/ChapterProgression/presentation_demo_Demo_Presentation.yarn — ked-story-compositor가 낸 것)을 재생한다.")]
+             "(Assets/Dialogue/ChapterProgression/presentation_demo_Demo_Presentation.yarn — ked-story-compositor가 낸 것)을 재생한다.")]
     [SerializeField] private TextAsset presentationDemoChapterJson;
 
     [Header("무대")]
@@ -127,7 +127,7 @@ public partial class SampleBootstrap : MonoBehaviour, IRigPrefabSource
     [SerializeField] private RectTransform rigPrefab;
 
     [Header("작가 자산")]
-    [Tooltip("대본 번들 곁의 motions.json(Ked/Motion/Export motions.json으로 낸 것). 비우면 에디터에서만 Assets/Samples/Dialogue/motions.json을 읽는다 — 빌드에서는 읽지 않는다.")]
+    [Tooltip("대본 번들 곁의 motions.json(Ked/Motion/Export motions.json으로 낸 것). 비우면 에디터에서만 Assets/Dialogue/motions.json을 읽는다 — 빌드에서는 읽지 않는다.")]
     [SerializeField] private TextAsset motionsJson;
 
     [Header("등가성 하네스")]

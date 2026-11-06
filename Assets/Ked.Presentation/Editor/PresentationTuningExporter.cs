@@ -49,17 +49,17 @@ public static class PresentationTuningExporter
         ("depth",           "Assets/Ked.Presentation/Stage/Presets/CharacterDepthTuning.asset"),
         ("focus-tuning",    "Assets/Ked.Presentation/Stage/Presets/CharacterFocusTuningDB.asset"),
         ("role-anchor",     "Assets/Ked.Presentation/Stage/Presets/RoleAnchorTuningDB.asset"),
-        ("surface-layout",  "Assets/Samples/Data/DialogueSurfaceLayoutPresetDB.asset"),
+        ("surface-layout",  "Assets/Samples/Settings/DialogueSurfaceLayoutPresetDB.asset"),
     };
 
     /// <summary>초상 치수의 원천. 스프라이트 참조라 EditorJsonUtility로는 해석할 수 없어 따로 낸다.</summary>
-    private const string PortraitDbPath = "Assets/Samples/Data/PortraitGeneratedDB.asset";
+    private const string PortraitDbPath = "Assets/Samples/Settings/PortraitGeneratedDB.asset";
 
     // 이번 범위에 없어서 내보내지 않는 것들. 존재는 기록한다 —
     // 조용히 빠뜨린 것과 알고서 뺀 것은 다르다.
     private static readonly string[] KnownButOutOfScope =
     {
-        "Assets/Samples/Data/DialogueSpeakerPresentationPolicyDB.asset (speaker policy — 범위 밖)",
+        "Assets/Samples/Settings/DialogueSpeakerPresentationPolicyDB.asset (speaker policy — 범위 밖)",
         "Assets/Data/Generated/CharacterEmojiVisualPreset.asset (emoji preset — 범위 밖)",
         "Assets/Data/Generated/CharacterEmojiLibrary.asset (emoji library — 범위 밖)",
     };

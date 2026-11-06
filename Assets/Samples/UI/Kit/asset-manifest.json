@@ -1132,7 +1132,7 @@
       ],
       "pixelsPerUnit": 100,
       "padding": 0,
-      "source": "Samples/Portraits/*/a/01.png (잘라 냄)",
+      "source": "Samples/Content/Portraits/*/a/01.png (잘라 냄)",
       "sourceCrop": "none",
       "notes": "Placeholder until real art arrives."
     },
@@ -1151,7 +1151,7 @@
       ],
       "pixelsPerUnit": 100,
       "padding": 0,
-      "source": "Samples/Portraits/*/a/01.png (잘라 냄)",
+      "source": "Samples/Content/Portraits/*/a/01.png (잘라 냄)",
       "sourceCrop": "none",
       "notes": "Placeholder until real art arrives."
     },
@@ -1170,7 +1170,7 @@
       ],
       "pixelsPerUnit": 100,
       "padding": 0,
-      "source": "Samples/Portraits/*/a/01.png (잘라 냄)",
+      "source": "Samples/Content/Portraits/*/a/01.png (잘라 냄)",
       "sourceCrop": "none",
       "notes": "Placeholder until real art arrives."
     },
@@ -1189,7 +1189,7 @@
       ],
       "pixelsPerUnit": 100,
       "padding": 0,
-      "source": "Samples/Portraits/*/a/01.png (잘라 냄)",
+      "source": "Samples/Content/Portraits/*/a/01.png (잘라 냄)",
       "sourceCrop": "none",
       "notes": "Placeholder until real art arrives."
     },
@@ -1208,7 +1208,7 @@
       ],
       "pixelsPerUnit": 100,
       "padding": 0,
-      "source": "Samples/Portraits/*/a/01.png (잘라 냄)",
+      "source": "Samples/Content/Portraits/*/a/01.png (잘라 냄)",
       "sourceCrop": "none",
       "notes": "Placeholder until real art arrives."
     },
@@ -1227,7 +1227,7 @@
       ],
       "pixelsPerUnit": 100,
       "padding": 0,
-      "source": "Samples/Portraits/*/a/01.png (잘라 냄)",
+      "source": "Samples/Content/Portraits/*/a/01.png (잘라 냄)",
       "sourceCrop": "none",
       "notes": "Placeholder until real art arrives."
     },
@@ -1246,7 +1246,7 @@
       ],
       "pixelsPerUnit": 100,
       "padding": 0,
-      "source": "Samples/Resources/Backgrounds (예제 배경 축소)",
+      "source": "Samples/Content/Resources/Backgrounds (예제 배경 축소)",
       "sourceCrop": "none",
       "notes": "Placeholder until real art arrives."
     },
@@ -1265,7 +1265,7 @@
       ],
       "pixelsPerUnit": 100,
       "padding": 0,
-      "source": "Samples/Resources/Backgrounds (예제 배경 축소)",
+      "source": "Samples/Content/Resources/Backgrounds (예제 배경 축소)",
       "sourceCrop": "none",
       "notes": "Placeholder until real art arrives."
     },
@@ -1284,7 +1284,7 @@
       ],
       "pixelsPerUnit": 100,
       "padding": 0,
-      "source": "Samples/Resources/Backgrounds (예제 배경 축소)",
+      "source": "Samples/Content/Resources/Backgrounds (예제 배경 축소)",
       "sourceCrop": "none",
       "notes": "Placeholder until real art arrives."
     },
@@ -1303,7 +1303,7 @@
       ],
       "pixelsPerUnit": 100,
       "padding": 0,
-      "source": "Samples/Resources/Backgrounds (예제 배경 축소)",
+      "source": "Samples/Content/Resources/Backgrounds (예제 배경 축소)",
       "sourceCrop": "none",
       "notes": "Placeholder until real art arrives."
     },
@@ -1322,7 +1322,7 @@
       ],
       "pixelsPerUnit": 100,
       "padding": 0,
-      "source": "Samples/Resources/Backgrounds (예제 배경 축소)",
+      "source": "Samples/Content/Resources/Backgrounds (예제 배경 축소)",
       "sourceCrop": "none",
       "notes": "Placeholder until real art arrives."
     },
@@ -1341,7 +1341,7 @@
       ],
       "pixelsPerUnit": 100,
       "padding": 0,
-      "source": "Samples/Resources/Backgrounds (예제 배경 축소)",
+      "source": "Samples/Content/Resources/Backgrounds (예제 배경 축소)",
       "sourceCrop": "none",
       "notes": "Placeholder until real art arrives."
     },
@@ -1360,7 +1360,7 @@
       ],
       "pixelsPerUnit": 100,
       "padding": 0,
-      "source": "Samples/Resources/Backgrounds (예제 배경 축소)",
+      "source": "Samples/Content/Resources/Backgrounds (예제 배경 축소)",
       "sourceCrop": "none",
       "notes": "Placeholder until real art arrives."
     },

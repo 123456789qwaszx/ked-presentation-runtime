@@ -17,7 +17,7 @@ namespace Ked.Samples.UI.Editor
     /// </summary>
     public static class KedUIUnits
     {
-        private const string FallbackRoot = "Assets/Samples/KedUI";
+        private const string FallbackRoot = "Assets/Samples/UI/Kit";
 
         private static string _root;
         private static UIScreenUnits _rules;

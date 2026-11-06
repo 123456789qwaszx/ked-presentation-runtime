@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: MotionExportSettings
   m_EditorClassIdentifier: Ked.Presentation.Editor::MotionExportSettings
   rigSchemasPath: ExportedTuning/rig-schemas.json
-  outputPath: Assets/Samples/Dialogue/motions.json
+  outputPath: Assets/Dialogue/motions.json
   motions:
   - {fileID: 11400000, guid: b5f78170aa19c0c4aa1554a535ff36de, type: 2}
   - {fileID: 11400000, guid: 4a4f532674acd6141a91925acef612c1, type: 2}

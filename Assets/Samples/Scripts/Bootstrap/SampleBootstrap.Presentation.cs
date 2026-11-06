@@ -6,9 +6,9 @@ using UnityEngine;
 // 진행 · 저장을 모른다. 결과(PresentationRuntime)에 재생 호스트를 붙이면 돈다(Awake → InstallProgression).
 public partial class SampleBootstrap
 {
-    /// <summary>예제 대본 번들 폴더(Assets/Samples/Dialogue). 모션(motions.json)도 대본 곁에 산다.</summary>
+    /// <summary>대본 번들 폴더(Assets/Dialogue — 저작 툴이 내는 자리). 모션(motions.json)도 대본 곁에 산다.</summary>
     private static string DialogueFolder =>
-        System.IO.Path.Combine(Application.dataPath, "Samples", "Dialogue");
+        System.IO.Path.Combine(Application.dataPath, "Dialogue");
 
     private MotionLibrary _motions = MotionLibrary.Empty;
 

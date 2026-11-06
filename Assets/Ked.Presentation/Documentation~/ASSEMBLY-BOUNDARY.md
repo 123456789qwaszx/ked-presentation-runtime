@@ -31,7 +31,7 @@
 | `Ked.Progression` · `Ked.Progression.Save` | `Assets/Ked.Progression/{Core,Save}/` | 진행 판정 코어와 진행 저장 (**엔진 의존 0**. 원본은 형제 저장소 `ked-progression-runtime`, [vendoring.md](../../Ked.Progression/Documentation~/vendoring.md)) |
 | `Ked.Presentation.Editor` (에디터 전용) | `Assets/Ked.Presentation/Editor/` | 무대 에디터 도구 — 초상 DB 빌더 · 튜닝 덤프 익스포터 · 이징 골든 (참조: Core · Stage · CommandExecutor · UnityEngine.UI · DOTween.Modules) |
 | `Assembly-CSharp` (기본) | `Assets/Samples/Scripts/` | **예제 층** — Game(부트스트랩·조립·저장 흐름) · UI · ProgressionHost(진행 런타임을 꽂는 어댑터) |
-| `Assembly-CSharp-Editor` (기본) | `Assets/Samples/Editor/` | 예제 쪽 도구 — 폰트 교체 |
+| `Ked.Samples.UI.Editor` | `Assets/Samples/UI/Kit/Common/Editor/` | 예제 UI 도구 — 화면 짓기 · 폰트 교체 (2026-11-06까지 폰트 교체는 `Assets/Samples/Editor/`의 Assembly-CSharp-Editor) |
 | `Ked.Presentation.Tests.EditMode` | `Assets/Ked.Presentation/Tests/EditMode/` | EditMode 테스트 (참조: Core · Stage · Editor) |
 
 > **에디터 도구는 런타임 폴더 안에 두지 않는다.** 한때 런타임 트리 안에 에디터 전용

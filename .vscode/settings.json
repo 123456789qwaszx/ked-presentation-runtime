@@ -58,7 +58,7 @@
     ],
     "cSpell.overrides": [
         {
-            "filename": "Assets/Samples/Dialogue/**/*.yarn",
+            "filename": "Assets/Dialogue/**/*.yarn",
             "words": [
                 "reira"
             ]

@@ -9,7 +9,6 @@ on:
       - 'Assets/Ked.Presentation/Playback/Memory/**'
       - 'Assets/Ked.Presentation/Playback/FeatureController/**'
       - 'Assets/Ked.Presentation/Playback/DialoguePresenter/**'
-      - 'Assets/Samples/Scripts/Game/**'
       - 'Assets/Samples/Scripts/ProgressionHost/**'
       - 'tests/SaveLifecycle/**'
       - '.github/workflows/save-lifecycle.yml'
@@ -27,7 +26,6 @@ jobs:
             Assets/Ked.Progression
             Assets/Ked.Presentation/Playback
             Assets/Samples/Scripts/ProgressionHost
-            Assets/Samples/Scripts/Game
             tests/SaveLifecycle
       - uses: actions/setup-dotnet@v4
         with:

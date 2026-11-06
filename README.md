@@ -26,9 +26,9 @@ Yarn Spinner를 기반으로 제작한 **비주얼 노벨 화면 연출 런타�
 시작 예제는 하이어라키 `[VNAppBootstrap]`(`SampleBootstrap`)의 **예제** 칸이고, 실행 중에는 타이틀의
 **[다른 예제로]**로 바꾼다 — 챕터와 저장 폴더는 조립 때 정해지므로 씬을 다시 연다.
 
-- **진행·저장** — **진행 층 › Progression Chapter Json**의 챕터(`Assets/Samples/Dialogue/ChapterProgression/festival_eve.progression.json`).
+- **진행·저장** — **예제 › Festival Eve Chapter Json**의 챕터(`Assets/Dialogue/ChapterProgression/festival_eve.progression.json`).
   여러 장면·선택·스탯이 있다.
-- **연출 데모** — **Presentation Demo Chapter Json**의 챕터(`presentation_demo.progression.json`).
+- **연출 데모** — **예제 › Presentation Demo Chapter Json**의 챕터(`presentation_demo.progression.json`).
   챕터 하나 · 장면 하나 · 에피소드 하나가 `Demo_Presentation` 노드를 재생한다.
 
 둘 다 장면 경계마다 확정해 저장하고, 슬롯 저장·불러오기와 백로그 줄에서 갈라지기가 있다. 저장 폴더는 예제마다 나뉜다.
@@ -51,7 +51,7 @@ Yarn Spinner를 기반으로 제작한 **비주얼 노벨 화면 연출 런타�
 
 ### 2. 연출 스크립트 예제
 
-`Assets/Samples/Dialogue/ChapterProgression/presentation_demo_Demo_Presentation.yarn` — 연출 데모 챕터의 에피소드 하나가 재생하는 노드 `Demo_Presentation`
+`Assets/Dialogue/ChapterProgression/presentation_demo_Demo_Presentation.yarn` — 연출 데모 챕터의 에피소드 하나가 재생하는 노드 `Demo_Presentation`
 
 짧은 장면 하나에서 배경·BGM·등장, 배치·크기, 표정·포즈·모션, 포커스·카메라, 화면 효과·효과음,
 트랜지션을 한 번씩 지나갑니다. 공개된 예제 초상화(harin·sigure·kasmi)와 저장소에 있는 배경·음원만 씁니다.
@@ -65,7 +65,7 @@ Yarn Spinner를 기반으로 제작한 **비주얼 노벨 화면 연출 런타�
 하린: 배경이 들어오고, 음악이 깔리고, 내가 걸어 들어왔어.
 ```
 
-진행·저장 예제의 대본은 `Assets/Samples/Dialogue/ChapterProgression/festival_eve_*.yarn`(카드 하나에 파일 하나, 챕터 JSON은 곁의 `festival_eve.progression.json`)입니다.
+진행·저장 예제의 대본은 `Assets/Dialogue/ChapterProgression/festival_eve_*.yarn`(카드 하나에 파일 하나, 챕터 JSON은 곁의 `festival_eve.progression.json`)입니다.
 챕터 하나(축제 전날)에 장면 둘 — 진행 선택지와 스탯, 숨는 · 잠기는 선택지, 자동 간선,
 조건 분기(`<<detour>>`로 다녀가는 카드가 제 첫머리에서 스탯을 본다), 장면 확정과 지난 장면에서 갈라지기, 챕터 끝(끝 카드)을 한 번씩 지나갑니다.
 
@@ -97,7 +97,7 @@ Yarn Spinner를 기반으로 제작한 **비주얼 노벨 화면 연출 런타�
 
 * `Assets/Ked.CommandExecutor/` — 실행기(커맨드 수명 · 스텝 스코프 · 압축 정책 포트). 분리본 ked-command-executor가 따라간다
 * `Assets/Ked.Presentation/Stage/Commands/` — 커맨드 · 팩토리 · 대본 커맨드 파서(`StageCommandParser/`)
-* `Assets/Ked.Presentation/Stage/` — 무대 상태(리그·배경·cast 레지스트리)와 무대 키
+* `Assets/Ked.Presentation/Stage/` — 무대 실행 층(리그 · 샷 · 화면 효과 · 오디오, 뿌리의 `PresentationStage`가 무대 하나의 상태)
 
 연출 명령의 생성과 실행, 실행 수명 관리(스텝/런 스코프) 구조를 확인할 수 있습니다.
 
@@ -106,7 +106,7 @@ Yarn Spinner를 기반으로 제작한 **비주얼 노벨 화면 연출 런타�
 `Assets/Ked.Presentation/Core/`
 
 커맨드 열을 "트윈이 끝났다면 어디에 있을 것인가"로 접는 순수 C# 층입니다(엔진 의존 0).
-그 계산이 실제 재생과 같은지는 `Game/StageEquivalenceHarness.cs`가 라인마다 판정합니다.
+그 계산이 실제 재생과 같은지는 `Assets/Ked.Presentation/Playback/Host/StageEquivalenceHarness.cs`가 라인마다 판정합니다.
 
 ### 6. 진행 층
 
