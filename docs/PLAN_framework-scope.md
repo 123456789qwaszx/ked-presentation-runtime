@@ -53,7 +53,7 @@ SCOPE-BOUNDARY.md §1은 "여기 적힌 것은 전부 필요한 기능이고 주
 | 재생 단위·연출 기억 | `Ked.Presentation/Playback/{Host,Memory}/` | 본체 | 호스트가 보는 면은 `PlaybackUnit`·`PlaybackMemory` 둘 — `PLAN_playback-unit.md` |
 | 등가성 하네스 | `Ked.Presentation/Playback/Host/StageEquivalenceHarness.cs` | 본체 (Diagnostics) | 본체 타입만 쓴다. 대본 폴더는 호스트가 넘긴다 |
 | 에디터 도구 | `Ked.Presentation/Editor/` | 본체 (Editor) | `Ked.Presentation.Editor` asmdef(에디터 전용). 씬에서는 본체 계약으로만 찾는다 |
-| 본체 에셋 | `Ked.Presentation/{Prefabs,Audio,Resources,Data}/` | 본체 | 리그 프리팹 3 · 믹서 · VisualEffects 재질과 셰이더(재질은 이름으로 읽는다 — 프리팹이 들고 있으면 그것이 먼저) · 화면 효과 프리셋·튜닝 |
+| 본체 에셋 | `Ked.Presentation/Runtime/{Prefabs,Resources,Presets}/` | 본체 | 리그 프리팹 2 · VisualEffects 재질과 셰이더(재질은 이름으로 읽는다 — 프리팹이 들고 있으면 그것이 먼저) · 커맨드 프리셋과 튜닝의 기본값 (2026-11-06 — 어셈블리 폴더 옆에서 Runtime 아래로) |
 | 진행 판정·실행 | `Ked.Progression/` | 꽂힌 모듈 (반입본) | 원본은 ked-progression-runtime. 고칠 일은 원본과 함께(vendoring) |
 | 저장 모델·조정자·포크 | `Ked.Progression/Save/` | 꽂힌 모듈 (반입본) | 진행 겹. 과거 장면 루트 보관(E3)은 여기 몫 |
 | 로컬 파일 저장 | `Ked.Progression/Save/{Persistence,Slots,Maintenance}` | 꽂힌 모듈 (기본 제공 구현) | D2. 연출 겹은 `PlaybackMemory`가 문자열로 싣는다 |
@@ -62,7 +62,7 @@ SCOPE-BOUNDARY.md §1은 "여기 적힌 것은 전부 필요한 기능이고 주
 | 부트스트랩 | `Samples/Scripts/Bootstrap/` | 샘플 | `SampleBootstrap`(예제 = 돌릴 챕터 고르기) · `SampleBootstrap.Presentation.cs`(연출 조립 — 11-04 조립기와 씬 참조 묶음을 합침) · `SampleExampleSwitch`. 11-04에 `Game/`에서 이름을 바꾸고 저장 흐름은 `ProgressionHost/`로 보냄. (`NodePlaythrough`는 2026-11-03에 걷음) 학습 토글은 통합 샘플에만(D1) |
 | UI 프레임·화면·바인딩 | `Samples/Scripts/UI/` | 샘플 | 두 예제가 타이틀([처음부터]·[이어하기]·[다른 예제로])을 같이 쓴다 |
 | 예제 대본·진행 JSON·커브 | `Samples/Dialogue/` | 샘플 | 예제 챕터마다 대본과 진행 JSON이 `ChapterProgression/`에 나란히(`Demo_Presentation` · `FestivalEve`, 11-04 — 전 이름 `qwer_scene`). `curves.json`은 작가 자산이라 대본 곁에 산다 |
-| 예제 에셋 | `Samples/{Prefabs,Resources,Scenes,Data,Portraits,Art,Editor}/` | 샘플 | 대사창 항목·선택지·저장 슬롯 프리팹 · 배경·음원·UI 이미지 · 씬 · 초상화 DB·대사창 배치·화자 정책 · 공개 초상화 · 이모지(참조 없음) · 폰트 교체 도구 |
+| 예제 에셋 | `Samples/{Audio,Prefabs,Resources,Scenes,Data,Portraits,Art,Editor}/` | 샘플 | 믹서 · 대사창 항목·선택지·저장 슬롯 프리팹 · 배경·음원·UI 이미지 · 씬 · 초상화 DB·대사창 배치·화자 정책 · 공개 초상화 · 이모지(참조 없음) · 폰트 교체 도구 |
 | 앨범·CG 해금·앨범 저장 | `Scripts/Album/`, `UI/Screens/AlbumUIRoot.cs`, `UI/Bindings/VnScreenBindings.Album.cs`, `Data/Album/`, `VNAlbumSlotButton.prefab` | 게임 층 | 제거 |
 | Settings 버튼 | `TitleUIRoot`·`VNScreenBindings.Title` | 미구현 메뉴 | 제거 (D3) |
 | URP 템플릿 잔해 | `Assets/TutorialInfo/`, `Assets/Readme.asset` | 잔재 | 제거 |

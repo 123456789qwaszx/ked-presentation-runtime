@@ -41,14 +41,14 @@ public static class PresentationTuningExporter
 
     private static readonly (string group, string path)[] PresetAssets =
     {
-        ("visual-focus",    "Assets/Ked.Presentation/Data/ScreenEffect/CharacterVisualFocusPresetDB.asset"),
-        ("mask-motion",     "Assets/Ked.Presentation/Data/Generated/StageMaskMotionPresetDB.asset"),
-        ("screen-flash",    "Assets/Ked.Presentation/Data/ScreenEffect/ScreenFlashPresetDB.asset"),
-        ("screen-noise",    "Assets/Ked.Presentation/Data/ScreenEffect/ScreenNoisePresetDB.asset"),
-        ("screen-vignette", "Assets/Ked.Presentation/Data/ScreenEffect/ScreenVignettePresetDB.asset"),
-        ("depth",           "Assets/Ked.Presentation/Data/Generated/CharacterDepthTuning.asset"),
-        ("focus-tuning",    "Assets/Ked.Presentation/Data/Generated/CharacterFocusTuningDB.asset"),
-        ("role-anchor",     "Assets/Ked.Presentation/Data/Generated/RoleAnchorTuningDB.asset"),
+        ("visual-focus",    "Assets/Ked.Presentation/Runtime/Presets/CharacterVisualFocusPresetDB.asset"),
+        ("mask-motion",     "Assets/Ked.Presentation/Runtime/Presets/StageMaskMotionPresetDB.asset"),
+        ("screen-flash",    "Assets/Ked.Presentation/Runtime/Presets/ScreenFlashPresetDB.asset"),
+        ("screen-noise",    "Assets/Ked.Presentation/Runtime/Presets/ScreenNoisePresetDB.asset"),
+        ("screen-vignette", "Assets/Ked.Presentation/Runtime/Presets/ScreenVignettePresetDB.asset"),
+        ("depth",           "Assets/Ked.Presentation/Runtime/Presets/CharacterDepthTuning.asset"),
+        ("focus-tuning",    "Assets/Ked.Presentation/Runtime/Presets/CharacterFocusTuningDB.asset"),
+        ("role-anchor",     "Assets/Ked.Presentation/Runtime/Presets/RoleAnchorTuningDB.asset"),
         ("surface-layout",  "Assets/Samples/Data/DialogueSurfaceLayoutPresetDB.asset"),
     };
 

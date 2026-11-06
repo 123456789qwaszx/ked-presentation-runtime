@@ -38,7 +38,7 @@ public partial class SampleBootstrap : MonoBehaviour, IRigPrefabSource
 
     public enum SampleExample
     {
-        ProgressionAndSave = 0,
+        FestivalEve = 0,
         PresentationDemo = 1,
     }
 
@@ -59,19 +59,21 @@ public partial class SampleBootstrap : MonoBehaviour, IRigPrefabSource
     private PlaythroughForkService _playthroughForkService;
     private LocalSaveMaintenance _saveMaintenance;
     private ILocalSaveStore _localSaveStore;
-    private bool _useLearningSaveData;
     private string _saveRoot;
 
     private TextAsset _chapterJson;
     private ScenarioDefinition _scenarioDef;
 
-    [Header("예제")]
-    [Tooltip("어느 챕터를 돌릴지. 둘 다 진행 호스트로 돌고 타이틀에서 시작한다.\n" +
-             "진행·저장: 아래 '진행 층'의 챕터 JSON.\n" +
-             "연출 데모: 챕터 하나 · 장면 하나 · 에피소드 하나짜리 챕터 JSON.")]
-    [SerializeField] private SampleExample example = SampleExample.ProgressionAndSave;
+    [Header("예제 — 어느 챕터를 돌릴지")]
+    [Tooltip("플레이를 시작할 때의 예제. 둘 다 진행 호스트로 돌고 타이틀에서 시작하며, 저장 폴더는 예제마다 따로다.\n" +
+             "타이틀의 [다른 예제로]로 바꾸면 그 플레이 동안은 그쪽이 이 값보다 우선한다(SampleExampleSwitch).")]
+    [SerializeField] private SampleExample example = SampleExample.FestivalEve;
 
-    [Tooltip("연출 데모 챕터 JSON — 에피소드 하나가 연출 데모 노드 Demo_Presentation(Assets/Samples/Dialogue/ChapterProgression/presentation_demo_Demo_Presentation.yarn — ked-story-compositor가 낸 것)을 재생한다.")]
+    [Tooltip("축제 전야 챕터 JSON — 여러 장면·선택·스탯. Assets/Samples/Dialogue/ChapterProgression/ 아래의 .json(툴이 낸 것).")]
+    [SerializeField] private TextAsset festivalEveChapterJson;
+
+    [Tooltip("연출 데모 챕터 JSON — 챕터·장면·에피소드 하나. 에피소드가 연출 데모 노드 Demo_Presentation" +
+             "(Assets/Samples/Dialogue/ChapterProgression/presentation_demo_Demo_Presentation.yarn — ked-story-compositor가 낸 것)을 재생한다.")]
     [SerializeField] private TextAsset presentationDemoChapterJson;
 
     [Header("무대")]
@@ -109,16 +111,7 @@ public partial class SampleBootstrap : MonoBehaviour, IRigPrefabSource
     // 씬의 UnsupportedOptionsPresenter는 DialogueRunner의 프리젠터 목록에만 산다(조립할 것이 없다).
     // 선택지는 진행 층(ChapterOptionsView)뿐이다.
 
-    [Header("진행 층")]
-    [Tooltip("툴이 낸 챕터 JSON. Assets/Samples/Dialogue/ChapterProgression/ 아래의 .json 을 넣는다. " +
-             "경로 문자열이 아니라 에셋 참조다 — 머신에 안 매이고 빌드에도 실린다.")]
-    [SerializeField] private TextAsset progressionChapterJson;
-
-    [Header("로컬 저장 데이터")]
-    [FormerlySerializedAs("learningMode")]
-    [Tooltip("기존 학습용 콘텐츠와 saves-learning 경로를 선택한다. 저장 기능과 네트워크 사용 여부에는 영향이 없다.")]
-    [SerializeField] private bool useLearningSaveData;
-    [SerializeField] private TextAsset learningChapterJson;
+    [Header("저장")]
     [Tooltip("저장과 현재 대본의 호환성을 판별한다. 복원에 영향을 주는 대본 변경 시 값을 올린다.\n" +
              "2 — Yarn 변수 층 제거(2026-09-17). 1로 저장된 회차는 대사가 $작가변수를 읽던 대본이라 재개할 수 없다.\n" +
              "3 — 예제를 두 툴로 다시 냄(2026-11-04). 줄 신원(#line:)과 에피소드 Id(EP01 → Festival_Classroom)가 바뀌었다.")]
@@ -266,27 +259,18 @@ public partial class SampleBootstrap : MonoBehaviour, IRigPrefabSource
 
     private bool TryBootstrapProgressionData()
     {
-        // 실행 중 Inspector를 바꿔도 저장 경로와 기능 구성이 서로 엇갈리지 않는다.
-        // 학습용 데이터는 진행·저장 예제의 콘텐츠만 바꾼다 — 연출 데모는 언제나 같은 챕터다.
-        _useLearningSaveData = useLearningSaveData && !IsPresentationDemo;
-
+        // 예제가 챕터와 저장 폴더를 함께 정한다 — 실행 중 인스펙터를 바꿔도 둘이 엇갈리지 않게 여기서 한 번 읽는다.
         _saveRoot = Path.Combine(
             Application.persistentDataPath,
-            IsPresentationDemo ? "saves-presentation-demo"
-            : _useLearningSaveData ? "saves-learning"
-            : "saves");
+            IsPresentationDemo ? "saves-presentation-demo" : "saves");
 
-        _chapterJson =
-            IsPresentationDemo ? presentationDemoChapterJson
-            : _useLearningSaveData ? learningChapterJson
-            : progressionChapterJson;
+        _chapterJson = IsPresentationDemo ? presentationDemoChapterJson : festivalEveChapterJson;
 
         if (_chapterJson == null)
         {
             Debug.LogError(
                 IsPresentationDemo ? "[연출 데모] Presentation Demo Chapter Json을 지정해야 한다."
-                : _useLearningSaveData ? "[학습] Learning Chapter Json을 지정해야 한다."
-                : "[진행] Progression Chapter Json을 지정해야 한다.");
+                : "[축제 전야] Festival Eve Chapter Json을 지정해야 한다.");
 
             enabled = false;
             return false;

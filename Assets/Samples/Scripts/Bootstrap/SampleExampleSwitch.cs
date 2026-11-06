@@ -21,7 +21,7 @@ public static class SampleExampleSwitch
 
     public static SampleBootstrap.SampleExample Other(SampleBootstrap.SampleExample example) =>
         example == SampleBootstrap.SampleExample.PresentationDemo
-            ? SampleBootstrap.SampleExample.ProgressionAndSave
+            ? SampleBootstrap.SampleExample.FestivalEve
             : SampleBootstrap.SampleExample.PresentationDemo;
 
     public static string DisplayName(SampleBootstrap.SampleExample example) =>
