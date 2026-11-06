@@ -23,6 +23,6 @@
   <ItemGroup>
     <!-- Save/ 는 Newtonsoft에 매인 별도 어셈블리(Ked.Progression.Save)라 여기서 빼고, tests/SaveLifecycle이 본다. -->
     <Compile Include="../../Assets/Ked.Progression/**/*.cs"
-             Exclude="../../Assets/Ked.Progression/Save/**/*.cs" />
+             Exclude="../../Assets/Ked.Progression/Runtime/Save/**/*.cs" />
   </ItemGroup>
 </Project>

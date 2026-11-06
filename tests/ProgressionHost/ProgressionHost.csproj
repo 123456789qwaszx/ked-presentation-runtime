@@ -24,7 +24,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="../../Assets/Ked.Progression/**/*.cs"
-             Exclude="../../Assets/Ked.Progression/Tests/**/*.cs;../../Assets/Ked.Progression/Save/**/*.cs" />
+             Exclude="../../Assets/Ked.Progression/Tests/**/*.cs;../../Assets/Ked.Progression/Runtime/Save/**/*.cs" />
     <Compile Include="../../Assets/Samples/Scripts/ProgressionHost/SceneRunner.cs" />
     <Compile Include="../../Assets/Samples/Scripts/ProgressionHost/IChapterEndView.cs" />
     <Compile Include="../../Assets/Ked.Presentation/Playback/Host/IPlaybackStage.cs" />

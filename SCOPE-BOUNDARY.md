@@ -73,7 +73,7 @@
 | **재료는 이미 있다** | `Ked.Presentation.Core`의 `StageState` / `StageReducer`가 정확히 *"N번 라인 시점의 확정된 무대"*다. 등가성 하네스에 이은 **정지 프레임의 두 번째 고객**이 세이브다 |
 | **저장 위치** | 런타임이 정하지 않는다. `ISaveStore` 같은 포트를 두고 구현은 호스트가 갖는다 — `IInputSource` · `ITimeSource` · `ILaneRunner`와 같은 규율 |
 | **커밋** | `18df6f78` |
-| **✅ 2026-10-26 — 두 겹으로 갈라 돌아왔다** | 저장은 **진행 겹**과 **연출 겹**으로 나뉜다.<br>진행 겹(챕터·장면·경로·스탯·완료 장면·슬롯·갈라지기·원자적 파일)은 `ked-progression-runtime`의 `Ked.Progression.Save`가 소유하고, 이 저장소에는 `Assets/Ked.Progression/Save/`로 반입돼 있다. 엔진을 모른다 — 시계와 로그를 꽂아 쓴다.<br>연출 겹(줄 좌표 `LineTarget`, Yarn 선택 기록, 백로그)은 저장이 없어도 연출이 늘 들고 있는 것이다. 진행 저장은 그것을 `HostState` 문자열 한 칸으로만 받고, 그 문자열을 꺼내고 되돌리는 입구는 `Ked.Presentation.Playback`의 `Memory/PlaybackMemory`다 — 진행을 모른다. (연출 단독 예제가 이 문자열을 파일 하나에 두던 `NodePlaythrough`는 2026-11-03에 걷었다 — 예제는 모두 진행 호스트로 돈다.)<br>위 ⚠ 셋은 그대로다 — 리플레이 방식의 파생이고, 스냅샷 기반 세이브는 여전히 열려 있다. 바뀐 것은 "어느 층이 무엇을 아는가"뿐이다 |
+| **✅ 2026-10-26 — 두 겹으로 갈라 돌아왔다** | 저장은 **진행 겹**과 **연출 겹**으로 나뉜다.<br>진행 겹(챕터·장면·경로·스탯·완료 장면·슬롯·갈라지기·원자적 파일)은 `ked-progression-runtime`의 `Ked.Progression.Save`가 소유하고, 이 저장소에는 `Assets/Ked.Progression/Runtime/Save/`로 반입돼 있다. 엔진을 모른다 — 시계와 로그를 꽂아 쓴다.<br>연출 겹(줄 좌표 `LineTarget`, Yarn 선택 기록, 백로그)은 저장이 없어도 연출이 늘 들고 있는 것이다. 진행 저장은 그것을 `HostState` 문자열 한 칸으로만 받고, 그 문자열을 꺼내고 되돌리는 입구는 `Ked.Presentation.Playback`의 `Memory/PlaybackMemory`다 — 진행을 모른다. (연출 단독 예제가 이 문자열을 파일 하나에 두던 `NodePlaythrough`는 2026-11-03에 걷었다 — 예제는 모두 진행 호스트로 돈다.)<br>위 ⚠ 셋은 그대로다 — 리플레이 방식의 파생이고, 스냅샷 기반 세이브는 여전히 열려 있다. 바뀐 것은 "어느 층이 무엇을 아는가"뿐이다 |
 
 ### 3.3 에피소드 · 챕터 진행
 

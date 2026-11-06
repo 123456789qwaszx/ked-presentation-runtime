@@ -5,7 +5,7 @@
 
 ```
 원본   ked-progression-runtime   (형제 폴더 · Unity 프로젝트 · 진행 코어의 집 + 최소 샘플)
-반입   Assets/Ked.Progression/   ← 이 폴더
+반입   Assets/Ked.Progression/   ← 이 폴더 (Runtime/ · Tests/EditMode/ — 원본과 같은 배치)
 ```
 
 `Assets/Ked.Presentation/Core`가 저작 도구(VnTool)에 `src/Ked.Presentation.Core`로
@@ -24,6 +24,7 @@ Playback을 뺀 전부)는 반대다 — 이 저장소가 원본이고 ked-comma
 | 마지막 동기화 | 2026-10-26 · **사본 → 원본** (역반입) |
 | 맞춘 것 | `Runtime/` 전체(Spec · State · Transition · Vocabulary · Loading · Scene · Contracts · Response · `ProgressionDriver` · `ISceneRunner`) + `Save/`(`Ked.Progression.Save`) + EditMode 테스트 |
 | 코드 일치 | `.cs` 기준 `diff -r` 0건 (아래 "대조" 명령) |
+| 2026-11-06 | **사본 배치를 원본에 맞춤.** 뿌리에 펼쳐 두던 코드를 `Runtime/`으로 옮겼다(.meta 그대로, `Runtime.meta`는 원본 것). `Tests/`는 `Runtime/`과 형제다. 주석만 세 곳 갈려 있다(`ProgressionLoader` · `ProgressionStateFoldTests` · `SceneBoundaryTests` — 사본이 11-05에 결정 번호 표기를 지웠다) |
 | 2026-11-04 | **사본 → 원본, `Save/` 배치.** 사본에서 먼저 `Coordinator/` · `Fork/` · `Maintenance/` · `Slots/`를 걷고 다섯 파일(`SaveCoordinator` · `PlaythroughSaveSnapshot` · `SaveSlotService` · `PlaythroughForkService` · `LocalSaveMaintenance`)을 `Save/` 바로 아래로 옮겼고, 원본도 같게 옮겼다(.meta 그대로). 원본 `tests/ProgressionSave` 25/25 |
 | 원본 쪽 정리 | 옛 `SceneRunner`·`SceneRunContext`·`ProgressionState`·디버그 호스트 삭제, `Assets/Progression/Samples/` 최소 샘플 추가, README 갱신 |
 | 그 뒤 원본에만 | 결정 E3 테스트(`tests/ProgressionSave`), 샘플의 저장·이어하기·대사 기록 갈라지기, README — **코드(`Runtime/`)는 그대로**라 사본에 가져올 것이 없다 |
@@ -62,10 +63,11 @@ Playback을 뺀 전부)는 반대다 — 이 저장소가 원본이고 ked-comma
 ```bash
 diff -r -q --strip-trailing-cr -x "*.meta" \
   ../ked-progression-runtime/Assets/Progression/Runtime \
-  Assets/Ked.Progression | grep -v "^Only in"
+  Assets/Ked.Progression/Runtime
 ```
 
-2026-10-26 기준 이 명령의 출력은 **0줄**이다. `Only in`으로 나오는 `Documentation~`(이 문서)와 `Tests`는 사본에만 있는 자리다.
+두 `Runtime/`은 경로가 1:1이다(2026-11-06부터 — 그 전에는 사본이 `Runtime/`의 내용을 폴더 뿌리에 펼쳐 두고 `Tests/`를 그 사이에 넣었다).
+2026-10-26 기준 이 명령의 출력은 **0줄**이다.
 
 테스트는 따로 본다:
 
@@ -80,13 +82,13 @@ diff -r -q --strip-trailing-cr -x "*.meta" \
 ## 반입 — 원본 → 사본
 
 ```bash
-rm -rf Assets/Ked.Progression/{Contracts,Loading,Response,Save,Scene,Spec,State,Transition,Vocabulary}
-cp -r ../ked-progression-runtime/Assets/Progression/Runtime/. Assets/Ked.Progression/
+rm -rf Assets/Ked.Progression/Runtime/{Contracts,Loading,Response,Save,Scene,Spec,State,Transition,Vocabulary}
+cp -r ../ked-progression-runtime/Assets/Progression/Runtime/. Assets/Ked.Progression/Runtime/
 cp ../ked-progression-runtime/Assets/Progression/Tests/EditMode/*.cs* \
    Assets/Ked.Progression/Tests/EditMode/
 
 # 사본이 자기 GUID를 쓰는 .meta 넷은 되돌린다 (아래 ".meta GUID" 참고)
-git checkout -- Assets/Ked.Progression/{Ked.Progression.asmdef,Spec,State,Vocabulary}.meta
+git checkout -- Assets/Ked.Progression/Runtime/{Ked.Progression.asmdef,Spec,State,Vocabulary}.meta
 ```
 
 asmdef는 양쪽 이름과 설정이 같다(`Ked.Progression` · `noEngineReferences: true`). 이 저장소의 asmdef들은
@@ -102,9 +104,9 @@ asmdef는 양쪽 이름과 설정이 같다(`Ked.Progression` · `noEngineRefere
 ```bash
 cd ../ked-progression-runtime
 rm -rf Assets/Progression/Runtime/{Contracts,Loading,Response,Save,Scene,Spec,State,Transition,Vocabulary}
-cp -r ../ked-presentation-runtime/Assets/Ked.Progression/{Contracts,Loading,Response,Save,Scene,Spec,State,Transition,Vocabulary} \
+cp -r ../ked-presentation-runtime/Assets/Ked.Progression/Runtime/{Contracts,Loading,Response,Save,Scene,Spec,State,Transition,Vocabulary} \
       Assets/Progression/Runtime/
-cp ../ked-presentation-runtime/Assets/Ked.Progression/*.cs* Assets/Progression/Runtime/
+cp ../ked-presentation-runtime/Assets/Ked.Progression/Runtime/*.cs* Assets/Progression/Runtime/
 ```
 
 `Documentation~`·`Tests`·asmdef는 보내지 않는다. 테스트는 아래 표대로 고른다.

@@ -115,7 +115,7 @@ Yarn Spinner를 기반으로 제작한 **비주얼 노벨 화면 연출 런타�
 
 챕터 JSON을 실어 불변식을 검사하고, 대사 재생 뒤 한 번 판정해 선택지를 띄우고
 스탯 반영과 이동을 장면 경계에서 한 번에 커밋하는 루프는
-[ProgressionDriver.cs](Assets/Ked.Progression/ProgressionDriver.cs)와
+[ProgressionDriver.cs](Assets/Ked.Progression/Runtime/ProgressionDriver.cs)와
 [SceneRunner.cs](Assets/Samples/Scripts/ProgressionHost/SceneRunner.cs)에 있습니다.
 
 `ProgressionDriver`는 `ISceneRunner`를 통해 게임의 `SceneRunner`를 실행합니다. SceneRunner는
