@@ -22,13 +22,11 @@ public abstract class CanvasFadeCommandBase : ClaimTweenCommandBase
         _canvasGroup = ResolveFadeRect(scope).GetComponent<CanvasGroup>();
     }
 
-    // 페이드는 목표(alpha)가 스펙에 있어 언제나 낸다.
-    protected override bool ClaimTarget(CommandRunScope scope)
+    // 페이드의 목표(alpha)는 스펙에 있다.
+    protected override void ClaimTarget(CommandRunScope scope)
     {
         _canvasGroup.DOKill(true);
         _startAlpha = _canvasGroup.alpha;
-
-        return true;
     }
 
     protected override Tween CreateTween(float duration)

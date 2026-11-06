@@ -17,7 +17,7 @@ public static class CharacterFocusPlacementSolver
     // 체인 인덱스를 찾기 위한 스크래치. 커맨드 실행은 단일 스레드다.
     private static readonly List<RectTransform> ChainRects = new(48);
 
-    public static bool TryCalculateFocusPlacement(
+    public static Vector2 CalculateFocusPlacement(
         PresentationStage stage,
         string roleKey,
         RectTransform moveRect,
@@ -25,11 +25,8 @@ public static class CharacterFocusPlacementSolver
         Vector2 focusOffset,
         CharacterFocusTuningDBSO focusTuningDb,
         ScreenFocusPoint screenPoint,
-        Vector2 screenOffset,
-        out Vector2 destinationAnchoredPosition)
+        Vector2 screenOffset)
     {
-        destinationAnchoredPosition = default;
-
         CharacterRigRefs rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(stage, roleKey);
 
         // 리그 좌표 계산의 경계는 이 리그가 선 무대의 루트다.
@@ -52,16 +49,8 @@ public static class CharacterFocusPlacementSolver
         RectNodeState[] chain = rigRefs.PlacementTargets.CaptureSettledChain(
             measureRect, rigSpaceRoot, ChainRects, stage.StageView);
 
+        // 이동 축은 리그 스키마상 언제나 측정 체인 위에 있다. 아니면 코어(RequireIndex)가 예외로 드러낸다.
         int moveIndex = ChainRects.IndexOf(moveRect);
-
-        if (moveIndex < 0)
-        {
-            Debug.LogWarning(
-                $"[CharacterFocusPlacementSolver] 이동 축 '{moveRect.name}'이 focus 측정 체인에 없다. " +
-                $"배치를 건너뛴다. role='{roleKey}'");
-
-            return false;
-        }
 
         // 지점 비율표는 아직 호스트 지식이다 — 게임별 값이라 언젠가 tuning으로 간다.
         Vector2 desiredFocusInRigSpace =
@@ -75,8 +64,6 @@ public static class CharacterFocusPlacementSolver
             desiredFocusInRigSpace.ToCore(),
             moveRect.anchoredPosition.ToCore());
 
-        destinationAnchoredPosition = solved.ToUnity();
-
-        return true;
+        return solved.ToUnity();
     }
 }

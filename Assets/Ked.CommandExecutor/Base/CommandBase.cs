@@ -43,9 +43,7 @@ public abstract class CommandBase : ISequenceCommand, IStepScopedCommand
 
     protected abstract IEnumerator ExecuteInner(CommandRunScope scope);
 
-    protected virtual void OnSkip(CommandRunScope scope)
-    {
-    }
+    protected virtual void OnSkip(CommandRunScope scope) { }
     
     // Default step-lifetime binding.
     // Background routines are stopped at the next step boundary.

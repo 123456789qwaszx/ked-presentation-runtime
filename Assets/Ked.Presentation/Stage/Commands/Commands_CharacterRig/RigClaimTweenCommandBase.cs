@@ -19,7 +19,6 @@ using UnityEngine;
 /// 파생이 채우는 것:
 ///   ResolveRects    — RigRefs에서 rect를 꺼낸다 (리그 해석은 여기가 했다)
 ///   ClaimTarget     — DOKill → (from-override) → 목표 계산 → Claim(rect, claim)
-///                     목표를 낼 수 없는 커맨드(place의 해 실패)는 Claim을 부르지 않고 돌아온다 — 그게 실패다
 ///   WriteFinalState — 최종 쓰기만. Clear는 여기가 한다
 /// </summary>
 public abstract class RigClaimTweenCommandBase : ClaimTweenCommandBase
@@ -55,20 +54,14 @@ public abstract class RigClaimTweenCommandBase : ClaimTweenCommandBase
         ResolveRects();
     }
 
-    protected sealed override bool ClaimTarget(CommandRunScope scope)
+    protected sealed override void ClaimTarget(CommandRunScope scope)
     {
         _claims.Clear();
 
         ClaimTarget();
 
-        // 클레임 없이 트윈하는 클레임-트윈 커맨드는 없다 — 클레임이 없으면 목표를 못 낸 것이다.
-        if (_claims.Count == 0)
-            return false;
-
         for (int i = 0; i < _claims.Count; i++)
             RigRefs.PlacementTargets.Publish(_claims[i].rect, _claims[i].claim);
-
-        return true;
     }
 
     protected sealed override void OnCommitFinalState()

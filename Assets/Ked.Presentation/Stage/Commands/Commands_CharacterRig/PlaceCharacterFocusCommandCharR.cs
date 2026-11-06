@@ -69,8 +69,7 @@ public sealed class PlaceCharacterFocusCommandCharR : RigClaimTweenCommandBase
 
         _startPosition = _moveRect.anchoredPosition;
 
-        // 해를 못 구하면 클레임을 내지 않는다 = 움직이지 않는다. 종전엔 반환값을 버려 (0,0)으로 트윈했다 — 무음 실패.
-        if (!CharacterFocusPlacementSolver.TryCalculateFocusPlacement(
+        _destination = CharacterFocusPlacementSolver.CalculateFocusPlacement(
             _stage,
             _spec.slotKey,
             _moveRect,
@@ -78,13 +77,8 @@ public sealed class PlaceCharacterFocusCommandCharR : RigClaimTweenCommandBase
             _spec.focusOffset,
             _focusTuningDb,
             _spec.screenPoint,
-            _spec.screenOffset,
-            out Vector2 destination))
-        {
-            return;
-        }
+            _spec.screenOffset);
 
-        _destination = destination;
         Claim(_moveRect, StageNodeClaim.AnchoredPosition(_moveRect.name, _destination.ToCore()));
     }
 
