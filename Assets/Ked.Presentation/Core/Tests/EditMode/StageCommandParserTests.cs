@@ -18,8 +18,8 @@ public class StageCommandParserTests
         return output;
     }
 
-    // (리그 프리팹, 이징 곡선). 배경도 캐릭터 리그다.
-    private static StageCommandParser NewParser() => new(null, null);
+    // 리그 프리팹 없이(모션도 없이) 세운다. 배경도 캐릭터 리그다.
+    private static StageCommandParser NewParser() => new(null);
 
     [Test]
     public void 표에_있는_이름과_프레임_별칭을_안다()
@@ -216,7 +216,7 @@ public class StageCommandParserTests
             ""channels"": [ { ""node"": ""CharacterPortrait_Track_Move_Y"", ""kind"": ""position"",
             ""y"": [ { ""t"": 0, ""v"": 0 }, { ""t"": 0.6, ""v"": 0 } ] } ] } ] }";
 
-        StageCommandParser parser = new(null, null, MotionLibrary.Parse(json, "test"));
+        StageCommandParser parser = new(null, MotionLibrary.Parse(json, "test"));
 
         List<CommandSpecBase> specs = Parse(parser, Cmd("motion", "c1", "nod"));
         MotionCommandSpecCharR spec = (MotionCommandSpecCharR)specs[0];
