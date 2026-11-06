@@ -318,7 +318,7 @@ fade·move·scale을 **같은 노드, 같은 목표 계산**으로 접고, 종�
   스텝 경계 가속(2026-11-06 개편): 처음엔 트윈을 죽이고 남은 비율(`MeasureRemainingRatio` — 커맨드마다 거리·각도·배율로 어림)로
   새 트윈(`CreateAcceleratedTween`)을 만들었고, 그 변형점으로 `AccelerateOnStepFinish` · `StepFinishSpeedUpMultiplier`가 있었다.
   지금은 **지금 트윈의 `timeScale`을 30으로 올린다** — 같은 길을 빠르게 끝까지 돌고, 남은 시간은 트윈이 안다.
-  그래서 커맨드가 채울 훅은 `ResolveTargets` · `ClaimTarget` · `CreateTween` · `OnCommitFinalState` 넷뿐이다.
+  그래서 커맨드가 채울 훅은 `ResolveRefs` · `ClaimTarget` · `CreateTween` · `OnCommitFinalState` 넷뿐이다.
   이게 되는 까닭은 값과 타이밍이 갈라져서다 — 끝값은 장부의 타깃이 쥐고(트윈 전에 게시, 확정 때 해제),
   트윈이 언제 거기 닿느냐는 보이는 연출일 뿐이다. 장부가 없던 때는 다음 커맨드가 라이브 트랜스폼을 읽었기에
   남은 만큼을 재서 다시 만들어야 했다. 샷과 화면 효과·블러의 전환(`IntentTransition`)도 같은 날 같은 방식으로 바꿨다 —

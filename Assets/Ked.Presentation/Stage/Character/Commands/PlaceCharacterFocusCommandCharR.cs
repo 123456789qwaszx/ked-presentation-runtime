@@ -59,7 +59,7 @@ public sealed class PlaceCharacterFocusCommandCharR : ClaimTweenCommandBase
         _focusTuningDb = focusTuningDb;
     }
 
-    protected override void ResolveTargets()
+    protected override void ResolveRefs()
     {
         _rig = CharacterRigResolver.ResolveRig(_stage, _spec.roleKey);
         _moveRect = _rig.GetRect(_spec.moveNode);

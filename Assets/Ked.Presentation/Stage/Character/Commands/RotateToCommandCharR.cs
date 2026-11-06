@@ -46,7 +46,7 @@ public sealed class RotateToCommandCharR : ClaimTweenCommandBase
         _spec = spec;
     }
 
-    protected override void ResolveTargets()
+    protected override void ResolveRefs()
     {
         _rig = CharacterRigResolver.ResolveRig(_stage, _spec.roleKey);
         _rect = _rig.GetRect(_spec.node);

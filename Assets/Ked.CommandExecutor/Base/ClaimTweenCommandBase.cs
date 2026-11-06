@@ -21,7 +21,7 @@ public abstract class ClaimTweenCommandBase : CommandBase
 
     // 대상 해석(한 번만 불린다). 이 훅과 ClaimTarget은 스코프를 받지 않는다 — 무대는 커맨드가 생성자로 받고,
     // 스코프의 실행 상태(취소 · 압축 · 스텝 경계)는 이 기반이 다룬다.
-    protected abstract void ResolveTargets();
+    protected abstract void ResolveRefs();
 
     // DOKill -> (from-override) -> 목표 계산(코어)과 장부 예약. 타깃은 언제나 나온다.
     protected abstract void ClaimTarget();
@@ -40,7 +40,7 @@ public abstract class ClaimTweenCommandBase : CommandBase
         if (!_resolved)
         {
             _resolved = true;
-            ResolveTargets();
+            ResolveRefs();
         }
         
         ClaimTarget();
@@ -67,7 +67,7 @@ public abstract class ClaimTweenCommandBase : CommandBase
         if (!_resolved)
         {
             _resolved = true;
-            ResolveTargets();
+            ResolveRefs();
         }
 
         if (!_hasClaimedTarget)
