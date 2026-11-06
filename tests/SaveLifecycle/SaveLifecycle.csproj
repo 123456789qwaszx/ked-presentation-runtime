@@ -20,7 +20,7 @@
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <Compile Include="../../Assets/Ked.Progression/**/*.cs"
-             Exclude="../../Assets/Ked.Progression/Tests/**/*.cs;../../Assets/Ked.Progression/Runtime/ProgressionDriver.cs" />
+             Exclude="../../Assets/Ked.Progression/Tests/**/*.cs;../../Assets/Ked.Progression/Core/ProgressionDriver.cs" />
     <Compile Include="../../Assets/Samples/Scripts/ProgressionHost/ProgressionLauncher.cs" />
     <Compile Include="../../Assets/Samples/Scripts/ProgressionHost/ProgressionSaveBridge.cs" />
     <Compile Include="../../Assets/Ked.Presentation/Playback/Host/IPlaybackHost.cs" />

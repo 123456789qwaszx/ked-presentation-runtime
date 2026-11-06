@@ -83,7 +83,7 @@ Yarn Spinner를 기반으로 제작한 **비주얼 노벨 화면 연출 런타�
 한 줄의 대사가 들어온 뒤 연출 실행, 텍스트 출력, 입력 대기, 스킵 및 상태 복원으로 이어지는 흐름을 담당합니다.
 이 폴더는 이름 있는 어셈블리 `Ked.Presentation.Playback`의 일부입니다. 롤백 기록·백로그·줄 시크·선택 기록과
 재생 단위(`Host/PlaybackUnit.cs`)까지 — 저장이 없어도 연출이 스스로 기억하는 것을 같은 어셈블리가 소유합니다
-([ASSEMBLY-BOUNDARY.md](Assets/Ked.Presentation/Runtime/ASSEMBLY-BOUNDARY.md)).
+([ASSEMBLY-BOUNDARY.md](Assets/Ked.Presentation/Documentation~/ASSEMBLY-BOUNDARY.md)).
 호스트(예제)가 만지는 것은 재생 단위와 연출 기억의 입구(`Memory/PlaybackMemory.cs`) 둘뿐입니다.
 
 주요 파일:
@@ -96,8 +96,8 @@ Yarn Spinner를 기반으로 제작한 **비주얼 노벨 화면 연출 런타�
 ### 4. 연출 명령과 실행 구조
 
 * `Assets/Ked.CommandExecutor/` — 실행기(커맨드 수명 · 스텝 스코프 · 압축 정책 포트). 분리본 ked-command-executor가 따라간다
-* `Assets/Ked.Presentation/Runtime/Commands/` — 커맨드 · 팩토리 · 대본 커맨드 파서(`StageCommandParser/`)
-* `Assets/Ked.Presentation/Runtime/Stage/` — 무대 상태(리그·배경·cast 레지스트리)와 무대 키
+* `Assets/Ked.Presentation/Stage/Commands/` — 커맨드 · 팩토리 · 대본 커맨드 파서(`StageCommandParser/`)
+* `Assets/Ked.Presentation/Stage/` — 무대 상태(리그·배경·cast 레지스트리)와 무대 키
 
 연출 명령의 생성과 실행, 실행 수명 관리(스텝/런 스코프) 구조를 확인할 수 있습니다.
 
@@ -115,7 +115,7 @@ Yarn Spinner를 기반으로 제작한 **비주얼 노벨 화면 연출 런타�
 
 챕터 JSON을 실어 불변식을 검사하고, 대사 재생 뒤 한 번 판정해 선택지를 띄우고
 스탯 반영과 이동을 장면 경계에서 한 번에 커밋하는 루프는
-[ProgressionDriver.cs](Assets/Ked.Progression/Runtime/ProgressionDriver.cs)와
+[ProgressionDriver.cs](Assets/Ked.Progression/Core/ProgressionDriver.cs)와
 [SceneRunner.cs](Assets/Samples/Scripts/ProgressionHost/SceneRunner.cs)에 있습니다.
 
 `ProgressionDriver`는 `ISceneRunner`를 통해 게임의 `SceneRunner`를 실행합니다. SceneRunner는

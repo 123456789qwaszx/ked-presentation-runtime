@@ -8,7 +8,7 @@ namespace Ked.Samples.UI.Editor
     /// 가는 글자가 된다(IMPLEMENTATION §3). 그래서 같은 글꼴에서 뽑은 정적 굵기 둘(Medium 500 · Bold 700, OFL 그대로)을 쓴다.
     /// 둘 다 동적 SDF — 한국어 글자는 쓰는 대로 아틀라스에 들어간다. Bold는 Medium의 굵기 표(700)에 걸어
     /// 글자 스타일 Bold가 가짜 굵게가 아니라 Bold 글꼴로 그려지게 한다.
-    /// 만들기 · 비우기 · 굵기 표는 UIPF의 UIFontAssets(Editor/UI/Authoring)가 하고, 여기는 KedUI의 글꼴과 자리만 둔다.
+    /// 만들기 · 비우기 · 굵기 표는 UIPF의 UIFontAssets(Editor/Authoring)가 하고, 여기는 KedUI의 글꼴과 자리만 둔다.
     /// </summary>
     public static class KedUIFonts
     {

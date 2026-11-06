@@ -24,24 +24,26 @@
 
 ## 무엇을 가져왔나
 
-원본 README "요구 사항"의 복사 목록 그대로다. 폴더 구조도 원본과 같다 — 원본의 `Assets/` 아래 자리를 이 폴더 아래에 그대로 둔다.
+원본 README "요구 사항"의 복사 목록 그대로다. 2026-11-06부터 사본은 **어셈블리마다 폴더 하나**(이 저장소의 모든 모듈이 따르는 규칙)로 둔다 — 원본도 같은 배치로 바꿀 예정이고, 그때까지는 아래 대응표대로 옮겨 놓는다.
 
 | 원본 | 사본 |
 |---|---|
-| `Assets/Scripts/{UI,Presentation,Display,Localization}/` + `UIPresentationFlow.Runtime.asmdef` | `Assets/UIPresentationFlow/Scripts/` 같은 자리 |
-| `Assets/Editor/UI/` | `Assets/UIPresentationFlow/Editor/UI/` |
-| `Assets/Shaders/` | `Assets/UIPresentationFlow/Shaders/` |
-| 폴더 `.meta` `Scripts` · `Editor` · `Shaders` | 같은 GUID 그대로 |
+| `Assets/Scripts/{UI,Presentation,Display,Localization}/` + `UIPresentationFlow.Runtime.asmdef` | `Assets/UIPresentationFlow/Runtime/` 같은 자리 |
+| `Assets/Shaders/` | `Assets/UIPresentationFlow/Runtime/Shaders/` (런타임 어셈블리가 쓰는 에셋) |
+| `Assets/Editor/UI/` (+ `UIPresentationFlow.Editor.asmdef`) | `Assets/UIPresentationFlow/Editor/` (한 층 걷음) |
+| 폴더 `.meta` `Scripts` · `Editor` · `Shaders` | `Runtime.meta` · `Editor.meta` · `Runtime/Shaders.meta` — 같은 GUID 그대로. 원본 `Editor/UI.meta`는 쓰지 않는다 |
 
-에디터 코드(`Editor/UI`)는 원본의 에디터 asmdef `Editor/UI/UIPresentationFlow.Editor.asmdef`(`f912e99`부터)에 든다. 예제 UI의 에디터 asmdef(`Ked.Samples.UI.Editor`)가 이것을 참조해 화면 짓기 도구를 쓴다 — asmdef 어셈블리는 `Assembly-CSharp-Editor`를 참조할 수 없다.
+에디터 코드는 원본의 에디터 asmdef `UIPresentationFlow.Editor`(원본 자리 `Editor/UI/`, `f912e99`부터)에 든다 — 사본에서는 `Editor/` 바로 아래. 예제 UI의 에디터 asmdef(`Ked.Samples.UI.Editor`)가 이것을 참조해 화면 짓기 도구를 쓴다 — asmdef 어셈블리는 `Assembly-CSharp-Editor`를 참조할 수 없다.
 
 가져오지 않은 것은 다음과 같다.
 - `Assets/Demo/`: 블랙홀 데모, 비주얼 노벨 샘플(이 저장소 VN UI 묶음의 복사본 + 데모 앱 — 이 저장소가 묶음의 원본이다)
 - `Assets/Scripts/Demo/` · `Assets/UI/`: Adaptive UI 데모의 코드와 바인딩 · 테마 에셋. 원본에서 `752d168`로 걷었다
 
-## 사본에만 있는 것 — 없다
+## 사본에만 있는 것 — 폴더 배치뿐
 
-가져온 파일은 모두 원본 blob과 바이트 단위로 같다(LF, `.meta` 포함). 폴더 구조도 같다.
+가져온 파일은 모두 원본 blob과 바이트 단위로 같다(LF, `.meta` 포함). 다른 것은 **폴더 배치** 하나다(2026-11-06, 위 대응표 — 원본이 같은 배치로 바뀌면 없어진다).
+
+반입 때의 첫 갈림(아래 표 첫 줄)과 달리, 이번 배치는 에디터 asmdef를 런타임 asmdef **아래**에 두지 않는다 — `Editor/`는 `Runtime/`의 형제라 그 표의 CS0433 문제가 생기지 않는다.
 
 반입 때(2026-10-27)는 갈림이 셋 있었고, 같은 날 모두 없앴다.
 
@@ -61,10 +63,13 @@
 mkdir -p /tmp/uipf && git -C ../UIPresentationFlow archive --format=tar <커밋> \
   Assets/Scripts Assets/Scripts.meta Assets/Editor Assets/Editor.meta Assets/Shaders Assets/Shaders.meta \
   | tar -x -C /tmp/uipf
-diff -r -q --strip-trailing-cr -x Demo -x Demo.meta /tmp/uipf/Assets/Scripts  Assets/UIPresentationFlow/Scripts
-diff -r -q --strip-trailing-cr                     /tmp/uipf/Assets/Editor   Assets/UIPresentationFlow/Editor
-diff -r -q --strip-trailing-cr                     /tmp/uipf/Assets/Shaders  Assets/UIPresentationFlow/Shaders
-for m in Scripts Editor Shaders; do diff --strip-trailing-cr /tmp/uipf/Assets/$m.meta Assets/UIPresentationFlow/$m.meta; done
+diff -r -q --strip-trailing-cr -x Demo -x Demo.meta -x Shaders -x Shaders.meta \
+                                      /tmp/uipf/Assets/Scripts    Assets/UIPresentationFlow/Runtime
+diff -r -q --strip-trailing-cr        /tmp/uipf/Assets/Shaders    Assets/UIPresentationFlow/Runtime/Shaders
+diff -r -q --strip-trailing-cr        /tmp/uipf/Assets/Editor/UI  Assets/UIPresentationFlow/Editor
+diff --strip-trailing-cr /tmp/uipf/Assets/Scripts.meta Assets/UIPresentationFlow/Runtime.meta
+diff --strip-trailing-cr /tmp/uipf/Assets/Editor.meta  Assets/UIPresentationFlow/Editor.meta
+diff --strip-trailing-cr /tmp/uipf/Assets/Shaders.meta Assets/UIPresentationFlow/Runtime/Shaders.meta
 ```
 
 결과가 0줄이면 같다. 결과(2026-10-27, `cf3fa98`)는 PLAN_uipf-ui의 U3 기록에, `3a26d8b`(= `dev` `4a4af6f`)와 `f912e99` · `c22bb76` · `6fe89e7`은 "UIPF로 되돌림"에 있다.
@@ -77,7 +82,7 @@ for m in Scripts Editor Shaders; do diff --strip-trailing-cr /tmp/uipf/Assets/$m
    git -C ../UIPresentationFlow archive --format=tar <커밋> \
      Assets/Scripts Assets/Editor Assets/Shaders | tar -x -C /tmp/uipf
    ```
-3. 위 표의 자리에 `.meta`째 덮어쓴다. `Demo`는 빼고 가져온다.
+3. 위 대응표의 자리에 `.meta`째 덮어쓴다(`Scripts` → `Runtime`, `Shaders` → `Runtime/Shaders`, `Editor/UI` → `Editor`). `Demo`는 빼고 가져온다.
 4. 갈림이 있으면(위 절) 다시 적용한다. 지금은 없다.
 5. 위 "대조"를 돌리고, 스냅샷 표를 고친다.
 

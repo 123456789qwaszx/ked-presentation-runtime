@@ -19,7 +19,7 @@ namespace Ked.Samples.UI.Editor
     /// 화면 빌드 명세(Screens/*/Editor)가 쓰는 부품 상자 — KedUI의 부품 모양. 시안의 부품 규칙(Docs/IMPLEMENTATION.md §4·§8)을 한곳에 둔다:
     /// Simple/Sliced는 asset-manifest.json대로, 아이콘은 비율 유지, 버튼은 UIPF ButtonAnimation(누름 0.98)과
     /// KedButton(포커스 테두리·막힘 투명도), 글자는 모두 TMP(Noto Sans KR).
-    /// 노드 자리(시안 좌표 → 앵커) · 그림 찾기 · 직렬화 칸 쓰기는 UIPF(Editor/UI/Authoring)의 것을 쓴다 — UINodes · UISpriteIndex · UISerialized.
+    /// 노드 자리(시안 좌표 → 앵커) · 그림 찾기 · 직렬화 칸 쓰기는 UIPF(Editor/Authoring)의 것을 쓴다 — UINodes · UISpriteIndex · UISerialized.
     /// 시안 판은 1600×900.
     /// </summary>
     public sealed class KedUIKit

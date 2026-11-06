@@ -6,7 +6,7 @@ namespace Ked.Samples.UI.Editor
 {
     /// <summary>
     /// KedUI의 자리와 화면 묶음 설정. 규칙(생성물 자리 · 묶음 감사)과 그림을 이름으로 찾는 도구는 UIPF의
-    /// UIScreenUnits · UISpriteIndex(Editor/UI/Authoring)이고, 여기는 KedUI가 넘기는 값만 둔다.
+    /// UIScreenUnits · UISpriteIndex(Editor/Authoring)이고, 여기는 KedUI가 넘기는 값만 둔다.
     ///
     ///   {뿌리}/Screens/{묶음}/Scripts · Prefabs · Presentation · Sprites · Editor
     ///   {뿌리}/Common/   여러 화면이 같이 쓰는 키트 스크립트 · 그림 · 글꼴
@@ -42,7 +42,7 @@ namespace Ked.Samples.UI.Editor
 
         private static UIScreenUnits NewRules()
         {
-            // UIPF 코드의 자리도 asmdef로 찾는다(ked는 사본 Assets/UIPresentationFlow/Scripts, UIPF 저장소는 Assets/Scripts).
+            // UIPF 코드의 자리도 asmdef로 찾는다(ked는 사본 Assets/UIPresentationFlow/Runtime, UIPF 저장소는 Assets/Scripts).
             string uipf = AsmdefDir("UIPresentationFlow.Runtime");
             return uipf != null
                 ? new UIScreenUnits(UnitsDir, CommonDir, uipf)

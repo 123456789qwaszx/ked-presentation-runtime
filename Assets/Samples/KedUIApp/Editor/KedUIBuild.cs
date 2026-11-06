@@ -35,7 +35,7 @@ namespace Ked.Samples.UI.Editor
     /// (저장/불러오기의 슬롯 카드 여섯 장)이 있는 프리팹은 파일 안 fileID가 빌드마다 바뀐다(UIPF UIPrefabs).
     /// 플레이 중에는 빌드하지 않는다 — 실행 중에만 붙는 컴포넌트가 섞여 저장된다.
     /// 씬은 건드리지 않는다 — SampleBootstrap이 Resources에서 캔버스를 읽는다.
-    /// 자리 계산 · 저장 · Presentation · 글꼴 · 검사의 도구는 UIPF(Editor/UI/Authoring)의 것이다.
+    /// 자리 계산 · 저장 · Presentation · 글꼴 · 검사의 도구는 UIPF(Editor/Authoring)의 것이다.
     ///
     /// 배치 모드: -executeMethod Ked.Samples.UI.Editor.KedUIBuild.BuildBatch (문제가 있으면 종료 코드 1).
     /// Unity가 이 프로젝트를 열고 있으면 배치 모드는 프로젝트를 열지 못한다.

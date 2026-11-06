@@ -1,10 +1,10 @@
 # 분리본 — ked-stage-runtime
 
-이 저장소가 원본이다. `Assets/Ked.Presentation/`의 **Playback을 뺀 전부**(Core · Runtime · Editor · Audio · Data · Prefabs · Resources)와
+이 저장소가 원본이다. `Assets/Ked.Presentation/`의 **Playback을 뺀 전부**(Core · Stage · Editor · Tests · README)와
 루트의 `ExportedTuning/`을 포트폴리오에서 따로 보이려고 **ked-stage-runtime**에 떼어 두었다. 그쪽은 이것과 같은 한 벌이다(.meta GUID까지).
 
 ```
-원본     Assets/Ked.Presentation/{Core, Runtime, Editor, Audio, Data, Prefabs, Resources} · ExportedTuning/   ← 이 저장소
+원본     Assets/Ked.Presentation/{Core, Stage, Editor, Tests} · ExportedTuning/   ← 이 저장소
 분리본   ked-stage-runtime   (형제 폴더 · Unity 프로젝트) — Playback과 예제는 없다
 ```
 
@@ -21,6 +21,7 @@
 | 마지막으로 맞춘 날 | 2026-11-04 · 이 저장소 → 분리본 (11-03~04에 여기서 고친 것 전부 — face_swap · 샷 의도 · 화면 효과 의도 · 블러 의도 · BGM · 보이스 · 무대 마스크 · S2~S6 · `Shaders/`를 `Resources/VisualEffects/`로. 분리본 안의 `Ked.CommandExecutor`도 함께). 그 전: 2026-11-03 분리본 쪽에서 먼저 한 정본 커맨드 정리를 들여옴, 2026-10-29 배경 리그 제거, 2026-10-28 `dev` @ `640ac60`, 2026-10-27 처음 떼어 냄 |
 | 맞춘 것 | 위 폴더 전부 + `ExportedTuning/` |
 | 일치 | `diff -r` 0건 (아래 "대조" 명령) |
+| 2026-11-06 | **원본만 재배치 — 분리본은 아직 옛 배치.** `Runtime/` → `Stage/`(어셈블리 `Ked.Presentation.Stage`), `Core/Tests/EditMode/` → `Tests/EditMode/`(어셈블리 `Ked.Presentation.Tests.EditMode`), 에셋은 `Stage/{Prefabs,Resources,Presets}`로, 믹서는 예제(`Samples/Audio`)로, 뿌리에 `README.md`. 다음 맞춤 때 분리본도 같은 배치로 옮긴다 |
 
 **갈리면 이 표를 고친다.** 표가 낡으면 분리본이 어느 판인지 아무도 모른다.
 

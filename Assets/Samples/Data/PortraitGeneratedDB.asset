@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ba5599f350ee0eb4da73ea693b4bd57c, type: 3}
   m_Name: PortraitGeneratedDB
-  m_EditorClassIdentifier: Ked.Presentation.Runtime::PortraitGeneratedDBSO
+  m_EditorClassIdentifier: Ked.Presentation.Stage::PortraitGeneratedDBSO
   entries:
   - characterId: harin
     variantKey: a
