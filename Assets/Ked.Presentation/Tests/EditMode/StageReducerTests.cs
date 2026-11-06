@@ -600,6 +600,19 @@ namespace Ked.Presentation.Tests
             Assert.That(back.GetAlpha("c1/CharacterPortraitSprite_Root"), Is.EqualTo(1f));
         }
 
+        [Test]
+        public void fade는_목표_alpha까지_접고_범위_밖은_자른다()
+        {
+            StageState state = Fold(Cmd("slot", "c1"), Cmd("show", "c1"));
+
+            StageState half = StageReducer.Apply(state, Cmd("fade", "c1", "0.5", "12fr"), NewTuning());
+            Assert.That(half.GetAlpha("c1/CharacterPortraitSprite_Root"), Is.EqualTo(0.5f));
+            Assert.That(half.GetAlpha("c1/__root"), Is.EqualTo(1f), "리그 루트는 그대로");
+
+            StageState over = StageReducer.Apply(state, Cmd("fade", "c1", "1.5"), NewTuning());
+            Assert.That(over.GetAlpha("c1/CharacterPortraitSprite_Root"), Is.EqualTo(1f), "[0,1] 밖은 자른다");
+        }
+
         // ── shot ─────────────────────────────────────────────────────
 
         [Test]

@@ -72,7 +72,7 @@ namespace Ked.Presentation.Core
     /// 이 기록이 "아직 못 접는 것"의 유일한 진실이고, 수렴의 작업 목록이 된다.
     ///
     /// 현재 어휘(v1): slot 계열(리그 스폰) · cast/actor(배역·별칭) ·
-    ///   show(리셋+앵커+사이징+가시성) · fade_in/out · slide_in/out · place/size 계열 ·
+    ///   show(리셋+앵커+사이징+가시성) · fade_in/out · fade · slide_in/out · place/size 계열 ·
     ///   nudge/move/scale/rotate 계열 · shot 5종 ·
     ///   초상 축(pose/face/face_swap) · motion(채널마다 마지막 키) · 시간 커맨드(pause·Nfr — 접을 것이 없다) ·
     ///   배경 bg_*(캐스팅하지 않은 슬롯 — spawn/sprite/fade/move/scale).
@@ -167,6 +167,7 @@ namespace Ked.Presentation.Core
                 // fade — 브리지와 같은 표적(CharacterPortraitSprite_Root).
                 case "fade_in": return ApplyFade(state, cmd, visible: true, out reason);
                 case "fade_out": return ApplyFade(state, cmd, visible: false, out reason);
+                case "fade":     return ApplyFadeTo(state, cmd, out reason);   // fade(slot, alpha="1", dur) — 반투명까지
 
                 // place 계열 — focus 지점을 화면 지점으로 (SettledFocusMath.SolveFocusPlacement).
                 // 파서 표: place(role, focus="bust", screenPoint="center") /

@@ -88,5 +88,22 @@ namespace Ked.Presentation.Core
 
             return true;
         }
+
+        /// <summary>fade(slot, alpha, dur) — 같은 표적, 목표 alpha만 인자에서. 생략값은 파서 표와 같은 1이다.</summary>
+        private static bool ApplyFadeTo(StageState state, in StageCommand cmd, out string reason)
+        {
+            if (!TryGetSpawnedSlot(state, cmd, out string slotKey, out reason))
+                return false;
+
+            if (!NumberToken.TryParseFloat(cmd.Arg(1, "1"), out float alpha))
+            {
+                reason = $"목표 alpha를 읽지 못했다: '{cmd.Arg(1)}'";
+                return false;
+            }
+
+            state.Apply(FadeReduction.Reduce(StageState.NodeKeyOf(slotKey, "CharacterPortraitSprite_Root"), alpha));
+
+            return true;
+        }
     }
 }

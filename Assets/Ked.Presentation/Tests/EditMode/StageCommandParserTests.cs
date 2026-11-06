@@ -200,6 +200,19 @@ public class StageCommandParserTests
     }
 
     [Test]
+    public void fade는_목표_alpha를_싣고_범위_밖은_경고하고_자른다()
+    {
+        FadeCommandSpecCharR half = (FadeCommandSpecCharR)Parse(NewParser(), Cmd("fade", "c1", "0.5", "12fr"))[0];
+        Assert.AreEqual(0.5f, half.targetAlpha, 1e-6f);
+        Assert.AreEqual(CharacterRigTarget.CharacterPortraitSprite_Root, half.target, "fade_in · fade_out과 같은 표적");
+        Assert.AreEqual(0.5f, half.duration, 1e-5f, "12fr");
+
+        LogAssert.Expect(LogType.Warning, new Regex("fade.*밖이다"));
+        FadeCommandSpecCharR clamped = (FadeCommandSpecCharR)Parse(NewParser(), Cmd("fade", "c1", "-0.2"))[0];
+        Assert.AreEqual(0f, clamped.targetAlpha, 1e-6f);
+    }
+
+    [Test]
     public void 출력_리스트_뒤에_붙인다()
     {
         List<CommandSpecBase> output = new() { new WaitCommandSpec() };

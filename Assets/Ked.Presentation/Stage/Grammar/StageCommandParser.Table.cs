@@ -52,6 +52,7 @@ public sealed partial class StageCommandParser
         ["size_reset"] = (p, c) => p.EnqueueDepthResetSpec(c.Arg(0), Float(c, 1, 0f), c.Arg(2, "")),
         ["fade_in"] = (p, c) => p.EnqueueFadeInSpec(c.Arg(0), c.Arg(1, "14fr")),
         ["fade_out"] = (p, c) => p.EnqueueFadeOutSpec(c.Arg(0), c.Arg(1, "14fr")),
+        ["fade"] = (p, c) => p.EnqueueFadeToSpec(c.Arg(0), Float(c, 1, 1f), c.Arg(2, "14fr")),
         ["slide_in"] = (p, c) => p.EnqueueSlideInSpec(c.Arg(0), c.Arg(1, "left"), c.Arg(2, "12u"), c.Arg(3, "10fr")),
         ["slide_out"] = (p, c) => p.EnqueueSlideOutSpec(c.Arg(0), c.Arg(1, "right"), c.Arg(2, "12u"), c.Arg(3, "10fr")),
         ["char_move_to"] = (p, c) => p.EnqueueMoveByUnitCharSpec(c.Arg(0), c.Arg(1), c.Arg(2), c.Arg(3, "10fr")),

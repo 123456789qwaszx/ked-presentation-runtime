@@ -188,6 +188,9 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler<string, string>(
             "fade_out", EnqueueFadeOutSpec);
 
+        runner.AddCommandHandler<string, string, string>(
+            "fade", EnqueueFadeToSpec);
+
         runner.AddCommandHandler<string, string, string, string>(
             "slide_in", EnqueueSlideInSpec);
 

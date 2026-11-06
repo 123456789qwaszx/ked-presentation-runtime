@@ -107,6 +107,9 @@ public sealed partial class YarnCommandBridge
     private void EnqueueFadeOutSpec(string roleKey = null, string durationToken = null)
         => Forward("fade_out", roleKey, durationToken);
 
+    private void EnqueueFadeToSpec(string roleKey = null, string alpha = null, string durationToken = null)
+        => Forward("fade", roleKey, alpha, durationToken);
+
     private void EnqueueSlideInSpec(string roleKey = null, string direction = null, string distanceToken = null, string durationToken = null)
         => Forward("slide_in", roleKey, direction, distanceToken, durationToken);
 

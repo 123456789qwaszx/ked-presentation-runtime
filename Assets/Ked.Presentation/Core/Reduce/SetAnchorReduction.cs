@@ -88,4 +88,17 @@ namespace Ked.Presentation.Core
         public static StageNodeClaim Reduce(string nodeKey)
             => StageNodeClaim.CanvasAlpha(nodeKey, TargetAlpha);
     }
+
+    /// <summary>
+    /// fade — 목표 alpha를 정하는 정본. fade_in(1) · fade_out(0)은 이것의 두 끝이다.
+    /// [0,1] 밖은 잘라 낸다 — 재생(파서)과 폴드가 같은 규칙으로 같은 값을 낸다.
+    /// </summary>
+    public static class FadeReduction
+    {
+        public static float TargetAlpha(float alpha)
+            => alpha < 0f ? 0f : alpha > 1f ? 1f : alpha;
+
+        public static StageNodeClaim Reduce(string nodeKey, float alpha)
+            => StageNodeClaim.CanvasAlpha(nodeKey, TargetAlpha(alpha));
+    }
 }
