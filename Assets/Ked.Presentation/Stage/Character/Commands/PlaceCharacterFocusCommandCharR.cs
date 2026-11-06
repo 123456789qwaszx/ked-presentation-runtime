@@ -60,13 +60,13 @@ public sealed class PlaceCharacterFocusCommandCharR : ClaimTweenCommandBase
         _focusTuningDb = focusTuningDb;
     }
 
-    protected override void ResolveTargets(CommandRunScope scope)
+    protected override void ResolveTargets()
     {
         _rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(_stage, _spec.slotKey);
         _moveRect = _rig.GetRect(_spec.moveTarget);
     }
 
-    protected override void ClaimTarget(CommandRunScope scope)
+    protected override void ClaimTarget()
     {
         _moveRect.DOKill(true);
 

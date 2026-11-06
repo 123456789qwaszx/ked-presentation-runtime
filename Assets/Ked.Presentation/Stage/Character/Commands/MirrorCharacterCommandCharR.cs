@@ -52,7 +52,7 @@ public sealed class MirrorCharacterCommandCharR : ClaimTweenCommandBase
     /// 해석과 동시에 방향을 정해 대장에 기록한다 — 대장이 곧 다음 Toggle의 입력이라
     /// 커맨드가 여러 번 불려도 방향이 한 번만 뒤집히도록 여기(1회 호출)에 둔다.
     /// </summary>
-    protected override void ResolveTargets(CommandRunScope scope)
+    protected override void ResolveTargets()
     {
         _rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(_stage, _spec.slotKey);
 
@@ -92,7 +92,7 @@ public sealed class MirrorCharacterCommandCharR : ClaimTweenCommandBase
         }
     }
 
-    protected override void ClaimTarget(CommandRunScope scope)
+    protected override void ClaimTarget()
     {
         _rect.DOKill(true);
 

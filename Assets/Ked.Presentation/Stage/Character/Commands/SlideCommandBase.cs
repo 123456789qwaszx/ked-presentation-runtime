@@ -45,13 +45,13 @@ public abstract class SlideCommandBase : ClaimTweenCommandBase
         _slotKey = slotKey;
     }
 
-    protected override void ResolveTargets(CommandRunScope scope)
+    protected override void ResolveTargets()
     {
         _rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(_stage, _slotKey);
         _rect = SlideRectOf(_rig);
     }
 
-    protected override void ClaimTarget(CommandRunScope scope)
+    protected override void ClaimTarget()
     {
         _rect.DOKill(true);
 

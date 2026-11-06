@@ -40,12 +40,12 @@ public sealed class FadeCommandCharR : ClaimTweenCommandBase
         _spec = spec;
     }
 
-    protected override void ResolveTargets(CommandRunScope scope)
+    protected override void ResolveTargets()
         => _group = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(_stage, _spec.slotKey)
             .GetRect(_spec.target)
             .GetComponent<CanvasGroup>();
 
-    protected override void ClaimTarget(CommandRunScope scope)
+    protected override void ClaimTarget()
     {
         _group.DOKill(true);
         _startAlpha = _group.alpha;

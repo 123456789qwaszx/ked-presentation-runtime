@@ -6,22 +6,6 @@ using UnityEngine;
 /// "클레임-트윈" 커맨드의 공통 수명 —
 /// 57곳에 흩어져 있던 미니 상태머신(ResolveRefs → ClaimTarget → 트윈 → Commit /
 /// OnSkip / OnStepLifetimeFinished 가속)을 한 곳으로 모은 것.
-///
-/// ShotIntentCommandBase가 shot 계열에 했던 통합을 일반화했다 — 그 덕에 shot 이관이
-/// 커맨드당 몇 줄로 끝났던 것과 같은 효과를 노린다.
-///
-/// 파생이 채우는 것 (변형점):
-///   ResolveTargets    — 유니티 참조 해석 (한 번만 불린다)
-///   ClaimTarget       — DOKill → (from-override) → 목표 계산(코어 리덕션). 목표는 언제나 나온다 — 실패 경로가 없다
-///   CreateTween       — 목표를 향한 트윈 (ease·target 포함. SetUpdate/OnComplete는 여기서 건다)
-///   OnCommitFinalState— 최종 쓰기
-///   MeasureRemainingRatio — 가속 잔여시간 계산용 남은 비율 (계량은 커맨드마다 다르다)
-///
-/// 적용 범위: 목표값이 있는 클레임-트윈 부류만이다. 절차적 연기(Tremble·Sway 등)는
-/// 목표가 정의되지 않으므로 이 기반에 맞지 않는다 (reduction-boundary.md).
-///
-/// 검증: 이 리팩터의 오라클은 등가성 하네스다 — 이관 배치마다 랩드스킵 재판정으로
-/// 리포트가 리팩터 전과 같은지 확인한다.
 /// </summary>
 public abstract class ClaimTweenCommandBase : CommandBase
 {
@@ -36,10 +20,12 @@ public abstract class ClaimTweenCommandBase : CommandBase
     // 0이하일 시 즉시 스냅
     protected abstract float TweenDuration { get; }
 
-    protected abstract void ResolveTargets(CommandRunScope scope);
+    // 대상 해석(한 번만 불린다). 이 훅과 ClaimTarget은 스코프를 받지 않는다 — 무대는 커맨드가 생성자로 받고,
+    // 스코프의 실행 상태(취소 · 압축 · 스텝 경계)는 이 기반이 다룬다.
+    protected abstract void ResolveTargets();
 
     // DOKill -> (from-override) -> 목표 계산 및 확정(코어 리덕션). 목표는 언제나 나온다.
-    protected abstract void ClaimTarget(CommandRunScope scope);
+    protected abstract void ClaimTarget();
 
     // ease, SetTarget은 구현 커맨드가 직접. (SetUpdate,OnComplete는 Base측 정책)
     protected abstract Tween CreateTween(float duration);
@@ -68,10 +54,10 @@ public abstract class ClaimTweenCommandBase : CommandBase
         if (!_resolved)
         {
             _resolved = true;
-            ResolveTargets(scope);
+            ResolveTargets();
         }
         
-        ClaimTarget(scope);
+        ClaimTarget();
         _hasClaimedTarget = true;
 
         float duration = TweenDuration;
@@ -95,12 +81,12 @@ public abstract class ClaimTweenCommandBase : CommandBase
         if (!_resolved)
         {
             _resolved = true;
-            ResolveTargets(scope);
+            ResolveTargets();
         }
 
         if (!_hasClaimedTarget)
         {
-            ClaimTarget(scope);
+            ClaimTarget();
             _hasClaimedTarget = true;
         }
 

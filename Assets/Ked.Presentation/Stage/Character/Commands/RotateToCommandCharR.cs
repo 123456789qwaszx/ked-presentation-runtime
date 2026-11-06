@@ -46,13 +46,13 @@ public sealed class RotateToCommandCharR : ClaimTweenCommandBase
         _spec = spec;
     }
 
-    protected override void ResolveTargets(CommandRunScope scope)
+    protected override void ResolveTargets()
     {
         _rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(_stage, _spec.slotKey);
         _rect = _rig.GetRect(_spec.target);
     }
 
-    protected override void ClaimTarget(CommandRunScope scope)
+    protected override void ClaimTarget()
     {
         _rect.DOKill(true);
 

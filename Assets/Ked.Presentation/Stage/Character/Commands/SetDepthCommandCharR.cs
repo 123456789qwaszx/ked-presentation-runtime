@@ -62,7 +62,7 @@ public sealed class SetDepthCommandCharR : ClaimTweenCommandBase
         _focusTuningDb = focusTuningDb;
     }
 
-    protected override void ResolveTargets(CommandRunScope scope)
+    protected override void ResolveTargets()
     {
         _rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(_stage, _spec.slotKey);
 
@@ -70,7 +70,7 @@ public sealed class SetDepthCommandCharR : ClaimTweenCommandBase
         _depthScaleRect = _rig.GetRect(_spec.depthScaleTarget);
     }
 
-    protected override void ClaimTarget(CommandRunScope scope)
+    protected override void ClaimTarget()
     {
         _depthYRect.DOKill(true);
         _depthScaleRect.DOKill(true);
