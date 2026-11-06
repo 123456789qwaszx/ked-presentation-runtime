@@ -98,20 +98,8 @@ public sealed class SlideCommandCharR : ClaimTweenCommandBase
             .SetTarget(_rect);
     }
 
-    /// <summary>스텝 경계 마무리는 튐을 빼고 도착점까지 직선으로만 붙인다.</summary>
-    protected override Tween CreateAcceleratedTween(float duration)
-        => _rect
-            .DOAnchorPos(_endPos, duration)
-            .SetEase(_spec.ease)
-            .SetTarget(_rect);
-
     protected override void OnCommitFinalState()
         => _rect.anchoredPosition = _endPos;
-
-    protected override float MeasureRemainingRatio()
-        => RemainingRatio(
-            Vector2.Distance(_startPos, _endPos),
-            Vector2.Distance(_rect.anchoredPosition, _endPos));
 
     private void ApplyProgress(float progress)
     {

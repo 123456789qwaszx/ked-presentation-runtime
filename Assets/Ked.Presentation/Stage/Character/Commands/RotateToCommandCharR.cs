@@ -81,17 +81,4 @@ public sealed class RotateToCommandCharR : ClaimTweenCommandBase
     protected override void OnCommitFinalState()
         => _rect.localEulerAngles = _targetEuler;
 
-    protected override float MeasureRemainingRatio()
-        => RemainingRatio(
-            EulerDistance(_startEuler, _targetEuler),
-            EulerDistance(_rect.localEulerAngles, _targetEuler));
-
-    private static float EulerDistance(Vector3 from, Vector3 to)
-    {
-        float x = Mathf.DeltaAngle(from.x, to.x);
-        float y = Mathf.DeltaAngle(from.y, to.y);
-        float z = Mathf.DeltaAngle(from.z, to.z);
-
-        return new Vector3(x, y, z).magnitude;
-    }
 }

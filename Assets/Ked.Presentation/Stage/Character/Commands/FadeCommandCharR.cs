@@ -28,7 +28,6 @@ public sealed class FadeCommandCharR : ClaimTweenCommandBase
     private readonly FadeCommandSpecCharR _spec;
 
     private CanvasGroup _group;
-    private float _startAlpha;
 
     public override bool WaitForCompletion => _spec.wait;
 
@@ -48,7 +47,6 @@ public sealed class FadeCommandCharR : ClaimTweenCommandBase
     protected override void ClaimTarget()
     {
         _group.DOKill(true);
-        _startAlpha = _group.alpha;
     }
 
     protected override Tween CreateTween(float duration)
@@ -66,8 +64,4 @@ public sealed class FadeCommandCharR : ClaimTweenCommandBase
         _group.blocksRaycasts = visible;
     }
 
-    protected override float MeasureRemainingRatio()
-        => RemainingRatio(
-            Mathf.Abs(_spec.targetAlpha - _startAlpha),
-            Mathf.Abs(_spec.targetAlpha - _group.alpha));
 }

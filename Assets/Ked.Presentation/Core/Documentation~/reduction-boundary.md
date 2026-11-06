@@ -297,11 +297,10 @@ fade·move·scale을 **같은 노드, 같은 리덕션**으로 접고, 종횡비
     SetDepth(클레임 2장 + 시퀀스) · PlaceCharacterFocus(클레임 1장 + 게시) ·
     MirrorCharacter · CharVisualFocus · StageDepthDefocus
 
-  기반이 제공하는 변형점(2026-11-06에 `AccelerateOnStepFinish`를 걷었다 — 끈 곳이 죽은 RotateBy와 시간 0인 Mirror뿐이었다) ·
-  `CreateAcceleratedTween`(가속 트윈이 본 트윈과 다른 경우) ·
-  `StepFinishSpeedUpMultiplier`(가속 배율) · `ResolvePlaybackDuration`(배속 축약).
-  가속 잔여시간은 `MeasureRemainingRatio` 한 장으로 받는다 — 축이 여럿이면
-  축별 `RemainingRatio`의 최댓값이다(가장 늦게 도착하는 축이 기준).
+  스텝 경계 가속(2026-11-06 개편): 처음엔 트윈을 죽이고 남은 비율(`MeasureRemainingRatio` — 커맨드마다 거리·각도·배율로 어림)로
+  새 트윈(`CreateAcceleratedTween`)을 만들었고, 그 변형점으로 `AccelerateOnStepFinish` · `StepFinishSpeedUpMultiplier`가 있었다.
+  지금은 **지금 트윈의 `timeScale`을 30으로 올린다** — 같은 길을 빠르게 끝까지 돌고, 남은 시간은 트윈이 안다.
+  그래서 커맨드가 채울 훅은 `ResolveTargets` · `ClaimTarget` · `CreateTween` · `OnCommitFinalState` 넷뿐이다.
 
   - 대상 아님: 절차적 연기 —
     목표값이 정의되지 않는다. 즉시 확정(`SetAnchor`)은 트윈이 없어 모양이 다르다.

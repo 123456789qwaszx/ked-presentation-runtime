@@ -36,9 +36,6 @@ public sealed class SetDepthCommandCharR : ClaimTweenCommandBase
     private RectTransform _depthYRect;
     private RectTransform _depthScaleRect;
 
-    private Vector2 _startDepthY;
-    private Vector2 _startDepthScale;
-
     private Vector2 _destRawDepthY;
     private Vector2 _destFinalDepthY;
     private Vector2 _destDepthScale;
@@ -75,9 +72,6 @@ public sealed class SetDepthCommandCharR : ClaimTweenCommandBase
         _depthYRect.DOKill(true);
         _depthScaleRect.DOKill(true);
 
-        _startDepthY = _depthYRect.anchoredPosition;
-        _startDepthScale = new Vector2(_depthScaleRect.localScale.x, _depthScaleRect.localScale.y);
-        
         CharacterDepthResolver.ResolveRawDepth(
             _spec.preset,
             _spec.useLevel,
@@ -142,19 +136,4 @@ public sealed class SetDepthCommandCharR : ClaimTweenCommandBase
         _depthScaleRect.localScale = new Vector3(_destDepthScale.x, _destDepthScale.y, 1f);
     }
 
-    /// <summary>두 축 중 늦게 도착하는 쪽이 기준이다 — 먼저 붙은 축을 기다려주는 셈.</summary>
-    protected override float MeasureRemainingRatio()
-    {
-        Vector3 currentScale = _depthScaleRect.localScale;
-
-        float posRatio = RemainingRatio(
-            Vector2.Distance(_startDepthY, _destFinalDepthY),
-            Vector2.Distance(_depthYRect.anchoredPosition, _destFinalDepthY));
-
-        float scaleRatio = RemainingRatio(
-            Vector2.Distance(_startDepthScale, _destDepthScale),
-            Vector2.Distance(new Vector2(currentScale.x, currentScale.y), _destDepthScale));
-
-        return Mathf.Max(posRatio, scaleRatio);
-    }
 }

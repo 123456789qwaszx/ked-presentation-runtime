@@ -40,7 +40,6 @@ public sealed class PlaceCharacterFocusCommandCharR : ClaimTweenCommandBase
 
     private RectTransform _moveRect;
 
-    private Vector2 _startPosition;
     private Vector2 _destination;
 
     public override bool WaitForCompletion => _spec.wait;
@@ -70,8 +69,6 @@ public sealed class PlaceCharacterFocusCommandCharR : ClaimTweenCommandBase
     {
         _moveRect.DOKill(true);
 
-        _startPosition = _moveRect.anchoredPosition;
-
         _destination = CharacterFocusPlacementSolver.CalculateFocusPlacement(
             _stage,
             _spec.slotKey,
@@ -94,8 +91,4 @@ public sealed class PlaceCharacterFocusCommandCharR : ClaimTweenCommandBase
     protected override void OnCommitFinalState()
         => _moveRect.anchoredPosition = _destination;
 
-    protected override float MeasureRemainingRatio()
-        => RemainingRatio(
-            Vector2.Distance(_startPosition, _destination),
-            Vector2.Distance(_moveRect.anchoredPosition, _destination));
 }

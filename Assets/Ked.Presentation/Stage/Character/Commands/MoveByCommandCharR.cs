@@ -76,8 +76,4 @@ public sealed class MoveByCommandCharR : ClaimTweenCommandBase
     protected override void OnCommitFinalState()
         => _rect.anchoredPosition = _destPos;
 
-    protected override float MeasureRemainingRatio()
-        => RemainingRatio(
-            Vector2.Distance(_startPos, _destPos),
-            Vector2.Distance(_rect.anchoredPosition, _destPos));
 }

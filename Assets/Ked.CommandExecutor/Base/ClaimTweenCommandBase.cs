@@ -1,6 +1,5 @@
 using System.Collections;
 using DG.Tweening;
-using UnityEngine;
 
 /// <summary>
 /// "클레임-트윈" 커맨드의 공통 수명 —
@@ -33,16 +32,8 @@ public abstract class ClaimTweenCommandBase : CommandBase
     // 최종 쓰기. (수명 플래그 정리는 Base측 정책)
     protected abstract void OnCommitFinalState();
 
-    // 목표까지 남은 진행 비율 [0,1]. 0이면 가속할 것이 없다는 뜻이라 즉시 확정.
-    // 여러 축이면 축별 비율의 최댓값을 사용(가장 늦게 도착하는 축이 기준).
-    protected abstract float MeasureRemainingRatio();
-
-    protected virtual float StepFinishSpeedUpMultiplier => 30f;
-
-    // 스텝 경계 가속용 트윈. 기존 트윈을 다시 만드는 것.(잔여시간 기반 재계산)
-    // 다단 연출 커맨드(PivotRotateTo)는 이걸로 덮음.
-    // "현재 위치에서 목표까지"만 남기고 마무리해야 하기 때문.
-    protected virtual Tween CreateAcceleratedTween(float duration) => CreateTween(duration);
+    // 스텝 경계에서 남은 트윈을 몇 배로 돌릴지.
+    private const float StepFinishSpeedUp = 30f;
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
@@ -93,20 +84,7 @@ public abstract class ClaimTweenCommandBase : CommandBase
         if (!_hasClaimedTarget)
             return;
 
-        _tween?.Kill(false);
-
-        // 스텝 경계 — 남은 만큼을 빠르게 마저 간다. 남은 것이 없으면(비율 0) 곧장 확정한다.
-        float duration = CalculateAcceleratedRemainingDuration();
-
-        if (duration <= 0f)
-        {
-            Commit();
-            return;
-        }
-
-        _tween = CreateAcceleratedTween(duration)
-            .SetUpdate(true)
-            .OnComplete(Commit);
+        _tween.timeScale = StepFinishSpeedUp;
     }
 
     private void Commit()
@@ -116,26 +94,5 @@ public abstract class ClaimTweenCommandBase : CommandBase
 
         _hasClaimedTarget = false;
         _tween = null;
-    }
-
-    private float CalculateAcceleratedRemainingDuration()
-    {
-        float remainingRatio = Mathf.Clamp01(MeasureRemainingRatio());
-
-        if (remainingRatio <= 0f)
-            return 0f;
-
-        float remainingDuration = TweenDuration * remainingRatio;
-
-        return Mathf.Max(0.01f, remainingDuration / StepFinishSpeedUpMultiplier);
-    }
-
-    /// <summary>한 축의 남은 비율. 출발했던 거리 대비 남은 거리. Clamp01</summary>
-    protected static float RemainingRatio(float originalDistance, float remainingDistance)
-    {
-        if (originalDistance <= 0.001f || remainingDistance <= 0.001f)
-            return 0f;
-
-        return Mathf.Clamp01(remainingDistance / originalDistance);
     }
 }
