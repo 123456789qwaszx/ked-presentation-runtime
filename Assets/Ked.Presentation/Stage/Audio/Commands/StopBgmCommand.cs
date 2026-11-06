@@ -28,7 +28,7 @@ public sealed class StopBgmCommand : CommandBase
         yield break;
     }
 
-    protected override void OnSkip(CommandRunScope scope)
+    protected override void OnSkip()
     {
         _audio.Bgm.Stop(_fadeDuration, isSkipping: true);
     }

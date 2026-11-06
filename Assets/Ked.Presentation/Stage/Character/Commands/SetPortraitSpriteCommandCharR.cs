@@ -39,21 +39,21 @@ public sealed class SetPortraitSpriteCommandCharR : CommandBase
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
         if (!_resolveAttempted)
-            ResolveRefs(scope);
+            ResolveRefs();
 
-        Apply(scope);
+        Apply();
         yield break;
     }
 
-    protected override void OnSkip(CommandRunScope scope)
+    protected override void OnSkip()
     {
         if (!_resolveAttempted)
-            ResolveRefs(scope);
+            ResolveRefs();
 
-        Apply(scope);
+        Apply();
     }
 
-    private void Apply(CommandRunScope scope)
+    private void Apply()
     {
         Sprite sprite = _resolver.Resolve(_stage, _spec.slotKey, _spec.portrait, nameof(SetPortraitSpriteCommandCharR));
 
@@ -65,7 +65,7 @@ public sealed class SetPortraitSpriteCommandCharR : CommandBase
         CharRigImageSizingPolicy.Apply(_image, sprite, _spec.sizingMode, _spec.horizontalAlign);
     }
     
-    private void ResolveRefs(CommandRunScope scope)
+    private void ResolveRefs()
     {
         _resolveAttempted = true;
 

@@ -74,9 +74,9 @@ public sealed class SetEmotionPortraitWipeCommandCharR : CommandBase
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
         if (!_resolveAttempted)
-            ResolveRefs(scope);
+            ResolveRefs();
 
-        ResolveTargetSprite(scope);
+        ResolveTargetSprite();
 
         ClaimTarget();
         PrepareTransitionState();
@@ -107,19 +107,19 @@ public sealed class SetEmotionPortraitWipeCommandCharR : CommandBase
             yield return _seq.WaitForCompletion();
     }
 
-    protected override void OnSkip(CommandRunScope scope)
+    protected override void OnSkip()
     {
         if (!_resolveAttempted)
-            ResolveRefs(scope);
+            ResolveRefs();
 
-        ResolveTargetSprite(scope);
+        ResolveTargetSprite();
 
         // OnSkip은 ExecuteInner 전에만 불린다 — 아직 잡은 것이 없다.
         ClaimTarget();
         CommitFinalState();
     }
 
-    private void ResolveRefs(CommandRunScope scope)
+    private void ResolveRefs()
     {
         _resolveAttempted = true;
 
@@ -133,7 +133,7 @@ public sealed class SetEmotionPortraitWipeCommandCharR : CommandBase
         _overlayCanvasGroup = _overlayRoot.GetComponent<CanvasGroup>();
     }
 
-    private void ResolveTargetSprite(CommandRunScope scope)
+    private void ResolveTargetSprite()
     {
         if (_hasResolvedTargetSprite)
             return;

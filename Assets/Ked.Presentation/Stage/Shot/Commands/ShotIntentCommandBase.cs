@@ -33,7 +33,7 @@ public abstract class ShotIntentCommandBase<TSpec> : CommandBase
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
-        rig.Follow(BuildTargetState(rig.Intent, scope), spec.duration, spec.ease);
+        rig.Follow(BuildTargetState(rig.Intent), spec.duration, spec.ease);
 
         if (!spec.wait)
             yield break;
@@ -42,16 +42,14 @@ public abstract class ShotIntentCommandBase<TSpec> : CommandBase
             yield return null;
     }
 
-    protected override void OnSkip(CommandRunScope scope)
+    protected override void OnSkip()
     {
-        rig.Snap(BuildTargetState(rig.Intent, scope));
+        rig.Snap(BuildTargetState(rig.Intent));
     }
 
-    protected abstract PresentationIntentState BuildTargetState(
-        in PresentationIntentState from,
-        CommandRunScope scope);
+    protected abstract PresentationIntentState BuildTargetState(in PresentationIntentState from);
 
-    protected override void OnStepLifetimeFinished(CommandRunScope scope)
+    protected override void OnStepLifetimeFinished()
     {
         rig.AccelerateTransition(StepFinishSpeedUpMultiplier);
     }

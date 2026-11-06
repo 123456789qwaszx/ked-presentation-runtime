@@ -61,9 +61,9 @@ public sealed class StageLayerBlurCommand : CommandBase
             yield return null;
     }
 
-    protected override void OnSkip(CommandRunScope scope) => Apply(snap: true);
+    protected override void OnSkip() => Apply(snap: true);
 
-    protected override void OnStepLifetimeFinished(CommandRunScope scope)
+    protected override void OnStepLifetimeFinished()
         => _blur.AccelerateLayer(StepFinishSpeedUpMultiplier);
 
     private void Apply(bool snap)

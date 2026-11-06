@@ -63,9 +63,9 @@ public sealed class DepthFocusCommandCharR : CommandBase
             yield return null;
     }
 
-    protected override void OnSkip(CommandRunScope scope) => Apply(snap: true);
+    protected override void OnSkip() => Apply(snap: true);
 
-    protected override void OnStepLifetimeFinished(CommandRunScope scope)
+    protected override void OnStepLifetimeFinished()
         => _blur.AccelerateFocus(StepFinishSpeedUpMultiplier);
 
     private void Apply(bool snap)

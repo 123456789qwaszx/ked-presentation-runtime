@@ -47,7 +47,7 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
         if (!_resolveAttempted)
-            ResolveRefs(scope);
+            ResolveRefs();
 
         _controller.FollowStyle(BuildDestState(), _spec.duration, _spec.ease);
 
@@ -58,20 +58,20 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
             yield return null;
     }
 
-    protected override void OnSkip(CommandRunScope scope)
+    protected override void OnSkip()
     {
         if (!_resolveAttempted)
-            ResolveRefs(scope);
+            ResolveRefs();
 
         _controller.SnapStyle(BuildDestState());
     }
 
-    protected override void OnStepLifetimeFinished(CommandRunScope scope)
+    protected override void OnStepLifetimeFinished()
     {
         _controller.AccelerateStyle(StepFinishSpeedUpMultiplier);
     }
 
-    private void ResolveRefs(CommandRunScope scope)
+    private void ResolveRefs()
     {
         _resolveAttempted = true;
 

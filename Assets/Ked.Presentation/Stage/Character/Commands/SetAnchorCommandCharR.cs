@@ -49,21 +49,21 @@ public sealed class SetAnchorCommandCharR : CommandBase
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
         if (!_resolveAttempted)
-            ResolveRefs(scope);
+            ResolveRefs();
 
-        Apply(scope);
+        Apply();
         yield break;
     }
 
-    protected override void OnSkip(CommandRunScope scope)
+    protected override void OnSkip()
     {
         if (!_resolveAttempted)
-            ResolveRefs(scope);
+            ResolveRefs();
 
-        Apply(scope);
+        Apply();
     }
 
-    private void ResolveRefs(CommandRunScope scope)
+    private void ResolveRefs()
     {
         _resolveAttempted = true;
 
@@ -74,7 +74,7 @@ public sealed class SetAnchorCommandCharR : CommandBase
         _rect = _rigRefs.GetRect(_spec.target);
     }
 
-    private void Apply(CommandRunScope scope)
+    private void Apply()
     {
         // SetAnchor는 즉시 확정 command다.
         // 이전 PlaceTo tween/ledger가 남아 있으면 새 anchor 값과 싸우므로 먼저 정리.

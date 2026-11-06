@@ -46,7 +46,7 @@ public sealed class ScreenFlashCommand : CommandBase
             yield return null;
     }
 
-    protected override void OnSkip(CommandRunScope scope)
+    protected override void OnSkip()
     {
         _screenEffects.Flash.ClearImmediate();
     }

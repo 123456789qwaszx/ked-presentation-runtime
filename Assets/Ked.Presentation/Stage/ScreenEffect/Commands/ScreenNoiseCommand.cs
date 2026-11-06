@@ -49,7 +49,7 @@ public sealed class ScreenNoiseCommand : CommandBase
             yield return null;
     }
 
-    protected override void OnSkip(CommandRunScope scope)
+    protected override void OnSkip()
     {
         ScreenNoiseEffectController controller = _screenEffects.Noise;
         controller.Snap(BuildDestState(controller));

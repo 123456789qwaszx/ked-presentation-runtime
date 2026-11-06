@@ -49,7 +49,7 @@ public sealed class ScreenVignetteCommand : CommandBase
             yield return null;
     }
 
-    protected override void OnSkip(CommandRunScope scope)
+    protected override void OnSkip()
     {
         ScreenVignetteEffectController controller = _screenEffects.Vignette;
         controller.Snap(BuildDestState(controller));

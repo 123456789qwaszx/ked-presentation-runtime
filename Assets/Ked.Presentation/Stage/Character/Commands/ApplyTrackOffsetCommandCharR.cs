@@ -52,21 +52,21 @@ public sealed class ApplyTrackOffsetCommandCharR : CommandBase
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
         if (!_resolveAttempted)
-            ResolveRefs(scope);
+            ResolveRefs();
 
         ApplyFinalState();
         yield break;
     }
 
-    protected override void OnSkip(CommandRunScope scope)
+    protected override void OnSkip()
     {
         if (!_resolveAttempted)
-            ResolveRefs(scope);
+            ResolveRefs();
 
         ApplyFinalState();
     }
 
-    private void ResolveRefs(CommandRunScope scope)
+    private void ResolveRefs()
     {
         _resolveAttempted = true;
         

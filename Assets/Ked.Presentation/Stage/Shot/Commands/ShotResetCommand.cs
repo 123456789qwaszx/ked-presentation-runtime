@@ -10,9 +10,7 @@ public sealed class ShotResetCommand : ShotIntentCommandBase<ShotResetCommandSpe
         : base(rig, spec) 
     { }
 
-    protected override PresentationIntentState BuildTargetState(
-        in PresentationIntentState from,
-        CommandRunScope scope)
+    protected override PresentationIntentState BuildTargetState(in PresentationIntentState from)
     {
         return Ked.Presentation.Core.ShotResetReduction.Reduce().ToUnity();
     }

@@ -56,7 +56,7 @@ public sealed class StageMaskMotionCommand : CommandBase
             yield return null;
     }
 
-    protected override void OnSkip(CommandRunScope scope)
+    protected override void OnSkip()
     {
         if (!_resolveAttempted)
             ResolveRefs();

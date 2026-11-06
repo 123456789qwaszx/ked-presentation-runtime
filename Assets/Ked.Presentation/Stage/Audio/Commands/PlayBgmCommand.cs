@@ -37,7 +37,7 @@ public sealed class PlayBgmCommand : CommandBase
         yield break;
     }
 
-    protected override void OnSkip(CommandRunScope scope)
+    protected override void OnSkip()
     {
         _audio.Bgm.Play(_clip, _fadeDuration, isSkipping: true);
     }

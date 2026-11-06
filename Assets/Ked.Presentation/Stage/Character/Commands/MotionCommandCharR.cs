@@ -96,7 +96,7 @@ public sealed class MotionCommandCharR : CommandBase
         }
     }
 
-    protected override void OnSkip(CommandRunScope scope)
+    protected override void OnSkip()
     {
         Resolve();
 
@@ -106,7 +106,7 @@ public sealed class MotionCommandCharR : CommandBase
         Commit();
     }
 
-    protected override void OnStepLifetimeFinished(CommandRunScope scope)
+    protected override void OnStepLifetimeFinished()
     {
         if (!_claimed)
             return;

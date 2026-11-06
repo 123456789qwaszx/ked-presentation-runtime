@@ -38,7 +38,7 @@ public sealed class StageMaskClearCommand : CommandBase
         yield break;
     }
 
-    protected override void OnSkip(CommandRunScope scope)
+    protected override void OnSkip()
     {
         Apply();
     }

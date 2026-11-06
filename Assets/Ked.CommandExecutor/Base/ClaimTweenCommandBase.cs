@@ -62,7 +62,7 @@ public abstract class ClaimTweenCommandBase : CommandBase
             yield return _tween.WaitForCompletion();
     }
 
-    protected override void OnSkip(CommandRunScope scope)
+    protected override void OnSkip()
     {
         if (!_resolved)
         {
@@ -79,7 +79,7 @@ public abstract class ClaimTweenCommandBase : CommandBase
         Commit();
     }
 
-    protected override void OnStepLifetimeFinished(CommandRunScope scope)
+    protected override void OnStepLifetimeFinished()
     {
         if (!_hasClaimedTarget)
             return;

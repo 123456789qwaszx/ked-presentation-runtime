@@ -28,13 +28,13 @@ public sealed class SetPortraitPoseCommandCharR : CommandBase
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
-        Apply(scope);
+        Apply();
         yield break;
     }
 
-    protected override void OnSkip(CommandRunScope scope) => Apply(scope);
+    protected override void OnSkip() => Apply();
 
-    private void Apply(CommandRunScope scope)
+    private void Apply()
     {
         string resolvedSlotKey =
             CharacterRigTargetResolver.ResolveRigKeyByPolicy(_stage, _spec.slotKey);

@@ -56,7 +56,7 @@ public sealed class WaitCommand : CommandBase
         _tween = null;
     }
 
-    protected override void OnSkip(CommandRunScope scope)
+    protected override void OnSkip()
     {
         if (_tween != null && _tween.IsActive())
             _tween.Kill(false);
