@@ -19,6 +19,7 @@
 | 폴더 | 무엇 |
 |---|---|
 | `PresentationStage.cs` | 무대 하나의 상태 — 모든 기능의 입구 |
+| `IntentTransition.cs` | 의도 하나를 따라가는 전환 — 샷 · 화면 효과 · 블러 · 캐릭터 스타일이 함께 쓴다 |
 | `Grammar/` | 대본 → 스펙. `StageCommandParser`(표 + 기능별 partial), `Tokens/` 낱말 해석 |
 | `StageRig/` | 무대 리그 — Stage00/01/02 · 깊이 층 · 마운트 |
 | `Character/` | 캐릭터 리그 — `Rig/` 스키마·빌더·레지스트리 · `Portrait/` 초상 · `Placement/` 정착 장부·초점·배치·깊이 계산 · `Visual/` 비주얼 · `Motion/` 모션 클립 · `Commands/` |
