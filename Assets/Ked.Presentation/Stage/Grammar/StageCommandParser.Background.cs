@@ -1,4 +1,5 @@
 using DG.Tweening;
+using Ked.Presentation.Core;
 using UnityEngine;
 
 /// <summary>
@@ -60,18 +61,20 @@ public sealed partial class StageCommandParser
         });
 
     private void EnqueueFadeInBackgroundDslSpec(string rigKey, string durationToken)
-        => Emit(new FadeInCommandSpecCharR
+        => Emit(new FadeCommandSpecCharR
         {
             slotKey = rigKey,
             target = CharacterRigTarget.CharacterPortraitSprite_Root,
+            targetAlpha = FadeInReduction.TargetAlpha,
             duration = YarnDurationParser.Parse(durationToken, BackgroundDefaultDurationSeconds)
         });
 
     private void EnqueueFadeOutBackgroundDslSpec(string rigKey, string durationToken)
-        => Emit(new FadeOutCommandSpecCharR
+        => Emit(new FadeCommandSpecCharR
         {
             slotKey = rigKey,
             target = CharacterRigTarget.CharacterPortraitSprite_Root,
+            targetAlpha = FadeOutReduction.TargetAlpha,
             duration = YarnDurationParser.Parse(durationToken, BackgroundDefaultDurationSeconds)
         });
 

@@ -182,10 +182,11 @@ public class StageCommandParserTests
         Assert.AreEqual(4, specs.Count);
         Assert.IsInstanceOf<SetAnchorCommandSpecCharR>(specs[0]);
         Assert.IsInstanceOf<SetPortraitSpriteCommandSpecCharR>(specs[1]);
-        Assert.IsInstanceOf<FadeInCommandSpecCharR>(specs[2]);
-        Assert.IsInstanceOf<FadeInCommandSpecCharR>(specs[3]);
-        Assert.AreEqual(CharacterRigTarget.RigRoot, ((FadeInCommandSpecCharR)specs[2]).target);
-        Assert.AreEqual(CharacterRigTarget.CharacterPortraitSprite_Root, ((FadeInCommandSpecCharR)specs[3]).target);
+        Assert.IsInstanceOf<FadeCommandSpecCharR>(specs[2]);
+        Assert.IsInstanceOf<FadeCommandSpecCharR>(specs[3]);
+        Assert.AreEqual(CharacterRigTarget.RigRoot, ((FadeCommandSpecCharR)specs[2]).target);
+        Assert.AreEqual(CharacterRigTarget.CharacterPortraitSprite_Root, ((FadeCommandSpecCharR)specs[3]).target);
+        Assert.AreEqual(FadeInReduction.TargetAlpha, ((FadeCommandSpecCharR)specs[2]).targetAlpha, "show는 끝까지 나타난다");
     }
 
     [Test]
@@ -206,7 +207,8 @@ public class StageCommandParserTests
         NewParser().TryParse(Cmd("fade_in", "c1"), output);
 
         Assert.AreEqual(2, output.Count);
-        Assert.IsInstanceOf<FadeInCommandSpecCharR>(output[1]);
+        Assert.IsInstanceOf<FadeCommandSpecCharR>(output[1]);
+        Assert.AreEqual(FadeInReduction.TargetAlpha, ((FadeCommandSpecCharR)output[1]).targetAlpha);
     }
 
     [Test]
@@ -276,8 +278,9 @@ public class StageCommandParserTests
     [Test]
     public void bg_fade_move_scale은_캐릭터와_같은_노드를_잡는다()
     {
-        FadeOutCommandSpecCharR fade = (FadeOutCommandSpecCharR)Parse(NewParser(), Cmd("bg_fade_out", "bg_main"))[0];
+        FadeCommandSpecCharR fade = (FadeCommandSpecCharR)Parse(NewParser(), Cmd("bg_fade_out", "bg_main"))[0];
         Assert.AreEqual(CharacterRigTarget.CharacterPortraitSprite_Root, fade.target);
+        Assert.AreEqual(FadeOutReduction.TargetAlpha, fade.targetAlpha);
         Assert.AreEqual(10f / 24f, fade.duration, 1e-5f, "생략값 10fr");
 
         MoveByCommandSpecCharR move = (MoveByCommandSpecCharR)Parse(NewParser(), Cmd("bg_move", "bg_main", "2u", "-1u"))[0];

@@ -5,17 +5,19 @@ using UnityEngine;
 public sealed partial class StageCommandParser
 {
     private void EnqueueFadeInSpec(string roleKey, string durationToken)
-        => Emit(new FadeInCommandSpecCharR
+        => Emit(new FadeCommandSpecCharR
         {
             target = CharacterRigTarget.CharacterPortraitSprite_Root,
+            targetAlpha = FadeInReduction.TargetAlpha,
             slotKey = roleKey,
             duration = YarnDurationParser.Parse(durationToken)
         });
 
     private void EnqueueFadeOutSpec(string roleKey, string durationToken)
-        => Emit(new FadeOutCommandSpecCharR
+        => Emit(new FadeCommandSpecCharR
         {
             target = CharacterRigTarget.CharacterPortraitSprite_Root,
+            targetAlpha = FadeOutReduction.TargetAlpha,
             slotKey = roleKey,
             duration = YarnDurationParser.Parse(durationToken)
         });

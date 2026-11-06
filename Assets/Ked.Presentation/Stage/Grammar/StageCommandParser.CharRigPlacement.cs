@@ -25,17 +25,19 @@ public sealed partial class StageCommandParser
             portrait = new PortraitIdentity { emotion = ShowFaceAliasParser.Parse(faceToken) }
         };
         
-        var spec2FadeInCharRigRoot = new FadeInCommandSpecCharR
+        var spec2FadeInCharRigRoot = new FadeCommandSpecCharR
         {
             target = CharacterRigTarget.RigRoot,
+            targetAlpha = FadeInReduction.TargetAlpha,
             
             slotKey = roleKey,
             duration = YarnDurationParser.Parse(durationToken)
         };
         
-        var spec3FadeInPortraitSprite = new FadeInCommandSpecCharR
+        var spec3FadeInPortraitSprite = new FadeCommandSpecCharR
         {
             target = CharacterRigTarget.CharacterPortraitSprite_Root,
+            targetAlpha = FadeInReduction.TargetAlpha,
             
             slotKey = roleKey,
             duration = YarnDurationParser.Parse(durationToken)

@@ -58,8 +58,7 @@ public sealed class CharacterRigCommandFactory : INodeCommandFactory
             SetDepthCommandSpecCharR s => new SetDepthCommandCharR(_stage, s, _characterDepthTuning, _characterFocusTuningDb),
 
             // Visibility / Root Layers
-            FadeInCommandSpecCharR s => new FadeInCommandCharR(_stage, s),
-            FadeOutCommandSpecCharR s => new FadeOutCommandCharR(_stage, s),
+            FadeCommandSpecCharR s => new FadeCommandCharR(_stage, s),
 
             // Basic Transform
             MoveByCommandSpecCharR s => new MoveByCommandCharR(_stage, s),

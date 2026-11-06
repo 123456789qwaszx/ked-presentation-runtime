@@ -53,7 +53,7 @@ public sealed class YarnPlaybackDriver
         return true;
     }
 
-    // 이어진 같은 종류는 하나로 센다: FadeOutCommandCharRSpec×3, StopBgmSpec, …
+    // 이어진 같은 종류는 하나로 센다: FadeCommandSpecCharR×3, StopBgmSpec, …
     private static string Describe(List<CommandSpecBase> specs)
     {
         var sb = new StringBuilder();

@@ -291,7 +291,7 @@ fade·move·scale을 **같은 노드, 같은 리덕션**으로 접고, 종횡비
   `ShotIntentCommandBase`가 shot 계열에 했던 통합의 일반화. 하네스가 오라클이므로
   **이관 배치마다 랩드스킵 재판정으로 리포트가 리팩터 전과 같은지 확인했다.**
   - 배치 1: MoveBy · ScaleTo · RotateTo (코어 배선이 끝난 셋)
-  - 배치 2·3: Fade 4종(`CanvasFadeCommandBase`) · BgR 트랜스폼 계열 · RotateBy 쌍
+  - 배치 2·3: Fade 4종(`CanvasFadeCommandBase` — 2026-11-06에 `FadeCommandCharR` 하나로 합쳤다) · BgR 트랜스폼 계열 · RotateBy 쌍
   - 배치 4: PivotRotateTo · Slide 4종(`SlideCommandBase`) ·
     Overlay Move/Scale/Size · Overlay Show/Hide(`OverlayRootFadeCommandBase`) ·
     SetDepth(클레임 2장 + 시퀀스) · PlaceCharacterFocus(클레임 1장 + 게시) ·
