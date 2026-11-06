@@ -183,7 +183,6 @@ public partial class SampleBootstrap
     {
         YarnPlaybackDriver yarnPlaybackDriver = new(commandExecutor, _presentationScopeSession);
         _yarnPlaybackDriver = yarnPlaybackDriver;
-        yarnPlaybackDriver.LineHeadPlayed += _rigBlur.Reconcile;
 
         // 대사창 · 선택지 상자는 화면 쪽(새 예제 UI)이 넘긴다.
         IPresentationDialogueBoxView dialogueSurfaceBox = _kedUI.DialogueBox
@@ -230,7 +229,8 @@ public partial class SampleBootstrap
             yarnPlaybackDriver,
             lineHurrySpeed,
             _lineVoice,
-            _sceneBgm);
+            _sceneBgm,
+            _rigBlur);
 
         customLinePresenter.Initialize(
             dialogueRunner,

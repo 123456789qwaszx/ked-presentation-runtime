@@ -15,6 +15,7 @@ public sealed class LinePresentationContext
     public LocalizedLine Line { get; set; }
     public LineCancellationToken Token { get; set; }
     public bool ShouldUseImmediateTransition { get; set; }
+    public bool IsRapidSkip { get; set; }
 
     // Seek Kind
     public SeekKind EntrySeekKind { get; set; }

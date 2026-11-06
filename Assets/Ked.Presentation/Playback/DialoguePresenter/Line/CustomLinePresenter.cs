@@ -65,7 +65,8 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILineAborter
             {
                 Line = line,
                 Token = token,
-                ShouldUseImmediateTransition = _playbackRuntimeState.IsSpeedUpMode
+                ShouldUseImmediateTransition = _playbackRuntimeState.IsSpeedUpMode,
+                IsRapidSkip = _playbackRuntimeState.IsRapidSkipMode
             };
 
             await _linePresentationFlow.RunAsync(
