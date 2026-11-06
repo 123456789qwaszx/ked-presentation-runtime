@@ -14,7 +14,7 @@ namespace Ked.Presentation.Tests
     ///   · 지운 어휘(bg_size·bg_place)는 Unhandled로 소리를 낸다 — 조용히 통과하지 않는다.
     /// 합성 리그는 StageReducerTests와 같은 부모 사슬이다.
     /// </summary>
-    public sealed class BackgroundReductionTests
+    public sealed class BackgroundTargetTests
     {
         private const float Eps = 1e-3f;
 

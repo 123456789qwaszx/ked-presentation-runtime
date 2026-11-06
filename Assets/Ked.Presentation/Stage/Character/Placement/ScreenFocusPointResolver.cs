@@ -205,7 +205,7 @@ public static class ScreenFocusPointParser
             case "third_ul":
             case "thirds_ul":
             case "inner_ul":
-            case "inner_tl":   // 코어 FocusStageReductions·저작 툴과 같은 이름
+            case "inner_tl":   // 코어 ScreenPointRatios·저작 툴과 같은 이름
             case "inner_a1":
             case "ab1":
                 point = ScreenFocusPoint.ThirdsUpperLeft;
@@ -218,7 +218,7 @@ public static class ScreenFocusPointParser
             case "third_ur":
             case "thirds_ur":
             case "inner_ur":
-            case "inner_tr":   // 코어 FocusStageReductions·저작 툴과 같은 이름
+            case "inner_tr":   // 코어 ScreenPointRatios·저작 툴과 같은 이름
             case "inner_a3":
             case "ab2":
                 point = ScreenFocusPoint.ThirdsUpperRight;
@@ -231,7 +231,7 @@ public static class ScreenFocusPointParser
             case "third_ll":
             case "thirds_ll":
             case "inner_ll":
-            case "inner_bl":   // 코어 FocusStageReductions·저작 툴과 같은 이름
+            case "inner_bl":   // 코어 ScreenPointRatios·저작 툴과 같은 이름
             case "inner_c1":
             case "bc1":
                 point = ScreenFocusPoint.ThirdsLowerLeft;
@@ -244,7 +244,7 @@ public static class ScreenFocusPointParser
             case "third_lr":
             case "thirds_lr":
             case "inner_lr":
-            case "inner_br":   // 코어 FocusStageReductions·저작 툴과 같은 이름
+            case "inner_br":   // 코어 ScreenPointRatios·저작 툴과 같은 이름
             case "inner_c3":
             case "bc2":
                 point = ScreenFocusPoint.ThirdsLowerRight;

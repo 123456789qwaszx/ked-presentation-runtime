@@ -31,8 +31,8 @@ public sealed class CharacterPlacementTargetLedger : ICommitRelease
     // ── 게시 ─────────────────────────────────────────────────────────
 
     /// <summary>
-    /// 리덕션 출력을 그대로 예약으로 받는다. 키는 타깃의 NodeKey가 아니라 참조에서 정한다 —
-    /// 호스트에서 노드의 정체는 참조이고 NodeKey는 진단용 이름이다(reduction-boundary.md).
+    /// 목표 계산 출력을 그대로 예약으로 받는다. 키는 타깃의 NodeKey가 아니라 참조에서 정한다 —
+    /// 호스트에서 노드의 정체는 참조이고 NodeKey는 진단용 이름이다(target-boundary.md).
     /// 장부 대상이 아닌 종류(SizeDelta · CanvasAlpha)는 코어가 거부한다.
     /// </summary>
     public void Publish(RectTransform node, in NodeTarget target)

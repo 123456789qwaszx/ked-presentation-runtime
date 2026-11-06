@@ -7,11 +7,11 @@ using Object = UnityEngine.Object;
 namespace Ked.Presentation.Tests.UnityParity
 {
     /// <summary>
-    /// shot_focus_to의 명중을 실제 계층에서 잰다. 측정(정착 사슬, 샷 노드는 중립) → 코어 리덕션 →
+    /// shot_focus_to의 명중을 실제 계층에서 잰다. 측정(정착 사슬, 샷 노드는 중립) → 코어 목표 계산 →
     /// 샷 시스템 적용 → Unity 트랜스폼으로 본 그 점의 자리가 화면 지점이어야 한다. 리그가 어느 층에 서도.
     ///
     /// 무대는 StageRigBuilder, 샷은 PresentationShotResponseSystem, 리그는 CharacterRigBuilder — 조립과 같은 셋이다.
-    /// 커맨드(ShotZoomFocusCommand)는 이 사슬을 잇기만 한다(측정 · 화면 지점 해석 · 리덕션 · Follow).
+    /// 커맨드(ShotZoomFocusCommand)는 이 사슬을 잇기만 한다(측정 · 화면 지점 해석 · 목표 계산 · Follow).
     /// </summary>
     public sealed class ShotFocusUnityParityTests
     {
@@ -96,9 +96,9 @@ namespace Ked.Presentation.Tests.UnityParity
             return new Vector2(local.x, local.y);
         }
 
-        // ShotZoomFocusCommand.BuildTargetState의 리덕션 부분.
+        // ShotZoomFocusCommand.BuildTargetState의 목표 계산 부분.
         private ShotIntentState FocusTo(CharacterRigRefs refs, Vector2 desired, float zoom)
-            => ShotZoomFocusReduction.Reduce(
+            => ShotIntents.FocusTo(
                 zoom,
                 MeasureInStageSpace(refs).ToCore(),
                 desired.ToCore(),
@@ -152,7 +152,7 @@ namespace Ked.Presentation.Tests.UnityParity
         [Test]
         public void 카메라만_보고_푼_팬은_close에서_빗나간다()
         {
-            // 종전 식(pan = desired − p × cameraScale)이 층 반응을 빼서 생긴 어긋남 — 이 리덕션이 층을 보는 이유.
+            // 종전 식(pan = desired − p × cameraScale)이 층 반응을 빼서 생긴 어긋남 — 이 목표 계산이 층을 보는 이유.
             CharacterRigRefs refs = BuildRigOn(_stage.GetLayer(StageLayerLabels.Close), LeftTrack);
 
             Vector2 p = MeasureInStageSpace(refs);

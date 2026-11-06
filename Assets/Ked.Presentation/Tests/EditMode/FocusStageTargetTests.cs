@@ -11,7 +11,7 @@ namespace Ked.Presentation.Tests
     ///
     /// 튜닝 값은 실제 덤프(presets/depth.json · focus-tuning.json)의 실측값을 쓴다.
     /// </summary>
-    public sealed class FocusStageReductionTests
+    public sealed class FocusStageTargetTests
     {
         private const float Eps = 1e-2f;
 

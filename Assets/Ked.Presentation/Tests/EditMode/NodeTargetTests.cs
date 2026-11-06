@@ -6,22 +6,22 @@ using Ked.Presentation.Core;
 namespace Ked.Presentation.Tests
 {
     /// <summary>
-    /// 리덕션 규약과 본보기 둘.
+    /// 목표 계산 규약과 본보기 둘.
     ///
     /// 기대값은 전부 "종전 식"에서 온다 — 새 기대값을 만들면 동작 불변을 주장할 수 없다.
     ///   MoveBy   : useAbsolutePosition ? delta : startPos + delta
     ///   ScaleTo  : relativeToCurrent ? current * toScale : toScale
     /// </summary>
-    public sealed class ReductionTests
+    public sealed class NodeTargetTests
     {
-        // ── MoveByReduction ──────────────────────────────────────────
+        // ── NodeTargets.MoveBy ──────────────────────────────────────────
 
         [Test]
         public void MoveBy_상대는_현재_위치에_더한다()
         {
-            NodeTarget target = MoveByReduction.Reduce(
+            NodeTarget target = NodeTargets.MoveBy(
                 "track",
-                new MoveByReduction.Args(false, new Vec2(30f, -10f)),
+                new NodeTargets.MoveByArgs(false, new Vec2(30f, -10f)),
                 new Vec2(100f, 50f));
 
             Assert.That(target.NodeKey, Is.EqualTo("track"));
@@ -32,9 +32,9 @@ namespace Ked.Presentation.Tests
         [Test]
         public void MoveBy_절대는_현재_위치를_무시한다()
         {
-            NodeTarget target = MoveByReduction.Reduce(
+            NodeTarget target = NodeTargets.MoveBy(
                 "track",
-                new MoveByReduction.Args(true, new Vec2(30f, -10f)),
+                new NodeTargets.MoveByArgs(true, new Vec2(30f, -10f)),
                 new Vec2(100f, 50f));
 
             Assert.That(target.Value.XY, Is.EqualTo(new Vec2(30f, -10f)));
@@ -44,23 +44,23 @@ namespace Ked.Presentation.Tests
         public void MoveBy는_순수하다()
         {
             // 같은 입력은 언제나 같은 출력. 호출 순서·횟수에 의존하지 않는다.
-            MoveByReduction.Args args = new(false, new Vec2(5f, 5f));
+            NodeTargets.MoveByArgs args = new(false, new Vec2(5f, 5f));
 
-            Vec2 first = MoveByReduction.Reduce("n", args, new Vec2(1f, 1f)).Value.XY;
-            Vec2 second = MoveByReduction.Reduce("n", args, new Vec2(1f, 1f)).Value.XY;
+            Vec2 first = NodeTargets.MoveBy("n", args, new Vec2(1f, 1f)).Value.XY;
+            Vec2 second = NodeTargets.MoveBy("n", args, new Vec2(1f, 1f)).Value.XY;
 
             Assert.That(second, Is.EqualTo(first));
             Assert.That(first, Is.EqualTo(new Vec2(6f, 6f)));
         }
 
-        // ── ScaleToReduction ─────────────────────────────────────────
+        // ── NodeTargets.ScaleTo ─────────────────────────────────────────
 
         [Test]
         public void ScaleTo_절대는_스펙_값_그대로다()
         {
-            NodeTarget target = ScaleToReduction.Reduce(
+            NodeTarget target = NodeTargets.ScaleTo(
                 "scale",
-                new ScaleToReduction.Args(false, new Vec2(1.5f, 2f)),
+                new NodeTargets.ScaleToArgs(false, new Vec2(1.5f, 2f)),
                 new Vec2(3f, 3f));
 
             Assert.That(target.Kind, Is.EqualTo(NodeTargetKind.LocalScaleXY));
@@ -71,9 +71,9 @@ namespace Ked.Presentation.Tests
         public void ScaleTo_상대는_현재에_곱한다()
         {
             // 성분별 곱이다 — 종전 ResolveTargetScale과 같은 식.
-            NodeTarget target = ScaleToReduction.Reduce(
+            NodeTarget target = NodeTargets.ScaleTo(
                 "scale",
-                new ScaleToReduction.Args(true, new Vec2(2f, 0.5f)),
+                new NodeTargets.ScaleToArgs(true, new Vec2(2f, 0.5f)),
                 new Vec2(3f, 4f));
 
             Assert.That(target.Value.XY, Is.EqualTo(new Vec2(6f, 2f)));
@@ -155,12 +155,12 @@ namespace Ked.Presentation.Tests
         [Test]
         public void 세_갈래가_같은_값을_본다()
         {
-            // 이 단계의 존재 이유. 리덕션 하나의 출력이
+            // 이 단계의 존재 이유. 목표 계산 하나의 출력이
             //   장부 게시 · 트윈 종점 · 트리 폴드
             // 셋 모두에서 같은 값이어야 "재생 = 정착 예약 = 정지 프레임"이 성립한다.
-            NodeTarget target = MoveByReduction.Reduce(
+            NodeTarget target = NodeTargets.MoveBy(
                 "track",
-                new MoveByReduction.Args(false, new Vec2(40f, 0f)),
+                new NodeTargets.MoveByArgs(false, new Vec2(40f, 0f)),
                 new Vec2(60f, 10f));
 
             Vec2 expected = new(100f, 10f);

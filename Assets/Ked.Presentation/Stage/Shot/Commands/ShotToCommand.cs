@@ -20,8 +20,8 @@ public sealed class ShotToCommand : ShotIntentCommandBase<ShotToCommandSpec>
 
     protected override PresentationIntentState BuildTargetState(in PresentationIntentState from)
     {
-        return Ked.Presentation.Core.ShotToReduction
-            .Reduce(from.ToCore(), spec.zoom, spec.pan.ToCore())
+        return Ked.Presentation.Core.ShotIntents
+            .To(from.ToCore(), spec.zoom, spec.pan.ToCore())
             .ToUnity();
     }
 }

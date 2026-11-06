@@ -46,7 +46,7 @@ namespace Ked.Presentation.Core
         }
 
         /// <summary>
-        /// 리덕션 출력을 그대로 예약으로 받는다 — 타깃이 흐르는 세 갈래 중 하나.
+        /// 목표 계산 출력을 그대로 예약으로 받는다 — 타깃이 흐르는 세 갈래 중 하나.
         /// 트윈 종점·상태 폴드와 같은 값을 보게 하는 것이 요점이다.
         /// </summary>
         public void Publish(in NodeTarget target)

@@ -18,8 +18,8 @@ public sealed class ShotZoomCommand : ShotIntentCommandBase<ShotZoomCommandSpec>
 
     protected override PresentationIntentState BuildTargetState(in PresentationIntentState from)
     {
-        return Ked.Presentation.Core.ShotZoomReduction
-            .Reduce(from.ToCore(), spec.zoom)
+        return Ked.Presentation.Core.ShotIntents
+            .Zoom(from.ToCore(), spec.zoom)
             .ToUnity();
     }
 }

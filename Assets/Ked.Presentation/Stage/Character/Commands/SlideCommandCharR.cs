@@ -82,7 +82,7 @@ public sealed class SlideCommandCharR : ClaimTweenCommandBase
                 ? -DirectionToVector(_spec.direction) 
                 : DirectionToVector(_spec.direction));
 
-        // 끝값은 리덕션이 아니라 여기서 정한 값이다(등장은 현재 위치, 퇴장은 현재 + 거리).
+        // 끝값은 목표 계산이 아니라 여기서 정한 값이다(등장은 현재 위치, 퇴장은 현재 + 거리).
         // 등장은 CreateTween이 rect를 출발점으로 밀어 두므로, 게시가 없으면 같은 줄의 place가 화면 밖 값을 읽는다.
         _rig.PlacementTargets.Reserve(_rect, NodeTarget.AnchoredPosition(_rect.name, _endPos.ToCore()), Releases);
     }

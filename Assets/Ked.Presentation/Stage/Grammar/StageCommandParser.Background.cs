@@ -65,7 +65,7 @@ public sealed partial class StageCommandParser
         {
             slotKey = rigKey,
             target = CharacterRigTarget.CharacterPortraitSprite_Root,
-            targetAlpha = FadeInReduction.TargetAlpha,
+            targetAlpha = NodeTargets.FadeInAlpha,
             duration = YarnDurationParser.Parse(durationToken, BackgroundDefaultDurationSeconds)
         });
 
@@ -74,7 +74,7 @@ public sealed partial class StageCommandParser
         {
             slotKey = rigKey,
             target = CharacterRigTarget.CharacterPortraitSprite_Root,
-            targetAlpha = FadeOutReduction.TargetAlpha,
+            targetAlpha = NodeTargets.FadeOutAlpha,
             duration = YarnDurationParser.Parse(durationToken, BackgroundDefaultDurationSeconds)
         });
 

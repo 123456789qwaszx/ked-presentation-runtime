@@ -6,7 +6,7 @@ namespace Ked.Presentation.Core
     /// 화면 지점 프리셋의 rig-space 좌표 (호스트 ScreenFocusPointResolver의 비율 규약).
     ///
     /// 주의: 이 비율은 게임별 값이므로 원칙적으로는 tuning 데이터가 맞다
-    /// (reduction-boundary.md 백로그). 지금은 호스트에도 같은 상수가 있어 두 곳이다 —
+    /// (target-boundary.md 백로그). 지금은 호스트에도 같은 상수가 있어 두 곳이다 —
     /// 연출 기준값 덤프에 screen-focus-points.json을 추가할 때 여기를 지운다.
     /// </summary>
     public static class ScreenPointRatios
@@ -81,19 +81,21 @@ namespace Ked.Presentation.Core
         }
     }
 
-    /// <summary>
-    /// place 계열 — focus 지점을 무대 지점으로 보내는 이동 축(Track_Focus) 목표.
-    /// 무대 지점은 카메라가 중립일 때 그 화면 지점과 겹치는 무대 위 자리다. 이 노드 트리에는 카메라 ·
-    /// 깊이 층 프레이밍 노드가 없다 — 그것이 곧 카메라 중립이고, 런타임도 배치를 같은 중립으로 푼다(IStageViewNeutral).
-    /// </summary>
-    public static class PlaceFocusStageReduction
+    public static partial class NodeTargets
     {
+        /// <summary>측정 사슬의 끝 — place·size가 focus를 재는 노드.</summary>
+        public const string FocusMeasureNodeId = "CharacterPortrait_VisualOffset";
+
+        // ── place ────────────────────────────────────────
+        //
+        // place 계열 — focus 지점을 무대 지점으로 보내는 이동 축(Track_Focus) 목표.
+        // 무대 지점은 카메라가 중립일 때 그 화면 지점과 겹치는 무대 위 자리다. 이 노드 트리에는 카메라 ·
+        // 깊이 층 프레이밍 노드가 없다 — 그것이 곧 카메라 중립이고, 런타임도 배치를 같은 중립으로 푼다(IStageViewNeutral).
+
         /// <summary>스펙 기본 moveTarget (브리지: CharacterRigTarget.CharSlot_Track_Focus).</summary>
-        public const string MoveNodeId = "CharSlot_Track_Focus";
+        public const string PlaceFocusMoveNodeId = "CharSlot_Track_Focus";
 
-        public const string MeasureNodeId = "CharacterPortrait_VisualOffset";
-
-        public static bool TryReduce(
+        public static bool TryPlaceFocus(
             StageState state,
             string slotKey,
             string characterKey,
@@ -113,8 +115,8 @@ namespace Ked.Presentation.Core
 
             Vec2 focusOffset = FocusOffsetMath.Resolve(focusTuning, characterKey, focusPresetName, Vec2.Zero);
 
-            string measureKey = StageState.NodeKeyOf(slotKey, MeasureNodeId);
-            string moveKey = StageState.NodeKeyOf(slotKey, MoveNodeId);
+            string measureKey = StageState.NodeKeyOf(slotKey, FocusMeasureNodeId);
+            string moveKey = StageState.NodeKeyOf(slotKey, PlaceFocusMoveNodeId);
 
             List<string> chainKeys = new();
             RectNodeState[] chain = state.Nodes.BuildChainTo(measureKey, chainKeys);
@@ -139,14 +141,13 @@ namespace Ked.Presentation.Core
             reason = null;
             return true;
         }
-    }
 
-    /// <summary>size 계열 — depth 프리셋 적용(focus 보존 보정 포함). DepthY 위치 + DepthScale 배율 두 장.</summary>
-    public static class SetDepthStageReduction
-    {
+        // ── size (depth) ────────────────────────────────────────
+        //
+        // size 계열 — depth 프리셋 적용(focus 보존 보정 포함). DepthY 위치 + DepthScale 배율 두 장.
+
         public const string DepthYNodeId = "CharSlot_DepthY";
         public const string DepthScaleNodeId = "CharSlot_DepthScale";
-        public const string MeasureNodeId = "CharacterPortrait_VisualOffset";
 
         /// <param name="preserveFocusToken">
         /// 보존할 focus 프리셋 토큰. **항상 커맨드 인자에서 온다**(브리지 기본값 "bust").
@@ -156,7 +157,7 @@ namespace Ked.Presentation.Core
         /// 커맨드 인자로 무조건 덮어쓰기 때문이다(그 두 필드는 런타임에서 사장 데이터다).
         /// 프리셋 값을 폴백으로 쓰면 재생과 갈라진다.
         /// </param>
-        public static bool TryReduce(
+        public static bool TrySetDepth(
             StageState state,
             string slotKey,
             string characterKey,
@@ -201,7 +202,7 @@ namespace Ked.Presentation.Core
             // 런타임이 preserveFocusOffset을 그 값으로 덮어쓴다.
             Vec2 focusOffset = FocusOffsetMath.Resolve(focusTuning, characterKey, preserveName, Vec2.Zero);
 
-            string measureKey = StageState.NodeKeyOf(slotKey, MeasureNodeId);
+            string measureKey = StageState.NodeKeyOf(slotKey, FocusMeasureNodeId);
             string depthYKey = StageState.NodeKeyOf(slotKey, DepthYNodeId);
             string depthScaleKey = StageState.NodeKeyOf(slotKey, DepthScaleNodeId);
 

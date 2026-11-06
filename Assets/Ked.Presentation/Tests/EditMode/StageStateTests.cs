@@ -224,7 +224,7 @@ namespace Ked.Presentation.Tests
             state.Nodes.Add("c1/CharSlot_Track", null, RectNodeState.StretchFull);
 
             state.Apply(NodeTarget.AnchoredPosition("c1/CharSlot_Track", new Vec2(30f, -10f)));
-            state.Apply(FadeOutReduction.Reduce("c1/CharacterPortraitSprite_Root"));
+            state.Apply(NodeTargets.FadeOut("c1/CharacterPortraitSprite_Root"));
 
             Assert.That(state.Nodes.GetState("c1/CharSlot_Track").AnchoredPosition,
                 Is.EqualTo(new Vec2(30f, -10f)));

@@ -1,16 +1,16 @@
-# 리덕션 경계 — "스펙 → 목표 상태" 규약
+# 목표 계산 경계 — "스펙 → 목표 상태" 규약
 
 코드베이스 **57곳**에 흩어져 있던 `ClaimTarget` 관습을 규약으로 승격한 것.
 이후 커맨드 이관이 전부 이 문서의 모양을 따른다.
 
-본보기: [`Reduce/CharPlacementReductions.cs`](../Reduce/CharPlacementReductions.cs) (MoveBy · ScaleTo)
+본보기: [`Reduce/NodeTargets.Staging.cs`](../Reduce/NodeTargets.Staging.cs) (MoveBy · ScaleTo)
 ↔ 호스트 `MoveByCommandCharR` · `ScaleToCommandCharR`.
 
 ## 코어로 가는 것 / 호스트에 남는 것
 
 | | 어디 | 왜 |
 |---|---|---|
-| 스펙 → 목표 상태 변환 (`XxxReduction.Reduce`) | **코어** | 정지 프레임이 필요한 전부. 순수 산수다 |
+| 스펙 → 목표 상태 변환 (`NodeTargets.Xxx` · `ShotIntents.Xxx`) | **코어** | 정지 프레임이 필요한 전부. 순수 산수다 |
 | 출력 타입 (`NodeTarget`) | **코어** | 게시·트윈 종점·폴드가 같은 값을 봐야 한다 |
 | `CommandBase` · 코루틴 · `WaitForCompletion` | 호스트 | MonoBehaviour 호스트를 문다 |
 | `ResolveRefs` (slotKey → RectTransform) | 호스트 | 유니티 참조 해석이다 |
@@ -18,18 +18,24 @@
 | Commit의 트랜스폼 쓰기 · Ledger `Clear` | 호스트 | 유니티에 쓰는 일이다 |
 | `HasClaimedTarget` 수명 관리 | 호스트 | 실행 수명의 일부다 |
 
-## 리덕션의 형태
+## 목표 계산의 형태
+
+결과물 이름의 클래스에, 커맨드 이름의 메서드다. 노드 타깃은 `NodeTargets`(partial — 파일은
+리듀서와 같은 갈래로 Staging · Show · Portrait · Placement), 샷 의도는 `ShotIntents`.
 
 ```csharp
-public static class XxxReduction            // 커맨드당 하나, Reduce/ 폴더
+public static partial class NodeTargets         // Reduce/NodeTargets.*.cs
 {
-    public readonly struct Args { ... }     // 파싱된 스펙 값만. UnityEngine 타입 금지
-    public static NodeTarget Reduce(    // 순수 함수
-        string nodeKey,                     // 논리 노드 키
-        in Args args,
+    public readonly struct XxxArgs { ... }      // 파싱된 스펙 값만. UnityEngine 타입 금지
+    public static NodeTarget Xxx(               // 순수 함수. 이름 = 대본 커맨드 (move_by → MoveBy)
+        string nodeKey,                         // 논리 노드 키
+        in XxxArgs args,
         /* 필요한 현재 상태를 명시적 인자로 */ ...);
 }
 ```
+
+무대 상태를 읽고 실패 사유를 낼 수 있는 것은 `Try`로 시작한다 —
+`TryPlaceFocus` · `TrySetDepth` · `TryPortraitSizing`(`out NodeTarget`, `out string reason`).
 
 - **순수**: 시간·랜덤·IO·전역 상태 없음. 트랜스폼을 **읽지도** 않는다 —
   현재 상태가 필요하면 값으로 받는다. 같은 입력은 언제나 같은 출력.
@@ -44,24 +50,25 @@ private void ClaimTarget()
     _rect.DOKill(true);                                    // 호스트: 시간의 세계
     _startPos = _rect.anchoredPosition;                    // 호스트: 현재 상태 읽기
 
-    NodeTarget target = MoveByTarget.Reduce(_rect, _spec, _startPos);   // ── 코어 ── (변환은 MoveByTarget이)
+    NodeTarget target = RigTargets.MoveBy(_rect, _spec, _startPos);     // ── 코어 ── (변환은 RigTargets가)
     _rig.PlacementTargets.Reserve(_rect, target, Releases);               // 호스트: 장부에 게시 (해제는 확정 때 실행기가 — CommitReleases)
     _destPos = target.Value.XY.ToUnity();                                 // 호스트: 트윈 종점은 타깃에서 읽는다
 }
 
-// MoveBy의 Unity → Core 경계. 커맨드는 변환과 Args 조립을 들고 있지 않는다.
-static class MoveByTarget
+// 리그 커맨드의 Unity → Core 경계(Stage/Character/Commands/RigTargets.cs).
+// 커맨드는 변환과 Args 조립을 들고 있지 않는다.
+public static class RigTargets
 {
-    public static NodeTarget Reduce(RectTransform rect, MoveByCommandSpecCharR spec, Vector2 start)
-        => MoveByReduction.Reduce(
+    public static NodeTarget MoveBy(RectTransform rect, MoveByCommandSpecCharR spec, Vector2 start)
+        => NodeTargets.MoveBy(
             rect.name,
-            new MoveByReduction.Args(spec.useAbsolutePosition, spec.delta.ToCore()),
+            new NodeTargets.MoveByArgs(spec.useAbsolutePosition, spec.delta.ToCore()),
             start.ToCore());
 }
 ```
 
 **동작 불변이 규약이다**: 어댑터는 계산의 **자리만** 바꾸고 값·순서·부작용을 바꾸지 않는다.
-그래서 리덕션 테스트의 기대값은 **종전 식**에서 온다 — 새 기대값을 만들면 불변을 주장할 수 없다.
+그래서 목표 계산 테스트의 기대값은 **종전 식**에서 온다 — 새 기대값을 만들면 불변을 주장할 수 없다.
 
 호스트에서 노드의 정체는 `RectTransform` 참조이고, 타깃의 `NodeKey`는 진단용 이름이다.
 장부(`CharacterPlacementTargetLedger`)가 참조 ↔ 키 대응을 안다.
@@ -82,7 +89,7 @@ Ledger.Publish   DOTween 종점     target.ApplyTo(tree)
 
 **셋이 같은 값을 보므로 "재생 결과 = 정착 예약 = 정지 프레임"이 한 곳에서 갈라진다.**
 하나라도 빠뜨리면 나중에 원인 모를 불일치가 난다.
-(`ReductionTests.세_갈래가_같은_값을_본다`가 이 성질을 고정한다.)
+(`NodeTargetTests.세_갈래가_같은_값을_본다`가 이 성질을 고정한다.)
 
 ## 표본 정독 보고 — 편차 축
 
@@ -115,10 +122,10 @@ sizeDelta(Overlay) · 마스크(StageMaskMotion).
 > **2026-11-05 갱신.** 처음(2026-08)엔 "남이 알아야 하는 노드"만 골라 4곳(MoveBy · ScaleTo ·
 > PlaceCharacterFocus · SetDepth)에 손으로 게시를 넣었다. 그 판정에서 **회전(SwayPivot)과
 > 슬라이드(Track)가 빠졌다** — 둘 다 측정 체인 위라 같은 줄의 place가 트윈 중간값을 읽었다.
-> 지금은 판정하지 않는다. 커맨드가 내는 타깃은 **전부** 장부의 `Reserve`으로 게시되고
+> 지금은 판정하지 않는다. 커맨드가 내는 타깃은 **전부** 장부의 `Reserve`로 게시되고
 > 확정 때 실행기의 `CommitReleases`가 푼다(2026-11-06 — 그 전엔 상속 층 `RigClaimTweenCommandBase`가 했다). 체인 아래 노드도 게시된다 — 아무도 안 읽을 뿐 틀리지 않는다.
-> 해제를 잊는 상태는 구조적으로 없다 — 게시하는 그 호출이 해제를 등록한다. 리덕션 없이 끝값을 정하는 커맨드(Slide ·
-> Mirror)는 호스트가 타깃을 만든다 — "타깃 = 리덕션 출력"의 유일한 예외다.
+> 해제를 잊는 상태는 구조적으로 없다 — 게시하는 그 호출이 해제를 등록한다. 목표 계산 없이 끝값을 정하는 커맨드(Slide ·
+> Mirror)는 호스트가 타깃을 만든다 — "타깃 = 목표 계산 출력"의 유일한 예외다.
 
 ## 두 가지 주의 (표본 정독에서 드러난 것)
 
@@ -144,12 +151,12 @@ yarn 4묶음 기준. "이관 안 함"은 **조용히 버린 것이 아니라 판
 
 | 커맨드 | 처리 |
 |---|---|
-| `move_by` · `move_reset` | `MoveByReduction` |
-| `scale_by` · `scale_reset` | `ScaleToReduction` |
-| `set_anchor` / `show` | `SetAnchorReduction` |
-| `fade_in` / `fade_out` | `FadeInReduction` / `FadeOutReduction` (가시성 축) |
+| `move_by` · `move_reset` | `NodeTargets.MoveBy` |
+| `scale_by` · `scale_reset` | `NodeTargets.ScaleTo` |
+| `set_anchor` / `show` | `NodeTargets.SetAnchor` |
+| `fade_in` / `fade_out` | `NodeTargets.FadeIn` / `NodeTargets.FadeOut` (가시성 축) |
 | `place_focus` | `SettledFocusMath.SolveFocusPlacement` |
-| `set_portrait_sprite` | `PortraitSizingReduction` — 폭만 접는다(아래 참조) |
+| `set_portrait_sprite` | `NodeTargets.PortraitSizing` — 폭만 접는다(아래 참조) |
 
 ### 초상 (portrait)
 
@@ -185,7 +192,7 @@ yarn 4묶음 기준. "이관 안 함"은 **조용히 버린 것이 아니라 판
 `shot_zoom` · `shot_track` · `shot_to` · `shot_reset` · `shot_focus_to` 5종 전부.
 `ShotIntentMath`가 zoom→배율 규약(0.05)의 유일한 자리다 — 커맨드와 적용측이 같이 본다.
 
-샷 리덕션의 출력은 노드 타깃이 아니라 **샷 의도 `ShotIntentState`(zoom · pan · focus) 하나**다.
+샷 목표 계산의 출력은 노드 타깃이 아니라 **샷 의도 `ShotIntentState`(zoom · pan · focus) 하나**다.
 그 셋이 무대 노드(무대마다 카메라 둘 · 층마다 하나)에 무엇을 쓰는지는 **`Transforms/ShotLayoutMath`가 유일한 자리**다(2026-11-05).
 
 | 누가 | 무엇을 |
@@ -204,9 +211,9 @@ yarn 4묶음 기준. "이관 안 함"은 **조용히 버린 것이 아니라 판
 
 | 커맨드 | 스펙 클래스 | 처리 |
 |---|---|---|
-| `move_by` · `move_reset` | `MoveByCommandSpecCharR` | placement 리덕션이 이미 덮는다 |
+| `move_by` · `move_reset` | `MoveByCommandSpecCharR` | placement 목표 계산이 이미 덮는다 |
 | `scale_by` · `scale_reset` | `ScaleToCommandSpecCharR` | 동일 |
-| `rotate_by` · `rotate_reset` | `RotateToCommandSpecCharR` | `RotateToReduction` |
+| `rotate_by` · `rotate_reset` | `RotateToCommandSpecCharR` | `NodeTargets.RotateTo` |
 | `sibling_front` · `sibling_back` | — | **이관 안 함** (아래) |
 | `char_to` | — | **어휘에서 걷었다 (2026-11-06)** — 리그는 무대 · 층을 옮기지 않는다. 다른 자리는 fade_out 뒤 새 slot([stage-rig.md](../../Runtime/StageRig/Documentation~/stage-rig.md) §2.4). 무대를 이름에 박은 `char_to_s0/s1/s2`는 그 전 2026-11-03에 걷었다 |
 
@@ -258,8 +265,8 @@ CharSlot_Track_Idle.anchoredPosition          접힘=(0,0)   vs 캡처=(0, 7.99)
 **배경(`bg_*`)은 2026-10-29에 모델 안으로 들어왔다.** 별도 배경 리그를 지우고 배경을 **캐스팅하지 않은
 캐릭터 슬롯**으로 세우기로 했기 때문이다(재생 저장소 `docs/PLAN_background-as-slot.md`). 그래서 `StageState`가
 "캐릭터 리그만 담는다"는 문장은 더 정확히 "캐릭터 리그 *스키마*만 담는다"가 됐고, 배경 슬롯은 그 스키마의
-인스턴스다. 폴드는 새 리덕션을 만들지 않았다 — `StageReducer.Background.cs`는 슬롯 스폰·초상 사이징·
-fade·move·scale을 **같은 노드, 같은 리덕션**으로 접고, 종횡비의 출처만 `background-dimensions.json`이다.
+인스턴스다. 폴드는 새 목표 계산을 만들지 않았다 — `StageReducer.Background.cs`는 슬롯 스폰·초상 사이징·
+fade·move·scale을 **같은 노드, 같은 목표 계산**으로 접고, 종횡비의 출처만 `background-dimensions.json`이다.
 `bg_size`·`bg_place`는 어휘에서 지웠으므로 케이스가 없다 — 남은 대본이 있으면 여기서 소리가 난다(의도).
 
 같은 작업에서 **슬롯 재선언의 의미**를 런타임에 맞췄다. 런타임은 같은 키로 `slot`/`bg_spawn`을 다시 부르면

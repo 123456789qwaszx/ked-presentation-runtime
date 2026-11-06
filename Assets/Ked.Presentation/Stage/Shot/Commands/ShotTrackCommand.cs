@@ -17,8 +17,8 @@ public sealed class ShotTrackCommand : ShotIntentCommandBase<ShotTrackCommandSpe
 
     protected override PresentationIntentState BuildTargetState(in PresentationIntentState from)
     {
-        return Ked.Presentation.Core.ShotTrackReduction
-            .Reduce(from.ToCore(), spec.pan.ToCore())
+        return Ked.Presentation.Core.ShotIntents
+            .Track(from.ToCore(), spec.pan.ToCore())
             .ToUnity();
     }
 }

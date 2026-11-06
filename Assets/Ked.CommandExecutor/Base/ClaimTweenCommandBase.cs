@@ -23,7 +23,7 @@ public abstract class ClaimTweenCommandBase : CommandBase
     // 스코프의 실행 상태(취소 · 압축 · 스텝 경계)는 이 기반이 다룬다.
     protected abstract void ResolveTargets();
 
-    // DOKill -> (from-override) -> 목표 계산 및 확정(코어 리덕션). 목표는 언제나 나온다.
+    // DOKill -> (from-override) -> 목표 계산 및 확정(코어 목표 계산). 목표는 언제나 나온다.
     protected abstract void ClaimTarget();
 
     // ease, SetTarget은 구현 커맨드가 직접. (SetUpdate,OnComplete는 Base측 정책)

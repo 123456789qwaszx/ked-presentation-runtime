@@ -29,7 +29,7 @@ public sealed class SetAnchorCommandCharR : CommandBase
 
     private bool _resolveAttempted;
 
-    // 리셋 대상 rect 목록. 리덕션에 넘기는 키 목록과 같은 순서로 만들어 zip으로 적용한다.
+    // 리셋 대상 rect 목록. 목표 계산에 넘기는 키 목록과 같은 순서로 만들어 zip으로 적용한다.
     private readonly List<RectTransform> _resetPositionRects = new(16);
     private readonly List<RectTransform> _resetEulerRects = new(8);
     private readonly List<RectTransform> _resetScaleRects = new(8);
@@ -86,7 +86,7 @@ public sealed class SetAnchorCommandCharR : CommandBase
             CharacterRigTargetResolver.ResolveCharacterKeyFromTargetKey(_stage, _spec.slotKey);
 
         // ── 코어: 스펙 + 튜닝 → 목표 상태 ──
-        NodeTarget[] targets = SetAnchorReduction.Reduce(
+        NodeTarget[] targets = NodeTargets.SetAnchor(
             _rect.name,
             ResolveRoleAnchorTuning(tuningKey),
             NamesOf(_resetPositionRects),
@@ -114,7 +114,7 @@ public sealed class SetAnchorCommandCharR : CommandBase
     }
 
     /// <summary>
-    /// 리셋 대상을 축별로 모은다. 순서가 리덕션의 타깃 순서와 대응하므로 바꾸지 말 것.
+    /// 리셋 대상을 축별로 모은다. 순서가 목표 계산의 타깃 순서와 대응하므로 바꾸지 말 것.
     /// </summary>
     private void CollectResetTargets()
     {
@@ -154,13 +154,13 @@ public sealed class SetAnchorCommandCharR : CommandBase
         }
     }
 
-    private SetAnchorReduction.RoleAnchorTuning ResolveRoleAnchorTuning(string tuningKey)
+    private NodeTargets.RoleAnchorTuning ResolveRoleAnchorTuning(string tuningKey)
     {
-        // 하한 클램프는 리덕션이 한다 — 규약이 사는 자리를 하나로 둔다.
+        // 하한 클램프는 목표 계산이 한다 — 규약이 사는 자리를 하나로 둔다.
         if (_roleTuningDb.TryGet(tuningKey, out var entry))
-            return new SetAnchorReduction.RoleAnchorTuning(entry.offset.ToCore(), entry.visualScale);
+            return new NodeTargets.RoleAnchorTuning(entry.offset.ToCore(), entry.visualScale);
 
-        return SetAnchorReduction.RoleAnchorTuning.Default;
+        return NodeTargets.RoleAnchorTuning.Default;
     }
 
     private void ApplyTarget(RectTransform rect, in NodeTarget target)

@@ -210,7 +210,7 @@ namespace Ked.Presentation.Core
                 case "shot_to":    return ApplyShotTo(state, cmd, tuning, out reason);
                 case "shot_track": return ApplyShotTrack(state, cmd, tuning, out reason);
                 case "shot_reset":
-                    state.Shot = ShotResetReduction.Reduce();
+                    state.Shot = ShotIntents.Reset();
                     return true;
 
                 case "shot_focus_to": return ApplyShotFocusTo(state, cmd, tuning, out reason);

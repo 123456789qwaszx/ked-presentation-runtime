@@ -9,7 +9,7 @@ namespace Ked.Presentation.Tests
     ///
     /// yarn이 실제로 쓰는 조합 둘(rotate_by · rotate_reset)을 골든으로 고정한다.
     /// </summary>
-    public sealed class StagingBundleReductionTests
+    public sealed class StagingBundleTargetTests
     {
         private const float Eps = 1e-4f;
 
@@ -20,9 +20,9 @@ namespace Ked.Presentation.Tests
         public void rotate_by는_현재_각에_z를_더한다()
         {
             // 브리지: toEuler = (0, 0, degree), relativeToCurrent = true
-            NodeTarget target = RotateToReduction.Reduce(
+            NodeTarget target = NodeTargets.RotateTo(
                 SwayPivot,
-                new RotateToReduction.Args(true, new Vec3(0f, 0f, 15f)),
+                new NodeTargets.RotateToArgs(true, new Vec3(0f, 0f, 15f)),
                 new Vec3(0f, 0f, 20f));
 
             Assert.That(target.NodeKey, Is.EqualTo(SwayPivot));
@@ -34,9 +34,9 @@ namespace Ked.Presentation.Tests
         public void rotate_reset은_절대_0이다()
         {
             // 브리지: toEuler = (0, 0, 0), relativeToCurrent 기본값(false)
-            NodeTarget target = RotateToReduction.Reduce(
+            NodeTarget target = NodeTargets.RotateTo(
                 SwayPivot,
-                new RotateToReduction.Args(false, Vec3.Zero),
+                new NodeTargets.RotateToArgs(false, Vec3.Zero),
                 new Vec3(0f, 0f, 137f));
 
             Assert.That(target.Value, Is.EqualTo(Vec3.Zero));
@@ -45,9 +45,9 @@ namespace Ked.Presentation.Tests
         [Test]
         public void 절대_모드는_현재_각을_무시한다()
         {
-            NodeTarget target = RotateToReduction.Reduce(
+            NodeTarget target = NodeTargets.RotateTo(
                 SwayPivot,
-                new RotateToReduction.Args(false, new Vec3(10f, 20f, 30f)),
+                new NodeTargets.RotateToArgs(false, new Vec3(10f, 20f, 30f)),
                 new Vec3(90f, 90f, 90f));
 
             Assert.That(target.Value, Is.EqualTo(new Vec3(10f, 20f, 30f)));
@@ -56,10 +56,10 @@ namespace Ked.Presentation.Tests
         [Test]
         public void 상대_모드는_3축_전부_더한다()
         {
-            // Ledger가 Vector3를 게시하므로 리덕션도 3축을 다룬다.
-            NodeTarget target = RotateToReduction.Reduce(
+            // Ledger가 Vector3를 게시하므로 목표 계산도 3축을 다룬다.
+            NodeTarget target = NodeTargets.RotateTo(
                 SwayPivot,
-                new RotateToReduction.Args(true, new Vec3(5f, -10f, 15f)),
+                new NodeTargets.RotateToArgs(true, new Vec3(5f, -10f, 15f)),
                 new Vec3(1f, 2f, 3f));
 
             Assert.That(target.Value, Is.EqualTo(new Vec3(6f, -8f, 18f)));
@@ -72,9 +72,9 @@ namespace Ked.Presentation.Tests
             RectNodeTree tree = new(RectSpace.Centered(1000f, 500f));
             tree.Add(SwayPivot, null, RectNodeState.StretchFull);
 
-            NodeTarget target = RotateToReduction.Reduce(
+            NodeTarget target = NodeTargets.RotateTo(
                 SwayPivot,
-                new RotateToReduction.Args(true, new Vec3(0f, 0f, 90f)),
+                new NodeTargets.RotateToArgs(true, new Vec3(0f, 0f, 90f)),
                 tree.GetState(SwayPivot).LocalEulerAngles);
 
             target.ApplyTo(tree);
@@ -97,14 +97,14 @@ namespace Ked.Presentation.Tests
             tree.Add("CharSlot_SwayPivot", "CharSlot_Rotation", RectNodeState.StretchFull);
 
             // rotate_by
-            RotateToReduction
-                .Reduce("CharSlot_SwayPivot", new RotateToReduction.Args(true, new Vec3(0f, 0f, 30f)), Vec3.Zero)
+            NodeTargets
+                .RotateTo("CharSlot_SwayPivot", new NodeTargets.RotateToArgs(true, new Vec3(0f, 0f, 30f)), Vec3.Zero)
                 .ApplyTo(tree);
 
             // show 상당: 오일러 리셋 목록에 SwayPivot이 없다.
-            NodeTarget[] showTargets = SetAnchorReduction.Reduce(
+            NodeTarget[] showTargets = NodeTargets.SetAnchor(
                 "CharSlot_SwayPivot",
-                SetAnchorReduction.RoleAnchorTuning.Default,
+                NodeTargets.RoleAnchorTuning.Default,
                 resetPositionKeys: null,
                 resetEulerKeys: new[] { "CharSlot_Rotation" },
                 resetScaleKeys: null);

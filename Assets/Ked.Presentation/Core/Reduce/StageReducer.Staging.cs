@@ -4,7 +4,7 @@ namespace Ked.Presentation.Core
     /// nudge · move · scale · rotate — 현재 값에 얹는 상대 변형.
     ///
     /// place/size와 달리 focus를 모른다. 표적 노드와 델타만 정하면 끝이라
-    /// 폴드 본문은 전부 "토큰 파싱 → 표적 노드 → 리덕션 호출" 세 줄 모양이다.
+    /// 폴드 본문은 전부 "토큰 파싱 → 표적 노드 → 목표 계산 호출" 세 줄 모양이다.
     /// </summary>
     public static partial class StageReducer
     {
@@ -100,9 +100,9 @@ namespace Ked.Presentation.Core
         {
             string nodeKey = StageState.NodeKeyOf(slotKey, targetId);
 
-            state.Apply(MoveByReduction.Reduce(
+            state.Apply(NodeTargets.MoveBy(
                 nodeKey,
-                new MoveByReduction.Args(!relative, delta),
+                new NodeTargets.MoveByArgs(!relative, delta),
                 state.Nodes.GetState(nodeKey).AnchoredPosition));
         }
 
@@ -119,9 +119,9 @@ namespace Ked.Presentation.Core
 
             string nodeKey = StageState.NodeKeyOf(slotKey, "CharSlot_Scale");
 
-            state.Apply(ScaleToReduction.Reduce(
+            state.Apply(NodeTargets.ScaleTo(
                 nodeKey,
-                new ScaleToReduction.Args(true, new Vec2(multiplier, multiplier)),
+                new NodeTargets.ScaleToArgs(true, new Vec2(multiplier, multiplier)),
                 state.Nodes.GetState(nodeKey).LocalScale.XY));
 
             return true;
@@ -134,9 +134,9 @@ namespace Ked.Presentation.Core
 
             string nodeKey = StageState.NodeKeyOf(slotKey, "CharSlot_Scale");
 
-            state.Apply(ScaleToReduction.Reduce(
+            state.Apply(NodeTargets.ScaleTo(
                 nodeKey,
-                new ScaleToReduction.Args(false, Vec2.One),
+                new NodeTargets.ScaleToArgs(false, Vec2.One),
                 state.Nodes.GetState(nodeKey).LocalScale.XY));
 
             return true;
@@ -160,9 +160,9 @@ namespace Ked.Presentation.Core
             string nodeKey = StageState.NodeKeyOf(slotKey, "CharacterPortrait_ActingScale");
 
             // 브리지가 xy 하나를 두 축에 함께 넣는다(toScale = new Vector2(xy, xy)).
-            state.Apply(ScaleToReduction.Reduce(
+            state.Apply(NodeTargets.ScaleTo(
                 nodeKey,
-                new ScaleToReduction.Args(false, new Vec2(scale, scale)),
+                new NodeTargets.ScaleToArgs(false, new Vec2(scale, scale)),
                 state.Nodes.GetState(nodeKey).LocalScale.XY));
 
             return true;
@@ -246,9 +246,9 @@ namespace Ked.Presentation.Core
 
             string nodeKey = StageState.NodeKeyOf(slotKey, "CharacterPortrait_SwayPivot");
 
-            state.Apply(RotateToReduction.Reduce(
+            state.Apply(NodeTargets.RotateTo(
                 nodeKey,
-                new RotateToReduction.Args(false, new Vec3(0f, 0f, degree)),
+                new NodeTargets.RotateToArgs(false, new Vec3(0f, 0f, degree)),
                 state.Nodes.GetState(nodeKey).LocalEulerAngles));
 
             return true;
@@ -266,9 +266,9 @@ namespace Ked.Presentation.Core
 
             string nodeKey = StageState.NodeKeyOf(slotKey, "CharSlot_SwayPivot");
 
-            state.Apply(RotateToReduction.Reduce(
+            state.Apply(NodeTargets.RotateTo(
                 nodeKey,
-                new RotateToReduction.Args(true, new Vec3(0f, 0f, degree)),
+                new NodeTargets.RotateToArgs(true, new Vec3(0f, 0f, degree)),
                 state.Nodes.GetState(nodeKey).LocalEulerAngles));
 
             return true;
@@ -281,9 +281,9 @@ namespace Ked.Presentation.Core
 
             string nodeKey = StageState.NodeKeyOf(slotKey, "CharSlot_SwayPivot");
 
-            state.Apply(RotateToReduction.Reduce(
+            state.Apply(NodeTargets.RotateTo(
                 nodeKey,
-                new RotateToReduction.Args(false, Vec3.Zero),
+                new NodeTargets.RotateToArgs(false, Vec3.Zero),
                 state.Nodes.GetState(nodeKey).LocalEulerAngles));
 
             return true;

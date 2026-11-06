@@ -8,7 +8,7 @@ public sealed partial class StageCommandParser
         => Emit(new FadeCommandSpecCharR
         {
             target = CharacterRigTarget.CharacterPortraitSprite_Root,
-            targetAlpha = FadeInReduction.TargetAlpha,
+            targetAlpha = NodeTargets.FadeInAlpha,
             slotKey = roleKey,
             duration = YarnDurationParser.Parse(durationToken)
         });
@@ -17,13 +17,13 @@ public sealed partial class StageCommandParser
         => Emit(new FadeCommandSpecCharR
         {
             target = CharacterRigTarget.CharacterPortraitSprite_Root,
-            targetAlpha = FadeOutReduction.TargetAlpha,
+            targetAlpha = NodeTargets.FadeOutAlpha,
             slotKey = roleKey,
             duration = YarnDurationParser.Parse(durationToken)
         });
 
     // fade(slot, alpha, dur) — 반투명까지의 페이드. fade_in · fade_out은 이것의 두 끝(1 · 0)이다.
-    // [0,1] 밖이면 소리 내고 잘라 낸다 — 자르는 규칙은 코어 FadeReduction 한 곳이라 폴드와 같은 값이다.
+    // [0,1] 밖이면 소리 내고 잘라 낸다 — 자르는 규칙은 코어 NodeTargets.Fade 한 곳이라 폴드와 같은 값이다.
     private void EnqueueFadeToSpec(string roleKey, float alpha, string durationToken)
     {
         if (alpha < 0f || alpha > 1f)
@@ -32,7 +32,7 @@ public sealed partial class StageCommandParser
         Emit(new FadeCommandSpecCharR
         {
             target = CharacterRigTarget.CharacterPortraitSprite_Root,
-            targetAlpha = FadeReduction.TargetAlpha(alpha),
+            targetAlpha = NodeTargets.FadeAlpha(alpha),
             slotKey = roleKey,
             duration = YarnDurationParser.Parse(durationToken)
         });

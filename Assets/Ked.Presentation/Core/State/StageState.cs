@@ -334,7 +334,7 @@ namespace Ked.Presentation.Core
         // ── 타깃 라우팅 ────────────────────────────────────────────
 
         /// <summary>
-        /// 리덕션 출력을 상태에 접는다. 트랜스폼은 트리로, alpha는 가시성 축으로.
+        /// 목표 계산 출력을 상태에 접는다. 트랜스폼은 트리로, alpha는 가시성 축으로.
         /// 타깃이 흐르는 세 갈래 중 "상태 폴드"가 여기다.
         /// </summary>
         public void Apply(in NodeTarget target)

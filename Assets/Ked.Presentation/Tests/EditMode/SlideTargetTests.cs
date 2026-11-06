@@ -19,7 +19,7 @@ namespace Ked.Presentation.Tests
     /// 기본값·표적·방향 별칭은 전부 브리지 실측에서 왔다
     /// (<c>CommandBridge.CharRigPresentation.cs</c> · <c>CharRigDirectionParser</c>).
     /// </summary>
-    public sealed class SlideReductionTests
+    public sealed class SlideTargetTests
     {
         private const float Eps = 1e-3f;
 

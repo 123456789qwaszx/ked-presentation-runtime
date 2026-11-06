@@ -171,7 +171,7 @@ VisualOffset → … → Track_Focus → 리그 루트     리그   (장부가 �
 - **한 줄 결정:** 장부는 리그 노드의 끝값만 안다. 시간을 걷어 낸 체인이 폴드가 보는 무대다.
 - **무엇이 걸려 있었나:** 동시에 도는 커맨드끼리 서로의 중간값을 읽으면 같은 대본이 재생마다 다른 자리를 낸다.
 - **기각된 대안:** 잔여 벡터 합(1세대, 스케일에서 깨짐) / 트랜스폼을 잠깐 바꿔 재고 되돌리기(2세대, 엔진에 묶임) / 커맨드마다 손으로 게시(3세대 초기, 둘을 빠뜨림)
-- **지불한 비용:** 리덕션 없이 끝값을 정하는 커맨드(Slide · Mirror)도 타깃을 만들어야 한다. 체인 아래 노드의 게시는 읽히지 않는 쓰기다.
+- **지불한 비용:** 목표 계산 없이 끝값을 정하는 커맨드(Slide · Mirror)도 타깃을 만들어야 한다. 체인 아래 노드의 게시는 읽히지 않는 쓰기다.
 - **계약 집행:** 기반이 게시 · Clear를 소유한다. 타깃 0개면 움직이지 않는다. 리그가 없으면 예외. 장부와 샷이 한 노드를 같이 소유하면 예외.
 - **가치관이 드러나는 지점:** "남이 알아야 하는가"를 판정하는 대신 판정 자체를 없앴다.
 
@@ -180,5 +180,5 @@ VisualOffset → … → Track_Focus → 리그 루트     리그   (장부가 �
 ---
 
 관련 문서: [stage-rig.md](../../StageRig/Documentation~/stage-rig.md) (무대 계층 · 샷 식 · 중립),
-[reduction-boundary.md](../../../Core/Documentation~/reduction-boundary.md) (타깃이 흐르는 세 갈래),
+[target-boundary.md](../../../Core/Documentation~/target-boundary.md) (타깃이 흐르는 세 갈래),
 [rig-axis-order.md](../../CharacterRig/Documentation~/rig-axis-order.md) (체인의 노드 순서가 규약인 이유)

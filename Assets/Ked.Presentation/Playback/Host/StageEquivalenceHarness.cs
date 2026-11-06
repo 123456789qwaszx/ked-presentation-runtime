@@ -45,7 +45,7 @@ using Yarn.Unity;
 //   값이 매 라인 제각각인 것이 특징이다 — 목표값이 아니라 시간 함수의 스냅샷이라서.
 //
 //   이 부류는 정지 프레임에 목표가 **정의되지 않는다**. 리듀서가 접을 수 없고
-//   Unhandled로 남는 것이 맞다(Documentation~/reduction-boundary.md의 "절차적 커맨드").
+//   Unhandled로 남는 것이 맞다(Documentation~/target-boundary.md의 "절차적 커맨드").
 //   다만 라인 단위 재생은 **절차적 축이 어디에 있는지 드러내는 용도**로는 유용하다.
 // ─────────────────────────────────────────────────────────────────────────────
 public sealed class StageEquivalenceHarness : MonoBehaviour

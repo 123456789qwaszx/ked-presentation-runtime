@@ -640,7 +640,7 @@ namespace Ked.Presentation.Tests
         public void shot_focus_to는_focus_튜닝_없이도_접힌다()
         {
             // 튜닝이 없으면 오프셋이 0일 뿐 폴드 자체는 성립한다.
-            // (오프셋 합의 정확성은 FocusStageReductionTests가 본다.)
+            // (오프셋 합의 정확성은 FocusStageTargetTests가 본다.)
             StageState state = Fold(Cmd("slot", "c1"), Cmd("shot_focus_to", "c1", "body", "center", "2.5"));
 
             Assert.That(state.Unhandled, Is.Empty);

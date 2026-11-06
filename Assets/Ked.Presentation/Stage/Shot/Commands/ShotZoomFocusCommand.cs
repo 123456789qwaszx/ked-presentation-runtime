@@ -67,10 +67,10 @@ public sealed class ShotZoomFocusCommand : ShotIntentCommandBase<ShotZoomFocusCo
             ScreenFocusPointResolver.Resolve(focus.RigSpaceRoot, spec.screenPoint) + spec.screenOffset;
 
         // 목표 배율에서, 리그가 선 층의 반응까지 넣어 그 자리가 화면 지점에 보이는 pan을 푼다.
-        // 코어 폴드(StageReducer.Shot)와 같은 리덕션이고 같은 곡선(샷 시스템이 쓰는 것)을 본다.
+        // 코어 폴드(StageReducer.Shot)와 같은 목표 계산이고 같은 곡선(샷 시스템이 쓰는 것)을 본다.
         // 결과는 무대 위 자리와 층만으로 정해진다 — 지금 카메라 · 샷의 진행도와 무관.
-        return Ked.Presentation.Core.ShotZoomFocusReduction
-            .Reduce(
+        return Ked.Presentation.Core.ShotIntents
+            .FocusTo(
                 spec.zoom,
                 focus.FocusPointInRigSpace.ToCore(),
                 desiredPoint.ToCore(),

@@ -152,7 +152,7 @@ tx는 **보이는 범위만** 맡는다. 샷의 뜻(줌하며 열리기 같은)�
 
 - 덮는 무대가 화면 전체를 가리면(`iris_in` · `strip_cover`) 그것은 커튼이다. 가린 뒤에 본 무대를 다시 꾸미고 걷어 낸다. 덮는 무대에서 장면을 이어 가지 않는다.
 - 매치 컷(본 무대와 인서트를 같은 구도로 이어 보이기)은 저절로 되지 않는다. 필요하면 인서트 리그를 같은 자리 · 크기로 세운다. 샷을 복사하는 커맨드는 두지 않는다.
-- 폴드는 마스크를 모른다(무대 상태 모델 밖, [reduction-boundary.md](../../../Core/Documentation~/reduction-boundary.md)).
+- 폴드는 마스크를 모른다(무대 상태 모델 밖, [target-boundary.md](../../../Core/Documentation~/target-boundary.md)).
 
 ---
 
@@ -338,9 +338,9 @@ close 가로축 예시:
 | 자리 | 하는 일 |
 |---|---|
 | `ShotLayoutMath.SolvePanToPlace` | 위의 역산 |
-| `ShotZoomFocusReduction.Reduce(zoom, focus, desired, d, 곡선)` | 팬을 풀고 intent(zoom, pan, focus)를 만든다. 논리 focus = 그 점 |
-| 런타임 `ShotZoomFocusCommand` | 측정(무대 좌표 · 무대 · 층) → 덮는 무대면 경고하고 건너뜀 → `Layer.Depth` · `rig.LayerProfile`로 리덕션 → Follow |
-| 코어 `StageReducer.ApplyShotFocusTo` | 덮는 무대면 Unhandled → 폴드의 focus → `GetAttachment(slot).LayerDepth` · `ResolveLayerProfileCurve()`로 같은 리덕션 |
+| `ShotIntents.FocusTo(zoom, focus, desired, d, 곡선)` | 팬을 풀고 intent(zoom, pan, focus)를 만든다. 논리 focus = 그 점 |
+| 런타임 `ShotZoomFocusCommand` | 측정(무대 좌표 · 무대 · 층) → 덮는 무대면 경고하고 건너뜀 → `Layer.Depth` · `rig.LayerProfile`로 목표 계산 → Follow |
+| 코어 `StageReducer.ApplyShotFocusTo` | 덮는 무대면 Unhandled → 폴드의 focus → `GetAttachment(slot).LayerDepth` · `ResolveLayerProfileCurve()`로 같은 목표 계산 |
 
 입력이 이미 무대 좌표라 "지금 카메라를 씌웠다 벗기는" 왕복이 없다. 결과는 무대 위 자리와 층만으로 정해진다 — 지금 카메라 · 샷의 진행도와 무관하다.
 
@@ -409,5 +409,5 @@ Shot은 본 무대면 접힌 샷, 덮는 무대면 `Default`(항등)다 — 덮�
 ---
 
 관련 문서: [settled-chain.md](../../ShotResponse/Documentation~/settled-chain.md) (장부 · 샷 중립 · 라이브 — 측정 체인),
-[reduction-boundary.md](../../../Core/Documentation~/reduction-boundary.md) (스펙 → 목표 상태 규약),
+[target-boundary.md](../../../Core/Documentation~/target-boundary.md) (스펙 → 목표 상태 규약),
 [rig-axis-order.md](../../CharacterRig/Documentation~/rig-axis-order.md) (캐릭터 리그가 스키마로 간 이유)

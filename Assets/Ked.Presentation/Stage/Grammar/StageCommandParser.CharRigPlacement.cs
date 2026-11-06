@@ -28,7 +28,7 @@ public sealed partial class StageCommandParser
         var spec2FadeInCharRigRoot = new FadeCommandSpecCharR
         {
             target = CharacterRigTarget.RigRoot,
-            targetAlpha = FadeInReduction.TargetAlpha,
+            targetAlpha = NodeTargets.FadeInAlpha,
             
             slotKey = roleKey,
             duration = YarnDurationParser.Parse(durationToken)
@@ -37,7 +37,7 @@ public sealed partial class StageCommandParser
         var spec3FadeInPortraitSprite = new FadeCommandSpecCharR
         {
             target = CharacterRigTarget.CharacterPortraitSprite_Root,
-            targetAlpha = FadeInReduction.TargetAlpha,
+            targetAlpha = NodeTargets.FadeInAlpha,
             
             slotKey = roleKey,
             duration = YarnDurationParser.Parse(durationToken)

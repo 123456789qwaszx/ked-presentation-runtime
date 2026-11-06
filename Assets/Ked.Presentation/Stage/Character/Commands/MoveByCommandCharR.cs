@@ -59,7 +59,7 @@ public sealed class MoveByCommandCharR : ClaimTweenCommandBase
         _rect.DOKill(true);
         _startPos = _rect.anchoredPosition;
 
-        NodeTarget target = MoveByTarget.Reduce(_rect, _spec, _startPos);
+        NodeTarget target = RigTargets.MoveBy(_rect, _spec, _startPos);
         _rig.PlacementTargets.Reserve(_rect, target, Releases);
         _destPos = target.Value.XY.ToUnity();
     }
@@ -73,15 +73,4 @@ public sealed class MoveByCommandCharR : ClaimTweenCommandBase
     protected override void OnCommitFinalState()
         => _rect.anchoredPosition = _destPos;
 
-}
-
-// MoveBy의 Unity → Core 경계. 커맨드가 변환과 Args 조립을 들고 있지 않도록 여기서만 한다.
-// 시작점은 인자로 받는다 — 안에서 rect를 다시 읽으면 시작점을 먼저 잡아야 한다는 순서가 숨는다.
-static class MoveByTarget
-{
-    public static NodeTarget Reduce(RectTransform rect, MoveByCommandSpecCharR spec, Vector2 start)
-        => MoveByReduction.Reduce(
-            rect.name,
-            new MoveByReduction.Args(spec.useAbsolutePosition, spec.delta.ToCore()),
-            start.ToCore());
 }

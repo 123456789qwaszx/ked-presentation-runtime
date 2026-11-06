@@ -64,10 +64,7 @@ public sealed class ScaleToCommandCharR : ClaimTweenCommandBase
         _startScale = new Vector2(currentScale.x, currentScale.y);
 
         // ── 코어: 스펙 → 목표 상태. z는 타깃이 건드리지 않는다 (라이브 z 유지 규약) ──
-        NodeTarget target = ScaleToReduction.Reduce(
-            _rect.name,
-            new ScaleToReduction.Args(_spec.relativeToCurrent, _spec.toScale.ToCore()),
-            _startScale.ToCore());
+        NodeTarget target = RigTargets.ScaleTo(_rect, _spec, _startScale);
 
         _targetScale = target.Value.XY.ToUnity();
 
