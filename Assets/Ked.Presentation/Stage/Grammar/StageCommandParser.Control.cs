@@ -14,10 +14,10 @@ public sealed partial class StageCommandParser
     private void EnqueueWaitSpec(float seconds)
         => Emit(new WaitCommandSpec { duration = seconds });
 
-    private void EnqueuePresentationActorAliasSpec(string aliasSymbol, string targetKey)
+    private void EnqueuePresentationActorAliasSpec(string aliasSymbol, string roleKey)
         => Emit(new SetPresentationActorAliasCommandSpec
         {
             aliasSymbol = aliasSymbol,
-            targetKey = targetKey
+            roleKey = roleKey
         });
 }

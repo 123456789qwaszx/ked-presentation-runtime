@@ -284,16 +284,16 @@ namespace Ked.Presentation.Core
         private static bool TryGetSpawnedSlot(
             StageState state, in StageCommand cmd, out string slotKey, out string reason)
         {
-            if (!TryGetSlotKey(cmd, out string targetKey, out reason))
+            if (!TryGetSlotKey(cmd, out string roleKey, out reason))
             {
                 slotKey = null;
                 return false;
             }
 
             // 별칭("@3")·캐릭터 키("parkeunseol")도 슬롯으로 푼다 (actor/cast 축).
-            if (!state.TryResolveSlot(targetKey, out slotKey))
+            if (!state.TryResolveSlot(roleKey, out slotKey))
             {
-                reason = $"대상 '{targetKey}'를 슬롯으로 풀 수 없다 (slot/cast/actor 선행 필요)";
+                reason = $"대상 '{roleKey}'를 슬롯으로 풀 수 없다 (slot/cast/actor 선행 필요)";
                 return false;
             }
 

@@ -30,12 +30,18 @@ title: Demo_Presentation
 <<size s2 mid bust 12fr>>
 준비. 하린은 오른쪽, 시구레는 왼쪽.
 
+<<actor @2 s1>>
+<<place @2 face left>>
+test
+
 <<move_by s1 -6u 0u 30fr>>
 <<place_center s1 bust 20fr>>
 1. move_by + place — 하린이 옆으로 밀리는 중이지만, 가슴은 정확히 가운데에서 멈춰야 한다.
 
-<<size s1 front bust 30fr>>
+<<size s1 22 bust 30fr>>
 <<place_center s1 face 20fr>>
+<<up s1 2u 20fr>>
+<<shot_to 3 4 4 24>>
 2. size + place — 커지는 중에도 얼굴이 가운데에 와야 한다.
 
 <<rotate_by s1 12 30fr>>
@@ -44,6 +50,7 @@ title: Demo_Presentation
 
 <<mirror s1 toggle>>
 <<place_center s1 face 20fr>>
+<<shot_reset >>
 4. mirror + place — 좌우가 바뀌어도 얼굴이 가운데에 와야 한다.
 
 <<slide_in s2 left 4u 30fr>>

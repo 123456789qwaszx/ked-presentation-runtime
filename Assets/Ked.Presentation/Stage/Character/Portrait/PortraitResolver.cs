@@ -29,9 +29,9 @@ public sealed class PortraitResolver
         }
     }
 
-    public Sprite Resolve(PresentationStage stage, string targetKey, PortraitIdentity portrait, string debugName)
+    public Sprite Resolve(PresentationStage stage, string roleKey, PortraitIdentity portrait, string debugName)
     {
-        string roleKey = CharacterRigTargetResolver.ResolveRigKeyByPolicy(stage, targetKey);
+        string slotKey = CharacterRigResolver.ResolveSlotKey(stage, roleKey);
 
         string character = portrait.character;
         string variant = portrait.variant;
@@ -39,13 +39,13 @@ public sealed class PortraitResolver
     
         if (string.IsNullOrEmpty(character))
         {
-            if (stage.castRegistry.TryGetCharacter(roleKey, out string characterKey))
+            if (stage.castRegistry.TryGetCharacter(slotKey, out string characterKey))
                 character = characterKey;
         }
 
         if (string.IsNullOrEmpty(variant))
         {
-            if (stage.castRegistry.TryGetVariant(roleKey, out string variantKey))
+            if (stage.castRegistry.TryGetVariant(slotKey, out string variantKey))
                 variant = variantKey;
         }
     
@@ -64,7 +64,7 @@ public sealed class PortraitResolver
         {
             Debug.LogWarning(
                 $"[{debugName}] Failed to resolve portrait. " +
-                $"targetKey='{targetKey}', roleKey='{roleKey}', " +
+                $"roleKey='{roleKey}', slotKey='{slotKey}', " +
                 $"character='{character}', variant='{variant}', " +
                 $"emotion='{emotion}'.");
 

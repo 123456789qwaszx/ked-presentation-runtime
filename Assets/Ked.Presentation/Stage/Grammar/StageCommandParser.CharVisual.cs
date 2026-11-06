@@ -4,7 +4,7 @@ public sealed partial class StageCommandParser
     private void EnqueueCharVisualPresetSpec(string roleKey, string presetKey, float intensity, string durationToken)
         => Emit(new CharVisualFocusCommandSpecCharR 
         { 
-            slotKey = roleKey,
+            roleKey = roleKey,
             presetKey = CharacterVisualFocusPresetKeyParser.Parse(presetKey),
             intensity = intensity,
             duration = YarnDurationParser.Parse(durationToken)
@@ -15,7 +15,7 @@ public sealed partial class StageCommandParser
         {
             presetKey = "focus",
             
-            slotKey = roleKey,
+            roleKey = roleKey,
             intensity = intensity,
             duration = YarnDurationParser.Parse(durationToken),
         });
@@ -25,7 +25,7 @@ public sealed partial class StageCommandParser
         {
             presetKey = "defocus",
             
-            slotKey = roleKey,
+            roleKey = roleKey,
             intensity = intensity,
             duration = YarnDurationParser.Parse(durationToken),
         });
@@ -35,7 +35,7 @@ public sealed partial class StageCommandParser
         {
             presetKey = "dim",
             
-            slotKey = roleKey,
+            roleKey = roleKey,
             intensity = intensity,
             duration = YarnDurationParser.Parse(durationToken),
         });
@@ -45,7 +45,7 @@ public sealed partial class StageCommandParser
         {
             presetKey = "silhouette",
             
-            slotKey = roleKey,
+            roleKey = roleKey,
             intensity = intensity,
             duration = YarnDurationParser.Parse(durationToken)
         });
@@ -55,7 +55,7 @@ public sealed partial class StageCommandParser
         {
             presetKey = "inner_rim",
             
-            slotKey = roleKey,
+            roleKey = roleKey,
             intensity = intensity,
             duration = YarnDurationParser.Parse(durationToken)
         });
@@ -65,7 +65,7 @@ public sealed partial class StageCommandParser
         {
             presetKey = "outer_rim",
             
-            slotKey = roleKey,
+            roleKey = roleKey,
             intensity = intensity,
             duration = YarnDurationParser.Parse(durationToken)
         });
@@ -75,7 +75,7 @@ public sealed partial class StageCommandParser
         {
             presetKey = "clear",
             
-            slotKey = roleKey,
+            roleKey = roleKey,
             intensity = 1f,
             duration = YarnDurationParser.Parse(durationToken),
         });

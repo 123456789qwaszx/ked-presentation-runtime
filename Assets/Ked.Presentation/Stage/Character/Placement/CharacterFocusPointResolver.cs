@@ -26,8 +26,8 @@ public static class CharacterFocusPointResolver
         CharacterFocusTuningDBSO tuningDb,
         bool useSettledPlacementTargets)
     {
-        CharacterRigRefs rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(stage, roleKey);
-        string tuningKey = CharacterRigTargetResolver.ResolveCharacterKeyFromTargetKey(stage, roleKey);
+        CharacterRigRefs rigRefs = CharacterRigResolver.ResolveRig(stage, roleKey);
+        string tuningKey = CharacterRigResolver.ResolveCharacterKey(stage, roleKey);
 
         CharacterFacing facing = ResolveFacing(stage, roleKey);
 

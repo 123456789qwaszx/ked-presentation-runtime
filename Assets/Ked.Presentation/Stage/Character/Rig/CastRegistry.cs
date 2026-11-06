@@ -103,13 +103,13 @@ public sealed class CastRegistry
         return true;
     }
 
-    public bool SetFacing(string targetKey, CharacterFacing facing)
+    public bool SetFacing(string roleKey, CharacterFacing facing)
     {
-        if (!TryResolveSlotKey(targetKey, out string slotKey))
+        if (!TryResolveSlotKey(roleKey, out string slotKey))
         {
             Debug.LogWarning(
                 $"[CastRegistry] SetFacing failed. Binding not found. " +
-                $"targetKey='{targetKey}'. Expected slot key or cast character key.");
+                $"roleKey='{roleKey}'. Expected slot key or cast character key.");
 
             return false;
         }
@@ -118,33 +118,33 @@ public sealed class CastRegistry
         return true;
     }
 
-    public bool ToggleFacing(string targetKey, out CharacterFacing newFacing)
+    public bool ToggleFacing(string roleKey, out CharacterFacing newFacing)
     {
         newFacing = CharacterFacing.Right;
 
-        if (!TryGetFacing(targetKey, out CharacterFacing currentFacing))
+        if (!TryGetFacing(roleKey, out CharacterFacing currentFacing))
             return false;
 
         newFacing = currentFacing.Opposite();
-        return SetFacing(targetKey, newFacing);
+        return SetFacing(roleKey, newFacing);
     }
 
-    public bool TryGetFacing(string targetKey, out CharacterFacing facing)
+    public bool TryGetFacing(string roleKey, out CharacterFacing facing)
     {
         facing = CharacterFacing.Right;
 
-        if (!TryResolveSlotKey(targetKey, out string slotKey))
+        if (!TryResolveSlotKey(roleKey, out string slotKey))
             return false;
 
         facing = _slotToBinding[slotKey].facing;
         return true;
     }
 
-    public bool TryPeekFacing(string targetKey, out CharacterFacing facing)
+    public bool TryPeekFacing(string roleKey, out CharacterFacing facing)
     {
         facing = CharacterFacing.Right;
 
-        if (!TryResolveSlotKey(targetKey, out string slotKey))
+        if (!TryResolveSlotKey(roleKey, out string slotKey))
             return false;
 
         facing = _slotToBinding[slotKey].facing;
@@ -225,20 +225,20 @@ public sealed class CastRegistry
         return true;
     }
 
-    private bool IsCast(string targetKey)
+    private bool IsCast(string roleKey)
     {
-        targetKey = (targetKey ?? "").Trim();
+        roleKey = (roleKey ?? "").Trim();
 
-        if (_slotToBinding.ContainsKey(targetKey))
+        if (_slotToBinding.ContainsKey(roleKey))
             return true;
 
-        string characterKey = PresentationKeyNormalizer.NormalizeCharacterKey(targetKey);
+        string characterKey = PresentationKeyNormalizer.NormalizeCharacterKey(roleKey);
         return _characterToSlot.ContainsKey(characterKey);
     }
 
-    private bool TryResolveSlotKey(string targetKey, out string slotKey)
+    private bool TryResolveSlotKey(string roleKey, out string slotKey)
     {
-        slotKey = (targetKey ?? "").Trim();
+        slotKey = (roleKey ?? "").Trim();
 
         if (string.IsNullOrEmpty(slotKey))
             return false;

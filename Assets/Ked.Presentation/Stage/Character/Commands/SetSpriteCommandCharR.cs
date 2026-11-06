@@ -71,7 +71,7 @@ public sealed class SetSpriteCommandCharR : CommandBase
     {
         _resolveAttempted = true;
 
-        _rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(_stage, _spec.slotKey);
+        _rig = CharacterRigResolver.ResolveRig(_stage, _spec.roleKey);
         _image = _rig.GetImage(_spec.node);
     }
 

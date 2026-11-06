@@ -319,7 +319,7 @@ namespace Ked.Presentation.Tests
         [Test]
         public void 캐스팅된_캐릭터_키는_슬롯_키보다_먼저_풀린다()
         {
-            // 런타임 CharacterRigTargetResolver와 같은 순서 — 캐릭터 키가 이긴다.
+            // 런타임 CharacterRigResolver와 같은 순서 — 캐릭터 키가 이긴다.
             // 배경 키를 캐릭터 키와 같게 지으면 bg_* 명령이 그 캐릭터의 슬롯으로 간다(런타임은 세울 때 경고한다).
             StageState state = Fold(
                 Cmd("slot", "s1"),

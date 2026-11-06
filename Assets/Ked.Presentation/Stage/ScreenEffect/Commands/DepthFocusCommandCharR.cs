@@ -73,6 +73,6 @@ public sealed class DepthFocusCommandCharR : CommandBase
         if (_spec.clear)
             _blur.ClearFocus(_spec.duration, _spec.ease, snap);
         else
-            _blur.SetFocus(_spec.slotKey, _spec.falloff, _spec.maxBlur, _spec.duration, _spec.ease, snap);
+            _blur.SetFocus(_spec.roleKey, _spec.falloff, _spec.maxBlur, _spec.duration, _spec.ease, snap);
     }
 }

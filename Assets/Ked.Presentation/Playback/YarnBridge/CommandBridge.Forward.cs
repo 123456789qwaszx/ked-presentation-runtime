@@ -5,29 +5,29 @@ public sealed partial class YarnCommandBridge
     private void EnqueueWaitSpec(string duration = null)
         => Forward("pause", duration);
 
-    private void EnqueuePresentationActorAliasSpec(string aliasSymbol = null, string targetKey = null)
-        => Forward("actor", aliasSymbol, targetKey);
+    private void EnqueuePresentationActorAliasSpec(string aliasSymbol = null, string roleKey = null)
+        => Forward("actor", aliasSymbol, roleKey);
 
-    private void EnqueueSetupCharRigSpec(string slotKey = null, string stageKey = null, string layerKey = null)
-        => Forward("slot", slotKey, stageKey, layerKey);
+    private void EnqueueSetupCharRigSpec(string roleKey = null, string stageKey = null, string layerKey = null)
+        => Forward("slot", roleKey, stageKey, layerKey);
 
-    private void EnqueueCastCharacterSpec(string slotKey = null, string characterKey = null, string variantKey = null, string emotionKey = null)
-        => Forward("cast", slotKey, characterKey, variantKey, emotionKey);
+    private void EnqueueCastCharacterSpec(string roleKey = null, string characterKey = null, string variantKey = null, string emotionKey = null)
+        => Forward("cast", roleKey, characterKey, variantKey, emotionKey);
 
-    private void EnqueueSetPortraitPoseSpec(string slotKey = null, string variantKey = null)
-        => Forward("pose", slotKey, variantKey);
+    private void EnqueueSetPortraitPoseSpec(string roleKey = null, string variantKey = null)
+        => Forward("pose", roleKey, variantKey);
 
-    private void EnqueueSetPortraitFaceSpec(string slotKey = null, string emotionKey = null)
-        => Forward("face", slotKey, emotionKey);
+    private void EnqueueSetPortraitFaceSpec(string roleKey = null, string emotionKey = null)
+        => Forward("face", roleKey, emotionKey);
 
-    private void EnqueueSetEmotionPortraitWipeSpec(string targetKey = null, string emotion = null, string durationToken = null)
-        => Forward("face_swap", targetKey, emotion, durationToken);
+    private void EnqueueSetEmotionPortraitWipeSpec(string roleKey = null, string emotion = null, string durationToken = null)
+        => Forward("face_swap", roleKey, emotion, durationToken);
 
     private void EnqueueMirrorSetSpec(string roleKey = null, string directionToken = null)
         => Forward("mirror", roleKey, directionToken);
 
-    private void EnqueueSetAnchorOffsetSpecs(string slotKey = null, string xToken = null, string yToken = null, string durationToken = null, string easeToken = null)
-        => Forward("move_by", slotKey, xToken, yToken, durationToken, easeToken);
+    private void EnqueueSetAnchorOffsetSpecs(string roleKey = null, string xToken = null, string yToken = null, string durationToken = null, string easeToken = null)
+        => Forward("move_by", roleKey, xToken, yToken, durationToken, easeToken);
 
     private void EnqueueRotateBySpec(string roleKey = null, string degree = null, string durationToken = null, string easeToken = null)
         => Forward("rotate_by", roleKey, degree, durationToken, easeToken);
@@ -35,8 +35,8 @@ public sealed partial class YarnCommandBridge
     private void EnqueueSizeBySpec(string roleKey = null, string multiplier = null, string durationToken = null, string easeToken = null)
         => Forward("scale_by", roleKey, multiplier, durationToken, easeToken);
 
-    private void EnqueueSetPlaceResetSpecs(string slotKey = null, string durationToken = null)
-        => Forward("move_reset", slotKey, durationToken);
+    private void EnqueueSetPlaceResetSpecs(string roleKey = null, string durationToken = null)
+        => Forward("move_reset", roleKey, durationToken);
 
     private void EnqueueRotateResetSpec(string roleKey = null, string durationToken = null, string easeToken = null)
         => Forward("rotate_reset", roleKey, durationToken, easeToken);
@@ -209,8 +209,8 @@ public sealed partial class YarnCommandBridge
     private void EnqueueScreenNoiseClearSpec(string durationToken = null)
         => Forward("screen_noise_clear", durationToken);
 
-    private void EnqueueDepthFocusOnSpec(string slotKey = null, string maxBlur = null, string durationToken = null)
-        => Forward("focus_on", slotKey, maxBlur, durationToken);
+    private void EnqueueDepthFocusOnSpec(string roleKey = null, string maxBlur = null, string durationToken = null)
+        => Forward("focus_on", roleKey, maxBlur, durationToken);
 
     private void EnqueueDepthFocusClearSpec(string durationToken = null)
         => Forward("focus_clear", durationToken);

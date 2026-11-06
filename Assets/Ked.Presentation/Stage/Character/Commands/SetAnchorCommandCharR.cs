@@ -67,9 +67,9 @@ public sealed class SetAnchorCommandCharR : CommandBase
     {
         _resolveAttempted = true;
 
-        _rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(
+        _rigRefs = CharacterRigResolver.ResolveRig(
             _stage,
-            _spec.slotKey);
+            _spec.roleKey);
 
         _rect = _rigRefs.GetRect(_spec.node);
     }
@@ -83,7 +83,7 @@ public sealed class SetAnchorCommandCharR : CommandBase
         CollectResetTargets();
 
         string tuningKey =
-            CharacterRigTargetResolver.ResolveCharacterKeyFromTargetKey(_stage, _spec.slotKey);
+            CharacterRigResolver.ResolveCharacterKey(_stage, _spec.roleKey);
 
         // ── 코어: 스펙 + 튜닝 → 목표 상태 ──
         NodeTarget[] targets = NodeTargets.SetAnchor(

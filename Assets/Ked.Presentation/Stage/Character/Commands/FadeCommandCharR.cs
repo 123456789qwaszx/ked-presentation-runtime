@@ -40,7 +40,7 @@ public sealed class FadeCommandCharR : ClaimTweenCommandBase
     }
 
     protected override void ResolveTargets()
-        => _group = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(_stage, _spec.slotKey)
+        => _group = CharacterRigResolver.ResolveRig(_stage, _spec.roleKey)
             .GetRect(_spec.node)
             .GetComponent<CanvasGroup>();
 

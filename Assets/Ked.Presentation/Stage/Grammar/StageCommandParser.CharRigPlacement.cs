@@ -14,14 +14,14 @@ public sealed partial class StageCommandParser
     {
         var spec0SetAnchor = new SetAnchorCommandSpecCharR
         {
-            slotKey = roleKey,
+            roleKey = roleKey,
             resetSlotPos = true,
             resetCharacterPos = true
         };
         
         var spec1SetPortraitSprite = new SetPortraitSpriteCommandSpecCharR
         {
-            slotKey = roleKey,
+            roleKey = roleKey,
             portrait = new PortraitIdentity { emotion = ShowFaceAliasParser.Parse(faceToken) }
         };
         
@@ -30,7 +30,7 @@ public sealed partial class StageCommandParser
             node = CharacterRigNode.RigRoot,
             targetAlpha = NodeTargets.FadeInAlpha,
             
-            slotKey = roleKey,
+            roleKey = roleKey,
             duration = YarnDurationParser.Parse(durationToken)
         };
         
@@ -39,7 +39,7 @@ public sealed partial class StageCommandParser
             node = CharacterRigNode.CharacterPortraitSprite_Root,
             targetAlpha = NodeTargets.FadeInAlpha,
             
-            slotKey = roleKey,
+            roleKey = roleKey,
             duration = YarnDurationParser.Parse(durationToken)
         };
 
@@ -68,7 +68,7 @@ public sealed partial class StageCommandParser
 
         Emit(new MoveByCommandSpecCharR
         {
-            slotKey = roleKey,
+            roleKey = roleKey,
             node = node,
             useAbsolutePosition = false,
             delta = new Vector2(pixels * xSign, pixels * ySign),

@@ -4,36 +4,36 @@ using UnityEngine;
 
 public sealed partial class StageCommandParser
 {
-    private void EnqueueSetupCharRigSpec(string slotKey, string stageKey, string layerKey)
+    private void EnqueueSetupCharRigSpec(string roleKey, string stageKey, string layerKey)
         => Emit(new SetupCharRigCommandSpec
         {
-            roleKey = slotKey,
+            roleKey = roleKey,
             rigPrefab = _charRigPrefab,
 
             stage = StageKeyParser.ParseStage(stageKey),
             layerDepth = StageKeyParser.ParseLayerDepth(layerKey)
         });
 
-    private void EnqueueCastCharacterSpec(string slotKey, string characterKey, string variantKey, string emotionKey)
+    private void EnqueueCastCharacterSpec(string roleKey, string characterKey, string variantKey, string emotionKey)
     {
         var castSpec = new CastCharacterCommandSpec
         {
-            slotKey = slotKey,
+            roleKey = roleKey,
             characterKey = characterKey
         };
 
         Emit(castSpec);
 
-        EnqueueSetPortraitPoseSpec(slotKey, variantKey);
-        EnqueueSetPortraitFaceSpec(slotKey, emotionKey);
-        EnqueueSetAnchorSpecs(slotKey);
+        EnqueueSetPortraitPoseSpec(roleKey, variantKey);
+        EnqueueSetPortraitFaceSpec(roleKey, emotionKey);
+        EnqueueSetAnchorSpecs(roleKey);
     }
 
-    private void EnqueueSetAnchorSpecs(string slotKey, bool resetSlotPos = true,
+    private void EnqueueSetAnchorSpecs(string roleKey, bool resetSlotPos = true,
         bool resetCharPos = true)
         => Emit(new SetAnchorCommandSpecCharR
         {
-            slotKey = slotKey,
+            roleKey = roleKey,
             node = CharacterRigNode.CharacterPortrait_VisualOffset,
             resetSlotPos = resetSlotPos,
             resetCharacterPos = resetCharPos
@@ -42,23 +42,23 @@ public sealed partial class StageCommandParser
     private void EnqueueMirrorSetSpec(string roleKey, string directionToken)
         => Emit(new MirrorCharacterCommandSpecCharR
         {
-            slotKey = roleKey,
+            roleKey = roleKey,
             mode = CharacterMirrorModeParser.Parse(directionToken),
             node = CharacterRigNode.CharacterPortrait_ActingScale_X,
             duration = 0f,
         });
 
-    private void EnqueueSetPortraitPoseSpec(string slotKey, string variantKey)
+    private void EnqueueSetPortraitPoseSpec(string roleKey, string variantKey)
         => Emit(new SetPortraitPoseCommandSpecCharR
         {
-            slotKey = slotKey,
+            roleKey = roleKey,
             variantKey = variantKey,
         });
 
-    private void EnqueueSetPortraitFaceSpec(string slotKey, string emotionKey)
+    private void EnqueueSetPortraitFaceSpec(string roleKey, string emotionKey)
         => Emit(new SetPortraitSpriteCommandSpecCharR
         {
-            slotKey = slotKey,
+            roleKey = roleKey,
             portrait = new PortraitIdentity
             {
                 character = "",
@@ -67,13 +67,13 @@ public sealed partial class StageCommandParser
             }
         });
 
-    private void EnqueueSetAnchorOffsetSpecs(string slotKey, string xToken, string yToken, string durationToken, string easeToken)
+    private void EnqueueSetAnchorOffsetSpecs(string roleKey, string xToken, string yToken, string durationToken, string easeToken)
     {
         Ease ease = YarnEaseParser.Parse(easeToken);
 
         Emit(new MoveByCommandSpecCharR
         {
-            slotKey = slotKey,
+            roleKey = roleKey,
             node = CharacterRigNode.CharSlot_Track,
             useAbsolutePosition = false,
             delta = new Vector2(ParseSignedUnit(xToken), ParseSignedUnit(yToken)),
@@ -101,7 +101,7 @@ public sealed partial class StageCommandParser
             return;
         }
 
-        Emit(new MotionCommandSpecCharR { slotKey = roleKey, clip = clip, mode = mode });
+        Emit(new MotionCommandSpecCharR { roleKey = roleKey, clip = clip, mode = mode });
     }
 
     // ── 회전 (3a75d4f6에서 지운 것을 되살린 자리) ──────────────────
@@ -114,7 +114,7 @@ public sealed partial class StageCommandParser
 
         Emit(new RotateToCommandSpecCharR
         {
-            slotKey = roleKey,
+            roleKey = roleKey,
             node = CharacterRigNode.CharSlot_SwayPivot,
 
             toEuler = new Vector3(0f, 0f, degree),
@@ -131,7 +131,7 @@ public sealed partial class StageCommandParser
 
         Emit(new RotateToCommandSpecCharR
         {
-            slotKey = roleKey,
+            roleKey = roleKey,
             node = CharacterRigNode.CharSlot_SwayPivot,
 
             toEuler = Vector3.zero,
@@ -149,7 +149,7 @@ public sealed partial class StageCommandParser
 
         Emit(new RotateToCommandSpecCharR
         {
-            slotKey = roleKey,
+            roleKey = roleKey,
             node = CharacterRigNode.CharacterPortrait_SwayPivot,
 
             toEuler = new Vector3(0f, 0f, degree),
@@ -166,7 +166,7 @@ public sealed partial class StageCommandParser
 
         Emit(new ScaleToCommandSpecCharR
         {
-            slotKey = roleKey,
+            roleKey = roleKey,
             node = CharacterRigNode.CharSlot_Scale,
 
             toScale = new Vector2(multiplier, multiplier),
@@ -177,13 +177,13 @@ public sealed partial class StageCommandParser
         });
     }
 
-    private void EnqueueSetPlaceResetSpecs(string slotKey, string durationToken)
+    private void EnqueueSetPlaceResetSpecs(string roleKey, string durationToken)
     {
         float duration = YarnDurationParser.Parse(durationToken);
 
         var slotOffsetSpec = new MoveByCommandSpecCharR
         {
-            slotKey = slotKey,
+            roleKey = roleKey,
             node = CharacterRigNode.CharSlot_Track,
             useAbsolutePosition = true,
             delta = new Vector2(0, 0),
@@ -192,7 +192,7 @@ public sealed partial class StageCommandParser
 
         var spec2 = new MoveByCommandSpecCharR
         {
-            slotKey = slotKey,
+            roleKey = roleKey,
             node = CharacterRigNode.CharSlot_Track_Focus,
             useAbsolutePosition = true,
             delta = new Vector2(0, 0),
@@ -209,7 +209,7 @@ public sealed partial class StageCommandParser
 
         Emit(new ScaleToCommandSpecCharR
         {
-            slotKey = roleKey,
+            roleKey = roleKey,
             node = CharacterRigNode.CharSlot_Scale,
 
             toScale = new Vector2(1, 1),
@@ -222,14 +222,14 @@ public sealed partial class StageCommandParser
     private void EnqueueCharacterSiblingFrontSpec(string roleKey)
         => Emit(new SetCharacterSiblingOrderCommandSpecCharR
         {
-            slotKey = roleKey,
+            roleKey = roleKey,
             mode = CharacterRigSiblingOrderMode.Front
         });
 
     private void EnqueueCharacterSiblingBackSpec(string roleKey)
         => Emit(new SetCharacterSiblingOrderCommandSpecCharR
         {
-            slotKey = roleKey,
+            roleKey = roleKey,
             mode = CharacterRigSiblingOrderMode.Back
         });
 }

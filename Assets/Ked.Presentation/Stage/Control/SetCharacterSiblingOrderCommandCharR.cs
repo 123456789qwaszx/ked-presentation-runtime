@@ -49,9 +49,9 @@ public sealed class SetCharacterSiblingOrderCommandCharR : CommandBase
         _resolveAttempted = true;
 
         CharacterRigRefs rigRefs =
-            CharacterRigTargetResolver.ResolveCharRigFromTargetKey(
+            CharacterRigResolver.ResolveRig(
                 _stage,
-                _spec.slotKey);
+                _spec.roleKey);
 
         _rigRoot = rigRefs.RigRoot;
     }

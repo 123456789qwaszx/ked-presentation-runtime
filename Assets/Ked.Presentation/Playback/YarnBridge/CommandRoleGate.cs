@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-public sealed class CommandTargetGate
+public sealed class CommandRoleGate
 {
     private readonly PresentationStage _stage;
 
@@ -9,7 +9,7 @@ public sealed class CommandTargetGate
     private readonly HashSet<string> _pendingCharacters = new(StringComparer.Ordinal);
     private readonly HashSet<string> _pendingSlots = new(StringComparer.Ordinal);
 
-    public CommandTargetGate(PresentationStage stage)
+    public CommandRoleGate(PresentationStage stage)
     {
         _stage = stage ?? throw new ArgumentNullException(nameof(stage));
     }
@@ -28,11 +28,11 @@ public sealed class CommandTargetGate
 
         for (int i = 0; i < specs.Count; i++)
         {
-            if (TryGetTargetKey(specs[i], out string targetKey) && !CanResolve(targetKey))
+            if (TryGetRoleKey(specs[i], out string roleKey) && !CanResolve(roleKey))
             {
-                reason = string.IsNullOrEmpty(targetKey)
+                reason = string.IsNullOrEmpty(roleKey)
                     ? "대상 인자가 없다"
-                    : $"대상 '{targetKey}'를 슬롯으로 풀 수 없다 (slot/cast/actor 선행 필요)";
+                    : $"대상 '{roleKey}'를 슬롯으로 풀 수 없다 (slot/cast/actor 선행 필요)";
 
                 return false;
             }
@@ -44,7 +44,7 @@ public sealed class CommandTargetGate
         return true;
     }
 
-    private static bool TryGetTargetKey(CommandSpecBase spec, out string targetKey)
+    private static bool TryGetRoleKey(CommandSpecBase spec, out string roleKey)
     {
         switch (spec)
         {
@@ -52,19 +52,19 @@ public sealed class CommandTargetGate
                 break;
 
             case CharacterRigCommandSpecBase charRig:
-                targetKey = charRig.slotKey;
+                roleKey = charRig.roleKey;
                 return true;
 
             case CastCharacterCommandSpec cast:
-                targetKey = cast.slotKey;
+                roleKey = cast.roleKey;
                 return true;
 
             case ShotZoomFocusCommandSpec shotFocus:
-                targetKey = shotFocus.focusRoleKey;
+                roleKey = shotFocus.focusRoleKey;
                 return true;
         }
 
-        targetKey = null;
+        roleKey = null;
         return false;
     }
 
@@ -81,17 +81,17 @@ public sealed class CommandTargetGate
                 break;
 
             case SetPresentationActorAliasCommandSpec actor:
-                _pendingAliases[actor.aliasSymbol ?? ""] = actor.targetKey;
+                _pendingAliases[actor.aliasSymbol ?? ""] = actor.roleKey;
                 break;
         }
     }
 
-    private bool CanResolve(string targetKey)
+    private bool CanResolve(string roleKey)
     {
-        if (string.IsNullOrEmpty(targetKey))
+        if (string.IsNullOrEmpty(roleKey))
             return false;
 
-        string key = ResolveAlias(targetKey);
+        string key = ResolveAlias(roleKey);
 
         return _pendingCharacters.Contains(PresentationKeyNormalizer.NormalizeCharacterKey(key))
                || _pendingSlots.Contains(key)
@@ -99,14 +99,14 @@ public sealed class CommandTargetGate
                || _stage.characterRigs.TryPeekRig(key, out _);
     }
 
-    private string ResolveAlias(string targetKey)
+    private string ResolveAlias(string roleKey)
     {
-        if (_pendingAliases.TryGetValue(targetKey, out string aliased) && !string.IsNullOrEmpty(aliased))
+        if (_pendingAliases.TryGetValue(roleKey, out string aliased) && !string.IsNullOrEmpty(aliased))
             return aliased;
 
-        if (_stage.characterTargetAliases.TryPeekTarget(targetKey, out aliased) && !string.IsNullOrEmpty(aliased))
+        if (_stage.roleAliases.TryPeek(roleKey, out aliased) && !string.IsNullOrEmpty(aliased))
             return aliased;
 
-        return targetKey;
+        return roleKey;
     }
 }

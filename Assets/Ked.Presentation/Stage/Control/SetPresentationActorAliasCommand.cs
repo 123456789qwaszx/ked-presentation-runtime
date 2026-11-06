@@ -8,8 +8,8 @@ public sealed class SetPresentationActorAliasCommandSpec : CommandSpecBase
     [Header("Alias")]
     public string aliasSymbol = "@";
 
-    [Header("Target")]
-    public string targetKey;
+    [Header("Role")]
+    public string roleKey;
 }
 
 public sealed class SetPresentationActorAliasCommand : CommandBase
@@ -30,9 +30,9 @@ public sealed class SetPresentationActorAliasCommand : CommandBase
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
-        _stage.characterTargetAliases.Register(
+        _stage.roleAliases.Register(
             _spec.aliasSymbol,
-            _spec.targetKey);
+            _spec.roleKey);
         
         yield break;
     }

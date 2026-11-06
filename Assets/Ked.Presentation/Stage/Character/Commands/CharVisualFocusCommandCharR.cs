@@ -76,7 +76,7 @@ public sealed class CharVisualFocusCommandCharR : CommandBase
         _resolveAttempted = true;
 
         CharacterRigRefs rigRefs =
-            CharacterRigTargetResolver.ResolveCharRigFromTargetKey(_stage, _spec.slotKey);
+            CharacterRigResolver.ResolveRig(_stage, _spec.roleKey);
 
         _controller = rigRefs.VisualEffect;
     }

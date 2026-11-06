@@ -61,7 +61,7 @@ public sealed class SetDepthCommandCharR : ClaimTweenCommandBase
 
     protected override void ResolveTargets()
     {
-        _rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(_stage, _spec.slotKey);
+        _rig = CharacterRigResolver.ResolveRig(_stage, _spec.roleKey);
 
         _depthYRect = _rig.GetRect(_spec.depthYNode);
         _depthScaleRect = _rig.GetRect(_spec.depthScaleNode);
@@ -89,7 +89,7 @@ public sealed class SetDepthCommandCharR : ClaimTweenCommandBase
         
         CharacterDepthResolver.CalculateDepthYThatPreservesCurrentFocus(
             _stage,
-            _spec.slotKey,
+            _spec.roleKey,
             _depthYRect,
             _depthScaleRect,
             _destRawDepthY,

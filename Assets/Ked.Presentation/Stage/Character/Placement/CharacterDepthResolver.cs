@@ -64,10 +64,10 @@ public static class CharacterDepthResolver
         // 실패하면 raw Y로 떨어진다 — 크기는 바뀌고 초점만 보정 안 된다. 어느 경로든 반드시 경고한다.
         finalDepthY = rawDepthY;
 
-        CharacterRigRefs rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(stage, roleKey);
+        CharacterRigRefs rigRefs = CharacterRigResolver.ResolveRig(stage, roleKey);
         RectTransform rigSpaceRoot = rigRefs.Stage.Root;
 
-        string tuningKey = CharacterRigTargetResolver.ResolveCharacterKeyFromTargetKey(stage, roleKey);
+        string tuningKey = CharacterRigResolver.ResolveCharacterKey(stage, roleKey);
         CharacterFacing facing = CharacterFocusPointResolver.ResolveFacing(stage, roleKey);
 
         CharacterFocusPointResolver.ResolveFocusMeasureInputs(

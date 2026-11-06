@@ -37,7 +37,7 @@ public sealed class SetPortraitPoseCommandCharR : CommandBase
     private void Apply()
     {
         string resolvedSlotKey =
-            CharacterRigTargetResolver.ResolveRigKeyByPolicy(_stage, _spec.slotKey);
+            CharacterRigResolver.ResolveSlotKey(_stage, _spec.roleKey);
 
         string variantKey = string.IsNullOrWhiteSpace(_spec.variantKey)
             ? PortraitResolver.DefaultVariant

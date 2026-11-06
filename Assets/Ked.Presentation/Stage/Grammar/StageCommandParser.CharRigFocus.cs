@@ -31,7 +31,7 @@ public sealed partial class StageCommandParser
 
         Emit(new PlaceCharacterFocusCommandSpecCharR
         {
-            slotKey = roleKey,
+            roleKey = roleKey,
             focusPreset = CharacterFocusPresetParser.Parse(focus),
             screenPoint = screenPoint,
             moveNode = CharacterRigNode.CharSlot_Track_Focus,
@@ -46,7 +46,7 @@ public sealed partial class StageCommandParser
 
         Emit(new PlaceCharacterFocusCommandSpecCharR
         {
-            slotKey = roleKey,
+            roleKey = roleKey,
             focusPreset = CharacterFocusPresetParser.Parse(focus),
             screenPoint = ParseScreenPoint("place", screenPoint),
             moveNode = CharacterRigNode.CharSlot_Track_Focus,
@@ -61,7 +61,7 @@ public sealed partial class StageCommandParser
     {
         var spec = new SetDepthCommandSpecCharR
         {
-            slotKey = roleKey,
+            roleKey = roleKey,
             duration = YarnDurationParser.Parse(durationToken),
         };
 
@@ -109,7 +109,7 @@ public sealed partial class StageCommandParser
 
         Emit(new SetDepthCommandSpecCharR
         {
-            slotKey = roleKey,
+            roleKey = roleKey,
             preset = CharacterDepthKey.Mid,
             useLevel = false,
             duration = duration,

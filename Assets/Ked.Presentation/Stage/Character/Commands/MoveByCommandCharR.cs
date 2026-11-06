@@ -50,7 +50,7 @@ public sealed class MoveByCommandCharR : ClaimTweenCommandBase
 
     protected override void ResolveTargets()
     {
-        _rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(_stage, _spec.slotKey);
+        _rig = CharacterRigResolver.ResolveRig(_stage, _spec.roleKey);
         _rect = _rig.GetRect(_spec.node);
     }
 

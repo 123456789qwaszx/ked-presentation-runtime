@@ -8,7 +8,7 @@ public sealed partial class YarnCommandBridge
 {
     private readonly YarnPlaybackDriver _playbackDriver;
     private readonly StageCommandParser _parser;
-    private readonly CommandTargetGate _targetGate;
+    private readonly CommandRoleGate _roleGate;
     private readonly DialogueBoxPresentationController _dialogueBoxPresentation;
 
     // Forward가 쓰는 스크래치 — 커맨드 하나가 스펙 여럿을 낳는다(show·cast·bg_spawn).
@@ -23,7 +23,7 @@ public sealed partial class YarnCommandBridge
     {
         _playbackDriver = playbackDriver;
         _parser = parser;
-        _targetGate = new CommandTargetGate(stage);
+        _roleGate = new CommandRoleGate(stage);
         _dialogueBoxPresentation = dialogueBoxPresentation;
 
         BindRunnerCommands(runner);
@@ -337,7 +337,7 @@ public sealed partial class YarnCommandBridge
             return;
         }
 
-        if (!_targetGate.TryAccept(_playbackDriver.Collected, _parsed, out string reason))
+        if (!_roleGate.TryAccept(_playbackDriver.Collected, _parsed, out string reason))
         {
             Debug.LogError($"[YarnCommandBridge] {AuthoredText(commandName, args)} — {reason}. 실행하지 않는다.");
             return;

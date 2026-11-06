@@ -121,7 +121,7 @@ public sealed class MotionCommandCharR : CommandBase
             return;
 
         _resolved = true;
-        _rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(_stage, _spec.slotKey);
+        _rigRefs = CharacterRigResolver.ResolveRig(_stage, _spec.roleKey);
 
         foreach (MotionChannel channel in _spec.clip.Channels)
         {

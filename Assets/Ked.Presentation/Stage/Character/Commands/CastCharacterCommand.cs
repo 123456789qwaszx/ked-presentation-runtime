@@ -6,11 +6,11 @@ using UnityEngine;
 public sealed class CastCharacterCommandSpec : CommandSpecBase
 {
     [Header("Slot / Role")]
-    [Tooltip("캐릭터를 바인딩할 slotKey / roleKey.")]
-    public string slotKey;
+    [Tooltip("캐릭터를 바인딩할 역할(슬롯) 키.")]
+    public string roleKey;
 
     [Header("Character Identity")]
-    [Tooltip("이 slotKey에 바인딩할 캐릭터 키.")]
+    [Tooltip("이 역할에 바인딩할 캐릭터 키.")]
     public string characterKey;
 }
 public sealed class CastCharacterCommand : CommandBase
@@ -28,7 +28,7 @@ public sealed class CastCharacterCommand : CommandBase
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
-        _stage.castRegistry.CastCharRig(_spec.slotKey, _spec.characterKey);
+        _stage.castRegistry.CastCharRig(_spec.roleKey, _spec.characterKey);
         yield break;
     }
 }

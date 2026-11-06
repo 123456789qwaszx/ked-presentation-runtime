@@ -236,7 +236,7 @@ public class StageCommandParserTests
         List<CommandSpecBase> specs = Parse(parser, Cmd("motion", "c1", "nod"));
         MotionCommandSpecCharR spec = (MotionCommandSpecCharR)specs[0];
 
-        Assert.AreEqual("c1", spec.slotKey);
+        Assert.AreEqual("c1", spec.roleKey);
         Assert.AreEqual("nod", spec.clip.Name);
         Assert.AreEqual(0.6f, spec.clip.Duration, 0f);
         Assert.AreEqual(MotionChannelMode.Relative, spec.mode, "생략한 mode는 relative");
@@ -268,7 +268,7 @@ public class StageCommandParserTests
         Assert.IsTrue(setup.asBackground, "배역 있는 슬롯을 덮으면 배역을 푸는 경로");
 
         SetSpriteCommandSpecCharR sprite = (SetSpriteCommandSpecCharR)specs[1];
-        Assert.AreEqual("bg_main", sprite.slotKey);
+        Assert.AreEqual("bg_main", sprite.roleKey);
         Assert.AreEqual(CharacterRigNode.CharacterPortraitSprite_Image, sprite.node);
         Assert.AreEqual(ResourcesSpriteResolver.BackgroundsRoot, sprite.resourcesRoot);
         Assert.AreEqual("class_day", sprite.spriteKey);

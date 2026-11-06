@@ -84,7 +84,7 @@ public sealed class SetupCharRigCommand : CommandBase
         }
 
         // 슬롯 키가 캐스팅된 캐릭터 키와 같으면, 그 키로 부르는 명령은 캐릭터 쪽 슬롯으로 풀린다
-        // (CharacterRigTargetResolver — 캐릭터 키가 먼저). 이 리그에는 닿지 않는다. 조용히 두지 않는다.
+        // (CharacterRigResolver — 캐릭터 키가 먼저). 이 리그에는 닿지 않는다. 조용히 두지 않는다.
         if (_stage.castRegistry.TryGetSlotKey(rigKey, out string characterSlot) &&
             !string.Equals(characterSlot, rigKey, StringComparison.Ordinal))
         {

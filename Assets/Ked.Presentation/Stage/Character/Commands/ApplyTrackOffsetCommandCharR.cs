@@ -70,7 +70,7 @@ public sealed class ApplyTrackOffsetCommandCharR : CommandBase
     {
         _resolveAttempted = true;
         
-        _rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(_stage, _spec.slotKey);
+        _rigRefs = CharacterRigResolver.ResolveRig(_stage, _spec.roleKey);
         _rect = _rigRefs.GetRect(_spec.node);
     }
 

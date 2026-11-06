@@ -55,7 +55,7 @@ public sealed class SetPortraitSpriteCommandCharR : CommandBase
 
     private void Apply()
     {
-        Sprite sprite = _resolver.Resolve(_stage, _spec.slotKey, _spec.portrait, nameof(SetPortraitSpriteCommandCharR));
+        Sprite sprite = _resolver.Resolve(_stage, _spec.roleKey, _spec.portrait, nameof(SetPortraitSpriteCommandCharR));
 
         // 밑장에 쓰기 전에 진행 중인 face_swap을 완주시킨다 — 나중 쓰기가 이긴다.
         if (_spec.node == CharacterRigNode.CharacterPortraitSprite_Image)
@@ -69,7 +69,7 @@ public sealed class SetPortraitSpriteCommandCharR : CommandBase
     {
         _resolveAttempted = true;
 
-        _rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(_stage, _spec.slotKey);
+        _rig = CharacterRigResolver.ResolveRig(_stage, _spec.roleKey);
         _image = _rig.GetImage(_spec.node);
     }
 }

@@ -61,7 +61,7 @@ public sealed class PlaceCharacterFocusCommandCharR : ClaimTweenCommandBase
 
     protected override void ResolveTargets()
     {
-        _rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(_stage, _spec.slotKey);
+        _rig = CharacterRigResolver.ResolveRig(_stage, _spec.roleKey);
         _moveRect = _rig.GetRect(_spec.moveNode);
     }
 
@@ -71,7 +71,7 @@ public sealed class PlaceCharacterFocusCommandCharR : ClaimTweenCommandBase
 
         _destination = CharacterFocusPlacementSolver.CalculateFocusPlacement(
             _stage,
-            _spec.slotKey,
+            _spec.roleKey,
             _moveRect,
             _spec.focusPreset,
             _spec.focusOffset,

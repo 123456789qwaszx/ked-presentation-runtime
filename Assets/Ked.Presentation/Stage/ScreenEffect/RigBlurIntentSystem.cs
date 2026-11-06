@@ -20,7 +20,7 @@ public sealed class RigBlurIntentSystem
 
     // 초점 의도. 대상 키는 줄마다 다시 푼다 — 배역 키면 슬롯을 옮겨도 따라간다.
     private bool _hasFocus;
-    private string _focusTargetKey;
+    private string _focusRoleKey;
     private float _focusFalloff;
     private float _focusMaxBlur;
     private float _focusDuration = 0.4f;
@@ -46,10 +46,10 @@ public sealed class RigBlurIntentSystem
     public bool IsFocusTransitioning => AnyTransitioning(focus: true);
     public bool IsLayerTransitioning => AnyTransitioning(focus: false);
 
-    public void SetFocus(string targetKey, float falloff, float maxBlur, float duration, Ease ease, bool snap)
+    public void SetFocus(string roleKey, float falloff, float maxBlur, float duration, Ease ease, bool snap)
     {
         _hasFocus = true;
-        _focusTargetKey = targetKey;
+        _focusRoleKey = roleKey;
         _focusFalloff = falloff;
         _focusMaxBlur = maxBlur;
         _focusDuration = duration;
@@ -57,7 +57,7 @@ public sealed class RigBlurIntentSystem
 
         if (!TryResolveFocusScale(out _))
             Debug.LogWarning(
-                $"[RigBlurIntentSystem] Focus character not found. target='{targetKey}'. " +
+                $"[RigBlurIntentSystem] Focus character not found. role='{roleKey}'. " +
                 "초점면을 정할 수 없어 리그가 나타날 때까지 초점 블러를 바꾸지 않는다.");
 
         Apply(snap);
@@ -66,7 +66,7 @@ public sealed class RigBlurIntentSystem
     public void ClearFocus(float duration, Ease ease, bool snap)
     {
         _hasFocus = false;
-        _focusTargetKey = null;
+        _focusRoleKey = null;
         _focusDuration = duration;
         _focusEase = ease;
 
@@ -123,7 +123,7 @@ public sealed class RigBlurIntentSystem
     public void Clear()
     {
         _hasFocus = false;
-        _focusTargetKey = null;
+        _focusRoleKey = null;
         _layerBlur.Clear();
         _seen.Clear();
         _alive.Clear();
@@ -174,10 +174,10 @@ public sealed class RigBlurIntentSystem
     {
         focusScale = 0f;
 
-        if (string.IsNullOrEmpty(_focusTargetKey))
+        if (string.IsNullOrEmpty(_focusRoleKey))
             return false;
 
-        string rigKey = CharacterRigTargetResolver.ResolveRigKeyByPolicy(_stage, _focusTargetKey);
+        string rigKey = CharacterRigResolver.ResolveSlotKey(_stage, _focusRoleKey);
 
         if (!_stage.characterRigs.TryPeekRig(rigKey, out CharacterRigRefs focusRig) || focusRig?.RigRoot == null)
             return false;
