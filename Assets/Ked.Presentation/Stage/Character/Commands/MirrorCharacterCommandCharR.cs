@@ -92,7 +92,7 @@ public sealed class MirrorCharacterCommandCharR : ClaimTweenCommandBase
     {
         _rect.DOKill(true);
 
-        _rig.PlacementTargets.Claim(_rect, StageNodeClaim.LocalScaleXY(_rect.name, new Vec2(_targetScale.x, _targetScale.y)), Releases);
+        _rig.PlacementTargets.Reserve(_rect, NodeTarget.LocalScaleXY(_rect.name, new Vec2(_targetScale.x, _targetScale.y)), Releases);
     }
 
     protected override Tween CreateTween(float duration)

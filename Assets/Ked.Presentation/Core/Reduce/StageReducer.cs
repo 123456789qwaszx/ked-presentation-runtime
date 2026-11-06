@@ -40,7 +40,7 @@ namespace Ked.Presentation.Core
         public PortraitDimensionsFileDto PortraitDimensions;
 
         /// <summary>
-        /// motions.json — 이름 → 클립(검증된 것만). motion 폴드가 채널마다 마지막 키를 클레임으로 접는다.
+        /// motions.json — 이름 → 클립(검증된 것만). motion 폴드가 채널마다 마지막 키를 타깃으로 접는다.
         /// 없으면(null) motion 커맨드는 Unhandled — 재생이 모션을 읽었다면 폴드도 같은 파일을 받아야 한다.
         /// </summary>
         public IReadOnlyDictionary<string, MotionClip> Motions;
@@ -202,7 +202,7 @@ namespace Ked.Presentation.Core
                 case "char_scale_to":  return ApplyPortraitScaleTo(state, cmd, out reason);
                 case "char_rotate_to": return ApplyPortraitRotateTo(state, cmd, out reason);
 
-                // motion — 채널마다 마지막 키가 클레임이다. 샘플링하지 않는다(MotionMath.ClaimFor).
+                // motion — 채널마다 마지막 키가 타깃이다. 샘플링하지 않는다(MotionMath.TargetFor).
                 case "motion": return ApplyMotion(state, cmd, tuning, out reason);
 
                 // shot

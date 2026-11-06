@@ -1,6 +1,6 @@
 namespace Ked.Presentation.Core
 {
-    // 샷 축의 목표는 노드 클레임이 아니라 ShotIntentState 그 자체.
+    // 샷 축의 목표는 노드 타깃이 아니라 ShotIntentState 그 자체.
     // 의도를 실제 트랜스폼으로 푸는 것(카메라 루트·response 바인딩)은 적용측의 일.
 
     // shot_zoom - zoom만 바꾼다.

@@ -51,15 +51,15 @@ namespace Ked.Presentation.Core
                 tuning.RoleAnchors.TryGet(characterKey, out anchorTuning);
             }
 
-            StageNodeClaim[] claims = SetAnchorReduction.Reduce(
+            NodeTarget[] targets = SetAnchorReduction.Reduce(
                 StageState.NodeKeyOf(slotKey, "CharacterPortrait_VisualOffset"),
                 anchorTuning,
                 Prefixed(slotKey, ShowResetPositionIds),
                 Prefixed(slotKey, ShowResetEulerIds),
                 Prefixed(slotKey, ShowResetScaleIds));
 
-            foreach (StageNodeClaim claim in claims)
-                state.Apply(claim);
+            foreach (NodeTarget target in targets)
+                state.Apply(target);
 
             // 초상 사이징. faceToken의 기본값은 "e1"(생략된 인자)이고,
             // **명시적으로 빈 토큰은 "2"다** — 다른 규칙이라 별칭 파서가 나눠 본다.

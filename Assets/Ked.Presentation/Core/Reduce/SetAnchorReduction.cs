@@ -32,11 +32,11 @@ namespace Ked.Presentation.Core
         public const float MinVisualScale = 0.0001f;
 
         /// <summary>
-        /// 클레임 순서: 위치 리셋들 → 회전 리셋들 → 스케일 리셋들 → 앵커 위치 → 앵커 스케일.
+        /// 타깃 순서: 위치 리셋들 → 회전 리셋들 → 스케일 리셋들 → 앵커 위치 → 앵커 스케일.
         /// 호스트 어댑터는 같은 순서로 rect 목록을 만들어 zip으로 적용한다 —
         /// 순서를 바꾸면 조용히 엉뚱한 노드에 값이 들어간다.
         /// </summary>
-        public static StageNodeClaim[] Reduce(
+        public static NodeTarget[] Reduce(
             string anchorNodeKey,
             in RoleAnchorTuning tuning,
             IReadOnlyList<string> resetPositionKeys,
@@ -52,24 +52,24 @@ namespace Ked.Presentation.Core
 
             float visualScale = Math.Max(MinVisualScale, tuning.VisualScale);
 
-            StageNodeClaim[] claims = new StageNodeClaim[
+            NodeTarget[] targets = new NodeTarget[
                 resetPositionKeys.Count + resetEulerKeys.Count + resetScaleKeys.Count + 2];
 
             int i = 0;
 
             for (int k = 0; k < resetPositionKeys.Count; k++)
-                claims[i++] = StageNodeClaim.AnchoredPosition(resetPositionKeys[k], Vec2.Zero);
+                targets[i++] = NodeTarget.AnchoredPosition(resetPositionKeys[k], Vec2.Zero);
 
             for (int k = 0; k < resetEulerKeys.Count; k++)
-                claims[i++] = StageNodeClaim.LocalEuler(resetEulerKeys[k], Vec3.Zero);
+                targets[i++] = NodeTarget.LocalEuler(resetEulerKeys[k], Vec3.Zero);
 
             for (int k = 0; k < resetScaleKeys.Count; k++)
-                claims[i++] = StageNodeClaim.LocalScaleXY(resetScaleKeys[k], Vec2.One);
+                targets[i++] = NodeTarget.LocalScaleXY(resetScaleKeys[k], Vec2.One);
 
-            claims[i++] = StageNodeClaim.AnchoredPosition(anchorNodeKey, tuning.Offset);
-            claims[i] = StageNodeClaim.LocalScaleXY(anchorNodeKey, new Vec2(visualScale, visualScale));
+            targets[i++] = NodeTarget.AnchoredPosition(anchorNodeKey, tuning.Offset);
+            targets[i] = NodeTarget.LocalScaleXY(anchorNodeKey, new Vec2(visualScale, visualScale));
 
-            return claims;
+            return targets;
         }
     }
 
@@ -77,16 +77,16 @@ namespace Ked.Presentation.Core
     {
         public const float TargetAlpha = 1f;
 
-        public static StageNodeClaim Reduce(string nodeKey)
-            => StageNodeClaim.CanvasAlpha(nodeKey, TargetAlpha);
+        public static NodeTarget Reduce(string nodeKey)
+            => NodeTarget.CanvasAlpha(nodeKey, TargetAlpha);
     }
 
     public static class FadeOutReduction
     {
         public const float TargetAlpha = 0f;
 
-        public static StageNodeClaim Reduce(string nodeKey)
-            => StageNodeClaim.CanvasAlpha(nodeKey, TargetAlpha);
+        public static NodeTarget Reduce(string nodeKey)
+            => NodeTarget.CanvasAlpha(nodeKey, TargetAlpha);
     }
 
     /// <summary>
@@ -98,7 +98,7 @@ namespace Ked.Presentation.Core
         public static float TargetAlpha(float alpha)
             => alpha < 0f ? 0f : alpha > 1f ? 1f : alpha;
 
-        public static StageNodeClaim Reduce(string nodeKey, float alpha)
-            => StageNodeClaim.CanvasAlpha(nodeKey, TargetAlpha(alpha));
+        public static NodeTarget Reduce(string nodeKey, float alpha)
+            => NodeTarget.CanvasAlpha(nodeKey, TargetAlpha(alpha));
     }
 }

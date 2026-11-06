@@ -100,10 +100,10 @@ namespace Ked.Presentation.Core
             string focusPresetName,
             string screenPointName,
             FocusTuningBodyDto focusTuning,
-            out StageNodeClaim claim,
+            out NodeTarget target,
             out string reason)
         {
-            claim = default;
+            target = default;
 
             if (!ScreenPointRatios.TryResolve(state.Nodes.RootSpace.Size, screenPointName, out Vec2 desired))
             {
@@ -135,7 +135,7 @@ namespace Ked.Presentation.Core
                 desired,
                 state.Nodes.GetState(moveKey).AnchoredPosition);
 
-            claim = StageNodeClaim.AnchoredPosition(moveKey, solved);
+            target = NodeTarget.AnchoredPosition(moveKey, solved);
             reason = null;
             return true;
         }
@@ -164,12 +164,12 @@ namespace Ked.Presentation.Core
             string preserveFocusToken,
             DepthLevelTuningDto depthLevel,
             FocusTuningBodyDto focusTuning,
-            out StageNodeClaim depthYClaim,
-            out StageNodeClaim depthScaleClaim,
+            out NodeTarget depthYTarget,
+            out NodeTarget depthScaleTarget,
             out string reason)
         {
-            depthYClaim = default;
-            depthScaleClaim = default;
+            depthYTarget = default;
+            depthScaleTarget = default;
 
             // 깊이의 진실은 level 커브 하나다. 토큰은 숫자이거나 라벨이고,
             // 라벨은 커브 위에서 쓸 수치를 고르는 이름표일 뿐이다(DepthLevelLabels).
@@ -229,8 +229,8 @@ namespace Ked.Presentation.Core
                 rawDepthY,
                 targetScale);
 
-            depthYClaim = StageNodeClaim.AnchoredPosition(depthYKey, solvedDepthY);
-            depthScaleClaim = StageNodeClaim.LocalScaleXY(depthScaleKey, targetScale);
+            depthYTarget = NodeTarget.AnchoredPosition(depthYKey, solvedDepthY);
+            depthScaleTarget = NodeTarget.LocalScaleXY(depthScaleKey, targetScale);
             reason = null;
             return true;
         }

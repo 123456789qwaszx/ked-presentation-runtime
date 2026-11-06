@@ -741,7 +741,7 @@ namespace Ked.Presentation.Tests
         [Test]
         public void 폴드_중_예외는_기록이_되고_이전_상태는_무사하다()
         {
-            // VisualOffset이 없는 손상 리그: show의 앵커 클레임이 트리에서 터진다.
+            // VisualOffset이 없는 손상 리그: show의 앵커 타깃이 트리에서 터진다.
             StageReducerTuning tuning = NewTuning();
             tuning.RigSchemas.rigs[0].nodes.RemoveAll(n => n.id == "CharacterPortrait_VisualOffset");
             tuning.RigSchemas.rigs[0].nodes.RemoveAll(n => n.parent == "CharacterPortrait_VisualOffset");
@@ -774,7 +774,7 @@ namespace Ked.Presentation.Tests
                 Is.EqualTo(-PixelsPerUnit).Within(Eps));
         }
 
-        // ── motion — 채널마다 마지막 키가 클레임 ─────────────────────
+        // ── motion — 채널마다 마지막 키가 타깃 ─────────────────────
 
         private static MotionChannel MotionChannelOf(
             string node, MotionChannelKind kind, float duration,

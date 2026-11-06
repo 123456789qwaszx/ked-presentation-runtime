@@ -63,19 +63,19 @@ public sealed class ScaleToCommandCharR : ClaimTweenCommandBase
         Vector3 currentScale = _rect.localScale;
         _startScale = new Vector2(currentScale.x, currentScale.y);
 
-        // ── 코어: 스펙 → 목표 상태. z는 클레임이 건드리지 않는다 (라이브 z 유지 규약) ──
-        StageNodeClaim claim = ScaleToReduction.Reduce(
+        // ── 코어: 스펙 → 목표 상태. z는 타깃이 건드리지 않는다 (라이브 z 유지 규약) ──
+        NodeTarget target = ScaleToReduction.Reduce(
             _rect.name,
             new ScaleToReduction.Args(_spec.relativeToCurrent, _spec.toScale.ToCore()),
             _startScale.ToCore());
 
-        _targetScale = claim.Value.XY.ToUnity();
+        _targetScale = target.Value.XY.ToUnity();
 
         _endScale = currentScale;
         _endScale.x = _targetScale.x;
         _endScale.y = _targetScale.y;
 
-        _rig.PlacementTargets.Claim(_rect, claim, Releases);
+        _rig.PlacementTargets.Reserve(_rect, target, Releases);
     }
 
     protected override Tween CreateTween(float duration)

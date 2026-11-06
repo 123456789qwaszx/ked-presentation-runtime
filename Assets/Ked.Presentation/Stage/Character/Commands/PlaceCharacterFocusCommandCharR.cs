@@ -79,7 +79,7 @@ public sealed class PlaceCharacterFocusCommandCharR : ClaimTweenCommandBase
             _spec.screenPoint,
             _spec.screenOffset);
 
-        _rig.PlacementTargets.Claim(_moveRect, StageNodeClaim.AnchoredPosition(_moveRect.name, _destination.ToCore()), Releases);
+        _rig.PlacementTargets.Reserve(_moveRect, NodeTarget.AnchoredPosition(_moveRect.name, _destination.ToCore()), Releases);
     }
 
     protected override Tween CreateTween(float duration)

@@ -235,7 +235,7 @@ namespace Ked.Presentation.Tests.UnityParity
             // 같은 줄의 size가 깊이 크기를 예약한 상태 — 예약은 끝값으로, 카메라는 중립으로.
             CharacterPlacementTargetLedger ledger = new();
             RectTransform depthScale = _refs.GetRect(CharacterRigTarget.CharSlot_DepthScale);
-            ledger.Publish(depthScale, StageNodeClaim.LocalScaleXY(depthScale.name, new Vector2(1.58f, 1.58f).ToCore()));
+            ledger.Publish(depthScale, NodeTarget.LocalScaleXY(depthScale.name, new Vector2(1.58f, 1.58f).ToCore()));
 
             Vector2 atNeutralCamera = SolvePlace(ledger, _refs, _shotRoot, _view);
 
@@ -263,7 +263,7 @@ namespace Ked.Presentation.Tests.UnityParity
             Vector2 expected = SolvePlace(new CharacterPlacementTargetLedger(), _refs, _shotRoot, _view);
 
             CharacterPlacementTargetLedger ledger = new();
-            ledger.Publish(track, StageNodeClaim.AnchoredPosition(track.name, settled.ToCore()));
+            ledger.Publish(track, NodeTarget.AnchoredPosition(track.name, settled.ToCore()));
             track.anchoredPosition = settled + new Vector2(-960f, 0f);
 
             Vector2 actual = SolvePlace(ledger, _refs, _shotRoot, _view);
@@ -288,7 +288,7 @@ namespace Ked.Presentation.Tests.UnityParity
             Vector2 expected = SolvePlace(new CharacterPlacementTargetLedger(), _refs, _shotRoot, _view);
 
             CharacterPlacementTargetLedger ledger = new();
-            ledger.Publish(sway, StageNodeClaim.LocalEuler(sway.name, endEuler.ToCore()));
+            ledger.Publish(sway, NodeTarget.LocalEuler(sway.name, endEuler.ToCore()));
             sway.localEulerAngles = new Vector3(0f, 0f, 8f);
 
             Vector2 actual = SolvePlace(ledger, _refs, _shotRoot, _view);

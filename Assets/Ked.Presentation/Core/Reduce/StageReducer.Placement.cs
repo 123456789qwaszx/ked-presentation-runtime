@@ -25,12 +25,12 @@ namespace Ked.Presentation.Core
 
             if (!PlaceFocusStageReduction.TryReduce(
                     state, slotKey, characterKey, focusName, screenPointName,
-                    tuning.FocusTuning, out StageNodeClaim claim, out reason))
+                    tuning.FocusTuning, out NodeTarget target, out reason))
             {
                 return false;
             }
 
-            state.Apply(claim);
+            state.Apply(target);
             return true;
         }
 
@@ -46,14 +46,14 @@ namespace Ked.Presentation.Core
             if (!SetDepthStageReduction.TryReduce(
                     state, slotKey, characterKey, depthPresetKey, preserveFocusToken,
                     tuning.DepthLevel, tuning.FocusTuning,
-                    out StageNodeClaim depthYClaim, out StageNodeClaim depthScaleClaim,
+                    out NodeTarget depthYTarget, out NodeTarget depthScaleTarget,
                     out reason))
             {
                 return false;
             }
 
-            state.Apply(depthYClaim);
-            state.Apply(depthScaleClaim);
+            state.Apply(depthYTarget);
+            state.Apply(depthScaleTarget);
             return true;
         }
     }

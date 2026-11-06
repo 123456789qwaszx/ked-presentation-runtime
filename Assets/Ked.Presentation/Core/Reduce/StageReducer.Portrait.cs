@@ -49,12 +49,12 @@ namespace Ked.Presentation.Core
         {
             if (!PortraitSizingStageReduction.TryReduce(
                     state, slotKey, emotionKey, tuning.PortraitDimensions,
-                    out StageNodeClaim claim, out reason))
+                    out NodeTarget target, out reason))
             {
                 return false;
             }
 
-            state.Apply(claim);
+            state.Apply(target);
             return true;
         }
     }

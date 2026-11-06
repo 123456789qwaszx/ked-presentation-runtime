@@ -217,7 +217,7 @@ namespace Ked.Presentation.Tests.UnityParity
             _ => throw new ArgumentOutOfRangeException(nameof(token), token, "poses.json: 모르는 kind"),
         };
 
-        /// <summary>채널 종류가 노드 상태의 어느 자리인가 — MotionMath.StartOf·ClaimFor와 같은 대응(배율 z는 노드 것을 지킨다).</summary>
+        /// <summary>채널 종류가 노드 상태의 어느 자리인가 — MotionMath.StartOf·TargetFor와 같은 대응(배율 z는 노드 것을 지킨다).</summary>
         private static RectNodeState WithValue(MotionChannelKind kind, in RectNodeState state, Vec3 value) => kind switch
         {
             MotionChannelKind.Position => state.WithAnchoredPosition(value.XY),

@@ -15,12 +15,12 @@ namespace Ked.Presentation.Core
     /// </summary>
     public static class PortraitSizingReduction
     {
-        public static StageNodeClaim Reduce(string imageNodeKey, float parentHeight, float aspect)
-            => StageNodeClaim.SizeDelta(imageNodeKey, new Vec2(parentHeight * aspect, 0f));
+        public static NodeTarget Reduce(string imageNodeKey, float parentHeight, float aspect)
+            => NodeTarget.SizeDelta(imageNodeKey, new Vec2(parentHeight * aspect, 0f));
     }
 
     /// <summary>
-    /// 무대 상태에서 초상 사이징 클레임 하나를 뽑는다 —
+    /// 무대 상태에서 초상 사이징 타깃 하나를 뽑는다 —
     /// 부모 높이는 리그 트리에서, 종횡비는 초상 치수 덤프에서 온다.
     /// </summary>
     public static class PortraitSizingStageReduction
@@ -33,10 +33,10 @@ namespace Ked.Presentation.Core
             string slotKey,
             string emotionKey,
             PortraitDimensionsFileDto dimensions,
-            out StageNodeClaim claim,
+            out NodeTarget target,
             out string reason)
         {
-            claim = default;
+            target = default;
 
             if (dimensions == null)
             {
@@ -60,7 +60,7 @@ namespace Ked.Presentation.Core
                 .GetRectSize(StageState.NodeKeyOf(slotKey, ParentNodeId))
                 .Y;
 
-            claim = PortraitSizingReduction.Reduce(
+            target = PortraitSizingReduction.Reduce(
                 StageState.NodeKeyOf(slotKey, ImageNodeId),
                 parentHeight,
                 aspect);

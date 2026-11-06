@@ -86,27 +86,27 @@ public sealed class SetAnchorCommandCharR : CommandBase
             CharacterRigTargetResolver.ResolveCharacterKeyFromTargetKey(_stage, _spec.slotKey);
 
         // ── 코어: 스펙 + 튜닝 → 목표 상태 ──
-        StageNodeClaim[] claims = SetAnchorReduction.Reduce(
+        NodeTarget[] targets = SetAnchorReduction.Reduce(
             _rect.name,
             ResolveRoleAnchorTuning(tuningKey),
             NamesOf(_resetPositionRects),
             NamesOf(_resetEulerRects),
             NamesOf(_resetScaleRects));
 
-        // ── 호스트: 클레임을 같은 순서로 rect에 적용 ──
+        // ── 호스트: 타깃을 같은 순서로 rect에 적용 ──
         int i = 0;
 
         foreach (RectTransform rect in _resetPositionRects)
-            ApplyClaim(rect, claims[i++]);
+            ApplyTarget(rect, targets[i++]);
 
         foreach (RectTransform rect in _resetEulerRects)
-            ApplyClaim(rect, claims[i++]);
+            ApplyTarget(rect, targets[i++]);
 
         foreach (RectTransform rect in _resetScaleRects)
-            ApplyClaim(rect, claims[i++]);
+            ApplyTarget(rect, targets[i++]);
 
-        ApplyClaim(_rect, claims[i++]);   // 앵커 위치
-        ApplyClaim(_rect, claims[i]);     // 앵커 스케일
+        ApplyTarget(_rect, targets[i++]);   // 앵커 위치
+        ApplyTarget(_rect, targets[i]);     // 앵커 스케일
 
         // 즉시 적용이므로 Publish하지 않는다.
         // live transform이 이미 settled target.
@@ -114,7 +114,7 @@ public sealed class SetAnchorCommandCharR : CommandBase
     }
 
     /// <summary>
-    /// 리셋 대상을 축별로 모은다. 순서가 리덕션의 클레임 순서와 대응하므로 바꾸지 말 것.
+    /// 리셋 대상을 축별로 모은다. 순서가 리덕션의 타깃 순서와 대응하므로 바꾸지 말 것.
     /// </summary>
     private void CollectResetTargets()
     {
@@ -163,29 +163,29 @@ public sealed class SetAnchorCommandCharR : CommandBase
         return SetAnchorReduction.RoleAnchorTuning.Default;
     }
 
-    private void ApplyClaim(RectTransform rect, in StageNodeClaim claim)
+    private void ApplyTarget(RectTransform rect, in NodeTarget target)
     {
         KillTweenAndClearPlacementTarget(rect);
 
-        switch (claim.Kind)
+        switch (target.Kind)
         {
-            case StageNodeClaimKind.AnchoredPosition:
-                rect.anchoredPosition = claim.Value.XY.ToUnity();
+            case NodeTargetKind.AnchoredPosition:
+                rect.anchoredPosition = target.Value.XY.ToUnity();
                 break;
 
-            case StageNodeClaimKind.LocalEulerAngles:
-                rect.localEulerAngles = claim.Value.ToUnity();
+            case NodeTargetKind.LocalEulerAngles:
+                rect.localEulerAngles = target.Value.ToUnity();
                 break;
 
-            case StageNodeClaimKind.LocalScaleXY:
-                // z는 1로 확정한다 — 클레임의 z 보존 규약(트윈 종점용)과 다르다.
+            case NodeTargetKind.LocalScaleXY:
+                // z는 1로 확정한다 — 타깃의 z 보존 규약(트윈 종점용)과 다르다.
                 // set_anchor는 리셋 커맨드라 "알려진 상태로 되돌린다"가 종전 동작이다.
-                rect.localScale = new Vector3(claim.Value.X, claim.Value.Y, 1f);
+                rect.localScale = new Vector3(target.Value.X, target.Value.Y, 1f);
                 break;
 
             default:
                 throw new InvalidOperationException(
-                    $"[SetAnchorCommandCharR] set_anchor가 낼 수 없는 클레임 종류: {claim.Kind}");
+                    $"[SetAnchorCommandCharR] set_anchor가 낼 수 없는 타깃 종류: {target.Kind}");
         }
     }
 

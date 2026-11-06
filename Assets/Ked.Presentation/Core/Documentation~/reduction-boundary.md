@@ -11,7 +11,7 @@
 | | 어디 | 왜 |
 |---|---|---|
 | 스펙 → 목표 상태 변환 (`XxxReduction.Reduce`) | **코어** | 정지 프레임이 필요한 전부. 순수 산수다 |
-| 출력 타입 (`StageNodeClaim`) | **코어** | 게시·트윈 종점·폴드가 같은 값을 봐야 한다 |
+| 출력 타입 (`NodeTarget`) | **코어** | 게시·트윈 종점·폴드가 같은 값을 봐야 한다 |
 | `CommandBase` · 코루틴 · `WaitForCompletion` | 호스트 | MonoBehaviour 호스트를 문다 |
 | `ResolveRefs` (slotKey → RectTransform) | 호스트 | 유니티 참조 해석이다 |
 | `DOKill` · 트윈 생성/가속 (`OnStepLifetimeFinished`) | 호스트 | 시간의 세계다 |
@@ -24,7 +24,7 @@
 public static class XxxReduction            // 커맨드당 하나, Reduce/ 폴더
 {
     public readonly struct Args { ... }     // 파싱된 스펙 값만. UnityEngine 타입 금지
-    public static StageNodeClaim Reduce(    // 순수 함수
+    public static NodeTarget Reduce(    // 순수 함수
         string nodeKey,                     // 논리 노드 키
         in Args args,
         /* 필요한 현재 상태를 명시적 인자로 */ ...);
@@ -33,8 +33,8 @@ public static class XxxReduction            // 커맨드당 하나, Reduce/ 폴�
 
 - **순수**: 시간·랜덤·IO·전역 상태 없음. 트랜스폼을 **읽지도** 않는다 —
   현재 상태가 필요하면 값으로 받는다. 같은 입력은 언제나 같은 출력.
-- **출력은 `StageNodeClaim`.** 복수 노드를 겨누면 배열이다(SetDepth처럼 위치+스케일 두 장).
-  스케일 클레임의 z 보존 규약은 `ApplyTo`가 안다.
+- **출력은 `NodeTarget`.** 복수 노드를 겨누면 배열이다(SetDepth처럼 위치+스케일 두 장).
+  스케일 타깃의 z 보존 규약은 `ApplyTo`가 안다.
 
 ## 호스트 어댑터의 형태 (본보기에서)
 
@@ -44,33 +44,39 @@ private void ClaimTarget()
     _rect.DOKill(true);                                    // 호스트: 시간의 세계
     _startPos = _rect.anchoredPosition;                    // 호스트: 현재 상태 읽기
 
-    StageNodeClaim claim = MoveByReduction.Reduce(         // ── 코어 ──
-        _rect.name,
-        new MoveByReduction.Args(_spec.useAbsolutePosition, _spec.delta.ToCore()),
-        _startPos.ToCore());
+    NodeTarget target = MoveByTarget.Reduce(_rect, _spec, _startPos);   // ── 코어 ── (변환은 MoveByTarget이)
+    _rig.PlacementTargets.Reserve(_rect, target, Releases);               // 호스트: 장부에 게시 (해제는 확정 때 실행기가 — CommitReleases)
+    _destPos = target.Value.XY.ToUnity();                                 // 호스트: 트윈 종점은 타깃에서 읽는다
+}
 
-    _destPos = _rig.PlacementTargets                       // 호스트: 장부에 게시하고 트윈 종점을 받는다
-        .Claim(_rect, claim, Releases).XY.ToUnity();       //         (해제는 확정 때 실행기가 — CommitReleases)
+// MoveBy의 Unity → Core 경계. 커맨드는 변환과 Args 조립을 들고 있지 않는다.
+static class MoveByTarget
+{
+    public static NodeTarget Reduce(RectTransform rect, MoveByCommandSpecCharR spec, Vector2 start)
+        => MoveByReduction.Reduce(
+            rect.name,
+            new MoveByReduction.Args(spec.useAbsolutePosition, spec.delta.ToCore()),
+            start.ToCore());
 }
 ```
 
 **동작 불변이 규약이다**: 어댑터는 계산의 **자리만** 바꾸고 값·순서·부작용을 바꾸지 않는다.
 그래서 리덕션 테스트의 기대값은 **종전 식**에서 온다 — 새 기대값을 만들면 불변을 주장할 수 없다.
 
-호스트에서 노드의 정체는 `RectTransform` 참조이고, 클레임의 `NodeKey`는 진단용 이름이다.
+호스트에서 노드의 정체는 `RectTransform` 참조이고, 타깃의 `NodeKey`는 진단용 이름이다.
 장부(`CharacterPlacementTargetLedger`)가 참조 ↔ 키 대응을 안다.
 
 유니티 ↔ 코어 벡터 변환은 `PresentationCoreConversions`의 `ToCore()` / `ToUnity()` 한 곳에 둔다.
 
-## 클레임이 흐르는 세 갈래
+## 타깃이 흐르는 세 갈래
 
 ```
-              StageNodeClaim
+              NodeTarget
                     │
    ┌────────────────┼────────────────┐
    ↓                ↓                ↓
 ① 장부 게시      ② 트윈 종점      ③ 상태 폴드
-Ledger.Publish   DOTween 종점     claim.ApplyTo(tree)
+Ledger.Publish   DOTween 종점     target.ApplyTo(tree)
 (정착 예약)      (재생)           (정지 프레임)
 ```
 
@@ -102,17 +108,17 @@ Ledger.Publish   DOTween 종점     claim.ApplyTo(tree)
 
 트랜스폼(anchoredPosition / localScale / localEuler) · alpha(Fade) · color(ColorTo) ·
 sizeDelta(Overlay) · 마스크(StageMaskMotion).
-`StageNodeClaim`은 트랜스폼 셋으로 시작하고, 필요한 종류를 그때 더한다.
+`NodeTarget`은 트랜스폼 셋으로 시작하고, 필요한 종류를 그때 더한다.
 
 ### 축 ③ — 게시 여부
 
 > **2026-11-05 갱신.** 처음(2026-08)엔 "남이 알아야 하는 노드"만 골라 4곳(MoveBy · ScaleTo ·
 > PlaceCharacterFocus · SetDepth)에 손으로 게시를 넣었다. 그 판정에서 **회전(SwayPivot)과
 > 슬라이드(Track)가 빠졌다** — 둘 다 측정 체인 위라 같은 줄의 place가 트윈 중간값을 읽었다.
-> 지금은 판정하지 않는다. 커맨드가 내는 클레임은 **전부** 장부의 `Claim`으로 게시되고
+> 지금은 판정하지 않는다. 커맨드가 내는 타깃은 **전부** 장부의 `Reserve`으로 게시되고
 > 확정 때 실행기의 `CommitReleases`가 푼다(2026-11-06 — 그 전엔 상속 층 `RigClaimTweenCommandBase`가 했다). 체인 아래 노드도 게시된다 — 아무도 안 읽을 뿐 틀리지 않는다.
 > 해제를 잊는 상태는 구조적으로 없다 — 게시하는 그 호출이 해제를 등록한다. 리덕션 없이 끝값을 정하는 커맨드(Slide ·
-> Mirror)는 호스트가 클레임을 만든다 — "클레임 = 리덕션 출력"의 유일한 예외다.
+> Mirror)는 호스트가 타깃을 만든다 — "타깃 = 리덕션 출력"의 유일한 예외다.
 
 ## 두 가지 주의 (표본 정독에서 드러난 것)
 
@@ -179,7 +185,7 @@ yarn 4묶음 기준. "이관 안 함"은 **조용히 버린 것이 아니라 판
 `shot_zoom` · `shot_track` · `shot_to` · `shot_reset` · `shot_focus_to` 5종 전부.
 `ShotIntentMath`가 zoom→배율 규약(0.05)의 유일한 자리다 — 커맨드와 적용측이 같이 본다.
 
-샷 리덕션의 출력은 노드 클레임이 아니라 **샷 의도 `ShotIntentState`(zoom · pan · focus) 하나**다.
+샷 리덕션의 출력은 노드 타깃이 아니라 **샷 의도 `ShotIntentState`(zoom · pan · focus) 하나**다.
 그 셋이 무대 노드(무대마다 카메라 둘 · 층마다 하나)에 무엇을 쓰는지는 **`Transforms/ShotLayoutMath`가 유일한 자리**다(2026-11-05).
 
 | 누가 | 무엇을 |
@@ -294,14 +300,14 @@ fade·move·scale을 **같은 노드, 같은 리덕션**으로 접고, 종횡비
   - 배치 2·3: Fade 4종(`CanvasFadeCommandBase` — 2026-11-06에 `FadeCommandCharR` 하나로 합쳤다) · BgR 트랜스폼 계열 · RotateBy 쌍
   - 배치 4: PivotRotateTo · Slide 4종(`SlideCommandBase` — 2026-11-06에 `SlideCommandCharR` 하나로 합쳤다) ·
     Overlay Move/Scale/Size · Overlay Show/Hide(`OverlayRootFadeCommandBase`) ·
-    SetDepth(클레임 2장 + 시퀀스) · PlaceCharacterFocus(클레임 1장 + 게시) ·
+    SetDepth(타깃 2장 + 시퀀스) · PlaceCharacterFocus(타깃 1장 + 게시) ·
     MirrorCharacter · CharVisualFocus · StageDepthDefocus
 
   스텝 경계 가속(2026-11-06 개편): 처음엔 트윈을 죽이고 남은 비율(`MeasureRemainingRatio` — 커맨드마다 거리·각도·배율로 어림)로
   새 트윈(`CreateAcceleratedTween`)을 만들었고, 그 변형점으로 `AccelerateOnStepFinish` · `StepFinishSpeedUpMultiplier`가 있었다.
   지금은 **지금 트윈의 `timeScale`을 30으로 올린다** — 같은 길을 빠르게 끝까지 돌고, 남은 시간은 트윈이 안다.
   그래서 커맨드가 채울 훅은 `ResolveTargets` · `ClaimTarget` · `CreateTween` · `OnCommitFinalState` 넷뿐이다.
-  이게 되는 까닭은 값과 타이밍이 갈라져서다 — 끝값은 장부의 클레임이 쥐고(트윈 전에 게시, 확정 때 해제),
+  이게 되는 까닭은 값과 타이밍이 갈라져서다 — 끝값은 장부의 타깃이 쥐고(트윈 전에 게시, 확정 때 해제),
   트윈이 언제 거기 닿느냐는 보이는 연출일 뿐이다. 장부가 없던 때는 다음 커맨드가 라이브 트랜스폼을 읽었기에
   남은 만큼을 재서 다시 만들어야 했다. 샷과 화면 효과·블러의 전환(`IntentTransition`)도 같은 날 같은 방식으로 바꿨다 —
   거기서는 `Intent`가 끝값을 쥔다.

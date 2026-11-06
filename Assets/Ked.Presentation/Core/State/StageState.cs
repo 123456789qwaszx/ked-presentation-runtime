@@ -331,21 +331,21 @@ namespace Ked.Presentation.Core
             return new List<float>(depths);
         }
 
-        // ── 클레임 라우팅 ────────────────────────────────────────────
+        // ── 타깃 라우팅 ────────────────────────────────────────────
 
         /// <summary>
         /// 리덕션 출력을 상태에 접는다. 트랜스폼은 트리로, alpha는 가시성 축으로.
-        /// 클레임이 흐르는 세 갈래 중 "상태 폴드"가 여기다.
+        /// 타깃이 흐르는 세 갈래 중 "상태 폴드"가 여기다.
         /// </summary>
-        public void Apply(in StageNodeClaim claim)
+        public void Apply(in NodeTarget target)
         {
-            if (claim.Kind == StageNodeClaimKind.CanvasAlpha)
+            if (target.Kind == NodeTargetKind.CanvasAlpha)
             {
-                SetAlpha(claim.NodeKey, claim.Value.X);
+                SetAlpha(target.NodeKey, target.Value.X);
                 return;
             }
 
-            claim.ApplyTo(Nodes);
+            target.ApplyTo(Nodes);
         }
 
         // ── Unhandled ────────────────────────────────────────────────

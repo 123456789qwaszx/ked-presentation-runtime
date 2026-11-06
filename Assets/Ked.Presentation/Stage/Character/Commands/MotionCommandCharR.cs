@@ -17,10 +17,10 @@ public sealed class MotionCommandSpecCharR : CharacterRigCommandSpecBase
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// motion — 모션 클립 재생. commit이면 채널마다 **마지막 키 = 클레임**이고, restore면 남기는 것이 없다
+// motion — 모션 클립 재생. commit이면 채널마다 **마지막 키 = 타깃**이고, restore면 남기는 것이 없다
 // (끝나면 시작값을 되쓴다 — 마지막 키가 무엇이든). relative/absolute는 클립이 아니라 스펙(mode)이 정한다.
 //
-// 세 갈래가 같은 값을 본다(MotionMath.ClaimFor):
+// 세 갈래가 같은 값을 본다(MotionMath.TargetFor):
 //   ① 장부 게시  — commit이면 ClaimTarget에서 채널마다 종점을 게시한다(place가 정착 체인을 볼 수 있게).
 //                  restore는 게시하지 않는다 — 정착값이 시작값 그대로라 남이 알아야 할 것이 없다
 //   ② 트윈 종점  — 샘플러가 길이에서 쓰는 값이 그 종점이다(마지막 키 Time = 길이, 규칙)
@@ -204,15 +204,15 @@ public sealed class MotionCommandCharR : CommandBase
 
     private void Publish(in Bound b)
     {
-        StageNodeClaim claim = b.Channel.Kind switch
+        NodeTarget target = b.Channel.Kind switch
         {
-            MotionChannelKind.Position => StageNodeClaim.AnchoredPosition(b.Rect.name, new Vec2(b.End.x, b.End.y)),
-            MotionChannelKind.Scale => StageNodeClaim.LocalScaleXY(b.Rect.name, new Vec2(b.End.x, b.End.y)),
-            MotionChannelKind.Euler => StageNodeClaim.LocalEuler(b.Rect.name, b.End.ToCore()),
+            MotionChannelKind.Position => NodeTarget.AnchoredPosition(b.Rect.name, new Vec2(b.End.x, b.End.y)),
+            MotionChannelKind.Scale => NodeTarget.LocalScaleXY(b.Rect.name, new Vec2(b.End.x, b.End.y)),
+            MotionChannelKind.Euler => NodeTarget.LocalEuler(b.Rect.name, b.End.ToCore()),
             _ => throw new ArgumentOutOfRangeException(nameof(b.Channel.Kind), b.Channel.Kind, "모르는 채널 종류"),
         };
 
-        _rigRefs.PlacementTargets.Publish(b.Rect, claim);
+        _rigRefs.PlacementTargets.Publish(b.Rect, target);
     }
 
     private static Vector3 ReadStart(RectTransform rect, MotionChannelKind kind)

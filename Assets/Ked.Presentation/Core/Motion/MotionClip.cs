@@ -2,7 +2,7 @@ using System;
 
 namespace Ked.Presentation.Core
 {
-    /// <summary>채널이 쓰는 노드 속성. StageNodeClaimKind의 위치·배율·회전과 1:1이다.</summary>
+    /// <summary>채널이 쓰는 노드 속성. NodeTargetKind의 위치·배율·회전과 1:1이다.</summary>
     public enum MotionChannelKind
     {
         /// <summary>anchoredPosition (X·Y). 리그 로컬 px.</summary>
@@ -41,7 +41,7 @@ namespace Ked.Presentation.Core
         Restore,
 
         /// <summary>
-        /// 마지막 키가 남는다 — 고개 숙인 채로, 자세 바꾸기. 채널마다 마지막 키가 그 노드의 클레임이다.
+        /// 마지막 키가 남는다 — 고개 숙인 채로, 자세 바꾸기. 채널마다 마지막 키가 그 노드의 타깃이다.
         /// 중립값으로 끝나는 채널은 자연히 아무것도 남기지 않으므로, "어깨는 남고 고개는 돌아오는" 모션도 commit이다.
         /// </summary>
         Commit,
@@ -81,7 +81,7 @@ namespace Ked.Presentation.Core
     /// 키 하나의 수학은 같다(CurveKey · CurveFunctions). 값은 리그 로컬 단위(px·배율·도)이고,
     /// 원근(DepthScale)·시차·카메라는 계층 위에서 곱해지므로 모션은 셋을 모른다.
     ///
-    /// 종점은 평가 결과가 아니라 **키 값**이다 — commit이면 채널마다 마지막 키가 그 노드의 클레임이 되고(MotionMath.ClaimFor),
+    /// 종점은 평가 결과가 아니라 **키 값**이다 — commit이면 채널마다 마지막 키가 그 노드의 타깃이 되고(MotionMath.TargetFor),
     /// restore면 남는 것이 없다. 그래서 "이징은 종점에 관여하지 않는다"가 그대로 서고, 리듀서는 샘플링 없이 정지 프레임을 낸다.
     /// </summary>
     [Serializable]

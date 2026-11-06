@@ -103,8 +103,8 @@ public sealed class SetDepthCommandCharR : ClaimTweenCommandBase
         // 실패는 리졸버가 경로마다 경고한다. place는 대체값이 없어 움직이지 않는 것과 대비된다.
         _destFinalDepthY = destFinalDepthY;
 
-        _rig.PlacementTargets.Claim(_depthYRect, StageNodeClaim.AnchoredPosition(_depthYRect.name, _destFinalDepthY.ToCore()), Releases);
-        _rig.PlacementTargets.Claim(_depthScaleRect, StageNodeClaim.LocalScaleXY(_depthScaleRect.name, _destDepthScale.ToCore()), Releases);
+        _rig.PlacementTargets.Reserve(_depthYRect, NodeTarget.AnchoredPosition(_depthYRect.name, _destFinalDepthY.ToCore()), Releases);
+        _rig.PlacementTargets.Reserve(_depthScaleRect, NodeTarget.LocalScaleXY(_depthScaleRect.name, _destDepthScale.ToCore()), Releases);
     }
 
     /// <summary>깊이는 Y와 배율이 함께 움직여야 한 몸이라, 두 트윈을 한 시퀀스로 묶는다.</summary>

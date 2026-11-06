@@ -43,7 +43,7 @@
 
 ### 쓰기
 
-클레임-트윈 커맨드는 `ClaimTarget`에서 `_rig.PlacementTargets.Claim(rect, claim, Releases)`를 부른다. 이 한 줄이 예약을 게시하고, 확정할 때 풀리도록 실행기의 `CommitReleases`에 해제를 스스로 등록하고, 목표값을 돌려준다 — 커맨드가 `Clear`를 챙길 일이 없다. (2026-11-06까지는 상속 층 `RigClaimTweenCommandBase`가 게시·Clear를 했다.)
+클레임-트윈 커맨드는 `ClaimTarget`에서 `_rig.PlacementTargets.Reserve(rect, target, Releases)`를 부른다. 이 한 줄이 예약을 게시하고, 확정할 때 풀리도록 실행기의 `CommitReleases`에 해제를 스스로 등록하고, 목표값을 돌려준다 — 커맨드가 `Clear`를 챙길 일이 없다. (2026-11-06까지는 상속 층 `RigClaimTweenCommandBase`가 게시·Clear를 했다.)
 
 - 장부는 리그마다 하나다(`CharacterRigRefs.PlacementTargets`). 리그를 지우면 같이 사라진다.
 - 키는 노드 이름. 리그 노드 이름은 스키마가 유일하게 정하므로 충돌은 도달 불가 상태다 — 충돌하면 예외.
@@ -62,7 +62,7 @@
 | `CharacterDepthResolver` | `size_*` | 스케일을 바꿔도 초점이 제자리이도록 `DepthY` 보정 |
 | `CharacterFocusPointResolver` | `shot_focus_to` | 캐릭터 초점의 무대 좌표와 그 점이 선 층 |
 
-**쓰는 쪽**: 클레임-트윈 리그 커맨드 전부(move_by · scale_by · rotate_by · place · size · slide_in/out · mirror)가 `Claim`으로, `MotionCommandCharR`(commit 모션)이 `Publish` · `Clear`로. 이 중 체인 위에 있어 실제로 읽히는 노드는 `Track` · `Track_Focus` · `DepthY` · `DepthScale` · `Scale` · `SwayPivot`이다.
+**쓰는 쪽**: 클레임-트윈 리그 커맨드 전부(move_by · scale_by · rotate_by · place · size · slide_in/out · mirror)가 `Reserve`으로, `MotionCommandCharR`(commit 모션)이 `Publish` · `Clear`로. 이 중 체인 위에 있어 실제로 읽히는 노드는 `Track` · `Track_Focus` · `DepthY` · `DepthScale` · `Scale` · `SwayPivot`이다.
 
 ### 언제 비어 있나
 
@@ -88,7 +88,7 @@ for 노드 in 체인 (루트 쪽부터):
 
 | 목록 | 어디서 오나 | 무엇이 들어 있나 |
 |---|---|---|
-| 장부 | 리그 커맨드가 `Claim`한 rect | 그 리그의 노드 |
+| 장부 | 리그 커맨드가 `Reserve`한 rect | 그 리그의 노드 |
 | 샷 | `StageRigRefs.IsShotOwned` (무대 리그 빌더가 세운 참조) | 무대마다 `Camera_Pan` · `Camera_Zoom` · 층 Rect 전부. 덮는 무대의 것도 구조상 들어 있다 — 샷이 쓰지 않으니 답은 항등이다 |
 
 겹치면 구조가 깨진 것이라 예외다(2026-11-05부터 — 종전에는 장부가 먼저 이겨서 조용했다).
@@ -171,8 +171,8 @@ VisualOffset → … → Track_Focus → 리그 루트     리그   (장부가 �
 - **한 줄 결정:** 장부는 리그 노드의 끝값만 안다. 시간을 걷어 낸 체인이 폴드가 보는 무대다.
 - **무엇이 걸려 있었나:** 동시에 도는 커맨드끼리 서로의 중간값을 읽으면 같은 대본이 재생마다 다른 자리를 낸다.
 - **기각된 대안:** 잔여 벡터 합(1세대, 스케일에서 깨짐) / 트랜스폼을 잠깐 바꿔 재고 되돌리기(2세대, 엔진에 묶임) / 커맨드마다 손으로 게시(3세대 초기, 둘을 빠뜨림)
-- **지불한 비용:** 리덕션 없이 끝값을 정하는 커맨드(Slide · Mirror)도 클레임을 만들어야 한다. 체인 아래 노드의 게시는 읽히지 않는 쓰기다.
-- **계약 집행:** 기반이 게시 · Clear를 소유한다. 클레임 0개면 움직이지 않는다. 리그가 없으면 예외. 장부와 샷이 한 노드를 같이 소유하면 예외.
+- **지불한 비용:** 리덕션 없이 끝값을 정하는 커맨드(Slide · Mirror)도 타깃을 만들어야 한다. 체인 아래 노드의 게시는 읽히지 않는 쓰기다.
+- **계약 집행:** 기반이 게시 · Clear를 소유한다. 타깃 0개면 움직이지 않는다. 리그가 없으면 예외. 장부와 샷이 한 노드를 같이 소유하면 예외.
 - **가치관이 드러나는 지점:** "남이 알아야 하는가"를 판정하는 대신 판정 자체를 없앴다.
 
 샷 쪽은 같은 모양의 문장이 하나 더 된다 — **샷 중립은 카메라를 걷어 낸다.** 둘을 나란히 두면 `CaptureSettledChain`의 세 줄이 왜 그 순서인지가 설명 없이 읽힌다.
@@ -180,5 +180,5 @@ VisualOffset → … → Track_Focus → 리그 루트     리그   (장부가 �
 ---
 
 관련 문서: [stage-rig.md](../../StageRig/Documentation~/stage-rig.md) (무대 계층 · 샷 식 · 중립),
-[reduction-boundary.md](../../../Core/Documentation~/reduction-boundary.md) (클레임이 흐르는 세 갈래),
+[reduction-boundary.md](../../../Core/Documentation~/reduction-boundary.md) (타깃이 흐르는 세 갈래),
 [rig-axis-order.md](../../CharacterRig/Documentation~/rig-axis-order.md) (체인의 노드 순서가 규약인 이유)

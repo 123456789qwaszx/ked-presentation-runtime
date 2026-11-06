@@ -205,8 +205,8 @@ namespace Ked.Presentation.Tests.UnityParity
         {
             // 실사용 조건: place_focus가 Track_Focus에 예약을 걸어 둔 채로 size가 온다.
             CharacterPlacementTargetLedger ledger = new();
-            ledger.Publish(MoveRect, StageNodeClaim.AnchoredPosition(MoveRect.name, new Vector2(-460.8f, 60f).ToCore()));
-            ledger.Publish(Rect(CharacterRigTarget.CharSlot_Scale), StageNodeClaim.LocalScaleXY(Rect(CharacterRigTarget.CharSlot_Scale).name, new Vector2(1.2f, 1.2f).ToCore()));
+            ledger.Publish(MoveRect, NodeTarget.AnchoredPosition(MoveRect.name, new Vector2(-460.8f, 60f).ToCore()));
+            ledger.Publish(Rect(CharacterRigTarget.CharSlot_Scale), NodeTarget.LocalScaleXY(Rect(CharacterRigTarget.CharSlot_Scale).name, new Vector2(1.2f, 1.2f).ToCore()));
 
             Vector2 raw = new(0f, -320f);
             Vector2 targetScale = new(1.38f, 1.38f);
@@ -255,7 +255,7 @@ namespace Ked.Presentation.Tests.UnityParity
         public void 스케일_예약_아래에서도_배치_해가_종전과_같다()
         {
             CharacterPlacementTargetLedger ledger = new();
-            ledger.Publish(DepthScale, StageNodeClaim.LocalScaleXY(DepthScale.name, new Vector2(1.58f, 1.58f).ToCore()));
+            ledger.Publish(DepthScale, NodeTarget.LocalScaleXY(DepthScale.name, new Vector2(1.58f, 1.58f).ToCore()));
 
             Vector2 desired = new(268.8f, -172.8f);   // place … br 상당
 

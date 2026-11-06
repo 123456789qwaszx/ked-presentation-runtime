@@ -12,7 +12,7 @@ using UnityEngine;
 // - 라이브 체인 캡처 (+ 샷이 움직이는 무대 노드는 중립값으로 치환)
 // - stopRoot 로컬 ↔ 월드 변환
 //
-// 게시는 StageNodeClaim으로만 받는다 — 클레임-트윈 커맨드는 Claim으로(확정 때 저절로 풀린다),
+// 게시는 NodeTarget으로만 받는다 — 클레임-트윈 커맨드는 Reserve로(확정 때 저절로 풀린다),
 // 자기 수명을 직접 도는 MotionCommandCharR은 Publish · Clear로.
 
 // stopRoot는 측정 대상 leaf의 상위 RectTransform 중, Core가 변환 체인을 계산할 범위를 끊는 경계
@@ -31,13 +31,13 @@ public sealed class CharacterPlacementTargetLedger : ICommitRelease
     // ── 게시 ─────────────────────────────────────────────────────────
 
     /// <summary>
-    /// 리덕션 출력을 그대로 예약으로 받는다. 키는 클레임의 NodeKey가 아니라 참조에서 정한다 —
+    /// 리덕션 출력을 그대로 예약으로 받는다. 키는 타깃의 NodeKey가 아니라 참조에서 정한다 —
     /// 호스트에서 노드의 정체는 참조이고 NodeKey는 진단용 이름이다(reduction-boundary.md).
     /// 장부 대상이 아닌 종류(SizeDelta · CanvasAlpha)는 코어가 거부한다.
     /// </summary>
-    public void Publish(RectTransform node, in StageNodeClaim claim)
+    public void Publish(RectTransform node, in NodeTarget target)
     {
-        _core.Publish(claim.WithNodeKey(KeyOf(node)));
+        _core.Publish(target.WithNodeKey(KeyOf(node)));
     }
 
     public void Clear(RectTransform node)
@@ -47,15 +47,14 @@ public sealed class CharacterPlacementTargetLedger : ICommitRelease
     }
 
     /// <summary>
-    /// 클레임-트윈 커맨드의 게시. 예약을 걸고, 확정할 때 풀리도록 releases에 스스로 등록하고, 목표값을 돌려준다.
+    /// 클레임-트윈 커맨드의 게시. 예약을 걸고, 확정할 때 풀리도록 releases에 등록한다.
     /// 커맨드는 이것 하나만 부른다 — 게시와 해제를 따로 챙길 일이 없다.
+    /// 목표값은 돌려주지 않는다 — 장부는 기록만 하고, 목표값은 타깃에서 읽는다.
     /// </summary>
-    public Vec3 Claim(RectTransform node, in StageNodeClaim claim, CommitReleases releases)
+    public void Reserve(RectTransform node, in NodeTarget target, CommitReleases releases)
     {
-        Publish(node, claim);
+        Publish(node, target);
         releases.Add(this, node);
-
-        return claim.Value;
     }
 
     void ICommitRelease.Release(Object target) => Clear((RectTransform)target);

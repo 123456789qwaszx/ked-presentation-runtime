@@ -251,7 +251,7 @@ namespace Ked.Presentation.Tests
         }
 
         [Test]
-        public void place는_이동_축에만_클레임을_건다()
+        public void place는_이동_축에만_타깃을_건다()
         {
             StageState state = Fold(NewTuning(), Cmd("slot", "c1"), Cmd("place_right", "c1", "bust"));
 

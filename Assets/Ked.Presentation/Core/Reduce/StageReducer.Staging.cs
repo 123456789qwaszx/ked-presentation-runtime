@@ -23,7 +23,7 @@ namespace Ked.Presentation.Core
                 return false;
             }
 
-            ApplyMoveClaim(state, slotKey, targetId, relative: true, new Vec2(pixels * xSign, pixels * ySign));
+            ApplyMoveTarget(state, slotKey, targetId, relative: true, new Vec2(pixels * xSign, pixels * ySign));
             return true;
         }
 
@@ -40,7 +40,7 @@ namespace Ked.Presentation.Core
                 return false;
             }
 
-            ApplyMoveClaim(state, slotKey, "CharSlot_Track", relative: true, new Vec2(x, y));
+            ApplyMoveTarget(state, slotKey, "CharSlot_Track", relative: true, new Vec2(x, y));
             return true;
         }
 
@@ -59,7 +59,7 @@ namespace Ked.Presentation.Core
                     out string slotKey, out Vec2 offset, out reason))
                 return false;
 
-            ApplyMoveClaim(state, slotKey, "CharSlot_Track", relative: true, offset);
+            ApplyMoveTarget(state, slotKey, "CharSlot_Track", relative: true, offset);
             return true;
         }
 
@@ -90,12 +90,12 @@ namespace Ked.Presentation.Core
                 return false;
 
             // 브리지는 Track과 Track_Focus 두 노드에 절대 0을 건다.
-            ApplyMoveClaim(state, slotKey, "CharSlot_Track", relative: false, Vec2.Zero);
-            ApplyMoveClaim(state, slotKey, "CharSlot_Track_Focus", relative: false, Vec2.Zero);
+            ApplyMoveTarget(state, slotKey, "CharSlot_Track", relative: false, Vec2.Zero);
+            ApplyMoveTarget(state, slotKey, "CharSlot_Track_Focus", relative: false, Vec2.Zero);
             return true;
         }
 
-        private static void ApplyMoveClaim(
+        private static void ApplyMoveTarget(
             StageState state, string slotKey, string targetId, bool relative, Vec2 delta)
         {
             string nodeKey = StageState.NodeKeyOf(slotKey, targetId);
@@ -170,11 +170,11 @@ namespace Ked.Presentation.Core
 
         /// <summary>
         /// motion(slot, name, mode?) — restore면 무변(정착값이 시작값 그대로다), commit이면 채널마다 **마지막 키**를 그 노드의
-        /// 클레임으로 접는다. 종점이 평가 결과가 아니라 키 값이라 샘플링이 필요 없다 — "이징은 종점에 관여하지
+        /// 타깃으로 접는다. 종점이 평가 결과가 아니라 키 값이라 샘플링이 필요 없다 — "이징은 종점에 관여하지
         /// 않는다"가 모션에서도 그대로 선다. mode는 세 번째 인자(생략 = relative): relative는 현재 상태 위에
         /// (위치·회전 덧셈, 배율 곱셈), absolute는 그 값으로. 클립은 mode를 모른다(motions/2).
         ///
-        /// 재생(MotionCommandCharR.ClaimTarget)과 같은 함수(MotionMath.ClaimFor)를 지난다 —
+        /// 재생(MotionCommandCharR.ClaimTarget)과 같은 함수(MotionMath.TargetFor)를 지난다 —
         /// 장부 게시·트윈 종점·상태 폴드가 같은 값을 본다.
         /// </summary>
         private static bool ApplyMotion(
@@ -225,7 +225,7 @@ namespace Ked.Presentation.Core
                 string nodeKey = StageState.NodeKeyOf(slotKey, channel.Node);
 
                 Vec3 start = MotionMath.StartOf(channel, state.Nodes.GetState(nodeKey));
-                state.Apply(MotionMath.ClaimFor(channel, mode, nodeKey, start));
+                state.Apply(MotionMath.TargetFor(channel, mode, nodeKey, start));
             }
 
             return true;
