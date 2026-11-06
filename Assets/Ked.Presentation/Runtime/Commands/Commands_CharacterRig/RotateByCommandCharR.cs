@@ -15,9 +15,6 @@ public sealed class RotateByCommandSpecCharR : CharacterRigCommandSpecBase
     [Header("Tween")]
     public float duration = 0.4f;
     public Ease ease = Ease.OutCubic;
-
-    [Tooltip("커스텀 이징 곡선 키(@이름 인자에서). null/빈 배열이면 ease를 쓴다.")]
-    public CurveKey[] customCurveKeys;
 }
 
 public sealed class RotateByCommandCharR : RigClaimTweenCommandBase
@@ -59,7 +56,7 @@ public sealed class RotateByCommandCharR : RigClaimTweenCommandBase
     protected override Tween CreateTween(float duration)
         => DOTween
             .To(() => 0f, ApplyProgress, 1f, duration)
-            .ApplyEase(_spec.ease, _spec.customCurveKeys)
+            .SetEase(_spec.ease)
             .SetTarget(_rect);
 
     protected override void WriteFinalState()

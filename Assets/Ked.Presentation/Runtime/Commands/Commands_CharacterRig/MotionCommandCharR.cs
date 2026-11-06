@@ -22,7 +22,7 @@ public sealed class MotionCommandSpecCharR : CharacterRigCommandSpecBase
 //
 // 세 갈래가 같은 값을 본다(MotionMath.ClaimFor):
 //   ① 장부 게시  — commit이면 ClaimTarget에서 채널마다 종점을 게시한다(place가 정착 체인을 볼 수 있게).
-//                  restore는 게시하지 않는다 — 정착값이 시작값 그대로라 남이 알아야 할 것이 없다(gesture와 같다)
+//                  restore는 게시하지 않는다 — 정착값이 시작값 그대로라 남이 알아야 할 것이 없다
 //   ② 트윈 종점  — 샘플러가 길이에서 쓰는 값이 그 종점이다(마지막 키 Time = 길이, 규칙)
 //   ③ 상태 폴드  — 리듀서 ApplyMotion이 같은 함수로 접는다
 //
@@ -33,7 +33,7 @@ public sealed class MotionCommandSpecCharR : CharacterRigCommandSpecBase
 //   Resolve → Claim(DOKill·종점·게시) → 트윈들 → Commit(종점 쓰기·장부 Clear) / Skip / 스텝 경계.
 //
 // 소유 단위는 노드가 아니라 모션 하나(노드 묶음)다. 끊기면 언제나 전부 끝 상태로 확정한다:
-//   - 스텝 경계 — 가속 없음(초 단위 진행 트윈이라 "남은 거리"가 없다). gesture와 같은 판단으로 즉시 확정.
+//   - 스텝 경계 — 가속 없음(초 단위 진행 트윈이라 "남은 거리"가 없다). 즉시 확정.
 //   - 다른 커맨드가 노드 하나라도 잡으면(DOKill(true)로 그 노드 트윈이 완주되면) 나머지 노드도 멈추고 전부 확정한 뒤 넘겨준다.
 //     그래야 섞인 자세(일부만 끝난 모션)가 남지 않고, 잡은 쪽은 모션의 종점에서 출발한다.
 // ─────────────────────────────────────────────────────────────────────────────

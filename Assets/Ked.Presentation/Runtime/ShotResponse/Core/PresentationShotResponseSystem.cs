@@ -25,7 +25,6 @@ public sealed class PresentationShotResponseSystem : IStageViewNeutral
     private PresentationIntentState _transitionFrom;
     private float _transitionDuration;
     private Ease _transitionEase;
-    private CurveKey[] _transitionCurveKeys;
     private bool _transitionAccelerated;
 
     // 저작된 의도 — 다음 샷 커맨드의 출발점이고, 폴드가 접는 값이다.
@@ -49,8 +48,7 @@ public sealed class PresentationShotResponseSystem : IStageViewNeutral
     public void Follow(
         in PresentationIntentState intent,
         float duration,
-        Ease ease,
-        CurveKey[] curveKeys)
+        Ease ease)
     {
         _intent = intent;
         KillTransition();
@@ -63,7 +61,6 @@ public sealed class PresentationShotResponseSystem : IStageViewNeutral
 
         _transitionDuration = duration;
         _transitionEase = ease;
-        _transitionCurveKeys = curveKeys;
         _transitionAccelerated = false;
 
         StartTransition(duration);
@@ -115,7 +112,7 @@ public sealed class PresentationShotResponseSystem : IStageViewNeutral
                 t => Apply(PresentationShotIntentMath.Interpolate(from, to, t)),
                 1f,
                 duration)
-            .ApplyEase(_transitionEase, _transitionCurveKeys)
+            .SetEase(_transitionEase)
             .SetUpdate(true)
             .SetTarget(this)
             .OnComplete(() =>

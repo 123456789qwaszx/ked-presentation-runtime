@@ -6,7 +6,7 @@ using UnityEngine;
 // 진행 · 저장을 모른다. 결과(PresentationRuntime)에 재생 호스트를 붙이면 돈다(Awake → InstallProgression).
 public partial class SampleBootstrap
 {
-    /// <summary>예제 대본 번들 폴더(Assets/Samples/Dialogue). 커브(curves.json)·모션(motions.json)도 대본 곁에 산다.</summary>
+    /// <summary>예제 대본 번들 폴더(Assets/Samples/Dialogue). 모션(motions.json)도 대본 곁에 산다.</summary>
     private static string DialogueFolder =>
         System.IO.Path.Combine(Application.dataPath, "Samples", "Dialogue");
 
@@ -199,13 +199,11 @@ public partial class SampleBootstrap
             speakerPolicyDb);
         _dialogueBoxPresentation = dialogueBoxPresentationController;
 
-        EaseCurveLibrary easeCurves = LoadEaseCurves();
         _motions = LoadMotions();
 
         // 배경(bg_*)도 캐릭터 리그로 선다 — 캐스팅하지 않은 슬롯. 리그 프리팹은 하나다.
         StageCommandParser stageCommandParser = new(
             rigPrefab,
-            easeCurves,
             _motions);
 
         _ = new YarnCommandBridge(
@@ -330,15 +328,6 @@ public partial class SampleBootstrap
     }
 
     // ── 작가 자산 — TextAsset이 정본이다(빌드에서도 읽힌다). 안 꽂혀 있으면 에디터에서만 옛 경로의 파일을 읽는다 ──
-
-    private EaseCurveLibrary LoadEaseCurves()
-    {
-        if (easeCurvesJson != null)
-            return EaseCurveLibrary.Parse(easeCurvesJson.text, easeCurvesJson.name);
-
-        string json = ReadBundleFileEditorOnly(EaseCurveLibrary.BundleFileName);
-        return json == null ? EaseCurveLibrary.Empty : EaseCurveLibrary.Parse(json, EaseCurveLibrary.BundleFileName);
-    }
 
     private MotionLibrary LoadMotions()
     {

@@ -1,3 +1,4 @@
+using DG.Tweening;
 using Ked.Presentation.Core;
 using UnityEngine;
 
@@ -26,7 +27,7 @@ public sealed partial class StageCommandParser
         string durationToken,
         string easeToken = "")
     {
-        EaseSelection ease = ResolveEase(easeToken);
+        Ease ease = YarnEaseParser.Parse(easeToken);
 
         Emit(new PlaceCharacterFocusCommandSpecCharR
         {
@@ -35,14 +36,13 @@ public sealed partial class StageCommandParser
             screenPoint = screenPoint,
             moveTarget = CharacterRigTarget.CharSlot_Track_Focus,
             duration = YarnDurationParser.Parse(durationToken),
-            ease = ease.Ease,
-            customCurveKeys = ease.CurveKeys
+            ease = ease
         });
     }
 
     private void EnqueuePlaceCharacterFocusSpec(string roleKey, string focus, string screenPoint, string durationToken, string easeToken)
     {
-        EaseSelection ease = ResolveEase(easeToken);
+        Ease ease = YarnEaseParser.Parse(easeToken);
 
         Emit(new PlaceCharacterFocusCommandSpecCharR
         {
@@ -51,8 +51,7 @@ public sealed partial class StageCommandParser
             screenPoint = ParseScreenPoint("place", screenPoint),
             moveTarget = CharacterRigTarget.CharSlot_Track_Focus,
             duration = YarnDurationParser.Parse(durationToken),
-            ease = ease.Ease,
-            customCurveKeys = ease.CurveKeys
+            ease = ease
         });
     }
     #endregion
@@ -98,16 +97,15 @@ public sealed partial class StageCommandParser
 
         spec.focusPreset = focusPreset;
 
-        EaseSelection ease = ResolveEase(easeToken);
-        spec.ease = ease.Ease;
-        spec.customCurveKeys = ease.CurveKeys;
+        Ease ease = YarnEaseParser.Parse(easeToken);
+        spec.ease = ease;
 
         Emit(spec);
     }
 
     private void EnqueueDepthResetSpec(string roleKey, float duration, string easeToken)
     {
-        EaseSelection ease = ResolveEase(easeToken);
+        Ease ease = YarnEaseParser.Parse(easeToken);
 
         Emit(new SetDepthCommandSpecCharR
         {
@@ -115,8 +113,7 @@ public sealed partial class StageCommandParser
             preset = CharacterDepthKey.Mid,
             useLevel = false,
             duration = duration,
-            ease = ease.Ease,
-            customCurveKeys = ease.CurveKeys
+            ease = ease
         });
     }
     #endregion

@@ -62,7 +62,7 @@ public sealed partial class StageCommandParser
         float duration = YarnDurationParser.Parse(durationToken);
 
         // 미지정이면 종전 하드코딩 값과 같은 OutCubic이다 — 기존 대본 불변.
-        EaseSelection ease = ResolveEase(easeToken);
+        Ease ease = YarnEaseParser.Parse(easeToken);
 
         Emit(new MoveByCommandSpecCharR
         {
@@ -71,8 +71,7 @@ public sealed partial class StageCommandParser
             useAbsolutePosition = false,
             delta = new Vector2(pixels * xSign, pixels * ySign),
             duration = duration,
-            ease = ease.Ease,
-            customCurveKeys = ease.CurveKeys
+            ease = ease
         });
     }
     

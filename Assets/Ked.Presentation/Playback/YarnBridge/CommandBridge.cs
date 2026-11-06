@@ -105,10 +105,6 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler<string, string, string>(
             "scale_reset", EnqueueSizeResetSpec);
 
-        // 제자리 몸짓 — 순변위 0. 이동 계열과 다른 노드라 같은 라인에 겹칠 수 있다.
-        runner.AddCommandHandler<string, string, string, string, string, string>(
-            "gesture", EnqueueGestureSpec);
-
         // 모션 — motions.json의 클립(모션 툴·Animation 창에서 내보낸 것). 길이는 클립이 안다.
         // 세 번째 인자 relative|absolute(생략 relative)가 키 값을 어떻게 읽을지 정한다 — 클립은 mode를 모른다(motions/2).
         runner.AddCommandHandler<string, string, string>(

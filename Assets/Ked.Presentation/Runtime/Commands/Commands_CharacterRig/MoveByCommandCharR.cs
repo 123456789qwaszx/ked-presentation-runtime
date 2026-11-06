@@ -25,11 +25,6 @@ public class MoveByCommandSpecCharR : CharacterRigCommandSpecBase
     public float duration = 0.4f;
 
     public Ease ease = Ease.OutCubic;
-
-    [Tooltip(
-        "커스텀 이징 곡선 키(@이름 다섯째 인자에서). " +
-        "null/빈 배열이면 ease를 쓴다. 종점(dest)에는 관여하지 않는다 — 모양만 바꾼다.")]
-    public CurveKey[] customCurveKeys;
 }
 
 public sealed class MoveByCommandCharR : RigClaimTweenCommandBase
@@ -71,7 +66,7 @@ public sealed class MoveByCommandCharR : RigClaimTweenCommandBase
     protected override Tween CreateTween(float duration)
         => _rect
             .DOAnchorPos(_destPos, duration)
-            .ApplyEase(_spec.ease, _spec.customCurveKeys)
+            .SetEase(_spec.ease)
             .SetTarget(_rect);
 
     protected override void WriteFinalState()

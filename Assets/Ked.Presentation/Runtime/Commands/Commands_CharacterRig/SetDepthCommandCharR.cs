@@ -25,9 +25,6 @@ public sealed class SetDepthCommandSpecCharR : CharacterRigCommandSpecBase
     [Header("Tween")]
     public float duration = 0.4f;
     public Ease ease = Ease.OutCubic;
-
-    [Tooltip("커스텀 이징 곡선 키(@이름 인자에서). null/빈 배열이면 ease를 쓴다.")]
-    public CurveKey[] customCurveKeys;
 }
 
 public sealed class SetDepthCommandCharR : RigClaimTweenCommandBase
@@ -123,14 +120,14 @@ public sealed class SetDepthCommandCharR : RigClaimTweenCommandBase
         sequence.Join(
             _depthYRect
                 .DOAnchorPos(_destFinalDepthY, duration)
-                .ApplyEase(_spec.ease, _spec.customCurveKeys)
+                .SetEase(_spec.ease)
                 .SetUpdate(true)
                 .SetTarget(_depthYRect));
 
         sequence.Join(
             _depthScaleRect
                 .DOScale(new Vector3(_destDepthScale.x, _destDepthScale.y, 1f), duration)
-                .ApplyEase(_spec.ease, _spec.customCurveKeys)
+                .SetEase(_spec.ease)
                 .SetUpdate(true)
                 .SetTarget(_depthScaleRect));
 

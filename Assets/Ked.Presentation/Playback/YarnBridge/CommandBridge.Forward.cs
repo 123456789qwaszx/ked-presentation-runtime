@@ -47,9 +47,6 @@ public sealed partial class YarnCommandBridge
     private void EnqueueMotionSpec(string roleKey = null, string motionName = null, string modeToken = null)
         => Forward("motion", roleKey, motionName, modeToken);
 
-    private void EnqueueGestureSpec(string roleKey = null, string xAmpToken = null, string yAmpToken = null, string durationToken = null, string xEaseToken = null, string yEaseToken = null)
-        => Forward("gesture", roleKey, xAmpToken, yAmpToken, durationToken, xEaseToken, yEaseToken);
-
     private void EnqueueCharacterSiblingFrontSpec(string roleKey = null)
         => Forward("sibling_front", roleKey);
 

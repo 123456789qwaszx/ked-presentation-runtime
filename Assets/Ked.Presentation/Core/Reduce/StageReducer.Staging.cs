@@ -169,20 +169,7 @@ namespace Ked.Presentation.Core
         }
 
         /// <summary>
-        /// gesture — 무변으로 접는 것이 정답이다.
-        ///
-        /// 변위(t) = 진폭 × 곡선(t)이고 곡선이 (0,0)→(1,0)이라 순변위가 0이다.
-        /// 라인 시작과 끝의 무대가 같으므로 정지 프레임은 손대지 않는 것이 옳다 —
-        /// 그래서 리듀서가 곡선 내용을 알 필요가 없고, "이징은 종점에 관여하지 않는다"는
-        /// 불변식도 지켜진다(그게 이 커맨드를 move_by 위에 얹지 않은 이유다).
-        ///
-        /// 슬롯 존재 검사는 한다 — 없는 슬롯이면 다른 커맨드와 같은 규약으로 사유를 남긴다.
-        /// </summary>
-        private static bool ApplyGesture(StageState state, in StageCommand cmd, out string reason)
-            => TryGetSpawnedSlot(state, cmd, out _, out reason);
-
-        /// <summary>
-        /// motion(slot, name, mode?) — restore면 무변(gesture와 같다), commit이면 채널마다 **마지막 키**를 그 노드의
+        /// motion(slot, name, mode?) — restore면 무변(정착값이 시작값 그대로다), commit이면 채널마다 **마지막 키**를 그 노드의
         /// 클레임으로 접는다. 종점이 평가 결과가 아니라 키 값이라 샘플링이 필요 없다 — "이징은 종점에 관여하지
         /// 않는다"가 모션에서도 그대로 선다. mode는 세 번째 인자(생략 = relative): relative는 현재 상태 위에
         /// (위치·회전 덧셈, 배율 곱셈), absolute는 그 값으로. 클립은 mode를 모른다(motions/2).

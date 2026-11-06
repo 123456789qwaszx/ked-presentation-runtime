@@ -16,18 +16,15 @@ public sealed partial class StageCommandParser
 {
     // 배경(bg_*)도 이 리그로 선다 — 캐스팅하지 않은 슬롯.
     private readonly RectTransform _charRigPrefab;
-    private readonly EaseCurveLibrary _easeCurves;
     private readonly MotionLibrary _motions;
 
     private List<CommandSpecBase> _output;
 
     public StageCommandParser(
         RectTransform charRigPrefab,
-        EaseCurveLibrary easeCurves = null,
         MotionLibrary motions = null)
     {
         _charRigPrefab = charRigPrefab;
-        _easeCurves = easeCurves ?? EaseCurveLibrary.Empty;
         _motions = motions ?? MotionLibrary.Empty;
     }
 

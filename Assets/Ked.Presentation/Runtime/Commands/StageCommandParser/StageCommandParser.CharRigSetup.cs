@@ -1,4 +1,3 @@
-using System;
 using DG.Tweening;
 using Ked.Presentation.Core;
 using UnityEngine;
@@ -70,7 +69,7 @@ public sealed partial class StageCommandParser
 
     private void EnqueueSetAnchorOffsetSpecs(string slotKey, string xToken, string yToken, string durationToken, string easeToken)
     {
-        EaseSelection ease = ResolveEase(easeToken);
+        Ease ease = YarnEaseParser.Parse(easeToken);
 
         Emit(new MoveByCommandSpecCharR
         {
@@ -79,102 +78,9 @@ public sealed partial class StageCommandParser
             useAbsolutePosition = false,
             delta = new Vector2(ParseSignedUnit(xToken), ParseSignedUnit(yToken)),
             duration = YarnDurationParser.Parse(durationToken),
-            ease = ease.Ease,
-            customCurveKeys = ease.CurveKeys
+            ease = ease
         });
     }
-
-    /// <summary>
-    /// 이징 토큰의 두 갈래: "@이름" = curves.json의 커스텀 곡선,
-    /// 그 외 = EaseKind 이름. 미지정("")·실패는 스펙 기본값 OutCubic —
-    /// 기존 대본은 인자가 없으므로 재생 결과가 그대로다.
-    /// move_by·place 계열·size 계열·rotate 계열이 이 한 자리를 함께 쓴다.
-    /// </summary>
-    private EaseSelection ResolveEase(string easeToken, Ease fallback = Ease.OutCubic)
-    {
-        if (!string.IsNullOrWhiteSpace(easeToken) && easeToken[0] == '@')
-        {
-            string curveName = easeToken.Substring(1);
-
-            if (_easeCurves.TryGet(
-                    curveName, CurveKind.Motion, out CurveKey[] keys, out bool wrongKind))
-                return new EaseSelection(fallback, keys);
-
-            // 침묵 금지 — 1차 방어는 VnTool 저작 검증이고, 여기서는 소리 내고 굴러간다.
-            Debug.LogError(
-                wrongKind
-                    ? $"[StageCommandParser] Ease curve '{easeToken}' is an oscillation curve " +
-                      $"(gesture 전용 — 끝값이 0이다). 이동 커맨드에는 쓸 수 없다. Fallback to {fallback}."
-                    : $"[StageCommandParser] Unknown ease curve '{easeToken}' — " +
-                      $"{EaseCurveLibrary.BundleFileName}에 없다. Fallback to {fallback}.");
-
-            return new EaseSelection(fallback);
-        }
-
-        return new EaseSelection(YarnEaseParser.Parse(easeToken, fallback));
-    }
-
-    /// <summary>
-    /// gesture의 축 진동 해석. 셋을 받는다:
-    ///   빈 토큰    → 내장 기본 혹(sin πt)
-    ///   "@이름"    → curves.json의 진동 곡선
-    ///   표준 이징  → 그 이징의 **핑퐁**(왕복의 절반). 0→1 이징이 그대로 몸짓이 된다.
-    ///
-    /// 못 읽는 낱말만 경고 + 기본 혹으로 굴러간다(침묵 금지).
-    /// </summary>
-    private OscillationSource ResolveOscillation(string token)
-    {
-        if (string.IsNullOrWhiteSpace(token))
-            return OscillationSource.Default;
-
-        if (token[0] == '@')
-        {
-            string curveName = token.Substring(1);
-
-            if (_easeCurves.TryGet(
-                    curveName, CurveKind.Oscillation, out CurveKey[] keys, out bool wrongKind))
-                return OscillationSource.FromCurve(keys);
-
-            Debug.LogError(
-                wrongKind
-                    ? $"[StageCommandParser] Gesture curve '{token}' is a motion curve " +
-                      $"(끝값이 1이라 제자리로 안 돌아온다). 기본 혹으로 재생한다."
-                    : $"[StageCommandParser] Unknown gesture curve '{token}' — " +
-                      $"{EaseCurveLibrary.BundleFileName}에 없다. 기본 혹으로 재생한다.");
-
-            return OscillationSource.Default;
-        }
-
-        // 표준 이징 이름 → 핑퐁. 숫자 토큰은 거부한다(EaseKind가 임의 정수로도 파싱되므로).
-        string trimmed = token.Trim();
-
-        if (!char.IsDigit(trimmed[0]) && trimmed[0] != '-' && trimmed[0] != '+'
-            && Enum.TryParse(trimmed, ignoreCase: true, out EaseKind kind))
-            return OscillationSource.FromEase(kind);
-
-        Debug.LogWarning(
-            $"[StageCommandParser] Invalid gesture ease token '{token}'. " +
-            "진동 곡선(@이름)이나 표준 이징 이름(OutBack 등)을 써라. 기본 혹으로 재생한다.");
-
-        return OscillationSource.Default;
-    }
-
-    // ── 제자리 몸짓 ───────────────────────────────────────────────
-    // 순변위 0이 정체다. 표적(CharacterPortrait_Shake)이 이동 계열과 다른 노드라
-    // 같은 라인에서 move_by와 나란히 놀 수 있다 — "총총 뛰며 이동"이 그 조합이다.
-
-    private void EnqueueGestureSpec(string roleKey, string xAmpToken, string yAmpToken, string durationToken, string xEaseToken, string yEaseToken)
-        => Emit(new GestureCommandSpecCharR
-        {
-            slotKey = roleKey,
-            target = CharacterRigTarget.CharacterPortrait_Shake,
-
-            amplitude = new Vector2(ParseSignedUnit(xAmpToken, 0f), ParseSignedUnit(yAmpToken, 0f)),
-            duration = YarnDurationParser.Parse(durationToken),
-
-            xOscillation = ResolveOscillation(xEaseToken),
-            yOscillation = ResolveOscillation(yEaseToken)
-        });
 
     // motion(slot, name, mode) — motions.json의 클립을 그대로 싣는다. 길이는 클립이 안다.
     // mode(relative|absolute)는 클립이 아니라 이 커맨드가 정한다 — 생략값은 표에 있다(relative).
@@ -204,7 +110,7 @@ public sealed partial class StageCommandParser
 
     private void EnqueueRotateBySpec(string roleKey, float degree, string durationToken, string easeToken)
     {
-        EaseSelection ease = ResolveEase(easeToken);
+        Ease ease = YarnEaseParser.Parse(easeToken);
 
         Emit(new RotateToCommandSpecCharR
         {
@@ -215,14 +121,13 @@ public sealed partial class StageCommandParser
             relativeToCurrent = true,
 
             duration = YarnDurationParser.Parse(durationToken),
-            ease = ease.Ease,
-            customCurveKeys = ease.CurveKeys
+            ease = ease
         });
     }
 
     private void EnqueueRotateResetSpec(string roleKey, string durationToken, string easeToken)
     {
-        EaseSelection ease = ResolveEase(easeToken);
+        Ease ease = YarnEaseParser.Parse(easeToken);
 
         Emit(new RotateToCommandSpecCharR
         {
@@ -232,8 +137,7 @@ public sealed partial class StageCommandParser
             toEuler = Vector3.zero,
 
             duration = YarnDurationParser.Parse(durationToken),
-            ease = ease.Ease,
-            customCurveKeys = ease.CurveKeys
+            ease = ease
         });
     }
 
@@ -241,7 +145,7 @@ public sealed partial class StageCommandParser
     // 그 커맨드는 되살리지 않았다 — 여기서는 RotateTo의 절대 모드로 선다.
     private void EnqueuePortraitRotateToSpec(string roleKey, float degree, string durationToken, string easeToken)
     {
-        EaseSelection ease = ResolveEase(easeToken);
+        Ease ease = YarnEaseParser.Parse(easeToken);
 
         Emit(new RotateToCommandSpecCharR
         {
@@ -252,14 +156,13 @@ public sealed partial class StageCommandParser
             relativeToCurrent = false,
 
             duration = YarnDurationParser.Parse(durationToken),
-            ease = ease.Ease,
-            customCurveKeys = ease.CurveKeys
+            ease = ease
         });
     }
 
     private void EnqueueSizeBySpec(string roleKey, float multiplier, string durationToken, string easeToken)
     {
-        EaseSelection ease = ResolveEase(easeToken);
+        Ease ease = YarnEaseParser.Parse(easeToken);
 
         Emit(new ScaleToCommandSpecCharR
         {
@@ -270,8 +173,7 @@ public sealed partial class StageCommandParser
             relativeToCurrent = true,
 
             duration = YarnDurationParser.Parse(durationToken),
-            ease = ease.Ease,
-            customCurveKeys = ease.CurveKeys
+            ease = ease
         });
     }
 
@@ -303,7 +205,7 @@ public sealed partial class StageCommandParser
 
     private void EnqueueSizeResetSpec(string roleKey, string durationToken, string easeToken)
     {
-        EaseSelection ease = ResolveEase(easeToken);
+        Ease ease = YarnEaseParser.Parse(easeToken);
 
         Emit(new ScaleToCommandSpecCharR
         {
@@ -313,8 +215,7 @@ public sealed partial class StageCommandParser
             toScale = new Vector2(1, 1),
 
             duration = YarnDurationParser.Parse(durationToken),
-            ease = ease.Ease,
-            customCurveKeys = ease.CurveKeys
+            ease = ease
         });
     }
 

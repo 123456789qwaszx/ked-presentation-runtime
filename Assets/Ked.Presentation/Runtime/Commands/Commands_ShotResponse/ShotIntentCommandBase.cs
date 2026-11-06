@@ -11,11 +11,6 @@ public abstract class ShotIntentCommandSpecBase : CommandSpecBase
     public float duration = 0.45f;
 
     public Ease ease = Ease.OutCubic;
-
-    [Tooltip(
-        "커스텀 이징 곡선 키(@이름 인자에서). null/빈 배열이면 ease를 쓴다. " +
-        "종점(intent)에는 관여하지 않는다 — 모양만 바꾼다.")]
-    public Ked.Presentation.Core.CurveKey[] customCurveKeys;
 }
 
 // 샷 커맨드는 다음 의도를 계산해 넘기기만 한다 — 전환은 PresentationShotResponseSystem이 소유한다.
@@ -38,7 +33,7 @@ public abstract class ShotIntentCommandBase<TSpec> : CommandBase
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
-        rig.Follow(BuildTargetState(rig.Intent, scope), spec.duration, spec.ease, spec.customCurveKeys);
+        rig.Follow(BuildTargetState(rig.Intent, scope), spec.duration, spec.ease);
 
         if (!spec.wait)
             yield break;

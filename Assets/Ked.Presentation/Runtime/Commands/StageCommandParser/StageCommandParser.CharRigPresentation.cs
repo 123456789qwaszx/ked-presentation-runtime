@@ -1,3 +1,4 @@
+using DG.Tweening;
 using Ked.Presentation.Core;
 using UnityEngine;
 
@@ -58,7 +59,7 @@ public sealed partial class StageCommandParser
 
     private void EnqueueScaleSpec(string roleKey, float xyValue, string durationToken, string easeToken)
     {
-        EaseSelection ease = ResolveEase(easeToken);
+        Ease ease = YarnEaseParser.Parse(easeToken);
 
         Emit(new ScaleToCommandSpecCharR
         {
@@ -66,8 +67,7 @@ public sealed partial class StageCommandParser
             target = CharacterRigTarget.CharacterPortrait_ActingScale,
             duration = YarnDurationParser.Parse(durationToken),
             toScale = new Vector2(xyValue, xyValue),
-            ease = ease.Ease,
-            customCurveKeys = ease.CurveKeys
+            ease = ease
         });
     }
 }
