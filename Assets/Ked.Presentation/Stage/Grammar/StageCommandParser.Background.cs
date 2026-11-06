@@ -52,7 +52,7 @@ public sealed partial class StageCommandParser
         => Emit(new SetSpriteCommandSpecCharR
         {
             slotKey = rigKey,
-            target = CharacterRigTarget.CharacterPortraitSprite_Image,
+            node = CharacterRigNode.CharacterPortraitSprite_Image,
             resourcesRoot = ResourcesSpriteResolver.BackgroundsRoot,
             spriteKey = spriteKey,
             sizingMode = CharRigImageSizingMode.HeightFitPreserveAspect,
@@ -64,7 +64,7 @@ public sealed partial class StageCommandParser
         => Emit(new FadeCommandSpecCharR
         {
             slotKey = rigKey,
-            target = CharacterRigTarget.CharacterPortraitSprite_Root,
+            node = CharacterRigNode.CharacterPortraitSprite_Root,
             targetAlpha = NodeTargets.FadeInAlpha,
             duration = YarnDurationParser.Parse(durationToken, BackgroundDefaultDurationSeconds)
         });
@@ -73,7 +73,7 @@ public sealed partial class StageCommandParser
         => Emit(new FadeCommandSpecCharR
         {
             slotKey = rigKey,
-            target = CharacterRigTarget.CharacterPortraitSprite_Root,
+            node = CharacterRigNode.CharacterPortraitSprite_Root,
             targetAlpha = NodeTargets.FadeOutAlpha,
             duration = YarnDurationParser.Parse(durationToken, BackgroundDefaultDurationSeconds)
         });
@@ -82,7 +82,7 @@ public sealed partial class StageCommandParser
         => Emit(new MoveByCommandSpecCharR
         {
             slotKey = rigKey,
-            target = CharacterRigTarget.CharSlot_Track,
+            node = CharacterRigNode.CharSlot_Track,
             useAbsolutePosition = false,
             delta = new Vector2(ParseSignedUnit(xToken), ParseSignedUnit(yToken)),
             duration = YarnDurationParser.Parse(durationToken, BackgroundDefaultDurationSeconds),
@@ -93,7 +93,7 @@ public sealed partial class StageCommandParser
         => Emit(new ScaleToCommandSpecCharR
         {
             slotKey = rigKey,
-            target = CharacterRigTarget.CharacterPortrait_ActingScale,
+            node = CharacterRigNode.CharacterPortrait_ActingScale,
             toScale = new Vector2(scale, scale),
             duration = YarnDurationParser.Parse(durationToken, BackgroundDefaultDurationSeconds)
         });

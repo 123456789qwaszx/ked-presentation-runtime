@@ -6,8 +6,8 @@ using UnityEngine;
 [Serializable]
 public class RotateToCommandSpecCharR : CharacterRigCommandSpecBase
 {
-    [Header("Target")]
-    public CharacterRigTarget target = CharacterRigTarget.CharSlot_Rotation;
+    [Header("Node")]
+    public CharacterRigNode node = CharacterRigNode.CharSlot_Rotation;
 
     [Header("Rotation (localEulerAngles)")]
     public Vector3 toEuler = Vector3.zero;
@@ -49,7 +49,7 @@ public sealed class RotateToCommandCharR : ClaimTweenCommandBase
     protected override void ResolveTargets()
     {
         _rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(_stage, _spec.slotKey);
-        _rect = _rig.GetRect(_spec.target);
+        _rect = _rig.GetRect(_spec.node);
     }
 
     protected override void ClaimTarget()

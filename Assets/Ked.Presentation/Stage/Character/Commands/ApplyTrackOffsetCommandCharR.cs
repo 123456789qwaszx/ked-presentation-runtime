@@ -6,16 +6,16 @@ using UnityEngine;
 [Serializable]
 public class ApplyTrackOffsetCommandSpecCharR : CharacterRigCommandSpecBase
 {
-    [Header("Target")]
+    [Header("Node")]
     [Tooltip("offset를 실제로 적용할 대상.")]
-    public CharacterRigTarget target = CharacterRigTarget.CharacterPortrait_Track;
+    public CharacterRigNode node = CharacterRigNode.CharacterPortrait_Track;
 
     [Header("Offset")]
     [Tooltip("현재 anchoredPosition 기준으로 더해질 오프셋(픽셀 단위).")]
     public Vector2 offset = Vector2.zero;
 
-    [Header("Reset Target Before Apply")]
-    [Tooltip("체크하면 target의 위치를 먼저 (0,0)으로 맞춘 뒤 offset을 적용합니다. 상위 Anchor의 위치는 유지됩니다.")]
+    [Header("Reset Node Before Apply")]
+    [Tooltip("체크하면 node의 위치를 먼저 (0,0)으로 맞춘 뒤 offset을 적용합니다. 상위 Anchor의 위치는 유지됩니다.")]
     public bool applyFromZero = true;
     
     [Header("Track Layer Reset")]
@@ -71,7 +71,7 @@ public sealed class ApplyTrackOffsetCommandCharR : CommandBase
         _resolveAttempted = true;
         
         _rigRefs = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(_stage, _spec.slotKey);
-        _rect = _rigRefs.GetRect(_spec.target);
+        _rect = _rigRefs.GetRect(_spec.node);
     }
 
     private void ApplyFinalState()

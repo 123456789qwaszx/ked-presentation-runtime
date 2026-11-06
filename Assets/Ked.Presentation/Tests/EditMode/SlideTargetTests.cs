@@ -194,7 +194,7 @@ namespace Ked.Presentation.Tests
         public void 슬라이드는_move_by와_같은_노드를_민다()
         {
             // 표적이 갈리면 둘을 섞어 쓴 라인에서 자리가 어긋난다 — 런타임은 둘 다
-            // CharSlot_Track이다(SlideCommandSpecCharR.target · MoveByCommandSpecCharR).
+            // CharSlot_Track이다(SlideCommandSpecCharR.node · MoveByCommandSpecCharR).
             StageState slid = Fold(Cmd("slot", "c1"), Cmd("slide_out", "c1", "right", "3u"));
             StageState moved = Fold(Cmd("slot", "c1"), Cmd("move_by", "c1", "+3u", "0u"));
 

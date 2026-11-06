@@ -13,8 +13,8 @@ using UnityEngine.UI;
 [Serializable]
 public sealed class SetSpriteCommandSpecCharR : CharacterRigCommandSpecBase
 {
-    [Header("Target")]
-    public CharacterRigTarget target = CharacterRigTarget.CharacterPortraitSprite_Image;
+    [Header("Node")]
+    public CharacterRigNode node = CharacterRigNode.CharacterPortraitSprite_Image;
 
     [Header("Sprite (Resources)")]
     [Tooltip("Resources 아래 뿌리 폴더. 배경은 'Backgrounds'.")]
@@ -72,7 +72,7 @@ public sealed class SetSpriteCommandCharR : CommandBase
         _resolveAttempted = true;
 
         _rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(_stage, _spec.slotKey);
-        _image = _rig.GetImage(_spec.target);
+        _image = _rig.GetImage(_spec.node);
     }
 
     private void Apply()
@@ -82,7 +82,7 @@ public sealed class SetSpriteCommandCharR : CommandBase
         // 못 찾으면 이미지를 끈다 — sprite 없는 Image는 흰 사각형을 그린다. 조용히 남기지 않는다.
         // (해석기가 이미 경고를 남겼다.) sizeDelta는 건드리지 않는다 — 코어도 그 축을 Unhandled로 두고 값을 유지한다.
         // 밑장에 쓰기 전에 진행 중인 face_swap을 완주시킨다 — 나중 쓰기가 이긴다.
-        if (_spec.target == CharacterRigTarget.CharacterPortraitSprite_Image)
+        if (_spec.node == CharacterRigNode.CharacterPortraitSprite_Image)
             SetEmotionPortraitWipeCommandCharR.CompleteInFlight(_rig);
 
         _image.sprite = sprite;

@@ -82,10 +82,10 @@ public static class StageStateCapture
         // 스키마 선언 순서(부모 먼저)를 그대로 탄다 — 트리 Add의 부모 선행 조건과 맞는다.
         foreach (CharacterRigSchema.NodeDef def in CharacterRigSchema.Nodes)
         {
-            if (!TryToTarget(def.Id, out CharacterRigTarget target))
+            if (!TryToNode(def.Id, out CharacterRigNode node))
                 continue;
 
-            RectTransform rect = refs.GetRect(target);
+            RectTransform rect = refs.GetRect(node);
 
             string key = StageState.NodeKeyOf(slotKey, def.Id.ToString());
 
@@ -117,9 +117,9 @@ public static class StageStateCapture
             state.SetAlpha(key, group.alpha);
     }
 
-    private static bool TryToTarget(CharacterRigSchema.Refs id, out CharacterRigTarget target)
+    private static bool TryToNode(CharacterRigSchema.Refs id, out CharacterRigNode node)
     {
-        // 두 enum은 이름이 1:1이다 (CharacterRigTarget이 RigRoot 하나를 더 가질 뿐).
-        return Enum.TryParse(id.ToString(), out target);
+        // 두 enum은 이름이 1:1이다 (CharacterRigNode가 RigRoot 하나를 더 가질 뿐).
+        return Enum.TryParse(id.ToString(), out node);
     }
 }

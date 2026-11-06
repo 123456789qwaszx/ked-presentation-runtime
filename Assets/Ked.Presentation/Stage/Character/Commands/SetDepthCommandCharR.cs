@@ -18,9 +18,9 @@ public sealed class SetDepthCommandSpecCharR : CharacterRigCommandSpecBase
     [Tooltip("preserve focus point에 추가로 더할 offset.")]
     public Vector2 focusOffset = Vector2.zero;
 
-    [Header("Targets")]
-    public CharacterRigTarget depthYTarget = CharacterRigTarget.CharSlot_DepthY;
-    public CharacterRigTarget depthScaleTarget = CharacterRigTarget.CharSlot_DepthScale;
+    [Header("Nodes")]
+    public CharacterRigNode depthYNode = CharacterRigNode.CharSlot_DepthY;
+    public CharacterRigNode depthScaleNode = CharacterRigNode.CharSlot_DepthScale;
 
     [Header("Tween")]
     public float duration = 0.4f;
@@ -63,8 +63,8 @@ public sealed class SetDepthCommandCharR : ClaimTweenCommandBase
     {
         _rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(_stage, _spec.slotKey);
 
-        _depthYRect = _rig.GetRect(_spec.depthYTarget);
-        _depthScaleRect = _rig.GetRect(_spec.depthScaleTarget);
+        _depthYRect = _rig.GetRect(_spec.depthYNode);
+        _depthScaleRect = _rig.GetRect(_spec.depthScaleNode);
     }
 
     protected override void ClaimTarget()

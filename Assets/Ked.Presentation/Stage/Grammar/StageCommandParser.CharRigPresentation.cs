@@ -7,7 +7,7 @@ public sealed partial class StageCommandParser
     private void EnqueueFadeInSpec(string roleKey, string durationToken)
         => Emit(new FadeCommandSpecCharR
         {
-            target = CharacterRigTarget.CharacterPortraitSprite_Root,
+            node = CharacterRigNode.CharacterPortraitSprite_Root,
             targetAlpha = NodeTargets.FadeInAlpha,
             slotKey = roleKey,
             duration = YarnDurationParser.Parse(durationToken)
@@ -16,7 +16,7 @@ public sealed partial class StageCommandParser
     private void EnqueueFadeOutSpec(string roleKey, string durationToken)
         => Emit(new FadeCommandSpecCharR
         {
-            target = CharacterRigTarget.CharacterPortraitSprite_Root,
+            node = CharacterRigNode.CharacterPortraitSprite_Root,
             targetAlpha = NodeTargets.FadeOutAlpha,
             slotKey = roleKey,
             duration = YarnDurationParser.Parse(durationToken)
@@ -31,7 +31,7 @@ public sealed partial class StageCommandParser
 
         Emit(new FadeCommandSpecCharR
         {
-            target = CharacterRigTarget.CharacterPortraitSprite_Root,
+            node = CharacterRigNode.CharacterPortraitSprite_Root,
             targetAlpha = NodeTargets.FadeAlpha(alpha),
             slotKey = roleKey,
             duration = YarnDurationParser.Parse(durationToken)
@@ -73,7 +73,7 @@ public sealed partial class StageCommandParser
         => Emit(new MoveByCommandSpecCharR
         {
             slotKey = roleKey,
-            target = CharacterRigTarget.CharacterPortrait_Track,
+            node = CharacterRigNode.CharacterPortrait_Track,
             delta = new Vector2(YarnUnitParser.Parse(xToken), YarnUnitParser.Parse(yToken)),
             duration = YarnDurationParser.Parse(durationToken),
         });
@@ -95,7 +95,7 @@ public sealed partial class StageCommandParser
         Emit(new ScaleToCommandSpecCharR
         {
             slotKey = roleKey,
-            target = CharacterRigTarget.CharacterPortrait_ActingScale,
+            node = CharacterRigNode.CharacterPortrait_ActingScale,
             duration = YarnDurationParser.Parse(durationToken),
             toScale = new Vector2(xyValue, xyValue),
             ease = ease

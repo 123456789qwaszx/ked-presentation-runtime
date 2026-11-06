@@ -34,7 +34,7 @@ public sealed partial class StageCommandParser
         => Emit(new SetAnchorCommandSpecCharR
         {
             slotKey = slotKey,
-            target = CharacterRigTarget.CharacterPortrait_VisualOffset,
+            node = CharacterRigNode.CharacterPortrait_VisualOffset,
             resetSlotPos = resetSlotPos,
             resetCharacterPos = resetCharPos
         });
@@ -44,7 +44,7 @@ public sealed partial class StageCommandParser
         {
             slotKey = roleKey,
             mode = CharacterMirrorModeParser.Parse(directionToken),
-            target = CharacterRigTarget.CharacterPortrait_ActingScale_X,
+            node = CharacterRigNode.CharacterPortrait_ActingScale_X,
             duration = 0f,
         });
 
@@ -74,7 +74,7 @@ public sealed partial class StageCommandParser
         Emit(new MoveByCommandSpecCharR
         {
             slotKey = slotKey,
-            target = CharacterRigTarget.CharSlot_Track,
+            node = CharacterRigNode.CharSlot_Track,
             useAbsolutePosition = false,
             delta = new Vector2(ParseSignedUnit(xToken), ParseSignedUnit(yToken)),
             duration = YarnDurationParser.Parse(durationToken),
@@ -115,7 +115,7 @@ public sealed partial class StageCommandParser
         Emit(new RotateToCommandSpecCharR
         {
             slotKey = roleKey,
-            target = CharacterRigTarget.CharSlot_SwayPivot,
+            node = CharacterRigNode.CharSlot_SwayPivot,
 
             toEuler = new Vector3(0f, 0f, degree),
             relativeToCurrent = true,
@@ -132,7 +132,7 @@ public sealed partial class StageCommandParser
         Emit(new RotateToCommandSpecCharR
         {
             slotKey = roleKey,
-            target = CharacterRigTarget.CharSlot_SwayPivot,
+            node = CharacterRigNode.CharSlot_SwayPivot,
 
             toEuler = Vector3.zero,
 
@@ -150,7 +150,7 @@ public sealed partial class StageCommandParser
         Emit(new RotateToCommandSpecCharR
         {
             slotKey = roleKey,
-            target = CharacterRigTarget.CharacterPortrait_SwayPivot,
+            node = CharacterRigNode.CharacterPortrait_SwayPivot,
 
             toEuler = new Vector3(0f, 0f, degree),
             relativeToCurrent = false,
@@ -167,7 +167,7 @@ public sealed partial class StageCommandParser
         Emit(new ScaleToCommandSpecCharR
         {
             slotKey = roleKey,
-            target = CharacterRigTarget.CharSlot_Scale,
+            node = CharacterRigNode.CharSlot_Scale,
 
             toScale = new Vector2(multiplier, multiplier),
             relativeToCurrent = true,
@@ -184,7 +184,7 @@ public sealed partial class StageCommandParser
         var slotOffsetSpec = new MoveByCommandSpecCharR
         {
             slotKey = slotKey,
-            target = CharacterRigTarget.CharSlot_Track,
+            node = CharacterRigNode.CharSlot_Track,
             useAbsolutePosition = true,
             delta = new Vector2(0, 0),
             duration = duration
@@ -193,7 +193,7 @@ public sealed partial class StageCommandParser
         var spec2 = new MoveByCommandSpecCharR
         {
             slotKey = slotKey,
-            target = CharacterRigTarget.CharSlot_Track_Focus,
+            node = CharacterRigNode.CharSlot_Track_Focus,
             useAbsolutePosition = true,
             delta = new Vector2(0, 0),
             duration = duration
@@ -210,7 +210,7 @@ public sealed partial class StageCommandParser
         Emit(new ScaleToCommandSpecCharR
         {
             slotKey = roleKey,
-            target = CharacterRigTarget.CharSlot_Scale,
+            node = CharacterRigNode.CharSlot_Scale,
 
             toScale = new Vector2(1, 1),
 

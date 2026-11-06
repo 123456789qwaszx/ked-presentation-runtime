@@ -6,8 +6,8 @@ using UnityEngine;
 [Serializable]
 public class ScaleToCommandSpecCharR : CharacterRigCommandSpecBase
 {
-    [Header("Target")]
-    public CharacterRigTarget target = CharacterRigTarget.CharSlot_Scale;
+    [Header("Node")]
+    public CharacterRigNode node = CharacterRigNode.CharSlot_Scale;
 
     [Header("Scale (XY)")]
     public Vector2 toScale = Vector2.one;
@@ -50,7 +50,7 @@ public sealed class ScaleToCommandCharR : ClaimTweenCommandBase
     protected override void ResolveTargets()
     {
         _rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(_stage, _spec.slotKey);
-        _rect = _rig.GetRect(_spec.target);
+        _rect = _rig.GetRect(_spec.node);
     }
 
     protected override void ClaimTarget()

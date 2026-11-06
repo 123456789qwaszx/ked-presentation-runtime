@@ -112,7 +112,7 @@ public static class CharacterRigSchema
     };
 }
 
-public enum CharacterRigTarget
+public enum CharacterRigNode
 {
     RigRoot,
     
@@ -220,60 +220,60 @@ public sealed class CharacterRigRefs
 
 public static class CharacterRigRefsExtensions
 {
-    public static RectTransform GetRect(this CharacterRigRefs refs, CharacterRigTarget target)
+    public static RectTransform GetRect(this CharacterRigRefs refs, CharacterRigNode node)
     {
-        Component component = refs?.GetComponent(target);
+        Component component = refs?.GetComponent(node);
         return component != null ? component.transform as RectTransform : null;
     }
 
-    public static Image GetImage(this CharacterRigRefs refs, CharacterRigTarget target)
+    public static Image GetImage(this CharacterRigRefs refs, CharacterRigNode node)
     {
-        return refs?.GetComponent(target) as Image;
+        return refs?.GetComponent(node) as Image;
     }
 
-    private static Component GetComponent(this CharacterRigRefs refs, CharacterRigTarget target)
+    private static Component GetComponent(this CharacterRigRefs refs, CharacterRigNode node)
     {
         if (refs == null)
             return null;
 
-        return target switch
+        return node switch
         {
-            CharacterRigTarget.RigRoot => refs.RigRoot,
+            CharacterRigNode.RigRoot => refs.RigRoot,
             
             // Slot axis - stage placement
-            CharacterRigTarget.CharSlot_Track_Focus => refs.CharSlot_Track_Focus,
-            CharacterRigTarget.CharSlot_DepthY => refs.CharSlot_DepthY,
-            CharacterRigTarget.CharSlot_DepthScale => refs.CharSlot_DepthScale,
-            CharacterRigTarget.CharSlot_Track_Idle => refs.CharSlot_Track_Idle,
-            CharacterRigTarget.CharSlot_Track => refs.CharSlot_Track,
-            CharacterRigTarget.CharSlot_Track_X => refs.CharSlot_Track_X,
-            CharacterRigTarget.CharSlot_Track_Y => refs.CharSlot_Track_Y,
-            CharacterRigTarget.CharSlot_Rotation => refs.CharSlot_Rotation,
-            CharacterRigTarget.CharSlot_SwayPivot => refs.CharSlot_SwayPivot,
-            CharacterRigTarget.CharSlot_Scale => refs.CharSlot_Scale,
+            CharacterRigNode.CharSlot_Track_Focus => refs.CharSlot_Track_Focus,
+            CharacterRigNode.CharSlot_DepthY => refs.CharSlot_DepthY,
+            CharacterRigNode.CharSlot_DepthScale => refs.CharSlot_DepthScale,
+            CharacterRigNode.CharSlot_Track_Idle => refs.CharSlot_Track_Idle,
+            CharacterRigNode.CharSlot_Track => refs.CharSlot_Track,
+            CharacterRigNode.CharSlot_Track_X => refs.CharSlot_Track_X,
+            CharacterRigNode.CharSlot_Track_Y => refs.CharSlot_Track_Y,
+            CharacterRigNode.CharSlot_Rotation => refs.CharSlot_Rotation,
+            CharacterRigNode.CharSlot_SwayPivot => refs.CharSlot_SwayPivot,
+            CharacterRigNode.CharSlot_Scale => refs.CharSlot_Scale,
 
             // Character casting axis - per-character defaults
-            CharacterRigTarget.CharacterPortrait_VisualOffset => refs.CharacterPortrait_VisualOffset,
+            CharacterRigNode.CharacterPortrait_VisualOffset => refs.CharacterPortrait_VisualOffset,
 
             // Portrait acting axis
-            CharacterRigTarget.CharacterPortrait_Track => refs.CharacterPortrait_Track,
-            CharacterRigTarget.CharacterPortrait_Rotation => refs.CharacterPortrait_Rotation,
-            CharacterRigTarget.CharacterPortrait_Track_Move => refs.CharacterPortrait_Track_Move,
-            CharacterRigTarget.CharacterPortrait_Track_Move_X => refs.CharacterPortrait_Track_Move_X,
-            CharacterRigTarget.CharacterPortrait_Track_Move_Y => refs.CharacterPortrait_Track_Move_Y,
-            CharacterRigTarget.CharacterPortrait_SwayPivot => refs.CharacterPortrait_SwayPivot,
-            CharacterRigTarget.CharacterPortrait_Shake => refs.CharacterPortrait_Shake,
-            CharacterRigTarget.CharacterPortrait_ActingScale => refs.CharacterPortrait_ActingScale,
-            CharacterRigTarget.CharacterPortrait_ActingScale_X => refs.CharacterPortrait_ActingScale_X,
-            CharacterRigTarget.CharacterPortrait_ActingScale_Y => refs.CharacterPortrait_ActingScale_Y,
+            CharacterRigNode.CharacterPortrait_Track => refs.CharacterPortrait_Track,
+            CharacterRigNode.CharacterPortrait_Rotation => refs.CharacterPortrait_Rotation,
+            CharacterRigNode.CharacterPortrait_Track_Move => refs.CharacterPortrait_Track_Move,
+            CharacterRigNode.CharacterPortrait_Track_Move_X => refs.CharacterPortrait_Track_Move_X,
+            CharacterRigNode.CharacterPortrait_Track_Move_Y => refs.CharacterPortrait_Track_Move_Y,
+            CharacterRigNode.CharacterPortrait_SwayPivot => refs.CharacterPortrait_SwayPivot,
+            CharacterRigNode.CharacterPortrait_Shake => refs.CharacterPortrait_Shake,
+            CharacterRigNode.CharacterPortrait_ActingScale => refs.CharacterPortrait_ActingScale,
+            CharacterRigNode.CharacterPortrait_ActingScale_X => refs.CharacterPortrait_ActingScale_X,
+            CharacterRigNode.CharacterPortrait_ActingScale_Y => refs.CharacterPortrait_ActingScale_Y,
 
             // Portrait sprite
-            CharacterRigTarget.CharacterPortraitSprite_Root => refs.CharacterPortraitSprite_Root,
-            CharacterRigTarget.CharacterPortraitSprite_Image => refs.CharacterPortraitSprite_Image,
+            CharacterRigNode.CharacterPortraitSprite_Root => refs.CharacterPortraitSprite_Root,
+            CharacterRigNode.CharacterPortraitSprite_Image => refs.CharacterPortraitSprite_Image,
 
             // Portrait sprite overlay
-            CharacterRigTarget.CharacterPortraitSpriteOverlay_Root => refs.CharacterPortraitSpriteOverlay_Root,
-            CharacterRigTarget.CharacterPortraitSpriteOverlay_Image => refs.CharacterPortraitSpriteOverlay_Image,
+            CharacterRigNode.CharacterPortraitSpriteOverlay_Root => refs.CharacterPortraitSpriteOverlay_Root,
+            CharacterRigNode.CharacterPortraitSpriteOverlay_Image => refs.CharacterPortraitSpriteOverlay_Image,
 
             _ => null
         };

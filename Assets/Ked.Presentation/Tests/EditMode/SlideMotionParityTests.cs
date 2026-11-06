@@ -100,8 +100,8 @@ public class SlideMotionParityTests
         Assert.That(slideOut.punch, Is.EqualTo(SlideMotion.OutPunchPixels).Within(Tolerance));
 
         // 표적 rect도 같아야 한다 — 다른 노드를 밀면 자리가 어긋난다.
-        Assert.That(slideIn.target, Is.EqualTo(CharacterRigTarget.CharSlot_Track));
-        Assert.That(slideOut.target, Is.EqualTo(CharacterRigTarget.CharSlot_Track));
+        Assert.That(slideIn.node, Is.EqualTo(CharacterRigNode.CharSlot_Track));
+        Assert.That(slideOut.node, Is.EqualTo(CharacterRigNode.CharSlot_Track));
 
         // 기본 방향도 브리지 시그니처와 같다(등장 left · 퇴장 right).
         Assert.That(

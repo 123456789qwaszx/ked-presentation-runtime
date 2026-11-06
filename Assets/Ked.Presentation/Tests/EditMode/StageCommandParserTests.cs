@@ -184,8 +184,8 @@ public class StageCommandParserTests
         Assert.IsInstanceOf<SetPortraitSpriteCommandSpecCharR>(specs[1]);
         Assert.IsInstanceOf<FadeCommandSpecCharR>(specs[2]);
         Assert.IsInstanceOf<FadeCommandSpecCharR>(specs[3]);
-        Assert.AreEqual(CharacterRigTarget.RigRoot, ((FadeCommandSpecCharR)specs[2]).target);
-        Assert.AreEqual(CharacterRigTarget.CharacterPortraitSprite_Root, ((FadeCommandSpecCharR)specs[3]).target);
+        Assert.AreEqual(CharacterRigNode.RigRoot, ((FadeCommandSpecCharR)specs[2]).node);
+        Assert.AreEqual(CharacterRigNode.CharacterPortraitSprite_Root, ((FadeCommandSpecCharR)specs[3]).node);
         Assert.AreEqual(NodeTargets.FadeInAlpha, ((FadeCommandSpecCharR)specs[2]).targetAlpha, "show는 끝까지 나타난다");
     }
 
@@ -204,7 +204,7 @@ public class StageCommandParserTests
     {
         FadeCommandSpecCharR half = (FadeCommandSpecCharR)Parse(NewParser(), Cmd("fade", "c1", "0.5", "12fr"))[0];
         Assert.AreEqual(0.5f, half.targetAlpha, 1e-6f);
-        Assert.AreEqual(CharacterRigTarget.CharacterPortraitSprite_Root, half.target, "fade_in · fade_out과 같은 표적");
+        Assert.AreEqual(CharacterRigNode.CharacterPortraitSprite_Root, half.node, "fade_in · fade_out과 같은 표적");
         Assert.AreEqual(0.5f, half.duration, 1e-5f, "12fr");
 
         LogAssert.Expect(LogType.Warning, new Regex("fade.*밖이다"));
@@ -269,7 +269,7 @@ public class StageCommandParserTests
 
         SetSpriteCommandSpecCharR sprite = (SetSpriteCommandSpecCharR)specs[1];
         Assert.AreEqual("bg_main", sprite.slotKey);
-        Assert.AreEqual(CharacterRigTarget.CharacterPortraitSprite_Image, sprite.target);
+        Assert.AreEqual(CharacterRigNode.CharacterPortraitSprite_Image, sprite.node);
         Assert.AreEqual(ResourcesSpriteResolver.BackgroundsRoot, sprite.resourcesRoot);
         Assert.AreEqual("class_day", sprite.spriteKey);
         Assert.AreEqual(CharRigImageSizingMode.HeightFitPreserveAspect, sprite.sizingMode);
@@ -292,17 +292,17 @@ public class StageCommandParserTests
     public void bg_fade_move_scale은_캐릭터와_같은_노드를_잡는다()
     {
         FadeCommandSpecCharR fade = (FadeCommandSpecCharR)Parse(NewParser(), Cmd("bg_fade_out", "bg_main"))[0];
-        Assert.AreEqual(CharacterRigTarget.CharacterPortraitSprite_Root, fade.target);
+        Assert.AreEqual(CharacterRigNode.CharacterPortraitSprite_Root, fade.node);
         Assert.AreEqual(NodeTargets.FadeOutAlpha, fade.targetAlpha);
         Assert.AreEqual(10f / 24f, fade.duration, 1e-5f, "생략값 10fr");
 
         MoveByCommandSpecCharR move = (MoveByCommandSpecCharR)Parse(NewParser(), Cmd("bg_move", "bg_main", "2u", "-1u"))[0];
-        Assert.AreEqual(CharacterRigTarget.CharSlot_Track, move.target, "move_by와 같은 축");
+        Assert.AreEqual(CharacterRigNode.CharSlot_Track, move.node, "move_by와 같은 축");
         Assert.IsFalse(move.useAbsolutePosition);
         Assert.Less(move.delta.y, 0f, "부호 있는 단위");
 
         ScaleToCommandSpecCharR scale = (ScaleToCommandSpecCharR)Parse(NewParser(), Cmd("bg_scale", "bg_main", "1.2"))[0];
-        Assert.AreEqual(CharacterRigTarget.CharacterPortrait_ActingScale, scale.target, "가운데 피벗 — CharSlot_Scale은 발 피벗");
+        Assert.AreEqual(CharacterRigNode.CharacterPortrait_ActingScale, scale.node, "가운데 피벗 — CharSlot_Scale은 발 피벗");
         Assert.IsFalse(scale.relativeToCurrent);
         Assert.AreEqual(1.2f, scale.toScale.x, 1e-6f);
     }

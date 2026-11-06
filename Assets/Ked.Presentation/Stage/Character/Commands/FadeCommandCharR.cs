@@ -5,8 +5,8 @@ using UnityEngine;
 [Serializable]
 public sealed class FadeCommandSpecCharR : CharacterRigCommandSpecBase
 {
-    [Header("Target")]
-    public CharacterRigTarget target = CharacterRigTarget.RigRoot;
+    [Header("Node")]
+    public CharacterRigNode node = CharacterRigNode.RigRoot;
 
     [Tooltip("목표 alpha [0,1]. fade_in은 1, fade_out은 0(코어 NodeTargets.FadeIn · NodeTargets.FadeOut의 값)이고, 그 사이는 반투명까지의 페이드다.")]
     [Range(0f, 1f)]
@@ -41,7 +41,7 @@ public sealed class FadeCommandCharR : ClaimTweenCommandBase
 
     protected override void ResolveTargets()
         => _group = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(_stage, _spec.slotKey)
-            .GetRect(_spec.target)
+            .GetRect(_spec.node)
             .GetComponent<CanvasGroup>();
 
     protected override void ClaimTarget()

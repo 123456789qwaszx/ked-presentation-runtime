@@ -6,8 +6,8 @@ using UnityEngine;
 [Serializable]
 public class MoveByCommandSpecCharR : CharacterRigCommandSpecBase
 {
-    [Header("Target (Track or Rig)")]
-    public CharacterRigTarget target = CharacterRigTarget.CharSlot_Track;
+    [Header("Node (Track or Rig)")]
+    public CharacterRigNode node = CharacterRigNode.CharSlot_Track;
 
     [Header("Move")]
     [Tooltip(
@@ -51,7 +51,7 @@ public sealed class MoveByCommandCharR : ClaimTweenCommandBase
     protected override void ResolveTargets()
     {
         _rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(_stage, _spec.slotKey);
-        _rect = _rig.GetRect(_spec.target);
+        _rect = _rig.GetRect(_spec.node);
     }
 
     protected override void ClaimTarget()

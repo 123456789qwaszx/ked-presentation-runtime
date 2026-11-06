@@ -354,7 +354,7 @@ CharSlot_Track_Focus          place 계열          ← 슬롯 축 (무대 배�
 |---|---|---|
 | 1 | `CharacterRigSchema.Refs` enum | **계층 정의** — 이 그래프에 어떤 노드가 있는가 |
 | 2 | `CharacterRigSchema.Nodes` 배열 | **빌드 정의** — 부모·컴포넌트 요구·초기 α |
-| 3 | `CharacterRigTarget` enum | **커맨드 어휘** — 커맨드가 겨눌 수 있는 대상 |
+| 3 | `CharacterRigNode` enum | **커맨드 어휘** — 커맨드가 겨눌 수 있는 대상 |
 | 4 | `CharacterRigRefs`의 필드 | **실행 계층** — 해석된 런타임 참조 |
 | 5 | `CharacterRigRefsExtensions.GetComponent` | 3 → 4 해석 |
 | 6 | `CharacterRigBuilder.BuildRefs` | 1 → 4 바인딩 |
@@ -363,7 +363,7 @@ CharSlot_Track_Focus          place 계열          ← 슬롯 축 (무대 배�
 
 * **존재하는 노드 ≠ 겨눌 수 있는 노드.** 1과 3이 지금 25개로 겹치는 것은 우연이고,
   타입은 그 둘이 갈라질 수 있음을 표현한다. 하나로 합치면 구조용 보조 노드를 추가하는
-  순간 **커맨드가 그것을 겨눌 수 있게 된다.** `CharacterRigTarget`은 API 표면이다 —
+  순간 **커맨드가 그것을 겨눌 수 있게 된다.** `CharacterRigNode`은 API 표면이다 —
   화면 효과 리그에 이 enum이 없는 것이 그 증거다(거기서는 `ControllerKind`로 겨눈다).
 * **필드 이름 = 하이어라키 오브젝트 이름.** `refs.CharSlot_Track_X`를 보고 하이어라키에서
   `<role>CharSlot_Track_X`를 이름 대조만으로 찾을 수 있다. 딕셔너리로 접으면 이 성질이
@@ -373,7 +373,7 @@ CharSlot_Track_Focus          place 계열          ← 슬롯 축 (무대 배�
   리그 넷이 전부 `Definition` · `Builder` · `Registry` · `Resolver`로 선다.
 
 > ⚠ **다만 넷 사이의 대응은 아직 검사되지 않는다.** `Refs`에 노드를 넣고
-> `CharacterRigTarget`에 안 넣어도, `GetComponent`의 switch에서 빠뜨려도 컴파일은 통과한다.
+> `CharacterRigNode`에 안 넣어도, `GetComponent`의 switch에서 빠뜨려도 컴파일은 통과한다.
 > 경계는 유지하되 **대응만 고정하는** 테스트가 필요하다 —
 > `모든_Refs가_Target으로_겨눌_수_있다` · `모든_Target이_Refs를_해석한다`.
 > (`RigSchemaTreeUnityParityTests`의 `실제_리그에_있는_노드가_덤프에서_빠지지_않았다`와 같은 모양이다.)

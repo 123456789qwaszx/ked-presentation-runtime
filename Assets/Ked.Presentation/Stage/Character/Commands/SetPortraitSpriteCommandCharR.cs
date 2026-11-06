@@ -9,8 +9,8 @@ public sealed class SetPortraitSpriteCommandSpecCharR : CharacterRigCommandSpecB
     [Header("Portrait Identity")]
     public PortraitIdentity portrait;
     
-    [Header("Target")] 
-    public CharacterRigTarget target = CharacterRigTarget.CharacterPortraitSprite_Image;
+    [Header("Node")] 
+    public CharacterRigNode node = CharacterRigNode.CharacterPortraitSprite_Image;
     
     [Header("Sizing Policy")] 
     public CharRigImageSizingMode sizingMode = CharRigImageSizingMode.HeightFitPreserveAspect;
@@ -58,7 +58,7 @@ public sealed class SetPortraitSpriteCommandCharR : CommandBase
         Sprite sprite = _resolver.Resolve(_stage, _spec.slotKey, _spec.portrait, nameof(SetPortraitSpriteCommandCharR));
 
         // 밑장에 쓰기 전에 진행 중인 face_swap을 완주시킨다 — 나중 쓰기가 이긴다.
-        if (_spec.target == CharacterRigTarget.CharacterPortraitSprite_Image)
+        if (_spec.node == CharacterRigNode.CharacterPortraitSprite_Image)
             SetEmotionPortraitWipeCommandCharR.CompleteInFlight(_rig);
 
         _image.sprite = sprite;
@@ -70,6 +70,6 @@ public sealed class SetPortraitSpriteCommandCharR : CommandBase
         _resolveAttempted = true;
 
         _rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(_stage, _spec.slotKey);
-        _image = _rig.GetImage(_spec.target);
+        _image = _rig.GetImage(_spec.node);
     }
 }

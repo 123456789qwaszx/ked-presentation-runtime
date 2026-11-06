@@ -55,11 +55,11 @@ namespace Ked.Presentation.Tests.UnityParity
             _spawned.Clear();
         }
 
-        private RectTransform Rect(CharacterRigTarget target) => _refs.GetRect(target);
-        private RectTransform MeasureRect => Rect(CharacterRigTarget.CharacterPortrait_VisualOffset);
-        private RectTransform DepthY => Rect(CharacterRigTarget.CharSlot_DepthY);
-        private RectTransform DepthScale => Rect(CharacterRigTarget.CharSlot_DepthScale);
-        private RectTransform MoveRect => Rect(CharacterRigTarget.CharSlot_Track_Focus);
+        private RectTransform Rect(CharacterRigNode node) => _refs.GetRect(node);
+        private RectTransform MeasureRect => Rect(CharacterRigNode.CharacterPortrait_VisualOffset);
+        private RectTransform DepthY => Rect(CharacterRigNode.CharSlot_DepthY);
+        private RectTransform DepthScale => Rect(CharacterRigNode.CharSlot_DepthScale);
+        private RectTransform MoveRect => Rect(CharacterRigNode.CharSlot_Track_Focus);
 
         /// <summary>bust 상당 (ExportedTuning/presets/focus-tuning.json의 실값).</summary>
         private static readonly Vector3 BustOffset = new(0f, 820f, 0f);
@@ -206,7 +206,7 @@ namespace Ked.Presentation.Tests.UnityParity
             // 실사용 조건: place_focus가 Track_Focus에 예약을 걸어 둔 채로 size가 온다.
             CharacterPlacementTargetLedger ledger = new();
             ledger.Publish(MoveRect, NodeTarget.AnchoredPosition(MoveRect.name, new Vector2(-460.8f, 60f).ToCore()));
-            ledger.Publish(Rect(CharacterRigTarget.CharSlot_Scale), NodeTarget.LocalScaleXY(Rect(CharacterRigTarget.CharSlot_Scale).name, new Vector2(1.2f, 1.2f).ToCore()));
+            ledger.Publish(Rect(CharacterRigNode.CharSlot_Scale), NodeTarget.LocalScaleXY(Rect(CharacterRigNode.CharSlot_Scale).name, new Vector2(1.2f, 1.2f).ToCore()));
 
             Vector2 raw = new(0f, -320f);
             Vector2 targetScale = new(1.38f, 1.38f);
@@ -220,8 +220,8 @@ namespace Ked.Presentation.Tests.UnityParity
         [Test]
         public void 어질러진_라이브_상태에서도_depth_보정이_종전과_같다()
         {
-            Rect(CharacterRigTarget.CharSlot_Track).anchoredPosition = new Vector2(120f, -30f);
-            Rect(CharacterRigTarget.CharSlot_Scale).localScale = new Vector3(0.85f, 0.85f, 1f);
+            Rect(CharacterRigNode.CharSlot_Track).anchoredPosition = new Vector2(120f, -30f);
+            Rect(CharacterRigNode.CharSlot_Scale).localScale = new Vector3(0.85f, 0.85f, 1f);
             DepthY.anchoredPosition = new Vector2(0f, 90f);
             DepthScale.localScale = new Vector3(1.05f, 1.05f, 1f);
 

@@ -18,9 +18,9 @@ public sealed class PlaceCharacterFocusCommandSpecCharR : CharacterRigCommandSpe
     [Tooltip("ScreenFocusPoint에 추가로 더할 오프셋. Stage/RigSpace local 기준입니다.")]
     public Vector2 screenOffset = Vector2.zero;
 
-    [Header("Placement Target")]
+    [Header("Placement Node")]
     [Tooltip("Focus placement 전용 축. 보통 CharSlot_Track_Focus를 사용합니다.")]
-    public CharacterRigTarget moveTarget = CharacterRigTarget.CharSlot_Track_Focus;
+    public CharacterRigNode moveNode = CharacterRigNode.CharSlot_Track_Focus;
 
     [Header("Tween")]
     public float duration = 0.4f;
@@ -62,7 +62,7 @@ public sealed class PlaceCharacterFocusCommandCharR : ClaimTweenCommandBase
     protected override void ResolveTargets()
     {
         _rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(_stage, _spec.slotKey);
-        _moveRect = _rig.GetRect(_spec.moveTarget);
+        _moveRect = _rig.GetRect(_spec.moveNode);
     }
 
     protected override void ClaimTarget()

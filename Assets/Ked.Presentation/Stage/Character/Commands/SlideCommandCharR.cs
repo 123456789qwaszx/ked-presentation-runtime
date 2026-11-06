@@ -6,8 +6,8 @@ using UnityEngine;
 [Serializable]
 public sealed class SlideCommandSpecCharR : CharacterRigCommandSpecBase
 {
-    [Header("Target (Track)")]
-    public CharacterRigTarget target = CharacterRigTarget.CharSlot_Track;
+    [Header("Node (Track)")]
+    public CharacterRigNode node = CharacterRigNode.CharSlot_Track;
 
     [Header("Slide")]
     [Tooltip("In = 지금 위치가 도착점(화면 밖에서 들어온다) · Out = 지금 위치가 출발점(화면 밖으로 나간다).")]
@@ -52,7 +52,7 @@ public sealed class SlideCommandCharR : ClaimTweenCommandBase
     protected override void ResolveTargets()
     {
         _rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(_stage, _spec.slotKey);
-        _rect = _rig.GetRect(_spec.target);
+        _rect = _rig.GetRect(_spec.node);
     }
 
     protected override void ClaimTarget()

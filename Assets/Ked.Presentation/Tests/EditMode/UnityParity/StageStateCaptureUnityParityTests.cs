@@ -68,7 +68,7 @@ namespace Ked.Presentation.Tests.UnityParity
         public void 오브젝트_이름에_role_prefix가_붙어도_키는_스키마_id다()
         {
             // 전제 확인: 실제 이름에는 prefix가 붙어 있다.
-            RectTransform track = _refs.GetRect(CharacterRigTarget.CharSlot_Track);
+            RectTransform track = _refs.GetRect(CharacterRigNode.CharSlot_Track);
             Assert.That(track.name, Does.Contain(SlotKey), "빌더가 role prefix를 붙였다");
             Assert.That(track.name, Is.Not.EqualTo("CharSlot_Track"));
 
@@ -131,10 +131,10 @@ namespace Ked.Presentation.Tests.UnityParity
         [Test]
         public void 라이브_트랜스폼_값을_그대로_읽는다()
         {
-            RectTransform track = _refs.GetRect(CharacterRigTarget.CharSlot_Track);
+            RectTransform track = _refs.GetRect(CharacterRigNode.CharSlot_Track);
             track.anchoredPosition = new Vector2(123f, -45f);
 
-            RectTransform scale = _refs.GetRect(CharacterRigTarget.CharSlot_Scale);
+            RectTransform scale = _refs.GetRect(CharacterRigNode.CharSlot_Scale);
             scale.localScale = new Vector3(1.5f, 1.5f, 1f);
 
             StageState state = Capture();
@@ -158,7 +158,7 @@ namespace Ked.Presentation.Tests.UnityParity
         [Test]
         public void CanvasGroup_alpha를_읽고_없으면_기본값_1이다()
         {
-            RectTransform spriteRoot = _refs.GetRect(CharacterRigTarget.CharacterPortraitSprite_Root);
+            RectTransform spriteRoot = _refs.GetRect(CharacterRigNode.CharacterPortraitSprite_Root);
 
             Assert.That(spriteRoot.TryGetComponent(out CanvasGroup group), Is.True,
                 "스키마의 NeedsCanvasGroup 노드다");

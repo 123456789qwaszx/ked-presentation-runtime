@@ -92,7 +92,7 @@ namespace Ked.Presentation.Core
         // 무대 지점은 카메라가 중립일 때 그 화면 지점과 겹치는 무대 위 자리다. 이 노드 트리에는 카메라 ·
         // 깊이 층 프레이밍 노드가 없다 — 그것이 곧 카메라 중립이고, 런타임도 배치를 같은 중립으로 푼다(IStageViewNeutral).
 
-        /// <summary>스펙 기본 moveTarget (브리지: CharacterRigTarget.CharSlot_Track_Focus).</summary>
+        /// <summary>스펙 기본 moveTarget (브리지: CharacterRigNode.CharSlot_Track_Focus).</summary>
         public const string PlaceFocusMoveNodeId = "CharSlot_Track_Focus";
 
         public static bool TryPlaceFocus(

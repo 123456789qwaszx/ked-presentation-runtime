@@ -16,8 +16,8 @@ public sealed class MirrorCharacterCommandSpecCharR : CharacterRigCommandSpecBas
     [Header("Mirror")]
     public CharacterMirrorMode mode = CharacterMirrorMode.Toggle;
 
-    [Header("Target")]
-    public CharacterRigTarget target = CharacterRigTarget.CharacterPortrait_ActingScale_X;
+    [Header("Node")]
+    public CharacterRigNode node = CharacterRigNode.CharacterPortrait_ActingScale_X;
 
     [Header("Tween")]
     public float duration = 0f;
@@ -55,7 +55,7 @@ public sealed class MirrorCharacterCommandCharR : ClaimTweenCommandBase
         string resolvedRigKey =
             CharacterRigTargetResolver.ResolveRigKeyByPolicy(_stage, _spec.slotKey);
 
-        _rect = _rig.GetRect(_spec.target);
+        _rect = _rig.GetRect(_spec.node);
 
         CharacterFacing facing = ResolveTargetFacing(resolvedRigKey);
 

@@ -8,8 +8,8 @@ using UnityEngine;
 [Serializable]
 public sealed class SetAnchorCommandSpecCharR : CharacterRigCommandSpecBase
 {
-    [Header("Target (Anchor only)")]
-    public CharacterRigTarget target = CharacterRigTarget.CharacterPortrait_VisualOffset;
+    [Header("Node (Anchor only)")]
+    public CharacterRigNode node = CharacterRigNode.CharacterPortrait_VisualOffset;
 
     [Header("Reset")]
     [Tooltip("체크하면 Anchor 설정 후 CharSlot_Track / Move / X / Y / Rotation / Scale 축을 기본값으로 초기화합니다.")]
@@ -71,7 +71,7 @@ public sealed class SetAnchorCommandCharR : CommandBase
             _stage,
             _spec.slotKey);
 
-        _rect = _rigRefs.GetRect(_spec.target);
+        _rect = _rigRefs.GetRect(_spec.node);
     }
 
     private void Apply()

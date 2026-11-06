@@ -27,7 +27,7 @@ public sealed partial class StageCommandParser
         
         var spec2FadeInCharRigRoot = new FadeCommandSpecCharR
         {
-            target = CharacterRigTarget.RigRoot,
+            node = CharacterRigNode.RigRoot,
             targetAlpha = NodeTargets.FadeInAlpha,
             
             slotKey = roleKey,
@@ -36,7 +36,7 @@ public sealed partial class StageCommandParser
         
         var spec3FadeInPortraitSprite = new FadeCommandSpecCharR
         {
-            target = CharacterRigTarget.CharacterPortraitSprite_Root,
+            node = CharacterRigNode.CharacterPortraitSprite_Root,
             targetAlpha = NodeTargets.FadeInAlpha,
             
             slotKey = roleKey,
@@ -58,7 +58,7 @@ public sealed partial class StageCommandParser
         string unitToken,
         string durationToken,
         string easeToken,
-        CharacterRigTarget target)
+        CharacterRigNode node)
     {
         float pixels = YarnUnitParser.Parse(unitToken);
         float duration = YarnDurationParser.Parse(durationToken);
@@ -69,7 +69,7 @@ public sealed partial class StageCommandParser
         Emit(new MoveByCommandSpecCharR
         {
             slotKey = roleKey,
-            target = target,
+            node = node,
             useAbsolutePosition = false,
             delta = new Vector2(pixels * xSign, pixels * ySign),
             duration = duration,
@@ -79,18 +79,18 @@ public sealed partial class StageCommandParser
     
     
     private void EnqueueNudgeLeftSpec(string roleKey, string unitToken, string durationToken, string easeToken)
-        => EnqueueDirectionalNudgeSpec(roleKey, -1f, 0f, unitToken, durationToken, easeToken, CharacterRigTarget.CharSlot_Track_X);
+        => EnqueueDirectionalNudgeSpec(roleKey, -1f, 0f, unitToken, durationToken, easeToken, CharacterRigNode.CharSlot_Track_X);
 
     
     private void EnqueueNudgeRightSpec(string roleKey, string unitToken, string durationToken, string easeToken)
-        => EnqueueDirectionalNudgeSpec(roleKey, 1f, 0f, unitToken, durationToken, easeToken, CharacterRigTarget.CharSlot_Track_X);
+        => EnqueueDirectionalNudgeSpec(roleKey, 1f, 0f, unitToken, durationToken, easeToken, CharacterRigNode.CharSlot_Track_X);
 
     
     private void EnqueueNudgeUpSpec(string roleKey, string unitToken, string durationToken, string easeToken)
-        => EnqueueDirectionalNudgeSpec(roleKey, 0f, 1f, unitToken, durationToken, easeToken, CharacterRigTarget.CharSlot_Track_Y);
+        => EnqueueDirectionalNudgeSpec(roleKey, 0f, 1f, unitToken, durationToken, easeToken, CharacterRigNode.CharSlot_Track_Y);
 
     
     private void EnqueueNudgeDownSpec(string roleKey, string unitToken, string durationToken, string easeToken)
-        => EnqueueDirectionalNudgeSpec(roleKey, 0f, -1f, unitToken, durationToken, easeToken, CharacterRigTarget.CharSlot_Track_Y);
+        => EnqueueDirectionalNudgeSpec(roleKey, 0f, -1f, unitToken, durationToken, easeToken, CharacterRigNode.CharSlot_Track_Y);
     #endregion
 }

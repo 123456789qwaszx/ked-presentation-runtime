@@ -138,10 +138,10 @@ namespace Ked.Presentation.Tests.UnityParity
         // ── 프로덕션 경로와 같은 계산 ────────────────────────────────
 
         private static RectTransform MeasureRectOf(CharacterRigRefs refs)
-            => refs.GetRect(CharacterRigTarget.CharacterPortrait_VisualOffset);
+            => refs.GetRect(CharacterRigNode.CharacterPortrait_VisualOffset);
 
         private static RectTransform MoveRectOf(CharacterRigRefs refs)
-            => refs.GetRect(CharacterRigTarget.CharSlot_Track_Focus);
+            => refs.GetRect(CharacterRigNode.CharSlot_Track_Focus);
 
         // CharacterFocusPlacementSolver와 같은 순서: 사슬 → 이동 축 색인 → SolveFocusPlacement.
         private static Vector2 SolvePlace(
@@ -234,7 +234,7 @@ namespace Ked.Presentation.Tests.UnityParity
         {
             // 같은 줄의 size가 깊이 크기를 예약한 상태 — 예약은 끝값으로, 카메라는 중립으로.
             CharacterPlacementTargetLedger ledger = new();
-            RectTransform depthScale = _refs.GetRect(CharacterRigTarget.CharSlot_DepthScale);
+            RectTransform depthScale = _refs.GetRect(CharacterRigNode.CharSlot_DepthScale);
             ledger.Publish(depthScale, NodeTarget.LocalScaleXY(depthScale.name, new Vector2(1.58f, 1.58f).ToCore()));
 
             Vector2 atNeutralCamera = SolvePlace(ledger, _refs, _shotRoot, _view);
@@ -257,7 +257,7 @@ namespace Ked.Presentation.Tests.UnityParity
         public void 슬라이드_끝값을_게시하면_place는_화면_밖_출발점을_읽지_않는다()
         {
             // slide_in: 끝값 = 현재 위치. CreateTween이 rect를 출발점(화면 밖)으로 밀어 둔다.
-            RectTransform track = _refs.GetRect(CharacterRigTarget.CharSlot_Track);
+            RectTransform track = _refs.GetRect(CharacterRigNode.CharSlot_Track);
             Vector2 settled = track.anchoredPosition;
 
             Vector2 expected = SolvePlace(new CharacterPlacementTargetLedger(), _refs, _shotRoot, _view);
@@ -281,7 +281,7 @@ namespace Ked.Presentation.Tests.UnityParity
         public void 회전_끝값을_게시하면_place는_회전_중간값을_읽지_않는다()
         {
             // rotate_by: SwayPivot은 발 피벗이라 각도에 따라 얼굴이 원호를 그린다.
-            RectTransform sway = _refs.GetRect(CharacterRigTarget.CharSlot_SwayPivot);
+            RectTransform sway = _refs.GetRect(CharacterRigNode.CharSlot_SwayPivot);
             Vector3 endEuler = new(0f, 0f, 24f);
 
             sway.localEulerAngles = endEuler;

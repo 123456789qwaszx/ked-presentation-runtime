@@ -125,8 +125,8 @@ public sealed class MotionCommandCharR : CommandBase
 
         foreach (MotionChannel channel in _spec.clip.Channels)
         {
-            // 채널의 노드 id는 스키마 id이고, CharacterRigTarget의 이름과 같다.
-            RectTransform rect = _rigRefs.GetRect(Enum.Parse<CharacterRigTarget>(channel.Node));
+            // 채널의 노드 id는 스키마 id이고, CharacterRigNode의 이름과 같다.
+            RectTransform rect = _rigRefs.GetRect(Enum.Parse<CharacterRigNode>(channel.Node));
 
             _bound.Add(new Bound { Channel = channel, Rect = rect });
 

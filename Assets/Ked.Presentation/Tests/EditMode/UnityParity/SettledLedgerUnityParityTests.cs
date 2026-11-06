@@ -56,9 +56,9 @@ namespace Ked.Presentation.Tests.UnityParity
             _spawned.Clear();
         }
 
-        private RectTransform Rect(CharacterRigTarget target) => _refs.GetRect(target);
+        private RectTransform Rect(CharacterRigNode node) => _refs.GetRect(node);
 
-        private RectTransform MeasureRect => Rect(CharacterRigTarget.CharacterPortrait_VisualOffset);
+        private RectTransform MeasureRect => Rect(CharacterRigNode.CharacterPortrait_VisualOffset);
 
         // ── 종전 알고리즘 오라클 ─────────────────────────────────────
         //
@@ -226,8 +226,8 @@ namespace Ked.Presentation.Tests.UnityParity
         public void SetDepth_상당_예약에서_신구가_같다()
         {
             // 실사용 패턴: depthY에 위치, depthScale에 배율.
-            RectTransform depthY = Rect(CharacterRigTarget.CharSlot_DepthY);
-            RectTransform depthScale = Rect(CharacterRigTarget.CharSlot_DepthScale);
+            RectTransform depthY = Rect(CharacterRigNode.CharSlot_DepthY);
+            RectTransform depthScale = Rect(CharacterRigNode.CharSlot_DepthScale);
 
             Vector2 depthYTarget = new(0f, -320f);
             Vector2 depthScaleTarget = new(1.38f, 1.38f);
@@ -255,9 +255,9 @@ namespace Ked.Presentation.Tests.UnityParity
         [Test]
         public void MoveBy와_SetDepth가_겹친_실사용_패턴에서_신구가_같다()
         {
-            RectTransform track = Rect(CharacterRigTarget.CharSlot_Track);
-            RectTransform depthY = Rect(CharacterRigTarget.CharSlot_DepthY);
-            RectTransform depthScale = Rect(CharacterRigTarget.CharSlot_DepthScale);
+            RectTransform track = Rect(CharacterRigNode.CharSlot_Track);
+            RectTransform depthY = Rect(CharacterRigNode.CharSlot_DepthY);
+            RectTransform depthScale = Rect(CharacterRigNode.CharSlot_DepthScale);
 
             // 라이브를 먼저 어질러 둔다 — 예약과 라이브가 같으면 대조가 무의미하다.
             track.anchoredPosition = new Vector2(-120f, 30f);
@@ -286,7 +286,7 @@ namespace Ked.Presentation.Tests.UnityParity
         public void 회전_예약에서_신구가_같다()
         {
             // 실호출부는 아직 오일러를 게시하지 않는다. 그래도 규약이 살아 있음을 고정한다.
-            RectTransform sway = Rect(CharacterRigTarget.CharSlot_SwayPivot);
+            RectTransform sway = Rect(CharacterRigNode.CharSlot_SwayPivot);
 
             CharacterPlacementTargetLedger fresh = new();
             fresh.Publish(sway, NodeTarget.LocalEuler(sway.name, new Vector3(0f, 0f, 24f).ToCore()));
@@ -305,8 +305,8 @@ namespace Ked.Presentation.Tests.UnityParity
         [Test]
         public void 역방향_변환에서_신구가_같다()
         {
-            RectTransform depthY = Rect(CharacterRigTarget.CharSlot_DepthY);
-            RectTransform depthScale = Rect(CharacterRigTarget.CharSlot_DepthScale);
+            RectTransform depthY = Rect(CharacterRigNode.CharSlot_DepthY);
+            RectTransform depthScale = Rect(CharacterRigNode.CharSlot_DepthScale);
 
             CharacterPlacementTargetLedger fresh = new();
             fresh.Publish(depthY, NodeTarget.AnchoredPosition(depthY.name, new Vector2(0f, 440f).ToCore()));
@@ -316,7 +316,7 @@ namespace Ked.Presentation.Tests.UnityParity
             legacy.PublishAnchoredPosition(depthY, new Vector2(0f, 440f));
             legacy.PublishLocalScale(depthScale, new Vector2(1.58f, 1.58f));
 
-            RectTransform parent = Rect(CharacterRigTarget.CharSlot_Track);
+            RectTransform parent = Rect(CharacterRigNode.CharSlot_Track);
             Vector3 worldPoint = _stage.TransformPoint(new Vector3(180f, -220f, 0f));
 
             Vector2 actual = fresh.WorldPointToSettledParentLocalPoint(parent, worldPoint, _stage);
@@ -331,9 +331,9 @@ namespace Ked.Presentation.Tests.UnityParity
         [Test]
         public void 측정이_리그를_바꾸지_않는다()
         {
-            RectTransform depthY = Rect(CharacterRigTarget.CharSlot_DepthY);
-            RectTransform depthScale = Rect(CharacterRigTarget.CharSlot_DepthScale);
-            RectTransform track = Rect(CharacterRigTarget.CharSlot_Track);
+            RectTransform depthY = Rect(CharacterRigNode.CharSlot_DepthY);
+            RectTransform depthScale = Rect(CharacterRigNode.CharSlot_DepthScale);
+            RectTransform track = Rect(CharacterRigNode.CharSlot_Track);
 
             CharacterPlacementTargetLedger ledger = new();
             ledger.Publish(depthY, NodeTarget.AnchoredPosition(depthY.name, new Vector2(0f, -320f).ToCore()));
@@ -354,7 +354,7 @@ namespace Ked.Presentation.Tests.UnityParity
             // 값 스냅샷만으로는 종전 구현을 탓할 수 없다 — 복원하므로 사후 값은 같다.
             // 쓰기 자체는 Transform.hasChanged로 관찰된다. 그 사이에 예외가 나면
             // 리그가 더럽게 남던 것이 종전 문제였고, 이 단계가 없앤 것이 그것이다.
-            RectTransform depthY = Rect(CharacterRigTarget.CharSlot_DepthY);
+            RectTransform depthY = Rect(CharacterRigNode.CharSlot_DepthY);
             Vector2 target = new(0f, -320f);
 
             LegacyLedger legacy = new();
@@ -393,7 +393,7 @@ namespace Ked.Presentation.Tests.UnityParity
             RectTransform stranger = (RectTransform)strangerGo.transform;
 
             CharacterPlacementTargetLedger ledger = new();
-            ledger.Publish(Rect(CharacterRigTarget.CharSlot_DepthY), NodeTarget.AnchoredPosition(Rect(CharacterRigTarget.CharSlot_DepthY).name, new Vector2(0f, -320f).ToCore()));
+            ledger.Publish(Rect(CharacterRigNode.CharSlot_DepthY), NodeTarget.AnchoredPosition(Rect(CharacterRigNode.CharSlot_DepthY).name, new Vector2(0f, -320f).ToCore()));
 
             Dictionary<RectTransform, string> before = Snapshot();
 
@@ -411,7 +411,7 @@ namespace Ked.Presentation.Tests.UnityParity
             // 종전은 노드당 종류 하나만 담아 나중 게시가 앞의 것을 지웠다.
             // 실사용에서는 겹치지 않으므로(위치=track/depthY, 스케일=scale/depthScale)
             // 재생 결과는 같고, 겹치는 경우 새 쪽이 맞다.
-            RectTransform node = Rect(CharacterRigTarget.CharSlot_Track);
+            RectTransform node = Rect(CharacterRigNode.CharSlot_Track);
 
             CharacterPlacementTargetLedger fresh = new();
             fresh.Publish(node, NodeTarget.AnchoredPosition(node.name, new Vector2(300f, 0f).ToCore()));
