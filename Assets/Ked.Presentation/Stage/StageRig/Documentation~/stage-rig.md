@@ -409,5 +409,5 @@ Shot은 본 무대면 접힌 샷, 덮는 무대면 `Default`(항등)다 — 덮�
 ---
 
 관련 문서: [settled-chain.md](../../ShotResponse/Documentation~/settled-chain.md) (장부 · 샷 중립 · 라이브 — 측정 체인),
-[target-boundary.md](../../../Core/Documentation~/target-boundary.md) (스펙 → 목표 상태 규약),
+[target-boundary.md](../../../Core/Documentation~/target-boundary.md) (목표 계산 규약),
 [rig-axis-order.md](../../CharacterRig/Documentation~/rig-axis-order.md) (캐릭터 리그가 스키마로 간 이유)

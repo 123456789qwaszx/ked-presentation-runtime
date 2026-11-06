@@ -189,7 +189,7 @@ coc = saturate(|depthScale_char − depthScale_focus| × falloff) × maxBlur
 깊이는 `size` 커맨드로 갈리기 때문에, 레이어를 기준으로 삼으면 전원이 같은 값이 되어
 **v2의 실패를 그대로 반복한다.**
 
-그래서 `CharacterRigRefs.SettledDepthScale`을 추가했다. `SetDepthCommandCharR`가 목표값을
+그래서 `CharacterRigRefs.SettledDepthScale`을 추가했다. `SetDepthCommandCharR`가 끝값을
 확정할 때 기록하므로 **트윈이 도는 중에도 "끝나면 어디인가"** 를 들고 있다 — 정지 프레임 원칙.
 열거형이 아니라 스케일 값인 이유는 `useLevel=true` 경로에 프리셋 키가 없고, 공식이 필요로 하는
 것도 스케일이기 때문이다.
@@ -202,7 +202,7 @@ coc = saturate(|depthScale_char − depthScale_focus| × falloff) × maxBlur
 ### 블러를 쓰는 커맨드가 셋이다 — 출처를 나누고 가장 큰 값으로 합친다 (2026-11-03)
 
 `focus_on` · `screen_blur` · `char_visual_*`(프리셋의 `blur` 필드)가 모두 `_BlurAmount`에 닿는다.
-예전에는 셋이 같은 값을 서로 다른 트윈 타깃으로 써서 **동시에 걸면 매 프레임 싸웠고**,
+예전에는 셋이 같은 값을 서로 다른 트윈 대상으로 써서 **동시에 걸면 매 프레임 싸웠고**,
 blur가 0인 `char_visual` 프리셋(dim·rim·clear …)은 앞서 걸린 초점·레이어 블러를 지웠다.
 
 지금은 리그의 `RigVisualEffectController`가 출처를 따로 든다:

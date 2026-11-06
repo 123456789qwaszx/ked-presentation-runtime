@@ -61,7 +61,7 @@ public sealed class RotateToCommandCharR : ClaimTweenCommandBase
 
         _startEuler = _rect.localEulerAngles;
 
-        // ── 코어: 스펙 → 목표 상태 ──
+        // ── 코어: 목표 계산 ──
         // 회전도 게시한다. SwayPivot은 측정 체인 위라 RectChainMath가 euler를 읽는다 —
         // 같은 줄의 place가 회전 중간값을 보면 일반 재생과 롤백이 다른 자리를 낸다.
         NodeTarget target = RigTargets.RotateTo(_rect, _spec, _startEuler);

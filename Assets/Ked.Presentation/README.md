@@ -6,7 +6,7 @@
 
 | 폴더 | 어셈블리 | 하는 일 | 참조 |
 |---|---|---|---|
-| `Core/` | `Ked.Presentation.Core` | 계산. 커맨드를 정지 프레임으로 접는 리듀서, 대본 낱말(`12fr` · `2u`), 이징·모션 수학, 튜닝 형식. 순수 C#(엔진 참조 0)이라 저작 툴과 같은 코드를 쓴다 | 없음 |
+| `Core/` | `Ked.Presentation.Core` | 계산. 커맨드가 끝나면 노드가 어떤 값이어야 하는가(`NodeTargets` · `ShotIntents`), 커맨드를 정지 프레임으로 접는 리듀서, 대본 낱말(`12fr` · `2u`), 이징·모션 수학, 튜닝 형식. 순수 C#(엔진 참조 0)이라 저작 툴과 같은 코드를 쓴다 | 없음 |
 | `Stage/` | `Ked.Presentation.Stage` | 무대 실행. 캐릭터·무대 리그, 대본 문법의 뜻(`StageCommandParser`), 커맨드와 트윈, 샷, 화면 효과, 오디오. 리그 프리팹 · 셰이더 · 프리셋 기본값도 여기 있다 | Core · Ked.CommandExecutor · DOTween |
 | `Playback/` | `Ked.Presentation.Playback` | 대사 재생. Yarn 연결, 대사창·줄 표시, 진행 입력·자동·스킵, 되감기·백로그(연출 기억), 등가성 하네스 | Core · Stage · Ked.CommandExecutor · Yarn Spinner · TMP · UGUI |
 | `Editor/` | `Ked.Presentation.Editor` | 에디터 도구. 튜닝·모션 내보내기, 초상 DB 빌더 | Core · Stage |
@@ -52,3 +52,5 @@ Editor ──> Stage
 - `Documentation~/ASSEMBLY-BOUNDARY.md` — 경계를 이렇게 그은 이유
 - `Documentation~/vendoring.md` — 분리본 맞추기
 - `Documentation~/BLUR-DECISIONS.md` — 흐림 효과의 결정 기록
+- `Core/Documentation~/target-boundary.md` — 목표 계산을 순수 함수로 떼어 낸 규약과 이유(값 하나가 장부 · 트윈 · 정지 프레임에 쓰인다)
+- `Core/Documentation~/transform-math-and-epsilon.md` — 코어 좌표 계산의 규약과 허용 오차

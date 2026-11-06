@@ -1,19 +1,40 @@
-# 목표 계산 경계 — "스펙 → 목표 상태" 규약
+# 목표 계산 경계 — "스펙 → 타깃" 규약
 
-코드베이스 **57곳**에 흩어져 있던 `ClaimTarget` 관습을 규약으로 승격한 것.
+연출 커맨드는 트윈을 시작하기 전에 "끝나면 노드가 어떤 값이어야 하는가"를 먼저 정한다.
+그 계산을 엔진 의존이 없는 순수 함수(`NodeTargets` · `ShotIntents`)로 떼어 낸 것이 이 경계다.
+떼어 낸 이유는 하나다 — 같은 값이 장부 · 트윈 · 정지 프레임 세 곳에 쓰이므로,
+계산이 한 자리에 있어야 셋이 갈라지지 않는다(바로 아래).
+
+처음에는 코드베이스 **57곳**에 흩어져 있던 `ClaimTarget` 관습이었고, 그것을 규약으로 올렸다.
 이후 커맨드 이관이 전부 이 문서의 모양을 따른다.
 
 본보기: [`Reduce/NodeTargets.Staging.cs`](../Reduce/NodeTargets.Staging.cs) (MoveBy · ScaleTo)
 ↔ 호스트 `MoveByCommandCharR` · `ScaleToCommandCharR`.
 
+## 타깃이 흐르는 세 갈래
+
+```
+              NodeTarget
+                    │
+   ┌────────────────┼────────────────┐
+   ↓                ↓                ↓
+① 장부 게시      ② 트윈 종점      ③ 상태 폴드
+Ledger.Publish   DOTween 종점     target.ApplyTo(tree)
+(정착 예약)      (재생)           (정지 프레임)
+```
+
+**셋이 같은 값을 보므로 "재생 결과 = 정착 예약 = 정지 프레임"이 한 곳에서 갈라진다.**
+하나라도 빠뜨리면 나중에 원인 모를 불일치가 난다.
+(`NodeTargetTests.세_갈래가_같은_값을_본다`가 이 성질을 고정한다.)
+
 ## 코어로 가는 것 / 호스트에 남는 것
 
 | | 어디 | 왜 |
 |---|---|---|
-| 스펙 → 목표 상태 변환 (`NodeTargets.Xxx` · `ShotIntents.Xxx`) | **코어** | 정지 프레임이 필요한 전부. 순수 산수다 |
+| 스펙 → 타깃 변환 (`NodeTargets.Xxx` · `ShotIntents.Xxx`) | **코어** | 정지 프레임이 필요한 전부. 순수 산수다 |
 | 출력 타입 (`NodeTarget`) | **코어** | 게시·트윈 종점·폴드가 같은 값을 봐야 한다 |
 | `CommandBase` · 코루틴 · `WaitForCompletion` | 호스트 | MonoBehaviour 호스트를 문다 |
-| `ResolveRefs` (slotKey → RectTransform) | 호스트 | 유니티 참조 해석이다 |
+| `ResolveRefs` (roleKey → RectTransform) | 호스트 | 유니티 참조 해석이다 |
 | `DOKill` · 트윈 생성/가속 (`OnStepLifetimeFinished`) | 호스트 | 시간의 세계다 |
 | Commit의 트랜스폼 쓰기 · Ledger `Clear` | 호스트 | 유니티에 쓰는 일이다 |
 | `HasClaimedTarget` 수명 관리 | 호스트 | 실행 수명의 일부다 |
@@ -45,7 +66,7 @@ public static partial class NodeTargets         // Reduce/NodeTargets.*.cs
 ## 호스트 어댑터의 형태 (본보기에서)
 
 ```csharp
-private void ClaimTarget()
+protected override void ClaimTarget()
 {
     _rect.DOKill(true);                                    // 호스트: 시간의 세계
     _startPos = _rect.anchoredPosition;                    // 호스트: 현재 상태 읽기
@@ -74,22 +95,6 @@ public static class RigTargets
 장부(`CharacterPlacementTargetLedger`)가 참조 ↔ 키 대응을 안다.
 
 유니티 ↔ 코어 벡터 변환은 `PresentationCoreConversions`의 `ToCore()` / `ToUnity()` 한 곳에 둔다.
-
-## 타깃이 흐르는 세 갈래
-
-```
-              NodeTarget
-                    │
-   ┌────────────────┼────────────────┐
-   ↓                ↓                ↓
-① 장부 게시      ② 트윈 종점      ③ 상태 폴드
-Ledger.Publish   DOTween 종점     target.ApplyTo(tree)
-(정착 예약)      (재생)           (정지 프레임)
-```
-
-**셋이 같은 값을 보므로 "재생 결과 = 정착 예약 = 정지 프레임"이 한 곳에서 갈라진다.**
-하나라도 빠뜨리면 나중에 원인 모를 불일치가 난다.
-(`NodeTargetTests.세_갈래가_같은_값을_본다`가 이 성질을 고정한다.)
 
 ## 표본 정독 보고 — 편차 축
 
@@ -135,7 +140,7 @@ sizeDelta(Overlay) · 마스크(StageMaskMotion).
 메서드 이름으로 찾으면 놓친다.
 
 **2. 절차적 커맨드는 이관 대상이 아니다.**
-`Tremble`은 `_basePos`와 `Random.Range` 시드만 잡고 **목표값 자체가 없다** —
+`Tremble`은 `_basePos`와 `Random.Range` 시드만 잡고 **끝값 자체가 없다** —
 시간 함수로 계속 흔들 뿐이다. 정지 프레임에서 이런 커맨드는 목표가 정의되지 않으므로,
 리듀서에서 `Unhandled`로 남는 것이 맞다. 이관 개수 추정에서 뺀다.
 
@@ -226,7 +231,7 @@ yarn 4묶음 기준. "이관 안 함"은 **조용히 버린 것이 아니라 판
 
 ### 이관 대상이 아닌 부류 — 절차적 커맨드
 
-`Tremble` · `Sway` · `Breath` · `Walk` · `Hop` · `Bounce` 등은 목표값 자체가 없다.
+`Tremble` · `Sway` · `Breath` · `Walk` · `Hop` · `Bounce` 등은 끝값 자체가 없다.
 `_basePos`와 랜덤 시드를 잡고 시간 함수로 계속 흔들 뿐이다.
 정지 프레임에서 이들의 목표는 **정의되지 않으므로** 리듀서에서 `Unhandled`로 남는 것이 맞다.
 
@@ -238,7 +243,7 @@ CharacterPortrait_SwayPivot.localEulerAngles  접힘=(0,0,0) vs 캡처=(0,0,7.53
 CharSlot_Track_Idle.anchoredPosition          접힘=(0,0)   vs 캡처=(0, 7.99) …
 ```
 
-값이 매 라인 제각각인 것이 특징이다 — 목표값이 아니라 **시간 함수의 스냅샷**이라서.
+값이 매 라인 제각각인 것이 특징이다 — 끝값이 아니라 **시간 함수의 스냅샷**이라서.
 랩드스킵 재생에서는 즉시 확정되어 누적될 시간이 없으므로 이 축이 보이지 않는다.
 그래서 폴드 대조의 기준 프로토콜은 랩드스킵이다(하네스 파일 상단 주석 참조).
 
@@ -250,7 +255,7 @@ CharSlot_Track_Idle.anchoredPosition          접힘=(0,0)   vs 캡처=(0, 7.99)
 | 부류 | 건수 | 판정 |
 |---|---|---|
 | 시간 커맨드 (`pause` · `1fr`~`48fr`) | 19 | **접을 것이 없다** → 무해하게 접도록 고쳤다 |
-| 절차적 연기 (`tap`·`sway*`·`jolt`·`dip`·`idle_*`) | 38 | **이관 대상 아님** — 목표값이 정의되지 않는다 |
+| 절차적 연기 (`tap`·`sway*`·`jolt`·`dip`·`idle_*`) | 38 | **이관 대상 아님** — 끝값이 정의되지 않는다 |
 | 화면 효과 (`screen_blur/vignette/noise/flash`) | 36 | 무대 상태 모델 밖 (포스트 이펙트 축). 단 `screen_blur`는 이후 리그마다 거는 셰이더 블러가 되어 `char_visual_*`과 같은 머티리얼 축이다(2026-11-03 주) |
 | 배경 (`bg_*`) | 19 | **이관 완료 (2026-10-29)** — 배경은 캐스팅하지 않은 캐릭터 슬롯이 됐다. 아래 참조 |
 | 캐릭터 비주얼 (`char_visual_*`) | 14 | 무대 상태 모델 밖 (머티리얼 축) |
@@ -320,7 +325,7 @@ fade·move·scale을 **같은 노드, 같은 목표 계산**으로 접고, 종�
   거기서는 `Intent`가 끝값을 쥔다.
 
   - 대상 아님: 절차적 연기 —
-    목표값이 정의되지 않는다. 즉시 확정(`SetAnchor`)은 트윈이 없어 모양이 다르다.
+    끝값이 정의되지 않는다. 즉시 확정(`SetAnchor`)은 트윈이 없어 모양이 다르다.
   - 기반이 의도적으로 통일한 미세 차이 (실경로 무영향):
     ① 해석 실패 시 NRE 대신 경고+건너뛰기
     (예전의 ② 가속 잔여시간 0 경계 즉시 확정 · ③ 0.01초 하한은 timeScale 개편으로 사라졌다 — 잔여시간을 계산하지 않는다.)

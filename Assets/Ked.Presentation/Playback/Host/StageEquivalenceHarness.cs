@@ -42,7 +42,7 @@ using Yarn.Unity;
 //     CharacterPortrait_SwayPivot.localEulerAngles  캡처=(0,0,7.53) / (0,0,359.62) …
 //     CharSlot_Track_Idle.anchoredPosition          캡처=(0, 7.99) …
 //     CharacterPortraitSpriteOverlay_Root.alpha     캡처=0.018 ~ 0.207 (크로스페이드 중)
-//   값이 매 라인 제각각인 것이 특징이다 — 목표값이 아니라 시간 함수의 스냅샷이라서.
+//   값이 매 라인 제각각인 것이 특징이다 — 끝값이 아니라 시간 함수의 스냅샷이라서.
 //
 //   이 부류는 정지 프레임에 목표가 **정의되지 않는다**. 리듀서가 접을 수 없고
 //   Unhandled로 남는 것이 맞다(Documentation~/target-boundary.md의 "절차적 커맨드").

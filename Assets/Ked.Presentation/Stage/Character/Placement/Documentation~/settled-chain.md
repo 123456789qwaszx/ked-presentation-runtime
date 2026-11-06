@@ -32,7 +32,7 @@
 | 세대 | 커밋 | 모델 | 버린 이유 |
 |---|---|---|---|
 | 1 | `f0eee527` 06-12 | 남은 이동량을 월드 벡터로 더함 | 스케일 · 회전은 pivot 기준 비균일 변형이라 벡터 합이 안 된다 |
-| 2 | `3faee222` 06-12 | 실제 트랜스폼을 잠깐 목표값으로 세팅 → 측정 → 원복 | Unity 계층에 묶여 순수 계산이 안 된다. rect당 항목 하나라 위치 · 스케일을 둘 다 걸면 나중 것이 앞 것을 덮는다 |
+| 2 | `3faee222` 06-12 | 실제 트랜스폼을 잠깐 끝값으로 세팅 → 측정 → 원복 | Unity 계층에 묶여 순수 계산이 안 된다. rect당 항목 하나라 위치 · 스케일을 둘 다 걸면 나중 것이 앞 것을 덮는다 |
 | 3 | `cddce862` 08-08 | 코어 `PlacementTargetLedger`(문자열 키, 축별 슬롯) + 어댑터가 라이브 체인을 값으로 떠서 `RectChainMath`로 계산 | 지금 |
 
 2세대는 `SettledLedgerUnityParityTests` 안에 "고치지 말 것" 사본으로 남아 3세대의 대조 기준이 된다.
@@ -43,7 +43,7 @@
 
 ### 쓰기
 
-클레임-트윈 커맨드는 `ClaimTarget`에서 `_rig.PlacementTargets.Reserve(rect, target, Releases)`를 부른다. 이 한 줄이 예약을 게시하고, 확정할 때 풀리도록 실행기의 `CommitReleases`에 해제를 스스로 등록하고, 목표값을 돌려준다 — 커맨드가 `Clear`를 챙길 일이 없다. (2026-11-06까지는 상속 층 `RigClaimTweenCommandBase`가 게시·Clear를 했다.)
+클레임-트윈 커맨드는 `ClaimTarget`에서 `_rig.PlacementTargets.Reserve(rect, target, Releases)`를 부른다. 이 한 줄이 예약을 게시하고, 확정할 때 풀리도록 실행기의 `CommitReleases`에 해제를 등록한다 — 커맨드가 `Clear`를 챙길 일이 없다. 값은 돌려주지 않는다 — 트윈 종점은 커맨드가 `target`에서 직접 읽는다. (2026-11-06까지는 상속 층 `RigClaimTweenCommandBase`가 게시·Clear를 했다.)
 
 - 장부는 리그마다 하나다(`CharacterRigRefs.PlacementTargets`). 리그를 지우면 같이 사라진다.
 - 키는 노드 이름. 리그 노드 이름은 스키마가 유일하게 정하므로 충돌은 도달 불가 상태다 — 충돌하면 예외.

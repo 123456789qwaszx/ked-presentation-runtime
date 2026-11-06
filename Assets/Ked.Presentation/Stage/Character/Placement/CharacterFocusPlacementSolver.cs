@@ -3,7 +3,7 @@ using Ked.Presentation.Core;
 using UnityEngine;
 
 /// <summary>
-/// place — 캐릭터의 focus 지점을 무대의 지정 지점으로 보내는 이동 축 목표값.
+/// place — 캐릭터의 focus 지점을 무대의 지정 지점으로 보내는 이동 축 끝값.
 ///
 /// 지점은 **무대 좌표**다: 카메라가 중립일 때 그 화면 지점과 겹치는 무대 위 자리.
 /// 계산 사슬이 샷이 움직이는 무대 노드를 지날 때는 중립값을 쓴다(<see cref="IStageViewNeutral"/>) —

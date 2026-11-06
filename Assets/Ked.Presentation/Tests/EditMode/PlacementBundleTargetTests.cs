@@ -184,7 +184,7 @@ namespace Ked.Presentation.Tests
         // ── 가시성 축 ────────────────────────────────────────────────
 
         [Test]
-        public void fade_목표_계산은_목표_alpha를_낸다()
+        public void fade_in_out_타깃은_alpha_1과_0이다()
         {
             NodeTarget fadeIn = NodeTargets.FadeIn("CharacterPortraitSprite_Root");
             NodeTarget fadeOut = NodeTargets.FadeOut("CharacterPortraitSprite_Root");

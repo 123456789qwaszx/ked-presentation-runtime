@@ -49,7 +49,7 @@ public sealed class CharacterPlacementTargetLedger : ICommitRelease
     /// <summary>
     /// 클레임-트윈 커맨드의 게시. 예약을 걸고, 확정할 때 풀리도록 releases에 등록한다.
     /// 커맨드는 이것 하나만 부른다 — 게시와 해제를 따로 챙길 일이 없다.
-    /// 목표값은 돌려주지 않는다 — 장부는 기록만 하고, 목표값은 타깃에서 읽는다.
+    /// 값을 돌려주지 않는다 — 장부는 기록만 하고, 트윈 종점은 커맨드가 타깃에서 직접 읽는다.
     /// </summary>
     public void Reserve(RectTransform node, in NodeTarget target, CommitReleases releases)
     {
@@ -109,7 +109,7 @@ public sealed class CharacterPlacementTargetLedger : ICommitRelease
 
     /// <summary>
     /// Unity hierarchy에서 현재 상태를 읽어 Core 체인을 만들고,
-    /// 예약된 목표값이 있는 곳에는 그것을 덮어씌움.
+    /// 예약된 타깃이 있는 곳에는 그것을 덮어씌움.
     ///
     /// chainRects를 주면 같은 순서의 rect 목록을 채운다 — solver가 특정 노드의
     /// 체인 인덱스를 찾는 용도다(SettledFocusMath의 moveNodeIndex / depthYIndex).

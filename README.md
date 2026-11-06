@@ -102,12 +102,39 @@ Yarn Spinner를 기반으로 제작한 **비주얼 노벨 화면 연출 런타�
 
 연출 명령의 생성과 실행, 실행 수명 관리(스텝/런 스코프) 구조를 확인할 수 있습니다.
 
-### 5. 순수 코어
+### 5. 순수 코어 — 목표 계산
 
 `Assets/Ked.Presentation/Core/`
 
-커맨드 열을 "트윈이 끝났다면 어디에 있을 것인가"로 접는 순수 C# 층입니다(엔진 의존 0).
-그 계산이 실제 재생과 같은지는 `Assets/Ked.Presentation/Playback/Host/StageEquivalenceHarness.cs`가 라인마다 판정합니다.
+연출 커맨드는 트윈을 시작하기 전에 "끝나면 노드가 어떤 값이어야 하는가"를 먼저 정합니다.
+이 계산을 엔진 의존이 없는 순수 C# 함수로 떼어 두었습니다 — 노드는 `NodeTargets`, 카메라는 `ShotIntents`이고,
+메서드 이름은 대본 커맨드 이름을 따릅니다(`move_by` → `NodeTargets.MoveBy`).
+
+떼어 낸 이유는 나온 값 하나가 세 곳에 쓰이기 때문입니다.
+
+```
+                    NodeTarget  (NodeTargets.MoveBy …)
+       ┌────────────────────┼────────────────────┐
+  ① 장부 예약           ② 트윈 종점            ③ 상태 폴드
+  같은 줄의 다음 커맨드가  실제 재생              정지 프레임
+  중간값 대신 끝값을 잰다                       (저작 툴 미리보기 · 등가성 판정)
+```
+
+계산이 한 자리에 있으니 재생 결과와 정지 프레임이 갈라질 자리가 없습니다.
+커맨드 쪽은 세 줄입니다.
+
+```csharp
+NodeTarget target = RigTargets.MoveBy(_rect, _spec, _startPos);  // 계산 (Unity → Core 경계)
+_rig.PlacementTargets.Reserve(_rect, target, Releases);          // 장부 예약, 확정 때 저절로 풀린다
+_destPos = target.Value.XY.ToUnity();                            // 트윈 종점
+```
+
+같은 Core가 저작 툴(ked-story-compositor)에도 복사 반입돼 미리보기를 접습니다.
+런타임에서는 접은 상태가 실제 재생한 무대와 같은지를
+`Assets/Ked.Presentation/Playback/Host/StageEquivalenceHarness.cs`가 라인마다 판정합니다.
+
+규약과 그 이유는 [target-boundary.md](Assets/Ked.Presentation/Core/Documentation~/target-boundary.md),
+좌표 계산과 허용 오차는 [transform-math-and-epsilon.md](Assets/Ked.Presentation/Core/Documentation~/transform-math-and-epsilon.md)에 있습니다.
 
 ### 6. 진행 층
 

@@ -85,7 +85,7 @@ public sealed class SetAnchorCommandCharR : CommandBase
         string tuningKey =
             CharacterRigResolver.ResolveCharacterKey(_stage, _spec.roleKey);
 
-        // ── 코어: 스펙 + 튜닝 → 목표 상태 ──
+        // ── 코어: 목표 계산(스펙 + 튜닝) ──
         NodeTarget[] targets = NodeTargets.SetAnchor(
             _rect.name,
             ResolveRoleAnchorTuning(tuningKey),

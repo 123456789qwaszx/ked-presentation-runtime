@@ -1,7 +1,7 @@
 namespace Ked.Presentation.Core
 {
     // ShotIntents — 샷 커맨드가 끝나면 샷 의도가 어떤 값이어야 하는가(목표 계산).
-    // 샷 축의 목표는 노드 타깃이 아니라 ShotIntentState 그 자체.
+    // 샷 축의 끝값은 노드 타깃이 아니라 ShotIntentState 그 자체.
     // 의도를 실제 트랜스폼으로 푸는 것(카메라 루트·response 바인딩)은 적용측의 일.
     // 메서드 이름은 대본 커맨드 이름을 따른다: shot_zoom → Zoom.
     public static class ShotIntents

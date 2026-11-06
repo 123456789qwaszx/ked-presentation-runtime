@@ -194,7 +194,7 @@ Playback이 예제에게 요구할 때도 같다. 계약은 Playback에, 구현�
 
 - `Commands/` 116파일 중 `MonoBehaviour`는 **1개**, `PresentationCore/` 54파일 중 **2개**
   → 엉킴은 `MonoBehaviour`가 아니라 **`RectTransform`을 상태 담지체로 쓰는 것**(402회)이다
-- 커맨드 51개가 이미 "목표값 계산(`ClaimTarget`)"과 "트윈"을 나눠 두었다
+- 커맨드 51개가 이미 "목표 계산(`ClaimTarget`)"과 "트윈"을 나눠 두었다
   → 정지 프레임(2b)에 필요한 것은 앞쪽뿐이고, DOTween 의존은 뒤쪽에 몰려 있다
 - `ShotResponse/CharacterPlacementTargetLedger.cs`가 "트윈이 끝났다면 어디 있을 것인가"를
   이미 별도 딕셔너리로 들고 있다 → `StageState`의 원형이다

@@ -390,5 +390,5 @@ CharSlot_Track_Focus          place 계열          ← 슬롯 축 (무대 배�
 ## 참고
 
 * [ASSEMBLY-BOUNDARY.md](../../ASSEMBLY-BOUNDARY.md) — 어셈블리 경계
-* [target-boundary.md](../../../Core/Documentation~/target-boundary.md) — 스펙 → 목표 상태 규약
+* [target-boundary.md](../../../Core/Documentation~/target-boundary.md) — 목표 계산 규약
 * [SCOPE-BOUNDARY.md](../../../../../SCOPE-BOUNDARY.md) — 저장소 경계
