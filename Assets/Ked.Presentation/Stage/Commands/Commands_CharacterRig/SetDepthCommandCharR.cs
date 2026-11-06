@@ -27,7 +27,7 @@ public sealed class SetDepthCommandSpecCharR : CharacterRigCommandSpecBase
     public Ease ease = Ease.OutCubic;
 }
 
-public sealed class SetDepthCommandCharR : RigClaimTweenCommandBase
+public sealed class SetDepthCommandCharR : ClaimTweenCommandBase
 {
     private readonly SetDepthCommandSpecCharR _spec;
     private readonly CharacterDepthTuningSO _globalTuning;
@@ -48,13 +48,13 @@ public sealed class SetDepthCommandCharR : RigClaimTweenCommandBase
     protected override float TweenDuration => _spec.duration;
 
     private readonly PresentationStage _stage;
+    private CharacterRigRefs _rig;
 
     public SetDepthCommandCharR(
         PresentationStage stage,
         SetDepthCommandSpecCharR spec,
         CharacterDepthTuningSO globalTuning,
         CharacterFocusTuningDBSO focusTuningDb)
-        : base(stage, spec.slotKey)
     {
         _stage = stage;
         _spec = spec;
@@ -62,13 +62,15 @@ public sealed class SetDepthCommandCharR : RigClaimTweenCommandBase
         _focusTuningDb = focusTuningDb;
     }
 
-    protected override void ResolveRects()
+    protected override void ResolveTargets(CommandRunScope scope)
     {
-        _depthYRect = RigRefs.GetRect(_spec.depthYTarget);
-        _depthScaleRect = RigRefs.GetRect(_spec.depthScaleTarget);
+        _rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(_stage, _spec.slotKey);
+
+        _depthYRect = _rig.GetRect(_spec.depthYTarget);
+        _depthScaleRect = _rig.GetRect(_spec.depthScaleTarget);
     }
 
-    protected override void ClaimTarget()
+    protected override void ClaimTarget(CommandRunScope scope)
     {
         _depthYRect.DOKill(true);
         _depthScaleRect.DOKill(true);
@@ -89,7 +91,7 @@ public sealed class SetDepthCommandCharR : RigClaimTweenCommandBase
         _destDepthScale = rawDepth.DepthScale;
 
         // 착란원 계산이 읽는 정지 프레임 값. 트윈 시작 시점에 확정된다.
-        RigRefs.SettledDepthScale = _destDepthScale.x;
+        _rig.SettledDepthScale = _destDepthScale.x;
         
         CharacterDepthResolver.CalculateDepthYThatPreservesCurrentFocus(
             _stage,
@@ -107,8 +109,8 @@ public sealed class SetDepthCommandCharR : RigClaimTweenCommandBase
         // 실패는 리졸버가 경로마다 경고한다. place는 대체값이 없어 움직이지 않는 것과 대비된다.
         _destFinalDepthY = destFinalDepthY;
 
-        Claim(_depthYRect, StageNodeClaim.AnchoredPosition(_depthYRect.name, _destFinalDepthY.ToCore()));
-        Claim(_depthScaleRect, StageNodeClaim.LocalScaleXY(_depthScaleRect.name, _destDepthScale.ToCore()));
+        _rig.PlacementTargets.Claim(_depthYRect, StageNodeClaim.AnchoredPosition(_depthYRect.name, _destFinalDepthY.ToCore()), Releases);
+        _rig.PlacementTargets.Claim(_depthScaleRect, StageNodeClaim.LocalScaleXY(_depthScaleRect.name, _destDepthScale.ToCore()), Releases);
     }
 
     /// <summary>깊이는 Y와 배율이 함께 움직여야 한 몸이라, 두 트윈을 한 시퀀스로 묶는다.</summary>
@@ -134,7 +136,7 @@ public sealed class SetDepthCommandCharR : RigClaimTweenCommandBase
         return sequence;
     }
 
-    protected override void WriteFinalState()
+    protected override void OnCommitFinalState()
     {
         _depthYRect.anchoredPosition = _destFinalDepthY;
         _depthScaleRect.localScale = new Vector3(_destDepthScale.x, _destDepthScale.y, 1f);

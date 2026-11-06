@@ -30,6 +30,9 @@ public abstract class ClaimTweenCommandBase : CommandBase
 
     private bool _hasClaimedTarget;
 
+    // 확정할 때 함께 풀 예약. ClaimTarget에서 예약을 거는 쪽(장부)이 스스로 등록한다.
+    protected CommitReleases Releases { get; } = new();
+
     // 0이하일 시 즉시 스냅
     protected abstract float TweenDuration { get; }
 
@@ -133,6 +136,7 @@ public abstract class ClaimTweenCommandBase : CommandBase
     private void Commit()
     {
         OnCommitFinalState();
+        Releases.ReleaseAll();
 
         _hasClaimedTarget = false;
         _tween = null;

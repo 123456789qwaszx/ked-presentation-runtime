@@ -25,8 +25,10 @@ public class ScaleToCommandSpecCharR : CharacterRigCommandSpecBase
     public Ease ease = Ease.OutCubic;
 }
 
-public sealed class ScaleToCommandCharR : RigClaimTweenCommandBase
+public sealed class ScaleToCommandCharR : ClaimTweenCommandBase
 {
+    private readonly PresentationStage _stage;
+    private CharacterRigRefs _rig;
     private readonly ScaleToCommandSpecCharR _spec;
 
     private RectTransform _rect;
@@ -40,15 +42,18 @@ public sealed class ScaleToCommandCharR : RigClaimTweenCommandBase
     protected override float TweenDuration => _spec.duration;
 
     public ScaleToCommandCharR(PresentationStage stage, ScaleToCommandSpecCharR spec)
-        : base(stage, spec.slotKey)
     {
+        _stage = stage;
         _spec = spec;
     }
 
-    protected override void ResolveRects()
-        => _rect = RigRefs.GetRect(_spec.target);
+    protected override void ResolveTargets(CommandRunScope scope)
+    {
+        _rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(_stage, _spec.slotKey);
+        _rect = _rig.GetRect(_spec.target);
+    }
 
-    protected override void ClaimTarget()
+    protected override void ClaimTarget(CommandRunScope scope)
     {
         _rect.DOKill(true);
 
@@ -70,7 +75,7 @@ public sealed class ScaleToCommandCharR : RigClaimTweenCommandBase
         _endScale.x = _targetScale.x;
         _endScale.y = _targetScale.y;
 
-        Claim(_rect, claim);
+        _rig.PlacementTargets.Claim(_rect, claim, Releases);
     }
 
     protected override Tween CreateTween(float duration)
@@ -79,7 +84,7 @@ public sealed class ScaleToCommandCharR : RigClaimTweenCommandBase
             .SetEase(_spec.ease)
             .SetTarget(_rect);
 
-    protected override void WriteFinalState()
+    protected override void OnCommitFinalState()
         => ApplyScaleXY(_rect, _targetScale);
 
     protected override float MeasureRemainingRatio()

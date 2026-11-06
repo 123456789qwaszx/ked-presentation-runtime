@@ -43,7 +43,7 @@
 
 ### 쓰기
 
-`RigClaimTweenCommandBase`가 `ClaimTarget()` 직후 파생이 기록한 클레임을 전부 `Publish`하고, 확정(`Commit`) 때 `Clear`한다. 파생은 `Claim(rect, claim)`으로 목표를 기록만 한다.
+클레임-트윈 커맨드는 `ClaimTarget`에서 `_rig.PlacementTargets.Claim(rect, claim, Releases)`를 부른다. 이 한 줄이 예약을 게시하고, 확정할 때 풀리도록 실행기의 `CommitReleases`에 해제를 스스로 등록하고, 목표값을 돌려준다 — 커맨드가 `Clear`를 챙길 일이 없다. (2026-11-06까지는 상속 층 `RigClaimTweenCommandBase`가 게시·Clear를 했다.)
 
 - 장부는 리그마다 하나다(`CharacterRigRefs.PlacementTargets`). 리그를 지우면 같이 사라진다.
 - 키는 노드 이름. 리그 노드 이름은 스키마가 유일하게 정하므로 충돌은 도달 불가 상태다 — 충돌하면 예외.
@@ -62,7 +62,7 @@
 | `CharacterDepthResolver` | `size_*` | 스케일을 바꿔도 초점이 제자리이도록 `DepthY` 보정 |
 | `CharacterFocusPointResolver` | `shot_focus_to` | 캐릭터 초점의 무대 좌표와 그 점이 선 층 |
 
-**쓰는 쪽**: `RigClaimTweenCommandBase` 파생 전부(move_by · scale_by · rotate_by · place · size · slide_in/out · gesture · mirror) + `MotionCommandCharR`(commit 모션). 이 중 체인 위에 있어 실제로 읽히는 노드는 `Track` · `Track_Focus` · `DepthY` · `DepthScale` · `Scale` · `SwayPivot`이다.
+**쓰는 쪽**: 클레임-트윈 리그 커맨드 전부(move_by · scale_by · rotate_by · place · size · slide_in/out · mirror)가 `Claim`으로, `MotionCommandCharR`(commit 모션)이 `Publish` · `Clear`로. 이 중 체인 위에 있어 실제로 읽히는 노드는 `Track` · `Track_Focus` · `DepthY` · `DepthScale` · `Scale` · `SwayPivot`이다.
 
 ### 언제 비어 있나
 

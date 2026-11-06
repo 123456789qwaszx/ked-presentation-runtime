@@ -11,7 +11,7 @@ using UnityEngine;
 /// 등장/퇴장의 차이는 "현재 위치가 도착점이냐 출발점이냐" 하나로 환원된다
 /// (등장은 화면 밖에서 제자리로, 퇴장은 제자리에서 화면 밖으로).
 /// </summary>
-public abstract class SlideCommandBase : RigClaimTweenCommandBase
+public abstract class SlideCommandBase : ClaimTweenCommandBase
 {
     private RectTransform _rect;
 
@@ -35,15 +35,23 @@ public abstract class SlideCommandBase : RigClaimTweenCommandBase
     /// <summary>슬라이드할 rect. 어느 축인지는 파생의 스펙이 안다.</summary>
     protected abstract RectTransform SlideRectOf(CharacterRigRefs rig);
 
+    private readonly PresentationStage _stage;
+    private readonly string _slotKey;
+    private CharacterRigRefs _rig;
+
     protected SlideCommandBase(PresentationStage stage, string slotKey)
-        : base(stage, slotKey)
     {
+        _stage = stage;
+        _slotKey = slotKey;
     }
 
-    protected override void ResolveRects()
-        => _rect = SlideRectOf(RigRefs);
+    protected override void ResolveTargets(CommandRunScope scope)
+    {
+        _rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(_stage, _slotKey);
+        _rect = SlideRectOf(_rig);
+    }
 
-    protected override void ClaimTarget()
+    protected override void ClaimTarget(CommandRunScope scope)
     {
         _rect.DOKill(true);
 
@@ -70,7 +78,7 @@ public abstract class SlideCommandBase : RigClaimTweenCommandBase
 
         // 끝값은 리덕션이 아니라 여기서 정한 값이다(등장은 현재 위치, 퇴장은 현재 + 거리).
         // 등장은 CreateTween이 rect를 출발점으로 밀어 두므로, 게시가 없으면 같은 줄의 place가 화면 밖 값을 읽는다.
-        Claim(_rect, StageNodeClaim.AnchoredPosition(_rect.name, _endPos.ToCore()));
+        _rig.PlacementTargets.Claim(_rect, StageNodeClaim.AnchoredPosition(_rect.name, _endPos.ToCore()), Releases);
     }
 
     protected override Tween CreateTween(float duration)
@@ -91,7 +99,7 @@ public abstract class SlideCommandBase : RigClaimTweenCommandBase
             .SetEase(SlideEase)
             .SetTarget(_rect);
 
-    protected override void WriteFinalState()
+    protected override void OnCommitFinalState()
         => _rect.anchoredPosition = _endPos;
 
     protected override float MeasureRemainingRatio()

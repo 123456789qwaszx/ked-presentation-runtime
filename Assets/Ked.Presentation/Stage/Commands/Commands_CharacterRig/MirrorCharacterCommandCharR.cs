@@ -24,7 +24,7 @@ public sealed class MirrorCharacterCommandSpecCharR : CharacterRigCommandSpecBas
     public Ease ease = Ease.OutCubic;
 }
 
-public sealed class MirrorCharacterCommandCharR : RigClaimTweenCommandBase
+public sealed class MirrorCharacterCommandCharR : ClaimTweenCommandBase
 {
     private readonly MirrorCharacterCommandSpecCharR _spec;
 
@@ -40,9 +40,9 @@ public sealed class MirrorCharacterCommandCharR : RigClaimTweenCommandBase
     protected override bool AccelerateOnStepFinish => false;
 
     private readonly PresentationStage _stage;
+    private CharacterRigRefs _rig;
 
     public MirrorCharacterCommandCharR(PresentationStage stage, MirrorCharacterCommandSpecCharR spec)
-        : base(stage, spec.slotKey)
     {
         _stage = stage;
         _spec = spec;
@@ -52,12 +52,14 @@ public sealed class MirrorCharacterCommandCharR : RigClaimTweenCommandBase
     /// 해석과 동시에 방향을 정해 대장에 기록한다 — 대장이 곧 다음 Toggle의 입력이라
     /// 커맨드가 여러 번 불려도 방향이 한 번만 뒤집히도록 여기(1회 호출)에 둔다.
     /// </summary>
-    protected override void ResolveRects()
+    protected override void ResolveTargets(CommandRunScope scope)
     {
+        _rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(_stage, _spec.slotKey);
+
         string resolvedRigKey =
             CharacterRigTargetResolver.ResolveRigKeyByPolicy(_stage, _spec.slotKey);
 
-        _rect = RigRefs.GetRect(_spec.target);
+        _rect = _rig.GetRect(_spec.target);
 
         CharacterFacing facing = ResolveTargetFacing(resolvedRigKey);
 
@@ -90,11 +92,11 @@ public sealed class MirrorCharacterCommandCharR : RigClaimTweenCommandBase
         }
     }
 
-    protected override void ClaimTarget()
+    protected override void ClaimTarget(CommandRunScope scope)
     {
         _rect.DOKill(true);
 
-        Claim(_rect, StageNodeClaim.LocalScaleXY(_rect.name, new Vec2(_targetScale.x, _targetScale.y)));
+        _rig.PlacementTargets.Claim(_rect, StageNodeClaim.LocalScaleXY(_rect.name, new Vec2(_targetScale.x, _targetScale.y)), Releases);
     }
 
     protected override Tween CreateTween(float duration)
@@ -103,7 +105,7 @@ public sealed class MirrorCharacterCommandCharR : RigClaimTweenCommandBase
             .SetEase(_spec.ease)
             .SetTarget(_rect);
 
-    protected override void WriteFinalState()
+    protected override void OnCommitFinalState()
         => _rect.localScale = _targetScale;
 
     // AccelerateOnStepFinish = false라 불리지 않지만, 계약은 정직하게 채운다.

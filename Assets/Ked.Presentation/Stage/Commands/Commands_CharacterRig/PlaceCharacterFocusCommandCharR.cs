@@ -33,7 +33,7 @@ public sealed class PlaceCharacterFocusCommandSpecCharR : CharacterRigCommandSpe
 /// 같은 줄의 예약(size · move_by 등)은 끝값으로, 샷이 움직이는 무대 노드는 중립값으로 풀어서
 /// 일반 재생 · 롤백 · 코어 폴드가 같은 자리를 낸다(CharacterFocusPlacementSolver).
 /// </summary>
-public sealed class PlaceCharacterFocusCommandCharR : RigClaimTweenCommandBase
+public sealed class PlaceCharacterFocusCommandCharR : ClaimTweenCommandBase
 {
     private readonly PlaceCharacterFocusCommandSpecCharR _spec;
     private readonly CharacterFocusTuningDBSO _focusTuningDb;
@@ -48,22 +48,25 @@ public sealed class PlaceCharacterFocusCommandCharR : RigClaimTweenCommandBase
     protected override float TweenDuration => _spec.duration;
 
     private readonly PresentationStage _stage;
+    private CharacterRigRefs _rig;
 
     public PlaceCharacterFocusCommandCharR(
         PresentationStage stage,
         PlaceCharacterFocusCommandSpecCharR spec,
         CharacterFocusTuningDBSO focusTuningDb)
-        : base(stage, spec.slotKey)
     {
         _stage = stage;
         _spec = spec;
         _focusTuningDb = focusTuningDb;
     }
 
-    protected override void ResolveRects()
-        => _moveRect = RigRefs.GetRect(_spec.moveTarget);
+    protected override void ResolveTargets(CommandRunScope scope)
+    {
+        _rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(_stage, _spec.slotKey);
+        _moveRect = _rig.GetRect(_spec.moveTarget);
+    }
 
-    protected override void ClaimTarget()
+    protected override void ClaimTarget(CommandRunScope scope)
     {
         _moveRect.DOKill(true);
 
@@ -79,7 +82,7 @@ public sealed class PlaceCharacterFocusCommandCharR : RigClaimTweenCommandBase
             _spec.screenPoint,
             _spec.screenOffset);
 
-        Claim(_moveRect, StageNodeClaim.AnchoredPosition(_moveRect.name, _destination.ToCore()));
+        _rig.PlacementTargets.Claim(_moveRect, StageNodeClaim.AnchoredPosition(_moveRect.name, _destination.ToCore()), Releases);
     }
 
     protected override Tween CreateTween(float duration)
@@ -88,7 +91,7 @@ public sealed class PlaceCharacterFocusCommandCharR : RigClaimTweenCommandBase
             .SetEase(_spec.ease)
             .SetTarget(_moveRect);
 
-    protected override void WriteFinalState()
+    protected override void OnCommitFinalState()
         => _moveRect.anchoredPosition = _destination;
 
     protected override float MeasureRemainingRatio()

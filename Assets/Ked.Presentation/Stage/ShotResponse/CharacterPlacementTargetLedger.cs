@@ -12,12 +12,13 @@ using UnityEngine;
 // - 라이브 체인 캡처 (+ 샷이 움직이는 무대 노드는 중립값으로 치환)
 // - stopRoot 로컬 ↔ 월드 변환
 //
-// 게시는 StageNodeClaim으로만 받는다 — 게시하는 쪽은 RigClaimTweenCommandBase와 MotionCommandCharR 둘이다.
+// 게시는 StageNodeClaim으로만 받는다 — 클레임-트윈 커맨드는 Claim으로(확정 때 저절로 풀린다),
+// 자기 수명을 직접 도는 MotionCommandCharR은 Publish · Clear로.
 
 // stopRoot는 측정 대상 leaf의 상위 RectTransform 중, Core가 변환 체인을 계산할 범위를 끊는 경계
 // 실질적으로 stopRoot의 로컬 좌표계 = Core가 말하는 rig space
 // stopRoot 위로는 유니티의 UI같이 Core가 알 필요 없는 값.
-public sealed class CharacterPlacementTargetLedger
+public sealed class CharacterPlacementTargetLedger : ICommitRelease
 {
     private readonly PlacementTargetLedger _core = new();
 
@@ -44,6 +45,20 @@ public sealed class CharacterPlacementTargetLedger
         if (_keyByRect.TryGetValue(node, out string key))
             _core.Clear(key);
     }
+
+    /// <summary>
+    /// 클레임-트윈 커맨드의 게시. 예약을 걸고, 확정할 때 풀리도록 releases에 스스로 등록하고, 목표값을 돌려준다.
+    /// 커맨드는 이것 하나만 부른다 — 게시와 해제를 따로 챙길 일이 없다.
+    /// </summary>
+    public Vec3 Claim(RectTransform node, in StageNodeClaim claim, CommitReleases releases)
+    {
+        Publish(node, claim);
+        releases.Add(this, node);
+
+        return claim.Value;
+    }
+
+    void ICommitRelease.Release(Object target) => Clear((RectTransform)target);
 
     // ── 정착 측정  ─────────────────────────────
 

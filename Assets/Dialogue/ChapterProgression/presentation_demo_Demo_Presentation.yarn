@@ -22,6 +22,51 @@ title: Demo_Presentation
 <<fade_in s1 18fr>>
 하린: 배경이 들어오고, 음악이 깔리고, 내가 걸어 들어왔어. #line:ln_7u3jtu6n
 
+// ── 장부 확인 (붙여 넣어 보고 지울 것) ──────────────────────────
+<<fade_out s3 8fr>>
+<<place_left s2 bust 12fr>>
+<<place_right s1 bust 12fr>>
+<<size s1 mid bust 12fr>>
+<<size s2 mid bust 12fr>>
+준비. 하린은 오른쪽, 시구레는 왼쪽.
+
+<<move_by s1 -6u 0u 30fr>>
+<<place_center s1 bust 20fr>>
+1. move_by + place — 하린이 옆으로 밀리는 중이지만, 가슴은 정확히 가운데에서 멈춰야 한다.
+
+<<size s1 front bust 30fr>>
+<<place_center s1 face 20fr>>
+2. size + place — 커지는 중에도 얼굴이 가운데에 와야 한다.
+
+<<rotate_by s1 12 30fr>>
+<<place_center s1 face 20fr>>
+3. rotate_by + place — 기우는 중에도 얼굴이 가운데에 와야 한다.
+
+<<mirror s1 toggle>>
+<<place_center s1 face 20fr>>
+4. mirror + place — 좌우가 바뀌어도 얼굴이 가운데에 와야 한다.
+
+<<slide_in s2 left 4u 30fr>>
+<<place_left s2 bust 20fr>>
+5. slide_in + place — 시구레가 미끄러져 들어오는 중에도 가슴이 왼쪽 지점에서 멈춰야 한다.
+
+<<move_by s1 3u 0u 40fr>>
+6-1. 이 줄은 하린이 움직이는 도중에 바로 넘긴다.
+
+<<move_by s1 3u 0u 40fr>>
+6-2. 앞 이동이 끝값으로 확정된 뒤 이어서 간다 — 합쳐 6u 움직였어야 한다.
+
+<<size s1 mid bust 48fr>>
+<<rotate_by s1 -12 48fr>>
+<<place_right s1 bust 48fr>>
+7. 이 줄도 도중에 바로 넘긴다(스텝 경계 가속). 다음 줄에서 하린의 가슴이 오른쪽 지점에 있어야 한다.
+
+8. 확인 줄. 여기서 되감기(R)로 1~7 줄에 돌아가 본다 — 일반 재생 때와 같은 자리에 서야 한다.
+
+<<mirror s1 right>>
+<<rotate_reset s1 0fr>>
+정리.
+
 <<screen_blur front 0.5>>
 <<char_visual_dim s1 2 6fr>>
 하린: 지금부터 보이는 건 전부 이 대본 한 장에 적힌 명령이야. #line:ln_cydaj9ym

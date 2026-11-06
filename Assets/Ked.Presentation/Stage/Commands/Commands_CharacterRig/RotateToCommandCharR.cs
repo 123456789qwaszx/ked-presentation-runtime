@@ -25,8 +25,10 @@ public class RotateToCommandSpecCharR : CharacterRigCommandSpecBase
     public Ease ease = Ease.OutCubic;
 }
 
-public sealed class RotateToCommandCharR : RigClaimTweenCommandBase
+public sealed class RotateToCommandCharR : ClaimTweenCommandBase
 {
+    private readonly PresentationStage _stage;
+    private CharacterRigRefs _rig;
     private readonly RotateToCommandSpecCharR _spec;
 
     private RectTransform _rect;
@@ -39,15 +41,18 @@ public sealed class RotateToCommandCharR : RigClaimTweenCommandBase
     protected override float TweenDuration => _spec.duration;
 
     public RotateToCommandCharR(PresentationStage stage, RotateToCommandSpecCharR spec)
-        : base(stage, spec.slotKey)
     {
+        _stage = stage;
         _spec = spec;
     }
 
-    protected override void ResolveRects()
-        => _rect = RigRefs.GetRect(_spec.target);
+    protected override void ResolveTargets(CommandRunScope scope)
+    {
+        _rig = CharacterRigTargetResolver.ResolveCharRigFromTargetKey(_stage, _spec.slotKey);
+        _rect = _rig.GetRect(_spec.target);
+    }
 
-    protected override void ClaimTarget()
+    protected override void ClaimTarget(CommandRunScope scope)
     {
         _rect.DOKill(true);
 
@@ -64,8 +69,7 @@ public sealed class RotateToCommandCharR : RigClaimTweenCommandBase
             new RotateToReduction.Args(_spec.relativeToCurrent, _spec.toEuler.ToCore()),
             _startEuler.ToCore());
 
-        _targetEuler = claim.Value.ToUnity();
-        Claim(_rect, claim);
+        _targetEuler = _rig.PlacementTargets.Claim(_rect, claim, Releases).ToUnity();
     }
 
     protected override Tween CreateTween(float duration)
@@ -74,7 +78,7 @@ public sealed class RotateToCommandCharR : RigClaimTweenCommandBase
             .SetEase(_spec.ease)
             .SetTarget(_rect);
 
-    protected override void WriteFinalState()
+    protected override void OnCommitFinalState()
         => _rect.localEulerAngles = _targetEuler;
 
     protected override float MeasureRemainingRatio()

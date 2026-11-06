@@ -7,7 +7,7 @@
 
 | 자리 | 하는 일 |
 |---|---|
-| `Base/` | 커맨드 기반 타입 — `CommandSpecBase` · `CommandBase` · 트윈 하나로 노드를 잡는 `ClaimTweenCommandBase` · 팩토리 계약 |
+| `Base/` | 커맨드 기반 타입 — `CommandSpecBase` · `CommandBase` · 트윈 하나로 노드를 잡는 `ClaimTweenCommandBase` · 확정 때 함께 풀 예약(`CommitReleases`) · 팩토리 계약 |
 | `Execution/` | 실행 — `CommandExecutor` · `SequencePlayer` · 스킵 정책 · 호스트가 채우는 포트 |
 | 뿌리 | 실행 범위(`CommandRunScope`) · 수명(`LifetimeScope` · `PresentationScopeSession`) · 팩토리 합성(`CompositeCommandFactory`) |
 
