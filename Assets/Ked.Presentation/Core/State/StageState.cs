@@ -105,10 +105,16 @@ namespace Ked.Presentation.Core
         // 컷인 축: 덮는 무대마다 컷인 끝 상태(열림/닫힘 · 판 · 자리 · 배율). 창 모션의 도중은 접지 않는다(docs/PLAN_cutin.md §6).
         private readonly Dictionary<string, CutInState> _cutIns;
 
+        // 그림 팝업 축: 덮는 무대마다 팝업 끝 상태(열림/닫힘 · 그림 · 자리 · 배율). 페이드 도중은 접지 않는다(docs/PLAN_popup.md §7).
+        private readonly Dictionary<string, PopupState> _popups;
+
         public IReadOnlyList<UnhandledCommand> Unhandled => _unhandled;
 
         /// <summary>무대 키 → 컷인 끝 상태. 한 번도 열지 않은 무대는 없다.</summary>
         public IReadOnlyDictionary<string, CutInState> CutIns => _cutIns;
+
+        /// <summary>무대 키 → 그림 팝업 끝 상태. 한 번도 열지 않은 무대는 없다.</summary>
+        public IReadOnlyDictionary<string, PopupState> Popups => _popups;
 
         public IReadOnlyCollection<string> Slots => _slots;
 
@@ -126,6 +132,7 @@ namespace Ked.Presentation.Core
             _aliases = new Dictionary<string, string>(StringComparer.Ordinal);
             _variantBySlot = new Dictionary<string, string>(StringComparer.Ordinal);
             _cutIns = new Dictionary<string, CutInState>(StringComparer.Ordinal);
+            _popups = new Dictionary<string, PopupState>(StringComparer.Ordinal);
         }
 
         private StageState(StageState source)
@@ -142,6 +149,7 @@ namespace Ked.Presentation.Core
             _aliases = new Dictionary<string, string>(source._aliases, StringComparer.Ordinal);
             _variantBySlot = new Dictionary<string, string>(source._variantBySlot, StringComparer.Ordinal);
             _cutIns = new Dictionary<string, CutInState>(source._cutIns, StringComparer.Ordinal);
+            _popups = new Dictionary<string, PopupState>(source._popups, StringComparer.Ordinal);
         }
 
         // ── 컷인 ─────────────────────────────────────────────────────
@@ -155,6 +163,19 @@ namespace Ked.Presentation.Core
                 throw new ArgumentException("무대 키가 비어 있다.", nameof(stageKey));
 
             _cutIns[stageKey] = cutIn;
+        }
+
+        // ── 그림 팝업 ────────────────────────────────────────────────
+
+        public bool TryGetPopup(string stageKey, out PopupState popup)
+            => _popups.TryGetValue(stageKey ?? "", out popup);
+
+        public void SetPopup(string stageKey, in PopupState popup)
+        {
+            if (string.IsNullOrEmpty(stageKey))
+                throw new ArgumentException("무대 키가 비어 있다.", nameof(stageKey));
+
+            _popups[stageKey] = popup;
         }
 
         /// <summary>깊은 복제. 리듀서의 순수성(원본 불변)이 이것 위에 선다.</summary>
