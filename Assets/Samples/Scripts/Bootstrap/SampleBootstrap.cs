@@ -134,6 +134,10 @@ public partial class SampleBootstrap : MonoBehaviour, IRigPrefabSource
              "종료 시 EquivalenceReports/*.json을 남긴다. 판정 전용 — 재생에 영향 없음.")]
     [SerializeField] private bool enableEquivalenceHarness;
 
+    [Header("재생 도구")]
+    [Tooltip("조립이 끝나면 부를 개발 도구(IPlaybackToolHook 구현 — 녹화기 등). 재생에 영향을 주지 않는다. 비우면 아무 일도 하지 않는다.")]
+    [SerializeField] private MonoBehaviour[] playbackTools;
+
     [Header("UI")]
     [FormerlySerializedAs("screenNoisePresetDbso")]
     [SerializeField] private ScreenNoisePresetDBSO screenNoisePresetDb;

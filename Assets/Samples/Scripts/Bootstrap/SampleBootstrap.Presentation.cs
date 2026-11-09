@@ -61,6 +61,8 @@ public partial class SampleBootstrap
 
         BootstrapEquivalenceHarness();
 
+        BootstrapPlaybackTools();
+
         return new PresentationRuntime(
             _scenePresentation,
             _playbackFeatureController,
@@ -326,6 +328,29 @@ public partial class SampleBootstrap
             _dialogueAdvanceDispatcher,
             _motions,
             DialogueFolder);
+    }
+
+    // 개발 도구(IPlaybackToolHook) — 녹화기 등. 하네스처럼 조립 루트가 안쪽 부품을 넘긴다.
+    // 재생을 막지 않는 것은 도구의 규약이다(구현이 지킨다) — 여기서는 감싸지 않는다.
+    private void BootstrapPlaybackTools()
+    {
+        if (playbackTools == null || playbackTools.Length == 0)
+            return;
+
+        PlaybackToolServices services = new(
+            dialogueRunner,
+            _dialogueAdvanceDispatcher,
+            _linePresentationFlow,
+            _rollbackHistory);
+
+        foreach (MonoBehaviour tool in playbackTools)
+        {
+            if (tool is IPlaybackToolHook hook)
+                hook.OnPlaybackAssembled(services);
+            else
+                Debug.LogError(
+                    $"[재생 도구] '{(tool != null ? tool.name : "빈 칸")}'은 IPlaybackToolHook이 아니다 — 부르지 않았다.", this);
+        }
     }
 
     // ── 작가 자산 — TextAsset이 정본이다(빌드에서도 읽힌다). 안 꽂혀 있으면 에디터에서만 옛 경로의 파일을 읽는다 ──
