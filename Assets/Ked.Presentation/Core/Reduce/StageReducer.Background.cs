@@ -5,12 +5,13 @@ namespace Ked.Presentation.Core
     ///
     /// 배경도 캐릭터 리그지만 `bg_` 어휘를 둔다 — "이건 배경"이라는 저작 의도가 대본에 남는다.
     /// 그래서 여기 폴드는 새로 발명한 것이 없다: 슬롯 스폰 · 사이징 · fade · move · scale을
-    /// 캐릭터 폴드와 **같은 노드, 같은 목표 계산**으로 접는다. 다른 것은 종횡비의 출처 하나다
-    /// (초상 DB가 아니라 background-dimensions.json).
+    /// 캐릭터 폴드와 **같은 노드, 같은 목표 계산**으로 접는다. 다른 것은 사이징 하나다 —
+    /// 초상은 높이 맞춤이고, 배경은 원본 픽셀 크기 그대로 가운데(NodeTargets.BackgroundSizing,
+    /// 크기는 background-dimensions.json). 화면보다 큰 배경은 화면 밖까지 걸친다(2026-11-09).
     ///
     /// 파서(StageCommandParser.Background)와의 대응(PLAN_background-as-slot "명령 대응표"):
     ///   bg_spawn             → SetupCharRig(stage00 · far 생략값, 배경) + 스프라이트 → 여기: SpawnSlot + 배역 풀기 + 사이징 (숨은 채)
-    ///   bg_sprite            → 스프라이트 키 Spec(HeightFit)                 → 사이징
+    ///   bg_sprite            → 스프라이트 키 Spec(SourcePixels)              → 사이징
     ///   bg_fade_in/out       → FadeIn/Out(CharacterPortraitSprite_Root)       → ApplyFade (디스패치에서 직접)
     ///   bg_move              → MoveBy(CharSlot_Track)                         → ApplyMoveBy (디스패치에서 직접)
     ///   bg_scale             → ScaleTo(CharacterPortrait_ActingScale)         → ApplyPortraitScaleTo (디스패치에서 직접)
@@ -62,7 +63,7 @@ namespace Ked.Presentation.Core
         }
 
         /// <summary>
-        /// 배경 사이징 — 초상과 같은 목표 계산(폭 = 부모 높이 × 종횡비), 종횡비만 배경 치수표에서.
+        /// 배경 사이징 — 원본 픽셀 크기 그대로(NodeTargets.BackgroundSizing). 크기는 배경 치수표에서.
         /// 치수표가 없거나 키가 없으면 false — 짐작으로 잇지 않는다.
         /// </summary>
         private static bool ApplyBackgroundSizing(
@@ -75,17 +76,16 @@ namespace Ked.Presentation.Core
                 return false;
             }
 
-            if (!tuning.BackgroundDimensions.TryGetAspect(spriteKey, out float aspect, out reason))
+            if (!tuning.BackgroundDimensions.TryGetSize(spriteKey, out Vec2 spriteSize, out reason))
                 return false;
 
-            float parentHeight = state.Nodes
-                .GetRectSize(StageState.NodeKeyOf(slotKey, NodeTargets.PortraitParentNodeId))
-                .Y;
+            string imageKey = StageState.NodeKeyOf(slotKey, NodeTargets.PortraitImageNodeId);
+            Vec2 parentSize = state.Nodes
+                .GetRectSize(StageState.NodeKeyOf(slotKey, NodeTargets.PortraitParentNodeId));
+            RectNodeState image = state.Nodes.GetState(imageKey);
 
-            state.Apply(NodeTargets.PortraitSizing(
-                StageState.NodeKeyOf(slotKey, NodeTargets.PortraitImageNodeId),
-                parentHeight,
-                aspect));
+            state.Apply(NodeTargets.BackgroundSizing(
+                imageKey, parentSize, image.AnchorMin, image.AnchorMax, spriteSize));
 
             reason = null;
             return true;

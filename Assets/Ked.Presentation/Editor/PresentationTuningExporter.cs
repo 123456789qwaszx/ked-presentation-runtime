@@ -500,6 +500,21 @@ public static class PresentationTuningExporter
                 continue;
             }
 
+            // 배경은 원본 픽셀 크기 그대로 그린다 — 임포터 상한에 걸려 줄어든 그림은 화면에 작게 나온다. 조용히 두지 않는다.
+            if (AssetImporter.GetAtPath(assetPath) is TextureImporter importer)
+            {
+                importer.GetSourceTextureWidthAndHeight(out int sourceWidth, out int sourceHeight);
+
+                if (sourceWidth > 0 && sourceHeight > 0
+                    && (sourceWidth != (int)rect.width || sourceHeight != (int)rect.height))
+                {
+                    warnings.Add(
+                        $"배경 치수: '{key}'가 원본 {sourceWidth}x{sourceHeight}보다 작게 임포트됐다({rect.width}x{rect.height}) — " +
+                        $"maxTextureSize({importer.maxTextureSize})에 걸렸다. 배경은 원본 픽셀 크기로 그리므로 화면에 작게 나온다. " +
+                        "다시 임포트하면 BackgroundTextureImporter가 상한을 올린다.");
+                }
+            }
+
             dto.entries.Add(new BackgroundDimensionDto
             {
                 key = key,

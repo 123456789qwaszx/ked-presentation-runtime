@@ -270,8 +270,10 @@ CharSlot_Track_Idle.anchoredPosition          접힘=(0,0)   vs 캡처=(0, 7.99)
 **배경(`bg_*`)은 2026-10-29에 모델 안으로 들어왔다.** 별도 배경 리그를 지우고 배경을 **캐스팅하지 않은
 캐릭터 슬롯**으로 세우기로 했기 때문이다(재생 저장소 `docs/PLAN_background-as-slot.md`). 그래서 `StageState`가
 "캐릭터 리그만 담는다"는 문장은 더 정확히 "캐릭터 리그 *스키마*만 담는다"가 됐고, 배경 슬롯은 그 스키마의
-인스턴스다. 폴드는 새 목표 계산을 만들지 않았다 — `StageReducer.Background.cs`는 슬롯 스폰·초상 사이징·
-fade·move·scale을 **같은 노드, 같은 목표 계산**으로 접고, 종횡비의 출처만 `background-dimensions.json`이다.
+인스턴스다. 폴드는 새 목표 계산을 만들지 않았다 — `StageReducer.Background.cs`는 슬롯 스폰·
+fade·move·scale을 **같은 노드, 같은 목표 계산**으로 접는다. 사이징만 다르다 — 처음엔 초상과 같은 높이 맞춤이었고,
+2026-11-09부터 배경은 원본 픽셀 크기 그대로다(`NodeTargets.BackgroundSizing`, 크기는 `background-dimensions.json`,
+재생 저장소 `docs/PLAN_background-source-pixels.md`).
 `bg_size`·`bg_place`는 어휘에서 지웠으므로 케이스가 없다 — 남은 대본이 있으면 여기서 소리가 난다(의도).
 
 같은 작업에서 **슬롯 재선언의 의미**를 런타임에 맞췄다. 런타임은 같은 키로 `slot`/`bg_spawn`을 다시 부르면

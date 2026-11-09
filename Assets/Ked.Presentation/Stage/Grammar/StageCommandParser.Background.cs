@@ -11,7 +11,7 @@ using UnityEngine;
 ///
 ///   bg_spawn [stage] [layer] →  SetupCharRig(stage00 · far 생략값, asBackground) + SetSprite(키)
 ///                            (캐릭터 slot처럼 숨은 채 선다 — bg_fade_in으로 들인다. 배역 있는 슬롯을 덮으면 배역을 푼다)
-///   bg_sprite             →  SetSprite(키), HeightFitPreserveAspect, 레이캐스트 끔
+///   bg_sprite             →  SetSprite(키), SourcePixels(원본 픽셀 크기 그대로, 가운데), 레이캐스트 끔
 ///   bg_fade_in / out      →  FadeIn/Out  → CharacterPortraitSprite_Root
 ///   bg_move               →  MoveBy      → CharSlot_Track            (move_by와 같은 축)
 ///   bg_scale              →  ScaleTo     → CharacterPortrait_ActingScale (가운데 피벗 — CharSlot_Scale은 발 피벗이다)
@@ -55,7 +55,7 @@ public sealed partial class StageCommandParser
             node = CharacterRigNode.CharacterPortraitSprite_Image,
             resourcesRoot = ResourcesSpriteResolver.BackgroundsRoot,
             spriteKey = spriteKey,
-            sizingMode = CharRigImageSizingMode.HeightFitPreserveAspect,
+            sizingMode = CharRigImageSizingMode.SourcePixels,
             horizontalAlign = CharRigImageSizingPolicy.HorizontalAlign.Center,
             raycastTarget = false
         });

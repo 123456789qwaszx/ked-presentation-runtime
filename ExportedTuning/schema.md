@@ -265,15 +265,19 @@ MonoBehaviour.entries[] : { key(캐릭터), offset(px, Vec2), visualScale(무단
 `Resources/Backgrounds/**` → 배경 스프라이트 키 → 픽셀 치수.
 
 **배경은 캐스팅하지 않은 캐릭터 슬롯이다** (재생 저장소 `docs/PLAN_background-as-slot.md`). 리그 스키마는
-`character` 것을 그대로 쓰고, 사이징도 초상과 같은 `HeightFitPreserveAspect`다. 다른 것은 종횡비의 **출처** 하나 —
-초상은 (캐릭터·변형·표정)으로 초상 DB를 찾지만, 배경은 `bg_sprite`의 키 하나로 `Resources/Backgrounds/{키}`를 연다.
-익스포터도 같은 자리를 `Resources.LoadAll<Sprite>`로 읽는다.
+`character` 것을 그대로 쓴다. 다른 것은 둘이다.
+
+- **사이징** — 초상은 높이 맞춤(`HeightFitPreserveAspect`, 종횡비만 쓴다)이지만, 배경은 **원본 픽셀 크기 그대로**
+  화면 가운데에 놓인다(`SourcePixels`, 2026-11-09 — 재생 저장소 `docs/PLAN_background-source-pixels.md`).
+  캔버스 기준 1px = 원본 1px이고, 화면보다 큰 배경은 화면 밖까지 걸친다. 그래서 코어는 종횡비가 아니라 **픽셀 크기**를 쓴다.
+- **출처** — 초상은 (캐릭터·변형·표정)으로 초상 DB를 찾지만, 배경은 `bg_sprite`의 키 하나로 `Resources/Backgrounds/{키}`를 연다.
+  익스포터도 같은 자리를 `Resources.LoadAll<Sprite>`로 읽는다.
 
 | 필드 | 뜻 |
 |---|---|
 | `sourceFolder` | 읽은 Resources 하위 폴더 (재현 정보) |
 | `entries[].key` | `Backgrounds/` 아래 **상대 경로, 확장자 없이** — 런타임이 `Resources.Load`에 넘기는 그 문자열. 하위 폴더도 그대로(`ep1/hall`). 조회는 **대소문자를 가리지 않는다**(`Resources.Load`와 같다) — 대소문자만 다른 두 에셋은 익스포터가 경고하고 첫 것만 낸다 |
-| `entries[].width` · `.height` | `sprite.rect`의 픽셀 크기. 임포터 `maxTextureSize`(2048)에 걸린 그림은 **줄어든 크기**가 나온다 — 종횡비는 같다 |
+| `entries[].width` · `.height` | `sprite.rect`의 픽셀 크기 = 화면에 그려지는 크기(캔버스 기준 px). `Resources/Backgrounds/` 아래 텍스처는 `BackgroundTextureImporter`가 임포트 상한을 4096으로 올린다. 그래도 원본보다 작게 임포트된 그림은 익스포터가 경고한다 — 화면에 작게 나오기 때문이다 |
 
 없는 키는 사이징만 `Unhandled`로 남는다(슬롯 스폰·가시성은 접힌다 — "슬롯을 못 세웠다"는 거짓말을 하지 않는다).
 

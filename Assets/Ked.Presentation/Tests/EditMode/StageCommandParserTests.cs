@@ -272,7 +272,7 @@ public class StageCommandParserTests
         Assert.AreEqual(CharacterRigNode.CharacterPortraitSprite_Image, sprite.node);
         Assert.AreEqual(ResourcesSpriteResolver.BackgroundsRoot, sprite.resourcesRoot);
         Assert.AreEqual("class_day", sprite.spriteKey);
-        Assert.AreEqual(CharRigImageSizingMode.HeightFitPreserveAspect, sprite.sizingMode);
+        Assert.AreEqual(CharRigImageSizingMode.SourcePixels, sprite.sizingMode, "배경은 원본 픽셀 크기 그대로");
         Assert.IsFalse(sprite.raycastTarget, "화면 전체를 덮는 그림은 클릭을 받지 않는다");
     }
 

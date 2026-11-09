@@ -95,8 +95,9 @@ namespace Ked.Presentation.Tests
         }
 
         /// <summary>
-        /// 실제 예제 배경의 비율 둘 — 16:9(1920×1080)와 살짝 좁은 것(1026×580).
-        /// 높이가 부모 rect(1080)와 다르므로 접힌 폭은 1080 × 종횡비다.
+        /// 실제 예제 배경 둘 — 화면과 같은 것(1920×1080)과 화면보다 작은 것(1026×580) —
+        /// 그리고 화면보다 큰 원본 게임 배경(2540×1800).
+        /// 배경은 원본 픽셀 크기 그대로라 접힌 sizeDelta = 그림 크기 − 부모 rect(1920×1080)다.
         /// </summary>
         private static BackgroundDimensionsFileDto NewBackgroundDimensions()
         {
@@ -107,13 +108,23 @@ namespace Ked.Presentation.Tests
                 {
                     new() { key = "class_day", width = 1026f, height = 580f },
                     new() { key = "3_한옥_에피소드시작", width = 1920f, height = 1080f },
+                    new() { key = "BG_uniseed_office", width = 2540f, height = 1800f },
                     new() { key = "Class_Day", width = 100f, height = 100f }, // 대소문자만 다르다 — 먼저 온 class_day가 이긴다
                 },
             };
         }
 
-        private static float ImageWidthOf(StageState state, string slotKey)
-            => state.Nodes.GetState(StageState.NodeKeyOf(slotKey, "CharacterPortraitSprite_Image")).SizeDelta.X;
+        private static Vec2 ImageSizeDeltaOf(StageState state, string slotKey)
+            => state.Nodes.GetState(StageState.NodeKeyOf(slotKey, "CharacterPortraitSprite_Image")).SizeDelta;
+
+        private static Vec2 ImageRectSizeOf(StageState state, string slotKey)
+            => state.Nodes.GetRectSize(StageState.NodeKeyOf(slotKey, "CharacterPortraitSprite_Image"));
+
+        private static void AssertVec2(Vec2 actual, float x, float y, string message = null)
+        {
+            Assert.That(actual.X, Is.EqualTo(x).Within(Eps), message);
+            Assert.That(actual.Y, Is.EqualTo(y).Within(Eps), message);
+        }
 
         private static StageCommand Cmd(string name, params string[] args)
             => new(name, args, "test.yarn:1");
@@ -142,8 +153,9 @@ namespace Ked.Presentation.Tests
             // 숨은 채 선다 — 캐릭터 slot과 같다. 대본은 bg_fade_in으로 들인다.
             Assert.That(state.GetAlpha("bg_main/CharacterPortraitSprite_Root"), Is.EqualTo(0f));
 
-            // 폭 = 부모 높이 1080 × (1026/580).
-            Assert.That(ImageWidthOf(state, "bg_main"), Is.EqualTo(1080f * 1026f / 580f).Within(Eps));
+            // 원본 픽셀 크기 그대로 — 화면보다 작은 그림은 작게 선다(늘리지 않는다).
+            AssertVec2(ImageSizeDeltaOf(state, "bg_main"), 1026f - 1920f, 580f - 1080f);
+            AssertVec2(ImageRectSizeOf(state, "bg_main"), 1026f, 580f);
             Assert.That(state.Unhandled, Is.Empty);
         }
 
@@ -175,6 +187,17 @@ namespace Ked.Presentation.Tests
         // ── 사이징 ───────────────────────────────────────────────────
 
         [Test]
+        public void 화면보다_큰_배경은_원본_크기로_화면_밖까지_걸친다()
+        {
+            // 원본 게임 실영상(2026-11-09): 2540×1800 배경의 가운데 2336×1078이 보인다 — 높이 맞춤이 아니다.
+            StageState state = Fold(Cmd("bg_spawn", "bg_main", "BG_uniseed_office"));
+
+            AssertVec2(ImageSizeDeltaOf(state, "bg_main"), 620f, 720f, "2540−1920, 1800−1080");
+            AssertVec2(ImageRectSizeOf(state, "bg_main"), 2540f, 1800f);
+            Assert.That(state.Unhandled, Is.Empty);
+        }
+
+        [Test]
         public void bg_sprite는_폭만_바꾸고_가시성은_건드리지_않는다()
         {
             StageState state = Fold(
@@ -182,7 +205,7 @@ namespace Ked.Presentation.Tests
                 Cmd("bg_fade_out", "bg_main"),
                 Cmd("bg_sprite", "bg_main", "3_한옥_에피소드시작"));
 
-            Assert.That(ImageWidthOf(state, "bg_main"), Is.EqualTo(1920f).Within(Eps), "1080 × 16/9");
+            AssertVec2(ImageSizeDeltaOf(state, "bg_main"), 0f, 0f, "화면과 같은 크기 — 증감 0");
             Assert.That(state.GetAlpha("bg_main/CharacterPortraitSprite_Root"), Is.EqualTo(0f),
                 "그림 교체는 숨긴 배경을 드러내지 않는다");
             Assert.That(state.Unhandled, Is.Empty);
@@ -194,7 +217,7 @@ namespace Ked.Presentation.Tests
             // Resources.Load가 그렇다 — 가리면 런타임은 그림을 찾아 크기를 맞추는데 폴드만 Unhandled가 된다.
             StageState state = Fold(Cmd("bg_spawn", "bg_main", "CLASS_DAY"));
 
-            Assert.That(ImageWidthOf(state, "bg_main"), Is.EqualTo(1080f * 1026f / 580f).Within(Eps),
+            AssertVec2(ImageRectSizeOf(state, "bg_main"), 1026f, 580f,
                 "대소문자만 다른 두 엔트리 중 먼저 온 class_day");
             Assert.That(state.Unhandled, Is.Empty);
         }
@@ -310,7 +333,7 @@ namespace Ked.Presentation.Tests
             Assert.That(state.Nodes.Count, Is.EqualTo(RigNodeCount));
             Assert.That(state.Nodes.GetState("bg0/CharSlot_Track").AnchoredPosition, Is.EqualTo(Vec2.Zero));
             Assert.That(state.Nodes.GetState("bg0/CharacterPortrait_ActingScale").LocalScale.XY, Is.EqualTo(Vec2.One));
-            Assert.That(ImageWidthOf(state, "bg0"), Is.EqualTo(1920f).Within(Eps), "새 그림의 폭");
+            AssertVec2(ImageRectSizeOf(state, "bg0"), 1920f, 1080f, "새 그림의 크기");
             Assert.That(state.GetAlpha("bg0/CharacterPortraitSprite_Root"), Is.EqualTo(0f),
                 "새 리그는 숨은 채 선다 — 다시 bg_fade_in으로 들인다");
             Assert.That(state.Unhandled, Is.Empty);
