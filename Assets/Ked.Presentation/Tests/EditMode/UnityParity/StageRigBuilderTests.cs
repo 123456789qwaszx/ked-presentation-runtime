@@ -241,22 +241,21 @@ namespace Ked.Presentation.Tests.UnityParity
             try
             {
                 StagePopupSlot popup = refs.Popup;
-                popup.Layout(preset, sprite, new Vector2(40f, -20f), 1.5f);
+                popup.SnapOpen(preset, sprite, new Vector2(40f, -20f), 1.5f);
 
                 Assert.That(popup.IsOpen, Is.True);
-                Assert.That(popup.Alpha, Is.EqualTo(0f), "불투명도는 페이드가 올린다");
+                Assert.That(popup.Alpha, Is.EqualTo(1f));
                 Assert.That(popup.Picture.sizeDelta.x, Is.EqualTo(404f * 0.91f * 1.5f).Within(1e-3f));
                 Assert.That(popup.Picture.anchoredPosition, Is.EqualTo(new Vector2(40f, -20f)));
                 Assert.That(popup.Backdrop.enabled && popup.PictureImage.enabled, Is.True);
                 Assert.That(popup.Backdrop.color.a, Is.EqualTo(0.47f).Within(1e-4f));
 
-                popup.SetAlpha(1f);
-                popup.SetClosed();
+                popup.SnapClose();
                 Assert.That(popup.IsOpen, Is.False);
                 Assert.That(popup.Alpha, Is.EqualTo(0f));
                 Assert.That(popup.PictureImage.enabled, Is.False);
 
-                popup.Layout(preset, null, Vector2.zero, 1f);
+                popup.SnapOpen(preset, null, Vector2.zero, 1f);
                 Assert.That(popup.PictureImage.enabled, Is.False, "그림이 없으면 뒷막만");
                 Assert.That(popup.Backdrop.enabled, Is.True);
 

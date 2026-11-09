@@ -97,11 +97,12 @@ Create › Ked › Presentation › Popup Preset. 없으면 코드 기본값(위
 
 ## 5. 실행 — `PopupOpenCommand` · `PopupCloseCommand`
 
-컷인 커맨드와 같은 틀이다.
+tx(`StageMaskMotionCommand` · `StageMaskSlot`)와 같은 틀이다 — 커맨드는 프리셋 · 그림을 골라 슬롯에 걸기만 하고, 페이드는 슬롯이 소유한다.
 
-- DOTween 하나가 그룹 불투명도를 몬다. 끝 · Skip · 스텝 경계 어디서 확정돼도 같은 끝값.
-- 같은 팝업의 앞 페이드는 먼저 확정한다(`StagePopupSlot.CompleteActive`). tx · 마스크 지우기 · 장면 경계는 끝값 없이 끊고 닫는다(`Reset`).
-- 압축 재생(스킵 · 되감기의 앞 줄들)에서는 끝 상태(열림 · 닫힘)로 바로 간다.
+- 슬롯의 DOTween 하나가 그룹 불투명도를 몬다(`StagePopupSlot.PlayOpen` · `PlayClose`).
+- 같은 팝업의 앞 페이드는 먼저 확정한다. tx · 마스크 지우기 · 장면 경계는 끝값 없이 끊고 닫는다(`Reset`).
+- 압축 재생(스킵 · 되감기의 앞 줄들)에서는 끝 상태(열림 · 닫힘)로 바로 간다(`SnapOpen` · `SnapClose`).
+- 스텝 경계는 페이드를 건드리지 않는다 — tx 모션처럼 제 끝까지 돈다.
 
 ## 6. 다른 커맨드와의 관계
 

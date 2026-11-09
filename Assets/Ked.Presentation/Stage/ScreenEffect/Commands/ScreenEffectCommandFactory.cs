@@ -76,8 +76,8 @@ public sealed class ScreenEffectCommandFactory : INodeCommandFactory
             CutInCloseCommandSpec s => new CutInCloseCommand(s, _stages, _cutInPreset),
 
             // 그림 팝업 — 덮는 무대의 뒷막 + 그림(docs/PLAN_popup.md)
-            PopupOpenCommandSpec s => new PopupOpenCommand(s, _stages, _popupPreset),
-            PopupCloseCommandSpec s => new PopupCloseCommand(s, _stages, _popupPreset),
+            PopupOpenCommandSpec s => new PopupOpenCommand(s, _popupPreset, _stages),
+            PopupCloseCommandSpec s => new PopupCloseCommand(s, _popupPreset, _stages),
             
             _ => null
         };
