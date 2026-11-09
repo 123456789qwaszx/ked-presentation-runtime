@@ -50,6 +50,7 @@ public sealed class StageMaskClearCommand : CommandBase
         {
             StageRigRefs stage = _stages.Get(_spec.stage);
             stage.CutIn.Reset();
+            stage.Popup.Reset();
             stage.Mask.Clear(_spec.mode, _spec.hideEdge);
             return;
         }
@@ -57,6 +58,7 @@ public sealed class StageMaskClearCommand : CommandBase
         for (int i = 0; i < _stages.All.Count; i++)
         {
             _stages.All[i].CutIn.Reset();
+            _stages.All[i].Popup.Reset();
             _stages.All[i].Mask.Clear(_spec.mode, _spec.hideEdge);
         }
     }

@@ -162,7 +162,8 @@ public partial class SampleBootstrap
             stageMaskMotionPresetDb,
             _stageRigs,
             _rigBlur,
-            cutInPreset);
+            cutInPreset,
+            popupPreset);
 
         CompositeCommandFactory factory = new(
             charRigFactory,

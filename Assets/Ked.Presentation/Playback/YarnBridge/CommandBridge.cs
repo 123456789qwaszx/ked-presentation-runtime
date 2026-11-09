@@ -274,6 +274,13 @@ public sealed partial class YarnCommandBridge
 
         runner.AddCommandHandler<string>(
             "cutin_close", EnqueueCutInCloseSpec);
+
+        // <<popup 무대 그림 [x y] [배율]>> · <<popup_close 무대>> — docs/PLAN_popup.md
+        runner.AddCommandHandler<string, string, string, string, string>(
+            "popup", EnqueuePopupOpenSpec);
+
+        runner.AddCommandHandler<string>(
+            "popup_close", EnqueuePopupCloseSpec);
     }
     
     private void BindAudio(DialogueRunner runner)

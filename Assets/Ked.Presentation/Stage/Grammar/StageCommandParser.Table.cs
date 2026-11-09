@@ -79,6 +79,9 @@ public sealed partial class StageCommandParser
         // 컷인 — 덮는 무대의 창 · 판 · 마스크(StageCommandParser.CutIn, docs/PLAN_cutin.md)
         ["cutin_open"] = (p, c) => p.EnqueueCutInOpenSpec(c.Arg(0, "stage01"), c.Arg(1), c.Arg(2, "0u"), c.Arg(3, "0u"), Float(c, 4, 1f)),
         ["cutin_close"] = (p, c) => p.EnqueueCutInCloseSpec(c.Arg(0, "stage01")),
+        // 그림 팝업 — 덮는 무대의 뒷막 + 그림(StageCommandParser.Popup, docs/PLAN_popup.md)
+        ["popup"] = (p, c) => p.EnqueuePopupOpenSpec(c.Arg(0, "stage01"), c.Arg(1), c.Arg(2, "0u"), c.Arg(3, "0u"), Float(c, 4, 1f)),
+        ["popup_close"] = (p, c) => p.EnqueuePopupCloseSpec(c.Arg(0, "stage01")),
         ["bgm"] = (p, c) => p.EnqueuePlayBgmSpec(c.Arg(0), c.Arg(1, "1s")),
         ["stop_bgm"] = (p, c) => p.EnqueueStopBgmSpec(c.Arg(0, "1s")),
         ["sfx"] = (p, c) => p.EnqueuePlaySfxSpec(c.Arg(0)),

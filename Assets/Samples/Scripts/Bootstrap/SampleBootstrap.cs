@@ -148,6 +148,9 @@ public partial class SampleBootstrap : MonoBehaviour, IRigPrefabSource
     [Tooltip("컷인 판 모양 · 크기 · 등장/퇴장 모션. 비우면 코드 기본값(원본 게임 실측)으로 열고 경고한다.")]
     [SerializeField] private CutInPresetDBSO cutInPreset;
 
+    [Tooltip("그림 팝업 배율 · 뒷막 색과 세기 · 등장/퇴장 페이드. 비우면 코드 기본값(원본 게임 실측)으로 열고 경고한다.")]
+    [SerializeField] private PopupPresetDBSO popupPreset;
+
     [Header("Screen Effect Rig")]
     [SerializeField] private RectTransform screenEffectRigMount;
     [SerializeField] private RectTransform screenEffectRigPrefab;

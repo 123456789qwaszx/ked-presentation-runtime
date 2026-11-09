@@ -12,6 +12,7 @@ public sealed class ScreenEffectCommandFactory : INodeCommandFactory
     private readonly StageRigRegistry _stages;
     private readonly RigBlurIntentSystem _rigBlur;
     private readonly CutInPresetDBSO _cutInPreset;
+    private readonly PopupPresetDBSO _popupPreset;
 
     public ScreenEffectCommandFactory(
         PresentationStage stage,
@@ -22,7 +23,8 @@ public sealed class ScreenEffectCommandFactory : INodeCommandFactory
         StageMaskMotionPresetDBSO stageMaskMotionPresetDb,
         StageRigRegistry stages,
         RigBlurIntentSystem rigBlur,
-        CutInPresetDBSO cutInPreset = null)
+        CutInPresetDBSO cutInPreset = null,
+        PopupPresetDBSO popupPreset = null)
     {
         _stage = stage ?? throw new ArgumentNullException(nameof(stage));
         _screenEffects = screenEffects ? screenEffects : throw new ArgumentNullException(nameof(screenEffects));
@@ -43,6 +45,16 @@ public sealed class ScreenEffectCommandFactory : INodeCommandFactory
         }
 
         _cutInPreset = cutInPreset;
+
+        if (popupPreset == null)
+        {
+            UnityEngine.Debug.LogWarning(
+                "[ScreenEffectCommandFactory] 그림 팝업 프리셋(PopupPresetDBSO)이 연결되지 않았다. 코드 기본값(원본 실측)으로 연다 — " +
+                "Create › Ked › Presentation › Popup Preset으로 에셋을 만들어 조립에 연결하면 런타임에서 편집할 수 있다.");
+            popupPreset = PopupPresetDBSO.CreateDefault();
+        }
+
+        _popupPreset = popupPreset;
     }
 
     public bool TryCreate(CommandSpecBase spec, out ISequenceCommand command)
@@ -62,6 +74,10 @@ public sealed class ScreenEffectCommandFactory : INodeCommandFactory
             // 컷인 — 덮는 무대의 창 · 판 · 마스크(docs/PLAN_cutin.md)
             CutInOpenCommandSpec s => new CutInOpenCommand(s, _stages, _cutInPreset),
             CutInCloseCommandSpec s => new CutInCloseCommand(s, _stages, _cutInPreset),
+
+            // 그림 팝업 — 덮는 무대의 뒷막 + 그림(docs/PLAN_popup.md)
+            PopupOpenCommandSpec s => new PopupOpenCommand(s, _stages, _popupPreset),
+            PopupCloseCommandSpec s => new PopupCloseCommand(s, _stages, _popupPreset),
             
             _ => null
         };

@@ -179,6 +179,12 @@ public sealed partial class YarnCommandBridge
     private void EnqueueCutInCloseSpec(string stageKey = null)
         => Forward("cutin_close", stageKey);
 
+    private void EnqueuePopupOpenSpec(string stageKey = null, string pictureKey = null, string xToken = null, string yToken = null, string scale = null)
+        => Forward("popup", stageKey, pictureKey, xToken, yToken, scale);
+
+    private void EnqueuePopupCloseSpec(string stageKey = null)
+        => Forward("popup_close", stageKey);
+
     private void EnqueuePlayBgmSpec(string clipKey = null, string fadeDurationToken = null)
         => Forward("bgm", clipKey, fadeDurationToken);
 

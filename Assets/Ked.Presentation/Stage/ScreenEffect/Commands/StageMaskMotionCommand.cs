@@ -82,6 +82,12 @@ public sealed class StageMaskMotionCommand : CommandBase
             Debug.LogWarning($"[StageMaskMotionCommand] {_spec.stage}의 컷인을 tx '{_spec.presetKey}'가 덮는다 — 컷인 창을 중립으로 돌린다.");
 
         stage.CutIn.Reset();
+
+        // 그림 팝업도 같은 규칙 — 그 무대를 새로 보여 주는 전환이 덮는다(docs/PLAN_popup.md §6).
+        if (stage.Popup.IsOpen)
+            Debug.LogWarning($"[StageMaskMotionCommand] {_spec.stage}의 그림 팝업을 tx '{_spec.presetKey}'가 덮는다 — 팝업을 닫는다.");
+
+        stage.Popup.Reset();
     }
 
     private StageMaskMotionPresetDBSO.Entry ResolvePresetEntry()

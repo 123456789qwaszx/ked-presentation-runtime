@@ -188,6 +188,51 @@ public class StageCommandParserTests
         Assert.AreEqual("stage01", s.stage, "무대 생략값은 stage01");
     }
 
+    // ── 그림 팝업 (docs/PLAN_popup.md) ───────────────────────────
+
+    [Test]
+    public void popup은_무대_그림_자리_배율을_받는다()
+    {
+        PopupOpenCommandSpec s = (PopupOpenCommandSpec)Parse(
+            NewParser(), Cmd("popup", "stage02", "sample_letter", "2u", "-1.5u", "1.2"))[0];
+
+        Assert.AreEqual("stage02", s.stage);
+        Assert.AreEqual("sample_letter", s.pictureKey);
+        Assert.AreEqual(80f, s.center.x, 1e-3f, "1u = 40px");
+        Assert.AreEqual(-60f, s.center.y, 1e-3f);
+        Assert.AreEqual(1.2f, s.scale, 1e-6f);
+    }
+
+    [Test]
+    public void popup의_생략값은_stage01_가운데_배율_1이다()
+    {
+        PopupOpenCommandSpec s = (PopupOpenCommandSpec)Parse(NewParser(), Cmd("popup", "", "sample_seedling"))[0];
+
+        Assert.AreEqual("stage01", s.stage);
+        Assert.AreEqual(Vector2.zero, s.center);
+        Assert.AreEqual(1f, s.scale);
+    }
+
+    [Test]
+    public void popup은_본_무대에_쓰거나_그림이_없으면_경고하고_아무것도_내지_않는다()
+    {
+        LogAssert.Expect(LogType.Warning, new Regex("<<popup>> 본 무대"));
+        Assert.AreEqual(0, Parse(NewParser(), Cmd("popup", "stage00", "sample_letter")).Count);
+
+        LogAssert.Expect(LogType.Warning, new Regex("<<popup>>에 그림 키가 없다"));
+        Assert.AreEqual(0, Parse(NewParser(), Cmd("popup", "stage01")).Count);
+
+        LogAssert.Expect(LogType.Warning, new Regex("<<popup_close>> 본 무대"));
+        Assert.AreEqual(0, Parse(NewParser(), Cmd("popup_close", "stage00")).Count);
+    }
+
+    [Test]
+    public void popup_close는_무대_하나를_받는다()
+    {
+        PopupCloseCommandSpec s = (PopupCloseCommandSpec)Parse(NewParser(), Cmd("popup_close"))[0];
+        Assert.AreEqual("stage01", s.stage, "무대 생략값은 stage01");
+    }
+
     [Test]
     public void tx는_프리셋이_없으면_경고하고_아무것도_내지_않는다()
     {
