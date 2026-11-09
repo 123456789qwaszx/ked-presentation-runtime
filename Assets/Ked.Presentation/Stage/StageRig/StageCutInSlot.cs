@@ -1,5 +1,6 @@
 using System;
 using DG.Tweening;
+using Ked.Presentation.Core;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,8 +12,9 @@ using UnityEngine.UI;
 ///     {stage}_Stage_Root  (그대로) — 마스크가 판 아래 변으로만 자른다(위는 열림)
 ///
 /// 상태는 셋이다. 중립(창 항등 · 판 꺼짐 — 컷인을 안 쓰는 무대), 열림(Layout 뒤), 닫힘(창 배율 0 — 퇴장 모션 끝).
-/// 모션(창의 배율 · 회전)은 커맨드가 쓴다(CutInCommandBase). 여기는 자리와 모양만 안다.
-/// tx · 마스크 지우기 · 장면 경계가 Reset으로 중립에 돌린다 — 마스크 모양은 그 커맨드의 것이 이긴다.
+/// 창 모션(배율 · 회전 — 캐릭터 motion과 같은 식, MotionMath.Compose relative)은 이 슬롯이 하나만 소유한다
+/// (StageMaskSlot의 tx 모션과 같은 규율). 새 열기 · 닫기는 앞 모션을 먼저 확정한다.
+/// tx · 마스크 지우기 · 장면 경계가 Reset으로 끝값 없이 끊고 중립에 돌린다 — 마스크 모양은 그 커맨드의 것이 이긴다.
 /// </summary>
 public sealed class StageCutInSlot
 {
@@ -25,35 +27,10 @@ public sealed class StageCutInSlot
 
     public bool IsOpen { get; private set; }
 
-    // 창 모션은 한 번에 하나 — 지금 도는 컷인 커맨드의 트윈과 확정 함수. 새 커맨드는 앞 것을 확정하고(CompleteActive),
-    // Reset은 확정 없이 끊는다. DOTween.Kill(target)을 쓰지 않는 것은 에디트 모드(빌더 · 테스트)에서 DOTween을 깨우지 않으려는 것이다.
-    private Tween _activeTween;
-    private Action _activeFinish;
+    public bool IsPlayingMotion => _motion != null;
 
-    public void SetActive(Tween tween, Action finish)
-    {
-        _activeTween = tween;
-        _activeFinish = finish;
-    }
-
-    /// <summary>도는 컷인 모션을 끝값으로 확정한다(없으면 아무것도 안 한다).</summary>
-    public void CompleteActive()
-    {
-        Action finish = _activeFinish;
-        _activeTween = null;
-        _activeFinish = null;
-        finish?.Invoke();
-    }
-
-    /// <summary>모션이 스스로 끝났다 — 기록만 지운다(그 커맨드의 것일 때만).</summary>
-    public void ClearActive(Tween tween)
-    {
-        if (_activeTween != tween)
-            return;
-
-        _activeTween = null;
-        _activeFinish = null;
-    }
+    // 에디트 모드(빌더 · 테스트)에서 DOTween을 깨우지 않으려고 DOTween.Kill(target) 대신 이 참조로 끊는다.
+    private Tween _motion;
 
     public StageCutInSlot(string stageKey, RectTransform window, RectTransform panel, Image panelImage, StageMaskSlot mask)
     {
@@ -64,10 +41,43 @@ public sealed class StageCutInSlot
         _mask = mask;
     }
 
+    /// <summary>
+    /// 연다 — 판 · 창 피벗 · 마스크를 세우고(창은 1 · 0), 그 위에 등장 모션을 relative로 건다. clip이 null이면 열린 자리만 세운다.
+    /// </summary>
+    public void PlayOpen(CutInPresetDBSO preset, Sprite panelSprite, Vector2 center, float scale, MotionClip clip)
+    {
+        CompleteMotion();
+        Layout(preset, panelSprite, center, scale);
+        PlayMotion(clip, null);
+    }
+
+    // 압축 — 등장 모션의 끝값으로 바로.
+    public void SnapOpen(CutInPresetDBSO preset, Sprite panelSprite, Vector2 center, float scale, MotionClip clip)
+    {
+        CompleteMotion();
+        Layout(preset, panelSprite, center, scale);
+        WriteEnd(clip, Vector3.one.ToCore(), Vector3.zero.ToCore());
+    }
+
+    /// <summary>닫는다 — 지금 창 값에서 퇴장 모션을 걸고, 끝에서 닫힘(창 배율 0)으로 둔다. clip이 null이면 바로 닫는다.</summary>
+    public void PlayClose(MotionClip clip)
+    {
+        CompleteMotion();
+        PlayMotion(clip, SetClosed);
+    }
+
+    // 압축 — 닫힌 끝 상태로 바로.
+    public void SnapClose()
+    {
+        CompleteMotion();
+        SetClosed();
+    }
+
     /// <summary>중립 — 창 항등, 판 꺼짐. 마스크는 건드리지 않는다(부른 쪽이 정한다).</summary>
     public void Reset()
     {
-        KillWindowTweens();
+        _motion?.Kill(false);
+        _motion = null;
 
         Window.pivot = new Vector2(0.5f, 0.5f);
         Window.anchoredPosition = Vector2.zero;
@@ -81,20 +91,10 @@ public sealed class StageCutInSlot
         IsOpen = false;
     }
 
-    /// <summary>창 트윈을 끊는다 — 끝값을 쓰지 않는다(Reset이 바로 덮는다).</summary>
-    public void KillWindowTweens()
-    {
-        _activeTween?.Kill(false);
-        _activeTween = null;
-        _activeFinish = null;
-    }
-
-    /// <summary>
-    /// 연다 — 판 자리 · 크기 · 모양을 세우고, 창 피벗을 판 아래 가운데로, 마스크를 판 아래 변으로.
-    /// 창의 배율 · 회전은 1 · 0으로 둔다(등장 모션이 그 위에 relative로 얹힌다).
-    /// center는 판 중심(무대 중심 기준 px, y 위), scale은 프리셋 판 크기에 곱한다.
-    /// </summary>
-    public void Layout(CutInPresetDBSO preset, Sprite panelSprite, Vector2 center, float scale)
+    // 판 자리 · 크기 · 모양을 세우고, 창 피벗을 판 아래 가운데로, 마스크를 판 아래 변으로.
+    // 창의 배율 · 회전은 1 · 0으로 둔다(등장 모션이 그 위에 relative로 얹힌다).
+    // center는 판 중심(무대 중심 기준 px, y 위), scale은 프리셋 판 크기에 곱한다.
+    private void Layout(CutInPresetDBSO preset, Sprite panelSprite, Vector2 center, float scale)
     {
         Vector2 size = preset.panelSize * scale;
         Vector2 bottomCenter = new(center.x, center.y - size.y * 0.5f);
@@ -129,11 +129,82 @@ public sealed class StageCutInSlot
         IsOpen = true;
     }
 
-    /// <summary>닫힘 — 퇴장 모션의 끝. 창 배율 0으로 남는다(무대 내용도 함께 안 보인다).</summary>
-    public void SetClosed()
+    // 닫힘 — 퇴장 모션의 끝. 창 배율 0으로 남는다(무대 내용도 함께 안 보인다).
+    private void SetClosed()
     {
         Window.localScale = new Vector3(0f, 0f, 1f);
         Window.localEulerAngles = Vector3.zero;
         IsOpen = false;
     }
+
+    // 앞 모션을 끝값으로 확정한다(OnComplete가 돈다). 없으면 아무것도 안 한다.
+    private void CompleteMotion() => _motion?.Kill(true);
+
+    // 시작값은 창의 지금 값(열기는 Layout이 세운 1 · 0), 끝값은 클립의 마지막 키.
+    private void PlayMotion(MotionClip clip, Action onEnd)
+    {
+        Vec3 startScale = Window.localScale.ToCore();
+        Vec3 startEuler = SignedEuler(Window.localEulerAngles).ToCore();
+
+        if (clip == null || clip.Duration <= 0f)
+        {
+            WriteEnd(clip, startScale, startEuler);
+            onEnd?.Invoke();
+            return;
+        }
+
+        _motion = DOTween
+            .To(() => 0f, seconds => WriteAt(clip, startScale, startEuler, seconds), clip.Duration, clip.Duration)
+            .SetEase(Ease.Linear)
+            .SetUpdate(true)
+            .SetTarget(Window)
+            .OnComplete(() =>
+            {
+                _motion = null;
+                WriteEnd(clip, startScale, startEuler);
+                onEnd?.Invoke();
+            });
+    }
+
+    private void WriteAt(MotionClip clip, Vec3 startScale, Vec3 startEuler, float seconds)
+    {
+        foreach (MotionChannel channel in clip.Channels)
+            Write(channel, MotionMath.Compose(channel, MotionChannelMode.Relative, StartOf(channel, startScale, startEuler), seconds));
+    }
+
+    private void WriteEnd(MotionClip clip, Vec3 startScale, Vec3 startEuler)
+    {
+        if (clip == null)
+            return;
+
+        foreach (MotionChannel channel in clip.Channels)
+            Write(channel, MotionMath.EndValue(channel, MotionChannelMode.Relative, StartOf(channel, startScale, startEuler)));
+    }
+
+    private static Vec3 StartOf(in MotionChannel channel, Vec3 startScale, Vec3 startEuler)
+        => channel.Kind == MotionChannelKind.Scale ? startScale : startEuler;
+
+    private void Write(in MotionChannel channel, Vec3 value)
+    {
+        switch (channel.Kind)
+        {
+            case MotionChannelKind.Scale:
+                Window.localScale = new Vector3(value.X, value.Y, 1f);
+                break;
+
+            case MotionChannelKind.Euler:
+                Window.localEulerAngles = value.ToUnity();
+                break;
+
+            // 창은 자리를 움직이지 않는다 — 자리는 Layout(대본의 x y)이 정한다.
+            case MotionChannelKind.Position:
+                break;
+        }
+    }
+
+    private static Vector3 SignedEuler(Vector3 e)
+        => new(Signed(e.x), Signed(e.y), Signed(e.z));
+
+    private static float Signed(float degrees)
+        => degrees > 180f ? degrees - 360f : degrees;
 }

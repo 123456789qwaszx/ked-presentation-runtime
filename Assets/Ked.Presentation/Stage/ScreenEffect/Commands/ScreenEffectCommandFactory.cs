@@ -72,8 +72,8 @@ public sealed class ScreenEffectCommandFactory : INodeCommandFactory
             StageMaskClearCommandSpec s => new StageMaskClearCommand(s, _stages),
 
             // 컷인 — 덮는 무대의 창 · 판 · 마스크(docs/PLAN_cutin.md)
-            CutInOpenCommandSpec s => new CutInOpenCommand(s, _stages, _cutInPreset),
-            CutInCloseCommandSpec s => new CutInCloseCommand(s, _stages, _cutInPreset),
+            CutInOpenCommandSpec s => new CutInOpenCommand(s, _cutInPreset, _stages),
+            CutInCloseCommandSpec s => new CutInCloseCommand(s, _cutInPreset, _stages),
 
             // 그림 팝업 — 덮는 무대의 뒷막 + 그림(docs/PLAN_popup.md)
             PopupOpenCommandSpec s => new PopupOpenCommand(s, _popupPreset, _stages),

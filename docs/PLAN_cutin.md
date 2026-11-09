@@ -138,7 +138,7 @@ relative로 건다 — 배율은 곱, 회전은 덧셈이라 레이아웃의 기
 |---|---|
 | 스키마 · 빌더 | `StageRigSchema.WindowName · PanelName`, `StageRigBuilder.EnsureCutIn`, `StageRigRefs.CutIn`, 새 `StageCutInSlot`(자리 · 모양 · 중립 · 닫힘) |
 | 마스크 | `StageMaskKind.CustomQuad`, `StageMaskGraphic.SetCustomQuad`, `StageMaskSlot.SetCustomQuad` |
-| 런타임 커맨드 | `CutInCommands.cs` — `CutInOpenCommand` · `CutInCloseCommand`(창 모션은 `MotionMath.Compose`, relative) |
+| 런타임 커맨드 | `CutInOpenCommand` · `CutInCloseCommand` — 프리셋 · 판을 골라 슬롯에 걸기만 한다. 창 모션(`MotionMath.Compose`, relative)은 `StageCutInSlot`이 소유한다(tx의 `StageMaskSlot`과 같은 틀) |
 | tx · 마스크 지우기 · 장면 경계 | 컷인 창 · 판을 중립으로(`StageMaskMotionCommand` · `StageMaskClearCommand` · `StageRigRegistry.ResetAllMasksToBaseline`) |
 | 파서 · 브리지 | `StageCommandParser.CutIn.cs`, 표에 `cutin_open` · `cutin_close`, `CommandBridge` 등록 |
 | 코어 | `CutInState`, `StageState.CutIns`, `StageReducer.CutIn.cs` |

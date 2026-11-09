@@ -158,7 +158,7 @@ namespace Ked.Presentation.Tests.UnityParity
 
             try
             {
-                refs.CutIn.Layout(preset, null, new Vector2(-640f, 50f), 1f);
+                refs.CutIn.SnapOpen(preset, null, new Vector2(-640f, 50f), 1f, null);
 
                 // 판 아래 가운데 = (−640, 50 − 301/2) → 1920×1080 창 안의 비율.
                 Assert.That(refs.CutIn.Window.pivot.x, Is.EqualTo(0.5f - 640f / 1920f).Within(1e-4f));
@@ -168,7 +168,7 @@ namespace Ked.Presentation.Tests.UnityParity
                 Assert.That(refs.CutIn.IsOpen, Is.True);
                 Assert.That(refs.MaskRoot.GetComponent<StageMaskGraphic>().Kind, Is.EqualTo(StageMaskKind.CustomQuad));
 
-                refs.CutIn.SetClosed();
+                refs.CutIn.SnapClose();
                 Assert.That(refs.CutIn.Window.localScale, Is.EqualTo(new Vector3(0f, 0f, 1f)));
 
                 refs.CutIn.Reset();
