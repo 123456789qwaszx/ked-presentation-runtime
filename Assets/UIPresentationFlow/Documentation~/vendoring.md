@@ -4,7 +4,8 @@
 
 ```
 원본   UIPresentationFlow          (형제 폴더 · Unity 프로젝트 · UI 프레임워크의 집 + 데모 둘)
-반입   Assets/UIPresentationFlow/  ← 이 폴더
+         Assets/UIPresentationFlow/{Runtime,Editor}
+반입   Assets/UIPresentationFlow/  ← 이 폴더 (원본과 같은 자리 · 같은 배치)
 ```
 
 `Assets/Ked.Progression/`과 같은 방식이다. 규율도 같다. **사본만 고치지 않는다.** 고칠 일이 생기면 원본에서 먼저 고치고 다시 반입한다.
@@ -16,6 +17,7 @@
 | | |
 |---|---|
 | 원본 | `UIPresentationFlow` · `chore/dynamic-font-guard` @ `bfbb7fd` (2026-11-03). `feat/vn-sample` @ `364226d` 위에 동적 글꼴이 채운 글자를 저장 직전에 비우는 `Authoring/UIDynamicFontGuard`를 더했다(`UIFontAssets.cs`는 머리 주석 한 줄). `364226d`의 프레임워크는 `7da70e6`과 같다 — 그 사이 `7eec88b` · `b6a1e53` · `364226d`는 데모 · 문서만 바꿨다. 그 아래는 `feat/vn-sample` @ `7da70e6` (2026-10-27, `dev` 머지 전). `dev` @ `4a4af6f` 위에 화면 짓기 도구(`Editor/UI/Authoring`)와 에디터 asmdef를 더했다(`f912e99`, `c22bb76`은 그 주석 · 문서 고침과 블랙홀 일시 정지 창 산출물, `6fe89e7`은 레이아웃 Variant를 처음 한 번만 더하는 도구). `4a4af6f`는 `cf3fa98` 위에 이 저장소에서 드러난 빈틈 셋(끌기 넘기기 · Panel 아래 Root 막기 · 포커스 되돌리기)을 더한 것 — 원본 `docs/PLAN_from-ked.md`. 그 위 `feat/vn-sample`의 `752d168`(Adaptive UI 데모 걷음) · `a5bcb2b`(비주얼 노벨 샘플)은 데모 · 문서만 바꿨고, `7da70e6`이 `Presentation/Rules`의 `VariantId` · `ExperimentKey`를 직렬화되게 고쳤다(Variant 조건의 실험 칸이 에셋에 저장되지 않던 것 — 6000.6 분석기 UAC1001) |
+| 배치 | 2026-11-07 · 원본이 사본 배치를 따랐다 — `Assets/Scripts/` → `Assets/UIPresentationFlow/Runtime/`, `Assets/Shaders/` → `Runtime/Shaders/`, `Assets/Editor/UI/` → `Assets/UIPresentationFlow/Editor/`(폴더 `.meta`는 사본 GUID 그대로, 뿌리 `UIPresentationFlow.meta`도 사본 것). 코드 blob은 그대로라 git에는 이름 바꾸기로만 남는다 |
 | 반입 | 2026-10-27 · 원본 → 사본. 처음은 `cf3fa98`, 같은 날 `3a26d8b`(= `dev` `4a4af6f`)로 다시(`Scripts/UI`의 셋을 고치고 `UIManager.PanelInput.cs` 하나를 더함), 그다음 `f912e99`로 다시(`Editor/UI`에 asmdef와 `Authoring/` 여덟 파일), `c22bb76`으로 다시(`UIPrefabs.cs` 주석), `6fe89e7`로 다시(`UIPresentationAssets.cs` — `EnsureLayoutVariant` · `MoveWidget`), `7da70e6`으로 다시(`VariantId.cs` · `ExperimentKey.cs`). 2026-11-03 `bfbb7fd`로 다시(`UIDynamicFontGuard.cs` 더함, `UIFontAssets.cs` 주석). 매번 아래 "대조" 0줄 |
 | 원본 Unity | 6000.6.2f1 (ugui 2.6.0). 이 저장소는 6000.3.16f1 (ugui 2.0.0)이다. 코드만 들이고 에셋은 이 저장소에서 새로 만든다 |
 | GUID | 원본 `.meta`를 그대로 가져왔다(106개, 같은 날 구조를 원본대로 되돌리며 `Scripts.meta`를 더해 107개, `3a26d8b`에서 `UIManager.PanelInput.cs.meta`를 더해 108개, `f912e99`에서 asmdef · `Authoring` 폴더 · 스크립트 여덟의 `.meta`를 더해 118개, `bfbb7fd`에서 `UIDynamicFontGuard.cs.meta`를 더해 119개). 반입 때 이 저장소 전체 `.meta` 888개와 겹치는 GUID는 0개였고, 뒤에 더한 것들의 GUID도 겹치지 않는다. 사본 폴더 자신의 `Assets/UIPresentationFlow.meta`만 이 저장소에서 만든 것이다 |
@@ -24,26 +26,17 @@
 
 ## 무엇을 가져왔나
 
-원본 README "요구 사항"의 복사 목록 그대로다. 2026-11-06부터 사본은 **어셈블리마다 폴더 하나**(이 저장소의 모든 모듈이 따르는 규칙)로 둔다 — 원본도 같은 배치로 바꿀 예정이고, 그때까지는 아래 대응표대로 옮겨 놓는다.
+원본의 `Assets/UIPresentationFlow/` 폴더 하나다 — 런타임 `Runtime/`과 에디터 `Editor/`. 2026-11-07부터 원본과 사본의 배치가 같다(이 저장소의 모든 모듈이 따르는 규칙: 폴더 하나에 어셈블리 하나).
 
-| 원본 | 사본 |
-|---|---|
-| `Assets/Scripts/{UI,Presentation,Display,Localization}/` + `UIPresentationFlow.Runtime.asmdef` | `Assets/UIPresentationFlow/Runtime/` 같은 자리 |
-| `Assets/Shaders/` | `Assets/UIPresentationFlow/Runtime/Shaders/` (런타임 어셈블리가 쓰는 에셋) |
-| `Assets/Editor/UI/` (+ `UIPresentationFlow.Editor.asmdef`) | `Assets/UIPresentationFlow/Editor/` (한 층 걷음) |
-| 폴더 `.meta` `Scripts` · `Editor` · `Shaders` | `Runtime.meta` · `Editor.meta` · `Runtime/Shaders.meta` — 같은 GUID 그대로. 원본 `Editor/UI.meta`는 쓰지 않는다 |
-
-에디터 코드는 원본의 에디터 asmdef `UIPresentationFlow.Editor`(원본 자리 `Editor/UI/`, `f912e99`부터)에 든다 — 사본에서는 `Editor/` 바로 아래. 예제 UI의 에디터 asmdef(`Ked.Samples.UI.Editor`)가 이것을 참조해 화면 짓기 도구를 쓴다 — asmdef 어셈블리는 `Assembly-CSharp-Editor`를 참조할 수 없다.
+에디터 코드는 원본의 에디터 asmdef `UIPresentationFlow.Editor`(`Editor/`, `f912e99`부터)에 든다. 예제 UI의 에디터 asmdef(`Ked.Samples.UI.Editor`)가 이것을 참조해 화면 짓기 도구를 쓴다 — asmdef 어셈블리는 `Assembly-CSharp-Editor`를 참조할 수 없다.
 
 가져오지 않은 것은 다음과 같다.
 - `Assets/Demo/`: 블랙홀 데모, 비주얼 노벨 샘플(이 저장소 VN UI 묶음의 복사본 + 데모 앱 — 이 저장소가 묶음의 원본이다)
 - `Assets/Scripts/Demo/` · `Assets/UI/`: Adaptive UI 데모의 코드와 바인딩 · 테마 에셋. 원본에서 `752d168`로 걷었다
 
-## 사본에만 있는 것 — 폴더 배치뿐
+## 사본에만 있는 것 — 없음
 
-가져온 파일은 모두 원본 blob과 바이트 단위로 같다(LF, `.meta` 포함). 다른 것은 **폴더 배치** 하나다(2026-11-06, 위 대응표 — 원본이 같은 배치로 바뀌면 없어진다).
-
-반입 때의 첫 갈림(아래 표 첫 줄)과 달리, 이번 배치는 에디터 asmdef를 런타임 asmdef **아래**에 두지 않는다 — `Editor/`는 `Runtime/`의 형제라 그 표의 CS0433 문제가 생기지 않는다.
+가져온 파일은 모두 원본 blob과 바이트 단위로 같고(LF, `.meta` 포함), 배치도 같다. 폴더의 `README.md`와 `Documentation~/`만 저장소마다 자기 것이다.
 
 반입 때(2026-10-27)는 갈림이 셋 있었고, 같은 날 모두 없앴다.
 
@@ -60,16 +53,10 @@
 원본과 갈렸는지 확인한다. 원본 커밋의 blob을 풀어 비교한다(원본 작업 트리에는 커밋하지 않은 변경이 섞일 수 있다).
 
 ```bash
-mkdir -p /tmp/uipf && git -C ../UIPresentationFlow archive --format=tar <커밋> \
-  Assets/Scripts Assets/Scripts.meta Assets/Editor Assets/Editor.meta Assets/Shaders Assets/Shaders.meta \
+mkdir -p /tmp/uipf && git -C ../UIPresentationFlow archive --format=tar <커밋> Assets/UIPresentationFlow \
   | tar -x -C /tmp/uipf
-diff -r -q --strip-trailing-cr -x Demo -x Demo.meta -x Shaders -x Shaders.meta \
-                                      /tmp/uipf/Assets/Scripts    Assets/UIPresentationFlow/Runtime
-diff -r -q --strip-trailing-cr        /tmp/uipf/Assets/Shaders    Assets/UIPresentationFlow/Runtime/Shaders
-diff -r -q --strip-trailing-cr        /tmp/uipf/Assets/Editor/UI  Assets/UIPresentationFlow/Editor
-diff --strip-trailing-cr /tmp/uipf/Assets/Scripts.meta Assets/UIPresentationFlow/Runtime.meta
-diff --strip-trailing-cr /tmp/uipf/Assets/Editor.meta  Assets/UIPresentationFlow/Editor.meta
-diff --strip-trailing-cr /tmp/uipf/Assets/Shaders.meta Assets/UIPresentationFlow/Runtime/Shaders.meta
+diff -r -q --strip-trailing-cr -x README.md -x README.md.meta -x "Documentation~" \
+  /tmp/uipf/Assets/UIPresentationFlow Assets/UIPresentationFlow
 ```
 
 결과가 0줄이면 같다. 결과(2026-10-27, `cf3fa98`)는 PLAN_uipf-ui의 U3 기록에, `3a26d8b`(= `dev` `4a4af6f`)와 `f912e99` · `c22bb76` · `6fe89e7`은 "UIPF로 되돌림"에 있다.
@@ -79,10 +66,9 @@ diff --strip-trailing-cr /tmp/uipf/Assets/Shaders.meta Assets/UIPresentationFlow
 1. **Unity를 닫는다.** 열린 채 파일을 바꾸면 `.meta`가 새로 생긴다.
 2. 원본에서 커밋 하나를 고르고, 그 커밋의 blob으로 가져온다. 작업 트리에는 커밋하지 않은 변경이 섞일 수 있어서 쓰지 않는다.
    ```bash
-   git -C ../UIPresentationFlow archive --format=tar <커밋> \
-     Assets/Scripts Assets/Editor Assets/Shaders | tar -x -C /tmp/uipf
+   git -C ../UIPresentationFlow archive --format=tar <커밋> Assets/UIPresentationFlow | tar -x -C /tmp/uipf
    ```
-3. 위 대응표의 자리에 `.meta`째 덮어쓴다(`Scripts` → `Runtime`, `Shaders` → `Runtime/Shaders`, `Editor/UI` → `Editor`). `Demo`는 빼고 가져온다.
+3. `Runtime/` · `Editor/`를 `.meta`째 덮어쓴다(`README.md` · `Documentation~`는 이 저장소 것을 둔다).
 4. 갈림이 있으면(위 절) 다시 적용한다. 지금은 없다.
 5. 위 "대조"를 돌리고, 스냅샷 표를 고친다.
 

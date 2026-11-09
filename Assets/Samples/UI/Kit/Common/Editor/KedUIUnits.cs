@@ -42,7 +42,7 @@ namespace Ked.Samples.UI.Editor
 
         private static UIScreenUnits NewRules()
         {
-            // UIPF 코드의 자리도 asmdef로 찾는다(ked는 사본 Assets/UIPresentationFlow/Runtime, UIPF 저장소는 Assets/Scripts).
+            // UIPF 코드의 자리도 asmdef로 찾는다(ked · UIPF 저장소 모두 Assets/UIPresentationFlow/Runtime).
             string uipf = AsmdefDir("UIPresentationFlow.Runtime");
             return uipf != null
                 ? new UIScreenUnits(UnitsDir, CommonDir, uipf)
