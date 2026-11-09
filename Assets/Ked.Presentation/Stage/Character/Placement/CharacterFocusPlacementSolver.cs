@@ -19,6 +19,7 @@ public static class CharacterFocusPlacementSolver
 
     public static Vector2 CalculateFocusPlacement(
         PresentationStage stage,
+        IStageViewNeutral stageView,
         string roleKey,
         RectTransform moveRect,
         CharacterFocusPreset focusPreset,
@@ -47,7 +48,7 @@ public static class CharacterFocusPlacementSolver
             out Vector3 focusLocalOffset);
 
         RectNodeState[] chain = rigRefs.PlacementTargets.CaptureSettledChain(
-            measureRect, rigSpaceRoot, ChainRects, stage.StageView);
+            measureRect, rigSpaceRoot, ChainRects, stageView);
 
         // 이동 축은 리그 스키마상 언제나 측정 체인 위에 있다. 아니면 코어(RequireIndex)가 예외로 드러낸다.
         int moveIndex = ChainRects.IndexOf(moveRect);

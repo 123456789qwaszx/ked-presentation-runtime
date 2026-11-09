@@ -258,7 +258,7 @@ cameraScale 1, pan 0, 층 offset 0, 층 배율 1 — 즉 항등.
 조립 (SampleBootstrap.Presentation)
   StageRigRegistry.Build(IStageMount, "stage00"…, 층 다섯)     무대 셋을 세운다
   new PresentationShotResponseSystem(registry, LayerProfileCurve.Default)
-  PresentationStage.AttachStageView(샷 시스템)                    측정이 중립을 묻는 곳
+  CharacterRigCommandFactory(…, 샷 시스템 as IStageViewNeutral)   측정이 중립을 묻는 곳 — 배치 커맨드에 주입
 
 slot / bg_spawn
   StageKeyParser          무대 키(문자열, 생략하면 본 무대) · 라벨 → d

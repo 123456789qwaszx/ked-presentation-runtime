@@ -45,15 +45,18 @@ public sealed class SetDepthCommandCharR : ClaimTweenCommandBase
     protected override float TweenDuration => _spec.duration;
 
     private readonly PresentationStage _stage;
+    private readonly IStageViewNeutral _stageView;
     private CharacterRigRefs _rig;
 
     public SetDepthCommandCharR(
         PresentationStage stage,
+        IStageViewNeutral stageView,
         SetDepthCommandSpecCharR spec,
         CharacterDepthTuningSO globalTuning,
         CharacterFocusTuningDBSO focusTuningDb)
     {
         _stage = stage;
+        _stageView = stageView;
         _spec = spec;
         _globalTuning = globalTuning;
         _focusTuningDb = focusTuningDb;
@@ -89,6 +92,7 @@ public sealed class SetDepthCommandCharR : ClaimTweenCommandBase
         
         CharacterDepthResolver.CalculateDepthYThatPreservesCurrentFocus(
             _stage,
+            _stageView,
             _spec.roleKey,
             _depthYRect,
             _depthScaleRect,

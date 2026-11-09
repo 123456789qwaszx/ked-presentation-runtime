@@ -3,6 +3,7 @@ using System;
 public sealed class CharacterRigCommandFactory : INodeCommandFactory
 {
     private readonly PresentationStage _stage;
+    private readonly IStageViewNeutral _stageView;
     private readonly CharRigSlotResolver _rigSlotResolver;
     private readonly CharacterRigBuilder _rigBuilder;
     private readonly PortraitResolver _portraitResolver;
@@ -17,6 +18,7 @@ public sealed class CharacterRigCommandFactory : INodeCommandFactory
 
     public CharacterRigCommandFactory(
         PresentationStage stage,
+        IStageViewNeutral stageView,
         CharRigSlotResolver charRigSlotResolver,
         CharacterRigBuilder charRigBuilder,
         PortraitResolver portraitResolver,
@@ -27,6 +29,7 @@ public sealed class CharacterRigCommandFactory : INodeCommandFactory
         RigBlurIntentSystem rigBlur)
     {
         _stage = stage ?? throw new ArgumentNullException(nameof(stage));
+        _stageView = stageView;
         _rigSlotResolver = charRigSlotResolver ?? throw new ArgumentNullException(nameof(charRigSlotResolver));
         _rigBuilder = charRigBuilder ?? throw new ArgumentNullException(nameof(charRigBuilder));
         _portraitResolver = portraitResolver ?? throw new ArgumentNullException(nameof(portraitResolver));
@@ -55,7 +58,7 @@ public sealed class CharacterRigCommandFactory : INodeCommandFactory
 
             SetCharacterSiblingOrderCommandSpecCharR s => new SetCharacterSiblingOrderCommandCharR(_stage, s),
             
-            SetDepthCommandSpecCharR s => new SetDepthCommandCharR(_stage, s, _characterDepthTuning, _characterFocusTuningDb),
+            SetDepthCommandSpecCharR s => new SetDepthCommandCharR(_stage, _stageView, s, _characterDepthTuning, _characterFocusTuningDb),
 
             // Visibility / Root Layers
             FadeCommandSpecCharR s => new FadeCommandCharR(_stage, s),
@@ -70,7 +73,7 @@ public sealed class CharacterRigCommandFactory : INodeCommandFactory
             SetEmotionPortraitWipeCommandSpecCharR s => new SetEmotionPortraitWipeCommandCharR(_stage, s, _portraitResolver),
             
             // Composition / Focus-aware Placement
-            PlaceCharacterFocusCommandSpecCharR s => new PlaceCharacterFocusCommandCharR(_stage, s, _characterFocusTuningDb),
+            PlaceCharacterFocusCommandSpecCharR s => new PlaceCharacterFocusCommandCharR(_stage, _stageView, s, _characterFocusTuningDb),
 
             // Visual State
             SetSpriteCommandSpecCharR s => new SetSpriteCommandCharR(_stage, s),

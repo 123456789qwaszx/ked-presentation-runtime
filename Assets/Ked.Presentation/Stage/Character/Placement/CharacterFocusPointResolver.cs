@@ -20,6 +20,7 @@ public static class CharacterFocusPointResolver
 {
     public static CharacterFocusPointResult Resolve(
         PresentationStage stage,
+        IStageViewNeutral stageView,
         string roleKey,
         CharacterFocusPreset preset,
         Vector2 commandOffset,
@@ -41,7 +42,7 @@ public static class CharacterFocusPointResolver
             useSettledPlacementTargets,
             facing,
             mirrorCommandOffset: true,
-            useSettledPlacementTargets ? stage.StageView : null);
+            useSettledPlacementTargets ? stageView : null);
     }
 
     public static bool TryResolveFromRigRefs(

@@ -51,6 +51,7 @@ public static class CharacterDepthResolver
 
     public static void CalculateDepthYThatPreservesCurrentFocus(
         PresentationStage stage,
+        IStageViewNeutral stageView,
         string roleKey,
         RectTransform depthYRect,
         RectTransform depthScaleRect,
@@ -83,7 +84,7 @@ public static class CharacterDepthResolver
 
         // 초점 고정도 무대 좌표로 푼다 — 샷이 움직이는 무대 노드는 중립값.
         RectNodeState[] chain = rigRefs.PlacementTargets.CaptureSettledChain(
-            measureRect, rigSpaceRoot, ChainRects, stage.StageView);
+            measureRect, rigSpaceRoot, ChainRects, stageView);
 
         int depthYIndex = ChainRects.IndexOf(depthYRect);
         int depthScaleIndex = ChainRects.IndexOf(depthScaleRect);
