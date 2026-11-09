@@ -2,7 +2,6 @@ using System;
 
 public sealed class ScreenEffectCommandFactory : INodeCommandFactory
 {
-    private readonly PresentationStage _stage;
     private readonly ScreenEffectRig _screenEffects;
     private readonly ScreenFlashPresetDBSO _flashPresetDb;
     private readonly ScreenNoisePresetDBSO _noisePresetDb;
@@ -16,7 +15,6 @@ public sealed class ScreenEffectCommandFactory : INodeCommandFactory
     private readonly PopupPresetDBSO _popupPreset;
 
     public ScreenEffectCommandFactory(
-        PresentationStage stage,
         ScreenEffectRig screenEffects,
         ScreenFlashPresetDBSO flashPresetDb,
         ScreenNoisePresetDBSO noisePresetDb,
@@ -28,7 +26,6 @@ public sealed class ScreenEffectCommandFactory : INodeCommandFactory
         CutInPresetDBSO cutInPreset = null,
         PopupPresetDBSO popupPreset = null)
     {
-        _stage = stage ?? throw new ArgumentNullException(nameof(stage));
         _screenEffects = screenEffects ? screenEffects : throw new ArgumentNullException(nameof(screenEffects));
         _flashPresetDb = flashPresetDb ? flashPresetDb : throw new ArgumentNullException(nameof(flashPresetDb));
         _noisePresetDb = noisePresetDb ? noisePresetDb : throw new ArgumentNullException(nameof(noisePresetDb));

@@ -38,7 +38,7 @@ public sealed class AdvanceInputPoller : MonoBehaviour
         PollSpeedUpMode();
         PollFeatureToggles();
 
-        _featureController.Tick();
+        _featureController?.Tick();
     }
 
     private void PollAdvance()

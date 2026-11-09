@@ -16,13 +16,15 @@ using Object = UnityEngine.Object;
 /// 노드 이름은 씬에 저장된 것을 다시 찾기 위한 것이다 — 바깥(대본 · 폴드)이 이름으로 부르지 않는다.
 /// 무대 리그와 달리 부수지 않는다. 어긋난 자식만 경고하고 치우고, 묶을 때마다 자리와 중립을 다시 세운다.
 /// </summary>
-public sealed class StageFrameBuilder
+public static class StageFrameBuilder
 {
-    public void Build(StageRigRefs stage, out StageCutInSlot cutIn, out StagePopupSlot popup)
+    public static (StageCutInSlot CutIn, StagePopupSlot Popup) Build(StageRigRefs stage)
     {
         RectTransform window = EnsureWindow(stage.Root, stage.StageKey);
-        cutIn = EnsureCutIn(window, stage.Root, stage.StageKey, stage.Mask);
-        popup = EnsurePopup(window, stage.StageKey);
+
+        return (
+            EnsureCutIn(window, stage.Root, stage.StageKey, stage.Mask),
+            EnsurePopup(window, stage.StageKey));
     }
 
     private static string WindowName(string stageKey) => $"{stageKey}_Window";

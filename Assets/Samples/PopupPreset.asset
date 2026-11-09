@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1141e89ddb7577247946cede85620074, type: 3}
+  m_Name: PopupPreset
+  m_EditorClassIdentifier: Ked.Presentation.Stage::PopupPresetDBSO
+  pictureScale: 0.91
+  backdropColor: {r: 0.04, g: 0.04, b: 0.04, a: 0.47}
+  openTimes:
+  - 0
+  - 0.035
+  - 0.105
+  - 0.175
+  - 0.245
+  - 0.315
+  - 0.385
+  - 0.445
+  openAlpha:
+  - 0
+  - 0.07
+  - 0.42
+  - 0.53
+  - 0.75
+  - 0.93
+  - 0.97
+  - 1
+  closeTimes:
+  - 0
+  - 0.035
+  - 0.095
+  - 0.165
+  - 0.235
+  - 0.305
+  closeAlpha:
+  - 1
+  - 0.92
+  - 0.76
+  - 0.51
+  - 0.23
+  - 0

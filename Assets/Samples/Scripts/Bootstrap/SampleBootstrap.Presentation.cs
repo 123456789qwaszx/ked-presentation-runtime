@@ -6,6 +6,10 @@ using UnityEngine;
 // 진행 · 저장을 모른다. 결과(PresentationRuntime)에 재생 호스트를 붙이면 돈다(Awake → InstallProgression).
 public partial class SampleBootstrap
 {
+    // 무대 키 — 대본의 slot · bg_spawn · tx · screen_blur가 부르는 이름. 역할은 키로 정한다(StageRoles):
+    // stage00은 본 무대(샷이 움직인다, 생략값), stage01 · stage02는 덮는 무대(컷인 · 인서트 · 커튼, 카메라 고정).
+    private static readonly string[] StageKeys = { "stage00", "stage01", "stage02" };
+    
     /// <summary>대본 번들 폴더(Assets/Dialogue — 저작 툴이 내는 자리). 모션(motions.json)도 대본 곁에 산다.</summary>
     private static string DialogueFolder =>
         System.IO.Path.Combine(Application.dataPath, "Dialogue");
@@ -25,7 +29,6 @@ public partial class SampleBootstrap
     private readonly DialogueAdvanceDispatcher _dialogueAdvanceDispatcher = new();
     private readonly EpisodeSkipController _episodeSkipController = new();
 
-    private PresentationUIRoot _presentationUIRoot;
     private StageRigRegistry _stageRigs;
     private StageFrameRegistry _stageFrames;
     private PresentationShotResponseSystem _presentationResponseRig;
@@ -70,24 +73,16 @@ public partial class SampleBootstrap
 
     private void BootstrapPresentationRoots()
     {
-        _presentationUIRoot = stage
-            ? stage
-            : throw new InvalidOperationException("[연출 조립] 무대(PresentationUIRoot)가 없다 — 부트스트랩의 '무대' 칸을 채운다.");
+        // 무대 셋은 스키마가 세운다(StageRigSchema). 씬에는 뷰포트 층만 있다.
+        // 깊이 층 다섯은 미리 세운다. 그려지는 순서(먼 층이 뒤)를 처음부터 고정하기 위함.
+        StageRigBuilder stageRigBuilder = new();
+        _stageRigs = new StageRigRegistry(stageRigBuilder);
 
-        _presentationUIRoot.Initialize();
-
-        // 무대 셋은 스키마가 세운다(StageRigSchema). 씬에는 뷰포트 층만 있다. 깊이 층 다섯은 미리 세운다 —
-        // 그려지는 순서(먼 층이 뒤)를 처음부터 고정하기 위해서다. 그 밖의 깊이는 참조될 때 선다.
-        _stageRigs = new StageRigRegistry(new StageRigBuilder());
-
+        // 무대 틀(창, 컷인 판, 그림 팝업)은 리그 다음에 - 창이 무대 루트를 감싼다.
         foreach (string stageKey in StageKeys)
-            _stageRigs.Build(_presentationUIRoot.StageMount, stageKey, StageLayerLabels.Depths);
+            _stageRigs.Build(stage.StageMount, stageKey, StageLayerLabels.Depths);
 
-        // 무대 틀(창 · 컷인 판 · 그림 팝업)은 리그 다음에 — 창이 무대 루트를 감싼다(StageFrameBuilder).
-        _stageFrames = new StageFrameRegistry(new StageFrameBuilder());
-
-        foreach (StageRigRefs stageRig in _stageRigs.All)
-            _stageFrames.Build(stageRig);
+        _stageFrames = new StageFrameRegistry(_stageRigs);
 
         _presentationResponseRig = new PresentationShotResponseSystem(_stageRigs, LayerProfileCurve.Default);
         // 배치는 무대 좌표 — 배치 계산이 샷이 움직이는 무대 노드를 지날 때 샷 시스템의 중립값을 쓴다.
@@ -99,22 +94,18 @@ public partial class SampleBootstrap
             characterFocusTuningDb);
     }
 
-    // 무대 키 — 대본의 slot · bg_spawn · tx · screen_blur가 부르는 이름. 역할은 키로 정한다(StageRoles):
-    // stage00은 본 무대(샷이 움직인다, 생략값), stage01 · stage02는 덮는 무대(컷인 · 인서트 · 커튼, 카메라 고정).
-    private static readonly string[] StageKeys = { "stage00", "stage01", "stage02" };
 
     private ScreenEffectRig EnsureScreenEffectRig()
     {
-        ScreenEffectRig screenEffectRig = screenEffectRigMount.GetComponentInChildren<ScreenEffectRig>(true);
+        ScreenEffectRig screenEffectRig = stage.ScreenEffectMount.GetComponentInChildren<ScreenEffectRig>(true);
 
         if (screenEffectRig == null)
         {
             ScreenEffectRigBuilder screenEffectRigBuilder = new();
 
-            RectTransform rigRoot = screenEffectRigBuilder.BuildRigRoot(
-                screenEffectRigPrefab);
+            RectTransform rigRoot = screenEffectRigBuilder.BuildRigRoot();
 
-            rigRoot.SetParent(screenEffectRigMount, false);
+            rigRoot.SetParent(stage.ScreenEffectMount, false);
 
             if (!rigRoot.TryGetComponent(out screenEffectRig))
                 screenEffectRig = rigRoot.gameObject.AddComponent<ScreenEffectRig>();
@@ -161,7 +152,6 @@ public partial class SampleBootstrap
         AudioCommandFactory audioFactory = new(audioSystem);
 
         ScreenEffectCommandFactory screenEffectFactory = new(
-            _presentationStage,
             _screenEffectRig,
             screenFlashPresetDb,
             screenNoisePresetDb,

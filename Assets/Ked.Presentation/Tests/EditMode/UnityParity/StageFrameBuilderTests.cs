@@ -15,7 +15,6 @@ namespace Ked.Presentation.Tests.UnityParity
         private readonly List<GameObject> _spawned = new();
         private RectTransform _mount;
         private StageRigBuilder _rigBuilder;
-        private StageFrameBuilder _frameBuilder;
 
         [SetUp]
         public void SetUp()
@@ -25,7 +24,6 @@ namespace Ked.Presentation.Tests.UnityParity
             _mount = (RectTransform)go.transform;
             _mount.sizeDelta = new Vector2(1920f, 1080f);
             _rigBuilder = new StageRigBuilder();
-            _frameBuilder = new StageFrameBuilder();
         }
 
         [TearDown]
@@ -48,7 +46,7 @@ namespace Ked.Presentation.Tests.UnityParity
         public void 창이_무대_루트를_감싸고_판이_무대보다_뒤다()
         {
             StageRigRefs rig = BuildRig("stage00");
-            _frameBuilder.Build(rig, out StageCutInSlot cutIn, out _);
+            StageCutInSlot cutIn = StageFrameBuilder.Build(rig).CutIn;
 
             Assert.That(rig.Root.parent, Is.EqualTo(cutIn.Window), "무대 루트는 창 아래");
             Assert.That(cutIn.Window.parent, Is.EqualTo(_mount));
@@ -68,7 +66,7 @@ namespace Ked.Presentation.Tests.UnityParity
             RectTransform after = NewChild(_mount, "After");
 
             RectTransform pan = rig.CameraPan;
-            _frameBuilder.Build(rig, out StageCutInSlot cutIn, out _);
+            StageCutInSlot cutIn = StageFrameBuilder.Build(rig).CutIn;
 
             Assert.That(rig.CameraPan, Is.SameAs(pan), "무대 계층은 그대로");
             Assert.That(rig.Root.parent, Is.EqualTo(cutIn.Window));
@@ -81,10 +79,10 @@ namespace Ked.Presentation.Tests.UnityParity
         public void 다시_묶으면_있는_창을_쓰고_리그도_창_안에서_다시_묶인다()
         {
             StageRigRefs rig = BuildRig("stage01");
-            _frameBuilder.Build(rig, out StageCutInSlot first, out _);
+            StageCutInSlot first = StageFrameBuilder.Build(rig).CutIn;
 
             StageRigRefs rebound = _rigBuilder.BindRefsFromRoot(rig.Root, "stage01");
-            _frameBuilder.Build(rebound, out StageCutInSlot again, out _);
+            StageCutInSlot again = StageFrameBuilder.Build(rebound).CutIn;
 
             Assert.That(again.Window, Is.SameAs(first.Window), "창을 새로 끼우지 않는다");
             Assert.That(rebound.CameraPan, Is.SameAs(rig.CameraPan), "창 안의 리그도 그대로 묶인다");
@@ -95,7 +93,7 @@ namespace Ked.Presentation.Tests.UnityParity
         public void 컷인을_열면_창_피벗이_판_아래_가운데로_가고_마스크가_네_점이_된다()
         {
             StageRigRefs rig = BuildRig("stage01");
-            _frameBuilder.Build(rig, out StageCutInSlot cutIn, out _);
+            StageCutInSlot cutIn = StageFrameBuilder.Build(rig).CutIn;
             CutInPresetDBSO preset = CutInPresetDBSO.CreateDefault();
 
             try
@@ -129,8 +127,8 @@ namespace Ked.Presentation.Tests.UnityParity
         [Test]
         public void 팝업은_창의_다음_형제이고_뒷막이_그림보다_뒤다()
         {
-            _frameBuilder.Build(BuildRig("stage01"), out StageCutInSlot c1, out StagePopupSlot p1);
-            _frameBuilder.Build(BuildRig("stage02"), out StageCutInSlot c2, out _);
+            var (c1, p1) = StageFrameBuilder.Build(BuildRig("stage01"));
+            StageCutInSlot c2 = StageFrameBuilder.Build(BuildRig("stage02")).CutIn;
 
             Assert.That(p1.Group.name, Is.EqualTo("stage01_Popup"));
             Assert.That(p1.Group.parent, Is.EqualTo(_mount));
@@ -152,13 +150,13 @@ namespace Ked.Presentation.Tests.UnityParity
         public void 다시_묶어도_팝업은_창_다음_자리로_돌아온다()
         {
             StageRigRefs s1 = BuildRig("stage01");
-            _frameBuilder.Build(s1, out _, out StagePopupSlot p1);
-            _frameBuilder.Build(BuildRig("stage02"), out _, out _);
+            StagePopupSlot p1 = StageFrameBuilder.Build(s1).Popup;
+            StageFrameBuilder.Build(BuildRig("stage02"));
 
             RectTransform group = p1.Group;
             group.SetAsFirstSibling();   // 엉뚱한 자리(창 앞)
 
-            _frameBuilder.Build(s1, out StageCutInSlot cutIn, out StagePopupSlot rebound);
+            var (cutIn, rebound) = StageFrameBuilder.Build(s1);
 
             Assert.That(rebound.Group, Is.SameAs(group), "부수지 않고 다시 묶는다");
             Assert.That(group.GetSiblingIndex(), Is.EqualTo(cutIn.Window.GetSiblingIndex() + 1));
@@ -167,7 +165,7 @@ namespace Ked.Presentation.Tests.UnityParity
         [Test]
         public void 팝업을_열면_그림이_원본_픽셀_곱하기_배율로_서고_닫으면_꺼진다()
         {
-            _frameBuilder.Build(BuildRig("stage01"), out _, out StagePopupSlot popup);
+            StagePopupSlot popup = StageFrameBuilder.Build(BuildRig("stage01")).Popup;
             PopupPresetDBSO preset = PopupPresetDBSO.CreateDefault();
             Texture2D tex = new(404, 404);
             Sprite sprite = Sprite.Create(tex, new Rect(0f, 0f, 404f, 404f), new Vector2(0.5f, 0.5f), 100f);

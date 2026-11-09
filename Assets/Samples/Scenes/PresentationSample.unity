@@ -842,8 +842,7 @@ MonoBehaviour:
   screenFlashPresetDb: {fileID: 11400000, guid: fd8b0b7eceef6c549952782158c076ed, type: 2}
   stageMaskMotionPresetDb: {fileID: 11400000, guid: 5e92252f243dfe94fbce20f08a326a2b, type: 2}
   cutInPreset: {fileID: 11400000, guid: be32cae4a2356db4c821f4d5d1698993, type: 2}
-  screenEffectRigMount: {fileID: 1239989732}
-  screenEffectRigPrefab: {fileID: 4422593765165483704, guid: 83cb0b3e799522c4f8dc6d87cce85f30, type: 3}
+  popupPreset: {fileID: 11400000, guid: 2f018c6cbaa99114992e4c2649dbc24e, type: 2}
   characterFocusDebugView: {fileID: 1719686628}
 --- !u!1 &608895336
 GameObject:
@@ -2010,6 +2009,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c7928914f4690b9439a666b84fe197cf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PresentationUIRoot
+  stageViewportLayer: {fileID: 144827249}
+  screenEffectLayer: {fileID: 1239989732}
 --- !u!1 &1753826487
 GameObject:
   m_ObjectHideFlags: 0
