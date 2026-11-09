@@ -136,7 +136,7 @@ relative로 건다 — 배율은 곱, 회전은 덧셈이라 레이아웃의 기
 
 | 층 | 파일 |
 |---|---|
-| 스키마 · 빌더 | 무대 틀 — `StageFrameSchema.WindowName · PanelName`, `StageFrameBuilder.EnsureWindow · EnsureCutIn`, `StageFrameRefs.CutIn`, `StageCutInSlot`(자리 · 모양 · 모션 · 중립 · 닫힘). 무대 리그는 틀을 모른다([stage-frame.md](../Assets/Ked.Presentation/Stage/StageFrame/Documentation~/stage-frame.md)) |
+| 빌더 · 레지스트리 | 무대 틀 — `StageFrameBuilder.EnsureWindow · EnsureCutIn`(노드 이름도 빌더 안), `StageFrameRegistry.CutIn`, `StageCutInSlot`(자리 · 모양 · 모션 · 중립 · 닫힘). 무대 리그는 틀을 모른다([stage-frame.md](../Assets/Ked.Presentation/Stage/StageFrame/Documentation~/stage-frame.md)) |
 | 마스크 | `StageMaskKind.CustomQuad`, `StageMaskGraphic.SetCustomQuad`, `StageMaskSlot.SetCustomQuad` |
 | 런타임 커맨드 | `CutInOpenCommand` · `CutInCloseCommand` — 프리셋 · 판을 골라 슬롯에 걸기만 한다. 창 모션(`MotionMath.Compose`, relative)은 `StageCutInSlot`이 소유한다(tx의 `StageMaskSlot`과 같은 틀) |
 | tx · 마스크 지우기 · 장면 경계 | 컷인 창 · 판을 중립으로(`StageMaskMotionCommand` · `StageMaskClearCommand` · `ScenePresentation` → `StageFrameRegistry.ResetAll`) — 셋 다 틀 레지스트리를 받아 직접 부른다 |

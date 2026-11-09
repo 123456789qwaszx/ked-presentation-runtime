@@ -72,7 +72,7 @@ public sealed class PopupOpenCommand : CommandBase
     {
         _resolveAttempted = true;
 
-        _slot = _frames.Get(_spec.stage).Popup;
+        _slot = _frames.Popup(_spec.stage);
 
         // 못 찾으면 해석기가 경고한다 — 뒷막만 뜬다(폴드는 열림).
         _picture = ResourcesSpriteResolver.Resolve(PopupPresetDBSO.PictureResourcesRoot, _spec.pictureKey);

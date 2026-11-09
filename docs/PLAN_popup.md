@@ -60,7 +60,7 @@ StageViewportLayer (mount)
 - **창 바깥** — 같은 무대에서 컷인이 팝해도 팝업은 끌려가지 않는다.
 - **창 바로 다음** — 그 무대의 내용(같은 덮는 무대의 인물 포함) 위, 다음 무대 아래. 순서는 무대 인자로 고른다(컷인과 같은 규칙).
 - **무대 루트 바깥** — 측정 체인 · 리그 덤프 · 하네스 · 샷 · `tx` 마스크와 무관하다.
-- 노드 이름은 `StageFrameSchema`(`PopupName` · `PopupBackdropName` · `PopupImageName`), 세우기는 `StageFrameBuilder.EnsurePopup`. 묶을 때마다 창 다음 자리로 돌리고 닫힌 중립으로 선다. 스키마에 없는 자식은 경고하고 치운다.
+- 세우기는 `StageFrameBuilder.EnsurePopup`(노드 이름도 빌더 안), 꺼내기는 `StageFrameRegistry.Popup`. 묶을 때마다 창 다음 자리로 돌리고 닫힌 중립으로 선다. 스키마에 없는 자식은 경고하고 치운다.
 
 ### 검토한 다른 안 (가) — 슬롯 두 개
 

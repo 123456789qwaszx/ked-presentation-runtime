@@ -66,7 +66,7 @@ public sealed class CutInCloseCommand : CommandBase
     {
         _resolveAttempted = true;
 
-        _slot = _frames.Get(_spec.stage).CutIn;
+        _slot = _frames.CutIn(_spec.stage);
         _clip = _preset.PopOut;
 
         if (!MotionRules.TryValidate(_clip, null, out string why))

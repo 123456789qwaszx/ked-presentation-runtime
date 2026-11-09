@@ -51,7 +51,7 @@ public sealed class StageMaskClearCommand : CommandBase
         // 마스크를 지우면 틀도 끝난다 — 컷인 창 · 판과 그림 팝업을 중립으로(docs/PLAN_cutin.md §5 · PLAN_popup.md §6).
         if (!_spec.allStages)
         {
-            _frames.Get(_spec.stage).Reset();
+            _frames.Reset(_spec.stage);
             _stages.Get(_spec.stage).Mask.Clear(_spec.mode, _spec.hideEdge);
             return;
         }

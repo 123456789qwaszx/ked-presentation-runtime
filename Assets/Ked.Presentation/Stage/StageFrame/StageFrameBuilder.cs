@@ -3,25 +3,39 @@ using UnityEngine.UI;
 using Object = UnityEngine.Object;
 
 /// <summary>
-/// 무대 틀을 스키마대로 세우고, 있는 것은 다시 묶는다(StageFrameSchema). 무대 리그가 먼저 서 있어야 한다 — 틀은 그 무대 루트를 감싼다.
-/// 무대 리그와 달리 틀은 부수지 않는다. 어긋난 자식만 경고하고 치우고, 묶을 때마다 자리와 중립을 다시 세운다.
+/// 무대 틀 — 무대 루트 바깥의 창 · 컷인 판 · 그림 팝업을 세우고, 있는 것은 다시 묶어 슬롯 둘을 돌려준다.
+/// 무대 리그가 먼저 서 있어야 한다 — 창이 그 무대 루트를 감싼다. 틀은 리그를 알고, 리그는 틀을 모른다.
+///
+///   {stage}_Window              무대 전체를 들고 팝 · 회전한다(컷인). 중립 항등 — 무대 루트와 같은 rect
+///     {stage}_Panel             컷인 판 그림. 무대 루트보다 뒤(형제 0)
+///     {stage}_Stage_Root        (무대 리그)
+///   {stage}_Popup               창의 다음 형제. 뒷막과 그림을 한 덩어리로(CanvasGroup)
+///     {stage}_Popup_Backdrop    화면 전체 어두운 막
+///     {stage}_Popup_Image       그림
+///
+/// 노드 이름은 씬에 저장된 것을 다시 찾기 위한 것이다 — 바깥(대본 · 폴드)이 이름으로 부르지 않는다.
+/// 무대 리그와 달리 부수지 않는다. 어긋난 자식만 경고하고 치우고, 묶을 때마다 자리와 중립을 다시 세운다.
 /// </summary>
 public sealed class StageFrameBuilder
 {
-    public StageFrameRefs Build(StageRigRefs stage)
+    public void Build(StageRigRefs stage, out StageCutInSlot cutIn, out StagePopupSlot popup)
     {
         RectTransform window = EnsureWindow(stage.Root, stage.StageKey);
-        StageCutInSlot cutIn = EnsureCutIn(window, stage.Root, stage.StageKey, stage.Mask);
-        StagePopupSlot popup = EnsurePopup(window, stage.StageKey);
-
-        return new StageFrameRefs(stage.StageKey, window, cutIn, popup);
+        cutIn = EnsureCutIn(window, stage.Root, stage.StageKey, stage.Mask);
+        popup = EnsurePopup(window, stage.StageKey);
     }
+
+    private static string WindowName(string stageKey) => $"{stageKey}_Window";
+    private static string PanelName(string stageKey) => $"{stageKey}_Panel";
+    private static string PopupName(string stageKey) => $"{stageKey}_Popup";
+    private static string PopupBackdropName(string stageKey) => $"{stageKey}_Popup_Backdrop";
+    private static string PopupImageName(string stageKey) => $"{stageKey}_Popup_Image";
 
     // 창은 무대 루트의 **부모**다 — 무대 전체를 들고 움직이되 리그 좌표 계산(무대 루트까지)에는 들지 않는다.
     // 옛 씬(무대 루트가 mount 바로 아래)은 그 자리에 창을 끼워 넣는다 — 부수지 않는다(무대 루트는 창과 같은 rect로 선다).
     private static RectTransform EnsureWindow(RectTransform root, string stageKey)
     {
-        string windowName = StageFrameSchema.WindowName(stageKey);
+        string windowName = WindowName(stageKey);
         RectTransform parent = root.parent as RectTransform;
 
         if (parent != null && parent.name == windowName)
@@ -44,7 +58,7 @@ public sealed class StageFrameBuilder
     // 창 아래는 판과 무대 루트 둘뿐이다. 판이 뒤(형제 0), 무대가 앞(형제 1). 묶을 때마다 닫힌 중립으로 돌린다.
     private static StageCutInSlot EnsureCutIn(RectTransform window, RectTransform root, string stageKey, StageMaskSlot mask)
     {
-        RectTransform panel = EnsureRect(window, StageFrameSchema.PanelName(stageKey));
+        RectTransform panel = EnsureRect(window, PanelName(stageKey));
 
         // 스키마에 없는 자식은 경고하고 치운다 — 창 아래는 판과 무대 루트뿐이다.
         for (int i = window.childCount - 1; i >= 0; i--)
@@ -78,7 +92,7 @@ public sealed class StageFrameBuilder
     private static StagePopupSlot EnsurePopup(RectTransform window, string stageKey)
     {
         RectTransform mount = window.parent as RectTransform;
-        string groupName = StageFrameSchema.PopupName(stageKey);
+        string groupName = PopupName(stageKey);
 
         RectTransform group = mount != null ? FindDirectChild(mount, groupName) : null;
 
@@ -98,8 +112,8 @@ public sealed class StageFrameBuilder
             group.SetSiblingIndex(window.GetSiblingIndex() + 1);
         }
 
-        RectTransform backdrop = EnsureRect(group, StageFrameSchema.PopupBackdropName(stageKey));
-        RectTransform picture = EnsureRect(group, StageFrameSchema.PopupImageName(stageKey));
+        RectTransform backdrop = EnsureRect(group, PopupBackdropName(stageKey));
+        RectTransform picture = EnsureRect(group, PopupImageName(stageKey));
 
         // 스키마에 없는 자식은 경고하고 치운다 — 그룹 아래는 뒷막과 그림뿐이다.
         for (int i = group.childCount - 1; i >= 0; i--)

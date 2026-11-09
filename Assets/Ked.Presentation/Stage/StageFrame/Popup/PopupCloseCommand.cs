@@ -66,7 +66,7 @@ public sealed class PopupCloseCommand : CommandBase
     {
         _resolveAttempted = true;
 
-        _slot = _frames.Get(_spec.stage).Popup;
+        _slot = _frames.Popup(_spec.stage);
         _keys = _preset.CloseKeys(out string why);
 
         if (_keys == null)

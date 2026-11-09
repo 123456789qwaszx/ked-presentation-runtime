@@ -72,7 +72,7 @@ public sealed class CutInOpenCommand : CommandBase
     {
         _resolveAttempted = true;
 
-        _slot = _frames.Get(_spec.stage).CutIn;
+        _slot = _frames.CutIn(_spec.stage);
 
         // 못 찾으면 해석기가 경고한다 — 판 없이 열린다(마스크 · 모션은 그대로).
         _panel = ResourcesSpriteResolver.Resolve(CutInPresetDBSO.PanelResourcesRoot, _spec.panelKey);

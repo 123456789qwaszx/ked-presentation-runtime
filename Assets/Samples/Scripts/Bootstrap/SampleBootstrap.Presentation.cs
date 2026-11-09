@@ -83,7 +83,7 @@ public partial class SampleBootstrap
         foreach (string stageKey in StageKeys)
             _stageRigs.Build(_presentationUIRoot.StageMount, stageKey, StageLayerLabels.Depths);
 
-        // 무대 틀(창 · 컷인 판 · 그림 팝업)은 리그 다음에 — 틀이 무대 루트를 감싼다(StageFrameSchema).
+        // 무대 틀(창 · 컷인 판 · 그림 팝업)은 리그 다음에 — 창이 무대 루트를 감싼다(StageFrameBuilder).
         _stageFrames = new StageFrameRegistry(new StageFrameBuilder());
 
         foreach (StageRigRefs stageRig in _stageRigs.All)

@@ -25,7 +25,9 @@
     {stage}_Popup_Image       그림. 원본 픽셀 × 프리셋 배율, 무대 중심 기준 자리
 ```
 
-- 이름은 `StageFrameSchema`, 세우기는 `StageFrameBuilder`(`EnsureWindow` · `EnsureCutIn` · `EnsurePopup`), 참조는 `StageFrameRefs`.
+- 세우기는 `StageFrameBuilder`(`EnsureWindow` · `EnsureCutIn` · `EnsurePopup`), 꺼내기는 `StageFrameRegistry`(`CutIn` · `Popup` · `Reset` · `ResetAll`).
+- 틀에는 스키마 · 참조 묶음을 두지 않는다. 그것은 바깥(대본 · 연출 에디터 · 폴드)이 노드를 **이름으로** 부르고 여러 시스템이 같은 노드에 쓸 때 값을 한다(캐릭터 리그 · 무대 리그).
+  틀의 노드는 각 슬롯이 혼자 쓰고 폴드는 끝 상태 표만 안다 — **슬롯이 단위**다. 노드 이름은 씬에 저장된 것을 다시 찾기 위한 빌더 안의 사정이다.
 - 모든 무대에 선다. 컷인 · 팝업을 쓰지 않는 무대에서 창은 항등, 판 · 팝업은 꺼져 있다 — 화면은 틀이 없을 때와 같다.
 - 옛 씬(무대 루트가 mount 바로 아래)은 그 자리에 창을 끼워 넣는다 — 무대 계층을 부수지 않고 무대끼리의 그리기 순서를 지킨다.
 - 창이 **무대 루트 바깥**인 것이 요점이다. 측정 체인 · 샷 식은 무대 루트에서 멈추므로 창이 팝 · 회전하는 도중에도 `place` · `size`가 같다.
