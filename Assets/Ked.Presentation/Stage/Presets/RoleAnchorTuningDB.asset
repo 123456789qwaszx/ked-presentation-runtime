@@ -15,8 +15,8 @@ MonoBehaviour:
   entries:
   - key: Albedo
     defaultOffset: {x: 0, y: 0}
-    offset: {x: 0, y: 0}
-    visualScale: 1
+    offset: {x: 0, y: 248.1081}
+    visualScale: 0.540541
   - key: Laru
     defaultOffset: {x: 0, y: 0}
     offset: {x: 0, y: 0}
@@ -57,3 +57,33 @@ MonoBehaviour:
     defaultOffset: {x: 550, y: 0}
     offset: {x: 330, y: 0}
     visualScale: 10
+  - key: benito
+    offset: {x: 0, y: 223.9024}
+    visualScale: 0.585366
+  - key: chaton
+    offset: {x: 0, y: 223.9024}
+    visualScale: 0.585366
+  - key: desert_scorpion_female_grunt
+    offset: {x: 0, y: 223.9024}
+    visualScale: 0.585366
+  - key: desert_scorpion_male_grunt
+    offset: {x: 0, y: 223.9024}
+    visualScale: 0.585366
+  - key: harin
+    offset: {x: 0, y: 271.2442}
+    visualScale: 0.497696
+  - key: kasimira
+    offset: {x: 0, y: 251.5727}
+    visualScale: 0.534125
+  - key: kasmi
+    offset: {x: 0, y: 271.2442}
+    visualScale: 0.497696
+  - key: mirage_resident_m
+    offset: {x: 0, y: 223.9024}
+    visualScale: 0.585366
+  - key: sigure
+    offset: {x: 0, y: 271.2442}
+    visualScale: 0.497696
+  - key: white_cat_mercenary
+    offset: {x: 0, y: 223.9024}
+    visualScale: 0.585366

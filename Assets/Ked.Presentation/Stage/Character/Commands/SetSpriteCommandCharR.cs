@@ -7,7 +7,7 @@ using UnityEngine.UI;
 /// 리그의 Image 하나에 Resources 스프라이트를 키로 넣는다 — 배경(`bg_sprite`)이 쓰는 길이다.
 ///
 /// 초상(SetPortraitSpriteCommandCharR)과 다른 점은 출처 하나다: 배경은 캐스팅하지 않은 슬롯이라
-/// 초상 DB가 아니라 `Resources/{resourcesRoot}/{spriteKey}`를 연다. 사이징도 다르다 — 배경은 원본 픽셀 크기
+/// 초상 DB가 아니라 `Resources/{resourcesRoot}/{spriteKey}`를 연다. 사이징은 같다 — 원본 픽셀 크기
 /// 그대로(SourcePixels, 2026-11-09). 코어 StageReducer.Background가 background-dimensions.json의 크기로 같은 값을 접는다.
 /// </summary>
 [Serializable]
@@ -25,10 +25,6 @@ public sealed class SetSpriteCommandSpecCharR : CharacterRigCommandSpecBase
 
     [Header("Sizing Policy (Recommended)")]
     public CharRigImageSizingMode sizingMode = CharRigImageSizingMode.SourcePixels;
-
-    [Tooltip("HeightFit일 때 가로 정렬")]
-    public CharRigImageSizingPolicy.HorizontalAlign horizontalAlign =
-        CharRigImageSizingPolicy.HorizontalAlign.Center;
 
     [Tooltip("꺼 두면 이 Image가 클릭을 받지 않는다. 배경은 화면 전체를 덮으므로 끈다 — 무대 아래 UI가 클릭을 잃지 않게.")]
     public bool raycastTarget = false;
@@ -92,6 +88,6 @@ public sealed class SetSpriteCommandCharR : CommandBase
         if (sprite == null)
             return;
 
-        CharRigImageSizingPolicy.Apply(_image, sprite, _spec.sizingMode, _spec.horizontalAlign);
+        CharRigImageSizingPolicy.Apply(_image, sprite, _spec.sizingMode);
     }
 }

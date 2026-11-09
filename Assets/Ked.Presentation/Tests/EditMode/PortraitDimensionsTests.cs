@@ -6,7 +6,7 @@ namespace Ked.Presentation.Tests
 {
     /// <summary>
     /// 초상 치수 조회의 골든 — 런타임 PortraitResolver의 규약을 그대로 고정한다.
-    /// 여기가 갈라지면 폴드가 다른 스프라이트를 고르고, 그건 곧 폭 불일치다.
+    /// 여기가 갈라지면 폴드가 다른 스프라이트를 고르고, 그건 곧 크기 불일치다.
     /// </summary>
     public sealed class PortraitDimensionsTests
     {
@@ -20,12 +20,14 @@ namespace Ked.Presentation.Tests
             => new() { character = character, variant = variant, emotion = emotion, width = width, height = height };
 
         [Test]
-        public void 종횡비는_가로_나누기_세로다()
+        public void 크기는_가로_세로_픽셀_그대로다()
         {
+            // 초상은 원본 픽셀 크기 그대로 그린다(2026-11-09) — 종횡비가 아니라 크기를 낸다.
             PortraitDimensionsFileDto db = Db(E("tyrant", "a", "01", 800f, 1600f));
 
-            Assert.That(db.TryGetAspect("tyrant", "a", "01", out float aspect, out _), Is.True);
-            Assert.That(aspect, Is.EqualTo(0.5f).Within(Eps));
+            Assert.That(db.TryGetSize("tyrant", "a", "01", out Vec2 size, out _), Is.True);
+            Assert.That(size.X, Is.EqualTo(800f).Within(Eps));
+            Assert.That(size.Y, Is.EqualTo(1600f).Within(Eps));
         }
 
         [Test]
@@ -33,8 +35,8 @@ namespace Ked.Presentation.Tests
         {
             PortraitDimensionsFileDto db = Db(E("tyrant", "a", "01", 500f));
 
-            Assert.That(db.TryGetAspect("Tyrant", "a", "01", out _, out _), Is.True);
-            Assert.That(db.TryGetAspect(" TYRANT ", "a", "01", out _, out _), Is.True);
+            Assert.That(db.TryGetSize("Tyrant", "a", "01", out _, out _), Is.True);
+            Assert.That(db.TryGetSize(" TYRANT ", "a", "01", out _, out _), Is.True);
         }
 
         [Test]
@@ -46,14 +48,14 @@ namespace Ked.Presentation.Tests
                 E("tyrant", "school", "01", 700f),
                 E("tyrant", "casual", "01", 400f));
 
-            Assert.That(db.TryGetAspect("tyrant", "school", "01", out float school, out _), Is.True);
-            Assert.That(school, Is.EqualTo(0.7f).Within(Eps));
+            Assert.That(db.TryGetSize("tyrant", "school", "01", out Vec2 school, out _), Is.True);
+            Assert.That(school.X, Is.EqualTo(700f).Within(Eps));
 
-            Assert.That(db.TryGetAspect("tyrant", "casual", "01", out float casual, out _), Is.True);
-            Assert.That(casual, Is.EqualTo(0.4f).Within(Eps),
+            Assert.That(db.TryGetSize("tyrant", "casual", "01", out Vec2 casual, out _), Is.True);
+            Assert.That(casual.X, Is.EqualTo(400f).Within(Eps),
                 "마지막 글자가 같아도 다른 변형이다");
 
-            Assert.That(db.TryGetAspect("tyrant", " School ", "01", out _, out _), Is.True,
+            Assert.That(db.TryGetSize("tyrant", " School ", "01", out _, out _), Is.True,
                 "캐릭터 키와 마찬가지로 트림·소문자화는 한다");
         }
 
@@ -64,7 +66,7 @@ namespace Ked.Presentation.Tests
             // 폴백 (캐릭터, "a", "01")도 없으므로 그대로 실패한다 — 짐작으로 잇지 않는다.
             PortraitDimensionsFileDto db = Db(E("tyrant", "body_b", "01", 700f));
 
-            Assert.That(db.TryGetAspect("tyrant", "b", "01", out _, out string reason), Is.False);
+            Assert.That(db.TryGetSize("tyrant", "b", "01", out _, out string reason), Is.False);
             Assert.That(reason, Does.Contain("변형='b'"));
         }
 
@@ -73,8 +75,8 @@ namespace Ked.Presentation.Tests
         {
             PortraitDimensionsFileDto db = Db(E("tyrant", "a", "02", 640f));
 
-            Assert.That(db.TryGetAspect("tyrant", "a", "2", out _, out _), Is.True);
-            Assert.That(db.TryGetAspect("tyrant", "a", "02", out _, out _), Is.True);
+            Assert.That(db.TryGetSize("tyrant", "a", "2", out _, out _), Is.True);
+            Assert.That(db.TryGetSize("tyrant", "a", "02", out _, out _), Is.True);
         }
 
         [Test]
@@ -82,8 +84,8 @@ namespace Ked.Presentation.Tests
         {
             PortraitDimensionsFileDto db = Db(E("tyrant", "a", "01", 600f));
 
-            Assert.That(db.TryGetAspect("tyrant", "", "", out float aspect, out _), Is.True);
-            Assert.That(aspect, Is.EqualTo(0.6f).Within(Eps));
+            Assert.That(db.TryGetSize("tyrant", "", "", out Vec2 size, out _), Is.True);
+            Assert.That(size.X, Is.EqualTo(600f).Within(Eps));
         }
 
         [Test]
@@ -94,8 +96,8 @@ namespace Ked.Presentation.Tests
                 E("tyrant", "b", "03", 900f));
 
             // (b, 09)는 없다 → (a, 01)로.
-            Assert.That(db.TryGetAspect("tyrant", "b", "09", out float aspect, out _), Is.True);
-            Assert.That(aspect, Is.EqualTo(0.6f).Within(Eps));
+            Assert.That(db.TryGetSize("tyrant", "b", "09", out Vec2 size, out _), Is.True);
+            Assert.That(size.X, Is.EqualTo(600f).Within(Eps));
         }
 
         [Test]
@@ -105,8 +107,8 @@ namespace Ked.Presentation.Tests
             // 실패한 뒤 폴백으로 물러선다. 조용히 기본값으로 잇지 않는다.
             PortraitDimensionsFileDto db = Db(E("tyrant", "a", "01", 600f));
 
-            Assert.That(db.TryGetAspect("tyrant", "a", "abc", out float aspect, out _), Is.True);
-            Assert.That(aspect, Is.EqualTo(0.6f).Within(Eps));
+            Assert.That(db.TryGetSize("tyrant", "a", "abc", out Vec2 size, out _), Is.True);
+            Assert.That(size.X, Is.EqualTo(600f).Within(Eps));
         }
 
         [Test]
@@ -114,7 +116,7 @@ namespace Ked.Presentation.Tests
         {
             PortraitDimensionsFileDto db = Db(E("tyrant", "a", "01", 600f));
 
-            Assert.That(db.TryGetAspect("amber", "a", "01", out _, out string reason), Is.False);
+            Assert.That(db.TryGetSize("amber", "a", "01", out _, out string reason), Is.False);
             Assert.That(reason, Does.Contain("amber"));
         }
 
@@ -123,7 +125,7 @@ namespace Ked.Presentation.Tests
         {
             PortraitDimensionsFileDto db = Db(E("tyrant", "a", "01", 600f));
 
-            Assert.That(db.TryGetAspect("", "a", "01", out _, out string reason), Is.False);
+            Assert.That(db.TryGetSize("", "a", "01", out _, out string reason), Is.False);
             Assert.That(reason, Does.Contain("캐릭터 키"));
         }
 
@@ -135,17 +137,19 @@ namespace Ked.Presentation.Tests
                 E("tyrant", "a", "01", 600f),
                 E("tyrant", "a", "01", 900f));
 
-            Assert.That(db.TryGetAspect("tyrant", "a", "01", out float aspect, out _), Is.True);
-            Assert.That(aspect, Is.EqualTo(0.6f).Within(Eps));
+            Assert.That(db.TryGetSize("tyrant", "a", "01", out Vec2 size, out _), Is.True);
+            Assert.That(size.X, Is.EqualTo(600f).Within(Eps));
         }
 
         [Test]
-        public void 높이가_0이면_종횡비를_내지_않는다()
+        public void 가로나_세로가_0이면_크기를_내지_않는다()
         {
-            PortraitDimensionsFileDto db = Db(E("tyrant", "a", "01", 600f, 0f));
+            PortraitDimensionsFileDto tall = Db(E("tyrant", "a", "01", 600f, 0f));
+            PortraitDimensionsFileDto wide = Db(E("tyrant", "a", "01", 0f, 1000f));
 
-            Assert.That(db.TryGetAspect("tyrant", "a", "01", out _, out string reason), Is.False);
-            Assert.That(reason, Does.Contain("높이"));
+            Assert.That(tall.TryGetSize("tyrant", "a", "01", out _, out string reason), Is.False);
+            Assert.That(reason, Does.Contain("유효하지 않다"));
+            Assert.That(wide.TryGetSize("tyrant", "a", "01", out _, out _), Is.False);
         }
 
         // ── show의 faceToken 별칭 ────────────────────────────────────

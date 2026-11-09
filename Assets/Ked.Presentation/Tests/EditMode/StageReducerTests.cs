@@ -108,8 +108,9 @@ namespace Ked.Presentation.Tests
         }
 
         /// <summary>
-        /// 높이를 전부 1080(= 부모 rect 높이)으로 둔다 — 그러면 접힌 폭이 곧 여기 적은 width다.
-        /// tyrant는 변형·표정마다 폭이 다르다: **종횡비가 캐릭터당 하나라는 가정을 깨는 자리**다.
+        /// 초상은 원본 픽셀 크기 그대로라 그려지는 폭이 곧 여기 적은 width다.
+        /// tyrant는 변형·표정마다 폭이 다르다: **크기가 캐릭터당 하나라는 가정을 깨는 자리**다.
+        /// harin만 높이가 부모 rect(1080)와 다르다 — 높이 맞춤이 아니라는 것을 가르는 자리다.
         /// </summary>
         private static PortraitDimensionsFileDto NewPortraitDimensions()
         {
@@ -121,12 +122,14 @@ namespace Ked.Presentation.Tests
                     new() { character = "tyrant", variant = "a", emotion = "02", width = 540f, height = 1080f },
                     new() { character = "tyrant", variant = "b", emotion = "01", width = 810f, height = 1080f },
                     new() { character = "parkeunseol", variant = "a", emotion = "01", width = 432f, height = 1080f },
+                    new() { character = "harin", variant = "a", emotion = "01", width = 1745f, height = 2170f },
                 },
             };
         }
 
+        /// <summary>그려지는 폭 = 그림 노드 rect의 가로(부모 크기 × 앵커 간격 + sizeDelta).</summary>
         private static float PortraitWidthOf(StageState state, string slotKey)
-            => state.Nodes.GetState(StageState.NodeKeyOf(slotKey, "CharacterPortraitSprite_Image")).SizeDelta.X;
+            => state.Nodes.GetRectSize(StageState.NodeKeyOf(slotKey, "CharacterPortraitSprite_Image")).X;
 
         private static StageCommand Cmd(string name, params string[] args)
             => new(name, args, "test.yarn:1");
@@ -291,6 +294,23 @@ namespace Ked.Presentation.Tests
         }
 
         // ── 초상 축 (변형 · 표정 · 사이징) ───────────────────────────
+
+        [Test]
+        public void 초상은_원본_픽셀_크기_그대로_선다()
+        {
+            // 높이 맞춤을 걷었다(2026-11-09) — 부모 높이(1080)와 다른 그림도 늘이거나 줄이지 않는다.
+            // 화면에 서는 크기는 역할 앵커 visualScale이 정한다(CharacterPortrait_VisualOffset).
+            StageState state = Fold(Cmd("slot", "c1"), Cmd("cast", "c1", "harin"));
+
+            Vec2 sizeDelta = state.Nodes.GetState("c1/CharacterPortraitSprite_Image").SizeDelta;
+            Vec2 rect = state.Nodes.GetRectSize("c1/CharacterPortraitSprite_Image");
+
+            Assert.That(sizeDelta.X, Is.EqualTo(1745f - 1920f).Within(Eps), "그림 크기 − 부모 크기");
+            Assert.That(sizeDelta.Y, Is.EqualTo(2170f - 1080f).Within(Eps), "그림 크기 − 부모 크기");
+            Assert.That(rect.X, Is.EqualTo(1745f).Within(Eps));
+            Assert.That(rect.Y, Is.EqualTo(2170f).Within(Eps));
+            Assert.That(state.Unhandled, Is.Empty);
+        }
 
         [Test]
         public void face는_표정마다_폭을_다시_접는다()

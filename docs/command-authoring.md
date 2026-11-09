@@ -21,7 +21,7 @@
 | 무대 노드에 모션 · 페이드를 거는 커맨드 | tx — `StageMaskMotionCommand` + `StageMaskSlot`. 컷인(`StageFrame/CutIn`) · 그림 팝업(`StageFrame/Popup`)도 이 틀이다 |
 | 무대 루트 바깥에 무대를 띄우는 것 | 무대 틀 — `StageFrameBuilder` · `StageFrameRefs` · `StageFrameRegistry`(`stage-frame.md`) |
 | 리그 시각 효과 · 블러 | `RigVisualEffectController` + `IntentTransition` |
-| 원본 픽셀 크기로 그리는 것 | 배경 — `NodeTargets.BackgroundSizing` · `background-dimensions.json`(`cc927f38`) |
+| 원본 픽셀 크기로 그리는 것 | 배경 · 초상 — `NodeTargets.SourcePixelsSizing` · `background-dimensions.json` · `portrait-dimensions.json`(`cc927f38`, `PLAN_portrait-source-pixels.md`) |
 
 설계 문서(`docs/PLAN_*.md`)의 첫머리에 "무엇을 본보기로 따른다"를 적는다.
 

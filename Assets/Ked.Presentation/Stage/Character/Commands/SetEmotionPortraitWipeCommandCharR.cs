@@ -26,10 +26,7 @@ public sealed class SetEmotionPortraitWipeCommandSpecCharR : CharacterRigCommand
     public Ease ease = Ease.OutCubic;
 
     [Header("Sizing Policy")]
-    public CharRigImageSizingMode sizingMode = CharRigImageSizingMode.HeightFitPreserveAspect;
-
-    public CharRigImageSizingPolicy.HorizontalAlign horizontalAlign =
-        CharRigImageSizingPolicy.HorizontalAlign.Center;
+    public CharRigImageSizingMode sizingMode = CharRigImageSizingMode.SourcePixels;
 }
 
 public sealed class SetEmotionPortraitWipeCommandCharR : CommandBase
@@ -181,7 +178,6 @@ public sealed class SetEmotionPortraitWipeCommandCharR : CommandBase
         CharRigImageSizingPolicy.Apply(
             image,
             sprite,
-            _spec.sizingMode,
-            _spec.horizontalAlign);
+            _spec.sizingMode);
     }
 }

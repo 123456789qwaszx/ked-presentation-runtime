@@ -192,13 +192,18 @@ faceAura (0, 950) · handLeft (−80, 0) · handRight (80, 0). 엔트리 6건.
 `cast` / `show` / `set_anchor`가 캐릭터를 역할 기본 자리에 세울 때 쓰는 값(`cast`는 런타임 파서가 SetAnchor까지 팬아웃한다).
 키는 캐릭터 키 하나다 — 대소문자를 가리지 않고, 같은 키가 둘이면 나중 것이 이긴다. 변형은 키에 들어가지 않는다.
 
+초상은 원본 픽셀 크기 그대로 그리므로(§4) `visualScale`이 곧 **캔버스 px ÷ 그림 px**다. `offset`은
+`CharacterPortrait_VisualOffset`(아래 가운데 피벗, 배율도 거기서 걸린다)의 위치라, 슬롯 좌표(가운데 0)로
+**그림 가운데 y = −540 + 540 × visualScale + offset.y**다. 예제 인물 11건은 높이 맞춤 시절 모습 그대로가 되도록
+`visualScale = 1080 / 그림 높이`, `offset.y = 540 × (1 − visualScale)`이다.
+
 ```
 MonoBehaviour.entries[] : { key(캐릭터), offset(px, Vec2), visualScale(무단위) }
 ```
 
 `visualScale`은 적용 시 하한 `0.0001`로 클램프한다(런타임 규약).
 
-> ⚠ **엔트리가 전부 기본값(0,0 / 1)이 아니다.** 현재 11건 중 2건이 다르다:
+> ⚠ **엔트리가 전부 기본값(0,0 / 1)이 아니다.** 예제 인물 11건은 위 식의 값이고, 그 밖에 2건이 다르다:
 > `tyrant` = offset (−30, −800), scale 5.0 / `Amber` = offset (330, 0), scale 10.0.
 > 폴드에서 `Default(0/1)`로 가정하면 이 두 캐릭터가 나오는 장면이 어긋난다 —
 > **이 파일을 tuning으로 배선해야 한다.**
@@ -231,7 +236,7 @@ MonoBehaviour.entries[] : { key(캐릭터), offset(px, Vec2), visualScale(무단
 |---|---|
 | `sourceAsset` | 원천 에셋 경로 (재현 정보) |
 | `entries[].character` · `.variant` · `.emotion` | **정규화하지 않은 원본 키** |
-| `entries[].width` · `.height` | `sprite.rect`의 픽셀 크기 |
+| `entries[].width` · `.height` | `sprite.rect`의 픽셀 크기 = 그림 노드의 크기(캔버스 기준 px, 역할 앵커 배율 전). 경로에 `/Portraits/`가 든 텍스처는 `PortraitTextureImporter`가 임포트 상한을 4096으로 올린다. 그래도 원본보다 작게 임포트된 그림은 익스포터가 경고한다 — 화면에 작게 나오기 때문이다 |
 
 ### 키를 정규화하지 않고 내는 이유
 
@@ -246,13 +251,13 @@ MonoBehaviour.entries[] : { key(캐릭터), offset(px, Vec2), visualScale(무단
 그 규칙은 `school`과 `casual`을 조용히 같은 키(`l`)로 뭉갠다. 그래서 폐기했다 —
 접두사가 붙은 옛 덤프는 더 이상 같은 키로 접히지 않으니, 규약을 바꿀 때 덤프도 함께 다시 낸다.
 
-### 코어가 쓰는 값은 종횡비 하나
+### 코어가 쓰는 값은 픽셀 크기
 
-초상 사이징은 `HeightFitPreserveAspect` — `폭 = 부모 rect 높이 × (width/height)`,
-`sizeDelta = (폭, 0)`. 폭·높이를 둘 다 남기는 것은 나중에 값이 어긋났을 때
-어느 쪽이 변했는지 알기 위해서다.
+초상 사이징은 **원본 픽셀 크기 그대로**(`SourcePixels`, 2026-11-09 — 재생 저장소 `docs/PLAN_portrait-source-pixels.md`) —
+`sizeDelta = 그림 크기 − 부모 크기 × (anchorMax − anchorMin)`(`NodeTargets.SourcePixelsSizing`, 배경과 같은 식).
+화면에 서는 크기와 자리는 역할 앵커(`visualScale` · `offset`)가 정한다.
 
-**종횡비는 캐릭터당 하나가 아니다.** 실측 덤프에서 `yoonsaea/a/01`은 378×658이고
+**크기는 캐릭터당 하나가 아니다.** 실측 덤프에서 `yoonsaea/a/01`은 378×658이고
 `yoonsaea/b/01`은 425×746이다 — 변형·표정마다 다르다. 캐릭터 단위로 균일하다고 가정하면
 `pose` 이후 구간이 통째로 어긋난다.
 
@@ -266,13 +271,11 @@ MonoBehaviour.entries[] : { key(캐릭터), offset(px, Vec2), visualScale(무단
 `Resources/Backgrounds/**` → 배경 스프라이트 키 → 픽셀 치수.
 
 **배경은 캐스팅하지 않은 캐릭터 슬롯이다** (재생 저장소 `docs/PLAN_background-as-slot.md`). 리그 스키마는
-`character` 것을 그대로 쓴다. 다른 것은 둘이다.
+`character` 것을 그대로 쓰고, 사이징도 초상과 같은 **원본 픽셀 크기 그대로**다(`SourcePixels`, 2026-11-09 —
+재생 저장소 `docs/PLAN_background-source-pixels.md`). 캔버스 기준 1px = 원본 1px이고, 화면보다 큰 배경은 화면 밖까지 걸친다.
 
-- **사이징** — 초상은 높이 맞춤(`HeightFitPreserveAspect`, 종횡비만 쓴다)이지만, 배경은 **원본 픽셀 크기 그대로**
-  화면 가운데에 놓인다(`SourcePixels`, 2026-11-09 — 재생 저장소 `docs/PLAN_background-source-pixels.md`).
-  캔버스 기준 1px = 원본 1px이고, 화면보다 큰 배경은 화면 밖까지 걸친다. 그래서 코어는 종횡비가 아니라 **픽셀 크기**를 쓴다.
-- **출처** — 초상은 (캐릭터·변형·표정)으로 초상 DB를 찾지만, 배경은 `bg_sprite`의 키 하나로 `Resources/Backgrounds/{키}`를 연다.
-  익스포터도 같은 자리를 `Resources.LoadAll<Sprite>`로 읽는다.
+다른 것은 크기의 **출처** 하나다 — 초상은 (캐릭터·변형·표정)으로 초상 DB를 찾지만, 배경은 `bg_sprite`의 키 하나로
+`Resources/Backgrounds/{키}`를 연다. 익스포터도 같은 자리를 `Resources.LoadAll<Sprite>`로 읽는다.
 
 | 필드 | 뜻 |
 |---|---|

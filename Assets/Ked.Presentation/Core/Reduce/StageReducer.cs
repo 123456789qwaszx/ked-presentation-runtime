@@ -36,7 +36,7 @@ namespace Ked.Presentation.Core
         /// <summary>presets/focus-tuning.json — place/size의 focus 오프셋. 없으면 base 0으로 접는다.</summary>
         public FocusTuningBodyDto FocusTuning;
 
-        /// <summary>portrait-dimensions.json — 초상 사이징의 종횡비. 없으면 사이징은 Unhandled.</summary>
+        /// <summary>portrait-dimensions.json — 초상 사이징의 그림 크기. 없으면 사이징은 Unhandled.</summary>
         public PortraitDimensionsFileDto PortraitDimensions;
 
         /// <summary>
@@ -45,7 +45,7 @@ namespace Ked.Presentation.Core
         /// </summary>
         public IReadOnlyDictionary<string, MotionClip> Motions;
 
-        /// <summary>background-dimensions.json — 배경(bg_*) 사이징의 종횡비. 없으면 그 축만 Unhandled.</summary>
+        /// <summary>background-dimensions.json — 배경(bg_*) 사이징의 그림 크기. 없으면 그 축만 Unhandled.</summary>
         public BackgroundDimensionsFileDto BackgroundDimensions;
 
         /// <summary>

@@ -13,9 +13,7 @@ public sealed class SetPortraitSpriteCommandSpecCharR : CharacterRigCommandSpecB
     public CharacterRigNode node = CharacterRigNode.CharacterPortraitSprite_Image;
     
     [Header("Sizing Policy")] 
-    public CharRigImageSizingMode sizingMode = CharRigImageSizingMode.HeightFitPreserveAspect;
-    
-    public CharRigImageSizingPolicy.HorizontalAlign horizontalAlign = CharRigImageSizingPolicy.HorizontalAlign.Center;
+    public CharRigImageSizingMode sizingMode = CharRigImageSizingMode.SourcePixels;
 }
 
 public sealed class SetPortraitSpriteCommandCharR : CommandBase
@@ -62,7 +60,7 @@ public sealed class SetPortraitSpriteCommandCharR : CommandBase
             SetEmotionPortraitWipeCommandCharR.CompleteInFlight(_rig);
 
         _image.sprite = sprite;
-        CharRigImageSizingPolicy.Apply(_image, sprite, _spec.sizingMode, _spec.horizontalAlign);
+        CharRigImageSizingPolicy.Apply(_image, sprite, _spec.sizingMode);
     }
     
     private void ResolveRefs()

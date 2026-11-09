@@ -419,6 +419,24 @@ public static class PresentationTuningExporter
                 continue;
             }
 
+            // 초상은 원본 픽셀 크기 그대로 그린다 — 임포터 상한에 걸려 줄어든 그림은 화면에 작게 나온다. 조용히 두지 않는다.
+            string assetPath = AssetDatabase.GetAssetPath(entry.sprite);
+
+            if (AssetImporter.GetAtPath(assetPath) is TextureImporter importer)
+            {
+                importer.GetSourceTextureWidthAndHeight(out int sourceWidth, out int sourceHeight);
+
+                if (sourceWidth > 0 && sourceHeight > 0
+                    && (sourceWidth != (int)rect.width || sourceHeight != (int)rect.height))
+                {
+                    warnings.Add(
+                        $"초상 치수: '{entry.characterId}|{entry.variantKey}|{entry.emotionKey}'가 " +
+                        $"원본 {sourceWidth}x{sourceHeight}보다 작게 임포트됐다({rect.width}x{rect.height}) — " +
+                        $"maxTextureSize({importer.maxTextureSize})에 걸렸다. 초상은 원본 픽셀 크기로 그리므로 화면에 작게 나온다. " +
+                        "다시 임포트하면 PortraitTextureImporter가 상한을 올린다.");
+                }
+            }
+
             dto.entries.Add(new PortraitDimensionDto
             {
                 character = entry.characterId,
@@ -449,7 +467,7 @@ public static class PresentationTuningExporter
     // ── 배경 치수 ────────────────────────────────────────────────────
     //
     // 배경은 캐스팅하지 않은 캐릭터 슬롯이다(StageReducer.Background.cs). 사이징은 초상과 같지만
-    // 종횡비의 출처가 다르다 — `bg_sprite`의 키 하나로 Resources/Backgrounds/{키}를 연다.
+    // 크기의 출처가 다르다 — `bg_sprite`의 키 하나로 Resources/Backgrounds/{키}를 연다.
     // 키는 런타임 해석기(ResourcesSpriteResolver)가 Resources.Load에 넘기는 그 문자열이다:
     // Backgrounds/ 아래 **상대 경로, 확장자 없이**. 하위 폴더(ep1/hall)도 그대로 키가 된다 —
     // 스프라이트 이름만 쓰면 하위 폴더의 같은 이름이 서로를 덮는다.
@@ -653,8 +671,7 @@ public static class PresentationTuningExporter
         public string variant;
         public string emotion;
 
-        // 스프라이트 rect의 픽셀 크기. 사이징이 쓰는 건 종횡비 하나지만,
-        // 둘 다 남겨야 나중에 값이 어긋났을 때 어느 쪽이 변했는지 알 수 있다.
+        // 스프라이트 rect의 픽셀 크기 = 그림 노드의 크기(캔버스 기준 px). 초상은 원본 픽셀 크기 그대로 그린다.
         public float width;
         public float height;
     }

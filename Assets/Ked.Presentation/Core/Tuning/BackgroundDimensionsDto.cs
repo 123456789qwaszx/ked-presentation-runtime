@@ -6,10 +6,10 @@ namespace Ked.Presentation.Core
     /// <summary>
     /// background-dimensions.json — 배경 스프라이트 키 → 픽셀 치수.
     ///
-    /// 배경은 캐스팅하지 않은 캐릭터 슬롯이다(StageReducer.Background.cs). 초상은 높이 맞춤(종횡비만 쓴다)이지만
-    /// 배경은 **원본 픽셀 크기 그대로** 화면 가운데에 놓인다(2026-11-09) — 화면보다 큰 배경이 화면 밖까지 걸치고,
-    /// 카메라는 그 안을 본다. 그래서 배경은 종횡비가 아니라 **픽셀 크기**를 쓴다.
-    /// 키는 `bg_sprite`의 키 하나로 `Resources/Backgrounds/{키}`를 연다.
+    /// 배경은 캐스팅하지 않은 캐릭터 슬롯이다(StageReducer.Background.cs). 초상과 같은 사이징 —
+    /// **원본 픽셀 크기 그대로** 화면 가운데(2026-11-09) — 을 타고, 다른 것은 크기의 출처 하나다.
+    /// 화면보다 큰 배경이 화면 밖까지 걸치고, 카메라는 그 안을 본다.
+    /// 초상은 (캐릭터·변형·표정)으로 초상 DB를 찾고, 배경은 `bg_sprite`의 키 하나로 `Resources/Backgrounds/{키}`를 연다.
     ///
     /// 조회 규약은 런타임 해석기(ResourcesSpriteResolver → Resources.Load)를 그대로 따른다:
     ///   · 키는 Backgrounds/ 아래 상대 경로(확장자 없음). 트림하지 않는다.

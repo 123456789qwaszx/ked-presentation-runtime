@@ -10,7 +10,7 @@ namespace Ked.Presentation.Tests
     /// 고정하는 규율:
     ///   · 배경 슬롯은 캐릭터 슬롯과 **같은 리그·같은 노드**로 선다.
     ///   · bg_spawn은 캐릭터 slot처럼 숨은 채 선다(α 0) — bg_fade_in으로 들인다.
-    ///   · 종횡비는 초상 DB가 아니라 배경 치수표(키 하나)에서 온다. 없으면 그 축만 Unhandled.
+    ///   · 그림 크기는 초상 DB가 아니라 배경 치수표(키 하나)에서 온다. 없으면 그 축만 Unhandled.
     ///   · 지운 어휘(bg_size·bg_place)는 Unhandled로 소리를 낸다 — 조용히 통과하지 않는다.
     /// 합성 리그는 StageReducerTests와 같은 부모 사슬이다.
     /// </summary>

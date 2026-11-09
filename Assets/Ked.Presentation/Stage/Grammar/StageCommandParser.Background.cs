@@ -56,7 +56,6 @@ public sealed partial class StageCommandParser
             resourcesRoot = ResourcesSpriteResolver.BackgroundsRoot,
             spriteKey = spriteKey,
             sizingMode = CharRigImageSizingMode.SourcePixels,
-            horizontalAlign = CharRigImageSizingPolicy.HorizontalAlign.Center,
             raycastTarget = false
         });
 

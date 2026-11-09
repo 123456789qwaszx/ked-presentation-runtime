@@ -161,12 +161,13 @@ yarn 4묶음 기준. "이관 안 함"은 **조용히 버린 것이 아니라 판
 | `set_anchor` / `show` / `cast` | `NodeTargets.SetAnchor` — 런타임 파서가 `cast`를 배역 → pose → face → SetAnchor로 팬아웃하므로 `cast`도 축 리셋 + 역할 앵커를 접는다(`StageReducer.ApplyRoleAnchor`) |
 | `fade_in` / `fade_out` | `NodeTargets.FadeIn` / `NodeTargets.FadeOut` (가시성 축) |
 | `place_focus` | `SettledFocusMath.SolveFocusPlacement` |
-| `set_portrait_sprite` | `NodeTargets.PortraitSizing` — 폭만 접는다(아래 참조) |
+| `set_portrait_sprite` | `NodeTargets.SourcePixelsSizing` — 원본 픽셀 크기를 접는다(아래 참조) |
 
 ### 초상 (portrait)
 
 접는 것은 **사이징 한 축**이다: 어느 스프라이트인가가 아니라 그 스프라이트가 만드는
-`CharacterPortraitSprite_Image.sizeDelta`. 종횡비는 `portrait-dimensions.json`에서 오고,
+`CharacterPortraitSprite_Image.sizeDelta`. 초상은 원본 픽셀 크기 그대로라(2026-11-09, 재생 저장소
+`docs/PLAN_portrait-source-pixels.md`) 그림 크기가 `portrait-dimensions.json`에서 오고,
 조회 규약(캐릭터 소문자 · 변형은 문자열 전체 · 표정 2자리 · (캐릭터,"a","01") 폴백)은
 런타임 `PortraitResolver`를 그대로 옮긴 것이다.
 
@@ -179,7 +180,7 @@ yarn 4묶음 기준. "이관 안 함"은 **조용히 버린 것이 아니라 판
 
 **표정은 상태가 아니다** — 런타임 `CastBinding`도 변형만 들고, 표정은 커맨드마다 인자로 온다.
 **`pose`가 사이징을 다시 접지 않는 것도 실동작이다** — `SetPortraitPoseCommandCharR`의
-스프라이트 교체가 비활성이라, 폭은 다음 `show`/`face`/`face_swap`에서야 바뀐다.
+스프라이트 교체가 비활성이라, 크기는 다음 `show`/`face`/`face_swap`에서야 바뀐다.
 
 알려진 한계 하나: `show`의 빈 faceToken은 런타임에서 표정 `"2"`지만
 (생략된 인자의 기본값 `"e1"`과 다른 규칙), **원문 추출기가 빈 토큰을 버리므로**
@@ -271,9 +272,9 @@ CharSlot_Track_Idle.anchoredPosition          접힘=(0,0)   vs 캡처=(0, 7.99)
 캐릭터 슬롯**으로 세우기로 했기 때문이다(재생 저장소 `docs/PLAN_background-as-slot.md`). 그래서 `StageState`가
 "캐릭터 리그만 담는다"는 문장은 더 정확히 "캐릭터 리그 *스키마*만 담는다"가 됐고, 배경 슬롯은 그 스키마의
 인스턴스다. 폴드는 새 목표 계산을 만들지 않았다 — `StageReducer.Background.cs`는 슬롯 스폰·
-fade·move·scale을 **같은 노드, 같은 목표 계산**으로 접는다. 사이징만 다르다 — 처음엔 초상과 같은 높이 맞춤이었고,
-2026-11-09부터 배경은 원본 픽셀 크기 그대로다(`NodeTargets.BackgroundSizing`, 크기는 `background-dimensions.json`,
-재생 저장소 `docs/PLAN_background-source-pixels.md`).
+fade·move·scale을 **같은 노드, 같은 목표 계산**으로 접는다. 사이징도 초상과 같다 — 처음엔 둘 다 높이 맞춤이었고,
+2026-11-09부터 둘 다 원본 픽셀 크기 그대로다(`NodeTargets.SourcePixelsSizing`, 재생 저장소
+`docs/PLAN_background-source-pixels.md` · `docs/PLAN_portrait-source-pixels.md`). 다른 것은 크기의 출처 하나 — `background-dimensions.json`.
 `bg_size`·`bg_place`는 어휘에서 지웠으므로 케이스가 없다 — 남은 대본이 있으면 여기서 소리가 난다(의도).
 
 같은 작업에서 **슬롯 재선언의 의미**를 런타임에 맞췄다. 런타임은 같은 키로 `slot`/`bg_spawn`을 다시 부르면

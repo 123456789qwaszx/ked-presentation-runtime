@@ -219,7 +219,7 @@ public sealed class StageEquivalenceHarness : MonoBehaviour
 
     /// <summary>
     /// 배경 치수 — 초상 치수와 같은 규율. 없으면 bg_* 사이징이 전부 Unhandled로 잡히므로 경고한다.
-    /// (배경은 캐스팅하지 않은 슬롯이라 캐릭터 리그로 서지만, 종횡비만 이 표에서 온다.)
+    /// (배경은 캐스팅하지 않은 슬롯이라 캐릭터 리그로 서지만, 그림 크기만 이 표에서 온다.)
     /// </summary>
     private static BackgroundDimensionsFileDto LoadBackgroundDimensions(string tuningDir)
     {
