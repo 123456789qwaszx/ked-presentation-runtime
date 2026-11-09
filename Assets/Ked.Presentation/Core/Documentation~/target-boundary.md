@@ -158,7 +158,7 @@ yarn 4묶음 기준. "이관 안 함"은 **조용히 버린 것이 아니라 판
 |---|---|
 | `move_by` · `move_reset` | `NodeTargets.MoveBy` |
 | `scale_by` · `scale_reset` | `NodeTargets.ScaleTo` |
-| `set_anchor` / `show` | `NodeTargets.SetAnchor` |
+| `set_anchor` / `show` / `cast` | `NodeTargets.SetAnchor` — 런타임 파서가 `cast`를 배역 → pose → face → SetAnchor로 팬아웃하므로 `cast`도 축 리셋 + 역할 앵커를 접는다(`StageReducer.ApplyRoleAnchor`) |
 | `fade_in` / `fade_out` | `NodeTargets.FadeIn` / `NodeTargets.FadeOut` (가시성 축) |
 | `place_focus` | `SettledFocusMath.SolveFocusPlacement` |
 | `set_portrait_sprite` | `NodeTargets.PortraitSizing` — 폭만 접는다(아래 참조) |

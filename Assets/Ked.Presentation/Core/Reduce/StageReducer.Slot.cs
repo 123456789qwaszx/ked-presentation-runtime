@@ -110,8 +110,9 @@ namespace Ked.Presentation.Core
         /// <summary>
         /// cast (slot, characterKey, variant="a", emotion="1").
         ///
-        /// 브리지는 이걸 셋으로 팬아웃한다: 배역 → pose(변형) → face(표정+사이징).
+        /// 브리지는 이걸 넷으로 팬아웃한다: 배역 → pose(변형) → face(표정+사이징) → SetAnchor(축 리셋 + 역할 앵커).
         /// 그 순서를 그대로 따른다 — 배역이 변형을 비우므로 pose가 먼저여야 한다.
+        /// (StageCommandParser.CharRigSetup.EnqueueCastCharacterSpec)
         /// </summary>
         private static bool ApplyCast(
             StageState state, in StageCommand cmd, StageReducerTuning tuning, out string reason)
@@ -134,6 +135,9 @@ namespace Ked.Presentation.Core
             // "cast를 못 접었다"는 거짓말이 된다. 못 접은 축만 기록한다.
             if (!ApplyPortraitSizing(state, slotKey, cmd.Arg(3, "1"), tuning, out string sizingReason))
                 state.AddUnhandled(cmd, sizingReason);
+
+            // 런타임은 face 다음에 SetAnchor를 건다. 사이징과 앵커는 노드가 달라 순서가 결과를 바꾸지 않는다.
+            ApplyRoleAnchor(state, cmd, slotKey, tuning);
 
             return true;
         }

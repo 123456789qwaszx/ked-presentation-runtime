@@ -8,7 +8,7 @@ public sealed class RoleAnchorTuningDBSO : ScriptableObject
     [Serializable]
     public sealed class Entry
     {
-        [Tooltip("예: seina 또는 seina:pose_wide")]
+        [Tooltip("캐릭터 키(예: seina). 대소문자는 가리지 않는다. 변형은 키에 들어가지 않는다 — 캐릭터마다 항목 하나.")]
         public string key;
         
         [Header("Anchor Offsets")]

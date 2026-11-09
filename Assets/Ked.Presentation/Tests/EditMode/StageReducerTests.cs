@@ -533,6 +533,60 @@ namespace Ked.Presentation.Tests
                 "실측 덤프에 비기본값 엔트리(tyrant·Amber)가 있다 — 침묵하면 그 장면이 어긋난다");
         }
 
+        // ── cast의 역할 앵커 (런타임 파서: cast → pose → face → SetAnchor) ──
+
+        [Test]
+        public void cast는_배역_앵커를_입힌다()
+        {
+            // 런타임 파서가 cast를 SetAnchor까지 팬아웃한다(StageCommandParser.CharRigSetup.EnqueueCastCharacterSpec).
+            // show를 한 번도 쓰지 않는 대본(샘플 전부)도 이 앵커로 선다.
+            StageState state = Fold(Cmd("slot", "c1"), Cmd("cast", "c1", "tyrant"));
+
+            RectNodeState anchor = state.Nodes.GetState("c1/CharacterPortrait_VisualOffset");
+            Assert.That(anchor.AnchoredPosition, Is.EqualTo(new Vec2(-30f, -800f)));
+            Assert.That(anchor.LocalScale.XY, Is.EqualTo(new Vec2(5f, 5f)));
+            Assert.That(state.Unhandled, Is.Empty);
+        }
+
+        [Test]
+        public void 움직인_뒤의_cast는_연기_축을_되돌린다()
+        {
+            // 런타임 cast의 SetAnchor는 두 리셋 플래그가 모두 켜진 채 나간다(EnqueueSetAnchorSpecs 기본값) —
+            // show와 같은 리셋 목록이다. 항목이 없는 캐릭터(parkeunseol)는 앵커가 기본값(0/1)이다.
+            StageState state = Fold(
+                Cmd("slot", "c1"),
+                Cmd("cast", "c1", "tyrant"),
+                Cmd("move_by", "c1", "3u", "0u"),
+                Cmd("scale_by", "c1", "2"),
+                Cmd("cast", "c1", "parkeunseol"));
+
+            Assert.That(state.Nodes.GetState("c1/CharSlot_Track").AnchoredPosition, Is.EqualTo(Vec2.Zero));
+            Assert.That(state.Nodes.GetState("c1/CharSlot_Scale").LocalScale.XY, Is.EqualTo(Vec2.One));
+
+            RectNodeState anchor = state.Nodes.GetState("c1/CharacterPortrait_VisualOffset");
+            Assert.That(anchor.AnchoredPosition, Is.EqualTo(Vec2.Zero));
+            Assert.That(anchor.LocalScale.XY, Is.EqualTo(Vec2.One));
+            Assert.That(state.Unhandled, Is.Empty);
+        }
+
+        [Test]
+        public void 역할_앵커_키는_대소문자를_가리지_않고_나중_항목이_이긴다()
+        {
+            // 런타임 RoleAnchorTuningDBSO: OrdinalIgnoreCase 사전에 `_map[key] = entry`로 덮는다.
+            var anchors = new RoleAnchorTuningBodyDto
+            {
+                entries = new List<RoleAnchorEntryDto>
+                {
+                    new() { key = "Harin", offset = F2(1f, 2f), visualScale = 0.5f },
+                    new() { key = " harin ", offset = F2(3f, 4f), visualScale = 0.25f },
+                },
+            };
+
+            Assert.That(anchors.TryGet("HARIN", out NodeTargets.RoleAnchorTuning tuning), Is.True);
+            Assert.That(tuning.Offset, Is.EqualTo(new Vec2(3f, 4f)));
+            Assert.That(tuning.VisualScale, Is.EqualTo(0.25f).Within(Eps));
+        }
+
         // ── 초기 가시성 (첫 리포트의 최대 불일치 클래스) ────────────
 
         [Test]

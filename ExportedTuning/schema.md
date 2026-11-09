@@ -189,7 +189,8 @@ faceAura (0, 950) · handLeft (−80, 0) · handRight (80, 0). 엔트리 6건.
 
 ### `role-anchor.json` — `RoleAnchorTuningDBSO`
 
-`show` / `set_anchor`가 캐릭터를 역할 기본 자리에 세울 때 쓰는 값.
+`cast` / `show` / `set_anchor`가 캐릭터를 역할 기본 자리에 세울 때 쓰는 값(`cast`는 런타임 파서가 SetAnchor까지 팬아웃한다).
+키는 캐릭터 키 하나다 — 대소문자를 가리지 않고, 같은 키가 둘이면 나중 것이 이긴다. 변형은 키에 들어가지 않는다.
 
 ```
 MonoBehaviour.entries[] : { key(캐릭터), offset(px, Vec2), visualScale(무단위) }

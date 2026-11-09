@@ -26,7 +26,8 @@ namespace Ked.Presentation.Core
 
         /// <summary>
         /// 캐릭터 키 → 앵커 튜닝. 런타임 RoleAnchorTuningDBSO.TryGet과 같은 규약:
-        /// Trim 후 대소문자 구분 일치. 없으면 false — 호출자가 Default를 쓴다
+        /// Trim 후 **대소문자를 가리지 않는** 일치(OrdinalIgnoreCase), 같은 키가 둘이면 **나중 것이 이긴다**
+        /// (런타임 Build가 `_map[key] = entry`로 덮는다). 없으면 false — 호출자가 Default를 쓴다
         /// (엔트리 부재는 오류가 아니라 "기본값 캐릭터"라는 데이터 의미다).
         /// </summary>
         public bool TryGet(string characterKey, out NodeTargets.RoleAnchorTuning tuning)
@@ -37,25 +38,26 @@ namespace Ked.Presentation.Core
                 return false;
 
             string key = characterKey.Trim();
+            bool found = false;
 
             for (int i = 0; i < entries.Count; i++)
             {
                 RoleAnchorEntryDto entry = entries[i];
 
-                if (entry == null || entry.key == null)
+                if (entry == null || string.IsNullOrWhiteSpace(entry.key))
                     continue;
 
-                if (!string.Equals(entry.key.Trim(), key, StringComparison.Ordinal))
+                if (!string.Equals(entry.key.Trim(), key, StringComparison.OrdinalIgnoreCase))
                     continue;
 
                 tuning = new NodeTargets.RoleAnchorTuning(
                     entry.offset?.ToVec2() ?? Vec2.Zero,
                     entry.visualScale);
 
-                return true;
+                found = true;
             }
 
-            return false;
+            return found;
         }
     }
 
