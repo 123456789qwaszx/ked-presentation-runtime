@@ -26,4 +26,12 @@ public sealed partial class YarnCommandBridge
     
     private void ResetSurfaceLayout() 
         => _dialogueBoxPresentation.ResetSurfaceLayout();
+
+    // 메신저 구간 — surface_layout처럼 그 자리에서 상태만 바꾼다(큐에 넣지 않는다).
+    // 인자 = "나"(오른쪽)의 화자 이름.
+    private void OpenMessenger(string me)
+        => _dialogueBoxPresentation.OpenMessenger(me);
+
+    private void CloseMessenger()
+        => _dialogueBoxPresentation.CloseMessenger();
 }

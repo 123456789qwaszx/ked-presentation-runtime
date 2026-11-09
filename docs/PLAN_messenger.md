@@ -5,7 +5,7 @@
 | 브랜치 | `ked-presentation-runtime` · `feat/subSystem` |
 | 왜 | 원본 게임의 메신저 장면을 이 런타임의 대본으로 쓰고 재생한다 |
 | 결정 | 아미야(소유자) 2026-11-09: ① 지금 시스템을 그대로 쓴다 — 메신저 줄은 **표시가 말풍선인 일반 대사 한 줄**이다. ② 기록은 뷰가 아니라 데이터로 둔다(지나온 줄의 목록, 미리 굽지 않는다). ③ 구간은 커맨드로 열고 닫는다. ④ 타자기를 쓰지 않고 말풍선을 한 번에 띄운다. ⑤ `•••`는 줄이 아니라 대기 표시다. ⑥ 상대는 왼쪽, 나는 오른쪽. 헤더는 이번에 하지 않는다 |
-| 상태 | **설계** — 확인받으면 단계 1부터 구현 |
+| 상태 | **구현** (2026-11-09) — Unity 확인 대기(§6.1). 이 환경에는 Unity · C# 컴파일러가 없어 컴파일과 테스트를 돌리지 못했다 |
 
 ## 목표 한 문장
 
@@ -173,8 +173,15 @@ if (_boxPresentation.UsesTypewriter)   // 메신저 줄이면 false
 |---|---|---|
 | 1 | `MessengerLog` · 커맨드 둘 · 줄 진입 기록 · 장면 경계 리셋 (화면은 아직 그대로) | EditMode 테스트: 열기 전 줄은 안 적힌다 · 쪽 · 다시 열면 새 대화 · 닫으면 빈다 · `Reset`. 기존 테스트 전부 |
 | 2 | `DialogueBoxKind.Messenger` · 뷰 계약 분리 · 컨트롤러의 두 뷰 전환 · 타자기 건너뛰기 | EditMode 테스트(가짜 뷰 둘): ① 열린 구간의 줄은 메신저 뷰에 기록 전체가 `Render`된다 ② 메신저 → 대사창 `FadeOutIn`의 호출 순서 ③ `CloseAll`은 기록을 건드리지 않는다 ④ 메신저 뷰가 없으면 대사창으로 떨어진다. 메신저 뷰 없이 기존 대본 · 되감기 · 빨리 넘김이 같다 |
-| 3 | 예제 UI `KedMessengerView` · 프리팹 — 말풍선 · 좌우 · 아바타 묶음 · `•••` · 넘치면 위로 밀기 | 아미야 Unity |
+| 3 | 예제 UI `PlayMessengerPanel` · `KedMessengerView` — 말풍선 · 좌우 · 아바타 묶음 · `•••` · 넘치면 위로 밀기 | 아미야 Unity |
 | 4 | 데모 메신저 대본 · README 어휘 표 · `SCOPE-BOUNDARY.md` §4 | §6.1 |
+
+구현하며 달라진 것:
+
+- **단계 3의 패널은 프리팹이 아니라 코드로 선다**(`PlayMessengerPanel` — `PlayScreen`이 대사창 틀 바로 아래에 세운다). 빌더 · 프리팹 · `Refs`를 건드리지 않아 빌더를 다시 돌릴 필요가 없다. 그림은 색 판, 아바타는 화자 이름 첫 글자다 — 모양을 다듬을 때 프리팹으로 옮긴다.
+- 패널은 무대를 살짝 누르는 막(검정 0.35)을 함께 띄운다.
+- **단계 2의 컨트롤러 테스트(가짜 뷰)는 쓰지 않았다.** `LocalizedLine`을 손으로 만들어야 하는데 컴파일해 볼 수 없는 환경이라, 테스트 어셈블리 전체를 깨뜨릴 위험을 지지 않았다. 들어간 것은 `MessengerLogTests`(순수 C#)뿐이고, 이를 위해 테스트 asmdef에 `Ked.Presentation.Playback` 참조를 더했다.
+- README에는 커맨드 어휘 표가 없어(팝업 때도 고치지 않았다) 그대로 두었다. `SCOPE-BOUNDARY.md` §4의 "한 라인의 표시 트랜잭션"은 문구가 그대로 맞아 고치지 않았다.
 
 ### 6.1 Unity 확인 목록 (아미야)
 
@@ -200,7 +207,9 @@ if (_boxPresentation.UsesTypewriter)   // 메신저 줄이면 false
 | `YarnBridge/CommandBridge*.cs` | 커맨드 둘 |
 | `Host/ScenePresentation.cs` | `Reset` 두 곳 |
 | `Samples/…/SampleBootstrap.Presentation.cs` · `KedUIHost.cs` · `KedUIFlow.Play.cs` | 조립 · `•••` |
-| `Samples/…/KedMessengerView.cs` + 프리팹 (새) | 단계 3 |
+| `Samples/…/PlayMessengerPanel.cs` · `KedMessengerView.cs` · `PlayScreen.cs` (새 둘) | 단계 3 — 프리팹 없이 코드로 |
+| `Tests/EditMode/MessengerLogTests.cs` (새) · 테스트 asmdef | 단계 1 |
+| `presentation_demo_Demo_Presentation.yarn` | 데모 구간(팝업 뒤) |
 
 ## 8. 나중
 

@@ -88,6 +88,7 @@ namespace Ked.Samples.UI
 
         private PlayDialogueBox _dialogueBox;
         private PlayOptionsBox _optionsBox;
+        private PlayMessengerPanel _messenger;
         private KedButton _autoButton;
         private KedButton _speedButton;
         private float _shownSpeed = -1f;     // 이름에 보인 배속(0 = 끔). 매 프레임 같은 글자를 다시 쓰지 않게.
@@ -102,6 +103,15 @@ namespace Ked.Samples.UI
             {
                 EnsureInitialized();
                 return _dialogueBox;
+            }
+        }
+
+        public PlayMessengerPanel Messenger
+        {
+            get
+            {
+                EnsureInitialized();
+                return _messenger;
             }
         }
 
@@ -126,6 +136,10 @@ namespace Ked.Samples.UI
                 View.Text(Refs.DialogueText),
                 View.Text(Refs.Speaker),
                 View.Rect(Refs.NextMarker) != null ? View.Rect(Refs.NextMarker).gameObject : null);
+
+            // 메신저 패널은 프리팹에 없다 — 대사창 틀 바로 아래에 코드로 세운다.
+            if (View.Rect(Refs.DialogueFrame) != null)
+                _messenger = new PlayMessengerPanel(this, View.Rect(Refs.DialogueFrame), View.Text(Refs.DialogueText));
 
             _optionsBox = new PlayOptionsBox(
                 View.Rect(Refs.OptionsRoot),
@@ -250,6 +264,9 @@ namespace Ked.Samples.UI
         }
 
         public void SetNextMarkerVisible(bool visible) => _dialogueBox?.SetNextMarkerVisible(visible);
+
+        /// <summary>메신저의 입력 대기 표시(•••). 메신저 패널이 보일 때만 붙는다.</summary>
+        public void SetMessengerWaiting(bool waiting) => _messenger?.SetWaiting(waiting);
 
         public void SetDialogueOpacity(float opacity) => _dialogueBox?.SetOpacity(opacity);
 

@@ -49,6 +49,9 @@ namespace Ked.Samples.UI
         public IPresentationDialogueBoxView DialogueBox { get; private set; }
         public IChapterOptionsBoxView OptionsBox { get; private set; }
 
+        // 메신저 패널. 재생 화면에 대사창 틀이 없으면 null — 본체는 메신저 줄도 대사창으로 보인다.
+        public IPresentationMessengerView Messenger { get; private set; }
+
         public CustomOptionItem OptionItemPrefab => optionItemPrefab;
         public DialogueSurfaceLayoutPresetDBSO SurfaceLayoutDb => surfaceLayoutDb;
 
@@ -84,6 +87,7 @@ namespace Ked.Samples.UI
 
             DialogueBox = new KedDialogueBoxView(play.Dialogue);
             OptionsBox = new KedOptionsBoxView(play.Options);
+            Messenger = play.Messenger != null ? new KedMessengerView(play.Messenger) : null;
 
             _localizer = new Localizer(texts != null ? texts.text : string.Empty, localeId);
             _viewTexts = new ViewTexts(views, _localizer);

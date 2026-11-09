@@ -14,4 +14,17 @@ public partial class DialogueBoxPresentationController
     {
         _surfaceState.Reset();
     }
+
+    // 메신저 구간도 같은 방식의 상태 변경이다 — 화면은 건드리지 않는다.
+    // 다음 줄의 진입이 기록에 적고(YarnLineBoundary), 그 줄의 ShowLineAsync가 메신저 뷰를 고른다.
+    // 닫아도 패널은 다음 줄의 전환이 감출 때까지 그대로 보인다.
+    public void OpenMessenger(string me)
+    {
+        _messengerLog.Open(me);
+    }
+
+    public void CloseMessenger()
+    {
+        _messengerLog.Close();
+    }
 }

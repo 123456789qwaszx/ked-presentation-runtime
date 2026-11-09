@@ -1,12 +1,12 @@
 public sealed class DialogueBoxCurrentState
 {
-    public IPresentationDialogueBoxView Box { get; private set; }
+    public IPresentationLineSurfaceView Box { get; private set; }
     public DialogueBoxKind? BoxKind { get; private set; }
     public bool IsVisible { get; private set; }
 
     public void Commit(
         DialogueBoxKind boxKind,
-        IPresentationDialogueBoxView box,
+        IPresentationLineSurfaceView box,
         DialogueBoxTransitionKind transitionKind)
     {
         BoxKind = boxKind;

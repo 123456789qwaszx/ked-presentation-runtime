@@ -4,6 +4,7 @@
     "references": [
         "Ked.Presentation.Core",
         "Ked.Presentation.Stage",
+        "Ked.Presentation.Playback",
         "Ked.CommandExecutor",
         "Ked.Presentation.Editor",
         "UnityEngine.TestRunner",

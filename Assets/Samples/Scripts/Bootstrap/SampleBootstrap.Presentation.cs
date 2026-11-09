@@ -24,6 +24,7 @@ public partial class SampleBootstrap
 
     private readonly PresentationStage _presentationStage = new();
     private readonly DialogueSurfaceState _dialogueSurfaceState = new();
+    private readonly MessengerLog _messengerLog = new();
     private readonly BacklogRecorder _backlogRecorder = new();
 
     private readonly DialogueAdvanceDispatcher _dialogueAdvanceDispatcher = new();
@@ -197,7 +198,9 @@ public partial class SampleBootstrap
             dialogueSurfaceBox,
             _dialogueSurfaceState,
             _kedUI.SurfaceLayoutDb,
-            speakerPolicyDb);
+            speakerPolicyDb,
+            _messengerLog,
+            _kedUI.Messenger);
         _dialogueBoxPresentation = dialogueBoxPresentationController;
 
         _motions = LoadMotions();
@@ -216,7 +219,8 @@ public partial class SampleBootstrap
 
         YarnLineBoundary yarnLineBoundary = new(
             _backlogRecorder,
-            _rollbackHistory);
+            _rollbackHistory,
+            _messengerLog);
 
         LineHurrySpeedController lineHurrySpeed = new(ellipsisBreathTypewriter);
         _lineVoice = new LineVoiceController(audioSystem.Voice);
@@ -263,6 +267,7 @@ public partial class SampleBootstrap
             _sceneBgm,
             _presentationStage,
             _dialogueSurfaceState,
+            _messengerLog,
             _dialogueBoxPresentation,
             _presentationScopeSession,
             _episodeSkipController,

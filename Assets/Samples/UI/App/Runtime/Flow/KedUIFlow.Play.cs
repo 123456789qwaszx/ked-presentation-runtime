@@ -162,6 +162,7 @@ namespace Ked.Samples.UI
         private void HandleLineDisplayed()
         {
             _playScreen.SetNextMarkerVisible(true);
+            _playScreen.SetMessengerWaiting(true);
             _playScreen.SetChapterLabel(ChapterLabel());
         }
 

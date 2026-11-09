@@ -107,40 +107,49 @@ public sealed class LinePresentationFlow
             return;
         }
 
-        // Phase: TypewriterReady
-        ctx.LineText = _boxPresentation.LineTextTarget;
-        _typewriter.SetTextView(ctx.LineText);
+        // 메신저 줄은 말풍선이 한 번에 선다 — 타자기 단계를 건너뛴다(docs/PLAN_messenger.md §4.3).
+        bool usesTypewriter = _boxPresentation.UsesTypewriter;
 
-        ctx.Text = ctx.Line.TextWithoutCharacterName;
-        _typewriter.PrepareForContent(ctx.Text);
-        SetPhase(ctx, LinePresentationPhase.TypewriterReady);
-        
-        // Phase: TypewriterCompleted
-        try 
+        if (usesTypewriter)
         {
-            await _typewriter
-                .RunTypewriter(
-                    ctx.Text,
-                    ctx.Token.HurryUpToken,
-                    ctx.Token.NextContentToken,
-                    _lineHurrySpeed.Enter)
-                .SuppressCancellationThrow();
-        }
-        finally 
-        {
-            _lineHurrySpeed.Exit();
-        }
+            // Phase: TypewriterReady
+            ctx.LineText = _boxPresentation.LineTextTarget;
+            _typewriter.SetTextView(ctx.LineText);
 
-        SetPhase(ctx, LinePresentationPhase.TypewriterCompleted);
+            ctx.Text = ctx.Line.TextWithoutCharacterName;
+            _typewriter.PrepareForContent(ctx.Text);
+            SetPhase(ctx, LinePresentationPhase.TypewriterReady);
 
-        if (!ctx.Run.IsValid) {
-            await CompleteStaleAfterTypewriterAsync(ctx, waitForAdvance);
-            return;
+            // Phase: TypewriterCompleted
+            try
+            {
+                await _typewriter
+                    .RunTypewriter(
+                        ctx.Text,
+                        ctx.Token.HurryUpToken,
+                        ctx.Token.NextContentToken,
+                        _lineHurrySpeed.Enter)
+                    .SuppressCancellationThrow();
+            }
+            finally
+            {
+                _lineHurrySpeed.Exit();
+            }
+
+            SetPhase(ctx, LinePresentationPhase.TypewriterCompleted);
+
+            if (!ctx.Run.IsValid) {
+                await CompleteStaleAfterTypewriterAsync(ctx, waitForAdvance);
+                return;
+            }
         }
 
         // Phase: DisplayCommitted
         _lineDisplayState.MarkLineDisplayCompleted("normal");
-        _typewriter.ContentWillDismiss();
+
+        if (usesTypewriter)
+            _typewriter.ContentWillDismiss();
+
         SetPhase(ctx, LinePresentationPhase.DisplayCommitted);
 
         LineDisplayed?.Invoke();

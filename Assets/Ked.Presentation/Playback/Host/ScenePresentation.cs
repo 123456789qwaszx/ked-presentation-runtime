@@ -24,6 +24,8 @@ public sealed class ScenePresentation : IPlaybackStage
     private readonly PresentationStage _presentationStage;
     // 대사창 레이아웃(surface_layout)도 무대처럼 단위마다 처음부터 — 리플레이가 다시 건다.
     private readonly DialogueSurfaceState _dialogueSurfaceState;
+    // 메신저 기록도 단위마다 처음부터 — 리플레이가 구간을 다시 열고 줄을 다시 적는다.
+    private readonly MessengerLog _messengerLog;
     // 대사창도 닫힌 채로 시작한다 — 장면 첫 줄·되감기 표적 줄이 언제나 페이드인한다(표적이 장면 첫 줄이어도).
     private readonly DialogueBoxPresentationController _dialogueBox;
     private readonly PresentationScopeSession _presentationScope;
@@ -49,6 +51,7 @@ public sealed class ScenePresentation : IPlaybackStage
         SceneBgmController sceneBgm,
         PresentationStage presentationStage,
         DialogueSurfaceState dialogueSurfaceState,
+        MessengerLog messengerLog,
         DialogueBoxPresentationController dialogueBox,
         PresentationScopeSession presentationScope,
         EpisodeSkipController episodeSkipController,
@@ -68,6 +71,7 @@ public sealed class ScenePresentation : IPlaybackStage
         _sceneBgm = sceneBgm;
         _presentationStage = presentationStage;
         _dialogueSurfaceState = dialogueSurfaceState;
+        _messengerLog = messengerLog;
         _dialogueBox = dialogueBox;
         _presentationScope = presentationScope;
         _episodeSkipController = episodeSkipController;
@@ -88,6 +92,7 @@ public sealed class ScenePresentation : IPlaybackStage
         _presentationView.GoToPresentationView();
         _presentationStage.Clear();
         _dialogueSurfaceState.Reset();
+        _messengerLog.Reset();
         _dialogueBox?.CloseAll();
         _sceneBgm?.BeginScene();
         _presentationScope.Start();
@@ -134,6 +139,7 @@ public sealed class ScenePresentation : IPlaybackStage
         _presentationView.GoToPresentationView();
         _presentationStage.Clear();
         _dialogueSurfaceState.Reset();
+        _messengerLog.Reset();
         _dialogueBox?.CloseAll();
         _sceneBgm?.BeginScene();
         _presentationScope.Start();

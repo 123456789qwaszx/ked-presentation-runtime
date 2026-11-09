@@ -67,6 +67,12 @@ public sealed partial class YarnCommandBridge
 
         runner.AddCommandHandler(
             "surface_reset", ResetSurfaceLayout);
+
+        runner.AddCommandHandler<string>(
+            "messenger_open", OpenMessenger);
+
+        runner.AddCommandHandler(
+            "messenger_close", CloseMessenger);
     }
     
     private void BindCharRigSetup(DialogueRunner runner)
