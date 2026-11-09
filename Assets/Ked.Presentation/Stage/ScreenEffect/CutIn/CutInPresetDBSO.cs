@@ -152,7 +152,7 @@ public sealed class CutInPresetDBSO : ScriptableObject
 
     private static MotionClip WindowClip(string name, float[] times, float[] scale, float[] rotationZ)
     {
-        CurveKey[] scaleKeys = SmoothKeys(times, scale);
+        CurveKey[] scaleKeys = PresetCurveKeys.Smooth(times, scale);
 
         return new MotionClip
         {
@@ -163,28 +163,8 @@ public sealed class CutInPresetDBSO : ScriptableObject
             Channels = new[]
             {
                 new MotionChannel { Node = WindowNode, Kind = MotionChannelKind.Scale, X = scaleKeys, Y = (CurveKey[])scaleKeys.Clone() },
-                new MotionChannel { Node = WindowNode, Kind = MotionChannelKind.Euler, Z = SmoothKeys(times, rotationZ) },
+                new MotionChannel { Node = WindowNode, Kind = MotionChannelKind.Euler, Z = PresetCurveKeys.Smooth(times, rotationZ) },
             },
         };
-    }
-
-    // 잰 점을 지나는 매끈한 곡선 — 접선은 이웃 두 점의 기울기(Catmull-Rom), 양끝은 0.
-    private static CurveKey[] SmoothKeys(float[] t, float[] v)
-    {
-        if (t.Length != v.Length)
-            throw new ArgumentException("시각과 값의 개수가 다르다.");
-
-        CurveKey[] keys = new CurveKey[t.Length];
-
-        for (int i = 0; i < t.Length; i++)
-        {
-            float tangent = i == 0 || i == t.Length - 1
-                ? 0f
-                : (v[i + 1] - v[i - 1]) / (t[i + 1] - t[i - 1]);
-
-            keys[i] = new CurveKey(t[i], v[i], tangent, tangent);
-        }
-
-        return keys;
     }
 }
