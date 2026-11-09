@@ -12,6 +12,40 @@
           "x": [ { "t": 0, "v": 0, "inTangent": 0, "outTangent": 0 }, { "t": 0.4, "v": 0, "inTangent": 0, "outTangent": 0 } ],
           "y": [ { "t": 0, "v": 0, "inTangent": 0, "outTangent": 0 }, { "t": 0.4, "v": 0, "inTangent": 0, "outTangent": 0 } ],
           "z": [ { "t": 0, "v": 0, "inTangent": 0, "outTangent": 0 }, { "t": 0.4, "v": 8, "inTangent": 0, "outTangent": 0 } ] }
+      ] },
+    { "name": "hop", "rig": "character", "duration": 0.5, "end": "restore",
+      "channels": [
+        { "node": "CharacterPortrait_Track_Move", "kind": "position",
+          "y": [ { "t": 0, "v": 0, "inTangent": 0, "outTangent": 0 }, { "t": 0.2, "v": 40, "inTangent": 0, "outTangent": 0 }, { "t": 0.4, "v": 0, "inTangent": -184.00002, "outTangent": -184.00002 }, { "t": 0.45, "v": -6, "inTangent": 0, "outTangent": 0 }, { "t": 0.5, "v": 0, "inTangent": 0, "outTangent": 0 } ] },
+        { "node": "CharacterPortrait_ActingScale", "kind": "scale",
+          "x": [ { "t": 0, "v": 1, "inTangent": 0, "outTangent": 0 }, { "t": 0.2, "v": 0.95, "inTangent": 0, "outTangent": 0 }, { "t": 0.4, "v": 1.04, "inTangent": 0, "outTangent": 0 }, { "t": 0.5, "v": 1, "inTangent": 0, "outTangent": 0 } ],
+          "y": [ { "t": 0, "v": 1, "inTangent": 0, "outTangent": 0 }, { "t": 0.2, "v": 1.06, "inTangent": 0, "outTangent": 0 }, { "t": 0.4, "v": 0.96, "inTangent": 0, "outTangent": 0 }, { "t": 0.5, "v": 1, "inTangent": 0, "outTangent": 0 } ] }
+      ] },
+    { "name": "flinch", "rig": "character", "duration": 0.4, "end": "restore",
+      "channels": [
+        { "node": "CharacterPortrait_Track_Move", "kind": "position",
+          "x": [ { "t": 0, "v": 0, "inTangent": 0, "outTangent": 0 }, { "t": 0.08, "v": -10, "inTangent": 0, "outTangent": 0 }, { "t": 0.4, "v": 0, "inTangent": 0, "outTangent": 0 } ] },
+        { "node": "CharacterPortrait_Rotation", "kind": "euler",
+          "z": [ { "t": 0, "v": 0, "inTangent": 0, "outTangent": 0 }, { "t": 0.08, "v": -4, "inTangent": 0, "outTangent": 0 }, { "t": 0.4, "v": 0, "inTangent": 0, "outTangent": 0 } ] },
+        { "node": "CharacterPortrait_ActingScale", "kind": "scale",
+          "y": [ { "t": 0, "v": 1, "inTangent": 0, "outTangent": 0 }, { "t": 0.08, "v": 0.96, "inTangent": 0, "outTangent": 0 }, { "t": 0.4, "v": 1, "inTangent": 0, "outTangent": 0 } ] }
+      ] },
+    { "name": "tremble", "rig": "character", "duration": 0.6, "end": "restore",
+      "channels": [
+        { "node": "CharacterPortrait_Shake", "kind": "position",
+          "x": [ { "t": 0, "v": 0, "inTangent": 60, "outTangent": 60 }, { "t": 0.05, "v": 3, "inTangent": 60, "outTangent": -120 }, { "t": 0.1, "v": -3, "inTangent": -120, "outTangent": 119.99999 }, { "t": 0.15, "v": 3, "inTangent": 119.99999, "outTangent": -120.00001 }, { "t": 0.2, "v": -3, "inTangent": -120.00001, "outTangent": 120.00001 }, { "t": 0.25, "v": 3, "inTangent": 120.00001, "outTangent": -119.99997 }, { "t": 0.3, "v": -3, "inTangent": -119.99997, "outTangent": 120.000046 }, { "t": 0.35, "v": 3, "inTangent": 120.000046, "outTangent": -119.99997 }, { "t": 0.4, "v": -3, "inTangent": -119.99997, "outTangent": 120.000046 }, { "t": 0.45, "v": 3, "inTangent": 120.000046, "outTangent": -119.99997 }, { "t": 0.5, "v": -3, "inTangent": -119.99997, "outTangent": 99.99998 }, { "t": 0.55, "v": 2, "inTangent": 99.99998, "outTangent": -39.999992 }, { "t": 0.6, "v": 0, "inTangent": -39.999992, "outTangent": -39.999992 } ] }
+      ] },
+    { "name": "bounce", "rig": "character", "duration": 0.6, "end": "restore",
+      "channels": [
+        { "node": "CharacterPortrait_Track_Move", "kind": "position",
+          "y": [ { "t": 0, "v": 0, "inTangent": 0, "outTangent": 0 }, { "t": 0.15, "v": 12, "inTangent": 0, "outTangent": 0 }, { "t": 0.3, "v": 0, "inTangent": 0, "outTangent": 0 }, { "t": 0.45, "v": 6, "inTangent": 0, "outTangent": 0 }, { "t": 0.6, "v": 0, "inTangent": 0, "outTangent": 0 } ] },
+        { "node": "CharacterPortrait_ActingScale", "kind": "scale",
+          "y": [ { "t": 0, "v": 1, "inTangent": 0, "outTangent": 0 }, { "t": 0.15, "v": 1.03, "inTangent": 0, "outTangent": 0 }, { "t": 0.3, "v": 0.97, "inTangent": 0, "outTangent": 0 }, { "t": 0.45, "v": 1.01, "inTangent": 0, "outTangent": 0 }, { "t": 0.6, "v": 1, "inTangent": 0, "outTangent": 0 } ] }
+      ] },
+    { "name": "shake_head", "rig": "character", "duration": 0.6, "end": "restore",
+      "channels": [
+        { "node": "CharacterPortrait_Track_Move", "kind": "position",
+          "x": [ { "t": 0, "v": 0, "inTangent": 0, "outTangent": 0 }, { "t": 0.1, "v": -12, "inTangent": 0, "outTangent": 0 }, { "t": 0.25, "v": 12, "inTangent": 0, "outTangent": 0 }, { "t": 0.4, "v": -8, "inTangent": 0, "outTangent": 0 }, { "t": 0.5, "v": 4, "inTangent": 0, "outTangent": 0 }, { "t": 0.6, "v": 0, "inTangent": 0, "outTangent": 0 } ] }
       ] }
   ]
 }
