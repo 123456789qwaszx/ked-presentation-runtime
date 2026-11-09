@@ -182,6 +182,16 @@ rrr
 // 창 안의 인물은 닫힌 뒤(다음 줄)에 치운다 — 같은 줄이면 판이 닫히기 전에 사라진다.
 <<fade_out c2 0fr>>
 
+// ── 그림 팝업 (docs/PLAN_popup.md) — 덮는 무대에 뒷막과 그림을 한 페이드로 띄운다 ──
+<<popup stage02 sample_letter>>
+하린: 그림 팝업이야. 화면이 같이 어두워지고, 그림은 가운데에 떠.
+
+<<popup stage02 sample_seedling>>
+하린: 열린 채로 다시 쓰면 그림만 바로 바뀌어.
+
+<<popup_close stage02>>
+하린: 닫으면 막과 그림이 같이 사라져.
+
 시구레: 여기까지예요. 되감기(R)로 아무 줄이나 돌아갈 수 있고, 타이틀의 ‘이어하기’로 다시 올 수 있어요. #line:ln_6mq0fm7a
 
 <<fade_out s3 12fr>>
