@@ -72,6 +72,7 @@ public sealed class StageRigBuilder
 
         refs.Mask = EnsureMask(refs.MaskRoot, refs.MaskEdgeRoot);
         refs.CutIn = EnsureCutIn(root, stageKey, refs.Mask);
+        refs.Popup = EnsurePopup(refs.CutIn.Window, stageKey);
 
         // 이미 서 있는 층을 거둔다(검증 통과한 계층이거나, 방금 다시 세워 비어 있다).
         RectTransform zoom = refs.CameraZoom;
@@ -315,6 +316,77 @@ public sealed class StageRigBuilder
         image.raycastTarget = false;
 
         StageCutInSlot slot = new(stageKey, window, panel, image, mask);
+        slot.Reset();
+
+        return slot;
+    }
+
+    // 그림 팝업은 창의 **다음 형제**다 — 그 무대의 내용 위, 다음 무대 아래. 창 밖이라 컷인 팝(창 배율 · 회전)에 끌려가지 않는다.
+    // 그룹 아래는 뒷막(형제 0)과 그림(형제 1)뿐이다. 그룹의 불투명도 하나가 둘을 같이 페이드한다(docs/PLAN_popup.md §2).
+    // 묶을 때마다 닫힌 중립으로 돌린다.
+    private static StagePopupSlot EnsurePopup(RectTransform window, string stageKey)
+    {
+        RectTransform mount = window.parent as RectTransform;
+        string groupName = StageRigSchema.PopupName(stageKey);
+
+        RectTransform group = mount != null ? FindDirectChild(mount, groupName) : null;
+
+        if (group == null)
+        {
+            GameObject go = new(groupName, typeof(RectTransform));
+            group = (RectTransform)go.transform;
+            group.SetParent(mount, false);
+        }
+
+        StretchFull(group);
+
+        // 창 바로 다음 자리 — 먼저 맨 뒤로 보낸 뒤 창 번호를 읽는다(그룹이 창 앞에 있었으면 창 번호가 하나 줄어든다).
+        if (mount != null)
+        {
+            group.SetAsLastSibling();
+            group.SetSiblingIndex(window.GetSiblingIndex() + 1);
+        }
+
+        RectTransform backdrop = EnsureRect(group, StageRigSchema.PopupBackdropName(stageKey));
+        RectTransform picture = EnsureRect(group, StageRigSchema.PopupImageName(stageKey));
+
+        // 스키마에 없는 자식은 경고하고 치운다 — 그룹 아래는 뒷막과 그림뿐이다.
+        for (int i = group.childCount - 1; i >= 0; i--)
+        {
+            Transform child = group.GetChild(i);
+
+            if (child == backdrop || child == picture)
+                continue;
+
+            Debug.LogWarning($"[StageRigBuilder] 그림 팝업 아래에 스키마에 없는 '{child.name}'가 있다. 치운다. stage='{stageKey}'.", group);
+            child.SetParent(null, false);
+
+            if (Application.isPlaying)
+                Object.Destroy(child.gameObject);
+            else
+                Object.DestroyImmediate(child.gameObject);
+        }
+
+        backdrop.SetSiblingIndex(0);
+        picture.SetSiblingIndex(1);
+        StretchFull(backdrop);
+
+        if (!group.TryGetComponent(out CanvasGroup canvasGroup))
+            canvasGroup = group.gameObject.AddComponent<CanvasGroup>();
+
+        canvasGroup.interactable = false;
+        canvasGroup.blocksRaycasts = false;
+
+        if (!backdrop.TryGetComponent(out Image backdropImage))
+            backdropImage = backdrop.gameObject.AddComponent<Image>();
+
+        if (!picture.TryGetComponent(out Image pictureImage))
+            pictureImage = picture.gameObject.AddComponent<Image>();
+
+        backdropImage.raycastTarget = false;
+        pictureImage.raycastTarget = false;
+
+        StagePopupSlot slot = new(stageKey, group, canvasGroup, backdropImage, picture, pictureImage);
         slot.Reset();
 
         return slot;

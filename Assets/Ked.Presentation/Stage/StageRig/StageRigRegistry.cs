@@ -43,12 +43,13 @@ public sealed class StageRigRegistry
     public StageLayerRefs EnsureLayer(string stageKey, float depth)
         => _builder.EnsureLayer(Get(stageKey), depth);
 
-    /// <summary>장면 경계 — 무대마다 마스크를 기준 모양으로, 컷인 창 · 판은 중립으로.</summary>
+    /// <summary>장면 경계 — 무대마다 마스크를 기준 모양으로, 컷인 창 · 판과 그림 팝업은 중립(닫힘)으로.</summary>
     public void ResetAllMasksToBaseline()
     {
         for (int i = 0; i < _ordered.Count; i++)
         {
             _ordered[i].CutIn.Reset();
+            _ordered[i].Popup.Reset();
             _ordered[i].Mask.ResetToBaseline();
         }
     }

@@ -190,6 +190,88 @@ namespace Ked.Presentation.Tests.UnityParity
             return rt;
         }
 
+        // ── 그림 팝업 (docs/PLAN_popup.md) ──────────────────────────
+
+        [Test]
+        public void 팝업은_창의_다음_형제이고_뒷막이_그림보다_뒤다()
+        {
+            StageRigRefs s1 = _builder.Build(_mount, "stage01", StageLayerLabels.Depths);
+            StageRigRefs s2 = _builder.Build(_mount, "stage02", StageLayerLabels.Depths);
+
+            StagePopupSlot p1 = s1.Popup;
+            Assert.That(p1.Group.name, Is.EqualTo("stage01_Popup"));
+            Assert.That(p1.Group.parent, Is.EqualTo(_mount));
+            Assert.That(p1.Group.GetSiblingIndex(), Is.EqualTo(s1.CutIn.Window.GetSiblingIndex() + 1), "그 무대 내용 바로 위");
+            Assert.That(p1.Group.GetSiblingIndex(), Is.LessThan(s2.CutIn.Window.GetSiblingIndex()), "다음 무대 아래");
+            Assert.That(p1.Backdrop.transform.GetSiblingIndex(), Is.EqualTo(0));
+            Assert.That(p1.Picture.GetSiblingIndex(), Is.EqualTo(1));
+            Assert.That(p1.Group.childCount, Is.EqualTo(2));
+            Assert.That(p1.Canvas.blocksRaycasts, Is.False);
+
+            // 닫힌 채 선다.
+            Assert.That(p1.IsOpen, Is.False);
+            Assert.That(p1.Alpha, Is.EqualTo(0f));
+            Assert.That(p1.Backdrop.enabled, Is.False);
+            Assert.That(p1.PictureImage.enabled, Is.False);
+        }
+
+        [Test]
+        public void 다시_묶어도_팝업은_창_다음_자리로_돌아온다()
+        {
+            StageRigRefs s1 = _builder.Build(_mount, "stage01", StageLayerLabels.Depths);
+            _builder.Build(_mount, "stage02", StageLayerLabels.Depths);
+
+            RectTransform group = s1.Popup.Group;
+            group.SetAsFirstSibling();   // 엉뚱한 자리(창 앞)
+
+            StageRigRefs rebound = _builder.BindRefsFromRoot(s1.Root, "stage01");
+
+            Assert.That(rebound.Popup.Group, Is.SameAs(group), "부수지 않고 다시 묶는다");
+            Assert.That(group.GetSiblingIndex(), Is.EqualTo(rebound.CutIn.Window.GetSiblingIndex() + 1));
+        }
+
+        [Test]
+        public void 팝업을_열면_그림이_원본_픽셀_곱하기_배율로_서고_닫으면_꺼진다()
+        {
+            StageRigRefs refs = _builder.Build(_mount, "stage01", StageLayerLabels.Depths);
+            PopupPresetDBSO preset = PopupPresetDBSO.CreateDefault();
+            Texture2D tex = new(404, 404);
+            Sprite sprite = Sprite.Create(tex, new Rect(0f, 0f, 404f, 404f), new Vector2(0.5f, 0.5f), 100f);
+
+            try
+            {
+                StagePopupSlot popup = refs.Popup;
+                popup.Layout(preset, sprite, new Vector2(40f, -20f), 1.5f);
+
+                Assert.That(popup.IsOpen, Is.True);
+                Assert.That(popup.Alpha, Is.EqualTo(0f), "불투명도는 페이드가 올린다");
+                Assert.That(popup.Picture.sizeDelta.x, Is.EqualTo(404f * 0.91f * 1.5f).Within(1e-3f));
+                Assert.That(popup.Picture.anchoredPosition, Is.EqualTo(new Vector2(40f, -20f)));
+                Assert.That(popup.Backdrop.enabled && popup.PictureImage.enabled, Is.True);
+                Assert.That(popup.Backdrop.color.a, Is.EqualTo(0.47f).Within(1e-4f));
+
+                popup.SetAlpha(1f);
+                popup.SetClosed();
+                Assert.That(popup.IsOpen, Is.False);
+                Assert.That(popup.Alpha, Is.EqualTo(0f));
+                Assert.That(popup.PictureImage.enabled, Is.False);
+
+                popup.Layout(preset, null, Vector2.zero, 1f);
+                Assert.That(popup.PictureImage.enabled, Is.False, "그림이 없으면 뒷막만");
+                Assert.That(popup.Backdrop.enabled, Is.True);
+
+                popup.Reset();
+                Assert.That(popup.IsOpen, Is.False);
+                Assert.That(popup.Backdrop.enabled, Is.False);
+            }
+            finally
+            {
+                Object.DestroyImmediate(sprite);
+                Object.DestroyImmediate(tex);
+                Object.DestroyImmediate(preset);
+            }
+        }
+
         [Test]
         public void 샷_소유는_카메라_둘과_층의_Rect뿐이다()
         {

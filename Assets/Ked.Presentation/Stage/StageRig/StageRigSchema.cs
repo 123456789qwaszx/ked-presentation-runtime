@@ -20,6 +20,13 @@ using Ked.Presentation.Core;
 /// 창이 무대 루트 바깥이라 리그 좌표 계산(측정 체인 · 샷 식)은 창을 모른다 — 창이 팝하는 도중에 place를 해도 같다.
 /// 창은 아래 Nodes 표에 없다(표는 무대 루트에서 시작한다). StageRigBuilder.EnsureCutIn이 세운다.
 ///
+/// 창의 **형제**로 그림 팝업이 하나 더 있다(2026-11-09, docs/PLAN_popup.md):
+///   {stage}_Popup             뒷막과 그림을 한 덩어리로 든다(CanvasGroup). 불투명도 하나가 둘을 같이 페이드한다
+///     {stage}_Popup_Backdrop  화면 전체 어두운 막(Image, 색 · 세기는 프리셋)
+///     {stage}_Popup_Image     그림(Image). 원본 픽셀 × 프리셋 배율, 무대 중심 기준 자리
+/// 창 바로 다음 형제라서 그 무대의 내용(창 안) 위, 다음 무대 아래에 그려진다. 창 밖이라 컷인 팝에 끌려가지 않는다.
+/// StageRigBuilder.EnsurePopup이 세운다.
+///
 /// 카메라가 무대 **아래**에 있어서 무대마다 카메라가 있다. 어느 무대의 카메라를 샷이 움직이는지는 역할(StageRoles)이
 /// 정한다 — 지금은 본 무대만이다. 구조가 아니라 정책이다(2026-11-06 D2).
 ///
@@ -65,6 +72,15 @@ public static class StageRigSchema
 
     /// <summary>컷인 판 — 창의 첫 자식(무대 루트보다 뒤에 그려진다).</summary>
     public static string PanelName(string stageKey) => $"{stageKey}_Panel";
+
+    /// <summary>그림 팝업 그룹 — 창의 다음 형제.</summary>
+    public static string PopupName(string stageKey) => $"{stageKey}_Popup";
+
+    /// <summary>팝업 뒷막 — 그룹의 첫 자식(그림보다 뒤).</summary>
+    public static string PopupBackdropName(string stageKey) => $"{stageKey}_Popup_Backdrop";
+
+    /// <summary>팝업 그림 — 그룹의 둘째 자식.</summary>
+    public static string PopupImageName(string stageKey) => $"{stageKey}_Popup_Image";
 
     public static string LayerName(string stageKey, float depth)
         => $"{stageKey}_{LayerPrefix}{StageLayerLabels.NameOf(depth)}";
