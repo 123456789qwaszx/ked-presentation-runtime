@@ -23,6 +23,7 @@ public sealed class StageMaskMotionCommand : CommandBase
     private readonly StageMaskMotionCommandSpec _spec;
     private readonly StageMaskMotionPresetDBSO _presetDb;
     private readonly StageRigRegistry _stages;
+    private readonly StageFrameRegistry _frames;
 
     private StageMaskMotionPresetDBSO.Entry _entry;
     private float _duration;
@@ -35,11 +36,13 @@ public sealed class StageMaskMotionCommand : CommandBase
     public StageMaskMotionCommand(
         StageMaskMotionCommandSpec spec,
         StageMaskMotionPresetDBSO presetDb,
-        StageRigRegistry stages)
+        StageRigRegistry stages,
+        StageFrameRegistry frames)
     {
         _spec = spec;
         _presetDb = presetDb;
         _stages = stages;
+        _frames = frames;
     }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
@@ -73,21 +76,21 @@ public sealed class StageMaskMotionCommand : CommandBase
             ? _spec.durationOverride
             : _entry.duration;
 
-        StageRigRefs stage = _stages.Get(_spec.stage);
-        _slot = stage.Mask;
+        _slot = _stages.Get(_spec.stage).Mask;
+        StageFrameRefs frame = _frames.Get(_spec.stage);
 
         // tx는 무대를 어디까지 보여 줄지를 새로 정한다 — 열려 있던(또는 닫힌 채 남은) 컷인 창 · 판은 중립으로.
         // 마스크 모양은 tx의 것이 이긴다(docs/PLAN_cutin.md §5).
-        if (stage.CutIn.IsOpen || stage.CutIn.Window.localScale != Vector3.one)
+        if (frame.CutIn.IsOpen || frame.Window.localScale != Vector3.one)
             Debug.LogWarning($"[StageMaskMotionCommand] {_spec.stage}의 컷인을 tx '{_spec.presetKey}'가 덮는다 — 컷인 창을 중립으로 돌린다.");
 
-        stage.CutIn.Reset();
+        frame.CutIn.Reset();
 
         // 그림 팝업도 같은 규칙 — 그 무대를 새로 보여 주는 전환이 덮는다(docs/PLAN_popup.md §6).
-        if (stage.Popup.IsOpen)
+        if (frame.Popup.IsOpen)
             Debug.LogWarning($"[StageMaskMotionCommand] {_spec.stage}의 그림 팝업을 tx '{_spec.presetKey}'가 덮는다 — 팝업을 닫는다.");
 
-        stage.Popup.Reset();
+        frame.Popup.Reset();
     }
 
     private StageMaskMotionPresetDBSO.Entry ResolvePresetEntry()

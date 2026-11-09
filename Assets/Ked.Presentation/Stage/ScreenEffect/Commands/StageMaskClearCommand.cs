@@ -21,15 +21,18 @@ public sealed class StageMaskClearCommand : CommandBase
 {
     private readonly StageMaskClearCommandSpec _spec;
     private readonly StageRigRegistry _stages;
+    private readonly StageFrameRegistry _frames;
 
     public override bool WaitForCompletion => false;
 
     public StageMaskClearCommand(
         StageMaskClearCommandSpec spec,
-        StageRigRegistry stages)
+        StageRigRegistry stages,
+        StageFrameRegistry frames)
     {
         _spec = spec;
         _stages = stages;
+        _frames = frames;
     }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
@@ -45,21 +48,17 @@ public sealed class StageMaskClearCommand : CommandBase
 
     private void Apply()
     {
-        // 마스크를 지우면 컷인도 끝난다 — 창 · 판을 중립으로(docs/PLAN_cutin.md §5).
+        // 마스크를 지우면 틀도 끝난다 — 컷인 창 · 판과 그림 팝업을 중립으로(docs/PLAN_cutin.md §5 · PLAN_popup.md §6).
         if (!_spec.allStages)
         {
-            StageRigRefs stage = _stages.Get(_spec.stage);
-            stage.CutIn.Reset();
-            stage.Popup.Reset();
-            stage.Mask.Clear(_spec.mode, _spec.hideEdge);
+            _frames.Get(_spec.stage).Reset();
+            _stages.Get(_spec.stage).Mask.Clear(_spec.mode, _spec.hideEdge);
             return;
         }
 
+        _frames.ResetAll();
+
         for (int i = 0; i < _stages.All.Count; i++)
-        {
-            _stages.All[i].CutIn.Reset();
-            _stages.All[i].Popup.Reset();
             _stages.All[i].Mask.Clear(_spec.mode, _spec.hideEdge);
-        }
     }
 }

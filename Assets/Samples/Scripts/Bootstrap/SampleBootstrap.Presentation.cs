@@ -27,6 +27,7 @@ public partial class SampleBootstrap
 
     private PresentationUIRoot _presentationUIRoot;
     private StageRigRegistry _stageRigs;
+    private StageFrameRegistry _stageFrames;
     private PresentationShotResponseSystem _presentationResponseRig;
     private ScreenEffectRig _screenEffectRig;
 
@@ -81,6 +82,12 @@ public partial class SampleBootstrap
 
         foreach (string stageKey in StageKeys)
             _stageRigs.Build(_presentationUIRoot.StageMount, stageKey, StageLayerLabels.Depths);
+
+        // 무대 틀(창 · 컷인 판 · 그림 팝업)은 리그 다음에 — 틀이 무대 루트를 감싼다(StageFrameSchema).
+        _stageFrames = new StageFrameRegistry(new StageFrameBuilder());
+
+        foreach (StageRigRefs stageRig in _stageRigs.All)
+            _stageFrames.Build(stageRig);
 
         _presentationResponseRig = new PresentationShotResponseSystem(_stageRigs, LayerProfileCurve.Default);
         // 배치는 무대 좌표 — 배치 계산이 샷이 움직이는 무대 노드를 지날 때 샷 시스템의 중립값을 쓴다.
@@ -161,6 +168,7 @@ public partial class SampleBootstrap
             screenVignettePresetDb,
             stageMaskMotionPresetDb,
             _stageRigs,
+            _stageFrames,
             _rigBlur,
             cutInPreset,
             popupPreset);
@@ -258,6 +266,7 @@ public partial class SampleBootstrap
             _rigBlur,
             _screenEffectRig,
             _stageRigs,
+            _stageFrames,
             audioSystem,
             _sceneBgm,
             _presentationStage,

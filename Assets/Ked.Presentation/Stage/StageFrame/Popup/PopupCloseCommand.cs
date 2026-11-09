@@ -15,7 +15,7 @@ public sealed class PopupCloseCommand : CommandBase
 {
     private readonly PopupCloseCommandSpec _spec;
     private readonly PopupPresetDBSO _preset;
-    private readonly StageRigRegistry _stages;
+    private readonly StageFrameRegistry _frames;
 
     private StagePopupSlot _slot;
     private CurveKey[] _keys;
@@ -27,11 +27,11 @@ public sealed class PopupCloseCommand : CommandBase
     public PopupCloseCommand(
         PopupCloseCommandSpec spec,
         PopupPresetDBSO preset,
-        StageRigRegistry stages)
+        StageFrameRegistry frames)
     {
         _spec = spec;
         _preset = preset;
-        _stages = stages;
+        _frames = frames;
     }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
@@ -66,7 +66,7 @@ public sealed class PopupCloseCommand : CommandBase
     {
         _resolveAttempted = true;
 
-        _slot = _stages.Get(_spec.stage).Popup;
+        _slot = _frames.Get(_spec.stage).Popup;
         _keys = _preset.CloseKeys(out string why);
 
         if (_keys == null)

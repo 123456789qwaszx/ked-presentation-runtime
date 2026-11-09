@@ -26,7 +26,7 @@ public sealed class PopupOpenCommand : CommandBase
 {
     private readonly PopupOpenCommandSpec _spec;
     private readonly PopupPresetDBSO _preset;
-    private readonly StageRigRegistry _stages;
+    private readonly StageFrameRegistry _frames;
 
     private StagePopupSlot _slot;
     private Sprite _picture;
@@ -39,11 +39,11 @@ public sealed class PopupOpenCommand : CommandBase
     public PopupOpenCommand(
         PopupOpenCommandSpec spec,
         PopupPresetDBSO preset,
-        StageRigRegistry stages)
+        StageFrameRegistry frames)
     {
         _spec = spec;
         _preset = preset;
-        _stages = stages;
+        _frames = frames;
     }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
@@ -72,7 +72,7 @@ public sealed class PopupOpenCommand : CommandBase
     {
         _resolveAttempted = true;
 
-        _slot = _stages.Get(_spec.stage).Popup;
+        _slot = _frames.Get(_spec.stage).Popup;
 
         // 못 찾으면 해석기가 경고한다 — 뒷막만 뜬다(폴드는 열림).
         _picture = ResourcesSpriteResolver.Resolve(PopupPresetDBSO.PictureResourcesRoot, _spec.pictureKey);

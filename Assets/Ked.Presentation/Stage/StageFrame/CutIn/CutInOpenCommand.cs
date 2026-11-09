@@ -26,7 +26,7 @@ public sealed class CutInOpenCommand : CommandBase
 {
     private readonly CutInOpenCommandSpec _spec;
     private readonly CutInPresetDBSO _preset;
-    private readonly StageRigRegistry _stages;
+    private readonly StageFrameRegistry _frames;
 
     private StageCutInSlot _slot;
     private Sprite _panel;
@@ -39,11 +39,11 @@ public sealed class CutInOpenCommand : CommandBase
     public CutInOpenCommand(
         CutInOpenCommandSpec spec,
         CutInPresetDBSO preset,
-        StageRigRegistry stages)
+        StageFrameRegistry frames)
     {
         _spec = spec;
         _preset = preset;
-        _stages = stages;
+        _frames = frames;
     }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
@@ -72,7 +72,7 @@ public sealed class CutInOpenCommand : CommandBase
     {
         _resolveAttempted = true;
 
-        _slot = _stages.Get(_spec.stage).CutIn;
+        _slot = _frames.Get(_spec.stage).CutIn;
 
         // 못 찾으면 해석기가 경고한다 — 판 없이 열린다(마스크 · 모션은 그대로).
         _panel = ResourcesSpriteResolver.Resolve(CutInPresetDBSO.PanelResourcesRoot, _spec.panelKey);
