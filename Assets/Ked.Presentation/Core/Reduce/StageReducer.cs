@@ -227,6 +227,10 @@ namespace Ked.Presentation.Core
                 case "bg_move":  return ApplyMoveBy(state, cmd, tuning, out reason);
                 case "bg_scale": return ApplyPortraitScaleTo(state, cmd, out reason);
 
+                // 컷인 — 끝 상태만(StageReducer.CutIn). 파서 표: cutin_open(무대="stage01", 판, x="0u", y="0u", 배율="1") · cutin_close(무대="stage01")
+                case "cutin_open":  return ApplyCutInOpen(state, cmd, tuning, out reason);
+                case "cutin_close": return ApplyCutInClose(state, cmd, out reason);
+
                 default:
                     // 시간만 쓰는 커맨드는 못 접는 게 아니라 접을 것이 없다 — 아래 참조.
                     if (IsWaitCommand(cmd.Name))

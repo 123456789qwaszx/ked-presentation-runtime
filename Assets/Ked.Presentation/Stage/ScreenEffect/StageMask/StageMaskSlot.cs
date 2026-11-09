@@ -205,6 +205,23 @@ public sealed class StageMaskSlot : MonoBehaviour
         _graphic.ResetToHiddenOffset();
     }
 
+    /// <summary>
+    /// 컷인 — 네 점 모양으로 자른다(판 아래 변 · 위는 열림). 진행 중인 tx 모션은 끊고 테두리는 끈다
+    /// (판 그림이 제 외곽선을 갖는다). StageCutInSlot.Layout이 부른다.
+    /// </summary>
+    public void SetCustomQuad(Vector2 p0, Vector2 p1, Vector2 p2, Vector2 p3)
+    {
+        StopMotion();
+
+        if (!HasMask)
+            return;
+
+        ActivateMasked();
+        _graphic.SetCustomQuad(p0, p1, p2, p3);
+        _graphic.SetShapeOffsetImmediate(Vector2.zero);
+        SetEdgeVisible(false);
+    }
+
     public void SetMaskOffsetImmediate(Vector2 offset)
     {
         if (!HasMask)

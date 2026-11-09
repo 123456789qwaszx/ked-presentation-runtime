@@ -71,6 +71,7 @@ public sealed class StageRigBuilder
         };
 
         refs.Mask = EnsureMask(refs.MaskRoot, refs.MaskEdgeRoot);
+        refs.CutIn = EnsureCutIn(root, stageKey, refs.Mask);
 
         // 이미 서 있는 층을 거둔다(검증 통과한 계층이거나, 방금 다시 세워 비어 있다).
         RectTransform zoom = refs.CameraZoom;
@@ -255,6 +256,66 @@ public sealed class StageRigBuilder
             slot = maskRoot.gameObject.AddComponent<StageMaskSlot>();
 
         slot.BindFromBuilder(graphic, mask, edge);
+
+        return slot;
+    }
+
+    // 컷인 창은 무대 루트의 **부모**다 — 무대 전체를 들고 움직이되 리그 좌표 계산(무대 루트까지)에는 들지 않는다.
+    // 옛 씬(무대 루트가 mount 바로 아래)은 그 자리에 창을 끼워 넣는다 — 부수지 않는다(무대 루트는 창과 같은 rect로 선다).
+    // 창 아래는 판과 무대 루트 둘뿐이다. 판이 뒤(형제 0), 무대가 앞(형제 1). 묶을 때마다 닫힌 중립으로 돌린다.
+    private static StageCutInSlot EnsureCutIn(RectTransform root, string stageKey, StageMaskSlot mask)
+    {
+        string windowName = StageRigSchema.WindowName(stageKey);
+        RectTransform parent = root.parent as RectTransform;
+        RectTransform window;
+
+        if (parent != null && parent.name == windowName)
+        {
+            window = parent;
+        }
+        else
+        {
+            GameObject go = new(windowName, typeof(RectTransform));
+            window = (RectTransform)go.transform;
+            window.SetParent(parent, false);
+
+            if (parent != null)
+                window.SetSiblingIndex(root.GetSiblingIndex());
+
+            StretchFull(window);
+            root.SetParent(window, false);
+            StretchFull(root);
+        }
+
+        RectTransform panel = EnsureRect(window, StageRigSchema.PanelName(stageKey));
+
+        // 스키마에 없는 자식은 경고하고 치운다 — 창 아래는 판과 무대 루트뿐이다.
+        for (int i = window.childCount - 1; i >= 0; i--)
+        {
+            Transform child = window.GetChild(i);
+
+            if (child == panel || child == root)
+                continue;
+
+            Debug.LogWarning($"[StageRigBuilder] 컷인 창 아래에 스키마에 없는 '{child.name}'가 있다. 치운다. stage='{stageKey}'.", window);
+            child.SetParent(null, false);
+
+            if (Application.isPlaying)
+                Object.Destroy(child.gameObject);
+            else
+                Object.DestroyImmediate(child.gameObject);
+        }
+
+        panel.SetSiblingIndex(0);
+        root.SetSiblingIndex(1);
+
+        if (!panel.TryGetComponent(out Image image))
+            image = panel.gameObject.AddComponent<Image>();
+
+        image.raycastTarget = false;
+
+        StageCutInSlot slot = new(stageKey, window, panel, image, mask);
+        slot.Reset();
 
         return slot;
     }

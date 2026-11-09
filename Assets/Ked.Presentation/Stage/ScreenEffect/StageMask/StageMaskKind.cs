@@ -12,6 +12,10 @@ public enum StageMaskKind
     VerticalStrip = 3,
     DiagonalBand = 4,
     CircleIris = 5,
+
+    // 네 점을 그대로 쓴다(p0 왼아래 · p1 왼위 · p2 오른위 · p3 오른아래, 로컬 px). 컷인이 판 아래 변으로 자를 때 쓴다 —
+    // StageCutInSlot.Layout · CutInPresetDBSO.GetMaskQuad.
+    CustomQuad = 6,
 }
 
 [Flags]

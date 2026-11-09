@@ -13,6 +13,13 @@ using Ked.Presentation.Core;
 ///             …_Content   리그가 붙는 곳. 블러 대상
 ///     MaskEdge_Root 마스크 테두리 그래픽. Mask_Root의 형제(마스크에 잘리지 않아야 한다)
 ///
+/// 무대 루트 **바깥**에 컷인 창이 하나 더 있다(2026-11-09, docs/PLAN_cutin.md):
+///   {stage}_Window      무대 전체를 들고 팝 · 회전한다. 중립 항등(무대 루트와 같은 rect). 피벗은 컷인을 열 때 판 아래 가운데로
+///     {stage}_Panel     컷인 판 그림(Image). 무대 루트보다 뒤(형제 0). 닫혀 있으면 꺼져 있다
+///     {stage}_Stage_Root
+/// 창이 무대 루트 바깥이라 리그 좌표 계산(측정 체인 · 샷 식)은 창을 모른다 — 창이 팝하는 도중에 place를 해도 같다.
+/// 창은 아래 Nodes 표에 없다(표는 무대 루트에서 시작한다). StageRigBuilder.EnsureCutIn이 세운다.
+///
 /// 카메라가 무대 **아래**에 있어서 무대마다 카메라가 있다. 어느 무대의 카메라를 샷이 움직이는지는 역할(StageRoles)이
 /// 정한다 — 지금은 본 무대만이다. 구조가 아니라 정책이다(2026-11-06 D2).
 ///
@@ -52,6 +59,12 @@ public static class StageRigSchema
     public const string ContentSuffix = "_Content";
 
     public static string NodeName(string stageKey, Refs id) => $"{stageKey}_{id}";
+
+    /// <summary>컷인 창 — 무대 루트의 부모.</summary>
+    public static string WindowName(string stageKey) => $"{stageKey}_Window";
+
+    /// <summary>컷인 판 — 창의 첫 자식(무대 루트보다 뒤에 그려진다).</summary>
+    public static string PanelName(string stageKey) => $"{stageKey}_Panel";
 
     public static string LayerName(string stageKey, float depth)
         => $"{stageKey}_{LayerPrefix}{StageLayerLabels.NameOf(depth)}";

@@ -45,13 +45,19 @@ public sealed class StageMaskClearCommand : CommandBase
 
     private void Apply()
     {
+        // 마스크를 지우면 컷인도 끝난다 — 창 · 판을 중립으로(docs/PLAN_cutin.md §5).
         if (!_spec.allStages)
         {
-            _stages.Get(_spec.stage).Mask.Clear(_spec.mode, _spec.hideEdge);
+            StageRigRefs stage = _stages.Get(_spec.stage);
+            stage.CutIn.Reset();
+            stage.Mask.Clear(_spec.mode, _spec.hideEdge);
             return;
         }
 
         for (int i = 0; i < _stages.All.Count; i++)
+        {
+            _stages.All[i].CutIn.Reset();
             _stages.All[i].Mask.Clear(_spec.mode, _spec.hideEdge);
+        }
     }
 }

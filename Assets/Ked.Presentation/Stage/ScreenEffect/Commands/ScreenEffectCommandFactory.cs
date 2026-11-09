@@ -11,6 +11,7 @@ public sealed class ScreenEffectCommandFactory : INodeCommandFactory
     private readonly StageMaskMotionPresetDBSO _stageMaskMotionPresetDb;
     private readonly StageRigRegistry _stages;
     private readonly RigBlurIntentSystem _rigBlur;
+    private readonly CutInPresetDBSO _cutInPreset;
 
     public ScreenEffectCommandFactory(
         PresentationStage stage,
@@ -20,7 +21,8 @@ public sealed class ScreenEffectCommandFactory : INodeCommandFactory
         ScreenVignettePresetDBSO vignettePresetDb,
         StageMaskMotionPresetDBSO stageMaskMotionPresetDb,
         StageRigRegistry stages,
-        RigBlurIntentSystem rigBlur)
+        RigBlurIntentSystem rigBlur,
+        CutInPresetDBSO cutInPreset = null)
     {
         _stage = stage ?? throw new ArgumentNullException(nameof(stage));
         _screenEffects = screenEffects ? screenEffects : throw new ArgumentNullException(nameof(screenEffects));
@@ -30,6 +32,17 @@ public sealed class ScreenEffectCommandFactory : INodeCommandFactory
         _stageMaskMotionPresetDb = stageMaskMotionPresetDb ? stageMaskMotionPresetDb : throw new ArgumentNullException(nameof(stageMaskMotionPresetDb));
         _stages = stages ?? throw new ArgumentNullException(nameof(stages));
         _rigBlur = rigBlur ?? throw new ArgumentNullException(nameof(rigBlur));
+
+        // 프리셋 에셋이 없으면 코드 기본값(원본 게임 실측)으로 — 조용히 넘기지 않는다.
+        if (cutInPreset == null)
+        {
+            UnityEngine.Debug.LogWarning(
+                "[ScreenEffectCommandFactory] 컷인 프리셋(CutInPresetDBSO)이 연결되지 않았다. 코드 기본값으로 연다 — " +
+                "Create › Ked › Presentation › Cut-in Preset으로 에셋을 만들어 조립에 연결하면 런타임에서 편집할 수 있다.");
+            cutInPreset = CutInPresetDBSO.CreateDefault();
+        }
+
+        _cutInPreset = cutInPreset;
     }
 
     public bool TryCreate(CommandSpecBase spec, out ISequenceCommand command)
@@ -45,6 +58,10 @@ public sealed class ScreenEffectCommandFactory : INodeCommandFactory
             // Stage-local Mask
             StageMaskMotionCommandSpec s => new StageMaskMotionCommand(s, _stageMaskMotionPresetDb, _stages),
             StageMaskClearCommandSpec s => new StageMaskClearCommand(s, _stages),
+
+            // 컷인 — 덮는 무대의 창 · 판 · 마스크(docs/PLAN_cutin.md)
+            CutInOpenCommandSpec s => new CutInOpenCommand(s, _stages, _cutInPreset),
+            CutInCloseCommandSpec s => new CutInCloseCommand(s, _stages, _cutInPreset),
             
             _ => null
         };

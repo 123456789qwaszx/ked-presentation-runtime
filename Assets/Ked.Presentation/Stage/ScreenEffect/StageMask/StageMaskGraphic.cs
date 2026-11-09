@@ -34,6 +34,9 @@ public sealed class StageMaskGraphic : Graphic
     [SerializeField] private float _diagonalBandBleedPixels = 220f;
     [SerializeField] private bool _diagonalBandToRight = true;
 
+    [Header("Custom Quad")]
+    [SerializeField] private Vector2[] _customQuad = new Vector2[4];
+
     [Header("Circle Iris")]
     [SerializeField] private float _irisRadiusPixels = 720f;
     [SerializeField] private float _irisAspect = 1f;
@@ -342,6 +345,21 @@ public sealed class StageMaskGraphic : Graphic
         SetVerticesDirty();
     }
 
+    /// <summary>네 점 모양(로컬 px). 순서는 다른 모양과 같다 — 왼아래 · 왼위 · 오른위 · 오른아래.</summary>
+    public void SetCustomQuad(Vector2 p0, Vector2 p1, Vector2 p2, Vector2 p3)
+    {
+        if (_customQuad == null || _customQuad.Length != 4)
+            _customQuad = new Vector2[4];
+
+        _customQuad[0] = p0;
+        _customQuad[1] = p1;
+        _customQuad[2] = p2;
+        _customQuad[3] = p3;
+
+        _kind = StageMaskKind.CustomQuad;
+        SetVerticesDirty();
+    }
+
     public void SetSlanted(
         float slantPixels,
         bool slantToRight,
@@ -433,6 +451,13 @@ public sealed class StageMaskGraphic : Graphic
 
             case StageMaskKind.DiagonalBand:
                 GetDiagonalBandQuad(rect, out p0, out p1, out p2, out p3);
+                break;
+
+            case StageMaskKind.CustomQuad when _customQuad is { Length: 4 }:
+                p0 = _customQuad[0];
+                p1 = _customQuad[1];
+                p2 = _customQuad[2];
+                p3 = _customQuad[3];
                 break;
 
             default:

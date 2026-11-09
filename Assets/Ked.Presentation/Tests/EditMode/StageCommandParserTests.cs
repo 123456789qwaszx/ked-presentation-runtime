@@ -139,6 +139,55 @@ public class StageCommandParserTests
         Assert.AreEqual(0.5f, b.durationOverride, 1e-6f);
     }
 
+    // ── 컷인 (docs/PLAN_cutin.md) ────────────────────────────────
+
+    [Test]
+    public void cutin_open은_무대_판_자리_배율을_받는다()
+    {
+        CutInOpenCommandSpec s = (CutInOpenCommandSpec)Parse(
+            NewParser(), Cmd("cutin_open", "stage02", "pink_stars", "-16u", "1.25u", "0.86"))[0];
+
+        Assert.AreEqual("stage02", s.stage);
+        Assert.AreEqual("pink_stars", s.panelKey);
+        Assert.AreEqual(-640f, s.center.x, 1e-3f, "1u = 40px, 음수 그대로");
+        Assert.AreEqual(50f, s.center.y, 1e-3f);
+        Assert.AreEqual(0.86f, s.scale, 1e-6f);
+    }
+
+    [Test]
+    public void cutin_open의_생략값은_stage01_가운데_배율_1이다()
+    {
+        CutInOpenCommandSpec s = (CutInOpenCommandSpec)Parse(NewParser(), Cmd("cutin_open", "", "blue_question"))[0];
+
+        Assert.AreEqual("stage01", s.stage);
+        Assert.AreEqual(Vector2.zero, s.center);
+        Assert.AreEqual(1f, s.scale);
+    }
+
+    [Test]
+    public void cutin은_본_무대에_쓰면_경고하고_아무것도_내지_않는다()
+    {
+        LogAssert.Expect(LogType.Warning, new Regex("<<cutin_open>> 본 무대"));
+        Assert.AreEqual(0, Parse(NewParser(), Cmd("cutin_open", "stage00", "pink_stars")).Count);
+
+        LogAssert.Expect(LogType.Warning, new Regex("<<cutin_close>> 본 무대"));
+        Assert.AreEqual(0, Parse(NewParser(), Cmd("cutin_close", "stage00")).Count);
+    }
+
+    [Test]
+    public void cutin_open은_판이_없으면_경고하고_아무것도_내지_않는다()
+    {
+        LogAssert.Expect(LogType.Warning, new Regex("<<cutin_open>>에 판 키가 없다"));
+        Assert.AreEqual(0, Parse(NewParser(), Cmd("cutin_open", "stage01")).Count);
+    }
+
+    [Test]
+    public void cutin_close는_무대_하나를_받는다()
+    {
+        CutInCloseCommandSpec s = (CutInCloseCommandSpec)Parse(NewParser(), Cmd("cutin_close"))[0];
+        Assert.AreEqual("stage01", s.stage, "무대 생략값은 stage01");
+    }
+
     [Test]
     public void tx는_프리셋이_없으면_경고하고_아무것도_내지_않는다()
     {

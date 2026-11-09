@@ -73,7 +73,15 @@ public sealed class StageMaskMotionCommand : CommandBase
             ? _spec.durationOverride
             : _entry.duration;
 
-        _slot = _stages.Get(_spec.stage).Mask;
+        StageRigRefs stage = _stages.Get(_spec.stage);
+        _slot = stage.Mask;
+
+        // tx는 무대를 어디까지 보여 줄지를 새로 정한다 — 열려 있던(또는 닫힌 채 남은) 컷인 창 · 판은 중립으로.
+        // 마스크 모양은 tx의 것이 이긴다(docs/PLAN_cutin.md §5).
+        if (stage.CutIn.IsOpen || stage.CutIn.Window.localScale != Vector3.one)
+            Debug.LogWarning($"[StageMaskMotionCommand] {_spec.stage}의 컷인을 tx '{_spec.presetKey}'가 덮는다 — 컷인 창을 중립으로 돌린다.");
+
+        stage.CutIn.Reset();
     }
 
     private StageMaskMotionPresetDBSO.Entry ResolvePresetEntry()

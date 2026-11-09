@@ -1,0 +1,210 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 793ccb1c72b9b7c438f8ca306209f3ac, type: 3}
+  m_Name: CutInPreset
+  m_EditorClassIdentifier: Ked.Presentation.Stage::CutInPresetDBSO
+  panelSize: {x: 550, y: 301}
+  cornerBottomLeft: {x: 0, y: 0.012}
+  cornerTopLeft: {x: 0.029, y: 1}
+  cornerTopRight: {x: 0.965, y: 0.918}
+  cornerBottomRight: {x: 1, y: 0}
+  maskInsetPixels: 3.5
+  clipSides: 0
+  maskReachPixels: 6000
+  popIn:
+    Name: cutin_pop_in
+    Rig: stageWindow
+    Duration: 0.42
+    End: 1
+    Channels:
+    - Node: Window
+      Kind: 1
+      X:
+      - Time: 0
+        Value: 0.45
+        InTangent: 0
+        OutTangent: 0
+      - Time: 0.07
+        Value: 1.1
+        InTangent: 5.2857146
+        OutTangent: 5.2857146
+      - Time: 0.14
+        Value: 1.19
+        InTangent: -0.35714337
+        OutTangent: -0.35714337
+      - Time: 0.21
+        Value: 1.05
+        InTangent: -1.5000002
+        OutTangent: -1.5000002
+      - Time: 0.28
+        Value: 0.98
+        InTangent: -0.3571425
+        OutTangent: -0.3571425
+      - Time: 0.35
+        Value: 1
+        InTangent: 0.14285702
+        OutTangent: 0.14285702
+      - Time: 0.42
+        Value: 1
+        InTangent: 0
+        OutTangent: 0
+      Y:
+      - Time: 0
+        Value: 0.45
+        InTangent: 0
+        OutTangent: 0
+      - Time: 0.07
+        Value: 1.1
+        InTangent: 5.2857146
+        OutTangent: 5.2857146
+      - Time: 0.14
+        Value: 1.19
+        InTangent: -0.35714337
+        OutTangent: -0.35714337
+      - Time: 0.21
+        Value: 1.05
+        InTangent: -1.5000002
+        OutTangent: -1.5000002
+      - Time: 0.28
+        Value: 0.98
+        InTangent: -0.3571425
+        OutTangent: -0.3571425
+      - Time: 0.35
+        Value: 1
+        InTangent: 0.14285702
+        OutTangent: 0.14285702
+      - Time: 0.42
+        Value: 1
+        InTangent: 0
+        OutTangent: 0
+      Z: []
+    - Node: Window
+      Kind: 2
+      X: []
+      Y: []
+      Z:
+      - Time: 0
+        Value: -6.7
+        InTangent: 0
+        OutTangent: 0
+      - Time: 0.07
+        Value: 0.2
+        InTangent: 73.57143
+        OutTangent: 73.57143
+      - Time: 0.14
+        Value: 3.6
+        InTangent: 32.142857
+        OutTangent: 32.142857
+      - Time: 0.21
+        Value: 4.7
+        InTangent: -24.285713
+        OutTangent: -24.285713
+      - Time: 0.28
+        Value: 0.2
+        InTangent: -47.142857
+        OutTangent: -47.142857
+      - Time: 0.35
+        Value: -1.9
+        InTangent: -1.4285716
+        OutTangent: -1.4285716
+      - Time: 0.42
+        Value: 0
+        InTangent: 0
+        OutTangent: 0
+  popOut:
+    Name: cutin_pop_out
+    Rig: stageWindow
+    Duration: 0.35
+    End: 1
+    Channels:
+    - Node: Window
+      Kind: 1
+      X:
+      - Time: 0
+        Value: 1
+        InTangent: 0
+        OutTangent: 0
+      - Time: 0.07
+        Value: 1.04
+        InTangent: 1.142857
+        OutTangent: 1.142857
+      - Time: 0.14
+        Value: 1.16
+        InTangent: 0.92857146
+        OutTangent: 0.92857146
+      - Time: 0.21
+        Value: 1.17
+        InTangent: -3.9999995
+        OutTangent: -3.9999995
+      - Time: 0.28
+        Value: 0.6
+        InTangent: -8.357142
+        OutTangent: -8.357142
+      - Time: 0.35
+        Value: 0
+        InTangent: 0
+        OutTangent: 0
+      Y:
+      - Time: 0
+        Value: 1
+        InTangent: 0
+        OutTangent: 0
+      - Time: 0.07
+        Value: 1.04
+        InTangent: 1.142857
+        OutTangent: 1.142857
+      - Time: 0.14
+        Value: 1.16
+        InTangent: 0.92857146
+        OutTangent: 0.92857146
+      - Time: 0.21
+        Value: 1.17
+        InTangent: -3.9999995
+        OutTangent: -3.9999995
+      - Time: 0.28
+        Value: 0.6
+        InTangent: -8.357142
+        OutTangent: -8.357142
+      - Time: 0.35
+        Value: 0
+        InTangent: 0
+        OutTangent: 0
+      Z: []
+    - Node: Window
+      Kind: 2
+      X: []
+      Y: []
+      Z:
+      - Time: 0
+        Value: 0
+        InTangent: 0
+        OutTangent: 0
+      - Time: 0.07
+        Value: 1.7
+        InTangent: 44.285713
+        OutTangent: 44.285713
+      - Time: 0.14
+        Value: 6.2
+        InTangent: 41.428574
+        OutTangent: 41.428574
+      - Time: 0.21
+        Value: 7.5
+        InTangent: -50.714283
+        OutTangent: -50.714283
+      - Time: 0.28
+        Value: -0.9
+        InTangent: -53.57143
+        OutTangent: -53.57143
+      - Time: 0.35
+        Value: 0
+        InTangent: 0
+        OutTangent: 0

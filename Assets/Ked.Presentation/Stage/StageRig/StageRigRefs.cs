@@ -36,6 +36,9 @@ public sealed class StageRigRefs
     public RectTransform CameraZoom { get; internal set; }
     public StageMaskSlot Mask { get; internal set; }
 
+    /// <summary>컷인 창 · 판(무대 루트 바깥). 빌더가 세운다 — docs/PLAN_cutin.md.</summary>
+    public StageCutInSlot CutIn { get; internal set; }
+
     // d 오름차순 = 멀리서 가까이로 = 형제 순서(먼 층이 뒤에 그려진다).
     private readonly SortedDictionary<float, StageLayerRefs> _layers = new();
 

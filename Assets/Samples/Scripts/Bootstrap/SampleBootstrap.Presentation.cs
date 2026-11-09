@@ -161,7 +161,8 @@ public partial class SampleBootstrap
             screenVignettePresetDb,
             stageMaskMotionPresetDb,
             _stageRigs,
-            _rigBlur);
+            _rigBlur,
+            cutInPreset);
 
         CompositeCommandFactory factory = new(
             charRigFactory,

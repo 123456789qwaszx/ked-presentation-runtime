@@ -43,7 +43,13 @@ namespace Ked.Presentation.Tests.UnityParity
         {
             StageRigRefs refs = _builder.Build(_mount, "stage00", StageLayerLabels.Depths);
 
-            Assert.That(refs.Root.parent, Is.EqualTo(_mount));
+            Assert.That(refs.Root.parent, Is.EqualTo(refs.CutIn.Window), "무대 루트는 컷인 창 아래");
+            Assert.That(refs.CutIn.Window.parent, Is.EqualTo(_mount));
+            Assert.That(refs.CutIn.Window.name, Is.EqualTo("stage00_Window"));
+            Assert.That(refs.CutIn.Panel.parent, Is.EqualTo(refs.CutIn.Window));
+            Assert.That(refs.CutIn.Panel.GetSiblingIndex(), Is.EqualTo(0), "판이 무대보다 뒤");
+            Assert.That(refs.Root.GetSiblingIndex(), Is.EqualTo(1));
+            Assert.That(refs.CutIn.PanelImage.enabled, Is.False, "판은 닫힌 채 선다");
             Assert.That(refs.MaskRoot.parent, Is.EqualTo(refs.Root));
             Assert.That(refs.MaskEdgeRoot.parent, Is.EqualTo(refs.Root));
             Assert.That(refs.CameraPan.parent, Is.EqualTo(refs.MaskRoot));
@@ -116,6 +122,72 @@ namespace Ked.Presentation.Tests.UnityParity
             Assert.That(rebuilt.CameraPan, Is.Not.SameAs(pan), "부수고 새로 세웠다");
             Assert.That(rebuilt.Layers.Count, Is.EqualTo(0), "층은 참조될 때 다시 선다");
             Assert.That(rebuilt.Mask.HasMask, Is.True);
+        }
+
+        [Test]
+        public void 옛_씬의_무대_루트는_부수지_않고_창으로_감싼다()
+        {
+            // 컷인 이전 계층: mount 바로 아래 무대 루트. 다른 무대 둘 사이의 그리기 순서를 지킨다.
+            RectTransform before = NewChild(_mount, "Before");
+            StageRigRefs old = _builder.Build(_mount, "stage01", StageLayerLabels.Depths);
+            RectTransform after = NewChild(_mount, "After");
+
+            RectTransform root = old.Root;
+            RectTransform pan = old.CameraPan;
+            int windowIndex = old.CutIn.Window.GetSiblingIndex();
+
+            // 창을 걷어 옛 모양을 흉내 낸다.
+            root.SetParent(_mount, false);
+            root.SetSiblingIndex(windowIndex);
+            Object.DestroyImmediate(old.CutIn.Window.gameObject);
+
+            StageRigRefs rebound = _builder.BindRefsFromRoot(root, "stage01");
+
+            Assert.That(rebound.CameraPan, Is.SameAs(pan), "무대 계층은 그대로 묶는다");
+            Assert.That(rebound.Root.parent, Is.EqualTo(rebound.CutIn.Window));
+            Assert.That(rebound.CutIn.Window.parent, Is.EqualTo(_mount));
+            Assert.That(before.GetSiblingIndex(), Is.LessThan(rebound.CutIn.Window.GetSiblingIndex()));
+            Assert.That(after.GetSiblingIndex(), Is.GreaterThan(rebound.CutIn.Window.GetSiblingIndex()));
+        }
+
+        [Test]
+        public void 컷인을_열면_창_피벗이_판_아래_가운데로_가고_마스크가_네_점이_된다()
+        {
+            StageRigRefs refs = _builder.Build(_mount, "stage01", StageLayerLabels.Depths);
+            CutInPresetDBSO preset = CutInPresetDBSO.CreateDefault();
+
+            try
+            {
+                refs.CutIn.Layout(preset, null, new Vector2(-640f, 50f), 1f);
+
+                // 판 아래 가운데 = (−640, 50 − 301/2) → 1920×1080 창 안의 비율.
+                Assert.That(refs.CutIn.Window.pivot.x, Is.EqualTo(0.5f - 640f / 1920f).Within(1e-4f));
+                Assert.That(refs.CutIn.Window.pivot.y, Is.EqualTo(0.5f + (50f - 150.5f) / 1080f).Within(1e-4f));
+                Assert.That(refs.CutIn.Window.rect.size, Is.EqualTo(_mount.rect.size), "피벗을 옮겨도 창 rect는 무대와 같다");
+                Assert.That(refs.CutIn.Panel.sizeDelta, Is.EqualTo(preset.panelSize));
+                Assert.That(refs.CutIn.IsOpen, Is.True);
+                Assert.That(refs.MaskRoot.GetComponent<StageMaskGraphic>().Kind, Is.EqualTo(StageMaskKind.CustomQuad));
+
+                refs.CutIn.SetClosed();
+                Assert.That(refs.CutIn.Window.localScale, Is.EqualTo(new Vector3(0f, 0f, 1f)));
+
+                refs.CutIn.Reset();
+                Assert.That(refs.CutIn.Window.localScale, Is.EqualTo(Vector3.one));
+                Assert.That(refs.CutIn.Window.pivot, Is.EqualTo(new Vector2(0.5f, 0.5f)));
+                Assert.That(refs.CutIn.PanelImage.enabled, Is.False);
+            }
+            finally
+            {
+                Object.DestroyImmediate(preset);
+            }
+        }
+
+        private RectTransform NewChild(RectTransform parent, string name)
+        {
+            GameObject go = new(name, typeof(RectTransform));
+            RectTransform rt = (RectTransform)go.transform;
+            rt.SetParent(parent, false);
+            return rt;
         }
 
         [Test]

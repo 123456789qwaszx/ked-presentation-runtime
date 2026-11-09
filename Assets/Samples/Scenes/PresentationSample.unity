@@ -841,6 +841,7 @@ MonoBehaviour:
   screenVignettePresetDb: {fileID: 11400000, guid: 53356775219299c42981714a7e8b025e, type: 2}
   screenFlashPresetDb: {fileID: 11400000, guid: fd8b0b7eceef6c549952782158c076ed, type: 2}
   stageMaskMotionPresetDb: {fileID: 11400000, guid: 5e92252f243dfe94fbce20f08a326a2b, type: 2}
+  cutInPreset: {fileID: 11400000, guid: be32cae4a2356db4c821f4d5d1698993, type: 2}
   screenEffectRigMount: {fileID: 1239989732}
   screenEffectRigPrefab: {fileID: 4422593765165483704, guid: 83cb0b3e799522c4f8dc6d87cce85f30, type: 3}
   characterFocusDebugView: {fileID: 1719686628}

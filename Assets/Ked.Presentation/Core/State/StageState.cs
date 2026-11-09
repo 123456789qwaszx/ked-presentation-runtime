@@ -102,7 +102,13 @@ namespace Ked.Presentation.Core
         // 런타임 CastBinding도 변형만 들고, 표정은 커맨드마다 인자로 온다.
         private readonly Dictionary<string, string> _variantBySlot;
 
+        // 컷인 축: 덮는 무대마다 컷인 끝 상태(열림/닫힘 · 판 · 자리 · 배율). 창 모션의 도중은 접지 않는다(docs/PLAN_cutin.md §6).
+        private readonly Dictionary<string, CutInState> _cutIns;
+
         public IReadOnlyList<UnhandledCommand> Unhandled => _unhandled;
+
+        /// <summary>무대 키 → 컷인 끝 상태. 한 번도 열지 않은 무대는 없다.</summary>
+        public IReadOnlyDictionary<string, CutInState> CutIns => _cutIns;
 
         public IReadOnlyCollection<string> Slots => _slots;
 
@@ -119,6 +125,7 @@ namespace Ked.Presentation.Core
             _characterBySlot = new Dictionary<string, string>(StringComparer.Ordinal);
             _aliases = new Dictionary<string, string>(StringComparer.Ordinal);
             _variantBySlot = new Dictionary<string, string>(StringComparer.Ordinal);
+            _cutIns = new Dictionary<string, CutInState>(StringComparer.Ordinal);
         }
 
         private StageState(StageState source)
@@ -134,6 +141,20 @@ namespace Ked.Presentation.Core
             _characterBySlot = new Dictionary<string, string>(source._characterBySlot, StringComparer.Ordinal);
             _aliases = new Dictionary<string, string>(source._aliases, StringComparer.Ordinal);
             _variantBySlot = new Dictionary<string, string>(source._variantBySlot, StringComparer.Ordinal);
+            _cutIns = new Dictionary<string, CutInState>(source._cutIns, StringComparer.Ordinal);
+        }
+
+        // ── 컷인 ─────────────────────────────────────────────────────
+
+        public bool TryGetCutIn(string stageKey, out CutInState cutIn)
+            => _cutIns.TryGetValue(stageKey ?? "", out cutIn);
+
+        public void SetCutIn(string stageKey, in CutInState cutIn)
+        {
+            if (string.IsNullOrEmpty(stageKey))
+                throw new ArgumentException("무대 키가 비어 있다.", nameof(stageKey));
+
+            _cutIns[stageKey] = cutIn;
         }
 
         /// <summary>깊은 복제. 리듀서의 순수성(원본 불변)이 이것 위에 선다.</summary>

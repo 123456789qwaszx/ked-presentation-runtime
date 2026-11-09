@@ -267,6 +267,13 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler(
             "tx_stage_mask_clear",
             EnqueueStageMaskClearSpec);
+
+        // <<cutin_open 무대 판 x y [배율]>> · <<cutin_close 무대>> — docs/PLAN_cutin.md
+        runner.AddCommandHandler<string, string, string, string, string>(
+            "cutin_open", EnqueueCutInOpenSpec);
+
+        runner.AddCommandHandler<string>(
+            "cutin_close", EnqueueCutInCloseSpec);
     }
     
     private void BindAudio(DialogueRunner runner)
