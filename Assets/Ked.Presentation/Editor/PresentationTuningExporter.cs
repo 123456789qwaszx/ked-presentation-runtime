@@ -174,7 +174,7 @@ public static class PresentationTuningExporter
 
         try
         {
-            // Character — 배경도 이 리그다(캐스팅하지 않은 슬롯). 리그 스키마는 둘뿐이다.
+            // Character — 배경도 이 리그다(캐스팅하지 않은 슬롯).
             {
                 CharacterRigBuilder builder = new();
                 RectTransform root = builder.BuildCharacterRigRoot(characterPrefab);
@@ -199,6 +199,21 @@ public static class PresentationTuningExporter
                 dump.rigs.Add(CaptureRig(
                     "screenEffect", null, root,
                     ScreenEffectSchemaNodes(), warnings));
+
+                Object.DestroyImmediate(root.gameObject);
+            }
+
+            // Emoji — 프리팹이 없다(스키마 베이크가 런타임 경로). 런타임에서는 캐릭터 슬롯의 노드 밑에 붙지만,
+            // 덤프는 다른 리그와 같이 임시 부모 밑에서 홀로 선 모양을 담는다 — 붙이는 것은 쓰는 쪽의 일이다.
+            {
+                EmojiRigBuilder builder = new();
+                RectTransform root = builder.BuildRigRoot();
+                root.SetParent(stage, false);
+                builder.BindRefsFromRoot(root, "", out _);
+
+                dump.rigs.Add(CaptureRig(
+                    EmojiRigSchema.RigKind, null, root,
+                    EmojiSchemaNodes(), warnings));
 
                 Object.DestroyImmediate(root.gameObject);
             }
@@ -308,6 +323,7 @@ public static class PresentationTuningExporter
             measuredRectSize = rect.rect.size,
             hasCanvasGroup = hasCanvasGroup,
             canvasGroupAlpha = hasCanvasGroup ? canvasGroup.alpha : 1f,
+            hasImage = rect.TryGetComponent(out Image _),
         };
     }
 
@@ -329,6 +345,16 @@ public static class PresentationTuningExporter
         List<(string, string)> nodes = new(ScreenEffectRigSchema.Nodes.Length);
 
         foreach (ScreenEffectRigSchema.NodeDef n in ScreenEffectRigSchema.Nodes)
+            nodes.Add((n.Id.ToString(), n.Parent?.ToString()));
+
+        return nodes;
+    }
+
+    private static List<(string, string)> EmojiSchemaNodes()
+    {
+        List<(string, string)> nodes = new(EmojiRigSchema.Nodes.Length);
+
+        foreach (EmojiRigSchema.NodeDef n in EmojiRigSchema.Nodes)
             nodes.Add((n.Id.ToString(), n.Parent?.ToString()));
 
         return nodes;
@@ -639,6 +665,9 @@ public static class PresentationTuningExporter
         // 가시성 축. hasCanvasGroup이 bool 게이트다 — 위 CaptureNode 주석 참조.
         public bool hasCanvasGroup;
         public float canvasGroupAlpha;
+
+        // 그림을 그리는 노드인가 — 코어 RigSchemaNodeDto.hasImage.
+        public bool hasImage;
     }
 
     [Serializable]

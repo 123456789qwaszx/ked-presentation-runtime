@@ -40,7 +40,7 @@
 
 ## 2. `rig-schemas.json`
 
-리그 2종(character · screenEffect)의 **노드 트리 초기 상태**. 빌더 로직을 전사한 것이 아니라,
+리그 3종(character · screenEffect · emoji)의 **노드 트리 초기 상태**. 빌더 로직을 전사한 것이 아니라,
 실제 프리팹·실제 빌더로 리그를 세운 뒤 **실물 `RectTransform`에서 읽은 값**이다
 (`BindRefsFromRoot`의 그래프 검증·복구까지 지난 뒤의 상태 — 런타임과 같은 경로).
 
@@ -67,11 +67,11 @@ new RectSpace(capturedUnderParentSize, Vec2.Half)
 
 | 필드 | 뜻 |
 |---|---|
-| `rigKind` | `character` · `screenEffect` — 익스포터가 내보내는 두 종류다. 배경은 캐스팅하지 않은 `character` 슬롯이라 따로 없다(2026-10-29까지는 `background`가 있었다). 노드 수는 스키마를 따라 변하므로 여기 적지 않는다 |
+| `rigKind` | `character` · `screenEffect` · `emoji` — 익스포터가 내보내는 세 종류다. 배경은 캐스팅하지 않은 `character` 슬롯이라 따로 없다(2026-10-29까지는 `background`가 있었다). `emoji`는 캐릭터 슬롯의 노드 밑에 붙는 리그인데, 덤프에는 다른 리그처럼 홀로 선 모양으로 담긴다(`docs/PLAN_emoji.md` §3). 노드 수는 스키마를 따라 변하므로 여기 적지 않는다 |
 | `sourcePrefab` | 세울 때 쓴 프리팹 에셋 경로. **빈 문자열이면 프리팹 없이 스키마 베이크로 세웠다는 뜻** |
 | `nodes` | 부모가 항상 자식보다 먼저 온다 — 순서대로 넣으면 트리가 세워진다 |
 
-> `screenEffect`의 `sourcePrefab`이 비어 있는 것은 정상이다. 프리팹 필드 자체가 없어
+> `screenEffect` · `emoji`의 `sourcePrefab`이 비어 있는 것은 정상이다. 프리팹 필드 자체가 없어
 > **부트스트랩도 `null`을 넘긴다** — 스키마 베이크가 곧 런타임 경로다.
 
 ### `nodes[]` — 코어 `RectNodeState`와 1:1
@@ -87,6 +87,7 @@ new RectSpace(capturedUnderParentSize, Vec2.Half)
 | `localScale` | 무단위 배율 (x, y, z) |
 | `localEulerAngles` | 도(°). 적용 순서는 Unity `Quaternion.Euler`와 같은 **Z → X → Y** |
 | `measuredRectSize` | ⚠ **재현 입력이 아니다.** 캡처 시점의 파생 rect 크기 — 검산용으로만 쓴다 |
+| `hasImage` | 그림을 그리는 노드인가(`Image`가 붙어 있다). 조각 여럿으로 된 리그(`emoji`)에서 어느 노드가 그림인지를 이것으로 안다. 없는 필드는 `false`로 읽힌다 |
 
 `localPosition.z`와 `offsetMin`/`offsetMax`는 담지 않는다
 (전자는 리그가 안 쓰고, 후자는 `anchoredPosition` + `sizeDelta`의 다른 표현이라 중복).

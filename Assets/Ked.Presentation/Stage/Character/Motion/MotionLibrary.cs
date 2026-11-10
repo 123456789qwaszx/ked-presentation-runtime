@@ -52,9 +52,29 @@ public sealed class MotionLibrary
     /// <summary>
     /// 본문을 읽는다. 파일을 어디서 가져오는지(Resources · TextAsset · 경로)는 호스트가 정한다 —
     /// 무대는 Application.dataPath를 열지 않는다.
-    /// rigNodeIds를 주면 채널 노드를 그 스키마로 검증한다(지금 모션은 캐릭터 리그용이다 — CharacterRigSchema.NodeIds()).
+    /// rigNodeIds를 주면 모든 클립의 채널 노드를 그 한 스키마로 검증한다.
+    /// 리그가 여럿이면 리그마다의 목록을 받는 쪽을 쓴다.
     /// </summary>
     public static MotionLibrary Parse(string json, string sourceLabel, ICollection<string> rigNodeIds = null)
+        => ParseCore(json, sourceLabel, _ => rigNodeIds, null);
+
+    /// <summary>
+    /// 클립을 **제 리그의 스키마**로 검증한다(<see cref="MotionRigSchemas.NodeIdsByRig"/>) — character 클립은 캐릭터 리그의 노드로,
+    /// emoji 클립은 이모지 리그의 노드로. 목록에 없는 리그의 클립은 거른다(세울 리그가 없다).
+    /// </summary>
+    public static MotionLibrary Parse(string json, string sourceLabel, IReadOnlyDictionary<string, ICollection<string>> nodeIdsByRig)
+    {
+        if (nodeIdsByRig == null)
+            throw new ArgumentNullException(nameof(nodeIdsByRig));
+
+        return ParseCore(
+            json, sourceLabel,
+            rig => nodeIdsByRig.TryGetValue(rig ?? "", out ICollection<string> ids) ? ids : null,
+            rig => nodeIdsByRig.ContainsKey(rig ?? ""));
+    }
+
+    private static MotionLibrary ParseCore(
+        string json, string sourceLabel, Func<string, ICollection<string>> nodeIdsOf, Func<string, bool> knowsRig)
     {
         FileDto file;
 
@@ -90,7 +110,13 @@ public sealed class MotionLibrary
                 if (!TryConvert(dto, sourceLabel, out MotionClip clip))
                     continue;
 
-                if (!MotionRules.TryValidate(clip, rigNodeIds, out string why))
+                if (knowsRig != null && !knowsRig(clip.Rig))
+                {
+                    Warn(sourceLabel, clip.Name, $"리그 '{clip.Rig}'의 스키마를 모른다");
+                    continue;
+                }
+
+                if (!MotionRules.TryValidate(clip, nodeIdsOf(clip.Rig), out string why))
                 {
                     Warn(sourceLabel, clip.Name, why);
                     continue;

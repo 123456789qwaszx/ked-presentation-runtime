@@ -9,9 +9,9 @@
                 "key": "Albedo",
                 "offset": {
                     "x": 0.0,
-                    "y": 0.0
+                    "y": 248.10809326171876
                 },
-                "visualScale": 1.0
+                "visualScale": 0.5405409932136536
             },
             {
                 "key": "Laru",
@@ -92,6 +92,86 @@
                     "y": 0.0
                 },
                 "visualScale": 10.0
+            },
+            {
+                "key": "benito",
+                "offset": {
+                    "x": 0.0,
+                    "y": 223.90240478515626
+                },
+                "visualScale": 0.5853660106658936
+            },
+            {
+                "key": "chaton",
+                "offset": {
+                    "x": 0.0,
+                    "y": 223.90240478515626
+                },
+                "visualScale": 0.5853660106658936
+            },
+            {
+                "key": "desert_scorpion_female_grunt",
+                "offset": {
+                    "x": 0.0,
+                    "y": 223.90240478515626
+                },
+                "visualScale": 0.5853660106658936
+            },
+            {
+                "key": "desert_scorpion_male_grunt",
+                "offset": {
+                    "x": 0.0,
+                    "y": 223.90240478515626
+                },
+                "visualScale": 0.5853660106658936
+            },
+            {
+                "key": "harin",
+                "offset": {
+                    "x": 0.0,
+                    "y": 271.24420166015627
+                },
+                "visualScale": 0.49769601225852969
+            },
+            {
+                "key": "kasimira",
+                "offset": {
+                    "x": 0.0,
+                    "y": 251.57269287109376
+                },
+                "visualScale": 0.5341249704360962
+            },
+            {
+                "key": "kasmi",
+                "offset": {
+                    "x": 0.0,
+                    "y": 271.24420166015627
+                },
+                "visualScale": 0.49769601225852969
+            },
+            {
+                "key": "mirage_resident_m",
+                "offset": {
+                    "x": 0.0,
+                    "y": 223.90240478515626
+                },
+                "visualScale": 0.5853660106658936
+            },
+            {
+                "key": "sigure",
+                "offset": {
+                    "x": 0.0,
+                    "y": 271.24420166015627
+                },
+                "visualScale": 0.49769601225852969
+            },
+            {
+                "key": "white_cat_mercenary",
+                "offset": {
+                    "x": 0.0,
+                    "y": 223.90240478515626
+                },
+                "visualScale": 0.5853660106658936
             }
         ]
     }

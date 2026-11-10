@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Ked.Presentation.Core;
 using UnityEngine;
 
@@ -362,7 +363,8 @@ public partial class SampleBootstrap
 
     private MotionLibrary LoadMotions()
     {
-        string[] nodeIds = CharacterRigSchema.NodeIds();
+        // 클립마다 제 리그(character · emoji)의 스키마로 검증한다.
+        IReadOnlyDictionary<string, ICollection<string>> nodeIds = MotionRigSchemas.NodeIdsByRig();
 
         if (motionsJson != null)
             return MotionLibrary.Parse(motionsJson.text, motionsJson.name, nodeIds);

@@ -117,6 +117,15 @@ namespace Ked.Presentation.Tests.UnityParity
                     return root;
                 }
 
+                case "emoji":
+                {
+                    EmojiRigBuilder builder = new();
+                    RectTransform root = builder.BuildRigRoot();
+                    root.SetParent(stage, false);
+                    builder.BindRefsFromRoot(root, "", out _);
+                    return root;
+                }
+
                 default:
                     Assert.Fail($"모르는 rigKind: {rig.rigKind}");
                     return null;
@@ -155,9 +164,10 @@ namespace Ked.Presentation.Tests.UnityParity
 
         // ── 대조 ─────────────────────────────────────────────────────
 
-        // 배경은 캐스팅하지 않은 캐릭터 슬롯이라 리그 종류는 둘이다.
+        // 배경은 캐스팅하지 않은 캐릭터 슬롯이다. 이모지는 캐릭터 슬롯에 붙는 별도 리그다.
         [TestCase("character")]
         [TestCase("screenEffect")]
+        [TestCase("emoji")]
         public void 덤프로_세운_트리가_실제_리그와_같다(string rigKind)
         {
             RigSchemasFileDto file = LoadDump();
@@ -268,6 +278,28 @@ namespace Ked.Presentation.Tests.UnityParity
                 Assert.That(liveCount, Is.EqualTo(rig.nodes.Count),
                     $"[{rig.rigKind}] 실제 리그 노드 {liveCount}개 vs 덤프 {rig.nodes.Count}개 — " +
                     "리그가 바뀌었는데 재내보내기를 잊었을 수 있다.");
+            }
+        }
+
+        [Test]
+        public void 덤프의_hasImage가_실제_리그의_Image와_같다()
+        {
+            // 모션 툴은 "어느 노드가 그림인가"를 덤프의 hasImage로만 안다.
+            RigSchemasFileDto file = LoadDump();
+
+            foreach (RigSchemaRigDto rig in file.rigs)
+            {
+                RectTransform stage = CreateStage(file.capturedUnderParentSize.ToVec2());
+                RectTransform liveRoot = BuildLiveRig(rig, stage);
+
+                foreach (RigSchemaNodeDto node in rig.nodes)
+                {
+                    RectTransform live = node.id == RigSchemaLoader.RootKey ? liveRoot : FindByName(liveRoot, node.id);
+
+                    Assert.That(live, Is.Not.Null, $"[{rig.rigKind}] 덤프의 노드 '{node.id}'가 실제 리그에 없다");
+                    Assert.That(node.hasImage, Is.EqualTo(live.TryGetComponent(out UnityEngine.UI.Image _)),
+                        $"[{rig.rigKind}] '{node.id}'의 hasImage — 덤프가 낡았다(다시 내보낼 것).");
+                }
             }
         }
 

@@ -7,6 +7,10 @@
         "entries": [
             {
                 "key": "bottom",
+                "overrideImage": false,
+                "image": {
+                    "instanceID": 0
+                },
                 "kind": 5,
                 "lineAnchorMin": {
                     "x": 0.07999999821186066,
@@ -75,6 +79,10 @@
             },
             {
                 "key": "speaker_bottom",
+                "overrideImage": false,
+                "image": {
+                    "instanceID": 0
+                },
                 "kind": 1,
                 "lineAnchorMin": {
                     "x": 0.07999999821186066,
@@ -143,6 +151,10 @@
             },
             {
                 "key": "portrait_narrow",
+                "overrideImage": false,
+                "image": {
+                    "instanceID": 0
+                },
                 "kind": 0,
                 "lineAnchorMin": {
                     "x": 0.3199999928474426,
@@ -211,6 +223,10 @@
             },
             {
                 "key": "letterbox_bottom",
+                "overrideImage": false,
+                "image": {
+                    "instanceID": 0
+                },
                 "kind": 2,
                 "lineAnchorMin": {
                     "x": 0.11999999731779099,
@@ -279,6 +295,10 @@
             },
             {
                 "key": "full_top_left",
+                "overrideImage": false,
+                "image": {
+                    "instanceID": 0
+                },
                 "kind": 3,
                 "lineAnchorMin": {
                     "x": 0.07999999821186066,
@@ -347,6 +367,10 @@
             },
             {
                 "key": "blackbook_page",
+                "overrideImage": false,
+                "image": {
+                    "instanceID": 0
+                },
                 "kind": 4,
                 "lineAnchorMin": {
                     "x": 0.2199999988079071,

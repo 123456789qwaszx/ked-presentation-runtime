@@ -65,6 +65,27 @@ public class MotionLibraryTests
     }
 
     [Test]
+    public void 리그마다의_목록을_주면_클립을_제_리그의_스키마로_검증한다()
+    {
+        string pop = @"{ ""name"": ""pop"", ""rig"": ""emoji"", ""duration"": 1, ""end"": ""commit"",
+            ""channels"": [ { ""node"": ""Emoji_Body"", ""kind"": ""scale"", ""x"": [ { ""t"": 0, ""v"": 1 }, { ""t"": 1, ""v"": 1 } ], ""y"": [ { ""t"": 0, ""v"": 1 }, { ""t"": 1, ""v"": 1 } ] } ] }";
+
+        // 캐릭터 클립은 캐릭터 리그의 노드로, 이모지 클립은 이모지 리그의 노드로 본다.
+        MotionLibrary library = MotionLibrary.Parse(Doc(Nod, pop), "test", MotionRigSchemas.NodeIdsByRig());
+        Assert.AreEqual(2, library.Count);
+
+        // 자리(Anchor)와 그림(_Image)은 런타임이 놓는다 — 모션이 겨누면 거른다.
+        string onAnchor = pop.Replace("Emoji_Body", "Emoji_Anchor");
+        LogAssert.Expect(LogType.Warning, new Regex("MotionLibrary.*pop"));
+        Assert.AreEqual(0, MotionLibrary.Parse(Doc(onAnchor), "test", MotionRigSchemas.NodeIdsByRig()).Count);
+
+        // 목록에 없는 리그의 클립은 세울 리그가 없다.
+        string ghost = pop.Replace("emoji", "ghost");
+        LogAssert.Expect(LogType.Warning, new Regex("MotionLibrary.*스키마를 모른다"));
+        Assert.AreEqual(0, MotionLibrary.Parse(Doc(ghost), "test", MotionRigSchemas.NodeIdsByRig()).Count);
+    }
+
+    [Test]
     public void 스키마_노드_목록을_주면_없는_노드를_거른다()
     {
         string stray = Head + @"""end"": ""commit"", ""channels"": [ { ""node"": ""NoSuchNode"", ""kind"": ""position"", ""x"": [ { ""t"": 0, ""v"": 0 }, { ""t"": 1, ""v"": 1 } ] } ] }";
