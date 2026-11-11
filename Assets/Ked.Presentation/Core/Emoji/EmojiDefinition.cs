@@ -6,7 +6,7 @@ namespace Ked.Presentation.Core
     // ─────────────────────────────────────────────────────────────────
     // 이모지 하나 — 툴이 정하는 것 전부(docs/emoji-rig.md §5 · docs/emoji-format.md).
     //
-    //   구성: 자기 오프셋 + 리그 여러 개(이름 · 스프라이트 · 기본 자리)
+    //   구성: 자기 오프셋 + 리그 여러 개(이름 · 스프라이트 · 기본 자리 · 기본 배율 · 기본 회전)
     //   움직임: 클립들 + 어느 클립을 언제 재생하는가(Main / In · Hold · Out)
     //
     // 리그의 틀(노드와 채널)은 런타임의 EmojiRigSchema가 정하고, 여기에는 틀이 없다.
@@ -31,11 +31,22 @@ namespace Ked.Presentation.Core
         /// <summary>기본 자리(EmojiRig_Place). 오프셋 기준 px, y 위.</summary>
         public Vec2 Place { get; }
 
-        public EmojiRigEntry(string name, string spriteKey, Vec2 place)
+        /// <summary>
+        /// 기본 배율(EmojiRig_Place) — 그림을 이 이모지에서 얼마만 하게 쓰는가. 키의 배율은 이 위에서 1을 기준으로 잡는다
+        /// (클립마다 크기를 다시 적지 않는다).
+        /// </summary>
+        public float Scale { get; }
+
+        /// <summary>기본 회전(EmojiRig_Place, 도). 키의 회전은 이 위에 얹힌다.</summary>
+        public float Rotation { get; }
+
+        public EmojiRigEntry(string name, string spriteKey, Vec2 place, float scale = 1f, float rotation = 0f)
         {
             Name = name;
             SpriteKey = spriteKey;
             Place = place;
+            Scale = scale;
+            Rotation = rotation;
         }
     }
 
@@ -137,6 +148,13 @@ namespace Ked.Presentation.Core
                 if (!rigNames.Add(rig.Name))
                 {
                     why = $"리그 이름 '{rig.Name}'이 두 번 나온다 — 키가 리그를 이름으로 가리킨다";
+                    return false;
+                }
+
+                if (float.IsNaN(rig.Scale) || float.IsInfinity(rig.Scale) || rig.Scale == 0f ||
+                    float.IsNaN(rig.Rotation) || float.IsInfinity(rig.Rotation))
+                {
+                    why = $"리그 '{rig.Name}'의 기본 배율 · 회전이 쓸 수 없는 값이다 (배율 {rig.Scale}, 회전 {rig.Rotation})";
                     return false;
                 }
             }

@@ -18,10 +18,10 @@
   "fps": 24,
   "emojis": [
     { "name": "star", "offset": { "x": 170, "y": 60 },
-      "rigs": [ { "name": "body", "sprite": "star", "place": { "x": 0, "y": 0 } } ],
+      "rigs": [ { "name": "body", "sprite": "star", "place": { "x": 0, "y": 0 }, "scale": 0.45 } ],
       "clips": [
         { "name": "in", "length": 5, "tracks": [
-            { "rig": "body", "channel": "scaleX", "keys": [ { "f": 0, "v": 0.2 }, { "f": 3, "v": 0.572 }, { "f": 4, "v": 0.45 } ] },
+            { "rig": "body", "channel": "scaleX", "keys": [ { "f": 0, "v": 0.45 }, { "f": 3, "v": 1.27 }, { "f": 4, "v": 1 } ] },
             { "rig": "body", "channel": "alpha",  "keys": [ { "f": 0, "v": 0 }, { "f": 2, "v": 1 } ] } ] },
         { "name": "hold", "length": 16, "tracks": [ … ] },
         { "name": "out",  "length": 6,  "tracks": [ { "rig": "", "channel": "alpha", "keys": [ { "f": 0, "v": 1 }, { "f": 5, "v": 0 } ] } ] }
@@ -37,7 +37,7 @@
 | `fps` | 초당 프레임 수 — 프레임을 시간으로 바꾼다. 없으면 24 |
 | `emojis[].name` | 대본이 부르는 이름(`<<emoji 누구 이름>>`) |
 | `emojis[].offset` | 이모지별 오프셋(`Emoji_Offset`) — 로케이터 기준 px, y 위. 없으면 0 |
-| `emojis[].rigs[]` | 리그들 — 순서가 그려지는 순서다(뒤가 위). `name`은 툴이 붙인 이름, `sprite`는 기본 스프라이트(`Resources/Emojis/{키}`), `place`는 기본 자리(`EmojiRig_Place`) |
+| `emojis[].rigs[]` | 리그들 — 순서가 그려지는 순서다(뒤가 위). `name`은 툴이 붙인 이름, `sprite`는 기본 스프라이트(`Resources/Emojis/{키}`), `place` · `scale` · `rotation`은 기본 자리 · 배율 · 회전(`EmojiRig_Place` — 배율은 없으면 1, 회전은 도이고 없으면 0) |
 | `emojis[].clips[]` | 클립들(§2) |
 | `emojis[].main` · `in` · `hold` · `out` | 어느 클립을 언제 재생하는가 — 클립의 이름(§4) |
 
@@ -73,7 +73,9 @@
 
 **그림 키** `{ "f", "s" }` — 그 프레임부터 스프라이트 `s`다. 언제나 계단이다. 첫 키 앞은 리그의 기본 스프라이트다.
 
-**키가 없는 채널은 중립값이다 — 앞 클립의 값을 이어받지 않는다.** 클립은 따로 선 애니메이션이라, 배율 0.45로 머무는 이모지는 등장 · 머묾 · 퇴장 클립 각각이 배율을 적는다.
+**키가 없는 채널은 중립값이다 — 앞 클립의 값을 이어받지 않는다.** 클립은 따로 선 애니메이션이다.
+
+**키는 리그의 기본값 위에서 잡는다.** 그림을 0.45배로 쓰는 리그는 `scale: 0.45`를 한 번 적고, 키의 배율은 1을 기준으로 한다(등장이 `1.27 → 1`로 읽힌다). 기본 자리 · 배율 · 회전은 `EmojiRig_Place`에, 키는 그 밑의 `EmojiRig_Image`에 들어간다 — 클립마다 크기를 다시 적지 않는다.
 
 ## 4. 어느 클립을 언제 — 머묾이 있는가
 

@@ -68,6 +68,34 @@ namespace Ked.Presentation.Tests
         }
 
         [Test]
+        public void 리그의_기본_배율과_회전_생략하면_1과_0이다()
+        {
+            EmojisFileDto file = new()
+            {
+                schema = EmojiDefinitionLoader.Schema,
+                emojis = new List<EmojiDto>
+                {
+                    new()
+                    {
+                        name = "e",
+                        rigs = new List<EmojiRigDto>
+                        {
+                            new() { name = "a", sprite = "s", scale = 0.45f, rotation = 10f },
+                            new() { name = "b", sprite = "s" },
+                        },
+                    },
+                },
+            };
+
+            EmojiDefinition emoji = EmojiDefinitionLoader.Build(file)["e"];
+
+            Assert.That(emoji.Rigs[0].Scale, Is.EqualTo(0.45f));
+            Assert.That(emoji.Rigs[0].Rotation, Is.EqualTo(10f));
+            Assert.That(emoji.Rigs[1].Scale, Is.EqualTo(1f));
+            Assert.That(emoji.Rigs[1].Rotation, Is.EqualTo(0f));
+        }
+
+        [Test]
         public void 어긋난_이모지는_걸러지고_까닭이_남는다()
         {
             EmojisFileDto file = new()

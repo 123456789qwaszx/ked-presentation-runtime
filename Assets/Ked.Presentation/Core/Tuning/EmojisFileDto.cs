@@ -11,7 +11,7 @@ namespace Ked.Presentation.Core
     //     "fps": 24,
     //     "emojis": [
     //       { "name": "star", "offset": { "x": 170, "y": 60 },
-    //         "rigs":  [ { "name": "body", "sprite": "star", "place": { "x": 0, "y": 0 } } ],
+    //         "rigs":  [ { "name": "body", "sprite": "star", "place": { "x": 0, "y": 0 }, "scale": 0.45 } ],
     //         "clips": [ { "name": "hold", "length": 12,
     //                      "tracks": [ { "rig": "body", "channel": "scaleX",
     //                                    "keys": [ { "f": 0, "v": 1 }, { "f": 6, "v": 1.08 }, { "f": 11, "v": 1 } ] } ] } ],
@@ -59,6 +59,12 @@ namespace Ked.Presentation.Core
         public string name;
         public string sprite;
         public Float2Dto place;
+
+        /// <summary>기본 배율. 0이거나 없으면 1.</summary>
+        public float scale;
+
+        /// <summary>기본 회전(도). 없으면 0.</summary>
+        public float rotation;
     }
 
     [Serializable]
@@ -158,7 +164,9 @@ namespace Ked.Presentation.Core
             if (dto.rigs != null)
             {
                 foreach (EmojiRigDto rig in dto.rigs)
-                    rigs.Add(rig == null ? null : new EmojiRigEntry(rig.name, rig.sprite, ToVec2(rig.place)));
+                    rigs.Add(rig == null
+                        ? null
+                        : new EmojiRigEntry(rig.name, rig.sprite, ToVec2(rig.place), rig.scale == 0f ? 1f : rig.scale, rig.rotation));
             }
 
             List<EmojiClip> clips = new();

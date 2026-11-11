@@ -14,7 +14,7 @@ public sealed class SetEmojiCommandSpec : EmojiRigCommandSpecBase
 // 슬롯을 풀고 · 정의를 찾고 · 빌더로 세우고 · 정의의 값을 넣고 · 재생을 맡긴다(EmojiPlaybackSystem).
 //   Emoji_Locator   ← RootSpace(지금은 기본값 하나 — 캐릭터 + 바리에이션별 표는 뒤에 붙는다)
 //   Emoji_Offset    ← 정의의 offset
-//   EmojiRig_Place  ← 리그의 place
+//   EmojiRig_Place  ← 리그의 place · scale · rotation(기본 자리 · 배율 · 회전)
 //   EmojiRig_Image  ← 리그의 sprite(Resources/Emojis/{키}), 크기는 원본 픽셀
 // 같은 이름이 서 있으면 부수고 새로 세운다. 모르는 이모지는 경고하고 건너뛴다(폴드는 Unhandled).
 //
@@ -107,7 +107,10 @@ public sealed class SetEmojiCommand : CommandBase
             EmojiRigEntry entry = definition.Rigs[i];
             EmojiRigRefs rig = emoji.Rigs[i];
 
+            // 기본 자리 · 배율 · 회전 — 키는 그 위(EmojiRig_Image)에서 중립(자리 0 · 배율 1 · 회전 0)을 기준으로 잡힌다.
             rig.EmojiRig_Place.anchoredPosition = new Vector2(entry.Place.X, entry.Place.Y);
+            rig.EmojiRig_Place.localScale = new Vector3(entry.Scale, entry.Scale, 1f);
+            rig.EmojiRig_Place.localEulerAngles = new Vector3(0f, 0f, entry.Rotation);
 
             ApplySprite(rig, entry.SpriteKey);
         }

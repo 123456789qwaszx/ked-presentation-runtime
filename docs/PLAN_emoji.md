@@ -185,6 +185,8 @@
 | | `Assets/Dialogue/emojis.json` · 데모 대본 | 견본 셋: `star`(머문다 — 등장 5 · 머묾 16 · 퇴장 6) · `question`(한 번, 22프레임) · `twinkle`(리그 셋, 한 번, 24프레임) |
 | | `Tests/EditMode/EmojiPlaybackTests.cs`(17개) | |
 
+**덧붙임(2026-11-11, 툴을 맞추기 전에)**: 리그에 **기본 배율 · 회전**을 더했다(`rigs[].scale` · `rotation` → `EmojiRig_Place`). 키는 그 위에서 1을 기준으로 잡는다 — 클립마다 크기를 다시 적지 않는다. 툴의 스킨이 갖던 "놓임(자리 · 크기 · 회전)"을 옮긴 것이다(스킨은 툴에서 걷는다). 견본 `emojis.json`을 그렇게 다시 적었다.
+
 **`EmojiMotionCommand`는 따로 두지 않았다** — 세우는 커맨드가 바로 재생한다(정한 것 9). 구간을 이름으로 골라 재생하는 커맨드가 필요해지면 그때 얹는다.
 
 **Unity 확인 목록**(아미야):
