@@ -1,0 +1,21 @@
+{
+  "schema": "emojis/1",
+  "emojis": [
+    { "name": "star", "offset": { "x": 170, "y": 60 },
+      "rigs": [
+        { "name": "body", "sprite": "star", "place": { "x": 0, "y": 0 } }
+      ] },
+
+    { "name": "question", "offset": { "x": -170, "y": 40 },
+      "rigs": [
+        { "name": "mark", "sprite": "question", "place": { "x": 0, "y": 0 } }
+      ] },
+
+    { "name": "twinkle", "offset": { "x": 0, "y": 150 },
+      "rigs": [
+        { "name": "left",   "sprite": "star", "place": { "x": -230, "y": -40 } },
+        { "name": "center", "sprite": "star", "place": { "x": 0,    "y": 60 } },
+        { "name": "right",  "sprite": "star", "place": { "x": 230,  "y": -40 } }
+      ] }
+  ]
+}

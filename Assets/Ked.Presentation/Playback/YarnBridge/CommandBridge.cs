@@ -38,6 +38,7 @@ public sealed partial class YarnCommandBridge
         BindControl(runner);
 
         BindCharRigSetup(runner);
+        BindEmoji(runner);
         BindCharRigPresentation(runner);
         BindCharRigStaging(runner);
         BindCharRigComposition(runner);
@@ -69,6 +70,15 @@ public sealed partial class YarnCommandBridge
             "surface_reset", ResetSurfaceLayout);
     }
     
+    private void BindEmoji(DialogueRunner runner)
+    {
+        runner.AddCommandHandler<string, string>(
+            "emoji", EnqueueSetEmojiSpec);
+
+        runner.AddCommandHandler<string, string>(
+            "emoji_off", EnqueueClearEmojiSpec);
+    }
+
     private void BindCharRigSetup(DialogueRunner runner)
     {
         runner.AddCommandHandler<string, string, string>(

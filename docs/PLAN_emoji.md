@@ -5,7 +5,7 @@
 | 브랜치 | `ked-presentation-runtime` · `feat/emojiRigSchema`(`dev` @ `50537b0e`에서 갈랐다) |
 | 정의 | [emoji-rig.md](emoji-rig.md) — 이모지 리그가 무엇인가. 이 문서는 **무엇을 어떤 순서로 만드는가**만 적는다 |
 | 결정 | 아미야(소유자) 2026-11-11: 과제 셋으로 나눈다. 과제마다 소유자의 지시로 시작한다 |
-| 상태 | **과제 1 — 코드와 테스트를 썼다(2026-11-11). Unity 확인 대기**(§3의 확인 목록). 과제 2 시작 전 |
+| 상태 | 과제 1 끝(`4b2478a6`). **과제 2 — 코드와 테스트를 썼다(2026-11-11). Unity 확인 대기**(§4의 확인 목록). 과제 3 시작 전 |
 | 툴 | `ked-motion-tool-characterRig` — 런타임과 같은 세션이 맡는다. 과제 3에서 맞춘다 |
 
 ## 0. 한 문장
@@ -102,7 +102,41 @@
 5. 스프라이트를 가리키는 법 — 키와 그것을 푸는 곳(초상의 `PortraitResolver` 같은 것).
 6. 인물의 페이드 · 퇴장과 이모지.
 
-**Unity 확인 목록**(끝날 때 채운다).
+**정한 것(소유자, 2026-11-11)**
+
+| | 무엇 | 결정 |
+|---|---|---|
+| 1 | 대본의 모양 | `<<emoji 누구 이름>>` · `<<emoji_off 누구 이름>>`. `emoji_off`에 이름이 없으면 그 슬롯의 이모지 전부 |
+| 2 | RootSpace 값의 집 | 기본값 하나로 시작한다 — 조립 루트의 칸(`emojiDefaultRootSpace`, 발에서 잰 px). 캐릭터 + 바리에이션별 표는 뒤에 붙인다 |
+| 3 | 좌우 | 과제 2에서 다루지 않는다 — RootSpace 표를 만들 때 함께 정한다 |
+| 4 | 건너뛰기 · 되감기 | 건너뛸 때도 세우고 내린다(`ExecuteEvenIfSkipping`). 되감기는 무대를 비우고 다시 달리므로 따로 할 일이 없다 — 이모지는 슬롯의 리그 밑에 살아 함께 부서진다 |
+| 5 | 스프라이트 | `Resources/Emojis/{키}`(그림 팝업과 같은 해석기). 못 찾으면 이미지를 끈다 |
+| 6 | 인물의 페이드 · 퇴장 | 묶지 않는다. 이모지는 `emoji_off`와 슬롯의 재선언으로만 사라진다 |
+
+**한 것(2026-11-11)** — Unity 없이 썼다. 코어(정의 · 폴드)는 저장소 밖에서 따로 컴파일해 폴드 규칙을 돌려 봤다(통과). Unity 쪽은 아래 목록으로 확인한다.
+
+| | 파일 | |
+|---|---|---|
+| 2-1 | `Stage/Emoji/Commands/EmojiRigCommandBase.cs` | `EmojiRigCommandSpecBase`(대상 · 이모지 이름) · `EmojiRigTargets`(슬롯과 접두 풀기) |
+| 2-2 | `Core/Emoji/EmojiDefinition.cs` · `Core/Tuning/EmojisFileDto.cs` · `Stage/Emoji/EmojiLibrary.cs` · `Assets/Dialogue/emojis.json` | 정의의 최소형(`emojis/1`) — 이름 · 오프셋 · 리그들(이름 · 스프라이트 · 기본 자리). 규칙(`EmojiRules`)과 읽기(`EmojiDefinitionLoader`)는 코어에 있다 — 툴이 같은 것을 쓴다 |
+| 2-3 | `Stage/Emoji/Commands/SetEmojiCommand.cs` · `ClearEmojiCommand.cs` | 세우기 · 내리기 |
+| 2-4 | `Stage/Emoji/EmojiRigRegistry.cs` · `Stage/PresentationStage.cs` | 장부(`stage.emojis`). 슬롯이 부서진 것을 통보받지 않는다 — 읽고 쓸 때 "지금 그 슬롯 밑에 선 것"만 남긴다. 캐릭터 쪽 코드는 고치지 않았다 |
+| 2-5 | `Stage/Emoji/Commands/EmojiRigCommandFactory.cs` · `SampleBootstrap`(칸 둘: `emojisJson` · `emojiDefaultRootSpace`) | |
+| 2-6 | `Stage/Grammar/StageCommandParser.Emoji.cs` · 표 · `CommandBridge`(`BindEmoji` · `Forward`) · `CommandRoleGate` | |
+| 2-7 | `Core/Reduce/StageReducer.Emoji.cs` · `StageState`(이모지 축) · `StageReducerTuning.Emojis` · 하네스 | **슬롯마다 서 있는 이모지의 이름만 접는다**(컷인 · 그림 팝업처럼 끝 상태의 기록이다). 노드는 리그 노드 트리에 넣지 않았다 — 트리에는 노드를 빼는 길이 없고(`emoji_off`), 지금 이모지는 정의의 값 그대로 서 있을 뿐이다. 움직임의 끝값은 과제 3에서 접는다. 하네스의 캡처는 캐릭터 스키마의 노드만 읽으므로 이모지 노드 때문에 어긋나지 않는다 |
+| 2-8 | 데모 대본(`presentation_demo_Demo_Presentation.yarn`의 끝 — 줄 넷) · `Resources/Emojis/star` · `question` · `Tests/EditMode/EmojiCommandTests.cs`(14개) | 견본 그림은 `Samples/Content/Art/Emoji`의 둘을 복사했다(256×256 — 크다. 크기를 줄이는 것은 과제 3의 배율 키다) |
+
+**Unity 확인 목록**(아미야):
+
+1. 컴파일 오류 0. 새 파일의 `.meta`는 Unity가 만든다(견본 그림 둘의 `.meta`는 원본의 임포트 설정을 복사하고 GUID만 바꿨다).
+2. EditMode 테스트 — `EmojiCommandTests` 14개, 그리고 기존 것이 그대로 통과한다.
+3. 예제 씬을 재생해 데모 대본의 끝(그림 팝업 다음)까지 간다:
+   - `<<emoji s1 star>>` — 하린의 머리 곁에 별이 선다. 하이어라키: `s1_CharSlot_Scale › s1_Emoji_Locator › s1_star_Emoji_Offset › s1_star_body_EmojiRig_Place › …_EmojiRig_Image`.
+   - `<<emoji s2 question>>` · `<<emoji s1 twinkle>>` — 시구레에게 물음표, 하린에게 별 셋이 더 선다(로케이터는 슬롯에 하나).
+   - `<<emoji_off s1 star>>` — 별 하나만 내려간다. `<<emoji_off s1>>` · `<<emoji_off s2>>` — 전부 내려간다.
+   - **자리가 어색하면** `[VNAppBootstrap] › 작가 자산 › Emoji Default Root Space`(기본 0, 800)와 `Assets/Dialogue/emojis.json`의 `offset`을 고친다.
+4. 그 구간에서 건너뛰기와 되감기(R) — 되감은 줄의 이모지 상태가 맞는가(세운 뒤의 줄로 돌아가면 서 있고, 내린 뒤의 줄이면 없다).
+5. 등가성 하네스를 켜고 재생 — 이모지 줄이 Unhandled로 남지 않는다.
 
 ## 5. 과제 3 — `EmojiMotionCommand`와 그 기반, 그리고 툴
 
@@ -131,6 +165,6 @@
 
 | 과제 | 상태 | 커밋 |
 |---|---|---|
-| 1 | 코드와 테스트 작성 — Unity 확인 대기 | |
-| 2 | 시작 전 | |
+| 1 | 끝 — 소유자가 Unity에서 확인하고 덤프를 다시 냈다 | `4b2478a6` |
+| 2 | 코드와 테스트 작성 — Unity 확인 대기 | |
 | 3 | 시작 전 | |

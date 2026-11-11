@@ -66,3 +66,17 @@ CharSlot_Scale               (캐릭터 리그 — 이 스키마의 것이 아�
 2. `EmojiRigRefs` / `EmojiRefs`의 필드와 `EmojiRigBuilder.Build`
 3. 덤프를 다시 낸다(`Ked / U12 / Export Presentation Tuning Dump`) — 안 하면 `RigSchemaTreeUnityParityTests`가 낡은 덤프를 신고한다
 4. `EmojiRigBuilderTests` · `RigSchemaTreeUnityParityTests`
+
+## 6. 대본과 수명
+
+```
+<<emoji 누구 이름>>        정의(emojis.json)대로 세운다. 같은 이름이 서 있으면 부수고 새로 세운다
+<<emoji_off 누구 이름>>    내린다. 이름이 없으면 그 슬롯의 이모지 전부
+```
+
+- **정의는 `emojis.json`**(`emojis/1`) — 이름 · 오프셋 · 리그들(이름 · 스프라이트 키 · 기본 자리). 읽는 규칙은 코어의 `EmojiDefinitionLoader` · `EmojiRules`다. 스프라이트는 `Resources/Emojis/{키}`.
+- **세울 때 넣는 값**: `Emoji_Locator` ← RootSpace(지금은 기본값 하나), `Emoji_Offset` ← 정의의 오프셋, `EmojiRig_Place` ← 리그의 기본 자리, `EmojiRig_Image` ← 스프라이트(크기는 원본 픽셀).
+- **이모지는 슬롯의 리그 밑에 산다.** 슬롯이 다시 선언되거나 무대가 비워지면(되감기) 리그와 함께 부서진다. `EmojiRigRegistry`는 그것을 통보받지 않는다 — 읽고 쓸 때마다 "지금 그 슬롯의 `CharSlot_Scale` 밑에 선 것"만 남긴다. 그래서 캐릭터 쪽 코드가 이모지를 모른다.
+- **인물의 페이드와 묶지 않는다.** 인물이 `fade_out`해도 이모지는 남는다.
+- **건너뛸 때도 세우고 내린다**(`ExecuteEvenIfSkipping`).
+- **폴드**: 슬롯마다 서 있는 이모지의 이름(`StageState.EmojisOf`). 노드는 리그 노드 트리에 넣지 않는다 — 움직임의 끝값은 모션이 설 때 접는다.

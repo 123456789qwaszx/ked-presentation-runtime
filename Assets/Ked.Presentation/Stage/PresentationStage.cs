@@ -8,6 +8,9 @@ public sealed class PresentationStage
 
     public readonly CharacterRoleAliasRegistry roleAliases = new();
 
+    // 슬롯에 딸린 이모지의 장부. 오브젝트는 슬롯의 리그 밑에 산다 — 리그가 부서지면 함께 부서진다.
+    public readonly EmojiRigRegistry emojis = new();
+
     // 무대 위 모든 리그를 파괴하고 cast를 비운다.
     // session 경계(롤백 재시작, 에피소드 종료)에서만 호출.
     public void Clear()
@@ -15,5 +18,6 @@ public sealed class PresentationStage
         roleAliases.Clear();
         castRegistry.Clear();
         characterRigs.Clear();
+        emojis.Clear();
     }
 }

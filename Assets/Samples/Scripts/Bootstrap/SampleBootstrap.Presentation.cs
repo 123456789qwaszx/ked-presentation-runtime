@@ -15,6 +15,7 @@ public partial class SampleBootstrap
         System.IO.Path.Combine(Application.dataPath, "Dialogue");
 
     private MotionLibrary _motions = MotionLibrary.Empty;
+    private EmojiLibrary _emojis = EmojiLibrary.Empty;
 
     private readonly PlaybackRuntimeState _playbackState = new();
 
@@ -144,6 +145,15 @@ public partial class SampleBootstrap
             characterDepthTuning,
             _rigBlur);
 
+        // Emoji — 슬롯에 딸려 서는 작은 연출. 캐릭터를 모른다: 설 자리(CharSlot_Scale)만 받는다.
+        _emojis = LoadEmojis();
+
+        EmojiRigCommandFactory emojiFactory = new(
+            _presentationStage,
+            new EmojiRigBuilder(),
+            _emojis,
+            emojiDefaultRootSpace);
+
         ShotResponseCommandFactory presentationShotFactory = new(
             _presentationStage, _presentationResponseRig, characterFocusTuningDb);
 
@@ -167,6 +177,7 @@ public partial class SampleBootstrap
 
         CompositeCommandFactory factory = new(
             charRigFactory,
+            emojiFactory,
             presentationShotFactory,
             presentationControlFactory,
             audioFactory,
@@ -327,6 +338,7 @@ public partial class SampleBootstrap
             _stageRigs,
             _dialogueAdvanceDispatcher,
             _motions,
+            _emojis,
             DialogueFolder);
     }
 
@@ -364,6 +376,15 @@ public partial class SampleBootstrap
 
         string json = ReadBundleFileEditorOnly(MotionLibrary.BundleFileName);
         return json == null ? MotionLibrary.Empty : MotionLibrary.Parse(json, MotionLibrary.BundleFileName, nodeIds);
+    }
+
+    private EmojiLibrary LoadEmojis()
+    {
+        if (emojisJson != null)
+            return EmojiLibrary.Parse(emojisJson.text, emojisJson.name);
+
+        string json = ReadBundleFileEditorOnly(EmojiLibrary.BundleFileName);
+        return json == null ? EmojiLibrary.Empty : EmojiLibrary.Parse(json, EmojiLibrary.BundleFileName);
     }
 
     /// <summary>

@@ -48,6 +48,9 @@ namespace Ked.Presentation.Core
             if (state.HasSlot(slotKey))
             {
                 ResetSlotToSchema(state, slotKey, rig);
+
+                // 이모지는 슬롯에 딸린 것이다 — 옛 리그가 부서지면 그 밑의 이모지도 함께 사라진다.
+                state.ClearEmojis(slotKey);
             }
             else
             {

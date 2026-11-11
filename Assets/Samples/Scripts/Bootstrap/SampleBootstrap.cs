@@ -129,6 +129,13 @@ public partial class SampleBootstrap : MonoBehaviour, IRigPrefabSource
     [Tooltip("대본 번들 곁의 motions.json(Ked/Motion/Export motions.json으로 낸 것). 비우면 에디터에서만 Assets/Dialogue/motions.json을 읽는다 — 빌드에서는 읽지 않는다.")]
     [SerializeField] private TextAsset motionsJson;
 
+    [Tooltip("대본 번들 곁의 emojis.json — 이모지의 구성(이름 · 오프셋 · 리그들). 비우면 에디터에서만 Assets/Dialogue/emojis.json을 읽는다.")]
+    [SerializeField] private TextAsset emojisJson;
+
+    [Tooltip("이모지 로케이터의 자리(RootSpace) — 인물의 발(슬롯의 아래 가운데)에서 잰 px, y 위. " +
+             "캐릭터 + 바리에이션별 표가 서기 전의 기본값 하나다. 머리 높이쯤으로 둔다.")]
+    [SerializeField] private Vector2 emojiDefaultRootSpace = new(0f, 800f);
+
     [Header("등가성 하네스")]
     [Tooltip("켜면 재생 중 라인마다 (코어 리듀서로 접은 상태) vs (실제 무대)를 비교하고 " +
              "종료 시 EquivalenceReports/*.json을 남긴다. 판정 전용 — 재생에 영향 없음.")]

@@ -54,6 +54,7 @@ public sealed class StageEquivalenceHarness : MonoBehaviour
     private PresentationScopeSession _session;
     private PresentationStage _stage;
     private MotionLibrary _motions = MotionLibrary.Empty;
+    private EmojiLibrary _emojis = EmojiLibrary.Empty;
     private PresentationShotResponseSystem _shotSystem;
     private StageRigRegistry _stageRigs;
     private LayerProfileCurve _layerProfile;
@@ -117,9 +118,11 @@ public sealed class StageEquivalenceHarness : MonoBehaviour
         StageRigRegistry stageRigs,
         DialogueAdvanceDispatcher dispatcher,
         MotionLibrary motions,
+        EmojiLibrary emojis,
         string dialogueFolder)
     {
         _motions = motions ?? MotionLibrary.Empty;
+        _emojis = emojis ?? EmojiLibrary.Empty;
         _rollbackHistory = rollbackHistory;
         _dialogueRunner = dialogueRunner;
         _session = session;
@@ -198,6 +201,9 @@ public sealed class StageEquivalenceHarness : MonoBehaviour
 
             // 재생이 읽은 것과 같은 클립 — 폴드가 다른 파일을 보면 대조가 거짓이다.
             Motions = _motions.Clips,
+
+            // 재생이 읽은 것과 같은 이모지 정의.
+            Emojis = _emojis.Definitions,
 
             BackgroundDimensions = LoadBackgroundDimensions(tuningDir),
 

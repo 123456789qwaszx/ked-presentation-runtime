@@ -55,6 +55,11 @@ public sealed class CommandRoleGate
                 roleKey = charRig.roleKey;
                 return true;
 
+            // 이모지는 슬롯에 딸려 선다 — 대상이 슬롯으로 풀려야 한다.
+            case EmojiRigCommandSpecBase emoji:
+                roleKey = emoji.roleKey;
+                return true;
+
             case CastCharacterCommandSpec cast:
                 roleKey = cast.roleKey;
                 return true;

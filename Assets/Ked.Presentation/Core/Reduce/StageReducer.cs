@@ -45,6 +45,12 @@ namespace Ked.Presentation.Core
         /// </summary>
         public IReadOnlyDictionary<string, MotionClip> Motions;
 
+        /// <summary>
+        /// 이모지 정의(emojis.json) — 재생이 읽은 것과 같은 것. 없으면 이모지 0개다:
+        /// 런타임이 모르는 이모지를 경고하고 건너뛰듯, 폴드는 Unhandled로 남긴다.
+        /// </summary>
+        public IReadOnlyDictionary<string, EmojiDefinition> Emojis;
+
         /// <summary>background-dimensions.json — 배경(bg_*) 사이징의 그림 크기. 없으면 그 축만 Unhandled.</summary>
         public BackgroundDimensionsFileDto BackgroundDimensions;
 
@@ -234,6 +240,10 @@ namespace Ked.Presentation.Core
                 // 그림 팝업 — 끝 상태만(StageReducer.Popup). 파서 표: popup(무대="stage01", 그림, x="0u", y="0u", 배율="1") · popup_close(무대="stage01")
                 case "popup":       return ApplyPopupOpen(state, cmd, tuning, out reason);
                 case "popup_close": return ApplyPopupClose(state, cmd, out reason);
+
+                // 이모지 — 슬롯에 딸려 서고 내린다(StageReducer.Emoji). 파서 표: emoji(누구, 이름) · emoji_off(누구, 이름="")
+                case "emoji":     return ApplyEmoji(state, cmd, tuning, out reason);
+                case "emoji_off": return ApplyEmojiOff(state, cmd, out reason);
 
                 default:
                     // 시간만 쓰는 커맨드는 못 접는 게 아니라 접을 것이 없다 — 아래 참조.

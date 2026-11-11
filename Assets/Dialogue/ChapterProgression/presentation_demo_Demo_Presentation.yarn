@@ -192,6 +192,21 @@ rrr
 <<popup_close stage02>>
 하린: 닫으면 막과 그림이 같이 사라져.
 
+// ── 이모지 (docs/emoji-rig.md) — 슬롯에 딸려 서는 작은 연출. 정의는 emojis.json. 아직 움직이지 않는다(과제 2) ──
+<<emoji s1 star>>
+하린: 이모지야. 내 머리 곁에 떠 있어.
+
+<<emoji s2 question>>
+<<emoji s1 twinkle>>
+시구레: 한 사람에게 여럿이 설 수 있고, 그림 여러 장으로 된 이모지도 있어요.
+
+<<emoji_off s1 star>>
+하린: 이름을 대면 그것만 내려가.
+
+<<emoji_off s1>>
+<<emoji_off s2>>
+하린: 이름이 없으면 전부 내려가.
+
 시구레: 여기까지예요. 되감기(R)로 아무 줄이나 돌아갈 수 있고, 타이틀의 ‘이어하기’로 다시 올 수 있어요. #line:ln_6mq0fm7a
 
 <<fade_out s3 12fr>>

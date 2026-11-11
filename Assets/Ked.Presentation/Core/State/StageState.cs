@@ -108,6 +108,11 @@ namespace Ked.Presentation.Core
         // 그림 팝업 축: 덮는 무대마다 팝업 끝 상태(열림/닫힘 · 그림 · 자리 · 배율). 페이드 도중은 접지 않는다(docs/PLAN_popup.md §7).
         private readonly Dictionary<string, PopupState> _popups;
 
+        // 이모지 축: 슬롯마다 서 있는 이모지의 이름(세운 순서). 이모지는 슬롯에 딸린 것이다 —
+        // 슬롯이 다시 서면 함께 사라진다. 노드는 접지 않는다(docs/PLAN_emoji.md §4의 2-7): 과제 2의 이모지는
+        // 정의의 값 그대로 서 있을 뿐이고, 움직임의 끝값은 과제 3에서 접는다.
+        private readonly Dictionary<string, List<string>> _emojisBySlot;
+
         public IReadOnlyList<UnhandledCommand> Unhandled => _unhandled;
 
         /// <summary>무대 키 → 컷인 끝 상태. 한 번도 열지 않은 무대는 없다.</summary>
@@ -133,6 +138,7 @@ namespace Ked.Presentation.Core
             _variantBySlot = new Dictionary<string, string>(StringComparer.Ordinal);
             _cutIns = new Dictionary<string, CutInState>(StringComparer.Ordinal);
             _popups = new Dictionary<string, PopupState>(StringComparer.Ordinal);
+            _emojisBySlot = new Dictionary<string, List<string>>(StringComparer.Ordinal);
         }
 
         private StageState(StageState source)
@@ -150,6 +156,62 @@ namespace Ked.Presentation.Core
             _variantBySlot = new Dictionary<string, string>(source._variantBySlot, StringComparer.Ordinal);
             _cutIns = new Dictionary<string, CutInState>(source._cutIns, StringComparer.Ordinal);
             _popups = new Dictionary<string, PopupState>(source._popups, StringComparer.Ordinal);
+
+            _emojisBySlot = new Dictionary<string, List<string>>(StringComparer.Ordinal);
+
+            foreach (KeyValuePair<string, List<string>> pair in source._emojisBySlot)
+                _emojisBySlot[pair.Key] = new List<string>(pair.Value);
+        }
+
+        // ── 이모지 ───────────────────────────────────────────────────
+
+        private static readonly IReadOnlyList<string> NoEmojis = Array.Empty<string>();
+
+        /// <summary>슬롯에 서 있는 이모지의 이름들 — 세운 순서. 없으면 빈 목록.</summary>
+        public IReadOnlyList<string> EmojisOf(string slotKey)
+            => slotKey != null && _emojisBySlot.TryGetValue(slotKey, out List<string> names) ? names : NoEmojis;
+
+        public bool HasEmoji(string slotKey, string emojiName)
+            => slotKey != null && _emojisBySlot.TryGetValue(slotKey, out List<string> names) && names.Contains(emojiName);
+
+        /// <summary>emoji — 슬롯에 이모지를 세운다. 같은 이름이 서 있으면 새로 선 것으로 친다(맨 뒤로).</summary>
+        public void AddEmoji(string slotKey, string emojiName)
+        {
+            if (string.IsNullOrEmpty(slotKey))
+                throw new ArgumentException("슬롯 키가 비어 있다.", nameof(slotKey));
+
+            if (string.IsNullOrEmpty(emojiName))
+                throw new ArgumentException("이모지 이름이 비어 있다.", nameof(emojiName));
+
+            if (!_emojisBySlot.TryGetValue(slotKey, out List<string> names))
+            {
+                names = new List<string>();
+                _emojisBySlot[slotKey] = names;
+            }
+
+            names.Remove(emojiName);
+            names.Add(emojiName);
+        }
+
+        /// <summary>emoji_off — 이름 하나를 내린다. 서 있지 않았으면 false.</summary>
+        public bool RemoveEmoji(string slotKey, string emojiName)
+        {
+            if (slotKey == null || !_emojisBySlot.TryGetValue(slotKey, out List<string> names))
+                return false;
+
+            bool removed = names.Remove(emojiName);
+
+            if (names.Count == 0)
+                _emojisBySlot.Remove(slotKey);
+
+            return removed;
+        }
+
+        /// <summary>슬롯의 이모지를 전부 내린다 — 이름 없는 emoji_off, 그리고 슬롯의 재선언.</summary>
+        public void ClearEmojis(string slotKey)
+        {
+            if (slotKey != null)
+                _emojisBySlot.Remove(slotKey);
         }
 
         // ── 컷인 ─────────────────────────────────────────────────────

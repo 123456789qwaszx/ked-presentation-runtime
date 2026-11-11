@@ -1,0 +1,69 @@
+namespace Ked.Presentation.Core
+{
+    /// <summary>
+    /// emoji · emoji_off — 슬롯에 딸린 이모지가 서 있는가(docs/PLAN_emoji.md §4).
+    ///
+    /// 런타임(SetEmojiCommand · ClearEmojiCommand)과 같은 규칙으로 접는다:
+    ///   · 대상은 슬롯으로 풀려야 한다(slot/cast/actor 선행).
+    ///   · 정의(emojis.json)에 없는 이모지는 런타임이 경고하고 건너뛴다 — 여기서는 Unhandled.
+    ///   · 서 있는 이모지를 다시 부르면 부수고 새로 세운다 — 접으면 "서 있다" 그대로다(맨 뒤로 간다).
+    ///   · emoji_off에 이름이 없으면 그 슬롯의 이모지를 전부 내린다(없어도 된다).
+    ///     이름이 있는데 서 있지 않으면 런타임은 경고하고 건너뛴다 — 여기서는 Unhandled.
+    ///   · 슬롯을 다시 선언하면 함께 사라진다(StageReducer.Slot.SpawnSlot).
+    ///   · 인물의 fade와는 묶지 않는다 — 내리는 것은 emoji_off와 슬롯의 재선언뿐이다.
+    ///
+    /// 이모지의 노드는 리그 노드 트리에 넣지 않는다 — 지금은 정의의 값 그대로 서 있을 뿐이다.
+    /// 움직임의 끝값은 과제 3에서 접는다.
+    /// </summary>
+    public static partial class StageReducer
+    {
+        private static bool ApplyEmoji(
+            StageState state, in StageCommand cmd, StageReducerTuning tuning, out string reason)
+        {
+            if (!TryGetSpawnedSlot(state, cmd, out string slotKey, out reason))
+                return false;
+
+            string emojiName = (cmd.Arg(1) ?? "").Trim();
+
+            if (emojiName.Length == 0)
+            {
+                reason = "이모지 이름 인자가 없다";
+                return false;
+            }
+
+            if (tuning.Emojis == null || !tuning.Emojis.ContainsKey(emojiName))
+            {
+                reason = $"이모지 '{emojiName}'이 정의(emojis.json)에 없다";
+                return false;
+            }
+
+            state.AddEmoji(slotKey, emojiName);
+            reason = null;
+            return true;
+        }
+
+        private static bool ApplyEmojiOff(StageState state, in StageCommand cmd, out string reason)
+        {
+            if (!TryGetSpawnedSlot(state, cmd, out string slotKey, out reason))
+                return false;
+
+            string emojiName = (cmd.Arg(1) ?? "").Trim();
+
+            if (emojiName.Length == 0)
+            {
+                state.ClearEmojis(slotKey);
+                reason = null;
+                return true;
+            }
+
+            if (!state.RemoveEmoji(slotKey, emojiName))
+            {
+                reason = $"슬롯 '{slotKey}'에 이모지 '{emojiName}'이 서 있지 않다";
+                return false;
+            }
+
+            reason = null;
+            return true;
+        }
+    }
+}
