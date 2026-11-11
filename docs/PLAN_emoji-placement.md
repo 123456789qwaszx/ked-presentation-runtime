@@ -5,7 +5,7 @@
 | 브랜치 | `ked-presentation-runtime` · `feat/emojiRigSchema` |
 | 앞 계획 | [PLAN_emoji.md](PLAN_emoji.md) — 과제 1~3, 닫았다. 정의는 [emoji-rig.md](emoji-rig.md), 형식은 [emoji-format.md](emoji-format.md) |
 | 무엇 | 과제 1~3에서 **미뤄 둔 결정 셋**을 닫는 계획. 이 문서는 "무엇을 정해야 하는가 · 제안 · 정한 뒤의 작업"을 적는다 |
-| 상태 | **계획 초안 — 소유자의 결정 대기.** 결정마다 "정할 것"을 소유자가 닫으면 그 결정의 작업을 지시로 시작한다 |
+| 상태 | **결정 1을 썼다(2026-11-11) — Unity 확인 대기**(§2의 확인 목록). 결정 3은 닫았다 — 하지 않는다(실례가 없다, §4). 결정 2는 결정 1이 도는 것을 본 뒤에 "정할 것"을 닫고 지시로 시작한다 |
 
 ## 0. 한 문장
 
@@ -50,6 +50,39 @@
 | 1-F | 문서 — [emoji-rig.md](emoji-rig.md) §5 · §8의 5를 닫는다 | |
 
 **하지 않는 것**: `CharacterRigSchema`와 캐릭터 커맨드를 고치는 것. 코어의 접기를 넓히는 것(접힌 상태는 이모지의 이름만 든다 — 자리는 무대에서 다시 풀린다).
+
+### 정한 것 (소유자, 2026-11-11)
+
+1-1 ~ 1-6을 **제안대로** 닫았다. 재는 도구(1-5 · 1-D)는 **뒤로 미룬다** — 표와 리졸버가 먼저 서야 도구가 무엇을 적는지 분명하다. 그동안은 표를 인스펙터에서 손으로 채운다.
+
+### 한 것 (2026-11-11) — 1-A · 1-B · 1-C · 1-E · 1-F
+
+Unity 없이 썼다. 아래 목록으로 확인한다.
+
+| | 파일 | |
+|---|---|---|
+| 1-A | `Stage/Emoji/EmojiLocatorTuningDBSO.cs` | 표 — 항목은 `character` · `variant`(비면 모든 포즈) · `position`. 찾는 순서는 포즈 항목 → 캐릭터 항목 → 없다. 키는 초상과 같은 정규화 |
+| 1-A · 1-B | `Stage/Emoji/EmojiLocatorSystem.cs` | 자리를 푸는 곳 하나 — `Resolve`(슬롯의 캐릭터 + 포즈 → 자리, 없으면 기본값) · `Place`(놓고 기억한다) · `Refresh`(다시 푼다 — 달라진 것만 옮긴다, 부서진 것은 잊는다) |
+| 1-B | `SetEmojiCommand` · `EmojiRigCommandFactory` · `EmojiPlaybackSystem` · `SampleBootstrap`(칸 하나: `emojiLocatorTuningDb`) | 커맨드는 기본값 대신 `Place`를 부른다. **`EmojiPlaybackSystem.Tick`이 `Refresh`를 부른다** — 호스트가 프레임마다 부를 것이 하나로 남는다. `emojiDefaultRootSpace`는 표에 없을 때의 값으로 남았다 |
+| 1-C | `Editor/PresentationTuningExporter.cs` · `ExportedTuning/schema.md` | 덤프 `presets/emoji-locator.json`. 에셋의 자리는 `Assets/Ked.Presentation/Stage/Presets/EmojiLocatorTuningDB.asset` |
+| 1-E | `Tests/EditMode/EmojiLocatorTests.cs`(10개) | 찾는 순서 · 없는 캐릭터와 캐스팅 전의 기본값 · 포즈와 캐릭터가 바뀌면 옮겨진다 · 부서진 로케이터를 잊는다 · `Tick`이 다시 푼다 |
+| 1-F | [emoji-rig.md](emoji-rig.md) §5 · §8의 5 | |
+
+- **캐릭터 쪽 코드는 한 줄도 고치지 않았다.** 이모지 쪽이 `CastRegistry`(`TryPeekCharacter` · `TryGetVariant`)를 읽는다.
+- **되감기 · 건너뛰기는 따로 한 것이 없다.** 되감으면 무대를 비우고 줄을 다시 달린다 — 포즈 커맨드가 `CastRegistry`를 다시 채우고, 이모지가 설 때와 그 뒤의 `Tick`이 그 값으로 자리를 푼다.
+- 포즈가 바뀌면 로케이터는 **그 자리에서 바로** 옮겨진다(트윈 없음, 1-4). 초상이 크로스페이드로 바뀌는 동안 이모지가 먼저 가 있는 것이 거슬리면 그때 다듬는다.
+- 표의 에셋은 만들지 않았다 — `.meta`의 GUID를 Unity가 정하므로 소유자가 메뉴로 만든다(확인 목록 2).
+
+**Unity 확인 목록**(아미야):
+
+1. 컴파일 오류 0. 새 파일 셋(`EmojiLocatorTuningDBSO.cs` · `EmojiLocatorSystem.cs` · `EmojiLocatorTests.cs`)의 `.meta`는 Unity가 만든다.
+2. 표를 만든다 — `Assets/Ked.Presentation/Stage/Presets`에서 `Create › CPS › Emoji › Tuning › Emoji Locator Tuning DB`, 이름은 `EmojiLocatorTuningDB`. `[VNAppBootstrap] › 작가 자산 › Emoji Locator Tuning Db`에 잇는다.
+3. EditMode 테스트 — `EmojiLocatorTests` 10개, 그리고 기존 이모지 테스트(`EmojiCommandTests` · `EmojiPlaybackTests` · `EmojiRigBuilderTests`)가 그대로 통과한다.
+4. 표가 빈 채로 예제 씬을 재생 — 전과 같은 자리(0, 800)에 뜬다.
+5. 표에 항목을 넣는다 — 데모 대본의 두 인물(하린 · 시구레)의 캐릭터 키로, `variant`는 비우고 `position`을 서로 다르게(예: (0, 700)과 (0, 950)). 재생하면 두 인물의 이모지가 다른 높이에 뜬다.
+6. 포즈 따라가기 — 한 인물에게 `variant`를 적은 항목을 더하고(그 인물이 대본에서 실제로 바꾸는 포즈 키), 별이 머무는 동안 포즈가 바뀌는 줄을 지난다. 로케이터(`s1_Emoji_Locator`)의 자리가 그 줄에서 바뀐다. 데모 대본에 그런 줄이 없으면 재생 중 인스펙터에서 표의 값을 고쳐 본다 — 다음 프레임에 옮겨진다.
+7. 그 구간에서 건너뛰기와 되감기(R) — 되감은 줄의 포즈에 맞는 자리에 선다.
+8. 메뉴 `Ked / U12 / Export Presentation Tuning Dump` — `ExportedTuning/presets/emoji-locator.json`이 생긴다. (2를 하기 전에는 `export-report.json`에 "프리셋 'emoji-locator'를 찾지 못했다"는 경고가 남는다.)
 
 ## 3. 결정 2 — 좌우
 
@@ -98,7 +131,15 @@
 | 3-2 | 어디서 묶는가 | **툴에서만** — 런타임과 형식은 그대로 둔다 | 런타임에게는 이름이 다른 이모지 둘일 뿐이다(`heart` · `heart_black`). [emoji-rig.md](emoji-rig.md) §2 "모션은 그 이모지의 것이다 · 한 덩어리로 나간다"가 그대로다. **다른 길**: 형식에 그림 묶음을 두고 대본이 고른다(`<<emoji s1 heart black>>`) — 대본의 셋째 칸을 좌우(2-5)와 다투고, 런타임이 합성을 하게 된다 |
 | 3-3 | 툴에서 어떻게 | ① **지금**: "이모지 복제 + 그림 갈기"(복제한 뒤에는 서로 남이다). ② **같은 수정을 두 번 하게 되면**: 딸린 이모지 — 원본을 가리키고 그림 바꿈표만 들며, 내보낼 때 온전한 이모지로 펼친다 | ①은 정의의 "재사용은 가져와서 고치는 것"과 같다. ②는 몇 년 쓰는 동안 원본의 키를 고쳤을 때 색 판이 따라오게 한다 — 필요가 보일 때 만든다 |
 
-### 작업 (정한 뒤)
+### 정한 것 (소유자, 2026-11-11)
+
+**하지 않는다.** 그림만 다른 이모지의 실례가 없다 — 소유자가 만들려는 목록에도, 원본(참고한 게임)에도 스프라이트만 갈아 끼운 이모지는 확인되지 않았다.
+
+- 런타임 · 형식 · 툴에 아무것도 더하지 않는다. 딸린 이모지(②)는 만들지 않는다.
+- 실례가 나오면 그때 이모지를 따로 하나 만든다(이름이 다른 이모지 — 3-2). 같은 수정을 두 번 하게 되는 일이 실제로 생기면 이 절을 다시 연다.
+- 반전 판은 결정 2가 푼다.
+
+### 작업 (다시 열게 되면)
 
 - ①이면: 툴에 복제 명령이 이미 있는지 보고, 없으면 얹는다(툴의 계획서에 한 단계). 런타임의 일은 없다.
 - ②이면: 툴의 모델(딸린 이모지 · 바꿈표) · 내보낼 때 펼치기 · 화면. 런타임의 일은 없다.
@@ -114,6 +155,6 @@
 
 | 결정 | 상태 | 커밋 |
 |---|---|---|
-| 1 자리 | 정할 것 1-1 ~ 1-6 — 소유자 대기 | |
-| 2 좌우 | 정할 것 2-1 ~ 2-6 — 소유자 대기 | |
-| 3 그림 묶음 | 정할 것 3-1 ~ 3-3 — 소유자 대기(3-1의 실례부터) | |
+| 1 자리 | 1-A · 1-B · 1-C · 1-E · 1-F 작성 — Unity 확인 대기. 1-D(재는 도구)는 뒤로 미뤘다 | |
+| 2 좌우 | 정할 것 2-1 ~ 2-6 — 결정 1을 확인한 뒤 소유자가 닫는다 | |
+| 3 그림 묶음 | **닫았다 — 하지 않는다**(실례 없음, 2026-11-11) | |

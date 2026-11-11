@@ -1,5 +1,4 @@
 using System;
-using UnityEngine;
 
 public sealed class EmojiRigCommandFactory : INodeCommandFactory
 {
@@ -7,23 +6,21 @@ public sealed class EmojiRigCommandFactory : INodeCommandFactory
     private readonly EmojiRigBuilder _builder;
     private readonly EmojiLibrary _library;
     private readonly EmojiPlaybackSystem _playback;
-    private readonly Vector2 _defaultRootSpace;
+    private readonly EmojiLocatorSystem _locators;
 
-    /// <param name="defaultRootSpace">
-    /// 로케이터의 자리 — 발(CharSlot_Scale의 아래 가운데)에서 잰 px, y 위. 캐릭터 + 바리에이션별 표가 서기 전의 기본값 하나다.
-    /// </param>
+    /// <param name="locators">로케이터의 자리를 푸는 곳 — 캐릭터 + 포즈별 표와 기본값을 든다.</param>
     public EmojiRigCommandFactory(
         PresentationStage stage,
         EmojiRigBuilder builder,
         EmojiLibrary library,
         EmojiPlaybackSystem playback,
-        Vector2 defaultRootSpace)
+        EmojiLocatorSystem locators)
     {
         _playback = playback ?? throw new ArgumentNullException(nameof(playback));
         _stage = stage ?? throw new ArgumentNullException(nameof(stage));
         _builder = builder ?? throw new ArgumentNullException(nameof(builder));
         _library = library ?? EmojiLibrary.Empty;
-        _defaultRootSpace = defaultRootSpace;
+        _locators = locators ?? throw new ArgumentNullException(nameof(locators));
     }
 
     public bool TryCreate(CommandSpecBase spec, out ISequenceCommand command)
@@ -32,7 +29,7 @@ public sealed class EmojiRigCommandFactory : INodeCommandFactory
         {
             null => null,
 
-            SetEmojiCommandSpec s => new SetEmojiCommand(_stage, _builder, _library, _playback, _defaultRootSpace, s),
+            SetEmojiCommandSpec s => new SetEmojiCommand(_stage, _builder, _library, _playback, _locators, s),
             ClearEmojiCommandSpec s => new ClearEmojiCommand(_stage, _playback, s),
 
             _ => null

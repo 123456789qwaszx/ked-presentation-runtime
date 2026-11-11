@@ -12,6 +12,7 @@ using UnityEngine;
 // 툴의 미리보기가 같은 둘을 쓴다. 여기서는 시간을 넘기고 값을 RectTransform에 옮기기만 한다.
 //
 // 호스트가 프레임마다 Tick을 부른다(예제: SampleBootstrap.Update).
+// Tick은 로케이터의 자리도 다시 푼다(EmojiLocatorSystem.Refresh) — 호스트가 부를 것이 하나이게.
 // 슬롯이 부서지면 이모지의 노드도 함께 부서진다 — 통보받지 않고, Tick에서 사라진 것을 잊는다.
 // ─────────────────────────────────────────────────────────────────────
 public sealed class EmojiPlaybackSystem
@@ -27,11 +28,14 @@ public sealed class EmojiPlaybackSystem
     }
 
     private readonly EmojiRigBuilder _builder;
+    private readonly EmojiLocatorSystem _locators;
     private readonly List<Entry> _entries = new();
 
-    public EmojiPlaybackSystem(EmojiRigBuilder builder)
+    /// <param name="locators">로케이터의 자리를 푸는 곳. 주면 Tick마다 다시 푼다(포즈가 바뀌면 따라간다).</param>
+    public EmojiPlaybackSystem(EmojiRigBuilder builder, EmojiLocatorSystem locators = null)
     {
         _builder = builder ?? throw new System.ArgumentNullException(nameof(builder));
+        _locators = locators;
     }
 
     /// <summary>재생 중인(서 있는) 이모지의 수.</summary>
@@ -110,6 +114,8 @@ public sealed class EmojiPlaybackSystem
     /// <summary>시간을 넘긴다(초). 끝난 이모지는 부순다.</summary>
     public void Tick(float deltaSeconds)
     {
+        _locators?.Refresh();
+
         for (int i = _entries.Count - 1; i >= 0; i--)
         {
             Entry entry = _entries[i];

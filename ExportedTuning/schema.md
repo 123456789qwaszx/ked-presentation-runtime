@@ -128,7 +128,7 @@ new RectSpace(capturedUnderParentSize, Vec2.Half)
 `m_*`는 무시한다.**
 
 에셋 참조 필드가 있으면 `{"instanceID": ...}`로 직렬화되어 이 덤프만으로는 해석할 수 없다.
-익스포터가 그런 파일을 만나면 경고한다. **현재 9개 파일 모두 `instanceID` 없음.**
+익스포터가 그런 파일을 만나면 경고한다. **현재 10개 파일 모두 `instanceID` 없음.**
 
 ### `depth.json` — `CharacterDepthTuningSO`
 
@@ -213,6 +213,20 @@ MonoBehaviour.entries[] : { key(캐릭터), offset(px, Vec2), visualScale(무단
 > `tyrant` = offset (−30, −800), scale 5.0 / `Amber` = offset (330, 0), scale 10.0.
 > 폴드에서 `Default(0/1)`로 가정하면 이 두 캐릭터가 나오는 장면이 어긋난다 —
 > **이 파일을 tuning으로 배선해야 한다.**
+
+### `emoji-locator.json` — `EmojiLocatorTuningDBSO`
+
+이모지 로케이터(`Emoji_Locator`)의 자리 — 캐릭터 + 포즈(변형)별 표다(재생 저장소 `docs/emoji-rig.md` §3 · `docs/PLAN_emoji-placement.md` §2).
+이모지는 초상의 형제라 `role-anchor`의 그림 보정을 받지 않는다 — 머리가 어디인가는 이 표가 따로 든다.
+
+```
+MonoBehaviour.entries[] : { character(캐릭터), variant(포즈 — 비면 그 캐릭터의 모든 포즈), position(px, Vec2) }
+```
+
+- `position`은 인물의 발(`CharSlot_Scale`의 아래 가운데)에서 잰 px, y 위.
+- 찾는 순서: `character` + `variant` → `character`(`variant`가 빈 항목) → 없다(호스트의 기본값 — 예제는 (0, 800)).
+- 키는 초상과 같은 정규화(앞뒤 공백을 떼고 소문자)를 거친다. 같은 키가 둘이면 나중 것이 이긴다.
+- 아직 코어가 소비하지 않는다 — 접힌 상태는 이모지의 이름만 들고, 자리는 무대에서 푼다. 툴도 읽지 않는다(이모지는 캐릭터 없이 만든다).
 
 ### `visual-focus.json` · `mask-motion.json` · `screen-flash/noise/vignette.json` · `surface-layout.json`
 

@@ -12,7 +12,7 @@ public sealed class SetEmojiCommandSpec : EmojiRigCommandSpecBase
 }
 
 // 슬롯을 풀고 · 정의를 찾고 · 빌더로 세우고 · 정의의 값을 넣고 · 재생을 맡긴다(EmojiPlaybackSystem).
-//   Emoji_Locator   ← RootSpace(지금은 기본값 하나 — 캐릭터 + 바리에이션별 표는 뒤에 붙는다)
+//   Emoji_Locator   ← RootSpace — 그 슬롯에 선 캐릭터 + 포즈의 자리(EmojiLocatorSystem). 포즈가 바뀌면 따라 옮겨진다
 //   Emoji_Offset    ← 정의의 offset
 //   EmojiRig_Place  ← 리그의 place · scale · rotation(기본 자리 · 배율 · 회전)
 //   EmojiRig_Image  ← 리그의 sprite(Resources/Emojis/{키}), 크기는 원본 픽셀
@@ -29,7 +29,7 @@ public sealed class SetEmojiCommand : CommandBase
     private readonly EmojiRigBuilder _builder;
     private readonly EmojiLibrary _library;
     private readonly EmojiPlaybackSystem _playback;
-    private readonly Vector2 _defaultRootSpace;
+    private readonly EmojiLocatorSystem _locators;
     private readonly SetEmojiCommandSpec _spec;
 
     // 건너뛸 때도 실행한다 — 머무는 이모지는 서 있어야 뒤의 emoji_off가 대상을 찾는다.
@@ -43,14 +43,14 @@ public sealed class SetEmojiCommand : CommandBase
         EmojiRigBuilder builder,
         EmojiLibrary library,
         EmojiPlaybackSystem playback,
-        Vector2 defaultRootSpace,
+        EmojiLocatorSystem locators,
         SetEmojiCommandSpec spec)
     {
         _stage = stage;
         _builder = builder;
         _library = library;
         _playback = playback;
-        _defaultRootSpace = defaultRootSpace;
+        _locators = locators;
         _spec = spec;
     }
 
@@ -74,7 +74,7 @@ public sealed class SetEmojiCommand : CommandBase
         EmojiRigTargets.Resolve(_stage, _spec.roleKey, out string slotKey, out RectTransform charSlotScale, out string rolePrefix);
 
         RectTransform locator = _builder.EnsureLocator(charSlotScale, rolePrefix);
-        locator.anchoredPosition = _defaultRootSpace;
+        _locators.Place(slotKey, locator);
 
         string[] rigNames = new string[definition.Rigs.Count];
 

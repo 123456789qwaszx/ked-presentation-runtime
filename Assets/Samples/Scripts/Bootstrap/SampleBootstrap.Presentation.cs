@@ -152,14 +152,15 @@ public partial class SampleBootstrap
         _emojis = LoadEmojis();
 
         EmojiRigBuilder emojiRigBuilder = new();
-        _emojiPlayback = new EmojiPlaybackSystem(emojiRigBuilder);
+        EmojiLocatorSystem emojiLocators = new(_presentationStage, emojiLocatorTuningDb, emojiDefaultRootSpace);
+        _emojiPlayback = new EmojiPlaybackSystem(emojiRigBuilder, emojiLocators);
 
         EmojiRigCommandFactory emojiFactory = new(
             _presentationStage,
             emojiRigBuilder,
             _emojis,
             _emojiPlayback,
-            emojiDefaultRootSpace);
+            emojiLocators);
 
         ShotResponseCommandFactory presentationShotFactory = new(
             _presentationStage, _presentationResponseRig, characterFocusTuningDb);

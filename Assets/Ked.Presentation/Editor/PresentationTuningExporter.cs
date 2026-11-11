@@ -49,6 +49,7 @@ public static class PresentationTuningExporter
         ("depth",           "Assets/Ked.Presentation/Stage/Presets/CharacterDepthTuning.asset"),
         ("focus-tuning",    "Assets/Ked.Presentation/Stage/Presets/CharacterFocusTuningDB.asset"),
         ("role-anchor",     "Assets/Ked.Presentation/Stage/Presets/RoleAnchorTuningDB.asset"),
+        ("emoji-locator",   "Assets/Ked.Presentation/Stage/Presets/EmojiLocatorTuningDB.asset"),
         ("surface-layout",  "Assets/Samples/Settings/DialogueSurfaceLayoutPresetDB.asset"),
     };
 

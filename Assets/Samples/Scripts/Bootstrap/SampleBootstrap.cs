@@ -132,8 +132,10 @@ public partial class SampleBootstrap : MonoBehaviour, IRigPrefabSource
     [Tooltip("대본 번들 곁의 emojis.json — 이모지의 구성(이름 · 오프셋 · 리그들). 비우면 에디터에서만 Assets/Dialogue/emojis.json을 읽는다.")]
     [SerializeField] private TextAsset emojisJson;
 
-    [Tooltip("이모지 로케이터의 자리(RootSpace) — 인물의 발(슬롯의 아래 가운데)에서 잰 px, y 위. " +
-             "캐릭터 + 바리에이션별 표가 서기 전의 기본값 하나다. 머리 높이쯤으로 둔다.")]
+    [Tooltip("이모지 로케이터의 자리(RootSpace) — 캐릭터 + 포즈별 표. 비우면 모두 기본 자리에 선다.")]
+    [SerializeField] private EmojiLocatorTuningDBSO emojiLocatorTuningDb;
+
+    [Tooltip("표에 없는 캐릭터의 로케이터 자리 — 인물의 발(슬롯의 아래 가운데)에서 잰 px, y 위. 머리 높이쯤으로 둔다.")]
     [SerializeField] private Vector2 emojiDefaultRootSpace = new(0f, 800f);
 
     [Header("등가성 하네스")]
