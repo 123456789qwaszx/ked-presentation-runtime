@@ -147,7 +147,7 @@ public static class PresentationTuningExporter
         return dto;
     }
 
-    // ── 리그 스키마 4종 ──────────────────────────────────────────────
+    // ── 리그 스키마 ──────────────────────────────────────────────
     //
     // 이 단계의 핵심: 빌더 로직을 전사하지 않고 실제로 세워서 읽는다.
     // BindRefsFromRoot까지 태우는 것도 의도다 — 런타임과 같은 경로(그래프 검증·복구)를
@@ -174,7 +174,7 @@ public static class PresentationTuningExporter
 
         try
         {
-            // Character — 배경도 이 리그다(캐스팅하지 않은 슬롯). 리그 스키마는 둘뿐이다.
+            // Character — 배경도 이 리그다(캐스팅하지 않은 슬롯).
             {
                 CharacterRigBuilder builder = new();
                 RectTransform root = builder.BuildCharacterRigRoot(characterPrefab);
@@ -201,6 +201,23 @@ public static class PresentationTuningExporter
                     ScreenEffectSchemaNodes(), warnings));
 
                 Object.DestroyImmediate(root.gameObject);
+            }
+
+            // Emoji — 틀의 견본(로케이터 · 오프셋 · 리그 하나). 프리팹이 없다.
+            // 이모지에 리그가 몇 개 서는가는 이모지의 구성(툴)이 정한다 — 리그마다 되풀이되는 노드는
+            // repeatsPerRig로 표시한다. 루트(__root)는 로케이터다.
+            {
+                EmojiRigBuilder builder = new();
+                EmojiRefs emoji = builder.BuildTemplate(stage);
+
+                RigDto rig = CaptureRig(
+                    EmojiRigSchema.RigKind, null, emoji.Emoji_Locator,
+                    EmojiSchemaNodes(), warnings);
+
+                MarkEmojiRepeats(rig);
+                dump.rigs.Add(rig);
+
+                Object.DestroyImmediate(emoji.Emoji_Locator.gameObject);
             }
         }
         finally
@@ -332,6 +349,34 @@ public static class PresentationTuningExporter
             nodes.Add((n.Id.ToString(), n.Parent?.ToString()));
 
         return nodes;
+    }
+
+    /// <summary>로케이터는 루트(__root)로 담기므로 뺀다 — 그 밑의 노드만 낸다.</summary>
+    private static List<(string, string)> EmojiSchemaNodes()
+    {
+        List<(string, string)> nodes = new(EmojiRigSchema.Nodes.Length);
+
+        foreach (EmojiRigSchema.NodeDef n in EmojiRigSchema.Nodes)
+        {
+            if (n.Id == EmojiRigSchema.Refs.Emoji_Locator)
+                continue;
+
+            string parent = n.Parent == EmojiRigSchema.Refs.Emoji_Locator ? null : n.Parent?.ToString();
+            nodes.Add((n.Id.ToString(), parent));
+        }
+
+        return nodes;
+    }
+
+    private static void MarkEmojiRepeats(RigDto rig)
+    {
+        foreach (RigNodeDto node in rig.nodes)
+        {
+            if (!System.Enum.TryParse(node.id, out EmojiRigSchema.Refs id))
+                continue;
+
+            node.repeatsPerRig = EmojiRigSchema.Get(id).Repeat == EmojiRigSchema.Repeat.PerRig;
+        }
     }
 
     // ── DBSO 프리셋 ──────────────────────────────────────────────────
@@ -639,6 +684,9 @@ public static class PresentationTuningExporter
         // 가시성 축. hasCanvasGroup이 bool 게이트다 — 위 CaptureNode 주석 참조.
         public bool hasCanvasGroup;
         public float canvasGroupAlpha;
+
+        // 이모지 리그의 틀에서만 참 — 이모지 안의 리그마다 되풀이되는 노드다.
+        public bool repeatsPerRig;
     }
 
     [Serializable]

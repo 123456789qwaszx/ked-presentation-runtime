@@ -3,11 +3,31 @@
     "entries": [
         {
             "key": "1_골동품상점_에피1용오픈",
-            "width": 2048.0,
-            "height": 1152.0
+            "width": 3840.0,
+            "height": 2160.0
         },
         {
             "key": "3_한옥_에피소드시작",
+            "width": 1920.0,
+            "height": 1080.0
+        },
+        {
+            "key": "bg01",
+            "width": 1920.0,
+            "height": 1080.0
+        },
+        {
+            "key": "bg02",
+            "width": 1920.0,
+            "height": 1080.0
+        },
+        {
+            "key": "bg03",
+            "width": 1920.0,
+            "height": 1080.0
+        },
+        {
+            "key": "bg05",
             "width": 1920.0,
             "height": 1080.0
         },
@@ -25,6 +45,21 @@
             "key": "festival_last_year",
             "width": 1028.0,
             "height": 577.0
+        },
+        {
+            "key": "filler_bg",
+            "width": 1920.0,
+            "height": 1080.0
+        },
+        {
+            "key": "mine_inside",
+            "width": 1920.0,
+            "height": 1080.0
+        },
+        {
+            "key": "mirage_eyphkabar_inside_daylight",
+            "width": 1920.0,
+            "height": 1080.0
         },
         {
             "key": "staffroom_evening",

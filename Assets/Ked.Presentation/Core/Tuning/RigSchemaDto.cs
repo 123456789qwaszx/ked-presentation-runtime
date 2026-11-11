@@ -67,6 +67,13 @@ namespace Ked.Presentation.Core
 
         /// <summary>hasCanvasGroup일 때만 의미 있는 스폰 직후 alpha.</summary>
         public float canvasGroupAlpha;
+
+        /// <summary>
+        /// 이모지 리그의 틀(rigKind "emoji")에서만 참. 이모지 안의 리그마다 되풀이되는 노드다 —
+        /// 덤프에는 견본으로 한 번만 실리고, 몇 번 서는가는 이모지의 구성이 정한다.
+        /// 구덤프(필드 없음)는 false로 떨어진다.
+        /// </summary>
+        public bool repeatsPerRig;
     }
 
     [Serializable]

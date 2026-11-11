@@ -5,7 +5,7 @@
 | 브랜치 | `ked-presentation-runtime` · `feat/emojiRigSchema`(`dev` @ `50537b0e`에서 갈랐다) |
 | 정의 | [emoji-rig.md](emoji-rig.md) — 이모지 리그가 무엇인가. 이 문서는 **무엇을 어떤 순서로 만드는가**만 적는다 |
 | 결정 | 아미야(소유자) 2026-11-11: 과제 셋으로 나눈다. 과제마다 소유자의 지시로 시작한다 |
-| 상태 | **계획** — 과제 1 시작 전. 코드는 아직 없다 |
+| 상태 | **과제 1 — 코드와 테스트를 썼다(2026-11-11). Unity 확인 대기**(§3의 확인 목록). 과제 2 시작 전 |
 | 툴 | `ked-motion-tool-characterRig` — 런타임과 같은 세션이 맡는다. 과제 3에서 맞춘다 |
 
 ## 0. 한 문장
@@ -56,7 +56,24 @@
 | 3 | `EmojiRig_Image`의 크기와 피벗 | 스프라이트의 원본 픽셀 · 가운데(초상 · 배경이 원본 픽셀로 맞춘다) |
 | 4 | `Emoji_Offset`의 값과 키 | 키를 오프셋 값에 더하는 것으로 읽는다(노드를 늘리지 않는다) |
 
-**Unity 확인 목록**(끝날 때 채운다): 컴파일 오류 0 · 새 파일의 `.meta` · 튜닝 내보내기를 돌려 `rig-schemas.json`에 `emoji`가 실리는가 · EditMode 테스트 통과.
+**한 것(2026-11-11)** — Unity 없이 썼다. 컴파일과 테스트는 아래 목록으로 확인한다.
+
+| | 파일 | |
+|---|---|---|
+| 1-1 · 1-2 | `Stage/Emoji/EmojiRigDefinition.cs` | `EmojiRigSchema`(노드 넷 · `Repeat` · `ReceivesKeys`) · `EmojiRigRefs` · `EmojiRefs` |
+| 1-3 | `Stage/Emoji/EmojiRigBuilder.cs` | `EnsureLocator` · `BuildEmoji` · `DestroyEmoji` · `BuildTemplate`(덤프용 견본) |
+| 1-4 | `Editor/PresentationTuningExporter.cs` · `Core/Tuning/RigSchemaDto.cs` · `ExportedTuning/schema.md` | 덤프에 `emoji` 틀, 노드에 `repeatsPerRig` |
+| 1-5 | `Tests/EditMode/EmojiRigBuilderTests.cs`(12개) · `UnityParity/RigSchemaTreeUnityParityTests.cs`(`emoji` 경우) | |
+| 1-6 | `Stage/Emoji/Documentation~/emoji-rig.md` · `rig-axis-order.md` §1.3 | |
+
+정한 것: 시작할 때 정할 것 넷을 **제안대로** 세웠다([emoji-rig.md](emoji-rig.md) §8의 1~4 — 소유자 확인 대기). 덤프에는 "키를 받는 노드"를 싣지 않았다 — 과제 3의 형식에서 정한다.
+
+**Unity 확인 목록**(아미야):
+
+1. 컴파일 오류 0. 새 파일 셋(`EmojiRigDefinition.cs` · `EmojiRigBuilder.cs` · `EmojiRigBuilderTests.cs`)과 폴더 `Stage/Emoji`의 `.meta`가 있다(손으로 만든 GUID다 — Unity가 다시 만들었으면 그것을 쓴다).
+2. 메뉴 `Ked / U12 / Export Presentation Tuning Dump` — `ExportedTuning/rig-schemas.json`에 `rigKind: "emoji"`가 실린다: 노드 넷(`__root` · `Emoji_Offset` · `EmojiRig_Place` · `EmojiRig_Image`), 뒤의 둘은 `repeatsPerRig: true`. `character` · `screenEffect`의 값은 바뀌지 않는다(노드마다 `repeatsPerRig: false`가 더해질 뿐).
+3. EditMode 테스트 — `EmojiRigBuilderTests` 12개, `RigSchemaTreeUnityParityTests`(`emoji` 경우 포함). **2를 하기 전에는 대조 테스트가 "덤프에 rigKind 'emoji'가 없다"로 실패한다** — 낡은 덤프를 신고하는 것이다.
+4. 예제 씬을 그대로 재생 — 이모지를 세우는 커맨드가 아직 없으니 전과 같다.
 
 ## 4. 과제 2 — 대본으로 이모지를 세운다
 
@@ -114,6 +131,6 @@
 
 | 과제 | 상태 | 커밋 |
 |---|---|---|
-| 1 | 시작 전 | |
+| 1 | 코드와 테스트 작성 — Unity 확인 대기 | |
 | 2 | 시작 전 | |
 | 3 | 시작 전 | |

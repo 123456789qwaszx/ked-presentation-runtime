@@ -40,7 +40,7 @@
 
 ## 2. `rig-schemas.json`
 
-리그 2종(character · screenEffect)의 **노드 트리 초기 상태**. 빌더 로직을 전사한 것이 아니라,
+리그 3종(character · screenEffect · emoji)의 **노드 트리 초기 상태**. 빌더 로직을 전사한 것이 아니라,
 실제 프리팹·실제 빌더로 리그를 세운 뒤 **실물 `RectTransform`에서 읽은 값**이다
 (`BindRefsFromRoot`의 그래프 검증·복구까지 지난 뒤의 상태 — 런타임과 같은 경로).
 
@@ -71,6 +71,11 @@ new RectSpace(capturedUnderParentSize, Vec2.Half)
 | `sourcePrefab` | 세울 때 쓴 프리팹 에셋 경로. **빈 문자열이면 프리팹 없이 스키마 베이크로 세웠다는 뜻** |
 | `nodes` | 부모가 항상 자식보다 먼저 온다 — 순서대로 넣으면 트리가 세워진다 |
 
+> **`emoji`는 틀의 견본이다**(2026-11-11). 이모지 리그는 스프라이트 하나의 뼈대이고 이모지마다 리그의 수가 다르다 —
+> 덤프에는 로케이터(`__root`) · 오프셋 · **리그 하나**가 실린다. 리그마다 되풀이되는 노드는 `repeatsPerRig`가 참이다.
+> 이모지에 리그가 몇 개 서고 이름이 무엇인가는 이모지의 구성(모션 툴)이 정한다. 재생 저장소 `docs/emoji-rig.md`.
+> `sourcePrefab`은 비어 있다(프리팹이 없다).
+
 > `screenEffect`의 `sourcePrefab`이 비어 있는 것은 정상이다. 프리팹 필드 자체가 없어
 > **부트스트랩도 `null`을 넘긴다** — 스키마 베이크가 곧 런타임 경로다.
 
@@ -87,6 +92,7 @@ new RectSpace(capturedUnderParentSize, Vec2.Half)
 | `localScale` | 무단위 배율 (x, y, z) |
 | `localEulerAngles` | 도(°). 적용 순서는 Unity `Quaternion.Euler`와 같은 **Z → X → Y** |
 | `measuredRectSize` | ⚠ **재현 입력이 아니다.** 캡처 시점의 파생 rect 크기 — 검산용으로만 쓴다 |
+| `repeatsPerRig` | `emoji`에서만 참. 이모지 안의 리그마다 되풀이되는 노드(`EmojiRig_Place` · `EmojiRig_Image`). 없는 덤프는 거짓으로 읽힌다 |
 
 `localPosition.z`와 `offsetMin`/`offsetMax`는 담지 않는다
 (전자는 리그가 안 쓰고, 후자는 `anchoredPosition` + `sizeDelta`의 다른 표현이라 중복).

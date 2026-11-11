@@ -87,6 +87,10 @@
 `StageRigSchema` · `StageRigBuilder` · `StageRigRegistry`가 세운다. 이유도 같다: 노드의 존재와 항등을
 코드가 보장하면 기준값을 잴 필요가 없다. [stage-rig.md](../../StageRig/Documentation~/stage-rig.md).
 
+2026-11-11에는 **이모지 리그**가 같은 방식으로 섰다(`EmojiRigSchema` · `EmojiRigBuilder`) — 다만 틀은 고정이고
+리그의 수가 이모지마다 다르다. 캐릭터 리그의 `CharSlot_Scale` 밑에 서지만 이 스키마의 노드는 아니다.
+[emoji-rig.md](../../../Emoji/Documentation~/emoji-rig.md).
+
 ### 1.5 그리고 배경 리그가 캐릭터 리그로 합쳐졌다 — 2026-10-29
 
 같은 계약이 **거꾸로도** 작동했다. 배경 리그(2026-05-21 `f8fca379`)는 캐릭터 리그를 본떠 만든

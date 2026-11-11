@@ -117,6 +117,13 @@ namespace Ked.Presentation.Tests.UnityParity
                     return root;
                 }
 
+                // 틀의 견본 — 로케이터가 루트(__root)다. 익스포터와 같은 경로(BuildTemplate).
+                case EmojiRigSchema.RigKind:
+                {
+                    EmojiRigBuilder builder = new();
+                    return builder.BuildTemplate(stage).Emoji_Locator;
+                }
+
                 default:
                     Assert.Fail($"모르는 rigKind: {rig.rigKind}");
                     return null;
@@ -155,9 +162,10 @@ namespace Ked.Presentation.Tests.UnityParity
 
         // ── 대조 ─────────────────────────────────────────────────────
 
-        // 배경은 캐스팅하지 않은 캐릭터 슬롯이라 리그 종류는 둘이다.
+        // 배경은 캐스팅하지 않은 캐릭터 슬롯이라 따로 없다. 이모지는 틀의 견본(리그 하나)이다.
         [TestCase("character")]
         [TestCase("screenEffect")]
+        [TestCase(EmojiRigSchema.RigKind)]
         public void 덤프로_세운_트리가_실제_리그와_같다(string rigKind)
         {
             RigSchemasFileDto file = LoadDump();
@@ -179,7 +187,7 @@ namespace Ked.Presentation.Tests.UnityParity
 
             // 1패스: 덤프의 논리 키 → 실제 rect.
             // __root는 익스포터가 붙인 논리 키이지 오브젝트 이름이 아니다
-            // (실제 이름은 CharacterRig / ScreenEffectRig). 리그 루트 자신을 가리킨다.
+            // (실제 이름은 CharacterRig / ScreenEffectRig / Emoji_Locator). 리그 루트 자신을 가리킨다.
             Dictionary<string, RectTransform> liveByKey = new();
 
             foreach (RigSchemaNodeDto node in rig.nodes)
