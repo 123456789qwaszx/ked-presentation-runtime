@@ -17,6 +17,9 @@ public partial class SampleBootstrap
     private MotionLibrary _motions = MotionLibrary.Empty;
     private EmojiLibrary _emojis = EmojiLibrary.Empty;
 
+    // 이모지의 재생 — 줄을 넘어 이어지므로 커맨드가 아니라 시스템이 든다. Update에서 시간을 넘긴다.
+    private EmojiPlaybackSystem _emojiPlayback;
+
     private readonly PlaybackRuntimeState _playbackState = new();
 
     private readonly RollbackHistory _rollbackHistory = new();
@@ -148,10 +151,14 @@ public partial class SampleBootstrap
         // Emoji — 슬롯에 딸려 서는 작은 연출. 캐릭터를 모른다: 설 자리(CharSlot_Scale)만 받는다.
         _emojis = LoadEmojis();
 
+        EmojiRigBuilder emojiRigBuilder = new();
+        _emojiPlayback = new EmojiPlaybackSystem(emojiRigBuilder);
+
         EmojiRigCommandFactory emojiFactory = new(
             _presentationStage,
-            new EmojiRigBuilder(),
+            emojiRigBuilder,
             _emojis,
+            _emojiPlayback,
             emojiDefaultRootSpace);
 
         ShotResponseCommandFactory presentationShotFactory = new(

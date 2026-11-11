@@ -425,6 +425,7 @@ public partial class SampleBootstrap : MonoBehaviour, IRigPrefabSource
     private void Update()
     {
         _saveMaintenance?.Tick(Time.realtimeSinceStartupAsDouble);
+        _emojiPlayback?.Tick(Time.deltaTime);
     }
 
     [ContextMenu("Save/Log current snapshot")]

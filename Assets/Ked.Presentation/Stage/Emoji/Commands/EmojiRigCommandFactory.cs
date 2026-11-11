@@ -6,6 +6,7 @@ public sealed class EmojiRigCommandFactory : INodeCommandFactory
     private readonly PresentationStage _stage;
     private readonly EmojiRigBuilder _builder;
     private readonly EmojiLibrary _library;
+    private readonly EmojiPlaybackSystem _playback;
     private readonly Vector2 _defaultRootSpace;
 
     /// <param name="defaultRootSpace">
@@ -15,8 +16,10 @@ public sealed class EmojiRigCommandFactory : INodeCommandFactory
         PresentationStage stage,
         EmojiRigBuilder builder,
         EmojiLibrary library,
+        EmojiPlaybackSystem playback,
         Vector2 defaultRootSpace)
     {
+        _playback = playback ?? throw new ArgumentNullException(nameof(playback));
         _stage = stage ?? throw new ArgumentNullException(nameof(stage));
         _builder = builder ?? throw new ArgumentNullException(nameof(builder));
         _library = library ?? EmojiLibrary.Empty;
@@ -29,8 +32,8 @@ public sealed class EmojiRigCommandFactory : INodeCommandFactory
         {
             null => null,
 
-            SetEmojiCommandSpec s => new SetEmojiCommand(_stage, _builder, _library, _defaultRootSpace, s),
-            ClearEmojiCommandSpec s => new ClearEmojiCommand(_stage, _builder, s),
+            SetEmojiCommandSpec s => new SetEmojiCommand(_stage, _builder, _library, _playback, _defaultRootSpace, s),
+            ClearEmojiCommandSpec s => new ClearEmojiCommand(_stage, _playback, s),
 
             _ => null
         };

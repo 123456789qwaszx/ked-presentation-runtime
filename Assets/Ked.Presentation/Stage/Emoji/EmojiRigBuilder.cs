@@ -100,6 +100,8 @@ public sealed class EmojiRigBuilder
             Emoji_Offset = CreateNode(locator, offsetName, EmojiRigSchema.Get(EmojiRigSchema.Refs.Emoji_Offset)),
         };
 
+        refs.OffsetCanvasGroup = refs.Emoji_Offset.GetComponent<CanvasGroup>();
+
         EmojiRigSchema.NodeDef placeDef = EmojiRigSchema.Get(EmojiRigSchema.Refs.EmojiRig_Place);
         EmojiRigSchema.NodeDef imageDef = EmojiRigSchema.Get(EmojiRigSchema.Refs.EmojiRig_Image);
 

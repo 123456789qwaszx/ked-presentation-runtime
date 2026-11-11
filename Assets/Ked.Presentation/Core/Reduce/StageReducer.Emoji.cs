@@ -6,14 +6,17 @@ namespace Ked.Presentation.Core
     /// 런타임(SetEmojiCommand · ClearEmojiCommand)과 같은 규칙으로 접는다:
     ///   · 대상은 슬롯으로 풀려야 한다(slot/cast/actor 선행).
     ///   · 정의(emojis.json)에 없는 이모지는 런타임이 경고하고 건너뛴다 — 여기서는 Unhandled.
+    ///   · **머무는 이모지(EmojiDefinition.Stays)만 남는다.** 머묾 없는 이모지는 한 번 재생하고 사라진다 —
+    ///     건너뛰면 런타임도 세우지 않는다. 접을 것이 없으므로 Unhandled도 아니다.
     ///   · 서 있는 이모지를 다시 부르면 부수고 새로 세운다 — 접으면 "서 있다" 그대로다(맨 뒤로 간다).
+    ///   · 퇴장의 움직임은 접지 않는다 — emoji_off는 내려간 것으로 접는다(다른 커맨드처럼 끝값이다).
     ///   · emoji_off에 이름이 없으면 그 슬롯의 이모지를 전부 내린다(없어도 된다).
     ///     이름이 있는데 서 있지 않으면 런타임은 경고하고 건너뛴다 — 여기서는 Unhandled.
     ///   · 슬롯을 다시 선언하면 함께 사라진다(StageReducer.Slot.SpawnSlot).
     ///   · 인물의 fade와는 묶지 않는다 — 내리는 것은 emoji_off와 슬롯의 재선언뿐이다.
     ///
-    /// 이모지의 노드는 리그 노드 트리에 넣지 않는다 — 지금은 정의의 값 그대로 서 있을 뿐이다.
-    /// 움직임의 끝값은 과제 3에서 접는다.
+    /// 이모지의 노드는 리그 노드 트리에 넣지 않는다 — 머무는 이모지는 되풀이하는 중이라 "끝값"이 없다.
+    /// 서 있는가만이 끝 상태다.
     /// </summary>
     public static partial class StageReducer
     {
@@ -31,13 +34,19 @@ namespace Ked.Presentation.Core
                 return false;
             }
 
-            if (tuning.Emojis == null || !tuning.Emojis.ContainsKey(emojiName))
+            if (tuning.Emojis == null || !tuning.Emojis.TryGetValue(emojiName, out EmojiDefinition definition))
             {
                 reason = $"이모지 '{emojiName}'이 정의(emojis.json)에 없다";
                 return false;
             }
 
-            state.AddEmoji(slotKey, emojiName);
+            // 끝 상태만 접는다: 머묾 없는 이모지는 한 번 재생하고 사라지므로 남는 것이 없다.
+            // 다만 같은 이름이 서 있었다면 런타임이 부수고 새로 세우므로, 그것은 내려간 것이다.
+            if (definition.Stays)
+                state.AddEmoji(slotKey, emojiName);
+            else
+                state.RemoveEmoji(slotKey, emojiName);
+
             reason = null;
             return true;
         }

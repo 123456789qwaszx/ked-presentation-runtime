@@ -133,6 +133,10 @@ namespace Ked.Presentation.Tests
             Assert.That(rig.EmojiRig_Place.GetComponent<Image>(), Is.Null);
             Assert.That(emoji.Emoji_Offset.GetComponent<Image>(), Is.Null);
 
+            // 이모지 전체의 불투명도 — 오프셋에도 CanvasGroup이 있다.
+            Assert.That(emoji.OffsetCanvasGroup, Is.Not.Null);
+            Assert.That(emoji.OffsetCanvasGroup.alpha, Is.EqualTo(1f));
+
             Assert.That(rig.CanvasGroup.alpha, Is.EqualTo(1f));
             Assert.That(rig.Image.raycastTarget, Is.False, "이모지는 클릭을 받지 않는다");
         }

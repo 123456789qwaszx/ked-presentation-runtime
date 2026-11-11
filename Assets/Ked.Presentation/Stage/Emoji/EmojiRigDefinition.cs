@@ -12,7 +12,7 @@ using UnityEngine.UI;
 //
 //   CharSlot_Scale               (캐릭터 리그 — 이 스키마의 것이 아니다)
 //    └ Emoji_Locator             슬롯에 하나.   캐릭터 + 바리에이션이 정하는 RootSpace
-//       └ Emoji_Offset           이모지에 하나. 이모지별 오프셋 + 이모지 전체를 움직이는 키
+//       └ Emoji_Offset           이모지에 하나. 이모지별 오프셋 + 이모지 전체를 움직이는 키  [CanvasGroup]
 //          └ EmojiRig_Place      리그마다.      기본 자리 — 키를 받지 않는다
 //             └ EmojiRig_Image   리그마다.      스프라이트를 들고 키를 받는다
 //
@@ -85,6 +85,9 @@ public static class EmojiRigSchema
         {
             Id = Refs.Emoji_Offset, Parent = Refs.Emoji_Locator, Repeat = Repeat.PerEmoji,
             ReceivesKeys = true,
+
+            // 이모지 전체의 불투명도(함께 흐려진다) — 리그마다 따로 잡지 않아도 되게.
+            NeedsCanvasGroup = true,
         },
 
         new()
@@ -141,6 +144,9 @@ public sealed class EmojiRefs
     public RectTransform Emoji_Locator;
 
     public RectTransform Emoji_Offset;
+
+    /// <summary>이모지 전체의 불투명도.</summary>
+    public CanvasGroup OffsetCanvasGroup;
 
     private readonly List<EmojiRigRefs> _rigs = new();
     private readonly Dictionary<string, EmojiRigRefs> _rigsByName = new(StringComparer.Ordinal);

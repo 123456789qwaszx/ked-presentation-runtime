@@ -14,7 +14,7 @@
 ```
 CharSlot_Scale               (캐릭터 리그 — 이 스키마의 것이 아니다)
  └ Emoji_Locator             슬롯에 하나.   캐릭터 + 바리에이션이 정하는 RootSpace
-    └ Emoji_Offset           이모지에 하나. 이모지별 오프셋 + 이모지 전체를 움직이는 키
+    └ Emoji_Offset           이모지에 하나. 이모지별 오프셋 + 이모지 전체를 움직이는 키  [CanvasGroup]
        └ EmojiRig_Place      리그마다.      기본 자리 — 키를 받지 않는다
           └ EmojiRig_Image   리그마다.      스프라이트를 들고 키를 받는다  [Image · CanvasGroup]
 ```
@@ -79,4 +79,14 @@ CharSlot_Scale               (캐릭터 리그 — 이 스키마의 것이 아�
 - **이모지는 슬롯의 리그 밑에 산다.** 슬롯이 다시 선언되거나 무대가 비워지면(되감기) 리그와 함께 부서진다. `EmojiRigRegistry`는 그것을 통보받지 않는다 — 읽고 쓸 때마다 "지금 그 슬롯의 `CharSlot_Scale` 밑에 선 것"만 남긴다. 그래서 캐릭터 쪽 코드가 이모지를 모른다.
 - **인물의 페이드와 묶지 않는다.** 인물이 `fade_out`해도 이모지는 남는다.
 - **건너뛸 때도 세우고 내린다**(`ExecuteEvenIfSkipping`).
-- **폴드**: 슬롯마다 서 있는 이모지의 이름(`StageState.EmojisOf`). 노드는 리그 노드 트리에 넣지 않는다 — 움직임의 끝값은 모션이 설 때 접는다.
+- **폴드**: 슬롯마다 서 있는 이모지의 이름(`StageState.EmojisOf`) — **머무는 이모지만 남는다.** 노드는 리그 노드 트리에 넣지 않는다(머무는 이모지는 되풀이하는 중이라 끝값이 없다).
+
+## 7. 움직임
+
+형식은 저장소의 [docs/emoji-format.md](../../../../../docs/emoji-format.md)다.
+
+- **재생은 `EmojiPlaybackSystem`이 든다** — 커맨드가 아니다. 머묾은 줄을 넘어 이어지는데 커맨드의 수명은 한 줄이다. 커맨드는 세워서 맡기고(`Play`) 내리라고만 한다(`Off`). 호스트가 프레임마다 `Tick`을 부른다.
+- **무엇을 언제 재생하는가**는 코어의 `EmojiPlayback`, **그 프레임의 모습**은 코어의 `EmojiClipMath`다 — 툴의 미리보기가 같은 둘을 쓴다. 시스템은 시간을 넘기고 값을 노드에 옮기기만 한다.
+- **쓰는 곳**: 리그의 키는 `EmojiRig_Image`(자리 · 배율 · 회전 · `CanvasGroup` · 스프라이트), 이모지 전체의 키는 `Emoji_Offset`(자리는 오프셋 값에 더한다 · 배율 · 회전 · `CanvasGroup`). `EmojiRig_Place`와 `Emoji_Locator`는 재생이 건드리지 않는다.
+- **머묾이 있는가가 종류를 정한다**(`EmojiDefinition.Stays`): 머무는 이모지는 장부에 오르고 `emoji_off`로 내린다. 머묾 없는 이모지는 한 번 재생하고 스스로 부서진다 — 장부에 오르지 않는다.
+- **건너뛸 때**: 머무는 이모지는 머묾의 처음으로 세우고, 머묾 없는 이모지는 세우지 않는다. 내릴 때는 퇴장 없이 바로 부순다.

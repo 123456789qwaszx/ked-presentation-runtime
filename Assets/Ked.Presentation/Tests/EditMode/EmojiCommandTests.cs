@@ -32,7 +32,7 @@ namespace Ked.Presentation.Tests
         // ── 정의(emojis.json) ────────────────────────────────────────
 
         private const string SampleJson = @"{
-  ""schema"": ""emojis/1"",
+  ""schema"": ""emojis/2"",
   ""emojis"": [
     { ""name"": ""star"", ""offset"": { ""x"": 170, ""y"": 60 },
       ""rigs"": [ { ""name"": ""body"", ""sprite"": ""star"", ""place"": { ""x"": 0, ""y"": 0 } } ] },
