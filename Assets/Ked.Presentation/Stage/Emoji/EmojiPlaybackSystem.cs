@@ -152,23 +152,37 @@ public sealed class EmojiPlaybackSystem
         EmojiClip clip = entry.Playback.Clip;
         float frame = entry.Playback.Frame;
 
+        // 좌우 — 인물이 뒤집혀 있으면 로케이터가 뒤집혀 있다(EmojiLocatorSystem). 이모지는 그대로 두면 통째로 거울에 비친다.
+        // 예외 둘만 한 번 더 뒤집는다(EmojiSide): 방향을 따르지 않는 이모지는 오프셋에서, 바로 서야 하는 그림은 리그의 기본 자리에서.
+        bool locatorFlipped = emoji.Emoji_Locator != null && emoji.Emoji_Locator.localScale.x < 0f;
+        float offsetSign = EmojiSide.OffsetSign(definition, locatorFlipped);
+
         // 이모지 전체 — 자리의 키는 오프셋 값에 더한다(오프셋을 옮겨도 키를 다시 잡지 않는다).
         EmojiNodePose whole = EmojiClipMath.SampleNode(clip, "", frame);
 
         emoji.Emoji_Offset.anchoredPosition = new Vector2(
-            definition.Offset.X + whole.Position.X,
+            offsetSign * (definition.Offset.X + whole.Position.X),
             definition.Offset.Y + whole.Position.Y);
-        emoji.Emoji_Offset.localScale = new Vector3(whole.Scale.X, whole.Scale.Y, 1f);
-        emoji.Emoji_Offset.localEulerAngles = new Vector3(0f, 0f, whole.Rotation);
+        emoji.Emoji_Offset.localScale = new Vector3(offsetSign * whole.Scale.X, whole.Scale.Y, 1f);
+        emoji.Emoji_Offset.localEulerAngles = new Vector3(0f, 0f, offsetSign * whole.Rotation);
 
         if (emoji.OffsetCanvasGroup != null)
             emoji.OffsetCanvasGroup.alpha = whole.Alpha;
 
-        // 리그마다 — 키는 그림 노드가 받는다. 기본 자리(Place)는 건드리지 않는다.
+        // 리그마다 — 키는 그림 노드가 받는다. 기본 자리(Place)는 바로 서야 하는 그림의 부호만 다시 쓴다.
         for (int i = 0; i < definition.Rigs.Count && i < emoji.Rigs.Count; i++)
         {
             EmojiRigEntry rigEntry = definition.Rigs[i];
             EmojiRigRefs rig = emoji.Rigs[i];
+
+            if (rigEntry.Upright)
+            {
+                // 가로 배율과 회전에 부호를 곱한다 — 그림과 이 리그의 키가 만든 그대로 보인다(자리는 부모를 따라 거울 쪽).
+                float placeSign = EmojiSide.PlaceSign(definition, rigEntry, locatorFlipped);
+
+                rig.EmojiRig_Place.localScale = new Vector3(placeSign * rigEntry.Scale, rigEntry.Scale, 1f);
+                rig.EmojiRig_Place.localEulerAngles = new Vector3(0f, 0f, placeSign * rigEntry.Rotation);
+            }
 
             EmojiNodePose pose = EmojiClipMath.SampleNode(clip, rigEntry.Name, frame);
 

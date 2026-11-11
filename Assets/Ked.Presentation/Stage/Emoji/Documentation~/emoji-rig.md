@@ -75,7 +75,7 @@ CharSlot_Scale               (캐릭터 리그 — 이 스키마의 것이 아�
 ```
 
 - **정의는 `emojis.json`**(`emojis/1`) — 이름 · 오프셋 · 리그들(이름 · 스프라이트 키 · 기본 자리). 읽는 규칙은 코어의 `EmojiDefinitionLoader` · `EmojiRules`다. 스프라이트는 `Resources/Emojis/{키}`.
-- **세울 때 넣는 값**: `Emoji_Locator` ← RootSpace(그 슬롯에 선 캐릭터 + 포즈의 자리 — `EmojiLocatorSystem`이 표 `EmojiLocatorTuningDBSO`에서 풀고, 없으면 호스트의 기본값. 서 있는 동안 포즈가 바뀌면 `EmojiPlaybackSystem.Tick`이 다시 풀어 옮긴다), `Emoji_Offset` ← 정의의 오프셋, `EmojiRig_Place` ← 리그의 기본 자리 · 배율 · 회전, `EmojiRig_Image` ← 스프라이트(크기는 원본 픽셀).
+- **세울 때 넣는 값**: `Emoji_Locator` ← RootSpace(그 슬롯에 선 캐릭터 + 포즈의 자리 — `EmojiLocatorSystem`이 표 `EmojiLocatorTuningDBSO`에서 풀고, 없으면 호스트의 기본값. 서 있는 동안 포즈가 바뀌면 `EmojiPlaybackSystem.Tick`이 다시 풀어 옮긴다. 인물이 뒤집혀 있으면 자리의 x와 가로 배율을 뒤집는다 — 이모지가 통째로 거울에 비친다. 방향을 따르지 않는 이모지(`fixedSide`)는 `Emoji_Offset`에서, 바로 서야 하는 그림(`upright`)은 `EmojiRig_Place`에서 재생이 한 번 더 뒤집는다 — 부호는 코어 `EmojiSide`), `Emoji_Offset` ← 정의의 오프셋, `EmojiRig_Place` ← 리그의 기본 자리 · 배율 · 회전, `EmojiRig_Image` ← 스프라이트(크기는 원본 픽셀).
 - **이모지는 슬롯의 리그 밑에 산다.** 슬롯이 다시 선언되거나 무대가 비워지면(되감기) 리그와 함께 부서진다. `EmojiRigRegistry`는 그것을 통보받지 않는다 — 읽고 쓸 때마다 "지금 그 슬롯의 `CharSlot_Scale` 밑에 선 것"만 남긴다. 그래서 캐릭터 쪽 코드가 이모지를 모른다.
 - **인물의 페이드와 묶지 않는다.** 인물이 `fade_out`해도 이모지는 남는다.
 - **건너뛸 때도 세우고 내린다**(`ExecuteEvenIfSkipping`).

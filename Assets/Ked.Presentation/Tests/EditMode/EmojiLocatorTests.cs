@@ -226,5 +226,61 @@ namespace Ked.Presentation.Tests
 
             Assert.That(locator.anchoredPosition, Is.EqualTo(new Vector2(20f, 600f)));
         }
+
+        // ── 좌우 (docs/PLAN_emoji-placement.md §3) ───────────────────
+
+        [Test]
+        public void 인물이_뒤집혀_있으면_자리의_x와_로케이터의_가로_배율이_뒤집힌다()
+        {
+            EmojiLocatorTuningDBSO table = NewTable(("harin", "", new Vector2(40f, 900f)));
+
+            PresentationStage stage = StageWith("s1", "harin");
+            stage.castRegistry.SetFacing("s1", CharacterFacing.Left);
+
+            EmojiLocatorSystem locators = new(stage, table, Default);
+            RectTransform locator = NewLocator("s1_Emoji_Locator");
+
+            Assert.That(locators.IsFlipped("s1"), Is.True);
+            Assert.That(locators.Resolve("s1"), Is.EqualTo(new Vector2(-40f, 900f)));
+
+            locators.Place("s1", locator);
+
+            Assert.That(locator.anchoredPosition, Is.EqualTo(new Vector2(-40f, 900f)));
+            Assert.That(locator.localScale, Is.EqualTo(new Vector3(-1f, 1f, 1f)));
+        }
+
+        [Test]
+        public void 서_있는_동안_인물이_뒤집히면_로케이터가_따라_뒤집힌다()
+        {
+            EmojiLocatorTuningDBSO table = NewTable(("harin", "", new Vector2(40f, 900f)));
+
+            PresentationStage stage = StageWith("s1", "harin");
+            EmojiLocatorSystem locators = new(stage, table, Default);
+            RectTransform locator = NewLocator("s1_Emoji_Locator");
+
+            locators.Place("s1", locator);
+            Assert.That(locator.localScale, Is.EqualTo(Vector3.one));
+
+            stage.castRegistry.SetFacing("s1", CharacterFacing.Left);
+            locators.Refresh();
+
+            Assert.That(locator.anchoredPosition, Is.EqualTo(new Vector2(-40f, 900f)));
+            Assert.That(locator.localScale, Is.EqualTo(new Vector3(-1f, 1f, 1f)));
+
+            stage.castRegistry.SetFacing("s1", CharacterFacing.Right);
+            locators.Refresh();
+
+            Assert.That(locator.anchoredPosition, Is.EqualTo(new Vector2(40f, 900f)));
+            Assert.That(locator.localScale, Is.EqualTo(Vector3.one));
+        }
+
+        [Test]
+        public void 캐스팅_전의_슬롯은_뒤집히지_않은_것이다()
+        {
+            EmojiLocatorSystem locators = new(new PresentationStage(), null, Default);
+
+            Assert.That(locators.IsFlipped("s1"), Is.False);
+            Assert.That(locators.Resolve("s1"), Is.EqualTo(Default));
+        }
     }
 }

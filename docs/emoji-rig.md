@@ -82,7 +82,7 @@ CharSlot_Scale                 (캐릭터 리그 — 지금 있는 노드)
 |---|---|
 | 캐릭터별 그림 보정 `CharacterPortrait_VisualOffset` | 머리가 어디인지는 이모지에 전해지지 않는다 — **`Emoji_Locator`가 캐릭터 + 바리에이션별 값으로 그것을 대신한다** |
 | 초상의 연기 — `gesture` · `char_scale_to` · `char_rotate_to` | 인물이 끄덕여도 이모지는 제자리다 |
-| 좌우 반전 `mirror`(`ActingScale_X`) | 인물이 뒤집혀도 이모지는 뒤집히지 않는다. 어느 쪽에 뜨는가는 따로 정한다(§8) |
+| 좌우 반전 `mirror`(`ActingScale_X`) | 초상의 반전은 형제인 이모지에 전해지지 않는다 — **`Emoji_Locator`가 인물의 방향을 읽어 대신 뒤집는다**(가로 배율 −1, 자리 x도). 이모지는 오른쪽을 보는 인물을 기준으로 만들고, 인물이 뒤집혀 있으면 통째로 거울에 비친다. 예외는 방향을 따르지 않는 이모지(`fixedSide`)와 바로 서야 하는 그림(`upright`) — [emoji-format.md](emoji-format.md) §6 |
 | 인물의 페이드(`CharacterPortraitSprite_Root`의 α) | 이모지의 불투명도는 이모지의 것이다. 인물이 사라질 때 이모지를 어떻게 하는가는 따로 정한다(§8) |
 
 ## 4. 이모지 리그 — 두 단
@@ -128,6 +128,7 @@ CharSlot_Scale                 (캐릭터 리그 — 지금 있는 노드)
 - **한 이모지는 한 덩어리로 나간다.** 리그마다 따로 나간 것을 런타임이 합성하지 않는다.
 - **같은 계산이다.** 툴의 미리보기와 게임의 재생은 `Ked.Presentation.Core`의 같은 함수(`EmojiClipMath` · `EmojiPlayback`)를 쓴다. 한쪽에만 있는 계산을 두지 않는다.
 - **커맨드는 한 줄을 살고, 줄을 넘는 것은 시스템이 든다.** 커맨드는 세워서 맡기고(`Play`) 내리라고만 한다(`Off`). 재생은 `EmojiPlaybackSystem`이, 되감기는 접힌 상태(`StageState`)가 책임진다.
+- **캐릭터에 달린 값은 경계의 위에만 있다.** 캐릭터 + 포즈의 자리와 인물의 방향은 `Emoji_Locator`에 들어간다. 그 아래에서 한 번 더 뒤집는 것(`fixedSide` · `upright`)은 이모지 자신의 성질이다 — 어느 캐릭터인가에 따라 달라지지 않는다.
 - **`CharacterRigSchema`는 고치지 않는다.** `Emoji_Locator`는 캐릭터 스키마의 노드가 아니라 이모지 쪽이 필요할 때 세운다 — 캐릭터 덤프와 그것을 읽는 툴이 바뀌지 않는다.
 
 ## 8. 아직 정하지 않은 것
@@ -139,7 +140,7 @@ CharSlot_Scale                 (캐릭터 리그 — 지금 있는 노드)
 | 3 | ~~`EmojiRig_Image`의 크기와 피벗~~ — **스프라이트의 원본 픽셀 · 가운데(과제 1)**. 스프라이트를 넣기 전에는 100×100이다(넣는 것은 과제 2) | 소유자 확인 |
 | 4 | ~~`Emoji_Offset`의 값과 키~~ — **키를 오프셋 값에 더해서 읽는다(과제 1의 방침, 노드를 늘리지 않았다)**. 실제로 더하는 계산은 과제 3에서 선다 | 소유자 확인 |
 | 5 | ~~RootSpace 값의 집~~ — **전용 표 `EmojiLocatorTuningDBSO`**(캐릭터 + 포즈 → 발에서 잰 px, 덤프 `presets/emoji-locator.json`). 포즈 항목 → 캐릭터 항목 → 호스트의 기본값 순으로 찾는다. 서 있는 동안 포즈가 바뀌면 로케이터가 따라 옮겨진다. 값은 소유자가 Unity에서 잰다(재는 도구는 뒤) — [PLAN_emoji-placement.md](PLAN_emoji-placement.md) 결정 1 | 정했다 |
-| 6 | 좌우 — 캐릭터의 어느 쪽에 뜨는가를 누가 정하는가. 과제 2에서 다루지 않았다 — RootSpace 표와 함께 정한다 | [PLAN_emoji-placement.md](PLAN_emoji-placement.md) 결정 2 |
+| 6 | ~~좌우~~ — **인물의 방향이 정한다.** 이모지는 오른쪽을 보는 인물을 기준으로 만들고, 인물이 뒤집혀 있으면 로케이터에서 통째로 거울에 비춘다(서 있는 동안 뒤집혀도 따라간다). 예외는 `fixedSide`(이모지) · `upright`(리그). 대본이 쪽을 고르는 칸은 두지 않았다 — [PLAN_emoji-placement.md](PLAN_emoji-placement.md) 결정 2 | 정했다 |
 | 7 | ~~인물의 페이드 · 퇴장 · 다시 선언과 이모지~~ — **묶지 않는다(소유자, 과제 2)**. 이모지는 `emoji_off`와 슬롯의 재선언으로만 사라진다. 인물을 `fade_out`해도 남는다 — 대본에서 먼저 내린다 | 정했다 |
 | 8 | ~~키의 시각 단위 · 그림 바꾸기 · 머묾의 끝~~ — **정했다(과제 3)**: 프레임 · 계단 키 · 머묾이 있는가가 종류를 정한다. [emoji-format.md](emoji-format.md) | 정했다 |
 | 9 | 이전 문서의 원본 관찰(GIF 일곱, `f1edce77`)을 근거로 가져오는가 | 소유자 |

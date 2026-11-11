@@ -12,7 +12,8 @@ public sealed class SetEmojiCommandSpec : EmojiRigCommandSpecBase
 }
 
 // 슬롯을 풀고 · 정의를 찾고 · 빌더로 세우고 · 정의의 값을 넣고 · 재생을 맡긴다(EmojiPlaybackSystem).
-//   Emoji_Locator   ← RootSpace — 그 슬롯에 선 캐릭터 + 포즈의 자리(EmojiLocatorSystem). 포즈가 바뀌면 따라 옮겨진다
+//   Emoji_Locator   ← RootSpace — 그 슬롯에 선 캐릭터 + 포즈의 자리와 인물의 방향(EmojiLocatorSystem). 바뀌면 따라간다
+//                     (인물이 뒤집혀 있으면 로케이터가 뒤집혀 이모지가 통째로 거울에 비친다 — 예외의 부호는 재생이 쓴다)
 //   Emoji_Offset    ← 정의의 offset
 //   EmojiRig_Place  ← 리그의 place · scale · rotation(기본 자리 · 배율 · 회전)
 //   EmojiRig_Image  ← 리그의 sprite(Resources/Emojis/{키}), 크기는 원본 픽셀
