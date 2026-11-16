@@ -248,4 +248,4 @@
 - **하류의 무대 줄.** ked-vn-workspace의 `무대 #boxhide #auto` 674줄(`tools/stage/script.py` · `compose.py`)과 녹화기의 `#auto` 무대 줄 규칙, ked-story-director의 `runtime-contract.md`(§5).
 - **노드가 끝난 뒤의 되감기 한 칸.** 노드가 끝나고(암묵 무대 스텝도 끝난 뒤) 선택지 · 끝 화면에서 R을 누르면 표적이 "마지막 줄의 앞 줄"이다 —
   줄로 끝나는 노드가 원래 그랬다. 가짜 무대 줄로 끝나던 예제 둘은 전에는 마지막 대사 줄로 갔으므로 한 줄 더 뒤로 가게 됐다.
-  "노드가 끝났으면 마지막 줄로"가 맞다면 무대 스텝 중과 같은 표적 규칙(`GetRollbackPoint(duringStageStep: true)`)을 쓰면 된다 — 소유자 결정.
+  **지금 동작이 맞다(2026-11-16, 소유자)** — 고치지 않는다.
