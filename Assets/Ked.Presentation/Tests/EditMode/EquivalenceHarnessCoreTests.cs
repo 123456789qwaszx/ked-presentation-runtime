@@ -98,6 +98,33 @@ namespace Ked.Presentation.Tests
         }
 
         [Test]
+        public void 무대_스텝은_커맨드가_아니고_그룹을_가르지_않는다()
+        {
+            const string yarn =
+                "title: Step_Sample\n" +
+                "---\n" +
+                "<<fade_out c1>>\n" +
+                "<<step>>\n" +
+                "<<fade_in c2>>\n" +
+                "대사다.\n" +
+                "<<fade_out c2>>\n" +
+                "<<step>>\n" +
+                "===\n";
+
+            List<string> warnings = new();
+            List<YarnLineGroup> groups = YarnCommandTextExtractor.Extract(yarn, "step.yarn", warnings);
+
+            Assert.That(warnings, Is.Empty);
+            Assert.That(groups.Count, Is.EqualTo(2));
+
+            Assert.That(groups[0].LineText, Is.EqualTo("대사다."));
+            Assert.That(groups[0].Commands.Select(c => c.Name), Is.EqualTo(new[] { "fade_out", "fade_in" }));
+
+            Assert.That(groups[1].LineText, Is.Null, "노드 끝의 무대 스텝은 꼬리 그룹이다");
+            Assert.That(groups[1].Commands.Select(c => c.Name), Is.EqualTo(new[] { "fade_out" }));
+        }
+
+        [Test]
         public void 주석_처리된_커맨드는_빠진다()
         {
             YarnNodeGroups story = ExtractSample()[1];

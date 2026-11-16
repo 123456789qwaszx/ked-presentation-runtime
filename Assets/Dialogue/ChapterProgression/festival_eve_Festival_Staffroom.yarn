@@ -36,6 +36,5 @@ title: Festival_Staffroom
 <<stop_bgm 2s>>
 <<bg_fade_out bg_main 20fr>>
 <<24fr>>
-캐릭터 퇴장 #boxhide #auto #line:ln_9k3krs99
 
 ===

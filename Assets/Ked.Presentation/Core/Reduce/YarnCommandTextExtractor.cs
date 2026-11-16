@@ -44,6 +44,12 @@ namespace Ked.Presentation.Core
     /// </summary>
     public static class YarnCommandTextExtractor
     {
+        /// <summary>
+        /// 무대 스텝 — 여기까지 쌓인 커맨드를 대사 없이 실행하는 스텝 경계다. 무대 커맨드가 아니다.
+        /// 접힘은 줄 단위로 쌓으므로 그룹을 가르지 않는다: 앞의 커맨드는 다음 대사의 그룹에 그대로 든다.
+        /// </summary>
+        public const string StageStepCommand = "step";
+
         /// <summary>파일 전체를 노드 구분 없이 하나의 흐름으로 뽑는다(단일 노드 파일용).</summary>
         public static List<YarnLineGroup> Extract(
             string yarnText, string sourceName, List<string> warnings = null)
@@ -122,6 +128,9 @@ namespace Ked.Presentation.Core
                 {
                     if (TryParseCommand(line, $"{sourceName}:{i + 1}", out StageCommand command))
                     {
+                        if (command.Name == StageStepCommand)
+                            continue;
+
                         if (IsFlowControl(command.Name))
                         {
                             warnings?.Add(
