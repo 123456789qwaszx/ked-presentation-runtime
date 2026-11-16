@@ -29,6 +29,12 @@ public sealed class YarnPlaybackDriver
         _executor.PlaySpecs(specs, scope);
     }
 
+    // 지금 스텝에 덧붙여 실행한다 — 스텝 경계를 치지 않는다(인라인 명령). 쌓인 명령은 건드리지 않는다.
+    public void PlayInStep(IReadOnlyList<CommandSpecBase> specs)
+    {
+        _executor.PlaySpecsInStep(new List<CommandSpecBase>(specs), CurrentScope);
+    }
+
     // 쌓인 명령을 실행하지 않고 버린다. 버린 것이 있으면 개수와 요약("이름×개수, …")을 돌려준다(로그용).
     public bool TryDiscardPending(out int count, out string summary)
     {

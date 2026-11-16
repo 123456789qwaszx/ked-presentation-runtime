@@ -47,6 +47,7 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILineAborter, I
         DialogueRunner dialogueRunner,
         LinePresentationFlow linePresentationFlow,
         StageStepFlow stageStepFlow,
+        InlineCommandTrack inlineCommands,
         EllipsisBreathTypewriter typewriter,
         PlaybackRuntimeState playbackRuntimeState)
     {
@@ -56,7 +57,9 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILineAborter, I
         _stageStepFlow = stageStepFlow;
 
         _typewriter = typewriter;
-        _typewriter.ActionMarkupHandlers = ActionMarkupHandlers;
+        List<IActionMarkupHandler> handlers = ActionMarkupHandlers;
+        handlers.Add(inlineCommands);
+        _typewriter.ActionMarkupHandlers = handlers;
 
         _playbackRuntimeState = playbackRuntimeState;
     }

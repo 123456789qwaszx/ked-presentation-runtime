@@ -226,7 +226,7 @@ public partial class SampleBootstrap
             rigPrefab,
             _motions);
 
-        _ = new YarnCommandBridge(
+        YarnCommandBridge commandBridge = new(
             dialogueRunner,
             yarnPlaybackDriver,
             stageCommandParser,
@@ -249,6 +249,8 @@ public partial class SampleBootstrap
             _sceneBgm,
             _rigBlur);
 
+        InlineCommandTrack inlineCommands = new(commandBridge, yarnPlaybackDriver);
+
         _linePresentationFlow = new LinePresentationFlow(
             yarnLineBoundary,
             _lineDisplayState,
@@ -256,6 +258,7 @@ public partial class SampleBootstrap
             dialogueBoxPresentationController,
             ellipsisBreathTypewriter,
             stepHead,
+            inlineCommands,
             lineHurrySpeed);
 
         StageStepFlow stageStepFlow = new(
@@ -270,6 +273,7 @@ public partial class SampleBootstrap
             dialogueRunner,
             _linePresentationFlow,
             stageStepFlow,
+            inlineCommands,
             ellipsisBreathTypewriter,
             _playbackState);
 

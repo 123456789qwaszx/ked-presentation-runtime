@@ -12,6 +12,7 @@ public sealed class LinePresentationFlow
     private readonly DialogueBoxPresentationController _boxPresentation;
     private readonly EllipsisBreathTypewriter _typewriter;
     private readonly StepHead _stepHead;
+    private readonly InlineCommandTrack _inlineCommands;
     private readonly LineHurrySpeedController _lineHurrySpeed;
 
     public LinePresentationFlow(
@@ -21,6 +22,7 @@ public sealed class LinePresentationFlow
         DialogueBoxPresentationController boxPresentation,
         EllipsisBreathTypewriter typewriter,
         StepHead stepHead,
+        InlineCommandTrack inlineCommands,
         LineHurrySpeedController lineHurrySpeed)
     {
         _yarnLineBoundary = yarnLineBoundary;
@@ -29,6 +31,7 @@ public sealed class LinePresentationFlow
         _boxPresentation = boxPresentation;
         _typewriter = typewriter;
         _stepHead = stepHead;
+        _inlineCommands = inlineCommands;
         _lineHurrySpeed = lineHurrySpeed;
     }
 
@@ -61,6 +64,9 @@ public sealed class LinePresentationFlow
 
         bool seekPassThrough = ctx.SeekDecision == SeekLineDecision.SkipVisualAndDispatchSeekNext;
         _stepHead.Play(snap: ctx.IsRapidSkip || seekPassThrough, seekPassThrough: seekPassThrough);
+
+        // 인라인 명령은 이 줄의 스텝에 덧붙는다. 글자 자리에서 타자기가 실행한다.
+        _inlineCommands.Begin(ctx.Line.TextWithoutCharacterName);
         SetPhase(ctx, LinePresentationPhase.LineEnteredCommitted);
         
         if (seekPassThrough) {
@@ -118,6 +124,10 @@ public sealed class LinePresentationFlow
             return;
         }
 
+        // 타자기가 닿지 않은 인라인 명령 — 글 끝에 둔 것, 다 보이기 전에 넘어간 줄, 글 칸이 없는 줄.
+        // 넘어간 줄의 끝 상태는 접힘과 같아야 한다. 끊긴 줄(위)은 실행하지 않는다 — 장면을 다시 접는다.
+        _inlineCommands.PlayRemaining();
+
         // Phase: DisplayCommitted
         _lineDisplayState.MarkLineDisplayCompleted("normal");
         _typewriter.ContentWillDismiss();
@@ -135,6 +145,9 @@ public sealed class LinePresentationFlow
     private void RunSeekPassThrough(LinePresentationContext ctx)
     {
         SetPhase(ctx, LinePresentationPhase.SeekPassThrough);
+
+        // 타자기가 돌지 않는다 — 인라인 명령은 줄 머리 명령 바로 뒤에 글 순서대로 압축 실행된다.
+        _inlineCommands.PlayRemaining();
 
         _boxPresentation.CloseAll();
         _lineDisplayState.MarkLineDisplayCompleted("passThrough");

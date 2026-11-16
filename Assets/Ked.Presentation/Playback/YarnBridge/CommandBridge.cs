@@ -377,6 +377,44 @@ public sealed partial class YarnCommandBridge
             _playbackDriver.Enqueue(_parsed[i]);
     }
 
+    // 인라인 명령([cmd="…"/])의 글을 스펙으로 풀어 output 뒤에 붙인다. 글은 대본 명령의 << >> 안과 같다.
+    // output에 이미 든 것은 같은 자리의 앞 명령이다 — 대상 판정이 그 선언(actor · slot · cast)을 본다.
+    // 전경 명령(pause · Nfr)은 받지 않는다 — 인라인 명령은 타자기도 넘김도 멈추지 않는다.
+    public bool TryParseInline(string commandText, List<CommandSpecBase> output)
+    {
+        if (!YarnCommandTextExtractor.TryParseCommand($"<<{commandText}>>", "inline", out StageCommand command))
+        {
+            Debug.LogError($"[인라인 명령] 읽지 못했다: [cmd=\"{commandText}\"/]. 실행하지 않는다.");
+            return false;
+        }
+
+        _parsed.Clear();
+
+        if (!_parser.TryParse(command, _parsed))
+        {
+            Debug.LogError($"[인라인 명령] 무대 파서가 모르는 커맨드 '{command.Name}': [cmd=\"{commandText}\"/]. 실행하지 않는다.");
+            return false;
+        }
+
+        for (int i = 0; i < _parsed.Count; i++)
+        {
+            if (_parsed[i] is WaitCommandSpec)
+            {
+                Debug.LogError($"[인라인 명령] 전경 명령(pause · Nfr)은 글 안에 쓸 수 없다: [cmd=\"{commandText}\"/]. 실행하지 않는다.");
+                return false;
+            }
+        }
+
+        if (!_roleGate.TryAccept(output, _parsed, out string reason))
+        {
+            Debug.LogError($"[인라인 명령] [cmd=\"{commandText}\"/] — {reason}. 실행하지 않는다.");
+            return false;
+        }
+
+        output.AddRange(_parsed);
+        return true;
+    }
+
     private static string AuthoredText(string commandName, string[] args)
     {
         var sb = new StringBuilder("<<").Append(commandName);
