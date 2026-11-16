@@ -19,6 +19,7 @@
 | 마지막으로 맞춘 날 | 2026-11-07 · 이 저장소 → 분리본 둘 (11-05~06에 여기서 고친 것 — `CanvasFadeCommandBase` 삭제, `CommitReleases`, 훅 `OnSkip` · `OnStepLifetimeFinished`에서 scope 제거, `ResolveTargets` → `ResolveRefs`, 팩토리 실패 방어 제거, 모듈 README). 분리본 쪽은 LinePlayback 예제의 훅 세 곳을 새 모양으로 고쳤다 — 압축 진입은 `Execute` 안에서 취소 검사 직후 동기로 불리므로 예제 무대의 `ActiveScope`가 곧 자기 세션이다. 그 전: 2026-11-04 (S2 스텝 세대 가드 · S3/E5 신호·시간·입력 포트와 시간 배율 삭제 · E6 Run 수명 삭제 · S6 첫 진입 try). 그 전: 2026-10-27 처음 떼어 냄(분리본 `main` @ `d12e098`) |
 | 맞춘 것 | `Assets/Ked.CommandExecutor/` 전체 |
 | 일치 | `.cs`·`.meta`·`.asmdef`·README 기준 `diff -r` 0건 (아래 "대조" 명령) |
+| **갈린 것(2026-11-16)** | 원본이 앞섰다 — `CommandExecutor.PlaySpecsInStep`(지금 스텝에 덧붙여 실행, 스텝의 실행 수로 진행 표시 · 토큰을 내림). 분리본 둘은 아직 맞추지 않았다 (`docs/PLAN_stage-step-inline-markup.md` S5) |
 
 **갈리면 이 표를 고친다.** 표가 낡으면 분리본이 어느 판인지 아무도 모른다.
 
