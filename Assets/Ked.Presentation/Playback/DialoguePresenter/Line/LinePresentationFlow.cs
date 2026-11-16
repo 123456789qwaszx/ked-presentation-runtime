@@ -11,11 +11,8 @@ public sealed class LinePresentationFlow
     private readonly SeekState _seekState;
     private readonly DialogueBoxPresentationController _boxPresentation;
     private readonly EllipsisBreathTypewriter _typewriter;
-    private readonly YarnPlaybackDriver _playbackDriver;
+    private readonly StepHead _stepHead;
     private readonly LineHurrySpeedController _lineHurrySpeed;
-    private readonly LineVoiceController _lineVoice;
-    private readonly SceneBgmController _sceneBgm;
-    private readonly RigBlurIntentSystem _rigBlur;
 
     public LinePresentationFlow(
         YarnLineBoundary yarnLineBoundary,
@@ -23,22 +20,16 @@ public sealed class LinePresentationFlow
         SeekState seekState,
         DialogueBoxPresentationController boxPresentation,
         EllipsisBreathTypewriter typewriter,
-        YarnPlaybackDriver playbackDriver,
-        LineHurrySpeedController lineHurrySpeed,
-        LineVoiceController lineVoice,
-        SceneBgmController sceneBgm,
-        RigBlurIntentSystem rigBlur)
+        StepHead stepHead,
+        LineHurrySpeedController lineHurrySpeed)
     {
         _yarnLineBoundary = yarnLineBoundary;
         _lineDisplayState = lineDisplayState;
         _seekState = seekState;
         _boxPresentation = boxPresentation;
         _typewriter = typewriter;
-        _playbackDriver = playbackDriver;
+        _stepHead = stepHead;
         _lineHurrySpeed = lineHurrySpeed;
-        _lineVoice = lineVoice;
-        _sceneBgm = sceneBgm;
-        _rigBlur = rigBlur;
     }
 
     public async YarnTask RunAsync(
@@ -61,29 +52,18 @@ public sealed class LinePresentationFlow
         SetPhase(ctx, LinePresentationPhase.LineRuntimeStateResolved);
         
         // Phase: LineEnteredCommitted
-        string voiceKey = LineVoiceController.FindLineVoiceKey(_playbackDriver.Collected);
+        string voiceKey = _stepHead.FindVoiceKey();
         _yarnLineBoundary.CommitLineEntered(meta, voiceKey, ctx.RecordDecision);
         _lineDisplayState.SetLineAutoAdvance(ctx.AdvanceMode == LineAdvanceMode.AutoWhenShown);
 
         if (ctx.SeekDecision == SeekLineDecision.TargetLineReached)
             _seekState.End(SeekEndReason.Arrived);
 
-        // 앞 줄의 보이스는 여기서 끝난다. 이 줄의 보이스는 PlayCollected가 낸다.
-        _lineVoice.EndPreviousLine();
-        _playbackDriver.PlayCollected();
-
-        // 블러 의도는 줄 머리 커맨드가 다 돈 뒤 살아 있는 리그에 다시 맞춘다 — 그 사이 등장한 리그, size로 바뀐 깊이, cast가 따라간다.
-        // 커맨드가 끝값으로 놓인 줄(시크 통과 · 빠른 넘김)은 블러도 Snap한다. 시크 통과 줄도 건너뛰지 않는다 —
-        // 도착 줄에서 밀린 변화가 한꺼번에 트윈으로 보이지 않게.
-        bool snap = ctx.IsRapidSkip || ctx.SeekDecision == SeekLineDecision.SkipVisualAndDispatchSeekNext;
-        _rigBlur.Reconcile(snap);
-
-        // 장면 BGM은 압축이 아닌 줄의 머리 커맨드가 다 돈 뒤에 맞춘다 — 시크 통과 줄은 의도만 쌓는다.
-        if (ctx.SeekDecision != SeekLineDecision.SkipVisualAndDispatchSeekNext)
-            _sceneBgm.SettleAfterLineHead();
+        bool seekPassThrough = ctx.SeekDecision == SeekLineDecision.SkipVisualAndDispatchSeekNext;
+        _stepHead.Play(snap: ctx.IsRapidSkip || seekPassThrough, seekPassThrough: seekPassThrough);
         SetPhase(ctx, LinePresentationPhase.LineEnteredCommitted);
         
-        if (ctx.SeekDecision == SeekLineDecision.SkipVisualAndDispatchSeekNext) {
+        if (seekPassThrough) {
             RunSeekPassThrough(ctx);
             return;
         }

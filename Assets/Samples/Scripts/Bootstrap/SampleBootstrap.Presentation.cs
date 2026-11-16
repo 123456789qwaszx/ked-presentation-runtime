@@ -241,17 +241,20 @@ public partial class SampleBootstrap
         _lineVoice = new LineVoiceController(audioSystem.Voice);
         _sceneBgm = new SceneBgmController(audioSystem.Bgm);
 
+        StepHead stepHead = new(
+            yarnPlaybackDriver,
+            _lineVoice,
+            _sceneBgm,
+            _rigBlur);
+
         _linePresentationFlow = new LinePresentationFlow(
             yarnLineBoundary,
             _lineDisplayState,
             _seekState,
             dialogueBoxPresentationController,
             ellipsisBreathTypewriter,
-            yarnPlaybackDriver,
-            lineHurrySpeed,
-            _lineVoice,
-            _sceneBgm,
-            _rigBlur);
+            stepHead,
+            lineHurrySpeed);
 
         customLinePresenter.Initialize(
             dialogueRunner,
