@@ -1,6 +1,6 @@
 # 무대 스텝 · 인라인 명령 — 계획 (2026-11-16)
 
-기준: `dev` @ `4db1d72`. 상태: **계획 — 결정 끝(§7, 2026-11-16 소유자)**. 코드는 아직 고치지 않았다.
+기준: `dev` @ `4db1d72`. 상태: **S1–S8 구현 끝(2026-11-16)** — S1–S6은 Unity 확인, S7 · S8은 확인 전. 남은 것은 §8.
 
 두 가지를 들인다.
 
@@ -205,8 +205,8 @@
 | S4 | 예제 대본 둘의 끝 가짜 줄을 지움(노드 끝 암묵 스텝) · 문서(README · analysis R1 · ASSEMBLY-BOUNDARY) — **함** | — |
 | S5 | 실행기: `PlaySpecsInStep` — 지금 스텝에 덧붙여 실행(스텝 경계를 치지 않는다. 진행 표시 · 토큰은 스텝의 실행이 다 끝날 때 내린다) — **함(Unity 확인 전)**. 분리본은 아직 맞추지 않았다 | 없음(입구만) |
 | S6 | `InlineCommandTrack`(타자기의 `IActionMarkupHandler`) + `YarnCommandBridge.TryParseInline` + 흐름의 세 길(글 끝 · 일찍 넘어감 · 시크 통과) — **함(Unity 확인 전)** | 인라인 생김 |
-| S7 | Core 추출기: 인라인 스캐너, 런타임 파싱과의 대조 테스트 | 폴드 |
-| S8 | 데모 대본에 인라인 한 곳 · 문서 · 사본에 알림 | — |
+| S7 | Core 추출기: 인라인 스캐너(`StripInlineCommands`) + EditMode 테스트 — **함(Unity 확인 전)**. 런타임 파싱(Yarn)과의 대조는 하네스가 맡는다 — 원문을 접은 것과 재생한 무대를 줄마다 견준다 | 폴드 |
+| S8 | 데모 대본에 인라인 한 줄(`ln_k7inl2cm`) · 문서(README · analysis R1 · 두 `vendoring.md`의 갈린 것) — **함**. 사본(분리본 둘 · compositor · characterRig · workspace 반입본)은 아직 맞추지 않았다 | — |
 
 ## 7. 정한 것 (2026-11-16, 소유자)
 
@@ -241,3 +241,11 @@
 - 자동 진행과 `#auto`는 서두르지 않는다 — 지금처럼 전경이 끝나기를 기다린다. 사용자 입력만 서두른다.
 - 넘김 쿨다운(`AdvanceGate`)은 그대로 적용한다 — 앞 줄을 넘긴 클릭이 곧바로 다음 스텝까지 서두르지 않게.
 - 작가가 둔 뜸(`pause`)을 사용자가 클릭으로 건너뛸 수 있게 된다(소유자 결정).
+
+## 8. 남은 것
+
+- **사본 맞추기.** 실행기 분리본 둘(ked-command-executor · ked-stage-runtime), Core 사본(ked-story-compositor · ked-motion-tool-characterRig · ked-vn-workspace 반입본). 흐름은 한 방향이다.
+- **하류의 무대 줄.** ked-vn-workspace의 `무대 #boxhide #auto` 674줄(`tools/stage/script.py` · `compose.py`)과 녹화기의 `#auto` 무대 줄 규칙, ked-story-director의 `runtime-contract.md`(§5).
+- **노드가 끝난 뒤의 되감기 한 칸.** 노드가 끝나고(암묵 무대 스텝도 끝난 뒤) 선택지 · 끝 화면에서 R을 누르면 표적이 "마지막 줄의 앞 줄"이다 —
+  줄로 끝나는 노드가 원래 그랬다. 가짜 무대 줄로 끝나던 예제 둘은 전에는 마지막 대사 줄로 갔으므로 한 줄 더 뒤로 가게 됐다.
+  "노드가 끝났으면 마지막 줄로"가 맞다면 무대 스텝 중과 같은 표적 규칙(`GetRollbackPoint(duringStageStep: true)`)을 쓰면 된다 — 소유자 결정.

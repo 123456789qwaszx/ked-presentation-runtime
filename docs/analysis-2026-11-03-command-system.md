@@ -66,6 +66,10 @@ RunNode → SequencePlayer.PlayCommands   (CommandIsPlaying = true)
 - 무대 스텝 `<<step>>`: 대사 없이 실행한다. 대사창을 닫고, 전경(`pause`)이 끝나면 Yarn이 이어 간다.
   줄이 아니다 — 백로그 · 되감기 기준점 · 줄 좌표에 들지 않고, 시크는 압축으로 지나간다.
 - 노드가 끝날 때 남은 커맨드는 암묵 무대 스텝으로 실행한다. 정지로 끝난 노드의 것은 버린다.
+- 인라인 명령 `[cmd="명령 한 줄"/]`: 대사 글 안에 쓰고, 타자기가 그 글자를 드러내기 직전에 실행한다(`InlineCommandTrack`).
+  새 스텝이 아니다 — 줄 머리와 같은 스텝에 덧붙는다(`CommandExecutor.PlaySpecsInStep`, 스텝 경계를 치지 않는다).
+  뜻은 같은 파서가 푼다(`YarnCommandBridge.TryParseInline`). 전경(`pause` · `Nfr`)은 거절한다.
+  타자기가 닿지 않은 것은 줄이 끝날 때, 시크가 지나가는 줄은 줄 머리 바로 뒤에 모두 실행한다. 끊긴 줄의 남은 것은 실행하지 않는다.
 - 전경이 도는 동안의 사용자 입력은 그 스텝을 서두른다(압축 래치 `PlaybackRuntimeState.IsStepHurried`) — 다음 스텝의 머리가 내린다.
 
 **R2 뜻은 파서 한 곳에 있다.** 브리지는 이름과 인자 수만 안다.
