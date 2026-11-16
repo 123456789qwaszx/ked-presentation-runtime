@@ -208,6 +208,25 @@ public partial class DialogueBoxPresentationController
         }
     }
 
+    // 무대 스텝 — 대사창을 닫는다. 내용은 건드리지 않는다(얹을 줄이 없다).
+    // 중단되면(run 무효) 상태를 적지 않는다 — 부른 쪽이 CleanupStale로 정리한다.
+    public async YarnTask HideForStageStepAsync(LinePresentationRun run, bool immediate)
+    {
+        if (!_boxState.IsVisible)
+            return;
+
+        if (!immediate)
+        {
+            await _box.FadeOutAsync(FadeDownDuration, run.VisualToken);
+
+            if (!run.IsValid)
+                return;
+        }
+
+        _box.SetVisibleImmediate(false);
+        _boxState.MarkHidden();
+    }
+
     public void CloseAll()
     {
         _box.SetVisibleImmediate(false);

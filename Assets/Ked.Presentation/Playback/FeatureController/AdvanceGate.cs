@@ -44,6 +44,24 @@ public sealed class AdvanceGate
             _cooldownUntilUnscaled = until;
     }
 
+    // 전경 명령(pause)이 도는 중이다 — 다음 줄을 열 수 없다.
+    public bool IsForegroundBusy => CurrentScope != null && CurrentScope.CommandIsPlaying;
+
+    // 사용자 입력이 전경 중에 왔다 — 넘김은 아니지만(스텝 서두르기 · 글 서두르기) 같은 쿨다운 · 간격을 지킨다.
+    // 앞 줄을 넘긴 입력이 곧바로 다음 스텝까지 서두르지 않게.
+    public bool TryAcceptWhileBusy()
+    {
+        if (_seekState.IsSeekingActive)
+            return false;
+
+        double unscaledNow = Time.unscaledTimeAsDouble;
+
+        if (unscaledNow < _cooldownUntilUnscaled)
+            return false;
+
+        return PassRateLimit(AdvanceRequestKind.User, unscaledNow);
+    }
+
     public bool TryAccept(AdvanceRequestKind kind)
     {
         if (_seekState.IsSeekingActive)
@@ -51,7 +69,8 @@ public sealed class AdvanceGate
 
         // RapidSkip도 막는다 — 앞 줄의 실행이 끝나기 전에 다음 줄을 열면 두 실행이 나란히 돈다(S2).
         // 압축이 켜지면 pause가 그 자리에서 끝나므로(WaitCommand) 기다림은 한 프레임이다.
-        if (CurrentScope != null && CurrentScope.CommandIsPlaying)
+        // 사용자 입력은 여기 오기 전에 스텝을 서두른다(DialogueAdvanceDispatcher).
+        if (IsForegroundBusy)
             return Reject(kind, "cps_node_busy");
         
         double unscaledNow = Time.unscaledTimeAsDouble;

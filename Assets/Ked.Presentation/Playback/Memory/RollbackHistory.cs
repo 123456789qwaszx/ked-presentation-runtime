@@ -37,8 +37,6 @@ public sealed class RollbackHistory
     private bool _hasPendingTarget;
     
     public IReadOnlyList<RollbackPoint> Points => _points;
-    public bool CanRollbackOneStep => _points.Count >= 2;
-
     // 마지막으로 쌓인 포인트의 historyIndex. 없으면 -1. 선택 기록의 앵커.
     public int LastHistoryIndex => _points.Count == 0 ? -1 : _points[^1].historyIndex;
     
@@ -91,16 +89,19 @@ public sealed class RollbackHistory
         return true;
     }
 
-    public bool GetRollbackPoint(out RollbackPoint target)
+    // 되감기 한 칸의 표적. 줄에 서 있으면 그 앞 줄이다.
+    // 무대 스텝 중이면 마지막 줄(방금 넘긴 줄)이다 — 무대 스텝은 기준점이 아니라서 "지금"이 그 줄의 뒤다.
+    public bool GetRollbackPoint(bool duringStageStep, out RollbackPoint target)
     {
         target = default;
 
-        if (!CanRollbackOneStep)
+        int targetListIndex = _points.Count - (duringStageStep ? 1 : 2);
+
+        if (targetListIndex < 0)
             return false;
 
-        int targetListIndex = _points.Count - 2;
         target = _points[targetListIndex];
-        
+
         return true;
     }
 

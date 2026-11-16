@@ -10,6 +10,7 @@ public sealed class ScenePresentation : IPlaybackStage
     private readonly IPresentationView _presentationView;
     private readonly RollbackHistory _rollbackHistory;
     private readonly ILineAborter _linePresentationAborter;
+    private readonly IStageStepRunner _stageStep;
     private readonly PresentationShotResponseSystem _shotResponseSystem;
     // 블러 의도(focus_on·screen_blur)도 샷처럼 정지에서 비운다 — 리플레이가 다시 건다.
     private readonly RigBlurIntentSystem _rigBlur;
@@ -40,6 +41,7 @@ public sealed class ScenePresentation : IPlaybackStage
         IPresentationView presentationView,
         RollbackHistory rollbackHistory,
         ILineAborter linePresentationAborter,
+        IStageStepRunner stageStep,
         PresentationShotResponseSystem shotResponseSystem,
         RigBlurIntentSystem rigBlur,
         ScreenEffectRig screenEffects,
@@ -59,6 +61,7 @@ public sealed class ScenePresentation : IPlaybackStage
         _presentationView = presentationView;
         _rollbackHistory = rollbackHistory;
         _linePresentationAborter = linePresentationAborter;
+        _stageStep = stageStep;
         _shotResponseSystem = shotResponseSystem;
         _rigBlur = rigBlur;
         _screenEffects = screenEffects;
@@ -80,7 +83,7 @@ public sealed class ScenePresentation : IPlaybackStage
         _stopRequested = false;
         
         // 앞 단위가 남긴 명령은 이 단위의 것이 아님.
-        DiscardPendingCommands(warn: false); 
+        DiscardPendingCommands();
         
         // 앞 단위가 시크 도중에 끝났다면 그 표적은 이 단위의 것이 아님.
         _seekState.End(SeekEndReason.SceneReset); 
@@ -101,8 +104,9 @@ public sealed class ScenePresentation : IPlaybackStage
         {
             await _nodeRunner.RunNodeAsync(nodeName);
 
+            // 노드 끝에 남은 명령은 암묵 무대 스텝으로 실행한다 — 줄이 없어도 버리지 않는다.
             if (!_stopRequested)
-                DiscardPendingCommands(warn: true);
+                await _stageStep.RunStageStepAsync();
         }
         finally
         {
@@ -148,7 +152,7 @@ public sealed class ScenePresentation : IPlaybackStage
             await _nodeRunner.StopAsync();
 
         // Yarn이 멈춘 뒤라 더 쌓이지 않는다.
-        DiscardPendingCommands(warn: false);
+        DiscardPendingCommands();
 
         _linePresentationAborter.AbortCurrentLine();
         _rollbackHistory.ClearRollbackPoints();
@@ -170,21 +174,13 @@ public sealed class ScenePresentation : IPlaybackStage
         _presentationScope.End();
     }
 
-    private void DiscardPendingCommands(bool warn)
+    private void DiscardPendingCommands()
     {
         if (_playbackDriver == null || !_playbackDriver.TryDiscardPending(out int count, out string summary))
             return;
 
         string node = string.IsNullOrEmpty(_currentNodeName) ? "(노드 없음)" : $"'{_currentNodeName}'";
 
-        if (warn)
-        {
-            Debug.LogWarning(
-                $"[연출 명령] {node} 재생이 끝났는데 다음 줄을 기다리던 명령 {count}개가 남아 실행하지 않고 버린다: {summary}. " +
-                "명령은 다음 줄의 앞머리로 실행된다 — 노드를 줄로 끝낸다(연출만이면 #boxhide 줄).");
-            return;
-        }
-
-        Debug.Log($"[연출 명령] {node} 정지 — 다음 줄을 기다리던 명령 {count}개를 버렸다: {summary}.");
+        Debug.Log($"[연출 명령] {node} 정지 — 다음 스텝을 기다리던 명령 {count}개를 버렸다: {summary}.");
     }
 }

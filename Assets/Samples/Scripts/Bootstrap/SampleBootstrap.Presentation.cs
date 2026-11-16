@@ -231,7 +231,8 @@ public partial class SampleBootstrap
             yarnPlaybackDriver,
             stageCommandParser,
             _presentationStage,
-            dialogueBoxPresentationController);
+            dialogueBoxPresentationController,
+            customLinePresenter);
 
         YarnLineBoundary yarnLineBoundary = new(
             _backlogRecorder,
@@ -243,6 +244,7 @@ public partial class SampleBootstrap
 
         StepHead stepHead = new(
             yarnPlaybackDriver,
+            _playbackState,
             _lineVoice,
             _sceneBgm,
             _rigBlur);
@@ -256,9 +258,18 @@ public partial class SampleBootstrap
             stepHead,
             lineHurrySpeed);
 
+        StageStepFlow stageStepFlow = new(
+            stepHead,
+            _lineDisplayState,
+            _seekState,
+            dialogueBoxPresentationController,
+            _playbackState,
+            _presentationScopeSession);
+
         customLinePresenter.Initialize(
             dialogueRunner,
             _linePresentationFlow,
+            stageStepFlow,
             ellipsisBreathTypewriter,
             _playbackState);
 
@@ -275,6 +286,7 @@ public partial class SampleBootstrap
             nodeRunner,
             _kedUI.Flow,
             _rollbackHistory,
+            customLinePresenter,
             customLinePresenter,
             _presentationResponseRig,
             _rigBlur,
@@ -327,7 +339,8 @@ public partial class SampleBootstrap
         _dialogueAdvanceDispatcher.Initialize(
             advanceGate,
             dialogueRunner,
-            _lineDisplayState);
+            _lineDisplayState,
+            _playbackState);
     }
 
     private void BootstrapEquivalenceHarness()

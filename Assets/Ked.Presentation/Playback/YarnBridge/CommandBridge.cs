@@ -10,6 +10,7 @@ public sealed partial class YarnCommandBridge
     private readonly StageCommandParser _parser;
     private readonly CommandRoleGate _roleGate;
     private readonly DialogueBoxPresentationController _dialogueBoxPresentation;
+    private readonly IStageStepRunner _stageStep;
 
     // Forward가 쓰는 스크래치 — 커맨드 하나가 스펙 여럿을 낳는다(show·cast·bg_spawn).
     private readonly List<CommandSpecBase> _parsed = new();
@@ -19,12 +20,14 @@ public sealed partial class YarnCommandBridge
         YarnPlaybackDriver playbackDriver,
         StageCommandParser parser,
         PresentationStage stage,
-        DialogueBoxPresentationController dialogueBoxPresentation)
+        DialogueBoxPresentationController dialogueBoxPresentation,
+        IStageStepRunner stageStep)
     {
         _playbackDriver = playbackDriver;
         _parser = parser;
         _roleGate = new CommandRoleGate(stage);
         _dialogueBoxPresentation = dialogueBoxPresentation;
+        _stageStep = stageStep;
 
         BindRunnerCommands(runner);
     }
@@ -68,6 +71,9 @@ public sealed partial class YarnCommandBridge
 
         runner.AddCommandHandler(
             "surface_reset", ResetSurfaceLayout);
+
+        runner.AddCommandHandler(
+            "step", RunStageStep);
     }
     
     private void BindEmoji(DialogueRunner runner)

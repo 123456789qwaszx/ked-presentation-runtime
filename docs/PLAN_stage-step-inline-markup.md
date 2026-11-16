@@ -78,25 +78,25 @@
 | 단위 | 만드는 것 | 스텝 경계 | 좌표(되감기 · 저장) | 백로그 |
 |---|---|---|---|---|
 | 줄 스텝 | 대사 줄 | 친다 | 된다 | 남는다 |
-| 무대 스텝 | `<<stage>>`(또는 노드 끝) | 친다 | **안 된다** | **안 남는다** |
+| 무대 스텝 | `<<step>>`(또는 노드 끝) | 친다 | **안 된다** | **안 남는다** |
 | 인라인 | 줄 글 안의 `[cmd="…"/]` | **치지 않는다** | 안 된다 | 마커는 글에서 빠진다 |
 
 무대 스텝과 인라인은 좌표가 아니다. 그래서 시크는 둘을 "지나가는 줄의 일부"로 압축 재생한다.
 루트부터의 재생이 줄 좌표 하나로 결정된다는 성질(README · `PLAN_playback-unit.md`)은 그대로다.
 
-## 3. 무대 스텝 `<<stage>>`
+## 3. 무대 스텝 `<<step>>`
 
 ```yarn
 <<fade_out s1 0.5s>>
 <<pause 0.5s>>
 <<fade s2 0.72 0.5s>>
 <<pause 0.5s>>
-<<stage>>
+<<step>>
 <<fade_in s2 0.33s>>
 세이나: 아, 음…… 이건 면접관에게만 알려주는 건데.
 ```
 
-`무대 #boxhide #auto #line:…` 한 줄이 `<<stage>>` 하나로 바뀐다. 인자는 없다.
+`무대 #boxhide #auto #line:…` 한 줄이 `<<step>>` 하나로 바뀐다. 인자는 없다.
 
 ### 3.1 하는 일 — 줄 머리와 같은 순서
 
@@ -108,8 +108,8 @@
 1–2는 지금 `LinePresentationFlow.RunAsync`의 "줄 머리" 구간(`PlayCollected` ~ `SettleAfterLineHead`)이다.
 이 구간을 떼어 내(`StepHead`) 줄과 무대 스텝이 같이 쓴다.
 
-`<<stage>>`는 브리지에서 `YarnTask`를 돌려주는 핸들러다. 지운 `box_hide`는 큐를 앞질러서 문제였다(S5).
-`<<stage>>`는 앞에 쌓인 명령을 자기가 실행하므로 순서가 뒤집히지 않는다.
+`<<step>>`는 브리지에서 `YarnTask`를 돌려주는 핸들러다. 지운 `box_hide`는 큐를 앞질러서 문제였다(S5).
+`<<step>>`는 앞에 쌓인 명령을 자기가 실행하므로 순서가 뒤집히지 않는다.
 
 ### 3.2 상황별
 
@@ -130,7 +130,7 @@
 
 ### 3.3 폴드 · 등가성
 
-`YarnCommandTextExtractor`(Core)는 `<<stage>>`를 무대 명령이 아니라 스텝 경계로 읽는다.
+`YarnCommandTextExtractor`(Core)는 `<<step>>`를 무대 명령이 아니라 스텝 경계로 읽는다.
 등가성 하네스는 줄마다 쌓아서 접고, 관측점은 줄을 넘기기 직전이다.
 그래서 무대 스텝의 명령은 다음 줄의 폴드에 들어간다. 판정은 지금과 같다.
 툴 미리보기가 "무대 스텝 하나의 정지 프레임"을 원하면 그룹을 하나 더 내면 된다 — 줄 글이 null이고 스텝 표시가 있는 그룹.
@@ -186,9 +186,9 @@
 
 | 어디 | 무엇이 바뀌나 |
 |---|---|
-| 예제 대본 둘(`presentation_demo_*` · `festival_eve_Festival_Staffroom`) | 마지막 `캐릭터 퇴장 #boxhide #auto` → `<<stage>>`(또는 노드 끝 암묵 스텝이면 줄째 지움). **툴이 낸 파일이다** — 정본은 ked-story-compositor `samples/RuntimeSamples`(README) |
+| 예제 대본 둘(`presentation_demo_*` · `festival_eve_Festival_Staffroom`) | 마지막 `캐릭터 퇴장 #boxhide #auto` → `<<step>>`(또는 노드 끝 암묵 스텝이면 줄째 지움). **툴이 낸 파일이다** — 정본은 ked-story-compositor `samples/RuntimeSamples`(README) |
 | ked-story-director `docs/runtime-contract.md` | 무대 스텝 · 인라인 명령을 계약에 적는다 |
-| ked-vn-workspace `tools/stage/script.py` · `drafts/ch09-prologue/compose.py` | `무대 #boxhide #auto #line:t…` → `<<stage>>`. 무대 줄 ID(`t…`)가 사라진다 |
+| ked-vn-workspace `tools/stage/script.py` · `drafts/ch09-prologue/compose.py` | `무대 #boxhide #auto #line:t…` → `<<step>>`. 무대 줄 ID(`t…`)가 사라진다 |
 | ked-vn-workspace 녹화기(`PlaybackRecorder`) | `#auto` 무대 줄 규칙(시각표에 없는 줄 · "첫 줄 앞의 무대 줄은 시계를 잡지 않는다")이 필요 없어진다 |
 | 문서 | `command-authoring.md` · `analysis-2026-11-03-command-system.md`(R1) · `ASSEMBLY-BOUNDARY.md` · `LineAdvanceTag.cs` 머리 주석 · `ScenePresentation` 경고문 |
 
@@ -199,8 +199,8 @@
 | # | 일 | 동작 변화 |
 |---|---|---|
 | S1 | `LinePresentationFlow`의 줄 머리를 `StepHead`로 떼기 — **함(Unity 확인 전)** | 없음(리팩터) |
-| S2 | `<<stage>>` 핸들러 + 스텝 서두르기(§7.1) + `LineDisplayState` "무대 스텝 중" + 되감기 한 칸 표적 + 노드 끝 암묵 스텝 | 무대 스텝 생김 |
-| S3 | Core 추출기: `<<stage>>` = 스텝 경계, EditMode 테스트 | 폴드 |
+| S2 | `<<step>>` 핸들러 + 스텝 서두르기(§7.1) + `LineDisplayState` "무대 스텝 중" + 되감기 한 칸 표적 + 노드 끝 암묵 스텝 — **함(Unity 확인 전)** | 무대 스텝 생김 |
+| S3 | Core 추출기: `<<step>>` = 스텝 경계, EditMode 테스트 | 폴드 |
 | S4 | 예제 대본 · 문서 | — |
 | S5 | 실행기: 지금 스텝에 덧붙여 실행하는 입구(토큰 · `CommandIsPlaying`의 수명) | 없음(입구만) |
 | S6 | `InlineCommandMarkupHandler`(`ActionMarkupHandler`) + 흐름의 세 길(글 끝 · 일찍 넘어감 · 시크 통과) | 인라인 생김 |
@@ -211,7 +211,7 @@
 
 | # | 물음 | 결정 |
 |---|---|---|
-| Q1 | 무대 스텝의 이름 | `<<stage>>` |
+| Q1 | 무대 스텝의 이름 | `<<step>>` — 처음에는 `<<stage>>`로 정했다가 S2를 시작하며 바꿨다 |
 | Q2 | 인라인 표기 | 범용 마커 `[cmd="명령 한 줄"/]` |
 | Q3 | 인라인의 전경(`pause` · `Nfr`) | 금지 — 경고하고 버린다 |
 | Q4 | 노드 끝에 남은 명령 | 암묵 무대 스텝으로 실행한다 |
@@ -232,8 +232,8 @@
 
 | 어디서 | 클릭 |
 |---|---|
-| 무대 스텝 | 스텝을 서두른다. 전경이 끝나 `<<stage>>`가 Yarn을 놓아준다 |
-| 대사 줄 — 글이 아직 나오는 중 | 타자기 서두르기(지금 그대로). 스텝은 건드리지 않는다 |
+| 무대 스텝 | 스텝을 서두른다. 전경이 끝나 `<<step>>`가 Yarn을 놓아준다 |
+| 대사 줄 — 글이 아직 나오는 중 | 타자기 서두르기. 스텝은 건드리지 않는다. 전에는 `pause`가 도는 동안 이것도 막혔다 — 같이 풀었다 |
 | 대사 줄 — 글은 다 나왔고 머리의 `pause`가 도는 중 | 스텝을 서두르고 다음 줄로 넘긴다. 지금은 `cps_node_busy`로 거절한다 |
 
 - 빨리 넘기기 · 시크와 종점이 같다(`OnSkip` = 자연 종료의 종점, R3). 폴드와 어긋나지 않는다.

@@ -2,21 +2,27 @@
 public sealed class StepHead
 {
     private readonly YarnPlaybackDriver _playbackDriver;
+    private readonly PlaybackRuntimeState _playbackState;
     private readonly LineVoiceController _lineVoice;
     private readonly SceneBgmController _sceneBgm;
     private readonly RigBlurIntentSystem _rigBlur;
 
     public StepHead(
         YarnPlaybackDriver playbackDriver,
+        PlaybackRuntimeState playbackState,
         LineVoiceController lineVoice,
         SceneBgmController sceneBgm,
         RigBlurIntentSystem rigBlur)
     {
         _playbackDriver = playbackDriver;
+        _playbackState = playbackState;
         _lineVoice = lineVoice;
         _sceneBgm = sceneBgm;
         _rigBlur = rigBlur;
     }
+
+    // 다음 스텝을 기다리는 명령이 있나.
+    public bool HasPending => _playbackDriver.Collected.Count > 0;
 
     // 이 스텝이 낼 보이스의 키. 명령을 실행하기 전에 읽는다 — 실행하면 쌓인 것이 비워진다.
     public string FindVoiceKey() => LineVoiceController.FindLineVoiceKey(_playbackDriver.Collected);
@@ -25,6 +31,9 @@ public sealed class StepHead
     // seekPassThrough: 시크가 지나가는 스텝 — 장면 BGM은 의도만 쌓는다.
     public void Play(bool snap, bool seekPassThrough)
     {
+        // 앞 스텝의 서두르기는 여기서 끝난다 — 이 스텝의 명령은 제 속도로 돈다.
+        _playbackState.EndStepHurry();
+
         // 앞 줄의 보이스는 여기서 끝난다. 이 스텝의 보이스는 PlayCollected가 낸다.
         _lineVoice.EndPreviousLine();
         _playbackDriver.PlayCollected();

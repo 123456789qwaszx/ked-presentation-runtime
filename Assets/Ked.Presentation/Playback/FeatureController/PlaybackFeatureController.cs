@@ -131,7 +131,7 @@ public sealed class PlaybackFeatureController
         if (_seekState.IsSeeking)
             return false;
 
-        if (!_rollbackController.GetRollbackPoint(out RollbackPoint target))
+        if (!_rollbackController.GetRollbackPoint(_lineDisplayState.IsStageStepActive, out RollbackPoint target))
             return false;
 
         return RequestRollbackTo(target);

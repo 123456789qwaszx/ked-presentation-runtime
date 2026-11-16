@@ -1,4 +1,4 @@
-// 지금 줄의 표시 상태 — 다 보였나 · #auto 넘김 대기. 시크는 SeekState가 가진다.
+// 지금 줄의 표시 상태 — 다 보였나 · #auto 넘김 대기 · 무대 스텝 중. 시크는 SeekState가 가진다.
 public sealed class LineDisplayState
 {
     public bool IsLineFullyShown { get; private set; } = true;
@@ -7,10 +7,27 @@ public sealed class LineDisplayState
     // 줄에 들어갈 때 · 무너질 때 내린다 — 다음 줄로 새지 않는다.
     public bool IsLineAutoAdvancePending { get; private set; }
 
+    // 무대 스텝(<<step>> · 노드 끝)이 도는 중이다. 줄이 아니다 — 넘길 줄도 서두를 글도 없다.
+    // 앞 줄의 "다 보임"이 남아 있으면 자동 진행이 한 번 더 넘기므로 들어갈 때 내린다.
+    public bool IsStageStepActive { get; private set; }
+
     public void MarkLineEntered()
     {
         IsLineFullyShown = false;
         IsLineAutoAdvancePending = false;
+        IsStageStepActive = false;
+    }
+
+    public void MarkStageStepEntered()
+    {
+        IsLineFullyShown = false;
+        IsLineAutoAdvancePending = false;
+        IsStageStepActive = true;
+    }
+
+    public void MarkStageStepExited()
+    {
+        IsStageStepActive = false;
     }
     
     // 줄마다 한 번, 넘김 정책(LineAdvancePolicy)이 정한 대로.

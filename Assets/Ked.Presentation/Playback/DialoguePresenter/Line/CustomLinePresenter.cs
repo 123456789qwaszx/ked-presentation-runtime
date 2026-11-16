@@ -8,9 +8,16 @@ public interface ILineAborter
     void AbortCurrentLine();
 }
 
-public sealed class CustomLinePresenter : DialoguePresenterBase, ILineAborter
+// 무대 스텝(<<step>> · 노드 끝)을 실행한다. 기다릴 것이 없으면 그 자리에서 끝난 태스크를 돌려준다.
+public interface IStageStepRunner
+{
+    YarnTask RunStageStepAsync();
+}
+
+public sealed class CustomLinePresenter : DialoguePresenterBase, ILineAborter, IStageStepRunner
 {
     private LinePresentationFlow _linePresentationFlow;
+    private StageStepFlow _stageStepFlow;
 
     private EllipsisBreathTypewriter _typewriter;
     private PlaybackRuntimeState _playbackRuntimeState;
@@ -18,7 +25,7 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILineAborter
     private CancellationTokenSource _presenterLifetimeCts = new();
     private CancellationTokenSource _lineVisualCts;
 
-    // 진행 중인 RunLineAsync가 실제로 빠져나올 때까지 기다리기 위한 통로.
+    // 진행 중인 RunLineAsync(· 무대 스텝)가 실제로 빠져나올 때까지 기다리기 위한 통로.
     // 이게 없으면 정지 이후에도 라인 태스크가 살아남아,
     // 다음 StartDialogue가 만든 새 dialogueCancellationSource를 보고
     // Dialogue.Continue()를 한 번 더 씀.
@@ -39,12 +46,14 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILineAborter
     public void Initialize(
         DialogueRunner dialogueRunner,
         LinePresentationFlow linePresentationFlow,
+        StageStepFlow stageStepFlow,
         EllipsisBreathTypewriter typewriter,
         PlaybackRuntimeState playbackRuntimeState)
     {
         RegisterPresenter(dialogueRunner);
         
         _linePresentationFlow = linePresentationFlow;
+        _stageStepFlow = stageStepFlow;
 
         _typewriter = typewriter;
         _typewriter.ActionMarkupHandlers = ActionMarkupHandlers;
@@ -73,6 +82,34 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILineAborter
                 ctx,
                 beginRun: BeginLinePresentationRun,
                 waitForAdvance: WaitForLineAdvanceAsync);
+        }
+        finally
+        {
+            drain.TrySetResult();
+
+            if (ReferenceEquals(_lineDrain, drain))
+                _lineDrain = null;
+        }
+    }
+
+    // 무대 스텝은 줄과 같은 화면 수명(AbortCurrentLine · 대화 끝이 끊는다)과 같은 배수 통로를 쓴다 —
+    // Yarn은 명령의 태스크가 끝나면 Continue()를 쓰므로, 정지 뒤에 늦게 끝나면 줄과 똑같이 새 대화의 줄을 먹는다.
+    public YarnTask RunStageStepAsync()
+    {
+        if (_stageStepFlow.TryPlayWithoutWaiting())
+            return YarnTask.CompletedTask;
+
+        return RunStageStepUntilDrainedAsync();
+    }
+
+    private async YarnTask RunStageStepUntilDrainedAsync()
+    {
+        var drain = new YarnTaskCompletionSource();
+        _lineDrain = drain;
+
+        try
+        {
+            await _stageStepFlow.RunAsync(BeginLinePresentationRun());
         }
         finally
         {
