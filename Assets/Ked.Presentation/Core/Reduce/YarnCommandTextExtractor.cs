@@ -10,7 +10,7 @@ namespace Ked.Presentation.Core
     /// </summary>
     public sealed class YarnLineGroup
     {
-        /// <summary>대사 원문(태그 제외). 꼬리 그룹이면 null.</summary>
+        /// <summary>대사 원문(태그 · 인라인 명령 마커 제외). 꼬리 그룹이면 null.</summary>
         public string LineText;
 
         /// <summary>
@@ -20,6 +20,10 @@ namespace Ked.Presentation.Core
         /// </summary>
         public string LineId;
 
+        /// <summary>
+        /// 이 줄에서 실행되는 커맨드 — 줄 머리의 것, 그 뒤에 대사 글 안의 인라인 명령(글 순서).
+        /// 줄이 끝났을 때의 무대가 이 열을 접은 것과 같다.
+        /// </summary>
         public readonly List<StageCommand> Commands = new();
     }
 
@@ -49,6 +53,13 @@ namespace Ked.Presentation.Core
         /// 접힘은 줄 단위로 쌓으므로 그룹을 가르지 않는다: 앞의 커맨드는 다음 대사의 그룹에 그대로 든다.
         /// </summary>
         public const string StageStepCommand = "step";
+
+        /// <summary>
+        /// 인라인 명령 마커의 이름 — 대사 글 안의 [cmd="명령 한 줄"/]. 따옴표 안은 &lt;&lt; &gt;&gt; 안과 같은 글이다.
+        /// 재생은 Yarn의 마크업 파서로 읽는다(Playback의 InlineCommandTrack). 여기서는 이 마커 하나만 읽는다 —
+        /// 코어는 Yarn을 모른다.
+        /// </summary>
+        public const string InlineCommandMarker = "cmd";
 
         /// <summary>파일 전체를 노드 구분 없이 하나의 흐름으로 뽑는다(단일 노드 파일용).</summary>
         public static List<YarnLineGroup> Extract(
@@ -154,8 +165,10 @@ namespace Ked.Presentation.Core
                     continue;
                 }
 
-                // 대사 라인 = 경계.
-                current.LineText = StripTags(line, out string lineId);
+                // 대사 라인 = 경계. 글 안의 인라인 명령은 줄 머리 커맨드 뒤에 글 순서대로 붙는다.
+                string text = StripTags(line, out string lineId);
+
+                current.LineText = StripInlineCommands(text, $"{sourceName}:{i + 1}", current.Commands, warnings);
                 current.LineId = lineId;
                 node?.Groups.Add(current);
                 current = new YarnLineGroup();
@@ -195,6 +208,100 @@ namespace Ked.Presentation.Core
 
             command = new StageCommand(name, tokens.ToArray(), source);
             return true;
+        }
+
+        /// <summary>
+        /// 대사 글에서 인라인 명령 마커 [cmd="…"/]를 떼어 커맨드로 읽고(글 순서대로 commands 뒤에), 마커를 뺀 글을 돌려준다.
+        /// Yarn처럼 따옴표 안의 역슬래시는 벗기고, 공백 뒤(또는 줄 머리)의 마커는 뒤따르는 공백 하나를 같이 먹는다.
+        /// </summary>
+        public static string StripInlineCommands(
+            string text, string source, List<StageCommand> commands, List<string> warnings = null)
+        {
+            if (string.IsNullOrEmpty(text) || text.IndexOf('[') < 0)
+                return text;
+
+            StringBuilder plain = new(text.Length);
+            int i = 0;
+
+            while (i < text.Length)
+            {
+                if (text[i] != '[' || !TryReadInlineMarker(text, i, out int end, out string commandText))
+                {
+                    plain.Append(text[i++]);
+                    continue;
+                }
+
+                if (TryParseCommand($"<<{commandText}>>", source, out StageCommand command))
+                    commands.Add(command);
+                else
+                    warnings?.Add($"{source} 인라인 명령을 읽지 못했다: {text.Substring(i, end - i)}");
+
+                bool afterWhitespace = plain.Length == 0 || char.IsWhiteSpace(plain[plain.Length - 1]);
+                i = end;
+
+                if (afterWhitespace && i < text.Length && char.IsWhiteSpace(text[i]))
+                    i++;
+            }
+
+            return plain.ToString();
+        }
+
+        // [ cmd = "…" / ] — start는 '['의 자리. 읽었으면 end는 ']' 다음 자리.
+        private static bool TryReadInlineMarker(string text, int start, out int end, out string commandText)
+        {
+            end = start;
+            commandText = null;
+
+            int i = SkipWhitespace(text, start + 1);
+
+            if (string.CompareOrdinal(text, i, InlineCommandMarker, 0, InlineCommandMarker.Length) != 0)
+                return false;
+
+            i = SkipWhitespace(text, i + InlineCommandMarker.Length);
+
+            if (i >= text.Length || text[i] != '=')
+                return false;
+
+            i = SkipWhitespace(text, i + 1);
+
+            if (i >= text.Length || text[i] != '"')
+                return false;
+
+            StringBuilder value = new();
+
+            for (i++; i < text.Length && text[i] != '"'; i++)
+            {
+                // 역슬래시는 다음 글자를 그대로 싣는다(\" → ").
+                if (text[i] == '\\' && i + 1 < text.Length)
+                    i++;
+
+                value.Append(text[i]);
+            }
+
+            if (i >= text.Length)
+                return false;
+
+            i = SkipWhitespace(text, i + 1);
+
+            if (i >= text.Length || text[i] != '/')
+                return false;
+
+            i = SkipWhitespace(text, i + 1);
+
+            if (i >= text.Length || text[i] != ']')
+                return false;
+
+            end = i + 1;
+            commandText = value.ToString();
+            return true;
+        }
+
+        private static int SkipWhitespace(string text, int index)
+        {
+            while (index < text.Length && char.IsWhiteSpace(text[index]))
+                index++;
+
+            return index;
         }
 
         private static bool IsFlowControl(string name)

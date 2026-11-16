@@ -125,6 +125,46 @@ namespace Ked.Presentation.Tests
         }
 
         [Test]
+        public void 인라인_명령은_줄_머리_커맨드_뒤에_글_순서대로_붙고_글에서_빠진다()
+        {
+            const string yarn =
+                "title: Inline_Sample\n" +
+                "---\n" +
+                "<<fade_in c1>>\n" +
+                "하린: 처음엔 [cmd=\"face c1 3\"/]이렇게, [cmd=\"motion c1 nod\"/][ cmd = \"face_swap c1 05 10fr\" / ]저렇게. #line:ln_a\n" +
+                "<<fade_out c1>>\n" +
+                "다음 대사다.\n" +
+                "===\n";
+
+            List<string> warnings = new();
+            List<YarnLineGroup> groups = YarnCommandTextExtractor.Extract(yarn, "inline.yarn", warnings);
+
+            Assert.That(warnings, Is.Empty);
+            Assert.That(groups.Count, Is.EqualTo(2));
+
+            Assert.That(groups[0].LineText, Is.EqualTo("하린: 처음엔 이렇게, 저렇게."));
+            Assert.That(groups[0].LineId, Is.EqualTo("line:ln_a"));
+            Assert.That(groups[0].Commands.Select(c => c.Name),
+                Is.EqualTo(new[] { "fade_in", "face", "motion", "face_swap" }));
+            Assert.That(groups[0].Commands[3].Args, Is.EqualTo(new[] { "c1", "05", "10fr" }));
+            Assert.That(groups[0].Commands[1].Source, Is.EqualTo("inline.yarn:4"));
+
+            Assert.That(groups[1].Commands.Select(c => c.Name), Is.EqualTo(new[] { "fade_out" }));
+        }
+
+        [Test]
+        public void 인라인_마커가_아닌_대괄호는_글로_남는다()
+        {
+            List<StageCommand> commands = new();
+
+            string text = YarnCommandTextExtractor.StripInlineCommands(
+                "[속삭임] 이건 [b]굵게[/b], [cmd=\"face c1 3\"/] 이건 명령.", "t", commands);
+
+            Assert.That(text, Is.EqualTo("[속삭임] 이건 [b]굵게[/b], 이건 명령."));
+            Assert.That(commands.Select(c => c.Name), Is.EqualTo(new[] { "face" }));
+        }
+
+        [Test]
         public void 주석_처리된_커맨드는_빠진다()
         {
             YarnNodeGroups story = ExtractSample()[1];
