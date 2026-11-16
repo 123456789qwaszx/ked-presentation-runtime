@@ -1,6 +1,8 @@
 # 샷의 겹 — 카메라 몸(트랙)과 렌즈(팬 · 틸트 · 줌)를 가른다 — 계획 (2026-11-16)
 
-기준: `refactor/actor-view` @ `8b60c733`. 상태: **계획 — 소유자 결정 대기(§8)**. 코드는 고치지 않았다.
+기준: `refactor/actor-view` @ `8b60c733`. 상태: **보류 — 다시 계획한다(§9).** §2–§8은 트랙만 넣는 첫 안이다. 달리 · 롤 · 흔들림까지 넣고 카메라 리그를 따로 세우는 안으로 다시 쓴다. 코드는 고치지 않았다.
+
+**이어받는 세션은 §9만 읽으면 된다** — 조사를 다시 하지 않도록 사실과 파일을 거기 모았다.
 
 ## 0. 한 문장
 
@@ -198,3 +200,70 @@ Stage_Root
 | Q5 | `shot_pan`을 더하나 | 더한다. 팬 · 틸트만 바꾸는 명령이 지금 없다 |
 | Q6 | 트랙의 축 | x · y 둘. 앞뒤(달리)는 이번에 넣지 않는다(§3) |
 | Q7 | 트랙이 줄을 넘겨도 이어 가나 | 이번에는 지금 규칙(다음 줄에서 가속해 끝냄) 그대로. 느린 트랙이 필요하면 바로 이어서 푼다 |
+
+## 9. 이어받기 (2026-11-16)
+
+### 9.1 정해진 것 (소유자)
+
+- **겹을 나눈다.** 노드로 나눈다.
+- **카메라 리그를 무대 리그와 따로 세운다** — `StageRigSchema`에 노드를 끼우지 않고 `CameraRig`(스키마 · 빌더 · 참조)를 둔다.
+- **달리 · 롤 · 흔들림도 넣는다.** 쓸 일이 많다. 트랙만 넣는 §2–§8은 버리고, 이 셋까지 넣은 계획을 새로 쓴다.
+- §8의 Q2–Q7은 아직 답하지 않았다. 새 계획에서 다시 묻는다.
+
+### 9.2 계층 순서 — "트랙이 부모, 팬이 자식" 아닌가
+
+카메라 자신의 계층으로는 맞다: **몸(트랙 · 달리) → 헤드(팬 · 틸트 · 롤) → 렌즈(줌)**.
+그런데 이 런타임에는 카메라가 없고 **무대를 반대로 움직여** 카메라처럼 보이게 한다. 무대에 거는 변환은 카메라 변환의 역이라 순서가 뒤집힌다.
+
+```
+카메라      C = 트랙 · 헤드            화면 = 렌즈 · 헤드⁻¹ · 트랙⁻¹ · p
+무대 노드   바깥 → 안 :  렌즈(줌) → 헤드(팬 · 롤) → 몸(트랙) → 층
+```
+
+그래서 무대 쪽에서는 **트랙이 가장 안쪽**이다 — 카메라에서 부모라서다. 첫 안(§2)의 트랙 자리는 맞다.
+
+지금 `Camera_Pan`은 줌 **바깥**에 있다. 진짜 팬(렌즈를 돌림)이라면 줌 안쪽이어야 한다 — 당겨 잡을수록 같은 각도에 화면이 더 민다.
+지금 것은 줌과 무관하게 화면 px로 미는 값, 곧 **화면 밀기(프레임 시프트)**다. 재현 대본 512줄이 이 뜻으로 쟀다(`인물 자리 = (화면 − 팬) ÷ 카메라 배율`).
+새 계획에서 정할 것: 지금 팬을 "화면 밀기"로 그대로 두고 진짜 팬을 줌 안쪽에 따로 둘지, 하나로 둘지.
+
+새 계획의 출발 순서(바깥 → 안, 무대를 움직이는 쪽):
+
+| 노드 | 겹 | 뜻 | 비고 |
+|---|---|---|---|
+| Shake | 연기 | 흔들림. 화면 px로 얹고 끝나면 0 | 끝값이 없다 — 폴드는 접지 않는다(모션의 절차적 축과 같은 부류) |
+| Shift | 렌즈 | 화면 밀기 = 지금의 `pan` | 512줄 호환 |
+| Zoom | 렌즈 | 화면 가운데 기준 배율 | 지금 그대로 |
+| Roll | 헤드 | 화면 가운데 기준 회전 | 줌과 중심이 같아 서로 순서를 바꿔도 같다 |
+| (Pan/Tilt) | 헤드 | 진짜 팬 — 둘지 미정 | 줌 안쪽 |
+| Track | 몸 | 카메라가 서는 자리(x · y). 층마다 시차 | 가장 안쪽 |
+| Dolly | 몸 | 앞뒤. **노드가 아니다** — 층마다 배율 · 산개가 d에 따라 다르게 변한다 | 지금 줌의 층 반응(`zoomScaleResponse` · `focusSpreadPerZoom`)이 이 성질이다. 줌에서 떼면 512줄 화면이 바뀐다 → 줌의 것은 두고 달리 축을 따로 더하는 쪽 |
+
+### 9.3 조사한 사실 (다시 읽지 않아도 되게)
+
+**구조** — 경로는 `Assets/Ked.Presentation/` 아래.
+- 무대 계층: `Stage/StageRig/StageRigSchema.cs`. `Stage_Root → Mask_Root → Camera_Pan → Camera_Zoom → Layer_{d} → …_Content`. 모든 노드가 stretch · 피벗 중앙 · 항등으로 선다. 빌더 `StageRigBuilder.cs`, 참조 `StageRigRefs.cs`(`IsShotOwned` — 샷 소유 노드 목록).
+- 무대는 여럿이다(`stage00` 본 무대 · `stage01/02` 덮는 무대). 카메라는 무대마다 있고 **샷은 본 무대만 움직인다**(`StageRoles`, 결정 D2 · D11). 카메라 리그를 따로 세울 때 "무대마다 하나"인지 "본 무대에만"인지 정해야 한다.
+- 마스크(`Mask_Root`)가 카메라 위에 있다 — 카메라가 밀어낸 내용을 자른다. 카메라 리그는 마스크 아래에 들어가야 한다.
+- 샷 시스템: `Stage/Shot/PresentationShotResponseSystem.cs`. `IntentTransition` **하나**가 의도 한 벌을 옮긴다. `Follow`(전환) · `Snap`(압축) · `AccelerateTransition`(스텝 경계) · `Clear`(장면 경계). 중립 조회 `TryGetNeutral`.
+- 의도: 런타임 `Stage/Shot/PresentationIntentState.cs`, Core `Core/State/ShotIntentState.cs` — `Zoom` · `PanInRigSpace` · `FocusPointInRigSpace`. 다리 `PresentationIntentStateCoreBridge.cs`.
+- 식: `Core/Transforms/ShotLayoutMath.cs` — `SolveCamera` · `SolveLayer` · `ProjectToRigSpace` · `SolvePanToPlace` · `LayerProfileCurve`(d → 계수, 기본 표본 다섯: far −1 · back −0.5 · mid 0 · front 0.5 · close 1). 카메라 배율 `1 + 0.05 × zoom`.
+- 목표 계산: `Core/Reduce/ShotIntents.cs`(`Zoom` · `Track` · `To` · `Reset` · `FocusTo`). 폴드 `Core/Reduce/StageReducer.Shot.cs`. 비교 `Core/State/StageStateComparer.cs` · `StageViewSnapshot.cs`.
+- 명령: `Stage/Shot/Commands/`(`ShotIntentCommandBase` — 의도에서 출발해 다음 의도를 넘긴다, 스텝 경계 가속 ×20). 파서 표 `Stage/Grammar/StageCommandParser.Table.cs` 39–43행. 브리지 등록 `Playback/YarnBridge/CommandBridge.cs`의 `BindShotStaging`.
+- 문서: `Stage/StageRig/Documentation~/stage-rig.md`(계층 §2 · 식 §4 · 중립 §5 · `shot_focus_to` §7 · 결정 §9). 캐릭터 리그의 규율은 `CharacterRigSchema.cs` 머리 주석과 `rig-axis-order.md`.
+- 튜닝 파일: `ExportedTuning/`의 `layer-profile.json`(DTO `Core/Tuning/LayerProfileDto.cs`).
+
+**쓰임**
+- 예제 대본: `shot_focus_to` 1 · `shot_reset` 5 · `shot_to` 1.
+- ked-vn-workspace 재현 대본: `shot_to` 512 · `shot_reset` 23, 전부 절대값. `tools/stage/script.py`가 낸다(112행이 `shot_to`를 쓴다 — `zoom = (배율 − 1) / 0.05`).
+- `shot_track` · `shot_zoom`: 쓰는 대본이 없다. `shot_track`은 지금 "팬에 더하기"다.
+- 배경은 `bg_spawn`의 기본 층이 `far`다.
+
+**지켜야 할 것** — §6 그대로. 무엇보다 **새 축이 모두 0이면 지금 식과 같아야 한다**(512줄).
+
+**수요의 근거**(ked-vn-workspace): `docs/vocabulary-gaps.md` R8(화면 흔들림 — 어휘 없음) · S12(집중선), `catalog/참고집.md` K01–K03(카메라 카드), `ch05_01.yarn` 99 · 108번 줄(배경만 track).
+
+### 9.4 다음 세션이 할 일
+
+1. 이 절(§9)만 읽는다.
+2. 달리 · 롤 · 흔들림 · 트랙을 넣은 카메라 리그 계획을 새로 쓴다 — 계층(§9.2에서 출발) · 식 · 겹마다의 전환 · 명령 어휘 · 폴드 · 단계.
+3. 그때 물을 것: 진짜 팬을 따로 둘지(§9.2) · 카메라 리그가 무대마다인지 · 값의 방향(Q2) · `shot_reset`의 범위(Q4) · 줄을 넘는 느린 움직임(Q7) · 흔들림을 폴드에서 어떻게 볼지.
