@@ -94,6 +94,24 @@ namespace Ked.Presentation.Tests.UnityParity
         }
 
         [Test]
+        public void 마스크는_그림을_찾은_채로_켜져_스텐실을_되돌린다()
+        {
+            // Mask.OnEnable이 그림을 찾아야 hasPopInstruction(아래를 다 그린 뒤 스텐실을 0으로 되돌리는 단계)이 선다.
+            // 그림보다 Mask가 먼저 붙으면(RequireComponent) 이 단계가 빠져, 뒤에 그리는 무대의 인물이 마스크에 잘리지 않는다.
+            StageRigRefs refs = _builder.Build(_mount, "stage01", StageLayerLabels.Depths);
+
+            StageMaskGraphic graphic = refs.MaskRoot.GetComponent<StageMaskGraphic>();
+            Mask mask = refs.MaskRoot.GetComponent<Mask>();
+
+            Assert.That(mask.isActiveAndEnabled, Is.True);
+            Assert.That(graphic.canvasRenderer.hasPopInstruction, Is.True, "스텐실을 되돌리는 단계가 서 있어야 한다");
+
+            // 있는 무대를 다시 묶어도 그대로다.
+            StageRigRefs again = _builder.BindRefsFromRoot(refs.Root, "stage01");
+            Assert.That(again.MaskRoot.GetComponent<StageMaskGraphic>().canvasRenderer.hasPopInstruction, Is.True);
+        }
+
+        [Test]
         public void 모든_노드는_항등이다()
         {
             StageRigRefs refs = _builder.Build(_mount, "stage00", StageLayerLabels.Depths);
