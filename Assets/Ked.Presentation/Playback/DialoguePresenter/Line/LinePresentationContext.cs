@@ -29,6 +29,9 @@ public sealed class LinePresentationContext
     // Advance Mode
     public LineAdvanceMode AdvanceMode { get; set; }
 
+    // 이 줄의 표지 목록 — 줄 머리가 짓고(StepHead.PlayLine) 이 줄의 흐름만 끝낸다(docs/PLAN_line-beat.md I5).
+    public InlineCommandTrack.Line Beats { get; set; }
+
     // Visual Run
     public LinePresentationRun Run { get; set; }
 

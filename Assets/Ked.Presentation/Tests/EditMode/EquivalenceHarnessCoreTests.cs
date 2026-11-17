@@ -153,15 +153,157 @@ namespace Ked.Presentation.Tests
         }
 
         [Test]
-        public void 인라인_마커가_아닌_대괄호는_글로_남는다()
+        public void 표지가_아닌_대괄호는_글로_남는다()
         {
-            List<StageCommand> commands = new();
+            List<LineMarker> markers = new();
 
-            string text = YarnCommandTextExtractor.StripInlineCommands(
-                "[속삭임] 이건 [b]굵게[/b], [cmd=\"face c1 3\"/] 이건 명령.", "t", commands);
+            string text = YarnCommandTextExtractor.StripLineMarkers(
+                "[속삭임] 이건 [b]굵게[/b], [cmd=\"face c1 3\"/] 이건 명령, [beat=a/]여기[beatbox=1/].", "t", markers);
 
-            Assert.That(text, Is.EqualTo("[속삭임] 이건 [b]굵게[/b], 이건 명령."));
-            Assert.That(commands.Select(c => c.Name), Is.EqualTo(new[] { "face" }));
+            Assert.That(text, Is.EqualTo("[속삭임] 이건 [b]굵게[/b], 이건 명령, 여기[beatbox=1/]."));
+            Assert.That(markers.Count, Is.EqualTo(2));
+            Assert.That(markers[0].Beat, Is.Null, "옛 [cmd]는 명령");
+            Assert.That(markers[0].Command.Name, Is.EqualTo("face"));
+            Assert.That(markers[1].Beat, Is.EqualTo("a"));
+            Assert.That(markers[1].Position, Is.EqualTo("[속삭임] 이건 [b]굵게[/b], 이건 명령, ".Length), "표지를 뺀 글의 자리");
+        }
+
+        [TestCase("[beat=a/]", "a")]
+        [TestCase("[beat=\"b2\"/]", "b2")]
+        [TestCase("[ beat = c / ]", "c")]
+        public void 표지_이름은_따옴표가_있어도_없어도_읽는다(string marker, string name)
+        {
+            List<LineMarker> markers = new();
+
+            string text = YarnCommandTextExtractor.StripLineMarkers($"앞 {marker}뒤", "t", markers);
+
+            Assert.That(text, Is.EqualTo("앞 뒤"));
+            Assert.That(markers.Single().Beat, Is.EqualTo(name));
+            Assert.That(markers.Single().Position, Is.EqualTo(2));
+        }
+
+        // ── 추출기: <<at>> · [beat] (docs/PLAN_line-beat.md R1 · R3) ───────────
+
+        [Test]
+        public void at_명령은_머리_명령_뒤에_표지_순서로_접히고_end가_마지막이다()
+        {
+            // <<at>>가 머리 명령 사이 · 앞에 쓰여도 머리 뒤에 접힌다 — 재생에서 머리는 줄이 들어올 때, 표지는 그 글자에서다.
+            const string yarn =
+                "title: At_Sample\n" +
+                "---\n" +
+                "<<at end emoji s2 sweat>>\n" +
+                "<<at b face s2 06>>\n" +
+                "<<face s2 05>>\n" +
+                "<<at a face_swap s2 03 0.3s>>\n" +
+                "<<at a motion s2 a008_s2>>\n" +
+                "<<fade_in s2>>\n" +
+                "세이나: 아, 음…… [beat=a/]이건 [beat=b/]비밀인데. #line:ln_at\n" +
+                "<<fade_out s2>>\n" +
+                "다음 대사다.\n" +
+                "===\n";
+
+            List<string> warnings = new();
+            List<YarnLineGroup> groups = YarnCommandTextExtractor.Extract(yarn, "at.yarn", warnings);
+
+            Assert.That(warnings, Is.Empty);
+            Assert.That(groups.Count, Is.EqualTo(2));
+            Assert.That(groups[0].LineText, Is.EqualTo("세이나: 아, 음…… 이건 비밀인데."));
+            Assert.That(groups[0].LineId, Is.EqualTo("line:ln_at"));
+            Assert.That(groups[0].Commands.Select(c => c.Name),
+                Is.EqualTo(new[] { "face", "fade_in", "face_swap", "motion", "face", "emoji" }));
+            Assert.That(groups[0].Commands[2].Args, Is.EqualTo(new[] { "s2", "03", "0.3s" }));
+            Assert.That(groups[0].Commands[2].Source, Is.EqualTo("at.yarn:6"), "at 명령의 출처는 <<at>>를 쓴 행");
+
+            Assert.That(groups[1].Commands.Select(c => c.Name), Is.EqualTo(new[] { "fade_out" }), "at은 다음 줄로 새지 않는다");
+        }
+
+        [Test]
+        public void 옛_cmd와_beat가_한_줄에_있으면_글_순서다()
+        {
+            const string yarn =
+                "title: Mixed\n" +
+                "---\n" +
+                "<<at a face s1 02>>\n" +
+                "하린: [cmd=\"face s1 01\"/]처음, [beat=a/]가운데, [cmd=\"face s1 03\"/]끝.\n" +
+                "===\n";
+
+            List<YarnLineGroup> groups = YarnCommandTextExtractor.Extract(yarn, "mixed.yarn");
+
+            Assert.That(groups[0].Commands.Select(c => c.Args[1]), Is.EqualTo(new[] { "01", "02", "03" }));
+        }
+
+        [TestCase("<<step>>", "무대 스텝")]
+        [TestCase("-> 고른다", "선택지")]
+        public void at_다음이_대사_줄이_아니면_경고하고_그_스텝의_머리_뒤에_둔다(string next, string where)
+        {
+            string yarn =
+                "title: Stray\n" +
+                "---\n" +
+                "<<at a face s1 02>>\n" +
+                "<<fade_in s1>>\n" +
+                next + "\n" +
+                "다음 대사다.\n" +
+                "===\n";
+
+            List<string> warnings = new();
+            List<YarnLineGroup> groups = YarnCommandTextExtractor.Extract(yarn, "stray.yarn", warnings);
+
+            Assert.That(warnings.Any(w => w.Contains("<<at>>") && w.Contains(where)), Is.True, string.Join("\n", warnings));
+            Assert.That(groups[0].Commands.Select(c => c.Name), Is.EqualTo(new[] { "fade_in", "face" }));
+        }
+
+        [Test]
+        public void 노드_끝의_at은_경고하고_꼬리_그룹에_남는다()
+        {
+            const string yarn =
+                "title: Tail\n" +
+                "---\n" +
+                "대사다.\n" +
+                "<<fade_out s1>>\n" +
+                "<<at a face s1 02>>\n" +
+                "===\n";
+
+            List<string> warnings = new();
+            List<YarnLineGroup> groups = YarnCommandTextExtractor.Extract(yarn, "tail.yarn", warnings);
+
+            Assert.That(warnings.Any(w => w.Contains("노드 끝")), Is.True);
+            Assert.That(groups.Last().LineText, Is.Null);
+            Assert.That(groups.Last().Commands.Select(c => c.Name), Is.EqualTo(new[] { "fade_out", "face" }));
+        }
+
+        [Test]
+        public void 표지가_없는_at은_경고하고_줄_끝에서_접힌다()
+        {
+            const string yarn =
+                "title: Missing\n" +
+                "---\n" +
+                "<<at b face s1 02>>\n" +
+                "<<at a face s1 03>>\n" +
+                "하린: [beat=a/]여기.\n" +
+                "===\n";
+
+            List<string> warnings = new();
+            List<YarnLineGroup> groups = YarnCommandTextExtractor.Extract(yarn, "missing.yarn", warnings);
+
+            Assert.That(warnings.Single(), Does.Contain("[beat=b/]가 없다").And.Contain("missing.yarn:5"));
+            Assert.That(groups[0].Commands.Select(c => c.Args[1]), Is.EqualTo(new[] { "03", "02" }));
+        }
+
+        [Test]
+        public void 명령이_없는_at은_경고하고_버린다()
+        {
+            const string yarn =
+                "title: Bare\n" +
+                "---\n" +
+                "<<at a>>\n" +
+                "하린: [beat=a/]여기.\n" +
+                "===\n";
+
+            List<string> warnings = new();
+            List<YarnLineGroup> groups = YarnCommandTextExtractor.Extract(yarn, "bare.yarn", warnings);
+
+            Assert.That(warnings.Any(w => w.Contains("bare.yarn:3") && w.Contains("<<at 표지 명령")), Is.True, string.Join("\n", warnings));
+            Assert.That(groups[0].Commands, Is.Empty);
         }
 
         [Test]

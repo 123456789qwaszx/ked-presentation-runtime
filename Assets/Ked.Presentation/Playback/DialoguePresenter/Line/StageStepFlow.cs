@@ -38,7 +38,7 @@ public sealed class StageStepFlow
         if (!_seekState.IsSeeking)
             return false;
 
-        _stepHead.Play(snap: true, seekPassThrough: true);
+        _stepHead.PlayStageStep(snap: true, seekPassThrough: true);
         return true;
     }
 
@@ -53,7 +53,7 @@ public sealed class StageStepFlow
             CommandRunScope scope = _scopeProvider.CurrentScope;
             bool rapidSkip = _playbackState.IsRapidSkipMode;
 
-            _stepHead.Play(snap: rapidSkip, seekPassThrough: false);
+            _stepHead.PlayStageStep(snap: rapidSkip, seekPassThrough: false);
 
             await _boxPresentation.HideForStageStepAsync(
                 run,

@@ -10,7 +10,7 @@ namespace Ked.Presentation.Core
     /// </summary>
     public sealed class YarnLineGroup
     {
-        /// <summary>대사 원문(태그 · 인라인 명령 마커 제외). 꼬리 그룹이면 null.</summary>
+        /// <summary>대사 원문(태그 · 표지 · 인라인 명령 마커 제외). 꼬리 그룹이면 null.</summary>
         public string LineText;
 
         /// <summary>
@@ -21,7 +21,8 @@ namespace Ked.Presentation.Core
         public string LineId;
 
         /// <summary>
-        /// 이 줄에서 실행되는 커맨드 — 줄 머리의 것, 그 뒤에 대사 글 안의 인라인 명령(글 순서).
+        /// 이 줄에서 실행되는 커맨드 — 줄 머리의 것(쓴 순서), 그 뒤에 표지 자리의 것(&lt;&lt;at&gt;&gt; · 옛 [cmd]),
+        /// 마지막에 &lt;&lt;at end …&gt;&gt;. 순서는 재생과 같은 LineBeatSchedule이 정한다(docs/PLAN_line-beat.md R2 · R3).
         /// 줄이 끝났을 때의 무대가 이 열을 접은 것과 같다.
         /// </summary>
         public readonly List<StageCommand> Commands = new();
@@ -55,8 +56,9 @@ namespace Ked.Presentation.Core
         public const string StageStepCommand = "step";
 
         /// <summary>
-        /// 인라인 명령 마커의 이름 — 대사 글 안의 [cmd="명령 한 줄"/]. 따옴표 안은 &lt;&lt; &gt;&gt; 안과 같은 글이다.
-        /// 재생은 Yarn의 마크업 파서로 읽는다(Playback의 InlineCommandTrack). 여기서는 이 마커 하나만 읽는다 —
+        /// 옛 인라인 명령 마커의 이름 — 대사 글 안의 [cmd="명령 한 줄"/]. 따옴표 안은 &lt;&lt; &gt;&gt; 안과 같은 글이다.
+        /// 자리 표지 [beat=a/] + &lt;&lt;at a 명령&gt;&gt;로 옮기는 동안만 받는다(docs/PLAN_line-beat.md L5에서 걷는다).
+        /// 재생은 Yarn의 마크업 파서로 읽는다(Playback의 InlineCommandTrack). 여기서는 이 두 마커만 읽는다 —
         /// 코어는 Yarn을 모른다.
         /// </summary>
         public const string InlineCommandMarker = "cmd";
@@ -86,7 +88,26 @@ namespace Ked.Presentation.Core
             string pendingTitle = null;
             bool inHeader = true;
 
+            // <<at 표지 명령>> — 다음 대사 줄의 것. 그 줄에서 머리 명령 뒤에 표지 순서로 접는다(R3).
+            List<AtCommand> pendingAt = new();
+            List<LineMarker> markers = new();
+            List<string> problems = new();
+
             string[] lines = yarnText.Replace("\r\n", "\n").Split('\n');
+
+            // R1 — <<at>> 다음이 대사 줄이 아니다. 재생은 경고하고 그 스텝의 머리 뒤에 붙인다 — 접기도 그렇게.
+            void FlushStrayAt(string where, string source)
+            {
+                if (pendingAt.Count == 0)
+                    return;
+
+                warnings?.Add($"{source} <<at>> {pendingAt.Count}개 다음이 대사 줄이 아니라 {where}이다 — 붙을 줄이 없어 그 스텝의 머리 뒤에 둔다.");
+
+                foreach (AtCommand at in pendingAt)
+                    current.Commands.Add(at.Command);
+
+                pendingAt.Clear();
+            }
 
             void FlushNode()
             {
@@ -130,6 +151,7 @@ namespace Ked.Presentation.Core
 
                 if (line == "===")
                 {
+                    FlushStrayAt("노드 끝", $"{sourceName}:{i + 1}");
                     FlushNode();
                     inHeader = true;
                     continue;
@@ -140,7 +162,20 @@ namespace Ked.Presentation.Core
                     if (TryParseCommand(line, $"{sourceName}:{i + 1}", out StageCommand command))
                     {
                         if (command.Name == StageStepCommand)
+                        {
+                            FlushStrayAt("무대 스텝", command.Source);
                             continue;
+                        }
+
+                        if (command.Name == LineBeatSchedule.AtCommandName)
+                        {
+                            if (LineBeatSchedule.TryReadAt(command.Args, command.Source, out AtCommand at, out string error))
+                                pendingAt.Add(at);
+                            else
+                                warnings?.Add($"{command.Source} {error}: {line}");
+
+                            continue;
+                        }
 
                         if (IsFlowControl(command.Name))
                         {
@@ -161,14 +196,26 @@ namespace Ked.Presentation.Core
 
                 if (line.StartsWith("->", StringComparison.Ordinal))
                 {
+                    FlushStrayAt("선택지", $"{sourceName}:{i + 1}");
                     warnings?.Add($"{sourceName}:{i + 1} 옵션(->)은 다루지 않는다 — 선형 파일 전용.");
                     continue;
                 }
 
-                // 대사 라인 = 경계. 글 안의 인라인 명령은 줄 머리 커맨드 뒤에 글 순서대로 붙는다.
+                // 대사 라인 = 경계. 표지 자리의 명령은 줄 머리 커맨드 뒤에 실행 순서대로 붙는다 — 재생과 같은 함수가 정한다.
                 string text = StripTags(line, out string lineId);
+                string lineSource = $"{sourceName}:{i + 1}";
 
-                current.LineText = StripInlineCommands(text, $"{sourceName}:{i + 1}", current.Commands, warnings);
+                markers.Clear();
+                problems.Clear();
+                current.LineText = StripLineMarkers(text, lineSource, markers, warnings);
+
+                foreach (ScheduledCommand scheduled in LineBeatSchedule.Build(markers, pendingAt, problems))
+                    current.Commands.Add(scheduled.Command);
+
+                foreach (string problem in problems)
+                    warnings?.Add($"{lineSource} {problem}");
+
+                pendingAt.Clear();
                 current.LineId = lineId;
                 node?.Groups.Add(current);
                 current = new YarnLineGroup();
@@ -211,11 +258,14 @@ namespace Ked.Presentation.Core
         }
 
         /// <summary>
-        /// 대사 글에서 인라인 명령 마커 [cmd="…"/]를 떼어 커맨드로 읽고(글 순서대로 commands 뒤에), 마커를 뺀 글을 돌려준다.
-        /// Yarn처럼 따옴표 안의 역슬래시는 벗기고, 공백 뒤(또는 줄 머리)의 마커는 뒤따르는 공백 하나를 같이 먹는다.
+        /// 대사 글에서 표지를 떼어 글 순서대로 markers 뒤에 붙이고, 표지를 뺀 글을 돌려준다.
+        ///   [beat=a/]       자리 표지(따옴표는 있어도 없어도 된다)
+        ///   [cmd="…"/]     옛 인라인 명령 — 명령으로 읽는다
+        /// 표지의 자리는 표지를 뺀 글의 글자 자리다. Yarn처럼 따옴표 안의 역슬래시는 벗기고,
+        /// 공백 뒤(또는 줄 머리)의 표지는 뒤따르는 공백 하나를 같이 먹는다.
         /// </summary>
-        public static string StripInlineCommands(
-            string text, string source, List<StageCommand> commands, List<string> warnings = null)
+        public static string StripLineMarkers(
+            string text, string source, List<LineMarker> markers, List<string> warnings = null)
         {
             if (string.IsNullOrEmpty(text) || text.IndexOf('[') < 0)
                 return text;
@@ -225,14 +275,16 @@ namespace Ked.Presentation.Core
 
             while (i < text.Length)
             {
-                if (text[i] != '[' || !TryReadInlineMarker(text, i, out int end, out string commandText))
+                if (text[i] != '[' || !TryReadMarker(text, i, out int end, out string name, out string value))
                 {
                     plain.Append(text[i++]);
                     continue;
                 }
 
-                if (TryParseCommand($"<<{commandText}>>", source, out StageCommand command))
-                    commands.Add(command);
+                if (name == LineBeatSchedule.MarkerName)
+                    markers.Add(LineMarker.ForBeat(value, plain.Length));
+                else if (TryParseCommand($"<<{value}>>", source, out StageCommand command))
+                    markers.Add(LineMarker.ForCommand(command, plain.Length));
                 else
                     warnings?.Add($"{source} 인라인 명령을 읽지 못했다: {text.Substring(i, end - i)}");
 
@@ -246,42 +298,61 @@ namespace Ked.Presentation.Core
             return plain.ToString();
         }
 
-        // [ cmd = "…" / ] — start는 '['의 자리. 읽었으면 end는 ']' 다음 자리.
-        private static bool TryReadInlineMarker(string text, int start, out int end, out string commandText)
+        // [ 이름 = 값 / ] — 이름은 beat 또는 cmd. cmd의 값은 따옴표 안이어야 한다(명령 한 줄에 공백이 있다).
+        // start는 '['의 자리. 읽었으면 end는 ']' 다음 자리.
+        private static bool TryReadMarker(string text, int start, out int end, out string name, out string value)
         {
             end = start;
-            commandText = null;
+            value = null;
 
             int i = SkipWhitespace(text, start + 1);
 
-            if (string.CompareOrdinal(text, i, InlineCommandMarker, 0, InlineCommandMarker.Length) != 0)
+            if (string.CompareOrdinal(text, i, LineBeatSchedule.MarkerName, 0, LineBeatSchedule.MarkerName.Length) == 0)
+                name = LineBeatSchedule.MarkerName;
+            else if (string.CompareOrdinal(text, i, InlineCommandMarker, 0, InlineCommandMarker.Length) == 0)
+                name = InlineCommandMarker;
+            else
+            {
+                name = null;
                 return false;
+            }
 
-            i = SkipWhitespace(text, i + InlineCommandMarker.Length);
+            i = SkipWhitespace(text, i + name.Length);
 
             if (i >= text.Length || text[i] != '=')
                 return false;
 
             i = SkipWhitespace(text, i + 1);
 
-            if (i >= text.Length || text[i] != '"')
-                return false;
+            StringBuilder read = new();
 
-            StringBuilder value = new();
-
-            for (i++; i < text.Length && text[i] != '"'; i++)
+            if (i < text.Length && text[i] == '"')
             {
-                // 역슬래시는 다음 글자를 그대로 싣는다(\" → ").
-                if (text[i] == '\\' && i + 1 < text.Length)
-                    i++;
+                for (i++; i < text.Length && text[i] != '"'; i++)
+                {
+                    // 역슬래시는 다음 글자를 그대로 싣는다(\" → ").
+                    if (text[i] == '\\' && i + 1 < text.Length)
+                        i++;
 
-                value.Append(text[i]);
+                    read.Append(text[i]);
+                }
+
+                if (i >= text.Length)
+                    return false;
+
+                i++;
+            }
+            else if (name == LineBeatSchedule.MarkerName)
+            {
+                for (; i < text.Length && !char.IsWhiteSpace(text[i]) && text[i] != '/' && text[i] != ']'; i++)
+                    read.Append(text[i]);
+            }
+            else
+            {
+                return false;
             }
 
-            if (i >= text.Length)
-                return false;
-
-            i = SkipWhitespace(text, i + 1);
+            i = SkipWhitespace(text, i);
 
             if (i >= text.Length || text[i] != '/')
                 return false;
@@ -292,7 +363,7 @@ namespace Ked.Presentation.Core
                 return false;
 
             end = i + 1;
-            commandText = value.ToString();
+            value = read.ToString();
             return true;
         }
 

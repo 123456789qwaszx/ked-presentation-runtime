@@ -74,6 +74,10 @@ public sealed partial class YarnCommandBridge
 
         runner.AddCommandHandler(
             "step", RunStageStep);
+
+        // <<at 표지 명령 …>> — 다음 대사 줄의 표지 [beat=표지/] 자리에서 실행할 명령(docs/PLAN_line-beat.md).
+        runner.AddCommandHandler<string, string[]>(
+            LineBeatSchedule.AtCommandName, CollectAt);
     }
     
     private void BindEmoji(DialogueRunner runner)
@@ -199,11 +203,9 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler<string, string, string, string>(
             "place_right", EnqueueFocusToRightSpec);
 
-        // Char focus depth
-        // Generic form:
-        // <<at c1 close bust 12fr>>
-        // <<at c1 front>>
-        // <<at c1 7 face 8fr>>
+        // Char focus depth — <<size 슬롯 깊이 [프레이밍] [길이] [이징]>>
+        // <<size c1 close bust 12fr>>
+        // <<size c1 front>>
         runner.AddCommandHandler<string, string, string, string, string>(
             "size", EnqueueDepthAtPresetSpec);
 
@@ -403,22 +405,34 @@ public sealed partial class YarnCommandBridge
             _playbackDriver.Enqueue(_parsed[i]);
     }
 
-    // 인라인 명령([cmd="…"/])의 글을 스펙으로 풀어 output 뒤에 붙인다. 글은 대본 명령의 << >> 안과 같다.
-    // output에 이미 든 것은 같은 자리의 앞 명령이다 — 대상 판정이 그 선언(actor · slot · cast)을 본다.
-    // 전경 명령(pause · Nfr · screen_cover)은 받지 않는다 — 인라인 명령은 타자기도 넘김도 멈추지 않는다.
-    public bool TryParseInline(string commandText, List<CommandSpecBase> output)
+    // <<at 표지 명령 …>> — 모으기만 한다. 명령 글은 닿았을 때 푼다(TryParseInline) — 대상 슬롯은 그때의 무대로 판정한다.
+    private void CollectAt(string beat, params string[] command)
     {
-        if (!YarnCommandTextExtractor.TryParseCommand($"<<{commandText}>>", "inline", out StageCommand command))
+        string[] args = new string[(command?.Length ?? 0) + 1];
+        args[0] = beat;
+
+        if (command != null)
+            command.CopyTo(args, 1);
+
+        if (!LineBeatSchedule.TryReadAt(args, "at", out AtCommand at, out string error))
         {
-            Debug.LogError($"[인라인 명령] 읽지 못했다: [cmd=\"{commandText}\"/]. 실행하지 않는다.");
-            return false;
+            Debug.LogError($"[줄의 자리] {AuthoredText(LineBeatSchedule.AtCommandName, args)} — {error}. 실행하지 않는다.");
+            return;
         }
 
+        _playbackDriver.EnqueueAt(at);
+    }
+
+    // 줄의 자리에 놓인 명령(<<at>> · 옛 [cmd="…"/])을 스펙으로 풀어 output 뒤에 붙인다. authored는 로그용 — 대본에 쓴 꼴.
+    // output에 이미 든 것은 같은 자리의 앞 명령이다 — 대상 판정이 그 선언(actor · slot · cast)을 본다.
+    // 전경 명령(pause · Nfr · screen_cover)은 받지 않는다 — 대사 줄은 타자기도 넘김도 멈추지 않는다(docs/PLAN_line-beat.md R8).
+    public bool TryParseInline(in StageCommand command, string authored, List<CommandSpecBase> output)
+    {
         _parsed.Clear();
 
         if (!_parser.TryParse(command, _parsed))
         {
-            Debug.LogError($"[인라인 명령] 무대 파서가 모르는 커맨드 '{command.Name}': [cmd=\"{commandText}\"/]. 실행하지 않는다.");
+            Debug.LogError($"[줄의 자리] 무대 파서가 모르는 커맨드 '{command.Name}': {authored}. 실행하지 않는다.");
             return false;
         }
 
@@ -427,14 +441,14 @@ public sealed partial class YarnCommandBridge
             // 덮기(screen_cover)도 전경이다 — 다 덮일 때까지 기다린다(docs/PLAN_screen-cover.md §3.1).
             if (_parsed[i] is WaitCommandSpec || _parsed[i] is ScreenCoverCommandSpec { clear: false })
             {
-                Debug.LogError($"[인라인 명령] 전경 명령(pause · Nfr · screen_cover)은 글 안에 쓸 수 없다: [cmd=\"{commandText}\"/]. 실행하지 않는다.");
+                Debug.LogError($"[줄의 자리] 전경 명령(pause · Nfr · screen_cover)은 대사 줄의 자리에 쓸 수 없다 — 무대 스텝(<<step>>)에 쓴다: {authored}. 실행하지 않는다.");
                 return false;
             }
         }
 
         if (!_roleGate.TryAccept(output, _parsed, out string reason))
         {
-            Debug.LogError($"[인라인 명령] [cmd=\"{commandText}\"/] — {reason}. 실행하지 않는다.");
+            Debug.LogError($"[줄의 자리] {authored} — {reason}. 실행하지 않는다.");
             return false;
         }
 
