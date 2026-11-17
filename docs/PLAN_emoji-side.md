@@ -130,7 +130,7 @@ EmojiRig_Place의 부호 = −1 ⇔  거울에 비치는가 그리고 그 리그
 |---|---|---|
 | S1 | `ef0f586` | 코어 `EmojiSide`의 세 함수가 `flip`을 받는다(생략하면 거짓 — 종전 식과 같다). 쪽 낱말 `EmojiSideToken`(생략 · `flip`, 그 밖은 모른다) — 파서와 폴드가 같이 읽는다. `EmojiSideTests` — 경우 전부에서 노드 부호의 곱이 규칙과 같은지 |
 | S2 | `5223766` | `SetEmojiCommandSpec.flip` · 파서 셋째 칸(모르는 낱말은 오류 · 세우지 않음) · `EmojiPlaybackSystem`(항목이 `flip`을 들고 프레임마다 부호를 다시 푼다) · 폴드(쪽은 접지 않음, 모르는 낱말은 `Unhandled`) · Yarn 등록(인자 셋). 테스트: 파서 · 폴드(`EmojiCommandTests`), 재생(`EmojiPlaybackTests`) |
-| S3 | (이 커밋) | 데모 대본에 `flip` 두 줄(`star` · upright인 `question`). 문서: `emoji-format.md` §6 · `emoji-rig.md`(§3.1 · §8의 6) · `PLAN_emoji-placement.md` 결정 2-5 · 코드 곁의 `emoji-rig.md` |
+| S3 | `85d7dc4e` | 데모 대본에 `flip` 두 줄(`star` · upright인 `question`). 문서: `emoji-format.md` §6 · `emoji-rig.md`(§3.1 · §8의 6) · `PLAN_emoji-placement.md` 결정 2-5 · 코드 곁의 `emoji-rig.md` |
 
 ## 9. Unity에서 확인할 것
 
