@@ -94,6 +94,14 @@ public sealed partial class StageCommandParser
             return;
         }
 
+        // 캐릭터 슬롯에 트는 것은 캐릭터 리그의 모션뿐이다. 카메라 리그의 클립(화면 흔들림)은 shot_shake가 튼다.
+        if (clip.Rig != MotionRules.CharacterRig)
+        {
+            Debug.LogError(
+                $"[StageCommandParser] motion '{motionName}'은 '{clip.Rig}' 리그의 모션이다 — 캐릭터 슬롯에 틀 수 없다. 이 커맨드는 재생하지 않는다.");
+            return;
+        }
+
         if (!MotionModeToken.TryParse(modeToken, out MotionChannelMode mode))
         {
             Debug.LogError(

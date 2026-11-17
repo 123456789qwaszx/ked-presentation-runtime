@@ -34,6 +34,23 @@ namespace Ked.Presentation.Core
         }
 
         /// <summary>
+        /// 세기를 곱한 원시 값 — 중립값에서 벗어난 만큼에 intensity를 곱한다. 위치 · 회전은 v × 세기,
+        /// 배율은 1 + (v − 1) × 세기. 세기 1이면 Sample 그대로, 0이면 중립이다. 없는 성분은 중립값 그대로다.
+        /// 화면 흔들림(shot_shake)이 같은 클립을 세기만 바꿔 튼다 — 흔들림 노드는 언제나 항등에서 시작하므로
+        /// 이 값이 곧 노드에 쓰는 값이다.
+        /// </summary>
+        public static Vec3 SampleScaled(in MotionChannel channel, float seconds, float intensity)
+        {
+            float neutral = Neutral(channel.Kind);
+            Vec3 sample = Sample(channel, seconds);
+
+            return new Vec3(
+                neutral + (sample.X - neutral) * intensity,
+                neutral + (sample.Y - neutral) * intensity,
+                neutral + (sample.Z - neutral) * intensity);
+        }
+
+        /// <summary>
         /// 시작값 위에 채널을 얹은 실제 값. 한 함수가 모션의 모양을 전부 정한다.
         ///   Relative : 위치·회전 start + v · 배율 start × v (없는 성분은 중립값이라 start 그대로)
         ///   Absolute : v, 없는 성분은 start 유지

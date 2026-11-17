@@ -158,6 +158,10 @@ public sealed partial class YarnCommandBridge
             "shot_reset", EnqueueShotResetSpec);
         runner.AddCommandHandler<string, string>(
             "shot_reset_all", EnqueueShotResetAllSpec);
+
+        // 연기 — 화면 흔들림
+        runner.AddCommandHandler<string, string>(
+            "shot_shake", EnqueueShotShakeSpec);
     }
     
     private void RegisterCharRigPlacementCommands(DialogueRunner runner)

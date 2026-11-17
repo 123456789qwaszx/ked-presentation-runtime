@@ -28,6 +28,18 @@ namespace Ked.Presentation.Core
         /// </summary>
         public static readonly IReadOnlyCollection<string> ForbiddenNodes = new[] { "CharSlot_Track_Focus" };
 
+        /// <summary>캐릭터 리그의 이름(rig-schemas.json의 rigKind). motion 커맨드가 트는 클립의 리그다.</summary>
+        public const string CharacterRig = "character";
+
+        /// <summary>카메라 리그의 이름. 이 리그의 클립은 화면 흔들림이다 — shot_shake가 튼다.</summary>
+        public const string CameraRig = "camera";
+
+        /// <summary>
+        /// 카메라 리그에서 키를 줄 수 있는 노드는 이것 하나다. 나머지 카메라 노드(팬 · 줌 · 롤 · 달리 · 트랙)는
+        /// 저작값이 아니라 샷 식의 해(解)다 — 직접 키잉하면 샷이 다음에 쓰는 값과 싸운다(Track_Focus와 같은 까닭).
+        /// </summary>
+        public const string CameraShakeNode = "Camera_Shake";
+
         /// <summary>
         /// 클립 전체를 검증한다. rigNodeIds를 주면 노드가 그 스키마에 있는지도 본다(null이면 생략 —
         /// 스키마가 없는 자리, 예: 단위 테스트).
@@ -58,6 +70,14 @@ namespace Ked.Presentation.Core
                 return false;
             }
 
+            // 흔들림은 끝값을 남기지 않는다 — 구도 위에 얹혔다가 0으로 돌아오는 연기라, 정지 프레임이 접을 것이 없다.
+            // commit이면 흔들림 노드에 값이 남아 화면이 폴드와 어긋난다.
+            if (clip.Rig == CameraRig && clip.End != MotionEnd.Restore)
+            {
+                reason = $"'{CameraRig}' 리그의 모션은 restore여야 한다 — 흔들림은 끝값을 남기지 않는다";
+                return false;
+            }
+
             // 채널이 없는 모션은 유효하다 — 아무것도 하지 않고 길이만큼 흐른다(저작 도구는 첫 키에서 채널을 만든다).
             HashSet<(string, MotionChannelKind)> seen = new();
             MotionChannel[] channels = clip.Channels ?? System.Array.Empty<MotionChannel>();
@@ -67,6 +87,12 @@ namespace Ked.Presentation.Core
                 if (!TryValidateChannel(channels[i], clip.Duration, clip.End, rigNodeIds, out string why))
                 {
                     reason = $"채널 {i}: {why}";
+                    return false;
+                }
+
+                if (clip.Rig == CameraRig && channels[i].Node != CameraShakeNode)
+                {
+                    reason = $"채널 {i}: '{CameraRig}' 리그에서 키를 줄 수 있는 노드는 {CameraShakeNode} 하나다 ('{channels[i].Node}') — 나머지는 샷 식의 해(解)다";
                     return false;
                 }
 

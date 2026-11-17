@@ -58,7 +58,7 @@ namespace Ked.Presentation.Tests.UnityParity
 
             try
             {
-                return MotionLibrary.Parse(File.ReadAllText(FixturePath("motions.json")), "ToolExport~/motions.json", CharacterRigSchema.NodeIds());
+                return MotionLibrary.Parse(File.ReadAllText(FixturePath("motions.json")), "ToolExport~/motions.json", MotionLibrary.StageRigNodeIds);
             }
             finally
             {

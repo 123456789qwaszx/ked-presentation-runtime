@@ -9,6 +9,7 @@ public sealed partial class StageCommandParser
     //
     // 어휘: shot_<축>은 그 축 하나를 절대값으로 놓는다(줌 · 팬 · 롤 · 달리 · 트랙). 묶음은 shot_to(줌 + 팬)와
     // shot_focus_to(줌 + 팬을 풀어서) 둘뿐이고, 되돌리기는 shot_reset(렌즈만) · shot_reset_all(통째로)이다.
+    // shot_shake는 축이 아니다 — 구도 위에 얹혔다가 0으로 돌아오는 흔들림 클립을 튼다.
     //
     // 값 인자에는 생략값이 없다. 빠졌거나 읽지 못하면 소리 내고 아무것도 내지 않는다 — 대신 갈 뜻 있는 값이 없다
     // (motion의 모르는 이름과 같다). 코어 폴드도 같은 줄을 Unhandled로 남긴다. 생략할 수 있는 것은 길이 · 이징뿐이다.
@@ -121,6 +122,27 @@ public sealed partial class StageCommandParser
             duration = YarnDurationParser.Parse(durationToken),
             ease = YarnEaseParser.Parse(easeToken),
         });
+    }
+
+    // shot_shake(이름, 세기) — motions.json의 카메라 리그 클립을 그대로 싣는다. 길이는 클립이 안다.
+    // 모르는 이름 · 다른 리그의 클립은 소리 내고 아무것도 내지 않는다 — 대신 틀 기본 흔들림이 없다(motion과 같다).
+    private void EnqueueShotShakeSpec(string shakeName, float intensity)
+    {
+        if (!_motions.TryGet(shakeName, out MotionClip clip))
+        {
+            Debug.LogError(
+                $"[StageCommandParser] Unknown shake '{shakeName}' — {MotionLibrary.BundleFileName}에 없다. 이 커맨드는 재생하지 않는다.");
+            return;
+        }
+
+        if (clip.Rig != MotionRules.CameraRig)
+        {
+            Debug.LogError(
+                $"[StageCommandParser] shot_shake '{shakeName}'은 '{clip.Rig}' 리그의 모션이다 — 화면 흔들림은 '{MotionRules.CameraRig}' 리그의 클립이어야 한다. 이 커맨드는 재생하지 않는다.");
+            return;
+        }
+
+        Emit(new ShotShakeCommandSpec { clip = clip, intensity = intensity });
     }
 
     // 값 인자 하나(숫자). 생략값이 없다 — 못 읽으면 소리 내고 false.

@@ -24,6 +24,10 @@ using UnityEngine;
 // 재생하는 커맨드(motion slot name mode)가 정한다. motions/1의 "mode"는 읽을 때 무시된다(스키마 경고만).
 // 성분 x·y·z는 생략 가능(= 건드리지 않는다). 키의 t는 **초**. 뜻은 docs/motion-contract.md가 규범이다.
 //
+// rig는 그 모션이 어느 리그의 것인가다(rig-schemas.json의 rigKind). 무대가 트는 리그는 둘이다(StageRigNodeIds):
+//   character — motion 커맨드가 캐릭터 슬롯에 튼다
+//   camera    — shot_shake가 본 무대의 카메라 리그에 튼다(화면 흔들림). Camera_Shake에만 키를 주고 end는 restore다
+//
 // 검증은 코어 MotionRules 한 곳이다(어긋난 모션은 로그 + 무시). 내보내기도 같은 규칙을 쓰므로
 // "툴에서는 되는데 재생에서 사라지는" 모션이 안 생긴다.
 // ─────────────────────────────────────────────────────────────────────────────
@@ -35,6 +39,16 @@ public sealed class MotionLibrary
     private readonly Dictionary<string, MotionClip> _clips;
 
     public static MotionLibrary Empty { get; } = new(new Dictionary<string, MotionClip>());
+
+    /// <summary>
+    /// 무대가 모션을 틀 수 있는 리그와 그 노드 — 리그 이름(rigKind) → 스키마 id.
+    /// 호스트가 Parse에 그대로 넘긴다. 여기 없는 리그의 모션은 틀 데가 없으므로 읽을 때 걸러진다.
+    /// </summary>
+    public static IReadOnlyDictionary<string, string[]> StageRigNodeIds { get; } = new Dictionary<string, string[]>
+    {
+        [MotionRules.CharacterRig] = CharacterRigSchema.NodeIds(),
+        [MotionRules.CameraRig] = CameraRigSchema.NodeIds(),
+    };
 
     private MotionLibrary(Dictionary<string, MotionClip> clips)
     {
@@ -52,9 +66,11 @@ public sealed class MotionLibrary
     /// <summary>
     /// 본문을 읽는다. 파일을 어디서 가져오는지(Resources · TextAsset · 경로)는 호스트가 정한다 —
     /// 무대는 Application.dataPath를 열지 않는다.
-    /// rigNodeIds를 주면 채널 노드를 그 스키마로 검증한다(지금 모션은 캐릭터 리그용이다 — CharacterRigSchema.NodeIds()).
+    /// nodeIdsByRig를 주면 모션마다 제 리그(rig)의 스키마로 채널 노드를 검증하고, 모르는 리그의 모션은 거른다 —
+    /// 런타임은 StageRigNodeIds를 넘긴다. 안 주면 리그와 노드는 보지 않는다(스키마가 없는 자리 — 내보내기의 되읽기 · 단위 테스트).
     /// </summary>
-    public static MotionLibrary Parse(string json, string sourceLabel, ICollection<string> rigNodeIds = null)
+    public static MotionLibrary Parse(
+        string json, string sourceLabel, IReadOnlyDictionary<string, string[]> nodeIdsByRig = null)
     {
         FileDto file;
 
@@ -89,6 +105,14 @@ public sealed class MotionLibrary
             {
                 if (!TryConvert(dto, sourceLabel, out MotionClip clip))
                     continue;
+
+                string[] rigNodeIds = null;
+
+                if (nodeIdsByRig != null && !nodeIdsByRig.TryGetValue(clip.Rig ?? "", out rigNodeIds))
+                {
+                    Warn(sourceLabel, clip.Name, $"모르는 리그다 ('{clip.Rig}') — 무대가 트는 리그는 {string.Join(" · ", nodeIdsByRig.Keys)}");
+                    continue;
+                }
 
                 if (!MotionRules.TryValidate(clip, rigNodeIds, out string why))
                 {

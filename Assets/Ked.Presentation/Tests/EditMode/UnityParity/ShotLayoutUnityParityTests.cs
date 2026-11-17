@@ -266,6 +266,79 @@ namespace Ked.Presentation.Tests.UnityParity
             }
         }
 
+        // ── 흔들림 — 의도가 아니다. 얹혔다가 항등으로 돌아온다 ───────────
+
+        private static MotionClip ShakeClip()
+            => new()
+            {
+                Name = "hit", Rig = MotionRules.CameraRig, Duration = 0.3f, End = MotionEnd.Restore,
+                Channels = new[]
+                {
+                    new MotionChannel
+                    {
+                        Node = MotionRules.CameraShakeNode,
+                        Kind = MotionChannelKind.Position,
+                        X = new[] { new CurveKey(0f, 0f, 0f, 0f), new CurveKey(0.1f, 14f, 0f, 0f), new CurveKey(0.3f, 0f, 0f, 0f) },
+                    },
+                },
+            };
+
+        [Test]
+        public void 흔들림을_끊으면_노드가_항등으로_돌아오고_샷_의도는_그대로다()
+        {
+            ShotIntentState intent = Intents[9];
+            _system.Snap(intent.ToUnity());
+
+            RectTransform shake = _stages.Get(StageRoles.MainStageKey).Camera.Shake;
+
+            _system.Shake.Play(ShakeClip(), 1.5f);
+            Assert.That(_system.Shake.IsPlaying, Is.True);
+
+            // 도는 중의 값을 손으로 흉내 낸다 — 끊으면 무엇이 남아 있든 항등이다.
+            shake.anchoredPosition = new Vector2(9f, -4f);
+            shake.localEulerAngles = new Vector3(0f, 0f, 0.7f);
+
+            _system.Shake.Stop();
+
+            Assert.That(_system.Shake.IsPlaying, Is.False);
+            Assert.That(shake.anchoredPosition, Is.EqualTo(Vector2.zero));
+            Assert.That(shake.localScale, Is.EqualTo(Vector3.one));
+            Assert.That(shake.localEulerAngles, Is.EqualTo(Vector3.zero));
+            Assert.That(_system.Intent.ToCore().ToString(), Is.EqualTo(intent.ToString()), "흔들림은 의도를 건드리지 않는다");
+        }
+
+        [Test]
+        public void 장면_경계는_흔들림도_끊는다()
+        {
+            _system.Shake.Play(ShakeClip(), 1f);
+            _system.Clear();
+
+            Assert.That(_system.Shake.IsPlaying, Is.False);
+            Assert.That(_stages.Get(StageRoles.MainStageKey).Camera.Shake.anchoredPosition, Is.EqualTo(Vector2.zero));
+        }
+
+        [Test]
+        public void 흔들리는_중에_재도_무대는_중립이고_하네스는_남은_흔들림을_잡는다()
+        {
+            ShotIntentState intent = Intents[4];
+            _system.Snap(intent.ToUnity());
+
+            RectTransform shake = _stages.Get(StageRoles.MainStageKey).Camera.Shake;
+            shake.anchoredPosition = new Vector2(9f, 0f);
+
+            // 측정은 흔들림 노드를 항등으로 본다.
+            Assert.That(_system.TryGetNeutral(shake, out Vector2 pos, out Vector3 scale), Is.True);
+            Assert.That(pos, Is.EqualTo(Vector2.zero));
+            Assert.That(scale, Is.EqualTo(Vector3.one));
+
+            // 정착한 프레임에 흔들림이 남아 있으면 불일치다.
+            StageStateComparer.Result result = new();
+            StageStateComparer.CompareStageView(in intent, StageStateCapture.CaptureStageView(_stages), LayerProfileCurve.Default, result);
+
+            Assert.That(result.IsEquivalent, Is.False);
+            Assert.That(result.Mismatches.Exists(m => m.StartsWith("stage:stage00.cameraShake")), Is.True, string.Join("\n", result.Mismatches));
+        }
+
         // ── 하네스 경로 — 캡처한 무대 뷰가 접힌 샷과 등가다 ─────────────
 
         [Test]

@@ -51,11 +51,16 @@ public sealed class PresentationShotResponseSystem : IStageViewNeutral
     // 층이 샷에 반응하는 곡선 — Apply가 쓰는 것과 같다. shot_focus_to가 팬을 풀 때 같은 곡선을 본다.
     public LayerProfileCurve LayerProfile => _profile;
 
+    // 화면 흔들림 — 의도가 아니라 연기다. 본 무대의 Camera_Shake에 클립을 틀고, 끝나면 항등으로 돌아온다.
+    public CameraShakePlayer Shake { get; }
+
     public PresentationShotResponseSystem(StageRigRegistry stages, LayerProfileCurve profile)
     {
         _stages = stages;
         _main = stages.Get(StageRoles.MainStageKey);
         _profile = profile;
+
+        Shake = new CameraShakePlayer(_main.Camera.Shake);
 
         _axes = new IAxis[]
         {
@@ -149,9 +154,10 @@ public sealed class PresentationShotResponseSystem : IStageViewNeutral
         }
     }
 
-    // 장면 경계 — 전환을 확정 없이 멈추고 의도·화면을 기본 샷으로.
+    // 장면 경계 — 전환을 확정 없이 멈추고 의도·화면을 기본 샷으로. 흔들림도 끊는다.
     public void Clear()
     {
+        Shake.Stop();
         Snap(PresentationIntentState.Default);
     }
 

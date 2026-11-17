@@ -46,6 +46,7 @@ public sealed partial class StageCommandParser
         ["shot_roll"] = (p, c) => p.EnqueueShotRollSpec(c, c.Arg(0), c.Arg(1, "0.45s"), c.Arg(2, "")),
         ["shot_reset"] = (p, c) => p.EnqueueShotResetSpec(all: false, c.Arg(0, "0.3s"), c.Arg(1, "")),
         ["shot_reset_all"] = (p, c) => p.EnqueueShotResetSpec(all: true, c.Arg(0, "0.3s"), c.Arg(1, "")),
+        ["shot_shake"] = (p, c) => p.EnqueueShotShakeSpec(c.Arg(0), Float(c, 1, 1f)),
         ["show"] = (p, c) => p.EnqueueShowAtSpec(c.Arg(0), c.Arg(1, DefaultShowFaceToken), c.Arg(2, DefaultShowDurationToken)),
         ["left"] = (p, c) => p.EnqueueNudgeLeftSpec(c.Arg(0), c.Arg(1), c.Arg(2, DefaultNudgeDurationToken), c.Arg(3, "")),
         ["right"] = (p, c) => p.EnqueueNudgeRightSpec(c.Arg(0), c.Arg(1), c.Arg(2, DefaultNudgeDurationToken), c.Arg(3, "")),

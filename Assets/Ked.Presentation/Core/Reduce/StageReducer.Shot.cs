@@ -137,6 +137,46 @@ namespace Ked.Presentation.Core
             return true;
         }
 
+        /// <summary>
+        /// shot_shake (이름, 세기=1) — 화면 흔들림. 카메라 리그에 건 restore 모션이다.
+        ///
+        /// 접을 것이 없다: 흔들림은 구도 위에 얹혔다가 0으로 돌아오고, 상태에 남기는 것이 없다(restore 모션과 같은 규칙).
+        /// 그래도 클립은 본다 — 모르는 이름이나 카메라 리그가 아닌 클립은 런타임이 틀지 않는 줄이라 Unhandled로 남긴다.
+        /// </summary>
+        private static bool ApplyShotShake(StageState state, in StageCommand cmd, StageReducerTuning tuning, out string reason)
+        {
+            string name = cmd.Arg(0);
+
+            if (string.IsNullOrEmpty(name))
+            {
+                reason = "흔들림 이름이 없다";
+                return false;
+            }
+
+            if (tuning.Motions == null || !tuning.Motions.TryGetValue(name, out MotionClip clip))
+            {
+                reason = tuning.Motions == null
+                    ? $"흔들림 '{name}' — 튜닝에 motions.json이 없다"
+                    : $"흔들림 '{name}'을 모른다 (motions.json에 없거나 검증에서 걸렸다)";
+                return false;
+            }
+
+            if (clip.Rig != MotionRules.CameraRig)
+            {
+                reason = $"'{name}'은 '{clip.Rig}' 리그의 모션이다 — shot_shake는 '{MotionRules.CameraRig}' 리그의 클립만 튼다";
+                return false;
+            }
+
+            if (cmd.Arg(1) != null && !NumberToken.TryParseFloat(cmd.Arg(1), out _))
+            {
+                reason = $"흔들림 '{name}'의 세기를 읽지 못했다: '{cmd.Arg(1)}'";
+                return false;
+            }
+
+            reason = null;
+            return true;
+        }
+
         // 값 인자 하나(숫자). 생략값이 없다.
         private static bool TryReadNumber(in StageCommand cmd, int index, string what, out float value, out string reason)
         {

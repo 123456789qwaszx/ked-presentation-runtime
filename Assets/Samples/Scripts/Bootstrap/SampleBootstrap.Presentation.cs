@@ -397,13 +397,15 @@ public partial class SampleBootstrap
 
     private MotionLibrary LoadMotions()
     {
-        string[] nodeIds = CharacterRigSchema.NodeIds();
-
+        // 무대가 모션을 트는 리그 둘의 스키마로 검증한다 — 캐릭터(motion)와 카메라(shot_shake).
         if (motionsJson != null)
-            return MotionLibrary.Parse(motionsJson.text, motionsJson.name, nodeIds);
+            return MotionLibrary.Parse(motionsJson.text, motionsJson.name, MotionLibrary.StageRigNodeIds);
 
         string json = ReadBundleFileEditorOnly(MotionLibrary.BundleFileName);
-        return json == null ? MotionLibrary.Empty : MotionLibrary.Parse(json, MotionLibrary.BundleFileName, nodeIds);
+
+        return json == null
+            ? MotionLibrary.Empty
+            : MotionLibrary.Parse(json, MotionLibrary.BundleFileName, MotionLibrary.StageRigNodeIds);
     }
 
     private EmojiLibrary LoadEmojis()

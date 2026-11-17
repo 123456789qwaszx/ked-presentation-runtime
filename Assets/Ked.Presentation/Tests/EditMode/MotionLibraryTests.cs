@@ -72,9 +72,44 @@ public class MotionLibraryTests
         Assert.AreEqual(1, MotionLibrary.Parse(Doc(stray), "test").Count, "목록이 없으면 노드는 보지 않는다");
 
         LogAssert.Expect(LogType.Warning, new Regex("MotionLibrary.*스키마"));
-        Assert.AreEqual(0, MotionLibrary.Parse(Doc(stray), "test", CharacterRigSchema.NodeIds()).Count);
+        Assert.AreEqual(0, MotionLibrary.Parse(Doc(stray), "test", MotionLibrary.StageRigNodeIds).Count);
 
-        Assert.AreEqual(1, MotionLibrary.Parse(Doc(Nod), "test", CharacterRigSchema.NodeIds()).Count, "실제 스키마의 노드는 통과한다");
+        Assert.AreEqual(1, MotionLibrary.Parse(Doc(Nod), "test", MotionLibrary.StageRigNodeIds).Count, "실제 스키마의 노드는 통과한다");
+    }
+
+    // ── 카메라 리그의 모션 = 화면 흔들림 ─────────────────────────────────
+
+    private static string Shake(string node, string end, string rig = "camera")
+        => "{ \"name\": \"shake\", \"rig\": \"" + rig + "\", \"duration\": 0.2, \"end\": \"" + end + "\", \"channels\": [ { \"node\": \"" + node
+           + "\", \"kind\": \"position\", \"x\": [ { \"t\": 0, \"v\": 0 }, { \"t\": 0.1, \"v\": 12 }, { \"t\": 0.2, \"v\": 0 } ] } ] }";
+
+    [Test]
+    public void 카메라_리그의_모션은_제_스키마로_검증된다()
+    {
+        MotionLibrary library = MotionLibrary.Parse(Doc(Nod, Shake("Camera_Shake", "restore")), "test", MotionLibrary.StageRigNodeIds);
+
+        Assert.AreEqual(2, library.Count, "캐릭터 모션과 흔들림이 한 파일에 산다");
+        Assert.IsTrue(library.TryGet("shake", out MotionClip shake));
+        Assert.AreEqual(MotionRules.CameraRig, shake.Rig);
+    }
+
+    [Test]
+    public void 흔들림은_Camera_Shake에만_키를_주고_restore여야_한다()
+    {
+        // 나머지 카메라 노드는 샷 식의 해다 — 키를 주면 샷이 쓰는 값과 싸운다.
+        LogAssert.Expect(LogType.Warning, new Regex("MotionLibrary.*Camera_Shake 하나다"));
+        Assert.AreEqual(0, MotionLibrary.Parse(Doc(Shake("Camera_Pan", "restore")), "test", MotionLibrary.StageRigNodeIds).Count);
+
+        // commit이면 흔들림 노드에 값이 남는다 — 폴드가 모르는 상태다.
+        LogAssert.Expect(LogType.Warning, new Regex("MotionLibrary.*restore여야 한다"));
+        Assert.AreEqual(0, MotionLibrary.Parse(Doc(Shake("Camera_Shake", "commit")), "test", MotionLibrary.StageRigNodeIds).Count);
+    }
+
+    [Test]
+    public void 무대가_모르는_리그의_모션은_거른다()
+    {
+        LogAssert.Expect(LogType.Warning, new Regex("MotionLibrary.*모르는 리그"));
+        Assert.AreEqual(0, MotionLibrary.Parse(Doc(Shake("Window", "restore", "stageWindow")), "test", MotionLibrary.StageRigNodeIds).Count);
     }
 
     [Test]

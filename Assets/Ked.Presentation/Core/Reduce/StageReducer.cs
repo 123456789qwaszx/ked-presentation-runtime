@@ -230,6 +230,9 @@ namespace Ked.Presentation.Core
 
                 case "shot_focus_to": return ApplyShotFocusTo(state, cmd, tuning, out reason);
 
+                // 흔들림 — 접을 것이 없다(끝나면 0). 클립만 본다.
+                case "shot_shake": return ApplyShotShake(state, cmd, tuning, out reason);
+
                 // 배경 — 캐스팅하지 않은 슬롯. StageCommandParser.Background가 캐릭터 Spec으로 펼치는 것을 그대로 접는다.
                 // 인자 자리·생략값은 파서 표(StageCommandParser.Table)와 같다:
                 //   bg_spawn(rigKey, spriteKey, stage="stage00", layer="far") ·

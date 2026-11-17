@@ -151,4 +151,40 @@ public class MotionMathTests
         Assert.AreEqual(new Vec3(2f, 3f, 1f), MotionMath.StartOf(Channel(MotionChannelKind.Scale), state));
         Assert.AreEqual(new Vec3(0f, 0f, 45f), MotionMath.StartOf(Channel(MotionChannelKind.Euler), state));
     }
+
+    // ── 세기 — 화면 흔들림이 같은 클립을 세기만 바꿔 튼다 ───────────────
+
+    [Test]
+    public void 세기는_중립에서_벗어난_만큼에_곱한다()
+    {
+        MotionChannel position = Channel(MotionChannelKind.Position, x: Rise10);
+        MotionChannel scale = Channel(MotionChannelKind.Scale, x: From5To7);
+
+        // 위치 · 회전의 중립은 0 — v × 세기.
+        Assert.AreEqual(MotionMath.Sample(position, 0.5f).X * 0.5f, MotionMath.SampleScaled(position, 0.5f, 0.5f).X, Eps);
+        Assert.AreEqual(20f, MotionMath.SampleScaled(position, 1f, 2f).X, Eps);
+
+        // 배율의 중립은 1 — 1 + (v − 1) × 세기. 5배의 절반 세기는 3배다(2.5배가 아니다).
+        Assert.AreEqual(3f, MotionMath.SampleScaled(scale, 0f, 0.5f).X, Eps);
+
+        // 없는 성분은 세기와 무관하게 중립이다.
+        Assert.AreEqual(0f, MotionMath.SampleScaled(position, 1f, 3f).Y, 0f);
+        Assert.AreEqual(1f, MotionMath.SampleScaled(scale, 1f, 3f).Y, 0f);
+    }
+
+    [Test]
+    public void 세기_1은_원시_값_그대로이고_0은_중립이다()
+    {
+        MotionChannel position = Channel(MotionChannelKind.Position, x: Rise10, y: From5To7);
+        MotionChannel scale = Channel(MotionChannelKind.Scale, x: From5To7);
+
+        for (int i = 0; i <= 4; i++)
+        {
+            float t = i / 4f;
+
+            Assert.AreEqual(MotionMath.Sample(position, t), MotionMath.SampleScaled(position, t, 1f), $"t={t}");
+            Assert.AreEqual(new Vec3(0f, 0f, 0f), MotionMath.SampleScaled(position, t, 0f), $"t={t}");
+            Assert.AreEqual(new Vec3(1f, 1f, 1f), MotionMath.SampleScaled(scale, t, 0f), $"t={t}");
+        }
+    }
 }

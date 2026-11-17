@@ -465,4 +465,41 @@ public class StageCommandParserTests
             NewParser(), Cmd("bg_sprite", "bg_main", "studio_evening", "back"))[0];
         Assert.AreEqual("studio_evening", sprite.spriteKey, "셋째 인자는 더 읽지 않는다");
     }
+
+    // ── shot_shake — 카메라 리그의 흔들림 클립 ────────────────────────────
+
+    private const string ShakeAndNod = "{ \"schema\": \"motions/2\", \"motions\": ["
+        + " { \"name\": \"hit\", \"rig\": \"camera\", \"duration\": 0.3, \"end\": \"restore\","
+        + " \"channels\": [ { \"node\": \"Camera_Shake\", \"kind\": \"position\","
+        + " \"x\": [ { \"t\": 0, \"v\": 0 }, { \"t\": 0.1, \"v\": 14 }, { \"t\": 0.3, \"v\": 0 } ] } ] },"
+        + " { \"name\": \"nod\", \"rig\": \"character\", \"duration\": 0.6, \"end\": \"restore\","
+        + " \"channels\": [ { \"node\": \"CharacterPortrait_Track_Move_Y\", \"kind\": \"position\","
+        + " \"y\": [ { \"t\": 0, \"v\": 0 }, { \"t\": 0.6, \"v\": 0 } ] } ] } ] }";
+
+    [Test]
+    public void shot_shake는_카메라_리그의_클립과_세기를_싣는다()
+    {
+        StageCommandParser parser = new(null, MotionLibrary.Parse(ShakeAndNod, "test", MotionLibrary.StageRigNodeIds));
+
+        ShotShakeCommandSpec spec = (ShotShakeCommandSpec)Parse(parser, Cmd("shot_shake", "hit"))[0];
+        Assert.AreEqual("hit", spec.clip.Name);
+        Assert.AreEqual(1f, spec.intensity, 1e-6f, "세기는 생략하면 1이다");
+
+        Assert.AreEqual(0.5f, ((ShotShakeCommandSpec)Parse(parser, Cmd("shot_shake", "hit", "0.5"))[0]).intensity, 1e-6f);
+    }
+
+    [Test]
+    public void 흔들림과_캐릭터_모션은_서로의_명령으로_틀_수_없다()
+    {
+        StageCommandParser parser = new(null, MotionLibrary.Parse(ShakeAndNod, "test", MotionLibrary.StageRigNodeIds));
+
+        LogAssert.Expect(LogType.Error, new Regex("StageCommandParser.*shot_shake 'nod'.*리그의 모션이다"));
+        Assert.IsEmpty(Parse(parser, Cmd("shot_shake", "nod")), "캐릭터 모션은 화면 흔들림이 아니다");
+
+        LogAssert.Expect(LogType.Error, new Regex("StageCommandParser.*motion 'hit'.*캐릭터 슬롯에 틀 수 없다"));
+        Assert.IsEmpty(Parse(parser, Cmd("motion", "c1", "hit")), "흔들림 클립은 캐릭터 슬롯에 틀 수 없다");
+
+        LogAssert.Expect(LogType.Error, new Regex("StageCommandParser.*Unknown shake"));
+        Assert.IsEmpty(Parse(parser, Cmd("shot_shake", "nope")), "기본 흔들림은 없다");
+    }
 }

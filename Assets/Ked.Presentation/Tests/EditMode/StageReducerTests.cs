@@ -900,6 +900,40 @@ namespace Ked.Presentation.Tests
         }
 
         [Test]
+        public void shot_shake는_아무것도_남기지_않는다()
+        {
+            // 흔들림은 구도 위에 얹혔다가 0으로 돌아온다 — 접을 것이 없다. 못 접는 것(Unhandled)이 아니다.
+            MotionClip hit = new()
+            {
+                Name = "hit", Rig = MotionRules.CameraRig, Duration = 0.3f, End = MotionEnd.Restore,
+                Channels = new[] { MotionChannelOf(MotionRules.CameraShakeNode, MotionChannelKind.Position, 0.3f, x: (0f, 0f)) },
+            };
+
+            StageReducerTuning tuning = TuningWithMotions(hit);
+
+            StageState before = Fold(tuning, Cmd("shot_track", "2u", "0u"), Cmd("shot_zoom", "3"));
+            StageState after = Fold(tuning, Cmd("shot_track", "2u", "0u"), Cmd("shot_zoom", "3"), Cmd("shot_shake", "hit", "1.5"));
+
+            Assert.That(after.Unhandled, Is.Empty);
+            Assert.That(after.Shot.ToString(), Is.EqualTo(before.Shot.ToString()), "샷 의도는 그대로다");
+        }
+
+        [Test]
+        public void 틀_수_없는_shot_shake는_Unhandled로_남는다()
+        {
+            // 런타임이 틀지 않는 줄이다 — 모르는 이름, 카메라 리그가 아닌 클립, 이름 없음.
+            MotionClip nod = new()
+            {
+                Name = "nod", Rig = MotionRules.CharacterRig, Duration = 0.6f, End = MotionEnd.Restore,
+                Channels = new[] { MotionChannelOf("CharacterPortrait_Track_Move_Y", MotionChannelKind.Position, 0.6f, y: (0f, 0f)) },
+            };
+
+            StageState state = Fold(TuningWithMotions(nod), Cmd("shot_shake", "nope"), Cmd("shot_shake", "nod"), Cmd("shot_shake"));
+
+            Assert.That(state.Unhandled.Count, Is.EqualTo(3), string.Join("\n", state.Unhandled));
+        }
+
+        [Test]
         public void motion은_채널마다_마지막_키를_접는다_mode는_세_번째_인자다_relative는_더하고_absolute는_그_값이다()
         {
             MotionClip walk = new()

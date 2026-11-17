@@ -35,6 +35,9 @@ public sealed class ShotResponseCommandFactory : INodeCommandFactory
             ShotDollyCommandSpec s => new ShotDollyCommand(_presentationResponseRig, s),
             ShotTrackCommandSpec s => new ShotTrackCommand(_presentationResponseRig, s),
 
+            // 연기 — 흔들림
+            ShotShakeCommandSpec s => new ShotShakeCommand(_presentationResponseRig, s),
+
             _ => null
         };
 
