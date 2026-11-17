@@ -70,6 +70,7 @@ StageViewportLayer                       (IStageMount — 무대가 서는 자�
       {stage}_Camera_Root … _Track       카메라 리그 — 노드 일곱의 사슬(CameraRigSchema · camera-rig.md §2)
         {stage}_Layer_{라벨|d}            깊이 층. 위치 · 배율을 이 한 노드에 쓴다. d 오름차순 = 형제 순서. 카메라 리그의 가장 안쪽(Mount) 아래
           {stage}_Layer_{…}_Content      리그가 붙는 곳. 블러 대상
+          {stage}_Layer_{…}_Dim          어둡기 판(screen_dim) — Content 다음 형제라 먼 층부터 이 층까지를 가린다. 층의 3배 크기
     {stage}_MaskEdge_Root                마스크 테두리 그래픽. 마스크에 잘리지 않도록 Mask_Root의 형제
 ```
 
@@ -80,9 +81,13 @@ StageViewportLayer                       (IStageMount — 무대가 서는 자�
 | 카메라 리그의 노드 일곱 | 샷 시스템(축마다 하나) · 흔들림 재생기(`Camera_Shake`) | 항등 | 그렇다 |
 | `Layer_{d}` | 샷 시스템 | 항등 | 그렇다 |
 | `Layer_{d}_Content` | 아무도(리그의 부모일 뿐) | 항등 | 아니다 |
+| `Layer_{d}_Dim` | 어둡게(`screen_dim` — `StageLayerDimController`, 판의 투명도만) | 걷힘(투명도 0) · 앵커 −1~2 | 아니다 |
 
 - 노드 이름은 `{무대 키}_{노드}` — 한 씬에 무대가 셋이라 접두사로 가른다. 층 이름의 꼬리는 정본 라벨이 있으면 라벨, 없으면 d 숫자(`stage00_Layer_0.25`).
 - 모든 노드는 stretch 앵커 · 피벗 중앙 · 항등으로 선다. 그래서 각 노드의 원점이 부모의 중심이고, 중립값이 상수다.
+  하나 다른 것은 어둡기 판이다 — 앵커가 −1~2라 층의 가로세로 3배다. 층은 카메라를 타므로, 넓히기 · 기울이기 · 옮기기에도
+  판의 가장자리가 무대 창 안에 드러나지 않게 넉넉히 둔다(창 밖은 마스크가 자른다). 판은 캐릭터를 건드리지 않고 위에서 가릴 뿐이다
+  — 선형 색 공간이라 투명도 α의 검은 판은 그 아래 밝기를 ×(1−α)로 만든다([PLAN_screen-cover.md](../../../../../docs/PLAN_screen-cover.md) §3.2).
 - 무대는 조립 때 셋(`stage00` · `stage01` · `stage02`)이 서고, 층 다섯(far…close)을 미리 세운다 — 먼 층이 뒤에 그려지는 순서를 처음부터 고정하려고. 그 밖의 d는 참조될 때 선다(`StageRigBuilder.EnsureLayer`, 형제 순서를 d 오름차순으로 다시 맞춘다).
 
 ### 2.1 무대마다 카메라가 있고, 역할이 그 쓰임을 정한다 (D2 · D11)
@@ -295,6 +300,10 @@ place / size / shot_focus_to 측정
 
 블러 (screen_blur)
   RigBlurIntentSystem     (무대 키, d)로 층의 Content를 고른다
+
+어둡게 (screen_dim)
+  StageLayerDimCommand    (무대 키, d)의 판 — all이면 그 무대의 가장 앞 층의 판. 판(StageLayerDimController)이 전환을 갖는다
+  정지                    StageRigRegistry.ResetAllDimsToBaseline — 되감기는 정지 → 루트부터 시크라 판은 시크가 다시 세운다
 
 정지 프레임 (StageReducer — 코어)
   slot · bg_spawn         SlotAttachment(무대 키, 라벨 → LayerDepth) — 스폰 때 한 번

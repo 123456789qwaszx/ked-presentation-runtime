@@ -84,6 +84,23 @@ Yarn Spinner를 기반으로 제작한 **비주얼 노벨 화면 연출 런타�
 하린: 말하는 도중에도 바꿀 수 있지. [cmd="face_swap s1 3 10fr"/]바로 여기서 바뀌어.
 ```
 
+화면을 덮었다 걷는 일(암전)은 `screen_cover` · `screen_cover_clear`입니다. 덮개는 무대 셋과 컷인 · 팝업을 모두 덮고 대사창 · HUD는 덮지 않습니다.
+`screen_cover`는 다 덮일 때까지 기다리므로 그 뒤의 무대 정리는 늘 덮인 밑에서 일어나고, `screen_cover_clear`는 기다리지 않고 다음 줄로 넘어가도 제 길이로 걷힙니다.
+무대를 어둡게 하는 일은 `screen_dim <층|all> <세기> [길이] [이징] [무대]`입니다 — 층마다 선 검은 판의 투명도라 캐릭터는 그대로이고,
+`all`은 무대 전체(속말 · 회상), `far`는 배경만(인물을 띄울 때)입니다. 세기 0이 걷기, `screen_dim_reset`이 전부 걷기입니다([PLAN_screen-cover.md](docs/PLAN_screen-cover.md)).
+
+```yarn
+<<screen_cover black 0.6s>>
+<<bg_sprite bg_main street_day>>
+<<pause 0.4s>>
+<<screen_cover_clear 0.5s>>
+<<step>>
+<<screen_dim all 0.45 0.27s>>
+(정말 괜찮을까……)
+<<screen_dim all 0 0.23s>>
+하린: 응, 괜찮아.
+```
+
 진행·저장 예제의 대본은 `Assets/Dialogue/ChapterProgression/festival_eve_*.yarn`(카드 하나에 파일 하나, 챕터 JSON은 곁의 `festival_eve.progression.json`)입니다.
 챕터 하나(축제 전날)에 장면 둘 — 진행 선택지와 스탯, 숨는 · 잠기는 선택지, 자동 간선,
 조건 분기(`<<detour>>`로 다녀가는 카드가 제 첫머리에서 스탯을 본다), 장면 확정과 지난 장면에서 갈라지기, 챕터 끝(끝 카드)을 한 번씩 지나갑니다.

@@ -21,6 +21,8 @@
 | 무대 노드에 모션 · 페이드를 거는 커맨드 | tx — `StageMaskMotionCommand` + `StageMaskSlot`. 컷인(`StageFrame/CutIn`) · 그림 팝업(`StageFrame/Popup`)도 이 틀이다 |
 | 무대 루트 바깥에 무대를 띄우는 것 | 무대 틀 — `StageFrameBuilder` · `StageFrameRefs` · `StageFrameRegistry`(`stage-frame.md`) |
 | 리그 시각 효과 · 블러 | `RigVisualEffectController` + `IntentTransition` |
+| 화면 전체에 머무는 효과(덮개 · 비네트 · 노이즈) | 화면 효과 리그 — 스키마 노드 하나 + 의도형 컨트롤러(`ScreenCoverEffectController` · `ScreenVignetteEffectController`). 한 번 터지고 0으로 돌아오는 것은 이벤트형(`ScreenFlashEffectController`) |
+| 무대 · 층 단위로 가리는 것 | 층의 어둡기 판 — `StageLayerDimController`(무대 리그의 층마다, `PLAN_screen-cover.md` §3.2). 리그마다 색을 바꾸지 않는다 |
 | 원본 픽셀 크기로 그리는 것 | 배경 · 초상 — `NodeTargets.SourcePixelsSizing` · `background-dimensions.json` · `portrait-dimensions.json`(`cc927f38`, `PLAN_portrait-source-pixels.md`) |
 
 설계 문서(`docs/PLAN_*.md`)의 첫머리에 "무엇을 본보기로 따른다"를 적는다.
