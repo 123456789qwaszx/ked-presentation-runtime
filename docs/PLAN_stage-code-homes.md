@@ -2,7 +2,7 @@
 
 > 상태: R1–R4 끝(2026-11-17). 소유자가 1 · 2 · 3을 모두 하기로 했다.
 > **§3 · §8과 R2(틀 되돌리기)는 [PLAN_stage-visibility.md](PLAN_stage-visibility.md)가 대신한다** — `tx`가 틀을 끄는 규칙 자체를 걷는다. R1 · R3(폴더 · 팩토리)은 그대로다.
-> 남은 것: 블러의 집(§5)과 명령 이름(§6)은 소유자가 정한다.
+> 블러의 집(§5)은 2026-11-17에 옮겼다(`Stage/Blur/`). 명령 이름(§6)은 연출 카드 · 툴과 함께 정한다 — [stage-changes-handoff.md](stage-changes-handoff.md).
 > **동작은 바꾸지 않는다.** 코드가 사는 폴더와, 커맨드를 만드는 팩토리만 옮긴다.
 > 본보기: [command-authoring.md](command-authoring.md) §6 — 컷인 창 · 그림 팝업을 무대 리그에서 무대 틀로 떼어 낸 일(2026-11-09). 그때도 동작은 같았고 틀린 것은 "어디에 무엇이 사는가"였다.
 
@@ -96,7 +96,8 @@ A의 새 커맨드 하나: `StageFrameResetCommand`(`Stage/StageFrame/`). 스펙
 
 ## 5. 이번에 하지 않는 것
 
-- **블러.** `screen_blur` · `focus_on`과 `RigBlurIntentSystem`도 `Stage/ScreenEffect/`에 산다. 이것은 화면 효과 리그가 아니라 캐릭터 리그마다 블러를 맞추는 시스템이다 — 같은 어긋남이다. 이번에 옮기지 않으므로 `ScreenEffectCommandFactory`에 `screen_blur`가 남는다. 옮길지와 어디로 옮길지는 소유자가 정한다.
+- **블러.** `screen_blur` · `focus_on`과 `RigBlurIntentSystem`도 `Stage/ScreenEffect/`에 살았다. 화면 효과 리그가 아니라 캐릭터 리그마다 블러를 맞추는 시스템이다 — 같은 어긋남이었다.
+  **2026-11-17 옮겼다**: `Stage/Blur/`(시스템) · `Stage/Blur/Commands/`(초점 · 층 블러 커맨드, `BlurCommandFactory`). 캐릭터 리그 팩토리와 화면 효과 팩토리는 블러 시스템을 받지 않는다. 동작 변경 없음.
 - **명령 이름.** 이번 정리는 이름을 바꾸지 않는다(§6).
 
 ## 6. 정할 것 — 명령 이름

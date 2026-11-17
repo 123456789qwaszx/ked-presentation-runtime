@@ -145,8 +145,7 @@ public partial class SampleBootstrap
             roleTuningDb,
             characterFocusTuningDb,
             characterVisualFocusPresetDb,
-            characterDepthTuning,
-            _rigBlur);
+            characterDepthTuning);
 
         // Emoji — 슬롯에 딸려 서는 작은 연출. 캐릭터를 모른다: 설 자리(CharSlot_Scale)만 받는다.
         _emojis = LoadEmojis();
@@ -171,6 +170,9 @@ public partial class SampleBootstrap
         // Audio
         AudioCommandFactory audioFactory = new(audioSystem);
 
+        // 블러 — 초점(focus_on) · 층 블러(screen_blur). 커맨드는 의도만 넘기고 시스템이 줄 머리에서 리그마다 맞춘다
+        BlurCommandFactory blurFactory = new(_rigBlur);
+
         // 무대 리그 — 마스크(tx) · 층의 어둡기 판(screen_dim)(stage-rig.md)
         StageRigCommandFactory stageRigFactory = new(
             stageMaskMotionPresetDb,
@@ -186,7 +188,6 @@ public partial class SampleBootstrap
             screenFlashPresetDb,
             screenNoisePresetDb,
             screenVignettePresetDb,
-            _rigBlur,
             screenCoverPresetDb);
 
         CompositeCommandFactory factory = new(
@@ -197,6 +198,7 @@ public partial class SampleBootstrap
             audioFactory,
             stageRigFactory,
             stageFrameFactory,
+            blurFactory,
             screenEffectFactory);
 
         commandExecutor.Initialize(factory);

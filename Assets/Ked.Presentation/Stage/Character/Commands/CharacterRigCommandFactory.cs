@@ -14,7 +14,6 @@ public sealed class CharacterRigCommandFactory : INodeCommandFactory
     private readonly CharacterVisualFocusPresetDBSO _characterVisualFocusPresetDb;
     
     private readonly CharacterDepthTuningSO _characterDepthTuning;
-    private readonly RigBlurIntentSystem _rigBlur;
 
     public CharacterRigCommandFactory(
         PresentationStage stage,
@@ -25,8 +24,7 @@ public sealed class CharacterRigCommandFactory : INodeCommandFactory
         RoleAnchorTuningDBSO roleTuningDb,
         CharacterFocusTuningDBSO characterFocusTuningDb,
         CharacterVisualFocusPresetDBSO characterVisualFocusPresetDb,
-        CharacterDepthTuningSO characterDepthTuning,
-        RigBlurIntentSystem rigBlur)
+        CharacterDepthTuningSO characterDepthTuning)
     {
         _stage = stage ?? throw new ArgumentNullException(nameof(stage));
         _stageView = stageView;
@@ -37,7 +35,6 @@ public sealed class CharacterRigCommandFactory : INodeCommandFactory
         _characterFocusTuningDb = characterFocusTuningDb ? characterFocusTuningDb : throw new ArgumentNullException(nameof(characterFocusTuningDb));
         _characterVisualFocusPresetDb = characterVisualFocusPresetDb ? characterVisualFocusPresetDb : throw new ArgumentNullException(nameof(characterVisualFocusPresetDb));
         _characterDepthTuning = characterDepthTuning ? characterDepthTuning : throw new ArgumentNullException(nameof(characterDepthTuning));
-        _rigBlur = rigBlur ?? throw new ArgumentNullException(nameof(rigBlur));
     }
 
     public bool TryCreate(CommandSpecBase spec, out ISequenceCommand command)
@@ -79,7 +76,7 @@ public sealed class CharacterRigCommandFactory : INodeCommandFactory
             SetSpriteCommandSpecCharR s => new SetSpriteCommandCharR(_stage, s),
             
             CharVisualFocusCommandSpecCharR s => new CharVisualFocusCommandCharR(_stage, s, _characterVisualFocusPresetDb),
-            DepthFocusCommandSpecCharR s => new DepthFocusCommandCharR(_rigBlur, s),
+            // 초점(focus_on)은 블러 시스템의 것이다 — BlurCommandFactory
 
             _ => null
         };

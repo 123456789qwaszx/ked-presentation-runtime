@@ -1,14 +1,13 @@
 using System;
 
 // 화면 효과 리그의 커맨드 — 덮개 · 플래시 · 노이즈 · 비네트(모든 무대 위, 화면 전체).
-// screen_blur는 블러 시스템(RigBlurIntentSystem)의 것인데 아직 여기서 만든다(docs/PLAN_stage-code-homes.md §5).
+// 층 블러(screen_blur)는 블러 시스템의 것이다 — BlurCommandFactory(Stage/Blur/).
 public sealed class ScreenEffectCommandFactory : INodeCommandFactory
 {
     private readonly ScreenEffectRig _screenEffects;
     private readonly ScreenFlashPresetDBSO _flashPresetDb;
     private readonly ScreenNoisePresetDBSO _noisePresetDb;
     private readonly ScreenVignettePresetDBSO _vignettePresetDb;
-    private readonly RigBlurIntentSystem _rigBlur;
     private readonly ScreenCoverPresetDBSO _coverPresetDb;
 
     public ScreenEffectCommandFactory(
@@ -16,14 +15,12 @@ public sealed class ScreenEffectCommandFactory : INodeCommandFactory
         ScreenFlashPresetDBSO flashPresetDb,
         ScreenNoisePresetDBSO noisePresetDb,
         ScreenVignettePresetDBSO vignettePresetDb,
-        RigBlurIntentSystem rigBlur,
         ScreenCoverPresetDBSO coverPresetDb = null)
     {
         _screenEffects = screenEffects ? screenEffects : throw new ArgumentNullException(nameof(screenEffects));
         _flashPresetDb = flashPresetDb ? flashPresetDb : throw new ArgumentNullException(nameof(flashPresetDb));
         _noisePresetDb = noisePresetDb ? noisePresetDb : throw new ArgumentNullException(nameof(noisePresetDb));
         _vignettePresetDb = vignettePresetDb ? vignettePresetDb : throw new ArgumentNullException(nameof(vignettePresetDb));
-        _rigBlur = rigBlur ?? throw new ArgumentNullException(nameof(rigBlur));
 
         if (coverPresetDb == null)
         {
@@ -46,9 +43,6 @@ public sealed class ScreenEffectCommandFactory : INodeCommandFactory
             ScreenFlashCommandSpec s    => new ScreenFlashCommand(s, _screenEffects, _flashPresetDb),
             ScreenNoiseCommandSpec s    => new ScreenNoiseCommand(s, _screenEffects, _noisePresetDb),
             ScreenVignetteCommandSpec s => new ScreenVignetteCommand(s, _screenEffects, _vignettePresetDb),
-
-            // 층 블러 — 블러 시스템에 의도만 넘긴다
-            StageLayerBlurCommandSpec s => new StageLayerBlurCommand(_rigBlur, s),
 
             _ => null
         };
