@@ -147,16 +147,16 @@ public class StageFrameResetTests
     }
 
     [Test]
-    public void 실험A_닫힌_채_남은_컷인_창은_되돌린다()
+    public void 실험A_닫힌_컷인은_중립_그대로다()
     {
         Open("stage01");
         _frames.CutIn("stage01").SnapClose();
         _frames.Popup("stage01").SnapClose();
-        Assert.AreEqual(new Vector3(0f, 0f, 1f), _frames.CutIn("stage01").Window.localScale, "닫힌 컷인 창은 배율 0 — 그 무대가 통째로 안 보인다");
+        Assert.IsTrue(IsNeutral("stage01"), "닫힌 컷인 창은 항등이다 — 숨기는 것은 마스크다");
 
         Run(new StageFrameResetCommandSpec { allStages = true }, keepOpenFrames: true);
 
-        Assert.IsTrue(IsNeutral("stage01"), "다음 tx가 그 무대를 열면 보여야 한다");
+        Assert.IsTrue(IsNeutral("stage01"));
     }
 
     [Test]

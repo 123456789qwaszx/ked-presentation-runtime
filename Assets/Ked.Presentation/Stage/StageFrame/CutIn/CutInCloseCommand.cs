@@ -10,7 +10,7 @@ public sealed class CutInCloseCommandSpec : CommandSpecBase
     public string stage = "stage01";
 }
 
-// cutin_close — 무대 슬롯에 퇴장 모션을 걸기만 한다. 끝에서 슬롯이 닫힘(창 배율 0)으로 둔다(StageCutInSlot.PlayClose).
+// cutin_close — 무대 슬롯에 퇴장 모션을 걸기만 한다. 끝에서 슬롯이 닫힘(창 항등 · 마스크 숨김)으로 둔다(StageCutInSlot.PlayClose).
 public sealed class CutInCloseCommand : CommandBase
 {
     private readonly CutInCloseCommandSpec _spec;

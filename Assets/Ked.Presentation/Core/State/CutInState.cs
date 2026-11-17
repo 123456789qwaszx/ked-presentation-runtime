@@ -3,7 +3,7 @@ namespace Ked.Presentation.Core
     /// <summary>
     /// 덮는 무대 하나의 컷인 끝 상태 — docs/PLAN_cutin.md §6.
     /// 창의 모션(팝 인 · 팝 아웃) 도중은 접지 않는다. 다른 커맨드처럼 끝값만이다:
-    /// 열림 = 창 항등 + 판이 이 자리 · 배율로 보인다, 닫힘 = 창 배율 0(무대 내용도 안 보인다).
+    /// 열림 = 창 항등 + 판이 이 자리 · 배율로 보인다, 닫힘 = 창 항등 + 마스크 숨김(무대 내용도 안 보인다).
     /// 판 모양 · 기본 크기는 게임 프리셋(런타임 CutInPresetDBSO)이라 여기 없다 — 툴 미리보기는 프리셋과 이 값으로 그린다.
     /// </summary>
     public readonly struct CutInState

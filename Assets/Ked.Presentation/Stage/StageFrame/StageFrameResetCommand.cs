@@ -77,7 +77,7 @@ public sealed class StageFrameResetCommand : CommandBase
             ResetClosedOnly(stage);
     }
 
-    // 닫힌 채 남은 컷인 창(배율 0)은 그 무대를 통째로 가리므로 되돌린다 — 이미 안 보이는 상태라 티가 나지 않는다.
+    // 열리지 않은 컷인은 중립으로 둔다(닫힌 컷인의 창은 이미 항등이다).
     // 열린(닫히는 중인) 컷인 · 팝업은 그대로 둔다. 판 그림과 팝업은 마스크 밖이라 tx로는 가려지지 않는다.
     private void ResetClosedOnly(string stage)
     {

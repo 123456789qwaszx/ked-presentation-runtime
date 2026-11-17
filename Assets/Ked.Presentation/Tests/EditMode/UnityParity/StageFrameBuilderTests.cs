@@ -108,8 +108,16 @@ namespace Ked.Presentation.Tests.UnityParity
                 Assert.That(cutIn.IsOpen, Is.True);
                 Assert.That(rig.MaskRoot.GetComponent<StageMaskGraphic>().Kind, Is.EqualTo(StageMaskKind.CustomQuad));
 
+                // 닫힘 — 창은 항등으로 돌아오고 무대는 마스크가 숨긴다(docs/PLAN_stage-visibility.md §3.2).
                 cutIn.SnapClose();
-                Assert.That(cutIn.Window.localScale, Is.EqualTo(new Vector3(0f, 0f, 1f)));
+                StageMaskGraphic mask = rig.MaskRoot.GetComponent<StageMaskGraphic>();
+                Assert.That(cutIn.IsOpen, Is.False);
+                Assert.That(cutIn.Window.localScale, Is.EqualTo(Vector3.one), "창을 배율 0으로 남기지 않는다 — 다음 tx가 그 무대를 열면 보여야 한다");
+                Assert.That(cutIn.Window.pivot, Is.EqualTo(new Vector2(0.5f, 0.5f)));
+                Assert.That(cutIn.PanelImage.enabled, Is.False);
+                Assert.That(mask.Kind, Is.EqualTo(StageMaskKind.FullRect), "네 점은 화면 밖까지 뻗어 옮기기만으로는 숨지 않는다 — 무대만 한 사각형으로 바꿔 숨긴다");
+                Assert.That(mask.ShapeOffsetPixels, Is.EqualTo(mask.HiddenOffsetPixels));
+                Assert.That(Mathf.Abs(mask.HiddenOffsetPixels.x), Is.GreaterThanOrEqualTo(_mount.rect.width), "숨김 자리는 무대 rect 밖이다");
 
                 cutIn.Reset();
                 Assert.That(cutIn.Window.localScale, Is.EqualTo(Vector3.one));

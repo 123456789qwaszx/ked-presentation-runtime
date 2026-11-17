@@ -11,7 +11,8 @@ using UnityEngine.UI;
 ///     {stage}_Panel       판 그림. 무대 루트보다 뒤
 ///     {stage}_Stage_Root  (그대로) — 마스크가 판 아래 변으로만 자른다(위는 열림)
 ///
-/// 상태는 셋이다. 중립(창 항등 · 판 꺼짐 — 컷인을 안 쓰는 무대), 열림(Layout 뒤), 닫힘(창 배율 0 — 퇴장 모션 끝).
+/// 상태는 셋이다. 중립(창 항등 · 판 꺼짐 — 컷인을 안 쓰는 무대), 열림(Layout 뒤), 닫힘(퇴장 모션 끝 — 창 항등 · 판 꺼짐 · 마스크 숨김).
+/// 보이기 · 숨기기는 마스크 하나가 정한다 — 창은 자세(팝 · 회전)만 맡고 무대를 숨기지 않는다(docs/PLAN_stage-visibility.md §2).
 /// 창 모션(배율 · 회전 — 캐릭터 motion과 같은 식, MotionMath.Compose relative)은 이 슬롯이 하나만 소유한다
 /// (StageMaskSlot의 tx 모션과 같은 규율). 새 열기 · 닫기는 앞 모션을 먼저 확정한다.
 /// tx · 마스크 지우기 · 장면 경계가 Reset으로 끝값 없이 끊고 중립에 돌린다 — 마스크 모양은 그 커맨드의 것이 이긴다.
@@ -59,7 +60,7 @@ public sealed class StageCutInSlot
         WriteEnd(clip, Vector3.one.ToCore(), Vector3.zero.ToCore());
     }
 
-    /// <summary>닫는다 — 지금 창 값에서 퇴장 모션을 걸고, 끝에서 닫힘(창 배율 0)으로 둔다. clip이 null이면 바로 닫는다.</summary>
+    /// <summary>닫는다 — 지금 창 값에서 퇴장 모션을 걸고, 끝에서 닫힘(창 항등 · 마스크 숨김)으로 둔다. clip이 null이면 바로 닫는다.</summary>
     public void PlayClose(MotionClip clip)
     {
         CompleteMotion();
@@ -79,15 +80,7 @@ public sealed class StageCutInSlot
         _motion?.Kill(false);
         _motion = null;
 
-        Window.pivot = new Vector2(0.5f, 0.5f);
-        Window.anchoredPosition = Vector2.zero;
-        Window.sizeDelta = Vector2.zero;
-        Window.localScale = Vector3.one;
-        Window.localEulerAngles = Vector3.zero;
-
-        PanelImage.sprite = null;
-        PanelImage.enabled = false;
-
+        SetWindowNeutral();
         IsOpen = false;
     }
 
@@ -129,12 +122,26 @@ public sealed class StageCutInSlot
         IsOpen = true;
     }
 
-    // 닫힘 — 퇴장 모션의 끝. 창 배율 0으로 남는다(무대 내용도 함께 안 보인다).
+    // 닫힘 — 퇴장 모션의 끝(창 배율 0). 같은 순간 창을 항등으로 돌리고 무대는 마스크가 숨긴다 — 화면은 그대로다.
+    // 창을 배율 0으로 남기면 다음에 그 무대를 tx로 열어도 보이지 않는다(docs/PLAN_stage-visibility.md §1).
     private void SetClosed()
     {
-        Window.localScale = new Vector3(0f, 0f, 1f);
-        Window.localEulerAngles = Vector3.zero;
+        SetWindowNeutral();
+        _mask.SetMaskedHidden();
         IsOpen = false;
+    }
+
+    // 창 항등 · 판 꺼짐. 마스크는 건드리지 않는다.
+    private void SetWindowNeutral()
+    {
+        Window.pivot = new Vector2(0.5f, 0.5f);
+        Window.anchoredPosition = Vector2.zero;
+        Window.sizeDelta = Vector2.zero;
+        Window.localScale = Vector3.one;
+        Window.localEulerAngles = Vector3.zero;
+
+        PanelImage.sprite = null;
+        PanelImage.enabled = false;
     }
 
     // 앞 모션을 끝값으로 확정한다(OnComplete가 돈다). 없으면 아무것도 안 한다.

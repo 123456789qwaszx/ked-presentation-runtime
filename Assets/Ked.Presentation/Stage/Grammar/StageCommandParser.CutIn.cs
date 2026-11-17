@@ -5,7 +5,7 @@ using UnityEngine;
 /// 컷인 — 덮는 무대 하나를 판 모양으로 띄운다(docs/PLAN_cutin.md).
 ///
 ///   cutin_open  {무대=stage01} {판} {x=0u} {y=0u} {배율=1}  →  CutInOpenCommandSpec  (창 피벗 · 판 · 마스크 → 팝 인)
-///   cutin_close {무대=stage01}                               →  CutInCloseCommandSpec (팝 아웃 → 창 배율 0)
+///   cutin_close {무대=stage01}                               →  CutInCloseCommandSpec (팝 아웃 → 마스크 숨김)
 ///
 /// x y는 판 중심 — 무대 중심 기준 u(bg_move와 같은 단위, 1u = 40px). 판은 Resources/CutInPanels의 키.
 /// 본 무대(stage00)에는 쓰지 않는다 — 경고하고 건너뛴다(폴드는 Unhandled).

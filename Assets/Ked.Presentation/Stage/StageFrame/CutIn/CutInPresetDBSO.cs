@@ -142,7 +142,7 @@ public sealed class CutInPresetDBSO : ScriptableObject
             new[] { 0.45f, 1.10f, 1.19f, 1.05f, 0.98f, 1.00f, 1.00f },
             new[] { -6.7f, 0.2f, 3.6f, 4.7f, 0.2f, -1.9f, 0f });
 
-    /// <summary>퇴장: 살짝 커지며 기울었다가(1.17배 · +7.5°) 0으로. 0.35초, commit — 창은 배율 0으로 남는다.</summary>
+    /// <summary>퇴장: 살짝 커지며 기울었다가(1.17배 · +7.5°) 0으로. 0.35초, commit — 끝에서 슬롯이 창을 항등으로 돌리고 마스크로 숨긴다.</summary>
     public static MotionClip DefaultPopOut()
         => WindowClip(
             "cutin_pop_out",
