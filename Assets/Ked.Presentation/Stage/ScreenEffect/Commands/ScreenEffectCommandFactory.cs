@@ -1,14 +1,13 @@
 using System;
 
+// 화면 효과 리그의 커맨드 — 덮개 · 플래시 · 노이즈 · 비네트(모든 무대 위, 화면 전체).
+// screen_blur는 블러 시스템(RigBlurIntentSystem)의 것인데 아직 여기서 만든다(docs/PLAN_stage-code-homes.md §5).
 public sealed class ScreenEffectCommandFactory : INodeCommandFactory
 {
     private readonly ScreenEffectRig _screenEffects;
     private readonly ScreenFlashPresetDBSO _flashPresetDb;
     private readonly ScreenNoisePresetDBSO _noisePresetDb;
     private readonly ScreenVignettePresetDBSO _vignettePresetDb;
-    
-    private readonly StageMaskMotionPresetDBSO _stageMaskMotionPresetDb;
-    private readonly StageRigRegistry _stages;
     private readonly RigBlurIntentSystem _rigBlur;
     private readonly ScreenCoverPresetDBSO _coverPresetDb;
 
@@ -17,8 +16,6 @@ public sealed class ScreenEffectCommandFactory : INodeCommandFactory
         ScreenFlashPresetDBSO flashPresetDb,
         ScreenNoisePresetDBSO noisePresetDb,
         ScreenVignettePresetDBSO vignettePresetDb,
-        StageMaskMotionPresetDBSO stageMaskMotionPresetDb,
-        StageRigRegistry stages,
         RigBlurIntentSystem rigBlur,
         ScreenCoverPresetDBSO coverPresetDb = null)
     {
@@ -26,8 +23,6 @@ public sealed class ScreenEffectCommandFactory : INodeCommandFactory
         _flashPresetDb = flashPresetDb ? flashPresetDb : throw new ArgumentNullException(nameof(flashPresetDb));
         _noisePresetDb = noisePresetDb ? noisePresetDb : throw new ArgumentNullException(nameof(noisePresetDb));
         _vignettePresetDb = vignettePresetDb ? vignettePresetDb : throw new ArgumentNullException(nameof(vignettePresetDb));
-        _stageMaskMotionPresetDb = stageMaskMotionPresetDb ? stageMaskMotionPresetDb : throw new ArgumentNullException(nameof(stageMaskMotionPresetDb));
-        _stages = stages ?? throw new ArgumentNullException(nameof(stages));
         _rigBlur = rigBlur ?? throw new ArgumentNullException(nameof(rigBlur));
 
         if (coverPresetDb == null)
@@ -51,15 +46,9 @@ public sealed class ScreenEffectCommandFactory : INodeCommandFactory
             ScreenFlashCommandSpec s    => new ScreenFlashCommand(s, _screenEffects, _flashPresetDb),
             ScreenNoiseCommandSpec s    => new ScreenNoiseCommand(s, _screenEffects, _noisePresetDb),
             ScreenVignetteCommandSpec s => new ScreenVignetteCommand(s, _screenEffects, _vignettePresetDb),
-            
-            StageLayerBlurCommandSpec s => new StageLayerBlurCommand(_rigBlur, s),
 
-            // 어둡게 — 무대 리그의 층마다 선 어둡기 판(docs/PLAN_screen-cover.md §3.2)
-            StageLayerDimCommandSpec s => new StageLayerDimCommand(s, _stages),
-            
-            // Stage-local Mask
-            StageMaskMotionCommandSpec s => new StageMaskMotionCommand(s, _stageMaskMotionPresetDb, _stages),
-            StageMaskClearCommandSpec s => new StageMaskClearCommand(s, _stages),
+            // 층 블러 — 블러 시스템에 의도만 넘긴다
+            StageLayerBlurCommandSpec s => new StageLayerBlurCommand(_rigBlur, s),
 
             _ => null
         };

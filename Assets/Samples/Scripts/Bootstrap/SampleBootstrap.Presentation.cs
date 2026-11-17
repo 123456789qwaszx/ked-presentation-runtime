@@ -171,6 +171,11 @@ public partial class SampleBootstrap
         // Audio
         AudioCommandFactory audioFactory = new(audioSystem);
 
+        // 무대 리그 — 마스크(tx) · 층의 어둡기 판(screen_dim)(stage-rig.md)
+        StageRigCommandFactory stageRigFactory = new(
+            stageMaskMotionPresetDb,
+            _stageRigs);
+
         // 무대 틀 — 컷인 창 · 그림 팝업, tx가 앞에 내는 틀 되돌리기(stage-frame.md)
         StageFrameCommandFactory stageFrameFactory = new(
             _stageFrames,
@@ -182,8 +187,6 @@ public partial class SampleBootstrap
             screenFlashPresetDb,
             screenNoisePresetDb,
             screenVignettePresetDb,
-            stageMaskMotionPresetDb,
-            _stageRigs,
             _rigBlur,
             screenCoverPresetDb);
 
@@ -193,6 +196,7 @@ public partial class SampleBootstrap
             presentationShotFactory,
             presentationControlFactory,
             audioFactory,
+            stageRigFactory,
             stageFrameFactory,
             screenEffectFactory);
 
