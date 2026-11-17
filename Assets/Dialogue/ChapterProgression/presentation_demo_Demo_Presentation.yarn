@@ -1,6 +1,6 @@
 title: Demo_Presentation
 ---
-<<shot_reset 0fr>>
+<<shot_reset_all 0fr>>
 <<screen_vignette_clear 0fr>>
 <<screen_noise_clear 0fr>>
 <<bg_spawn bg_main class_day>>
@@ -131,6 +131,27 @@ test
 <<char_visual_clear s1 10fr>>
 <<char_visual_clear s2 10fr>>
 시구레: 다시 넓게. 원래 무대로 돌아왔어요. #line:ln_9nyveem8
+
+// ── 카메라의 몸 · 롤 · 흔들림 ───────────────────────────────────
+<<shot_dolly 4 72fr>>
+시구레: 이번엔 카메라가 몸째로 다가가요. 줌과 달리 가까운 사람이 더 크게, 먼 배경은 덜 커져요.
+
+<<shot_track 1.5u 0u 60fr>>
+시구레: 옆으로 걸어가면 가까운 것이 더 많이 밀려요. 이 줄을 넘겨도 카메라는 제 속도로 가요.
+
+<<shot_zoom 2 10fr>>
+<<shot_shake shake_hit>>
+하린: 쾅! 걸어가는 중에 렌즈로 한 번 더 당기고, 화면을 흔들었어.
+
+<<shot_roll 3 12fr>>
+하린: 화면을 기울일 수도 있고.
+
+<<shot_roll 0 12fr>>
+<<shot_reset 12fr>>
+하린: shot_reset은 렌즈만 되돌려. 카메라는 아직 다가서서 옆에 선 채야.
+
+<<shot_reset_all 20fr>>
+시구레: 통째로 되돌리면 처음 자리예요.
 
 <<screen_vignette dream 0.6 20fr>>
 <<screen_noise memory 0.4 20fr>>

@@ -4,6 +4,12 @@
 그리고 같은 식을 런타임 · 폴드 · 하네스가 어떻게 나눠 쓰는지를 남긴다. 2026-11-05 `refactor/shotRig`의 기록이고,
 2026-11-06에 무대의 역할(§2.1)과 char_to 제거(§2.4)를 더했다.
 
+> **2026-11-17 — 카메라가 따로 선 리그가 됐다.** 샷의 축이 다섯(줌 · 팬 · 롤 · 달리 · 트랙)으로 늘고 흔들림이 생기면서,
+> `Camera_Pan` · `Camera_Zoom` 둘은 무대 리그에서 나가 카메라 리그(`CameraRigSchema` — 노드 일곱)가 됐다.
+> 축 · 식 · 전환 · 명령의 지금 모습은 [camera-rig.md](../../CameraRig/Documentation~/camera-rig.md)가 규범이다.
+> 이 문서의 §4 · §7은 **줌 · 팬 둘만 있던 때의 식**이다 — 트랙 · 달리 · 롤이 0이면 지금도 글자 그대로 맞다.
+> 무대(마스크 · 층 · 역할 · 중립 · 하네스)에 관한 절은 아래에 지금 모습으로 고쳐 두었다.
+
 ## 0. 세 문장
 
 > **샷은 숫자 셋이고, 무대의 트랜스폼은 전부 그 셋의 함수다.** 그 함수는 코어 `ShotLayoutMath` 한 곳에 있다.
@@ -61,10 +67,9 @@ StageViewportLayer
 StageViewportLayer                       (IStageMount — 무대가 서는 자리. 예제의 PresentationUIRoot)
   {stage}_Stage_Root                     세상의 자리. 안 움직인다. 리그 좌표 계산의 경계(RigSpaceRoot)
     {stage}_Mask_Root                    장면 전환 마스크. 카메라 위라서 화면에 고정된다
-      {stage}_Camera_Pan                 샷의 팬
-        {stage}_Camera_Zoom              샷의 줌
-          {stage}_Layer_{라벨|d}          깊이 층. 위치 · 배율을 이 한 노드에 쓴다. d 오름차순 = 형제 순서
-            {stage}_Layer_{…}_Content    리그가 붙는 곳. 블러 대상
+      {stage}_Camera_Root … _Track       카메라 리그 — 노드 일곱의 사슬(CameraRigSchema · camera-rig.md §2)
+        {stage}_Layer_{라벨|d}            깊이 층. 위치 · 배율을 이 한 노드에 쓴다. d 오름차순 = 형제 순서. 카메라 리그의 가장 안쪽(Mount) 아래
+          {stage}_Layer_{…}_Content      리그가 붙는 곳. 블러 대상
     {stage}_MaskEdge_Root                마스크 테두리 그래픽. 마스크에 잘리지 않도록 Mask_Root의 형제
 ```
 
@@ -72,8 +77,7 @@ StageViewportLayer                       (IStageMount — 무대가 서는 자�
 |---|---|---|---|
 | `Stage_Root` | 아무도 | 항등 | 아니다 |
 | `Mask_Root` · `MaskEdge_Root` | 마스크 커맨드(`tx` 등) — 트랜스폼이 아니라 마스크 그래픽 | 항등 | 아니다 |
-| `Camera_Pan` | 샷 시스템 | `anchoredPosition` (0, 0) | 그렇다 |
-| `Camera_Zoom` | 샷 시스템 | `localScale` 1 | 그렇다 |
+| 카메라 리그의 노드 일곱 | 샷 시스템(축마다 하나) · 흔들림 재생기(`Camera_Shake`) | 항등 | 그렇다 |
 | `Layer_{d}` | 샷 시스템 | 항등 | 그렇다 |
 | `Layer_{d}_Content` | 아무도(리그의 부모일 뿐) | 항등 | 아니다 |
 
@@ -83,7 +87,7 @@ StageViewportLayer                       (IStageMount — 무대가 서는 자�
 
 ### 2.1 무대마다 카메라가 있고, 역할이 그 쓰임을 정한다 (D2 · D11)
 
-카메라가 무대 루트 **아래**로 내려왔다. 그래서 무대마다 `Camera_Pan` · `Camera_Zoom`이 있다.
+카메라가 무대 루트 **아래**로 내려왔다. 그래서 무대마다 카메라 리그가 하나씩 있다.
 어느 무대의 카메라를 샷이 움직이는지는 구조가 아니라 정책이고, 그 정책이 무대의 역할(코어 `StageRoles`)이다.
 
 | 역할 | 무대 | 무엇을 담나 | 카메라 |
@@ -108,6 +112,7 @@ StageViewportLayer                       (IStageMount — 무대가 서는 자�
 ### 2.3 빌더가 보장하는 것
 
 `StageRigBuilder.BindRefsFromRoot`는 씬에 남은 무대를 검증한다 — 이름 · 부모 · 자식 집합 · 항등 · 마스크 컴포넌트가 하나라도 어긋나면 자식을 전부 부수고 다시 세운다(경고 "무대 계층이 스키마와 다르다").
+카메라 리그의 사슬은 `CameraRigBuilder.IsValid`가 본다 — 카메라만 어긋나도 무대를 통째로 다시 세운다(카메라 리그 이전의 계층이 남아 있는 경우도 이것이다).
 파괴 전 `SetParent(null)`은 캐릭터 리그 빌더와 같은 이유다 — 같은 프레임의 이름 검색이 삭제 예정 노드를 다시 잡는다.
 
 그래서 런타임 코드는 무대 노드에 null 검사를 하지 않는다. `StageRigRefs`가 있으면 노드도 있다.
@@ -180,6 +185,10 @@ tx는 **보이는 범위만** 맡는다. 샷의 뜻(줌하며 열리기 같은)�
 
 ## 4. 샷 식 — `Core/Transforms/ShotLayoutMath.cs`
 
+> 이 절은 줌 · 팬 둘만 있던 때의 식이다. 트랙 · 달리 · 롤까지 든 지금의 식은 [camera-rig.md](../../CameraRig/Documentation~/camera-rig.md) §3 —
+> 새 축이 0이면 아래와 비트 단위로 같다. 코어의 출력도 바뀌었다: `SolveCamera`는 `CameraPose`를 내고,
+> 층에 쓰는 값은 `LayerResponse.LocalPosition`(노드 로컬)으로 코어가 낸다 — 런타임은 벡터를 옮기지 않는다.
+
 입력은 샷 의도 `ShotIntentState`(zoom · pan · focus) 하나와 층 d. 층의 기준값은 입력에 없다 — 빌더가 항등을 보장하므로.
 
 ### 4.1 카메라
@@ -226,7 +235,7 @@ d → 프로필. 표본 사이는 선형, 바깥은 끝 표본으로 고정. 기
 
 mid는 항등이다 — mid에 선 리그에게 샷은 카메라 그대로다.
 
-생성자가 지키는 것 둘: 표본은 d 오름차순, **`panResponse`는 축마다 −1보다 크다.**
+생성자가 지키는 것 둘: 표본은 d 오름차순, **`panResponse`는 축마다 −1보다 크고 1보다 작다**(위쪽 한계는 2026-11-17 — 기운 화면에서 팬을 푸는 2×2가 언제나 풀리게).
 층이 화면에서 움직이는 양은 `pan × (1 + panResponse)`라, −1이면 그 층은 팬을 전혀 따라가지 않는다(무한히 먼 층).
 그런 층의 점은 팬으로 화면 지점에 놓을 수 없다(§7). 표본이 모두 −1보다 크면 보간한 값도 그렇다.
 
@@ -242,11 +251,12 @@ json은 다른 프리셋처럼 **런타임 값의 덤프**다(튜닝 덤프 메�
 `place` · `size` · `shot_focus_to`는 무대 좌표로 잰다 — "카메라가 없을 때 리그가 무대의 어디에 있나"(`a9bc19f7`).
 측정 체인(`CharacterPlacementTargetLedger.CaptureSettledChain`)이 샷 소유 노드를 지날 때는 라이브 대신 중립값을 쓴다.
 
-중립은 따로 적은 정의가 없다. 같은 식에 `ShotIntentState.Default`(zoom 0 · pan 0 · focus 0)를 넣은 값이다:
-cameraScale 1, pan 0, 층 offset 0, 층 배율 1 — 즉 항등.
+중립은 따로 적은 정의가 없다. 같은 식에 `ShotIntentState.Default`(모든 축 0)를 넣은 값이다:
+카메라 노드 전부 항등, 층 위치 0, 층 배율 1 — 즉 항등.
 
-어느 노드가 샷 소유인지는 빌더 출력이 안다: `StageRigRefs.IsShotOwned(rect)` — 카메라 둘이거나 어느 층의 Rect.
+어느 노드가 샷 소유인지는 빌더 출력이 안다: `StageRigRefs.IsShotOwned(rect, out layer)` — 카메라 리그의 노드(layer가 null)이거나 어느 층의 Rect.
 `PresentationShotResponseSystem.TryGetNeutral`은 이 목록에서 찾아 `Solve(Default)`를 돌려준다. 종전의 참조 비교 분기와 "바인드 때 잰 기준값"은 없다.
+샷 소유 노드의 중립 회전은 언제나 0이다 — 정착 사슬이 회전도 0으로 본다. 그래서 화면이 기울어 있거나(롤) 흔들리는 중에 재도 값이 같다.
 
 체인 전체에서 이 단계가 어디에 서는지는 [settled-chain.md](../../ShotResponse/Documentation~/settled-chain.md).
 
@@ -265,12 +275,16 @@ slot / bg_spawn
   CharRigSlotResolver     registry.Get(무대) + EnsureLayer(d)
   리그 루트 → Layer.Content,  CharacterRigRefs.StandOn(무대, 층) — 리그가 사는 동안 그대로
 
-shot_zoom / shot_track / shot_to / shot_reset / shot_focus_to
-  ShotIntentCommandBase   BuildTargetState → 새 intent
-  PresentationShotResponseSystem.Follow(intent)
-    → 트윈 하나가 intent를 보간(D9) → Apply
-    → 본 무대에만: SolveCamera → 카메라 둘,  SolveLayer(d) → 층마다 위치 · 배율
+shot_to / shot_zoom / shot_pan / shot_track / shot_dolly / shot_roll / shot_reset(_all) / shot_focus_to
+  ShotIntentCommandBase   BuildTargetState → 새 intent, Axes → 조준하는 축
+  PresentationShotResponseSystem.Follow(intent, axes)
+    → 그 축의 트윈이 intent의 제 조각을 보간(D9 · D12) → 한 벌을 통째로 다시 푼다
+    → 본 무대에만: SolveCamera → 카메라 노드 다섯,  SolveLayer(d) → 층마다 위치 · 배율
     → 덮는 무대: 쓰지 않는다(빌더가 세운 항등 = 중립)
+
+shot_shake
+  ShotShakeCommand        클립 + 세기
+  CameraShakePlayer       본 무대의 Camera_Shake에 튼다. 끝나면 항등 — 의도를 쓰지 않는다
 
 tx
   StageMaskSlot           그 무대의 마스크 모양만. 카메라 · 리그와 무관
@@ -343,11 +357,12 @@ close 가로축 예시:
 | 자리 | 하는 일 |
 |---|---|
 | `ShotLayoutMath.SolvePanToPlace` | 위의 역산 |
-| `ShotIntents.FocusTo(zoom, focus, desired, d, 곡선)` | 팬을 풀고 intent(zoom, pan, focus)를 만든다. 논리 focus = 그 점 |
-| 런타임 `ShotZoomFocusCommand` | 측정(무대 좌표 · 무대 · 층) → 덮는 무대면 경고하고 건너뜀 → `Layer.Depth` · `rig.LayerProfile`로 목표 계산 → Follow |
+| `ShotIntents.FocusTo(from, zoom, focus, desired, d, 곡선)` | 팬을 풀고 intent(zoom, pan, focus)를 만든다. 논리 focus = 그 점. 카메라의 몸과 롤은 `from` 그대로 |
+| 런타임 `ShotFocusToCommand` | 측정(무대 좌표 · 무대 · 층) → 덮는 무대면 경고하고 건너뜀 → `Layer.Depth` · `rig.LayerProfile`로 목표 계산 → Follow |
 | 코어 `StageReducer.ApplyShotFocusTo` | 덮는 무대면 Unhandled → 폴드의 focus → `GetAttachment(slot).LayerDepth` · `ResolveLayerProfileCurve()`로 같은 목표 계산 |
 
-입력이 이미 무대 좌표라 "지금 카메라를 씌웠다 벗기는" 왕복이 없다. 결과는 무대 위 자리와 층만으로 정해진다 — 지금 카메라 · 샷의 진행도와 무관하다.
+입력이 이미 무대 좌표라 "지금 카메라를 씌웠다 벗기는" 왕복이 없다. 결과는 무대 위 자리와 층, 그리고 **카메라의 몸과 롤**(2026-11-17)로 정해진다 — 지금 렌즈 · 샷의 진행도와 무관하다.
+카메라가 옮겨 서 있거나 기울어 있으면 같은 대상이라도 팬이 달라진다(camera-rig.md §3.3).
 
 ---
 
@@ -361,19 +376,21 @@ close 가로축 예시:
 
 ### 8.2 하네스가 보는 것
 
-`StageStateCapture.CaptureStageView`가 무대마다 카메라(팬 · 줌 배율)와 층마다 **무대 루트에서 본 중심 · 전체 배율**을 캡처한다(`StageViewSnapshot`).
-런타임이 값을 카메라와 층에 어떻게 나눠 썼는지는 보지 않는다 — Unity가 합성한 보이는 결과만 읽는다.
+`StageStateCapture.CaptureStageView`가 무대마다 카메라 노드 다섯(`CameraPose`) + 흔들림 노드와, 층마다 **무대 루트에서 본 중심 · 전체 배율 · 기울기**를 캡처한다(`StageViewSnapshot`).
+층은 런타임이 값을 카메라와 층에 어떻게 나눠 썼는지 보지 않는다 — Unity가 합성한 보이는 결과만 읽는다. 전체 배율은 축 벡터의 길이로 읽어 기운 화면에서도 같은 값이 나온다.
 
 `StageStateComparer.CompareStageView`의 기대값은 접힌 샷 의도를 코어 식으로 푼 값이다:
 
 ```
-층 중심     = ProjectToRigSpace(0, cameraScale, pan, SolveLayer(Shot, d))
-층 전체 배율 = SolveLayer(Shot, d).Scale × cameraScale
+층 중심     = ProjectToRigSpace(0, SolveCamera(Shot), SolveLayer(Shot, d))
+층 전체 배율 = SolveLayer(Shot, d).Scale × SolveCamera(Shot).Scale        (줌 × 달리 × 층)
+층 기울기   = 롤
 ```
 
 Shot은 본 무대면 접힌 샷, 덮는 무대면 `Default`(항등)다 — 덮는 무대가 샷을 따랐으면 불일치로 잡힌다.
 
-불일치 키는 `stage:{무대}` (cameraScale · cameraPan), `stage:{무대}/layer:{d}` (center · totalScale). 리포트에 "층 N개 비교"가 찍힌다.
+불일치 키는 `stage:{무대}` (cameraPan · cameraZoom · cameraRoll · cameraDolly · cameraTrack · cameraShake · cameraShakeRotation), `stage:{무대}/layer:{d}` (center · totalScale · rotation). 리포트에 "층 N개 비교"가 찍힌다.
+흔들림은 접히지 않으므로 정착한 프레임에서 `Camera_Shake`가 항등이 아니면 불일치다.
 
 ---
 
@@ -392,6 +409,7 @@ Shot은 본 무대면 접힌 샷, 덮는 무대면 `Default`(항등)다 — 덮�
 | D9 | 전환은 intent를 보간하고 매 프레임 다시 푼다. 트윈 하나 |
 | D10 | 리그는 무대 · 층을 옮기지 않는다. char_to 제거 — 다른 자리는 fade_out 뒤 새 slot (2026-11-06) |
 | D11 | 무대의 역할: 본 무대(stage00)만 샷을 따르고, 덮는 무대(stage01 · stage02)는 중립에 고정. 같은 세계는 층으로, 다른 화면은 무대로 (2026-11-06) |
+| D12 | 카메라는 따로 선 리그다(`CameraRigSchema`). 한 노드 = 한 축, 한 축 = 한 전환 — D9의 "트윈 하나"는 "축마다 하나"가 됐다. 흔들림은 축이 아니라 모션 클립이다 (2026-11-17, camera-rig.md) |
 
 ## 10. 커밋
 

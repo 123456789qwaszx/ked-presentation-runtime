@@ -1,6 +1,6 @@
 # 카메라 리그 — 몸(트랙 · 달리) · 헤드(롤) · 렌즈(줌 · 팬) · 흔들림 — 계획 (2026-11-17)
 
-기준: `refactor/actor-view` @ `8b60c733`. 상태: **진행 중 — C1–C5 · C7 끝. 남은 것은 C6(프로필 값 — Unity에서 눈으로)과 C8(문서 · 데모).** 구조의 물음 일곱(§10)과 명령 어휘(§7)를 정했고 단계(§9)대로 간다.
+기준: `refactor/actor-view` @ `8b60c733`. 상태: **코드는 끝 — C1–C5 · C7 · C8. 남은 것은 Unity에서 하는 일이다(§13): 테스트를 돌리고, 화면을 보고 프로필 값을 잡는다(C6).** 구조의 물음 일곱(§10)과 명령 어휘(§7)를 정했고 단계(§9)대로 간다.
 앞 문서: [PLAN_shot-layers.md](PLAN_shot-layers.md) — 트랙만 넣는 첫 안(§2–§8)은 버렸고, 그 §9(이어받기)가 이 계획의 출발점이다. 조사한 사실은 그 §9.3에 있다.
 
 ## 0. 한 문장
@@ -246,7 +246,7 @@ Layer_{d}.pos      = 층 오프셋 ÷ (s × g)  +  track × ( 1 − r(d) × (1 +
 | C5 ✅ | **흔들림** — `MotionRules` · `MotionLibrary`가 `camera` 리그 클립을 받는다 · `shot_shake` · 폴드 무변 · 견본 클립 | 흔들림이 생긴다 |
 | C6 | **프로필 기본값** — `trackResponse` · `dollyScaleResponse`를 Unity에서 눈으로 잡고 `layer-profile.json`을 다시 덤프한다 | 시차의 크기 |
 | C7 ✅ | **줄을 넘는 전환** — 몸의 전환은 스텝 경계에서 가속하지 않는다(Q5) | 느린 트랙 · 달리가 줄을 넘는다 |
-| C8 | **문서 · 데모** — `camera-rig.md`(새로) · `stage-rig.md`(계층 · 식 · 중립 · focus_to) · `target-boundary.md` · `command-authoring.md` · README, 데모 대본에 한 대목, 사본 동기화 안내 | — |
+| C8 ✅ | **문서 · 데모** — `camera-rig.md`(새로) · `stage-rig.md`(계층 · 식 · 중립 · focus_to) · `target-boundary.md` · `command-authoring.md` · README, 데모 대본에 한 대목, 사본 동기화 안내 | — |
 
 C1–C3은 화면이 바뀌지 않는 구조 작업이다. 재현 대본으로 등가 하네스를 돌려 변경 전과 같은 리포트가 나오는지 단계마다 본다.
 
@@ -285,3 +285,18 @@ C1–C3은 화면이 바뀌지 않는 구조 작업이다. 재현 대본으로 �
 | C3 | `ShotAxes`(줌 · 팬 · 롤 · 달리 · 트랙 — 초점은 줌에 실린다). 샷 시스템이 `IntentTransition`을 축마다 하나씩 든다 — `Follow` · `Snap` · `AccelerateTransition` · `IsTransitioning`이 축을 받는다. 의도 · 화면은 다섯 축을 합친 한 벌이고, 어느 축이 움직이든 한 벌을 통째로 다시 푼다. 커맨드는 제 축(`Axes`)을 밝히고 기다림 · 압축 · 스텝 경계를 제 축에만 건다. 런타임 `PresentationIntentState`에 `track` · `dolly` · `roll`. 쓰는 데가 없어진 `PresentationShotIntentMath`를 지웠다 | Core 순수 테스트 458개 통과, Stage + EditMode 컴파일 통과. `ShotLayoutUnityParityTests`에 새 축의 의도 넷과 축 단위 검사 셋을 더했다 — **Unity에서 돌려 주어야 한다.** 트윈이 실제로 도는 경로(축마다 제 길이로 가는지)는 자동 검사가 없다 — 눈으로 볼 것 |
 | C4 · C7 | 명령 열(§7.2) 가운데 `shot_shake`를 뺀 아홉. Core `ShotIntents`가 전부 `from`을 받아 제 축만 바꾼다(`Pan` · `Track`(절대값) · `Dolly` · `Roll` · `Reset(from)`(렌즈만) · `ResetAll` · `FocusTo(from, …)`). 폴드가 새 명령을 접고 `shot_reset`은 렌즈만 되돌린다. **값 인자의 생략값을 걷었다** — 빠졌거나 못 읽으면 런타임은 오류를 내고 그 줄을 실행하지 않고, 폴드는 `Unhandled`로 남긴다. 런타임: `ShotPanCommand` · `ShotDollyCommand` · `ShotRollCommand`, `ShotTrackCommand`(새 뜻), `ShotResetCommand`(`all`), `ShotZoomFocusCommand` → `ShotFocusToCommand`. 파서 표 · Yarn 브리지 등록. C7을 여기서 같이 했다: 스텝 경계의 가속(×20)은 렌즈 · 롤에만 걸고 몸(트랙 · 달리)은 뺐다(`ShotIntentCommandBase.HurriedAtStepEnd`). C1에서 남긴 `SolvePanToPlace(zoom, focus, …)`를 걷었다 | Core 순수 테스트 463개 통과, Stage + EditMode 컴파일 통과. **Yarn 브리지(Playback 어셈블리 — `CommandBridge` · `CommandBridge.Forward` · `CommandRoleGate`)는 컴파일해 보지 못했다.** 파서 테스트 셋을 더했다 — Unity에서 돌려 주어야 한다 |
 | C5 | `shot_shake 이름 [세기]`. Core `MotionRules`: `camera` 리그의 모션은 `Camera_Shake`에만 키를 주고 `restore`여야 한다. `MotionMath.SampleScaled`(세기 — 중립에서 벗어난 만큼에 곱한다). 폴드는 `shot_shake`를 무변으로 접고, 틀 수 없는 줄(모르는 이름 · 카메라 리그가 아닌 클립)은 `Unhandled`로 남긴다. 런타임: `CameraShakePlayer`(샷 시스템이 든다 — 한 번에 하나, 끊으면 항등), `ShotShakeCommand`(압축 중에는 틀지 않는다 · 스텝 경계에서 끊는다), `MotionLibrary`가 리그마다 제 스키마로 검증한다(`StageRigNodeIds` — `character` · `camera`). `motion`은 캐릭터 리그의 클립만, `shot_shake`는 카메라 리그의 클립만 튼다. 견본 클립 둘을 `Assets/Dialogue/motions.json`에 넣었다 — `shake_hit`(0.3초 · 14px 충격) · `shake_rumble`(0.8초 · 5px + 0.25° 떨림). 값은 출발값이다 | Core 순수 테스트 476개 통과, Stage + EditMode 컴파일 통과. **흔들림이 실제로 도는 모습과 견본 클립의 느낌은 Unity에서 봐야 한다.** `SampleBootstrap`(예제 어셈블리)의 `LoadMotions` 한 줄과 Yarn 브리지 등록은 컴파일해 보지 못했다. 견본 클립은 손으로 넣은 것이라 `Ked/Motion/Export motions.json`을 돌리면 지워진다(먼저 반입한 다섯과 같은 사정) |
+| C8 | 문서: `Stage/CameraRig/Documentation~/camera-rig.md`(새로 — 축 · 계층 · 식 · 전환 · 흔들림 · 명령의 규범), `stage-rig.md`(계층 · 중립 · 흐름 · 하네스를 지금 모습으로, §4 · §7은 줌 · 팬만 있던 때의 식이라고 밝혔다), `settled-chain.md` · `target-boundary.md` · `ExportedTuning/schema.md`. 데모 대본(`Demo_Presentation`)에 카메라의 몸 · 롤 · 흔들림 한 대목, 장면 머리의 되돌리기를 `shot_reset_all`로 | 대본은 눈으로만 썼다 — Unity에서 재생해 봐야 한다 |
+
+## 13. Unity에서 할 일
+
+이 작업은 Unity 없이 했다. 유니티 밖에서 본 것은 둘이다 — Core 순수 테스트(476개 통과)와 Stage 어셈블리 + EditMode 테스트의 컴파일(참조 어셈블리 2021.3 기준). 나머지는 Unity에서 확인해야 한다.
+
+| # | 무엇 | 까닭 |
+|---|---|---|
+| 1 | **컴파일** — Playback(`CommandBridge` · `CommandBridge.Forward` · `CommandRoleGate`) · Editor(`PresentationTuningExporter`) · 예제(`SampleBootstrap.Presentation`) | 이 셋은 컴파일해 보지 못했다. 고친 것은 등록 줄 · 덤프 블록 · 한 줄씩이다 |
+| 2 | **EditMode 테스트 전체** — 특히 `StageRigBuilderTests` · `ShotLayoutUnityParityTests` · `ShotFocusUnityParityTests` · `RigSchemaTreeUnityParityTests`(`camera`) · `StageCommandParserTests` · `MotionLibraryTests` | Unity 타입을 쓰는 테스트는 컴파일만 했다 |
+| 3 | **튜닝 덤프를 다시** — `rig-schemas.json`(`camera` 리그) · `presets/layer-profile.json`(`trackResponse` · `dollyScaleResponse`) | 둘 다 손으로 넣었다. 덤프가 내는 것과 같은지 본다(숫자 끝자리 표기만 다를 수 있다) |
+| 4 | **데모 재생** — `Demo_Presentation`의 카메라 대목. 느린 달리 · 트랙이 줄을 넘어 제 길이로 가는지, 그 도중의 `shot_zoom`이 달리를 끊지 않는지, 흔들림이 끝나고 제자리인지, `shot_reset`이 몸을 두는지 | 트윈이 실제로 도는 경로는 자동 검사가 없다 |
+| 5 | **등가 하네스** — 재현 대본으로 랩드스킵을 돌려 리포트가 변경 전과 같은지 | 513줄의 화면이 그대로라는 것의 마지막 확인 |
+| 6 | **C6 — 프로필 값** — `trackResponse` · `dollyScaleResponse`(§4.3)와 견본 흔들림 클립 둘의 값을 화면을 보고 잡는다. 바꾸면 `LayerProfileCurve.Default`를 고치고 다시 덤프한다 | 지금 값은 출발값이다 |
+| 7 | **사본 동기화** — Core를 반입한 곳(ked-vn-workspace의 `runtime/` · 저작 도구들)에 이번 Core 변경을 옮긴다. `rig-schemas.json` · `layer-profile.json` · `motions.json`도 | Core의 식 · 폴드 · 모션 규칙이 바뀌었다 |

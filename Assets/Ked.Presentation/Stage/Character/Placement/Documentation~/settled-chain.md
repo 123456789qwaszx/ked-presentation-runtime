@@ -89,7 +89,7 @@ for 노드 in 체인 (루트 쪽부터):
 | 목록 | 어디서 오나 | 무엇이 들어 있나 |
 |---|---|---|
 | 장부 | 리그 커맨드가 `Reserve`한 rect | 그 리그의 노드 |
-| 샷 | `StageRigRefs.IsShotOwned` (무대 리그 빌더가 세운 참조) | 무대마다 `Camera_Pan` · `Camera_Zoom` · 층 Rect 전부. 덮는 무대의 것도 구조상 들어 있다 — 샷이 쓰지 않으니 답은 항등이다 |
+| 샷 | `StageRigRefs.IsShotOwned` (무대 리그 빌더가 세운 참조) | 무대마다 카메라 리그의 노드 일곱(2026-11-17 — 종전에는 `Camera_Pan` · `Camera_Zoom` 둘) · 층 Rect 전부. 덮는 무대의 것도 구조상 들어 있다 — 샷이 쓰지 않으니 답은 항등이다 |
 
 겹치면 구조가 깨진 것이라 예외다(2026-11-05부터 — 종전에는 장부가 먼저 이겨서 조용했다).
 
@@ -104,8 +104,10 @@ for 노드 in 체인 (루트 쪽부터):
 | 리그 루트 | 리그 | 라이브(항등) |
 | `stage00_Layer_front_Content` | 무대, 샷 소유 아님 | 라이브(항등) |
 | `stage00_Layer_front` | 샷 | 중립 — 위치 0 · 배율 1 (라이브는 층 반응 중) |
+| `stage00_Camera_Track` · `_Dolly` · `_Roll` | 샷 | 중립(항등) |
 | `stage00_Camera_Zoom` | 샷 | 중립 배율 1 (라이브는 1.15쯤) |
 | `stage00_Camera_Pan` | 샷 | 중립 (0, 0) |
+| `stage00_Camera_Shake` · `_Root` | 샷 | 중립(항등) — 흔들리는 중이어도 |
 | `stage00_Mask_Root` | 무대, 샷 소유 아님 | 라이브(항등) |
 | `stage00_Stage_Root` | 체인의 끝 = RigSpaceRoot | — |
 
@@ -119,12 +121,13 @@ for 노드 in 체인 (루트 쪽부터):
 VisualOffset → … → Track_Focus → 리그 루트     리그   (장부가 끝값을 앎)
   → Layer_{d}_Content                          무대   (항등. 아무도 안 씀)
   → Layer_{d}                                  무대   (샷이 씀 — 층 반응)
-  → Camera_Zoom → Camera_Pan                   무대   (샷이 씀 — 카메라)
+  → Camera_Track → … → Camera_Root            카메라 리그 (샷이 씀 — 축마다 노드 하나. camera-rig.md §2)
   → Mask_Root                                  무대   (항등)
   → Stage_Root = RigSpaceRoot                  계산 공간의 경계 (무대마다)
 ```
 
 이 런타임에는 카메라 오브젝트가 없다. `shot_zoom`은 `Camera_Zoom`의 localScale을 키우고, `shot_to`는 `Camera_Pan`을 밀어 "카메라가 다가간 것처럼" 보이게 한다. 층은 그 카메라에 d만큼 다르게 반응해서 시차를 만든다. 카메라는 **무대 노드 몇 개의 값**으로 존재한다.
+2026-11-17부터 그 노드들은 따로 선 카메라 리그다 — 줌 · 팬에 롤 · 달리 · 트랙과 흔들림 노드가 더해졌다([camera-rig.md](../../../CameraRig/Documentation~/camera-rig.md)).
 
 문제는 place가 "무대의 왼쪽 지점"을 계산할 때 그 노드들도 체인에 있다는 것이다. 라이브를 읽으면 "지금 줌이 1.15인 무대의 왼쪽"을 풀고, 줌이 끝난 뒤 롤백에서 다시 풀면 다른 무대의 왼쪽이 나온다. 둘은 다른 좌표다. 2026-11-05 오전, 시구레가 롤백 후 다른 자리에 선 원인이 이것이었다(`a9bc19f7`).
 
@@ -132,11 +135,10 @@ VisualOffset → … → Track_Focus → 리그 루트     리그   (장부가 �
 
 중립은 따로 적은 정의가 없다. 샷 식(`ShotLayoutMath`)에 `ShotIntentState.Default`를 넣은 값이다.
 
-- `Camera_Pan` → (0, 0)
-- `Camera_Zoom` → 배율 1
+- 카메라 리그의 노드 → 전부 항등(위치 0 · 배율 1 · 회전 0). 흔들림 노드도 — 흔들리는 중에 재도 값이 같다
 - 층 → 위치 0 · 배율 1
 
-전부 항등이다. 무대 리그 빌더가 모든 노드를 항등으로 세우기 때문에 가능하다 — 종전에는 층의 기준값을 바인드 때 씬에서 쟀다(`Measure` 노드). 이제 잴 것이 없다.
+전부 항등이다. 회전의 중립도 0이다 — 화면이 기울어 있어도(`shot_roll`) 사슬은 기울지 않은 무대를 본다. 무대 리그 빌더가 모든 노드를 항등으로 세우기 때문에 가능하다 — 종전에는 층의 기준값을 바인드 때 씬에서 쟀다(`Measure` 노드). 이제 잴 것이 없다.
 
 계산에서 카메라의 영향을 0으로 되돌려 놓고 푼다. 코어 `RectNodeTree`에는 애초에 카메라 노드가 없으므로, 중립으로 푼 결과가 곧 코어 폴드와 같은 답이다.
 

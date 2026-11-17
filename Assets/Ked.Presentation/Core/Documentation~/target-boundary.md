@@ -195,11 +195,16 @@ yarn 4묶음 기준. "이관 안 함"은 **조용히 버린 것이 아니라 판
 
 ### shot
 
-`shot_zoom` · `shot_track` · `shot_to` · `shot_reset` · `shot_focus_to` 5종 전부.
-`ShotIntentMath`가 zoom→배율 규약(0.05)의 유일한 자리다 — 커맨드와 적용측이 같이 본다.
+`shot_to` · `shot_zoom` · `shot_pan` · `shot_track` · `shot_dolly` · `shot_roll` · `shot_reset` · `shot_reset_all` · `shot_focus_to` 전부(2026-11-17 — 종전 5종).
+`shot_<축>`은 그 축 하나를 절대값으로 놓고 나머지는 그대로 둔다 — `ShotIntents`의 함수가 전부 `from`을 받아 제 축만 바꾼다. 상대값 명령은 없다.
+`ShotIntentMath`가 zoom · dolly→배율 규약(0.05)의 유일한 자리다 — 커맨드와 적용측이 같이 본다.
 
-샷 목표 계산의 출력은 노드 타깃이 아니라 **샷 의도 `ShotIntentState`(zoom · pan · focus) 하나**다.
-그 셋이 무대 노드(무대마다 카메라 둘 · 층마다 하나)에 무엇을 쓰는지는 **`Transforms/ShotLayoutMath`가 유일한 자리**다(2026-11-05).
+샷 목표 계산의 출력은 노드 타깃이 아니라 **샷 의도 `ShotIntentState` 하나**다 — 렌즈(zoom · pan · focus) · 헤드(roll) · 몸(track · dolly).
+그 값이 무대 노드(무대마다 카메라 리그 · 층마다 하나)에 무엇을 쓰는지는 **`Transforms/ShotLayoutMath`가 유일한 자리**다(2026-11-05).
+
+`shot_shake`(화면 흔들림)는 **접을 것이 없다.** 카메라 리그에 건 `restore` 모션 클립이라 끝나면 0이고 상태에 남기는 것이 없다 —
+위의 절차적 커맨드(끝값이 정의되지 않아 `Unhandled`)와 다른 부류다. 시간 함수가 아니라 키가 있는 클립이고, 끝값이 "아무것도 남기지 않음"으로 정의돼 있다.
+틀 수 없는 줄(모르는 이름 · 카메라 리그가 아닌 클립)만 `Unhandled`로 남는다.
 
 | 누가 | 무엇을 |
 |---|---|
