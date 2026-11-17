@@ -10,6 +10,8 @@ public sealed class ShotResetCommand : ShotIntentCommandBase<ShotResetCommandSpe
         : base(rig, spec) 
     { }
 
+    protected override ShotAxes Axes => ShotAxes.Lens;
+
     protected override PresentationIntentState BuildTargetState(in PresentationIntentState from)
     {
         return Ked.Presentation.Core.ShotIntents.Reset().ToUnity();

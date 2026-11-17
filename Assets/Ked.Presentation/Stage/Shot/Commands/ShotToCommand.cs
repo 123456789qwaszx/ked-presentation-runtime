@@ -18,6 +18,8 @@ public sealed class ShotToCommand : ShotIntentCommandBase<ShotToCommandSpec>
         : base(rig, spec)
     { }
 
+    protected override ShotAxes Axes => ShotAxes.Lens;
+
     protected override PresentationIntentState BuildTargetState(in PresentationIntentState from)
     {
         return Ked.Presentation.Core.ShotIntents

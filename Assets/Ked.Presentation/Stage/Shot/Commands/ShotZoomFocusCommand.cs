@@ -41,6 +41,8 @@ public sealed class ShotZoomFocusCommand : ShotIntentCommandBase<ShotZoomFocusCo
         _focusTuningDB = focusTuningDB;
     }
 
+    protected override ShotAxes Axes => ShotAxes.Lens;
+
     protected override PresentationIntentState BuildTargetState(in PresentationIntentState from)
     {
         // 정착 focus 측정과 화면 지점 해석. 측정은 무대 좌표(카메라 중립)로 한다 — 캐릭터의 무대 위 자리.

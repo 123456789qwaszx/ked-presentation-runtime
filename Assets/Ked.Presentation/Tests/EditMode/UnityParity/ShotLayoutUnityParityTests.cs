@@ -7,7 +7,7 @@ using Object = UnityEngine.Object;
 namespace Ked.Presentation.Tests.UnityParity
 {
     /// <summary>
-    /// 무대 리그 리팩터의 오라클 — 런타임 샷 시스템이 무대에 쓰는 트랜스폼 전부(무대마다 카메라 2 + 층 5)가
+    /// 무대 리그 리팩터의 오라클 — 런타임 샷 시스템이 무대에 쓰는 트랜스폼 전부(무대마다 카메라 노드 5 + 층 5)가
     /// 코어 ShotLayoutMath.Solve의 출력과 같아야 한다. 본 무대는 Solve(intent), 덮는 무대는 Solve(Default)다(2026-11-06 역할).
     ///
     /// P1에서는 종전 런타임 식(PresentationResponseMath)과 코어 식이 같음을 고정했고,
@@ -73,6 +73,10 @@ namespace Ked.Presentation.Tests.UnityParity
             new(6f, Vec2.Zero, new Vec2(100f, 0f)),                      // 줌 + 초점 오른쪽
             new(6f, new Vec2(250f, -30f), new Vec2(-100f, 40f)),         // 전부 + 초점 왼쪽 위
             new(-4f, new Vec2(-120f, 60f), new Vec2(0f, -200f)),         // 줌 아웃 + 초점 아래
+            new(0f, Vec2.Zero, Vec2.Zero, new Vec2(240f, -60f), 0f, 0f), // 트랙만
+            new(0f, Vec2.Zero, Vec2.Zero, Vec2.Zero, 5f, 0f),            // 달리만
+            new(0f, Vec2.Zero, Vec2.Zero, Vec2.Zero, 0f, 12f),           // 롤만
+            new(3f, new Vec2(80f, -20f), new Vec2(100f, 0f), new Vec2(240f, 60f), 4f, -8f),   // 전부
         };
 
         [Test]
@@ -82,7 +86,7 @@ namespace Ked.Presentation.Tests.UnityParity
             {
                 _system.Snap(intent.ToUnity());
 
-                string tag = $"intent={{zoom {intent.Zoom}, pan {intent.PanInRigSpace}, focus {intent.FocusPointInRigSpace}}}";
+                string tag = $"intent={{{intent}}}";
 
                 foreach (StageRigRefs stage in _stages.All)
                 {
@@ -104,7 +108,7 @@ namespace Ked.Presentation.Tests.UnityParity
                     // 흔들림 노드는 의도가 쓰지 않는다 — 항등 그대로다.
                     Assert.That(camera.Shake.anchoredPosition, Is.EqualTo(Vector2.zero), $"{tag} {stage.StageKey} 흔들림");
 
-                    // 층에 쓰는 값은 코어가 낸 노드 로컬 값 그대로다. 새 축이 0이면 층 오프셋 ÷ 줌 배율 — 종전에 쓰던 값이다.
+                    // 층에 쓰는 값은 코어가 낸 노드 로컬 값 그대로다.
                     for (int l = 0; l < stage.Layers.Count; l++)
                     {
                         StageLayerRefs layer = stage.Layers[l];
@@ -113,8 +117,6 @@ namespace Ked.Presentation.Tests.UnityParity
 
                         Assert.That(layer.Rect.anchoredPosition.x, Is.EqualTo(expected.LocalPosition.X).Within(Eps), $"{where} 위치 x");
                         Assert.That(layer.Rect.anchoredPosition.y, Is.EqualTo(expected.LocalPosition.Y).Within(Eps), $"{where} 위치 y");
-                        Assert.That(layer.Rect.anchoredPosition.x, Is.EqualTo(expected.OffsetInRigSpace.X / pose.ZoomScale).Within(Eps), $"{where} 위치 x — 종전 값");
-                        Assert.That(layer.Rect.anchoredPosition.y, Is.EqualTo(expected.OffsetInRigSpace.Y / pose.ZoomScale).Within(Eps), $"{where} 위치 y — 종전 값");
                         Assert.That(layer.Rect.localScale.x, Is.EqualTo(expected.Scale.X).Within(Eps), $"{where} 배율 x");
                         Assert.That(layer.Rect.localScale.y, Is.EqualTo(expected.Scale.Y).Within(Eps), $"{where} 배율 y");
                     }
@@ -193,6 +195,77 @@ namespace Ked.Presentation.Tests.UnityParity
             Assert.That(_system.TryGetNeutral(_mount, out _, out _), Is.False);
         }
 
+        // ── 축마다 전환 — 커맨드는 제가 적은 축만 다시 조준한다 ─────────
+
+        [Test]
+        public void 적은_축만_바뀌고_나머지_축은_그대로다()
+        {
+            ShotIntentState a = Intents[9];
+            ShotIntentState b = new(-2f, new Vec2(-300f, 10f), new Vec2(-50f, 5f), new Vec2(-90f, 30f), -3f, 20f);
+
+            foreach (ShotAxes axes in new[] { ShotAxes.Zoom, ShotAxes.Pan, ShotAxes.Roll, ShotAxes.Dolly, ShotAxes.Track, ShotAxes.Lens, ShotAxes.Body })
+            {
+                _system.Snap(a.ToUnity());
+                _system.Snap(b.ToUnity(), axes);
+
+                ShotIntentState now = _system.Intent.ToCore();
+
+                bool zoom = (axes & ShotAxes.Zoom) != 0;
+                bool pan = (axes & ShotAxes.Pan) != 0;
+                bool roll = (axes & ShotAxes.Roll) != 0;
+                bool dolly = (axes & ShotAxes.Dolly) != 0;
+                bool track = (axes & ShotAxes.Track) != 0;
+
+                Assert.That(now.Zoom, Is.EqualTo(zoom ? b.Zoom : a.Zoom), $"{axes} 줌");
+                Assert.That(now.FocusPointInRigSpace, Is.EqualTo(zoom ? b.FocusPointInRigSpace : a.FocusPointInRigSpace), $"{axes} 초점은 줌에 실린다");
+                Assert.That(now.PanInRigSpace, Is.EqualTo(pan ? b.PanInRigSpace : a.PanInRigSpace), $"{axes} 팬");
+                Assert.That(now.Roll, Is.EqualTo(roll ? b.Roll : a.Roll), $"{axes} 롤");
+                Assert.That(now.Dolly, Is.EqualTo(dolly ? b.Dolly : a.Dolly), $"{axes} 달리");
+                Assert.That(now.Track, Is.EqualTo(track ? b.Track : a.Track), $"{axes} 트랙");
+
+                // 화면도 같은 한 벌이다 — 압축은 전환을 남기지 않는다.
+                Assert.That(_system.Presented.ToCore().ToString(), Is.EqualTo(now.ToString()), $"{axes} 화면 = 의도");
+                Assert.That(_system.IsTransitioning(ShotAxes.All), Is.False, $"{axes}");
+            }
+        }
+
+        [Test]
+        public void 길이_0의_전환은_그_축을_바로_쓰고_전환을_남기지_않는다()
+        {
+            ShotIntentState target = Intents[9];
+
+            _system.Follow(target.ToUnity(), ShotAxes.Body, 0f, DG.Tweening.Ease.Linear);
+
+            ShotIntentState now = _system.Presented.ToCore();
+
+            Assert.That(now.Track, Is.EqualTo(target.Track));
+            Assert.That(now.Dolly, Is.EqualTo(target.Dolly));
+            Assert.That(now.Zoom, Is.EqualTo(0f), "렌즈는 건드리지 않았다");
+            Assert.That(now.Roll, Is.EqualTo(0f), "롤도");
+            Assert.That(_system.IsTransitioning(ShotAxes.All), Is.False);
+
+            StageRigRefs main = _stages.Get(StageRoles.MainStageKey);
+            Assert.That(main.Camera.Track.anchoredPosition.x, Is.EqualTo(-target.Track.X).Within(Eps), "트랙 노드 = −track");
+            Assert.That(main.Camera.Zoom.localScale.x, Is.EqualTo(1f).Within(Eps));
+        }
+
+        [Test]
+        public void 장면_경계는_모든_축을_기본으로_돌린다()
+        {
+            _system.Snap(Intents[9].ToUnity());
+            _system.Clear();
+
+            Assert.That(_system.Intent.ToCore().ToString(), Is.EqualTo(ShotIntentState.Default.ToString()));
+
+            foreach (CameraRigSchema.NodeDef node in CameraRigSchema.Nodes)
+            {
+                RectTransform rect = _stages.Get(StageRoles.MainStageKey).Camera.Get(node.Id);
+
+                Assert.That(rect.anchoredPosition, Is.EqualTo(Vector2.zero), node.Id.ToString());
+                Assert.That(rect.localScale, Is.EqualTo(Vector3.one), node.Id.ToString());
+            }
+        }
+
         // ── 하네스 경로 — 캡처한 무대 뷰가 접힌 샷과 등가다 ─────────────
 
         [Test]
@@ -207,9 +280,7 @@ namespace Ked.Presentation.Tests.UnityParity
                 StageStateComparer.Result result = new();
                 StageStateComparer.CompareStageView(in intent, view, LayerProfileCurve.Default, result);
 
-                Assert.That(result.IsEquivalent, Is.True,
-                    $"zoom {intent.Zoom}, pan {intent.PanInRigSpace}, focus {intent.FocusPointInRigSpace}\n" +
-                    string.Join("\n", result.Mismatches));
+                Assert.That(result.IsEquivalent, Is.True, $"{intent}\n" + string.Join("\n", result.Mismatches));
                 Assert.That(result.ComparedLayers, Is.EqualTo(StageKeys.Length * StageLayerLabels.Depths.Length));
             }
         }

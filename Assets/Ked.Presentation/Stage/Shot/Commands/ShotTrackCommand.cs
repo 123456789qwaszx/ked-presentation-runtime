@@ -15,6 +15,8 @@ public sealed class ShotTrackCommand : ShotIntentCommandBase<ShotTrackCommandSpe
         : base(rig, spec)
     { }
 
+    protected override ShotAxes Axes => ShotAxes.Pan;
+
     protected override PresentationIntentState BuildTargetState(in PresentationIntentState from)
     {
         return Ked.Presentation.Core.ShotIntents

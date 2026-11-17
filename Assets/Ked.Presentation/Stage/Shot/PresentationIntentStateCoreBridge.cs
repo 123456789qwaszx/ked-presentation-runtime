@@ -4,7 +4,13 @@ using Ked.Presentation.Core;
 public static class PresentationIntentStateCoreBridge
 {
     public static ShotIntentState ToCore(this in PresentationIntentState state)
-        => new(state.zoom, state.panInRigSpace.ToCore(), state.focusPointInRigSpace.ToCore());
+        => new(
+            state.zoom,
+            state.panInRigSpace.ToCore(),
+            state.focusPointInRigSpace.ToCore(),
+            state.track.ToCore(),
+            state.dolly,
+            state.roll);
 
     public static PresentationIntentState ToUnity(this in ShotIntentState state)
         => new()
@@ -12,5 +18,8 @@ public static class PresentationIntentStateCoreBridge
             zoom = state.Zoom,
             panInRigSpace = state.PanInRigSpace.ToUnity(),
             focusPointInRigSpace = state.FocusPointInRigSpace.ToUnity(),
+            track = state.Track.ToUnity(),
+            dolly = state.Dolly,
+            roll = state.Roll,
         };
 }
