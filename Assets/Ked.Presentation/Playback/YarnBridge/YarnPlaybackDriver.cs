@@ -52,6 +52,25 @@ public sealed class YarnPlaybackDriver
         _executor.PlaySpecsInStep(new List<CommandSpecBase>(specs), CurrentScope);
     }
 
+    // 대사 줄의 머리에는 기다림이 없다(docs/PLAN_line-beat.md D3 · Q1) — 쌓인 명령의 기다림(wait)을 내린다.
+    // pause는 아무것도 아니게 되고, 덮기는 덮되 기다리지 않는다. 내린 것이 있으면 요약을 돌려준다(오류 로그용).
+    public bool TryReleaseWaits(out string summary)
+    {
+        var released = new List<CommandSpecBase>();
+
+        foreach (CommandSpecBase spec in _collectedSpecs)
+        {
+            if (spec == null || !spec.wait)
+                continue;
+
+            spec.wait = false;
+            released.Add(spec);
+        }
+
+        summary = released.Count > 0 ? Describe(released) : string.Empty;
+        return released.Count > 0;
+    }
+
     // 쌓인 명령을 실행하지 않고 버린다. 버린 것이 있으면 개수와 요약("이름×개수, …")을 돌려준다(로그용).
     public bool TryDiscardPending(out int count, out string summary)
     {

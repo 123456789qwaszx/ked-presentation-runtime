@@ -13,8 +13,7 @@ public sealed partial class StageCommandParser
     // 정본만 둔다. 같은 일을 인자 하나만 고정해 다시 부르는 이름(slotNN · bg_slotNN ·
     // screen_blur_sN · place_* · size_<라벨> · tx_<프리셋>)은 두지 않는다 —
     // 대본은 저작 툴(ked-story-compositor)이 내고, 툴은 정본만 낸다. 변형은 이름이 아니라 인자로 받는다.
-    // 예외: place_left · place_center · place_right, 프레임 대기 <<1fr>>~<<48fr>>(아래 정적 생성자),
-    // 그리고 char_visual_<효과> 일곱 — 캐릭터 비주얼은 커맨드 이름에서 어떤 효과인지 드러나야 한다(일반형 char_visual도 남김).
+    // 예외: place_left · place_center · place_right, 그리고 char_visual_<효과> 일곱 — 캐릭터 비주얼은 커맨드 이름에서 어떤 효과인지 드러나야 한다(일반형 char_visual도 남김).
     private static readonly Dictionary<string, Handler> Table = new(StringComparer.Ordinal)
     {
         ["pause"] = (p, c) => p.EnqueueWaitSpec(c.Arg(0)),
@@ -114,15 +113,6 @@ public sealed partial class StageCommandParser
         ["screen_dim_reset"] = (p, c) => p.EnqueueStageLayerDimResetSpec(c.Arg(0, "0.3s"), c.Arg(1, "")),
     };
 
-    static StageCommandParser()
-    {
-        for (int frame = 1; frame <= FramePauseAliasMaxFrame; frame++)
-        {
-            float seconds = YarnDurationParser.FramesToSeconds(frame);
-            Table[$"{frame}fr"] = (p, c) => p.EnqueueWaitSpec(seconds);
-        }
-    }
-
-    /// <summary>이 파서가 아는 커맨드 이름 전부(프레임 별칭 포함). 브리지가 Yarn 등록에 쓴다.</summary>
+    /// <summary>이 파서가 아는 커맨드 이름 전부. 브리지가 Yarn 등록에 쓴다.</summary>
     public static IEnumerable<string> CommandNames => Table.Keys;
 }

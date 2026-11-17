@@ -20,7 +20,8 @@ public sealed class ScreenCoverCommandSpec : CommandSpecBase
 
 // 덮개 — 화면 전체(무대 셋 · 무대 틀)를 한 색으로 덮고(screen_cover) 걷는다(screen_cover_clear). docs/PLAN_screen-cover.md §3.1.
 // 커맨드는 의도만 넘기고 전환은 컨트롤러가 갖는다 — 스텝 경계에 묶이지 않아, 걷기는 다음 줄이 열려도 제 길이로 간다.
-// 덮기는 다 덮일 때까지 기다린다(전경) — 뒤의 무대 정리가 늘 덮인 밑에서 일어나게(A5). 기다리는 동안 압축(빨리 넘기기 ·
+// 덮기는 다 덮일 때까지 기다린다(전경 — 파서가 wait를 세운다) — 뒤의 무대 정리가 늘 덮인 밑에서 일어나게(A5).
+// 대사 줄 머리에서는 기다림이 내려져 덮기만 한다(docs/PLAN_line-beat.md Q1). 기다리는 동안 압축(빨리 넘기기 ·
 // 스텝 서두르기 · 시크)이 켜지면 그 자리에서 끝값으로 가고 놓는다 — WaitCommand와 같다.
 // 압축 중에 온 덮기 · 걷기는 끝값을 바로 세운다(OnSkip). 플래시는 끝값이 0이라 끊지만, 덮개는 끝 상태가 남으니 세운다.
 public sealed class ScreenCoverCommand : CommandBase
@@ -29,7 +30,7 @@ public sealed class ScreenCoverCommand : CommandBase
     private readonly ScreenEffectRig _screenEffects;
     private readonly ScreenCoverPresetDBSO _presetDb;
 
-    public override bool WaitForCompletion => !_spec.clear;
+    public override bool WaitForCompletion => _spec.wait;
 
     public ScreenCoverCommand(
         ScreenCoverCommandSpec spec,
@@ -59,7 +60,7 @@ public sealed class ScreenCoverCommand : CommandBase
 
         controller.Follow(target, _spec.duration, _spec.ease);
 
-        if (_spec.clear)
+        if (!_spec.wait)
             yield break;
 
         while (controller.IsTransitioning)

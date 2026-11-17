@@ -16,7 +16,8 @@ title: Demo_Presentation
 <<bg_sprite bg_main class_day>>
 <<bg_fade_in bg_main 24fr>>
 <<bgm audio/bgm_idoberg-relaxing-guitar-loop-v5-245859 2s>>
-<<12fr>>
+<<pause 12fr>>
+<<step>>
 <<place_center s1 bust 0fr>>
 <<size s1 mid bust 0fr>>
 <<fade_in s1 18fr>>
@@ -505,6 +506,6 @@ rrr
 <<fade_out s1 12fr>>
 <<stop_bgm 2s>>
 <<bg_fade_out bg_main 20fr>>
-<<24fr>>
+<<pause 24fr>>
 
 ===

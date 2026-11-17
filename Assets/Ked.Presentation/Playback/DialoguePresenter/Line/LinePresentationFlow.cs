@@ -69,6 +69,7 @@ public sealed class LinePresentationFlow
             _seekState.End(SeekEndReason.Arrived);
 
         bool seekPassThrough = ctx.SeekDecision == SeekLineDecision.SkipVisualAndDispatchSeekNext;
+        _stepHead.ReleaseLineWaits(meta.lineId);
         _stepHead.Play(snap: ctx.IsRapidSkip || seekPassThrough, seekPassThrough: seekPassThrough);
 
         // 표지 자리의 명령(<<at>> · 옛 [cmd])은 이 줄의 스텝에 덧붙는다. 글자 자리에서 타자기가 실행한다.

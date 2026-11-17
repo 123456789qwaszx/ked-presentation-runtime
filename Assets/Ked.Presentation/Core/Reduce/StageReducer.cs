@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 
 namespace Ked.Presentation.Core
 {
@@ -80,7 +79,7 @@ namespace Ked.Presentation.Core
     /// 현재 어휘(v1): slot 계열(리그 스폰) · cast/actor(배역·별칭) ·
     ///   show(리셋+앵커+사이징+가시성) · fade_in/out · fade · slide_in/out · place/size 계열 ·
     ///   nudge/move/scale/rotate 계열 · shot 계열 ·
-    ///   초상 축(pose/face/face_swap) · motion(채널마다 마지막 키) · 시간 커맨드(pause·Nfr — 접을 것이 없다) ·
+    ///   초상 축(pose/face/face_swap) · motion(채널마다 마지막 키) · 시간 커맨드(pause — 접을 것이 없다) ·
     ///   배경 bg_*(캐스팅하지 않은 슬롯 — spawn/sprite/fade/move/scale).
     /// 명시적 한계: 오버레이/이펙트/오디오/트랜지션 리그, 대사창,
     ///   절차적 연기 커맨드(끝값이 정의되지 않음).
@@ -269,33 +268,15 @@ namespace Ked.Presentation.Core
 
         // ── helper ───────────────────────────────────────────────────
 
-        /// <summary>파서 표가 등록하는 프레임 대기 별칭의 상한. `&lt;&lt;48fr&gt;&gt;` = 2초.</summary>
-        private const int MaxFrameWaitAlias = 48;
-
         /// <summary>
-        /// 시간만 쓰는 커맨드인가 — `&lt;&lt;pause 시간&gt;&gt;`와 프레임 별칭 `&lt;&lt;1fr&gt;&gt;`~`&lt;&lt;48fr&gt;&gt;`
-        /// (파서 표의 정적 생성자, 24fps 기준).
+        /// 시간만 쓰는 커맨드인가 — `&lt;&lt;pause 시간&gt;&gt;`. 프레임 별칭 `&lt;&lt;Nfr&gt;&gt;`은 걷었다(docs/PLAN_line-beat.md D4) —
+        /// 남은 대본의 것은 모르는 이름으로 Unhandled에 남는다.
         ///
         /// 정지 프레임에 목표가 **없는 게 아니라 접을 것이 없다** — 무대 상태를 하나도
         /// 건드리지 않는다. duration 인자를 파싱조차 하지 않는 것과 같은 규율이라
         /// Unhandled로 남기지 않는다: 남기면 "아직 이관 안 됨" 작업 목록이 거짓말이 된다.
         /// </summary>
-        private static bool IsWaitCommand(string name)
-        {
-            if (name == "pause")
-                return true;
-
-            if (name == null || name.Length < 3 || !name.EndsWith("fr", StringComparison.Ordinal))
-                return false;
-
-            return int.TryParse(
-                       name.Substring(0, name.Length - 2),
-                       NumberStyles.None,
-                       CultureInfo.InvariantCulture,
-                       out int frames)
-                   && frames >= 1
-                   && frames <= MaxFrameWaitAlias;
-        }
+        private static bool IsWaitCommand(string name) => name == YarnCommandTextExtractor.PauseCommand;
 
         private static bool TryGetSlotKey(in StageCommand cmd, out string slotKey, out string reason)
         {

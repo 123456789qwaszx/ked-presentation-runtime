@@ -289,6 +289,65 @@ namespace Ked.Presentation.Tests
             Assert.That(groups[0].Commands.Select(c => c.Args[1]), Is.EqualTo(new[] { "03", "02" }));
         }
 
+        // ── 추출기: 대사 줄에는 시간이 없다 (docs/PLAN_line-beat.md D3 · R8) ─────
+
+        [Test]
+        public void 대사_줄_머리의_기다리는_명령은_경고한다()
+        {
+            const string yarn =
+                "title: Head\n" +
+                "---\n" +
+                "<<fade_out s1>>\n" +
+                "<<pause 12fr>>\n" +
+                "<<screen_cover black 0.5s>>\n" +
+                "<<step>>\n" +
+                "<<screen_cover_clear 0.5s>>\n" +
+                "<<pause 0.3s>>\n" +
+                "<<face s1 02>>\n" +
+                "하린: 여기.\n" +
+                "<<screen_cover>>\n" +
+                "하린: 저기.\n" +
+                "===\n";
+
+            List<string> warnings = new();
+            List<YarnLineGroup> groups = YarnCommandTextExtractor.Extract(yarn, "head.yarn", warnings);
+
+            // 무대 스텝의 pause · screen_cover(4 · 5행)는 된다. 걷기(7행)는 기다리지 않는다.
+            Assert.That(warnings.Count, Is.EqualTo(2), string.Join("\n", warnings));
+            Assert.That(warnings[0], Does.StartWith("head.yarn:8 ").And.Contain("pause"));
+            Assert.That(warnings[1], Does.StartWith("head.yarn:11 ").And.Contain("screen_cover"));
+
+            // 폴드는 그대로 접는다 — pause는 접을 것이 없다.
+            Assert.That(groups[0].Commands.Select(c => c.Name),
+                Is.EqualTo(new[] { "fade_out", "pause", "screen_cover", "screen_cover_clear", "pause", "face" }));
+        }
+
+        [Test]
+        public void 자리의_기다리는_명령은_경고한다()
+        {
+            const string yarn =
+                "title: AtWait\n" +
+                "---\n" +
+                "<<at a pause 1s>>\n" +
+                "하린: [beat=a/]여기.\n" +
+                "===\n";
+
+            List<string> warnings = new();
+            YarnCommandTextExtractor.Extract(yarn, "atwait.yarn", warnings);
+
+            Assert.That(warnings.Single(), Does.StartWith("atwait.yarn:3 ").And.Contain("자리에 쓸 수 없다"));
+        }
+
+        [TestCase("pause", true)]
+        [TestCase("screen_cover", true)]
+        [TestCase("screen_cover_clear", false)]
+        [TestCase("24fr", false)]
+        [TestCase("face", false)]
+        public void 기다리는_명령의_이름(string name, bool waiting)
+        {
+            Assert.That(YarnCommandTextExtractor.IsWaitingCommand(name), Is.EqualTo(waiting));
+        }
+
         [Test]
         public void 명령이_없는_at은_경고하고_버린다()
         {

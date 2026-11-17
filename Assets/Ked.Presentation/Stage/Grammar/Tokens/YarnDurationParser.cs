@@ -37,7 +37,4 @@ public static class YarnDurationParser
 
         return Mathf.Max(0f, fallbackFrames);
     }
-
-    // 프레임 -> 초. fps 규약(24)
-    public static float FramesToSeconds(float frames) => DurationToken.FramesToSeconds(frames);
 }

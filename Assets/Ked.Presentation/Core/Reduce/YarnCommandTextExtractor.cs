@@ -55,6 +55,16 @@ namespace Ked.Presentation.Core
         /// </summary>
         public const string StageStepCommand = "step";
 
+        /// <summary>기다리는 명령 — 시간만 쓴다. 무대 상태는 접을 것이 없다(StageReducer).</summary>
+        public const string PauseCommand = "pause";
+
+        /// <summary>
+        /// 기다리는 명령인가 — pause · screen_cover(덮기). 대사 줄의 머리 · 자리에는 쓸 수 없고 무대 스텝에서만 기다린다
+        /// (docs/PLAN_line-beat.md D3 · R8). 재생에서는 무대 파서가 이 둘의 스펙에 wait를 세운다 — 두 목록이 같아야 한다
+        /// (EditMode 시험이 맞춰 본다). screen_cover_clear는 기다리지 않는다.
+        /// </summary>
+        public static bool IsWaitingCommand(string name) => name == PauseCommand || name == "screen_cover";
+
         /// <summary>
         /// 옛 인라인 명령 마커의 이름 — 대사 글 안의 [cmd="명령 한 줄"/]. 따옴표 안은 &lt;&lt; &gt;&gt; 안과 같은 글이다.
         /// 자리 표지 [beat=a/] + &lt;&lt;at a 명령&gt;&gt;로 옮기는 동안만 받는다(docs/PLAN_line-beat.md L5에서 걷는다).
@@ -93,6 +103,9 @@ namespace Ked.Presentation.Core
             List<LineMarker> markers = new();
             List<string> problems = new();
 
+            // 이 줄 그룹에서 대사 줄 머리가 시작하는 자리 — 그 앞은 무대 스텝(<<step>>)의 것이다.
+            int headStart = 0;
+
             string[] lines = yarnText.Replace("\r\n", "\n").Split('\n');
 
             // R1 — <<at>> 다음이 대사 줄이 아니다. 재생은 경고하고 그 스텝의 머리 뒤에 붙인다 — 접기도 그렇게.
@@ -121,6 +134,7 @@ namespace Ked.Presentation.Core
                 nodes.Add(node);
                 node = null;
                 current = new YarnLineGroup();
+                headStart = 0;
             }
 
             for (int i = 0; i < lines.Length; i++)
@@ -164,6 +178,7 @@ namespace Ked.Presentation.Core
                         if (command.Name == StageStepCommand)
                         {
                             FlushStrayAt("무대 스텝", command.Source);
+                            headStart = current.Commands.Count;
                             continue;
                         }
 
@@ -209,6 +224,19 @@ namespace Ked.Presentation.Core
                 problems.Clear();
                 current.LineText = StripLineMarkers(text, lineSource, markers, warnings);
 
+                // R8 — 대사 줄에는 시간이 없다. 재생은 머리의 기다림을 내리고(오류), 자리의 것은 실행하지 않는다.
+                for (int h = headStart; h < current.Commands.Count; h++)
+                {
+                    if (IsWaitingCommand(current.Commands[h].Name))
+                        warnings?.Add($"{current.Commands[h].Source} 대사 줄 머리의 기다리는 명령 {current.Commands[h]} — 대사 줄에는 시간이 없다. 줄 앞에 <<step>>을 두고 거기서 기다린다.");
+                }
+
+                foreach (AtCommand at in pendingAt)
+                {
+                    if (IsWaitingCommand(at.Command.Name))
+                        warnings?.Add($"{at.Command.Source} {at} — 기다리는 명령은 대사 줄의 자리에 쓸 수 없다(재생은 실행하지 않는다).");
+                }
+
                 foreach (ScheduledCommand scheduled in LineBeatSchedule.Build(markers, pendingAt, problems))
                     current.Commands.Add(scheduled.Command);
 
@@ -219,6 +247,7 @@ namespace Ked.Presentation.Core
                 current.LineId = lineId;
                 node?.Groups.Add(current);
                 current = new YarnLineGroup();
+                headStart = 0;
             }
 
             FlushNode();

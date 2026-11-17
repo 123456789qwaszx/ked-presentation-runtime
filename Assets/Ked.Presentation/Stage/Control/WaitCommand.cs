@@ -14,7 +14,8 @@ public sealed class WaitCommand : CommandBase
     private readonly WaitCommandSpec _spec;
     private Tween _tween;
 
-    public override bool WaitForCompletion => true;
+    // 파서가 세운다. 기다리지 않는 pause는 아무것도 아니다 — 대사 줄 머리가 기다림을 내린 것(docs/PLAN_line-beat.md Q1).
+    public override bool WaitForCompletion => _spec.wait;
 
     public WaitCommand(WaitCommandSpec spec)
     {
@@ -25,7 +26,7 @@ public sealed class WaitCommand : CommandBase
     {
         float seconds = Mathf.Max(0f, _spec.duration);
 
-        if (seconds <= 0f)
+        if (!_spec.wait || seconds <= 0f)
             yield break;
 
         _tween = DOTween

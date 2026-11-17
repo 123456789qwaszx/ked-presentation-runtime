@@ -46,8 +46,9 @@ public class ScreenCoverTests
         return db;
     }
 
+    // 덮기는 전경이다 — 파서가 wait를 세운다(문법 시험이 본다).
     private static ScreenCoverCommandSpec Cover(string preset, float duration)
-        => new() { presetKey = preset, duration = duration, ease = Ease.Linear };
+        => new() { wait = true, presetKey = preset, duration = duration, ease = Ease.Linear };
 
     private static ScreenCoverCommandSpec Clear(float duration)
         => new() { clear = true, duration = duration, ease = Ease.Linear };
@@ -110,6 +111,11 @@ public class ScreenCoverTests
             "덮기는 다 덮일 때까지 기다린다 — 뒤의 무대 정리가 덮인 밑에서");
         Assert.IsFalse(new ScreenCoverCommand(Clear(0.5f), rig, db).WaitForCompletion,
             "걷기는 기다리지 않는다 — 다음 줄이 열려도 제 길이로");
+
+        ScreenCoverCommandSpec released = Cover("black", 0.5f);
+        released.wait = false;
+        Assert.IsFalse(new ScreenCoverCommand(released, rig, db).WaitForCompletion,
+            "대사 줄 머리가 기다림을 내린 덮기 — 덮기만 하고 기다리지 않는다(docs/PLAN_line-beat.md Q1)");
     }
 
     [Test]
@@ -206,6 +212,7 @@ public class ScreenCoverTests
 
         ScreenCoverCommandSpec spec = (ScreenCoverCommandSpec)output[0];
         Assert.IsFalse(spec.clear);
+        Assert.IsTrue(spec.wait, "덮기는 다 덮일 때까지 기다린다");
         Assert.AreEqual("black", spec.presetKey);
         Assert.AreEqual(0.5f, spec.duration, 1e-4f);
         Assert.AreEqual(Ease.Linear, spec.ease);
@@ -227,6 +234,7 @@ public class ScreenCoverTests
 
         ScreenCoverCommandSpec clear = (ScreenCoverCommandSpec)output[1];
         Assert.IsTrue(clear.clear);
+        Assert.IsFalse(clear.wait, "걷기는 기다리지 않는다");
         Assert.AreEqual(0.8f, clear.duration, 1e-4f);
         Assert.AreEqual(Ease.Linear, clear.ease);
     }

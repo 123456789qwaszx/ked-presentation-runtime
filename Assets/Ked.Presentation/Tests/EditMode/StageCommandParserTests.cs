@@ -22,20 +22,19 @@ public class StageCommandParserTests
     private static StageCommandParser NewParser() => new(null);
 
     [Test]
-    public void 표에_있는_이름과_프레임_별칭을_안다()
+    public void 표에_있는_이름을_안다()
     {
         Assert.IsTrue(StageCommandParser.Knows("move_by"));
         Assert.IsTrue(StageCommandParser.Knows("tx"));
         Assert.IsTrue(StageCommandParser.Knows("pause"));
-        Assert.IsTrue(StageCommandParser.Knows("1fr"));
-        Assert.IsTrue(StageCommandParser.Knows($"{StageCommandParser.FramePauseAliasMaxFrame}fr"));
-        Assert.IsFalse(StageCommandParser.Knows($"{StageCommandParser.FramePauseAliasMaxFrame + 1}fr"));
+        Assert.IsFalse(StageCommandParser.Knows("1fr"), "프레임 별칭은 걷었다 — <<pause 1fr>>(docs/PLAN_line-beat.md D4)");
+        Assert.IsFalse(StageCommandParser.Knows("24fr"));
         Assert.IsFalse(StageCommandParser.Knows("surface_reset"), "대사창은 무대 커맨드가 아니다");
         Assert.IsFalse(StageCommandParser.Knows(null));
     }
 
     // 인자 하나를 이름에 박아 다시 부르는 이름은 없다.
-    // 예외: place_left·center·right 셋, 프레임 대기 <<1fr>>~<<48fr>>, char_visual_<효과> 일곱.
+    // 예외: place_left·center·right 셋, char_visual_<효과> 일곱.
     [TestCase("slot01")]
     [TestCase("bg_slot01")]
     [TestCase("screen_blur_s1")]
@@ -90,15 +89,35 @@ public class StageCommandParserTests
 
         Assert.AreEqual(1, specs.Count);
         Assert.AreEqual(0.18f, ((WaitCommandSpec)specs[0]).duration, 1e-6f);
-
-        specs = Parse(NewParser(), Cmd("24fr"));
-        Assert.AreEqual(1f, ((WaitCommandSpec)specs[0]).duration, 1e-6f, "24fps 기준 24fr = 1초");
+        Assert.IsTrue(specs[0].wait, "pause는 기다린다(전경)");
 
         specs = Parse(NewParser(), Cmd("pause", "24fr"));
         Assert.AreEqual(1f, ((WaitCommandSpec)specs[0]).duration, 1e-6f, "24fps 기준 24fr = 1초 — 다른 커맨드와 같은 시간 토큰");
 
         specs = Parse(NewParser(), Cmd("pause", "0.5"));
         Assert.AreEqual(0.5f, ((WaitCommandSpec)specs[0]).duration, 1e-6f, "맨 숫자는 초");
+    }
+
+    // 기다리는 명령은 두 곳이 안다 — 재생은 스펙의 wait로, 폴드의 원문 검사는 이름으로(docs/PLAN_line-beat.md R8). 같아야 한다.
+    [TestCase("pause")]
+    [TestCase("pause 12fr")]
+    [TestCase("screen_cover")]
+    [TestCase("screen_cover white 0.3s")]
+    [TestCase("screen_cover_clear 0.5s")]
+    [TestCase("screen_dim all 0.4")]
+    [TestCase("face c1 3")]
+    [TestCase("fade_in c1")]
+    [TestCase("tx iris_in")]
+    public void 기다리는_명령은_파서의_wait와_코어의_이름이_같다(string line)
+    {
+        string[] tokens = line.Split(' ');
+        string[] args = new string[tokens.Length - 1];
+        System.Array.Copy(tokens, 1, args, 0, args.Length);
+
+        List<CommandSpecBase> specs = Parse(NewParser(), Cmd(tokens[0], args));
+        bool waits = specs.Exists(s => s.wait);
+
+        Assert.AreEqual(YarnCommandTextExtractor.IsWaitingCommand(tokens[0]), waits, line);
     }
 
     [TestCase("tl", ScreenFocusPoint.TopLeft)]

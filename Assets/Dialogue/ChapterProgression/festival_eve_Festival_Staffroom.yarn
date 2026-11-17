@@ -35,6 +35,6 @@ title: Festival_Staffroom
 <<fade_out s1 12fr>>
 <<stop_bgm 2s>>
 <<bg_fade_out bg_main 20fr>>
-<<24fr>>
+<<pause 24fr>>
 
 ===

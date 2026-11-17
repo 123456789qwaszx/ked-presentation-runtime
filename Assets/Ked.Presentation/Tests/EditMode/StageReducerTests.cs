@@ -755,16 +755,11 @@ namespace Ked.Presentation.Tests
 
         // ── 시간 커맨드 (접을 것이 없다) ─────────────────────────────
 
-        [TestCase("1fr")]
-        [TestCase("12fr")]
-        [TestCase("24fr")]
-        [TestCase("48fr")]
-        [TestCase("pause")]
-        public void 시간_커맨드는_무해하게_접힌다(string name)
+        [Test]
+        public void pause는_무해하게_접힌다()
         {
-            // 파서 표의 프레임 별칭: <<1fr>>~<<48fr>>은 대기 별칭이다(24fps 기준).
             // 무대 상태를 하나도 건드리지 않으므로 Unhandled 작업 목록에 넣지 않는다.
-            StageState state = Fold(Cmd("slot", "c1"), Cmd(name));
+            StageState state = Fold(Cmd("slot", "c1"), Cmd("pause"));
 
             Assert.That(state.Unhandled, Is.Empty);
         }
@@ -778,15 +773,14 @@ namespace Ked.Presentation.Tests
             Assert.That(state.Unhandled, Is.Empty);
         }
 
-        [TestCase("0fr")]
+        [TestCase("1fr")]
+        [TestCase("24fr")]
+        [TestCase("48fr")]
         [TestCase("49fr")]
-        [TestCase("fr")]
-        [TestCase("-2fr")]
-        [TestCase("2.5fr")]
         [TestCase("frame")]
-        public void 대기_별칭이_아닌_이름은_그대로_Unhandled다(string name)
+        public void 프레임_별칭은_모르는_이름으로_Unhandled다(string name)
         {
-            // 파서 표가 등록하지 않는 이름이다 — 비슷하게 생겼다고 삼키지 않는다.
+            // <<Nfr>> 별칭은 걷었다(docs/PLAN_line-beat.md D4) — <<pause 12fr>>로 쓴다. 비슷하게 생겼다고 삼키지 않는다.
             StageState state = Fold(Cmd(name));
 
             Assert.That(state.Unhandled.Count, Is.EqualTo(1));

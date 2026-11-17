@@ -1,3 +1,5 @@
+using UnityEngine;
+
 // 스텝의 머리 — 쌓인 명령을 실행하고 그 뒤를 맞춘다. 줄과 무대 스텝이 같이 쓴다(PLAN_stage-step-inline-markup.md §3.1).
 public sealed class StepHead
 {
@@ -26,6 +28,18 @@ public sealed class StepHead
 
     // 이 스텝이 낼 보이스의 키. 명령을 실행하기 전에 읽는다 — 실행하면 쌓인 것이 비워진다.
     public string FindVoiceKey() => LineVoiceController.FindLineVoiceKey(_playbackDriver.Collected);
+
+    // 대사 줄의 머리에는 기다림이 없다(docs/PLAN_line-beat.md D3) — 기다리는 명령(pause · screen_cover)은 오류를 남기고
+    // 기다리지 않게 실행한다(Q1 — 보이는 실수로 남게). 시간으로 짜는 일은 줄 앞의 무대 스텝(<<step>>)에서 한다.
+    public void ReleaseLineWaits(string lineId)
+    {
+        if (_playbackDriver.TryReleaseWaits(out string summary))
+        {
+            Debug.LogError(
+                $"[대사 줄 머리] {lineId}: 기다리는 명령({summary})은 대사 줄 머리에 쓸 수 없다 — 기다리지 않고 실행한다. " +
+                "시간으로 짜는 일은 줄 앞의 <<step>>에서 한다(docs/PLAN_line-beat.md D3).");
+        }
+    }
 
     // snap: 명령이 끝값으로 놓이는 스텝(시크 통과 · 빠른 넘김).
     // seekPassThrough: 시크가 지나가는 스텝 — 장면 BGM은 의도만 쌓는다.
