@@ -59,9 +59,10 @@ public sealed class PlaybackFeatureController
     public void Tick()
     {
         // #auto 줄은 자동 진행보다 먼저 — 켜져 있지 않아도, 대기 없이 넘긴다. 막히면(연출 명령 · 시크) 다음 프레임에 다시.
+        // #auto=길이면 줄이 들어온 때부터 그 머무름이 지나야 넘긴다. 머무는 동안의 클릭 · 빨리 넘기기는 제 길로 넘긴다.
         if (LineFullyShown && _lineDisplayState.IsLineAutoAdvancePending)
         {
-            if (_autoAdvanceScheduler.TryDispatchLineAutoAdvance())
+            if (_lineDisplayState.IsLineAutoHoldElapsed && _autoAdvanceScheduler.TryDispatchLineAutoAdvance())
                 _lineDisplayState.ConsumeLineAutoAdvance();
         }
         else if (IsAuto && LineFullyShown)

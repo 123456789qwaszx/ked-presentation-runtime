@@ -57,7 +57,13 @@ public sealed class LinePresentationFlow
         // Phase: LineEnteredCommitted
         string voiceKey = _stepHead.FindVoiceKey();
         _yarnLineBoundary.CommitLineEntered(meta, voiceKey, ctx.RecordDecision);
-        _lineDisplayState.SetLineAutoAdvance(ctx.AdvanceMode == LineAdvanceMode.AutoWhenShown);
+        bool autoAdvance = ctx.AdvanceMode == LineAdvanceMode.AutoWhenShown;
+        float autoHold = 0f;
+
+        if (autoAdvance)
+            LineAdvanceTag.TryGetAuto(ctx.Line.Metadata, out autoHold);
+
+        _lineDisplayState.SetLineAutoAdvance(autoAdvance, autoHold);
 
         if (ctx.SeekDecision == SeekLineDecision.TargetLineReached)
             _seekState.End(SeekEndReason.Arrived);
