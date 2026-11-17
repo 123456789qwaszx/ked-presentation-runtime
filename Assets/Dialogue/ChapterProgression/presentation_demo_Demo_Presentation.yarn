@@ -254,6 +254,88 @@ rrr
 
 <<emoji_off s1 star>>
 
+// ── 화면 덮개 (docs/PLAN_screen-cover.md) — 화면 전체(무대 셋 · 컷인 · 팝업)를 한 색으로 덮었다 걷는다 ──
+// 대사창 · HUD는 덮지 않는다. screen_cover는 다 덮일 때까지 기다리고(뒤의 무대 정리는 늘 덮인 밑에서),
+// screen_cover_clear는 기다리지 않고 다음 줄로 넘어가도 제 길이로 걷힌다.
+// 이 절은 보통으로 한 번, Ctrl(빨리 넘기기)로 한 번, 줄마다 클릭을 빨리 눌러 한 번, R(되감기)로 돌아와 한 번 지나가 본다 —
+// 끝 화면(누가 어디 서 있나 · 배경 · 덮였나)이 보통 재생과 같아야 한다.
+
+// ① 짧게 끊기 — 같은 곳에서 자리만 바꾼다. 대사 없이 한 스텝. 바뀌는 과정이 보이면 안 된다.
+<<screen_cover black 0.3s>>
+<<place_left s1 bust 0fr>>
+<<place_right s2 bust 0fr>>
+<<pause 0.1s>>
+<<screen_cover_clear 0.3s>>
+<<step>>
+하린: 툭 끊고 자리를 바꿨어. 바뀌는 건 안 보였지?
+
+// ② 장소 옮기기 — 배경과 사람을 통째로 바꾸고, 검게 0.4초 머문다.
+<<screen_cover black 0.5s>>
+<<bg_sprite bg_main class_day>>
+<<fade_out s2 0fr>>
+<<fade_out s3 0fr>>
+<<place_center s1 bust 0fr>>
+<<pause 0.4s>>
+<<screen_cover_clear 0.5s>>
+<<step>>
+하린: 교실로 돌아왔어. 검게 덮인 동안 배경도 사람도 바꿨어.
+
+// ③ 검은 화면 위 대사 — 덮은 채 줄이 지나간다. 대사창은 보이고, 넘길 때까지 검다. 걷기는 대사 줄 머리에서.
+<<screen_cover black 0.6s>>
+<<step>>
+그날 저녁.
+아무도 남지 않은 교실에 불이 꺼졌다.
+<<bg_sprite bg_main studio_evening>>
+<<screen_cover_clear 0.8s>>
+하린: 검은 화면 위에 글이 뜨는 동안, 화면은 넘길 때까지 검어.
+
+// ④ 흰 화면으로 회상에 들어가고 나온다. 비네트는 덮개 위에 얹힌다 — 하얗게 덮인 동안에도 가장자리가 어둡다.
+<<screen_cover white 0.5s>>
+<<bg_sprite bg_main class_day>>
+<<screen_vignette dream 0.5 0fr>>
+<<pause 0.2s>>
+<<screen_cover_clear 0.6s>>
+<<step>>
+하린: 하얗게 덮었다 걷으면 회상으로 들어가는 느낌이야.
+
+<<screen_cover white 0.5s>>
+<<screen_vignette_clear 0fr>>
+<<bg_sprite bg_main studio_evening>>
+<<screen_cover_clear 0.6s>>
+<<step>>
+하린: 다시 하얗게 — 지금으로 돌아왔어.
+
+// ⑤ 컷인도 덮인다 — 열린 컷인 위로 덮었다 걷는다. 덮인 동안 컷인 판도 보이면 안 된다.
+<<slot c3 stage01 mid>>
+<<cast c3 sigure a 1>>
+<<size c3 mid face 0fr>>
+<<place c3 face left 0fr>>
+<<fade_in c3 0fr>>
+<<cutin_open stage01 pink_stars -11.5u -3.25u>>
+시구레: 컷인을 열었어요.
+
+<<screen_cover black 0.4s>>
+<<pause 0.3s>>
+<<screen_cover_clear 0.4s>>
+<<step>>
+시구레: 덮개는 컷인 창까지 덮어요. 걷히면 그대로 있고요.
+
+<<cutin_close stage01>>
+시구레: 닫을게요.
+
+<<fade_out c3 0fr>>
+
+// ⑥ 카메라와 상관없다 — 덮인 동안 기울이고 넓히고 흔든다. 그동안 화면은 끝까지 고르게 검어야 한다(가장자리가 드러나면 안 된다).
+<<screen_cover black 0.4s>>
+<<shot_roll 5 0fr>>
+<<shot_zoom -3 0fr>>
+<<shot_shake shake_hit>>
+<<pause 0.6s>>
+<<shot_reset_all 0fr>>
+<<screen_cover_clear 0.4s>>
+<<step>>
+하린: 검은 동안 카메라를 기울이고 넓히고 흔들었어. 덮개는 끝까지 화면 전체였어?
+
 시구레: 여기까지예요. 되감기(R)로 아무 줄이나 돌아갈 수 있고, 타이틀의 ‘이어하기’로 다시 올 수 있어요. #line:ln_6mq0fm7a
 
 <<fade_out s3 12fr>>
