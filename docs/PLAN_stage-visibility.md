@@ -1,6 +1,7 @@
 # 무대에 무엇이 보이나 — 보이는 범위는 마스크 하나, 내용은 모두 리그, 틀은 창만 (2026-11-17)
 
 > 상태: **끝났다** — V1–V5 구현, 소유자가 Unity에서 확인했다(2026-11-17, "대체로 잘 된다"). 정할 것(§6)은 모두 정했다.
+> 런타임 밖(연출 카드 · 작업공간 · 툴)에 반영할 것은 [stage-changes-handoff.md](stage-changes-handoff.md)에 적었다.
 > 이 계획이 [PLAN_stage-code-homes.md](PLAN_stage-code-homes.md)의 §3 · §8과 R2(틀 되돌리기)를 대신한다.
 > **목표는 원본을 똑같이 재현하는 것이 아니라 연출 카드를 구현하는 것이다**(소유자, 2026-11-17). 원본 실측(색 · 곡선)은 맞추지 않는다.
 > 본보기: 무대 리그([stage-rig.md](../Assets/Ked.Presentation/Stage/StageRig/Documentation~/stage-rig.md)) — 배경도 캐릭터 리그로 서고(캐스팅하지 않은 슬롯), 층마다 어둡기 판이 선다([PLAN_screen-cover.md](PLAN_screen-cover.md) §3.2).
