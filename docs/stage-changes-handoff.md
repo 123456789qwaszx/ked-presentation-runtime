@@ -73,7 +73,8 @@ L3부터는 옛 대본이 그대로 돌지 않는다 — 대사 줄 머리의 `p
 
 ### 3.1 작업공간 — `ked-vn-workspace`
 
-**런타임 포크(`runtime/`)를 먼저 맞춘다.** 포크는 공개 런타임 `refactor/actor-view` `85d7dc4`까지 들였다(`runtime/FORK.md` §1). 그 뒤 공개 런타임에 30커밋이 더 있다(`85d7dc4..`) — 덮개 · 어둡게(S1–S5), 코드의 집(R1–R4), 보이는 범위(V1–V5), 블러 폴더, 시험 고침. 들인 뒤 `FORK.md`에 적는다.
+**런타임 포크(`runtime/`)를 먼저 맞춘다.** 포크는 공개 런타임 `refactor/actor-view` `85d7dc4`까지 들였다(`runtime/FORK.md` §1). 그 뒤 공개 런타임에 36커밋이 더 있다(`85d7dc4..bcbe5d8a`, 2026-11-17) — 덮개 · 어둡게(S1–S5), 코드의 집(R1–R4), 보이는 범위(V1–V5), 블러 폴더, 시험 고침, 줄의 자리(L1–L3, §1.4). 들인 뒤 `FORK.md`에 적는다.
+- 줄의 자리가 포크의 손댄 파일과 겹친다: `LinePresentationFlow.cs`(줄 머리 `Play` 앞에 `ReleaseLineWaits` 한 줄 — 메신저 · 글 카드 줄도 이 흐름을 지나면 같이 걸린다. 인라인 트랙의 `Begin` · `PlayRemaining`은 이름 · 모양이 그대로다), `CommandBridge.cs`(`at` 등록, `<<Nfr>>` 등록이 빠짐, `TryParseInline`의 인자가 `StageCommand`로), `StageStepFlow.cs`(생성자에 인라인 트랙 — 남은 `at`), 조립(`SampleBootstrap`). L1 · L2까지는 대본이 그대로 돌고, L3(`bcbe5d8a`)은 다시 낸 대본과 함께다(아래).
 - 포크에서 조립을 고친 곳이 있으면 겹친다: `SampleBootstrap`(팩토리 셋 — 무대 리그 · 무대 틀 · 블러, 덮개 프리셋, 팝업 프리셋이 파서로), 무대 틀(창만 남음), 파서 생성자(팝업 프리셋).
 - 프리셋 에셋: `ScreenCoverPresetDB.asset`(새로) · `PopupPreset.asset`(필드가 바뀜 — 배율 · 열기 · 닫기 길이) · `CutInPreset`(외곽선 색 필드가 더해짐 — 없으면 기본값).
 
