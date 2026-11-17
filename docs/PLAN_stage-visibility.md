@@ -1,6 +1,6 @@
 # 무대에 무엇이 보이나 — 보이는 범위는 마스크 하나, 내용은 모두 리그, 틀은 창만 (2026-11-17)
 
-> 상태: 진행 중 — 정할 것(§6)을 모두 정했다(2026-11-17). V1부터 차례로 한다.
+> 상태: V1–V5 끝(2026-11-17) — Unity 확인을 기다린다(§7 '소유자가 볼 것'). 정할 것(§6)은 모두 정했다.
 > 이 계획이 [PLAN_stage-code-homes.md](PLAN_stage-code-homes.md)의 §3 · §8과 R2(틀 되돌리기)를 대신한다.
 > **목표는 원본을 똑같이 재현하는 것이 아니라 연출 카드를 구현하는 것이다**(소유자, 2026-11-17). 원본 실측(색 · 곡선)은 맞추지 않는다.
 > 본보기: 무대 리그([stage-rig.md](../Assets/Ked.Presentation/Stage/StageRig/Documentation~/stage-rig.md)) — 배경도 캐릭터 리그로 서고(캐스팅하지 않은 슬롯), 층마다 어둡기 판이 선다([PLAN_screen-cover.md](PLAN_screen-cover.md) §3.2).
@@ -172,4 +172,4 @@
 | V2 | 이 커밋 | 끝 — 파서가 `cutin_open`을 [판 리그 5(세우기 · 그림 · 자리 · 배율 · 보임), 창]으로 푼다. 판 리그 키 `{무대}_cutin_panel`, far 층, 원본 픽셀 × 배율 ÷ 2(`CutInPresetDBSO.PanelPictureResolution` — 생성기와 같은 값). 틀에서 판 노드를 걷었다(옛 판 노드는 빌더가 경고하고 치운다). 마스크가 네 점에 선 하나(판 아래 외곽선 띠의 가운데 선)를 테두리로 받는다 — 색 `outlineColor`(생성기도 이 값으로 그린다) · 두께 `maskInsetPixels`. `SetupCharRigCommandSpec.outsideFold` → 레지스트리가 표시를 들고 하네스 캡처가 건너뛴다. 알아 둘 것: 대본이 판을 치우는 줄(`bg_fade_out stage01_cutin_panel`)은 폴드가 그 슬롯을 몰라 '접지 못한 명령'으로 남는다(불일치가 아니다) |
 | V3 | 이 커밋 | 끝 — 파서가 `popup`을 그림 리그 5(세우기 · 그림 · 자리 · 배율 · 페이드 인)로, `popup_close`를 페이드 아웃 하나로 푼다. 키 `{무대}_popup`, close 층, 원본 픽셀 × 0.91 × 배율. 프리셋(`PopupPresetDBSO`)은 그림 배율 · 열기 · 닫기 길이만 남기고 파서가 읽는다(없으면 기본값 · 조립이 경고) — 파서 옆(`Grammar/`)으로 옮겼다(.meta 그대로). 틀에서 팝업 그룹 · `StagePopupSlot` · 팝업 커맨드 둘을 걷었다. 열린 팝업에 다시 `popup`은 그림 리그를 새로 세운다(새 그림이 페이드 인). 열지 않은 무대의 `popup_close`는 브리지의 대상 확인이 경고하고 건너뛴다. 데모 팝업 절은 뒤를 `screen_dim front`로 깐다 |
 | V4 | 이 커밋 | 끝 — 파서가 `tx` · `tx_stage_mask_clear`를 마스크 커맨드 하나로 낸다. `StageFrameResetCommand`와 그 테스트, 실험 토글(`txKeepsOpenFrames`), 틀 레지스트리의 `StageKeys`를 걷었다. 틀을 중립으로 돌리는 것은 장면 경계 하나다. 데모의 실험 절은 확인 절("tx와 컷인 · 팝업")로 바꿨다 |
-| V5 | | |
+| V5 | 이 커밋 | 끝 — target-boundary에 예외(컷인 판 · 팝업 그림은 폴드 밖)를, PLAN_cutin · PLAN_popup 첫머리에 바뀐 것을 적었다. 데모 확인 절은 V4에서 바꿨다 |
