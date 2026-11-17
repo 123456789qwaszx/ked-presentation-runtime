@@ -67,7 +67,8 @@ public class MotionLibraryTests
     [Test]
     public void 스키마_노드_목록을_주면_없는_노드를_거른다()
     {
-        string stray = Head + @"""end"": ""commit"", ""channels"": [ { ""node"": ""NoSuchNode"", ""kind"": ""position"", ""x"": [ { ""t"": 0, ""v"": 0 }, { ""t"": 1, ""v"": 1 } ] } ] }";
+        // 리그를 밝힌다 — 리그가 없는 모션은 노드를 보기 전에 "모르는 리그"로 걸러진다(C5 이후). 여기서 보려는 것은 노드다.
+        string stray = Head + @"""rig"": ""character"", ""end"": ""commit"", ""channels"": [ { ""node"": ""NoSuchNode"", ""kind"": ""position"", ""x"": [ { ""t"": 0, ""v"": 0 }, { ""t"": 1, ""v"": 1 } ] } ] }";
 
         Assert.AreEqual(1, MotionLibrary.Parse(Doc(stray), "test").Count, "목록이 없으면 노드는 보지 않는다");
 
