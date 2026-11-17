@@ -1,6 +1,7 @@
 # 무대 코드의 집 — 마스크 · tx · 어둡게는 무대 리그로, 컷인 · 팝업은 무대 틀로 (2026-11-17)
 
-> 상태: 진행 중 — 소유자가 1 · 2 · 3을 모두 하기로 했다(2026-11-17).
+> 상태: R1–R4 끝(2026-11-17). Unity 확인을 기다린다. 소유자가 1 · 2 · 3을 모두 하기로 했다.
+> 남은 것: 블러의 집(§5)과 명령 이름(§6)은 소유자가 정한다.
 > **동작은 바꾸지 않는다.** 코드가 사는 폴더와, 커맨드를 만드는 팩토리만 옮긴다.
 > 본보기: [command-authoring.md](command-authoring.md) §6 — 컷인 창 · 그림 팝업을 무대 리그에서 무대 틀로 떼어 낸 일(2026-11-09). 그때도 동작은 같았고 틀린 것은 "어디에 무엇이 사는가"였다.
 
@@ -77,7 +78,7 @@ A의 새 커맨드 하나: `StageFrameResetCommand`(`Stage/StageFrame/`). 스펙
 | R1 | 마스크 코드를 `Stage/StageRig/Mask/`로(`git mv`, `.meta` 함께) | 컴파일. GUID가 같다 |
 | R2 | 무대 틀 팩토리와 틀 되돌리기 커맨드. 파서가 `tx` · `tx_stage_mask_clear`를 둘로 낸다. 마스크 커맨드에서 틀 레지스트리가 빠진다 | 파서 테스트(무엇을 어떤 순서로 내나), 틀 되돌리기 테스트 |
 | R3 | 무대 리그 커맨드 셋을 `Stage/StageRig/Commands/`로, `StageRigCommandFactory`. 화면 효과 팩토리를 줄인다. 조립 | 컴파일, 전체 테스트 |
-| R4 | 문서 — stage-rig.md(코드의 집 · 흐름) · stage-frame.md §4 · command-authoring.md §2 · PLAN_stage-seam.md 팩토리 목록 · PLAN_screen-cover.md 파일 표 | |
+| R4 | 문서 — Stage README의 폴더 표 · stage-rig.md(§2.5 코드의 집 · §6 흐름) · stage-frame.md(§1 · §4) · command-authoring.md §6 · PLAN_cutin.md 파일 표 · PLAN_screen-cover.md 파일 표 | |
 
 **Unity에서 소유자가 볼 것** — `PresentationSample`을 열어 Missing Script가 없는지, 데모 대본의 `tx` 절 · 컷인 뒤 `tx` · 어둡게 절이 전과 같은지.
 
@@ -85,10 +86,12 @@ A의 새 커맨드 하나: `StageFrameResetCommand`(`Stage/StageFrame/`). 스펙
 
 | 단계 | 커밋 | 상태 |
 |---|---|---|
-| R1 | | |
-| R2 | | |
-| R3 | | |
-| R4 | | |
+| R1 | `0e002827` | 끝 — 마스크 코드 다섯 파일과 그 `.meta`, 폴더 `.meta`를 `Stage/StageRig/Mask/`로. 코드 변경 없음 |
+| R2 | `5d63377e` | 끝 — `StageFrameResetCommand` · `StageFrameCommandFactory`, 파서가 `tx` · `tx_stage_mask_clear`를 둘로. 테스트 `StageFrameResetTests`(6), 파서 테스트의 tx 자리를 `[1]`로 |
+| R3 | `e3a3c46e` | 끝 — 커맨드 셋을 `Stage/StageRig/Commands/`로, `StageRigCommandFactory`. 화면 효과 팩토리는 덮개 · 플래시 · 노이즈 · 비네트 · `screen_blur` |
+| R4 | 문서 커밋 | 끝. `PLAN_stage-seam.md`의 팩토리 목록은 그때(④) 일의 기록이라 고치지 않았다 |
+
+유니티 밖 검사: Core 테스트 487 통과, Stage · EditMode 테스트 컴파일 통과(`LogAssert`처럼 유니티 테스트 프레임워크에만 있는 것은 이 검사가 보지 못한다). 조립(`Samples/`)과 재생(`Playback/`)은 이 검사가 컴파일하지 않는다 — Unity에서 처음 컴파일된다. EditMode 테스트 실행도 Unity에서.
 
 ## 5. 이번에 하지 않는 것
 

@@ -25,7 +25,7 @@
     {stage}_Popup_Image       그림. 원본 픽셀 × 프리셋 배율, 무대 중심 기준 자리
 ```
 
-- 세우기는 `StageFrameBuilder`(`EnsureWindow` · `EnsureCutIn` · `EnsurePopup`), 꺼내기는 `StageFrameRegistry`(`CutIn` · `Popup` · `Reset` · `ResetAll`).
+- 세우기는 `StageFrameBuilder`(`EnsureWindow` · `EnsureCutIn` · `EnsurePopup`), 꺼내기는 `StageFrameRegistry`(`CutIn` · `Popup` · `Reset` · `ResetAll`), 커맨드를 만드는 것은 `StageFrameCommandFactory`.
 - 틀에는 스키마 · 참조 묶음을 두지 않는다. 그것은 바깥(대본 · 연출 에디터 · 폴드)이 노드를 **이름으로** 부르고 여러 시스템이 같은 노드에 쓸 때 값을 한다(캐릭터 리그 · 무대 리그).
   틀의 노드는 각 슬롯이 혼자 쓰고 폴드는 끝 상태 표만 안다 — **슬롯이 단위**다. 노드 이름은 씬에 저장된 것을 다시 찾기 위한 빌더 안의 사정이다.
 - 모든 무대에 선다. 컷인 · 팝업을 쓰지 않는 무대에서 창은 항등, 판 · 팝업은 꺼져 있다 — 화면은 틀이 없을 때와 같다.
@@ -53,9 +53,12 @@
 
 | 누가 | 무엇을 |
 |---|---|
-| 그 무대의 `tx` (`StageMaskMotionCommand`) | 컷인 · 팝업을 중립으로(열려 있었으면 경고) |
-| `tx_stage_mask_clear` (`StageMaskClearCommand`) | 그 무대(또는 전부)의 틀을 중립으로 |
+| 그 무대의 `tx` | 파서가 틀 되돌리기(`StageFrameResetCommand`, 까닭 `tx '프리셋'`)를 마스크 모션 앞에 낸다 — 컷인 · 팝업을 중립으로(열려 있었으면 경고) |
+| `tx_stage_mask_clear` | 파서가 틀 되돌리기(무대 전부, 경고 없이)를 마스크 지우기 앞에 낸다 |
 | 장면 경계 (`ScenePresentation`) | `StageFrameRegistry.ResetAll` |
 
-셋 다 틀 레지스트리를 받아 **직접 부른다**. 이 결합은 우연이 아니라 의도된 규칙이라, 이벤트 뒤로 숨기지 않고 부르는 쪽에 드러낸다.
+셋 다 틀을 **직접** 되돌린다. 이 결합은 우연이 아니라 의도된 규칙이라, 이벤트 뒤로 숨기지 않고 부르는 쪽에 드러낸다.
+tx의 규칙은 문법(`StageCommandParser.Transition.cs`)에 있다 — 무대 리그의 마스크 커맨드는 틀을 모르고, 파서가 두 시스템의 커맨드를 차례로 낸다.
+같은 줄 · 같은 자리에서 그 차례로 돌므로 마스크 커맨드가 틀을 직접 부르던 때(2026-11-17까지)와 동작이 같다([docs/PLAN_stage-code-homes.md](../../../../../docs/PLAN_stage-code-homes.md) §3).
+`StageFrameResetCommand`는 대본 어휘가 아니다 — 표에 이름이 없다.
 폴드는 이 규칙을 모른다 — 폴드가 마스크를 모르는 것과 같은 경계다.

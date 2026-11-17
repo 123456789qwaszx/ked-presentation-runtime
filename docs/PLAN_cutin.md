@@ -139,7 +139,7 @@ relative로 건다 — 배율은 곱, 회전은 덧셈이라 레이아웃의 기
 | 빌더 · 레지스트리 | 무대 틀 — `StageFrameBuilder.EnsureWindow · EnsureCutIn`(노드 이름도 빌더 안), `StageFrameRegistry.CutIn`, `StageCutInSlot`(자리 · 모양 · 모션 · 중립 · 닫힘). 무대 리그는 틀을 모른다([stage-frame.md](../Assets/Ked.Presentation/Stage/StageFrame/Documentation~/stage-frame.md)) |
 | 마스크 | `StageMaskKind.CustomQuad`, `StageMaskGraphic.SetCustomQuad`, `StageMaskSlot.SetCustomQuad` |
 | 런타임 커맨드 | `CutInOpenCommand` · `CutInCloseCommand` — 프리셋 · 판을 골라 슬롯에 걸기만 한다. 창 모션(`MotionMath.Compose`, relative)은 `StageCutInSlot`이 소유한다(tx의 `StageMaskSlot`과 같은 틀) |
-| tx · 마스크 지우기 · 장면 경계 | 컷인 창 · 판을 중립으로(`StageMaskMotionCommand` · `StageMaskClearCommand` · `ScenePresentation` → `StageFrameRegistry.ResetAll`) — 셋 다 틀 레지스트리를 받아 직접 부른다 |
+| tx · 마스크 지우기 · 장면 경계 | 컷인 창 · 판을 중립으로 — tx · 마스크 지우기는 파서가 마스크 커맨드 앞에 낸 틀 되돌리기(`StageFrameResetCommand`)가, 장면 경계는 `ScenePresentation` → `StageFrameRegistry.ResetAll`이 한다(2026-11-17까지는 마스크 커맨드가 틀 레지스트리를 받아 직접 불렀다 — [PLAN_stage-code-homes.md](PLAN_stage-code-homes.md) §3) |
 | 파서 · 브리지 | `StageCommandParser.CutIn.cs`, 표에 `cutin_open` · `cutin_close`, `CommandBridge` 등록 |
 | 코어 | `CutInState`, `StageState.CutIns`, `StageReducer.CutIn.cs` |
 | 프리셋 | `CutInPresetDBSO`(판 크기 · 모서리 · 마스크 · 모션 둘) — 에셋이 없으면 코드 기본값 + 경고. 조립(`SampleBootstrap.cutInPreset`)에 연결 |

@@ -159,7 +159,7 @@ stage00_Layer_far                             stage00_Layer_far
 | `Stage/StageRig/StageRigBuilder.cs` | 층을 세울 때 Content와 판을 함께 세운다. 검사는 "층의 자식은 Content 하나"에서 "Content와 판 둘"로(판은 무대 크기가 아니어도 된다) |
 | `StageLayerRefs` · `StageRigRegistry.cs` | 층 참조에 판, 판 찾기, 모든 판을 0으로(정지에서) |
 | `Stage/StageRig/StageLayerDimController.cs`(새) | 판의 투명도 의도와 전환 |
-| `Stage/ScreenEffect/Commands/StageLayerDimCommand.cs`(새) · `ScreenEffectCommandFactory.cs` | 스펙 · 커맨드 둘 — 팩토리는 이미 무대 리그를 안다(`tx`와 같다) |
+| `Stage/ScreenEffect/Commands/StageLayerDimCommand.cs`(새) · `ScreenEffectCommandFactory.cs` | 스펙 · 커맨드 둘 — 팩토리는 이미 무대 리그를 안다(`tx`와 같다). 2026-11-17 `Stage/StageRig/Commands/` · `StageRigCommandFactory`로 옮겼다([PLAN_stage-code-homes.md](PLAN_stage-code-homes.md)) |
 | `Grammar/StageCommandParser.ScreenEffects.cs` · `.Table.cs` · `Playback/YarnBridge/CommandBridge*.cs` | 문법 · Yarn 등록 |
 | `Playback/Host/ScenePresentation.cs` | 정지에서 판을 0으로(마스크를 기준으로 되돌리는 자리 옆) |
 | `Stage/StageRig/Documentation~/stage-rig.md` | 구조 그림 |

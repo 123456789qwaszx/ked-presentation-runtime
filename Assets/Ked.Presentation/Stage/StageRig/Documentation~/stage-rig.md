@@ -163,6 +163,8 @@ tx는 **보이는 범위만** 맡는다. 샷의 뜻(줌하며 열리기 같은)�
 - 덮는 무대가 화면 전체를 가리면(`iris_in` · `strip_cover`) 그것은 커튼이다. 가린 뒤에 본 무대를 다시 꾸미고 걷어 낸다. 덮는 무대에서 장면을 이어 가지 않는다.
 - 매치 컷(본 무대와 인서트를 같은 구도로 이어 보이기)은 저절로 되지 않는다. 필요하면 인서트 리그를 같은 자리 · 크기로 세운다. 샷을 복사하는 커맨드는 두지 않는다.
 - 폴드는 마스크를 모른다(무대 상태 모델 밖, [target-boundary.md](../../../Core/Documentation~/target-boundary.md)).
+- 코드는 `Mask/`(그래픽 · 슬롯 · 테두리 · 모양 종류 · 프리셋 DB)와 `Commands/`(`StageMaskMotionCommand` · `StageMaskClearCommand`, 팩토리 `StageRigCommandFactory`)다.
+- tx가 오면 그 무대의 틀(컷인 · 팝업)은 끝난다. 이 규칙은 리그가 아니라 파서가 드러낸다 — 틀 되돌리기 커맨드를 마스크 커맨드 앞에 낸다([stage-frame.md](../../StageFrame/Documentation~/stage-frame.md) §4). 리그의 코드는 틀을 모른다.
 
 ### 2.6 무대 루트 바깥 — 무대 틀
 
@@ -292,6 +294,7 @@ shot_shake
   CameraShakePlayer       본 무대의 Camera_Shake에 튼다. 끝나면 항등 — 의도를 쓰지 않는다
 
 tx
+  (파서)                  [StageFrameResetCommand(그 무대), StageMaskMotionCommand] 차례로 낸다 — 앞의 것은 무대 틀의 것
   StageMaskSlot           그 무대의 마스크 모양만. 카메라 · 리그와 무관
 
 place / size / shot_focus_to 측정
