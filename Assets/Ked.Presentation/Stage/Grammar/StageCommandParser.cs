@@ -18,14 +18,19 @@ public sealed partial class StageCommandParser
     private readonly RectTransform _charRigPrefab;
     private readonly MotionLibrary _motions;
 
+    // 팝업을 그림 리그로 풀 때 읽는다(배율 · 페이드 길이). 없으면 기본값 — 연결 확인은 조립이 한다.
+    private readonly PopupPresetDBSO _popupPreset;
+
     private List<CommandSpecBase> _output;
 
     public StageCommandParser(
         RectTransform charRigPrefab,
-        MotionLibrary motions = null)
+        MotionLibrary motions = null,
+        PopupPresetDBSO popupPreset = null)
     {
         _charRigPrefab = charRigPrefab;
         _motions = motions ?? MotionLibrary.Empty;
+        _popupPreset = popupPreset;
     }
 
     public static bool Knows(string commandName)

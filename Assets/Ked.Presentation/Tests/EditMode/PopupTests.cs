@@ -1,12 +1,11 @@
 using Ked.Presentation.Core;
 using NUnit.Framework;
-using UnityEngine;
 
 namespace Ked.Presentation.Tests
 {
     /// <summary>
-    /// 그림 팝업 — 폴드의 끝 상태(docs/PLAN_popup.md §7)와 프리셋 페이드 기본값(§4, 원본 실측).
-    /// 계층 · 크기는 UnityParity/StageRigBuilderTests, 문법은 StageCommandParserTests.
+    /// 그림 팝업 — 폴드의 끝 상태(docs/PLAN_popup.md §7). 그림은 폴드 밖의 리그라 폴드는 이 표로만 안다(docs/PLAN_stage-visibility.md §3.5).
+    /// 문법(그림 리그로 풀기)은 StageCommandParserTests.
     /// </summary>
     public sealed class PopupTests
     {
@@ -103,73 +102,9 @@ namespace Ked.Presentation.Tests
                 Cmd("popup", "stage01", "sample_letter"),
                 Cmd("cutin_close", "stage01"));
 
-            Assert.That(state.Nodes.Count, Is.EqualTo(0), "팝업은 무대 루트 바깥 — 리그 노드 트리에 들지 않는다");
+            Assert.That(state.Nodes.Count, Is.EqualTo(0), "팝업 그림 · 컷인 판은 폴드 밖의 리그 — 노드 트리에 들지 않는다");
             Assert.That(state.TryGetPopup("stage01", out PopupState p) && p.IsOpen, Is.True, "컷인을 닫아도 팝업은 그대로");
             Assert.That(state.TryGetCutIn("stage01", out CutInState c) && !c.IsOpen, Is.True);
-        }
-
-        // ── 프리셋 ───────────────────────────────────────────────────
-
-        [Test]
-        public void 기본_페이드는_규칙을_지키고_실측_점을_지난다()
-        {
-            PopupPresetDBSO preset = PopupPresetDBSO.CreateDefault();
-
-            try
-            {
-                CurveKey[] open = preset.OpenKeys(out string a);
-                CurveKey[] close = preset.CloseKeys(out string b);
-
-                Assert.That(open, Is.Not.Null, a);
-                Assert.That(close, Is.Not.Null, b);
-
-                // 등장 약 0.4초, 퇴장 약 0.3초(docs/PLAN_popup.md §1).
-                Assert.That(open[open.Length - 1].Time, Is.EqualTo(0.445f).Within(1e-6f));
-                Assert.That(close[close.Length - 1].Time, Is.EqualTo(0.305f).Within(1e-6f));
-
-                Assert.That(CurveFunctions.Evaluate(open, 0f), Is.EqualTo(0f));
-                Assert.That(CurveFunctions.Evaluate(open, 0.245f), Is.EqualTo(0.75f).Within(1e-4f));
-                Assert.That(CurveFunctions.Evaluate(open, 1f), Is.EqualTo(1f));
-                Assert.That(CurveFunctions.Evaluate(close, 0.165f), Is.EqualTo(0.51f).Within(1e-4f));
-                Assert.That(CurveFunctions.Evaluate(close, 1f), Is.EqualTo(0f));
-
-                // 넘치지 않는다 — 불투명도가 0~1 밖으로 나가지 않는다(커맨드는 그래도 자른다).
-                for (float t = 0f; t <= 0.45f; t += 0.005f)
-                {
-                    float v = CurveFunctions.Evaluate(open, t);
-                    Assert.That(v, Is.InRange(-1e-3f, 1f + 1e-3f), $"등장 t={t}");
-                }
-
-                Assert.That(preset.pictureScale, Is.EqualTo(0.91f));
-                Assert.That(preset.backdropColor.a, Is.EqualTo(0.47f).Within(1e-6f));
-            }
-            finally
-            {
-                Object.DestroyImmediate(preset);
-            }
-        }
-
-        [Test]
-        public void 어긋난_페이드는_null과_이유를_낸다()
-        {
-            PopupPresetDBSO preset = PopupPresetDBSO.CreateDefault();
-
-            try
-            {
-                preset.openTimes = new[] { 0f, 0.2f, 0.1f };
-                preset.openAlpha = new[] { 0f, 0.5f, 1f };
-                Assert.That(preset.OpenKeys(out string why), Is.Null);
-                Assert.That(why, Does.Contain("오름차순"));
-
-                preset.closeTimes = new[] { 0f, 0.3f };
-                preset.closeAlpha = new[] { 1f, 0.2f };
-                Assert.That(preset.CloseKeys(out why), Is.Null);
-                Assert.That(why, Does.Contain("끝나야"));
-            }
-            finally
-            {
-                Object.DestroyImmediate(preset);
-            }
         }
     }
 }

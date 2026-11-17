@@ -11,11 +11,11 @@ public sealed class StageFrameResetCommandSpec : CommandSpecBase
     [Tooltip("true면 모든 무대의 틀. stage는 무시.")]
     public bool allStages;
 
-    [Tooltip("열려 있던 컷인 · 팝업을 닫을 때 경고에 적는 까닭(예: tx 'daze_close'). 비면 조용히 닫는다.")]
+    [Tooltip("열려 있던 컷인을 닫을 때 경고에 적는 까닭(예: tx 'daze_close'). 비면 조용히 닫는다.")]
     public string cause;
 }
 
-// 틀 되돌리기 — 그 무대(또는 전부)의 컷인 창 · 판과 그림 팝업을 중립으로(stage-frame.md §4). 즉시라 압축과 상관없다.
+// 틀 되돌리기 — 그 무대(또는 전부)의 컷인 창을 중립으로(stage-frame.md §4). 즉시라 압축과 상관없다.
 // 대본 어휘가 아니다. 무대를 어디까지 보여 줄지 새로 정하는 명령(tx · tx_stage_mask_clear)을 파서가 이 커맨드와 마스크 커맨드 둘로 낸다 —
 // 틀이 마스크의 결정을 따르는 규칙을 마스크 코드 안에 숨기지 않고 문법에 드러낸다(docs/PLAN_stage-code-homes.md §3).
 public sealed class StageFrameResetCommand : CommandBase
@@ -23,7 +23,7 @@ public sealed class StageFrameResetCommand : CommandBase
     private readonly StageFrameResetCommandSpec _spec;
     private readonly StageFrameRegistry _frames;
 
-    // 실험 A(docs/PLAN_stage-code-homes.md §8) — 열린 컷인 · 팝업은 닫지 않고 경고만, 닫힌 채 남은 컷인 창만 되돌린다.
+    // 실험 A(docs/PLAN_stage-code-homes.md §8) — 열린 컷인은 닫지 않고 경고만, 닫힌 컷인은 중립으로.
     // Unity에서 지금 규칙과 견주어 보려고 둔다. 소유자가 정하면 지운다.
     private readonly bool _keepOpenFrames;
 
@@ -77,8 +77,7 @@ public sealed class StageFrameResetCommand : CommandBase
             ResetClosedOnly(stage);
     }
 
-    // 열리지 않은 컷인은 중립으로 둔다(닫힌 컷인의 창은 이미 항등이다).
-    // 열린(닫히는 중인) 컷인 · 팝업은 그대로 둔다. 판 그림과 팝업은 마스크 밖이라 tx로는 가려지지 않는다.
+    // 열리지 않은 컷인은 중립으로 둔다(닫힌 컷인의 창은 이미 항등이다). 열린(닫히는 중인) 컷인은 그대로 둔다.
     private void ResetClosedOnly(string stage)
     {
         string cause = string.IsNullOrEmpty(_spec.cause) ? "tx_stage_mask_clear" : _spec.cause;
@@ -89,12 +88,9 @@ public sealed class StageFrameResetCommand : CommandBase
             Debug.LogWarning($"[StageFrameResetCommand] {stage}의 열린 컷인 위에 {cause} — 컷인은 그대로 둔다(실험 A).");
         else
             cutIn.Reset();
-
-        if (_frames.Popup(stage).IsOpen)
-            Debug.LogWarning($"[StageFrameResetCommand] {stage}의 열린 그림 팝업 위에 {cause} — 팝업은 그대로 둔다(실험 A).");
     }
 
-    // 열려 있던(또는 닫힌 채 남은) 컷인 창 · 열린 팝업을 덮는 것은 대본의 실수일 수 있다 — 까닭을 적어 알린다(docs/PLAN_cutin.md §5 · PLAN_popup.md §6).
+    // 열려 있던 컷인을 덮는 것은 대본의 실수일 수 있다 — 까닭을 적어 알린다(docs/PLAN_cutin.md §5).
     private void WarnIfOpen()
     {
         if (string.IsNullOrEmpty(_spec.cause))
@@ -104,8 +100,5 @@ public sealed class StageFrameResetCommand : CommandBase
 
         if (cutIn.IsOpen || cutIn.Window.localScale != Vector3.one)
             Debug.LogWarning($"[StageFrameResetCommand] {_spec.stage}의 컷인을 {_spec.cause}가 덮는다 — 컷인 창을 중립으로 돌린다.");
-
-        if (_frames.Popup(_spec.stage).IsOpen)
-            Debug.LogWarning($"[StageFrameResetCommand] {_spec.stage}의 그림 팝업을 {_spec.cause}가 덮는다 — 팝업을 닫는다.");
     }
 }

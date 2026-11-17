@@ -9,7 +9,7 @@ using Object = UnityEngine.Object;
 namespace Ked.Presentation.Tests.UnityParity
 {
     /// <summary>
-    /// 무대 틀(창 · 그림 팝업)은 무대 루트 바깥에서 리그를 감싼다 — StageFrameBuilder. 컷인 판 그림은 무대 안의 리그다.
+    /// 무대 틀(창)은 무대 루트 바깥에서 리그를 감싼다 — StageFrameBuilder. 컷인 판 · 팝업 그림은 무대 안의 리그다.
     /// 리그만 세운 계층은 StageRigBuilderTests.
     /// </summary>
     public sealed class StageFrameBuilderTests
@@ -48,7 +48,7 @@ namespace Ked.Presentation.Tests.UnityParity
         public void 창이_무대_루트를_감싸고_창_아래는_무대_루트뿐이다()
         {
             StageRigRefs rig = BuildRig("stage00");
-            StageCutInSlot cutIn = StageFrameBuilder.Build(rig).CutIn;
+            StageCutInSlot cutIn = StageFrameBuilder.Build(rig);
 
             Assert.That(rig.Root.parent, Is.EqualTo(cutIn.Window), "무대 루트는 창 아래");
             Assert.That(cutIn.Window.parent, Is.EqualTo(_mount));
@@ -60,7 +60,7 @@ namespace Ked.Presentation.Tests.UnityParity
         public void 창_아래의_옛_판_노드는_경고하고_치운다()
         {
             StageRigRefs rig = BuildRig("stage01");
-            RectTransform window = StageFrameBuilder.Build(rig).CutIn.Window;
+            RectTransform window = StageFrameBuilder.Build(rig).Window;
             NewChild(window, "stage01_Panel");
 
             LogAssert.Expect(LogType.Warning, new Regex("창 아래에 스키마에 없는 'stage01_Panel'"));
@@ -78,7 +78,7 @@ namespace Ked.Presentation.Tests.UnityParity
             RectTransform after = NewChild(_mount, "After");
 
             RectTransform pan = rig.Camera.Pan;
-            StageCutInSlot cutIn = StageFrameBuilder.Build(rig).CutIn;
+            StageCutInSlot cutIn = StageFrameBuilder.Build(rig);
 
             Assert.That(rig.Camera.Pan, Is.SameAs(pan), "무대 계층은 그대로");
             Assert.That(rig.Root.parent, Is.EqualTo(cutIn.Window));
@@ -91,10 +91,10 @@ namespace Ked.Presentation.Tests.UnityParity
         public void 다시_묶으면_있는_창을_쓰고_리그도_창_안에서_다시_묶인다()
         {
             StageRigRefs rig = BuildRig("stage01");
-            StageCutInSlot first = StageFrameBuilder.Build(rig).CutIn;
+            StageCutInSlot first = StageFrameBuilder.Build(rig);
 
             StageRigRefs rebound = _rigBuilder.BindRefsFromRoot(rig.Root, "stage01");
-            StageCutInSlot again = StageFrameBuilder.Build(rebound).CutIn;
+            StageCutInSlot again = StageFrameBuilder.Build(rebound);
 
             Assert.That(again.Window, Is.SameAs(first.Window), "창을 새로 끼우지 않는다");
             Assert.That(rebound.Camera.Pan, Is.SameAs(rig.Camera.Pan), "창 안의 리그도 그대로 묶인다");
@@ -105,7 +105,7 @@ namespace Ked.Presentation.Tests.UnityParity
         public void 컷인을_열면_창_피벗이_판_아래_가운데로_가고_마스크가_네_점_테두리가_판_아래_외곽선이_된다()
         {
             StageRigRefs rig = BuildRig("stage01");
-            StageCutInSlot cutIn = StageFrameBuilder.Build(rig).CutIn;
+            StageCutInSlot cutIn = StageFrameBuilder.Build(rig);
             CutInPresetDBSO preset = CutInPresetDBSO.CreateDefault();
 
             try
@@ -150,86 +150,6 @@ namespace Ked.Presentation.Tests.UnityParity
             }
             finally
             {
-                Object.DestroyImmediate(preset);
-            }
-        }
-
-        // ── 그림 팝업 (docs/PLAN_popup.md) ──────────────────────────
-
-        [Test]
-        public void 팝업은_창의_다음_형제이고_뒷막이_그림보다_뒤다()
-        {
-            var (c1, p1) = StageFrameBuilder.Build(BuildRig("stage01"));
-            StageCutInSlot c2 = StageFrameBuilder.Build(BuildRig("stage02")).CutIn;
-
-            Assert.That(p1.Group.name, Is.EqualTo("stage01_Popup"));
-            Assert.That(p1.Group.parent, Is.EqualTo(_mount));
-            Assert.That(p1.Group.GetSiblingIndex(), Is.EqualTo(c1.Window.GetSiblingIndex() + 1), "그 무대 내용 바로 위");
-            Assert.That(p1.Group.GetSiblingIndex(), Is.LessThan(c2.Window.GetSiblingIndex()), "다음 무대 아래");
-            Assert.That(p1.Backdrop.transform.GetSiblingIndex(), Is.EqualTo(0));
-            Assert.That(p1.Picture.GetSiblingIndex(), Is.EqualTo(1));
-            Assert.That(p1.Group.childCount, Is.EqualTo(2));
-            Assert.That(p1.Canvas.blocksRaycasts, Is.False);
-
-            // 닫힌 채 선다.
-            Assert.That(p1.IsOpen, Is.False);
-            Assert.That(p1.Alpha, Is.EqualTo(0f));
-            Assert.That(p1.Backdrop.enabled, Is.False);
-            Assert.That(p1.PictureImage.enabled, Is.False);
-        }
-
-        [Test]
-        public void 다시_묶어도_팝업은_창_다음_자리로_돌아온다()
-        {
-            StageRigRefs s1 = BuildRig("stage01");
-            StagePopupSlot p1 = StageFrameBuilder.Build(s1).Popup;
-            StageFrameBuilder.Build(BuildRig("stage02"));
-
-            RectTransform group = p1.Group;
-            group.SetAsFirstSibling();   // 엉뚱한 자리(창 앞)
-
-            var (cutIn, rebound) = StageFrameBuilder.Build(s1);
-
-            Assert.That(rebound.Group, Is.SameAs(group), "부수지 않고 다시 묶는다");
-            Assert.That(group.GetSiblingIndex(), Is.EqualTo(cutIn.Window.GetSiblingIndex() + 1));
-        }
-
-        [Test]
-        public void 팝업을_열면_그림이_원본_픽셀_곱하기_배율로_서고_닫으면_꺼진다()
-        {
-            StagePopupSlot popup = StageFrameBuilder.Build(BuildRig("stage01")).Popup;
-            PopupPresetDBSO preset = PopupPresetDBSO.CreateDefault();
-            Texture2D tex = new(404, 404);
-            Sprite sprite = Sprite.Create(tex, new Rect(0f, 0f, 404f, 404f), new Vector2(0.5f, 0.5f), 100f);
-
-            try
-            {
-                popup.SnapOpen(preset, sprite, new Vector2(40f, -20f), 1.5f);
-
-                Assert.That(popup.IsOpen, Is.True);
-                Assert.That(popup.Alpha, Is.EqualTo(1f));
-                Assert.That(popup.Picture.sizeDelta.x, Is.EqualTo(404f * 0.91f * 1.5f).Within(1e-3f));
-                Assert.That(popup.Picture.anchoredPosition, Is.EqualTo(new Vector2(40f, -20f)));
-                Assert.That(popup.Backdrop.enabled && popup.PictureImage.enabled, Is.True);
-                Assert.That(popup.Backdrop.color.a, Is.EqualTo(0.47f).Within(1e-4f));
-
-                popup.SnapClose();
-                Assert.That(popup.IsOpen, Is.False);
-                Assert.That(popup.Alpha, Is.EqualTo(0f));
-                Assert.That(popup.PictureImage.enabled, Is.False);
-
-                popup.SnapOpen(preset, null, Vector2.zero, 1f);
-                Assert.That(popup.PictureImage.enabled, Is.False, "그림이 없으면 뒷막만");
-                Assert.That(popup.Backdrop.enabled, Is.True);
-
-                popup.Reset();
-                Assert.That(popup.IsOpen, Is.False);
-                Assert.That(popup.Backdrop.enabled, Is.False);
-            }
-            finally
-            {
-                Object.DestroyImmediate(sprite);
-                Object.DestroyImmediate(tex);
                 Object.DestroyImmediate(preset);
             }
         }

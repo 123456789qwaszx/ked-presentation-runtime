@@ -176,11 +176,10 @@ public partial class SampleBootstrap
             stageMaskMotionPresetDb,
             _stageRigs);
 
-        // 무대 틀 — 컷인 창 · 그림 팝업, tx가 앞에 내는 틀 되돌리기(stage-frame.md)
+        // 무대 틀 — 컷인 창, tx가 앞에 내는 틀 되돌리기(stage-frame.md)
         StageFrameCommandFactory stageFrameFactory = new(
             _stageFrames,
             cutInPreset,
-            popupPreset,
             txKeepsOpenFrames);
 
         ScreenEffectCommandFactory screenEffectFactory = new(
@@ -232,9 +231,18 @@ public partial class SampleBootstrap
         _motions = LoadMotions();
 
         // 배경(bg_*)도 캐릭터 리그로 선다 — 캐스팅하지 않은 슬롯. 리그 프리팹은 하나다.
+        // 그림 팝업은 파서가 그림 리그로 푼다 — 프리셋(배율 · 페이드 길이)은 파서가 읽는다.
+        if (popupPreset == null)
+        {
+            Debug.LogWarning(
+                "[연출 조립] 그림 팝업 프리셋(PopupPresetDBSO)이 연결되지 않았다. 코드 기본값(배율 0.91 · 0.45초 · 0.3초)으로 연다 — " +
+                "Create › Ked › Presentation › Popup Preset으로 에셋을 만들어 조립에 연결하면 런타임에서 편집할 수 있다.");
+        }
+
         StageCommandParser stageCommandParser = new(
             rigPrefab,
-            _motions);
+            _motions,
+            popupPreset);
 
         YarnCommandBridge commandBridge = new(
             dialogueRunner,

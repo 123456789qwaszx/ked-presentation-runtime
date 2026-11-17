@@ -13,36 +13,5 @@ MonoBehaviour:
   m_Name: PopupPreset
   m_EditorClassIdentifier: Ked.Presentation.Stage::PopupPresetDBSO
   pictureScale: 0.91
-  backdropColor: {r: 0.04, g: 0.04, b: 0.04, a: 0.47}
-  openTimes:
-  - 0
-  - 0.035
-  - 0.105
-  - 0.175
-  - 0.245
-  - 0.315
-  - 0.385
-  - 0.445
-  openAlpha:
-  - 0
-  - 0.07
-  - 0.42
-  - 0.53
-  - 0.75
-  - 0.93
-  - 0.97
-  - 1
-  closeTimes:
-  - 0
-  - 0.035
-  - 0.095
-  - 0.165
-  - 0.235
-  - 0.305
-  closeAlpha:
-  - 1
-  - 0.92
-  - 0.76
-  - 0.51
-  - 0.23
-  - 0
+  openSeconds: 0.45
+  closeSeconds: 0.3

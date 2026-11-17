@@ -8,7 +8,7 @@ using UnityEngine.TestTools;
 
 // 틀 되돌리기 — tx · tx_stage_mask_clear가 마스크 커맨드 앞에 내는 커맨드(stage-frame.md §4, docs/PLAN_stage-code-homes.md §3).
 // 마스크 커맨드는 틀을 모른다 — 무대를 새로 보여 주면 틀이 끝난다는 규칙은 파서가 두 커맨드로 드러낸다.
-// 그 무대만 · 전부 · 까닭이 있을 때만 경고 · 파서가 내는 순서를 고정한다.
+// 그 무대만 · 전부 · 까닭이 있을 때만 경고 · 파서가 내는 순서를 고정한다. 그림 팝업은 틀이 아니다(무대 안의 리그).
 public class StageFrameResetTests
 {
     private sealed class Pace : ICommandPacePolicy
@@ -50,12 +50,9 @@ public class StageFrameResetTests
     private void Open(string stage)
     {
         CutInPresetDBSO cutIn = CutInPresetDBSO.CreateDefault();
-        PopupPresetDBSO popup = PopupPresetDBSO.CreateDefault();
         _spawned.Add(cutIn);
-        _spawned.Add(popup);
 
         _frames.CutIn(stage).SnapOpen(cutIn, new Vector2(-640f, 50f), 1f, null);
-        _frames.Popup(stage).SnapOpen(popup, null, Vector2.zero, 1f);
     }
 
     private void Run(StageFrameResetCommandSpec spec, bool compress = false, bool keepOpenFrames = false)
@@ -71,8 +68,7 @@ public class StageFrameResetTests
 
     private bool IsNeutral(string stage)
         => !_frames.CutIn(stage).IsOpen
-           && _frames.CutIn(stage).Window.localScale == Vector3.one
-           && !_frames.Popup(stage).IsOpen;
+           && _frames.CutIn(stage).Window.localScale == Vector3.one;
 
     [Test]
     public void 그_무대의_틀만_중립으로_돌리고_까닭을_적어_경고한다()
@@ -81,13 +77,11 @@ public class StageFrameResetTests
         Open("stage02");
 
         LogAssert.Expect(LogType.Warning, new Regex("stage01의 컷인을 tx 'daze_close'가 덮는다"));
-        LogAssert.Expect(LogType.Warning, new Regex("stage01의 그림 팝업을 tx 'daze_close'가 덮는다"));
 
         Run(new StageFrameResetCommandSpec { stage = "stage01", cause = "tx 'daze_close'" });
 
         Assert.IsTrue(IsNeutral("stage01"));
         Assert.IsTrue(_frames.CutIn("stage02").IsOpen, "다른 무대의 틀은 그대로");
-        Assert.IsTrue(_frames.Popup("stage02").IsOpen);
     }
 
     [Test]
@@ -133,17 +127,15 @@ public class StageFrameResetTests
     // ── 실험 A — 열린 틀은 그대로(docs/PLAN_stage-code-homes.md §8, 정하면 지운다) ──
 
     [Test]
-    public void 실험A_열린_컷인과_팝업은_그대로_두고_경고만_한다()
+    public void 실험A_열린_컷인은_그대로_두고_경고만_한다()
     {
         Open("stage01");
 
         LogAssert.Expect(LogType.Warning, new Regex("stage01의 열린 컷인 위에 tx 'iris_out'"));
-        LogAssert.Expect(LogType.Warning, new Regex("stage01의 열린 그림 팝업 위에 tx 'iris_out'"));
 
         Run(new StageFrameResetCommandSpec { stage = "stage01", cause = "tx 'iris_out'" }, keepOpenFrames: true);
 
         Assert.IsTrue(_frames.CutIn("stage01").IsOpen);
-        Assert.IsTrue(_frames.Popup("stage01").IsOpen);
     }
 
     [Test]
@@ -151,7 +143,6 @@ public class StageFrameResetTests
     {
         Open("stage01");
         _frames.CutIn("stage01").SnapClose();
-        _frames.Popup("stage01").SnapClose();
         Assert.IsTrue(IsNeutral("stage01"), "닫힌 컷인 창은 항등이다 — 숨기는 것은 마스크다");
 
         Run(new StageFrameResetCommandSpec { allStages = true }, keepOpenFrames: true);

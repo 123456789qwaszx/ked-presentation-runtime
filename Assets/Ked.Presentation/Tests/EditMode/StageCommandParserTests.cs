@@ -231,26 +231,47 @@ public class StageCommandParserTests
     // ── 그림 팝업 (docs/PLAN_popup.md) ───────────────────────────
 
     [Test]
-    public void popup은_무대_그림_자리_배율을_받는다()
+    public void popup은_그림_리그를_close_층에_세우고_페이드_인한다()
     {
-        PopupOpenCommandSpec s = (PopupOpenCommandSpec)Parse(
-            NewParser(), Cmd("popup", "stage02", "sample_letter", "2u", "-1.5u", "1.2"))[0];
+        // 팝업은 그림 하나다 — 배경처럼 그 무대의 close 층에 서는 리그(docs/PLAN_stage-visibility.md §3.3). 뒷막은 대본이 screen_dim으로 깐다.
+        List<CommandSpecBase> specs = Parse(NewParser(), Cmd("popup", "stage02", "sample_letter", "2u", "-1.5u", "1.2"));
+        string key = StageCommandParser.PopupSlotKey("stage02");
 
-        Assert.AreEqual("stage02", s.stage);
-        Assert.AreEqual("sample_letter", s.pictureKey);
-        Assert.AreEqual(80f, s.center.x, 1e-3f, "1u = 40px");
-        Assert.AreEqual(-60f, s.center.y, 1e-3f);
-        Assert.AreEqual(1.2f, s.scale, 1e-6f);
+        Assert.AreEqual(5, specs.Count);
+
+        SetupCharRigCommandSpec setup = (SetupCharRigCommandSpec)specs[0];
+        Assert.AreEqual(key, setup.roleKey);
+        Assert.AreEqual("stage02", setup.stage);
+        Assert.AreEqual(StageLayerLabels.Close, setup.layerDepth, "그 무대의 가장 앞 층");
+        Assert.IsTrue(setup.asBackground);
+        Assert.IsTrue(setup.outsideFold, "폴드 밖 — 하네스가 캡처하지 않는다");
+
+        SetSpriteCommandSpecCharR sprite = (SetSpriteCommandSpecCharR)specs[1];
+        Assert.AreEqual(PopupPresetDBSO.PictureResourcesRoot, sprite.resourcesRoot);
+        Assert.AreEqual("sample_letter", sprite.spriteKey);
+        Assert.AreEqual(CharRigImageSizingMode.SourcePixels, sprite.sizingMode);
+
+        MoveByCommandSpecCharR move = (MoveByCommandSpecCharR)specs[2];
+        Assert.IsTrue(move.useAbsolutePosition);
+        Assert.AreEqual(new Vector2(80f, -60f), move.delta, "1u = 40px");
+
+        ScaleToCommandSpecCharR scale = (ScaleToCommandSpecCharR)specs[3];
+        Assert.AreEqual(PopupPresetDBSO.DefaultPictureScale * 1.2f, scale.toScale.x, 1e-6f, "원본 픽셀 × 0.91 × 대본 배율");
+
+        FadeCommandSpecCharR fade = (FadeCommandSpecCharR)specs[4];
+        Assert.AreEqual(1f, fade.targetAlpha);
+        Assert.AreEqual(PopupPresetDBSO.DefaultOpenSeconds, fade.duration, 1e-6f);
     }
 
     [Test]
     public void popup의_생략값은_stage01_가운데_배율_1이다()
     {
-        PopupOpenCommandSpec s = (PopupOpenCommandSpec)Parse(NewParser(), Cmd("popup", "", "sample_seedling"))[0];
+        List<CommandSpecBase> specs = Parse(NewParser(), Cmd("popup", "", "sample_seedling"));
 
-        Assert.AreEqual("stage01", s.stage);
-        Assert.AreEqual(Vector2.zero, s.center);
-        Assert.AreEqual(1f, s.scale);
+        Assert.AreEqual("stage01", ((SetupCharRigCommandSpec)specs[0]).stage);
+        Assert.AreEqual("stage01_popup", ((SetupCharRigCommandSpec)specs[0]).roleKey);
+        Assert.AreEqual(Vector2.zero, ((MoveByCommandSpecCharR)specs[2]).delta);
+        Assert.AreEqual(PopupPresetDBSO.DefaultPictureScale, ((ScaleToCommandSpecCharR)specs[3]).toScale.x, 1e-6f);
     }
 
     [Test]
@@ -267,10 +288,15 @@ public class StageCommandParserTests
     }
 
     [Test]
-    public void popup_close는_무대_하나를_받는다()
+    public void popup_close는_그_무대의_그림_리그를_페이드_아웃한다()
     {
-        PopupCloseCommandSpec s = (PopupCloseCommandSpec)Parse(NewParser(), Cmd("popup_close"))[0];
-        Assert.AreEqual("stage01", s.stage, "무대 생략값은 stage01");
+        List<CommandSpecBase> specs = Parse(NewParser(), Cmd("popup_close"));
+
+        Assert.AreEqual(1, specs.Count);
+        FadeCommandSpecCharR fade = (FadeCommandSpecCharR)specs[0];
+        Assert.AreEqual("stage01_popup", fade.roleKey);
+        Assert.AreEqual(0f, fade.targetAlpha);
+        Assert.AreEqual(PopupPresetDBSO.DefaultCloseSeconds, fade.duration, 1e-6f);
     }
 
     [Test]

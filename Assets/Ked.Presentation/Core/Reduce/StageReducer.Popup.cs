@@ -3,12 +3,12 @@ namespace Ked.Presentation.Core
     /// <summary>
     /// popup · popup_close — 덮는 무대의 그림 팝업 끝 상태(docs/PLAN_popup.md §7).
     ///
-    /// 런타임(PopupOpenCommand · PopupCloseCommand)과 같은 규칙으로 접는다:
+    /// 런타임(파서가 그 무대의 close 층에 그림 리그로 푼다 — StageCommandParser.Popup)과 같은 규칙으로 접는다:
     ///   · 본 무대(stage00)에는 쓰지 않는다 — 런타임은 경고하고 건너뛰고, 여기서는 Unhandled로 소리를 낸다.
-    ///   · 열지 않은 무대를 닫으면 런타임은 경고하고 건너뛴다 — 여기서도 Unhandled.
+    ///   · 열지 않은 무대를 닫으면 런타임은 경고하고 건너뛴다(그림 리그가 없다) — 여기서도 Unhandled.
     ///   · 열린 팝업에 다시 popup을 쓰면 그림 · 자리 · 배율만 바뀐다(열림 그대로).
-    /// 팝업은 무대 루트 바깥이라 리그 노드 트리(리그 로컬 값)에 들지 않는다.
-    /// tx · 마스크 지우기는 런타임에서 팝업을 닫지만 폴드는 마스크를 모른다(target-boundary) — 컷인과 같은 경계다.
+    /// 그림 리그는 폴드 밖이다 — 리그 노드 트리에 들지 않고 이 표로만 안다(docs/PLAN_stage-visibility.md §3.5).
+    /// 그림은 그 무대의 마스크에 잘리지만 폴드는 마스크를 모른다(target-boundary) — 컷인과 같은 경계다.
     /// </summary>
     public static partial class StageReducer
     {
