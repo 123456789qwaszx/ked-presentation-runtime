@@ -176,11 +176,10 @@ public partial class SampleBootstrap
             stageMaskMotionPresetDb,
             _stageRigs);
 
-        // 무대 틀 — 컷인 창, tx가 앞에 내는 틀 되돌리기(stage-frame.md)
+        // 무대 틀 — 컷인 창(stage-frame.md)
         StageFrameCommandFactory stageFrameFactory = new(
             _stageFrames,
-            cutInPreset,
-            txKeepsOpenFrames);
+            cutInPreset);
 
         ScreenEffectCommandFactory screenEffectFactory = new(
             _screenEffectRig,

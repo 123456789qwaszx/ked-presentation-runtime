@@ -50,16 +50,9 @@
 
 ## 4. 중립으로 돌리는 쪽
 
-틀은 마스크의 결정을 따른다 — 무대를 어디까지 보여 줄지를 새로 정하면 그 무대의 틀은 끝난다.
+틀을 중립으로 돌리는 것은 **장면 경계 하나**다 — `ScenePresentation`이 `StageFrameRegistry.ResetAll`을 직접 부른다(이벤트 뒤로 숨기지 않는다).
 
-| 누가 | 무엇을 |
-|---|---|
-| 그 무대의 `tx` | 파서가 틀 되돌리기(`StageFrameResetCommand`, 까닭 `tx '프리셋'`)를 마스크 모션 앞에 낸다 — 컷인 창을 중립으로(열려 있었으면 경고) |
-| `tx_stage_mask_clear` | 파서가 틀 되돌리기(무대 전부, 경고 없이)를 마스크 지우기 앞에 낸다 |
-| 장면 경계 (`ScenePresentation`) | `StageFrameRegistry.ResetAll` |
-
-셋 다 틀을 **직접** 되돌린다. 이 결합은 우연이 아니라 의도된 규칙이라, 이벤트 뒤로 숨기지 않고 부르는 쪽에 드러낸다.
-tx의 규칙은 문법(`StageCommandParser.Transition.cs`)에 있다 — 무대 리그의 마스크 커맨드는 틀을 모르고, 파서가 두 시스템의 커맨드를 차례로 낸다.
-같은 줄 · 같은 자리에서 그 차례로 돌므로 마스크 커맨드가 틀을 직접 부르던 때(2026-11-17까지)와 동작이 같다([docs/PLAN_stage-code-homes.md](../../../../../docs/PLAN_stage-code-homes.md) §3).
-`StageFrameResetCommand`는 대본 어휘가 아니다 — 표에 이름이 없다.
-폴드는 이 규칙을 모른다 — 폴드가 마스크를 모르는 것과 같은 경계다.
+- `tx` · `tx_stage_mask_clear`는 틀을 모른다 — 마스크만 움직인다. 컷인 판 · 팝업 그림은 무대 안의 리그라 마스크가 함께 자른다.
+- 열린 컷인 위의 `tx`는 컷인을 연 채로 둔다(창 상태) — 뒤의 `cutin_close`가 팝 아웃으로 정리한다.
+- 컷인을 닫으면 창은 항등으로 돌아오고 그 무대는 마스크가 숨긴다 — 다음 `tx`가 되돌릴 것이 없다.
+- 2026-11-17까지는 `tx`가 그 무대의 컷인 · 팝업을 먼저 닫았다(마스크 밖이라 가려지지 않아서). 판 · 그림을 무대 안으로 들이면서 걷었다([docs/PLAN_stage-visibility.md](../../../../../docs/PLAN_stage-visibility.md)).

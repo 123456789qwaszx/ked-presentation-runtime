@@ -166,11 +166,6 @@ public partial class SampleBootstrap : MonoBehaviour, IRigPrefabSource
     [Tooltip("그림 팝업 배율 · 페이드 길이 — 파서가 popup을 그림 리그로 풀 때 읽는다. 뒷막은 대본이 screen_dim으로 깐다. 비우면 코드 기본값으로 열고 경고한다.")]
     [SerializeField] private PopupPresetDBSO popupPreset;
 
-    [Header("실험 — tx와 열린 틀 (docs/PLAN_stage-code-homes.md §8, 정하면 지운다)")]
-    [Tooltip("끄면 지금 규칙 — tx · tx_stage_mask_clear가 그 무대의 컷인을 먼저 닫는다. " +
-             "켜면 실험 A — 열린 컷인은 그대로 두고 경고만 한다. Play 전에 정한다.")]
-    [SerializeField] private bool txKeepsOpenFrames;
-
     [Header("NodeDebug")]
     [SerializeField] private CharacterFocusDebugView characterFocusDebugView;
 

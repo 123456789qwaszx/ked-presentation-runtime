@@ -129,15 +129,27 @@ public class StageCommandParserTests
     [Test]
     public void tx는_프리셋과_무대와_시간을_받는다()
     {
-        // [0]은 그 무대의 틀 되돌리기다(StageFrameResetTests) — 마스크 모션은 그 뒤.
-        StageMaskMotionCommandSpec a = (StageMaskMotionCommandSpec)Parse(NewParser(), Cmd("tx", "daze_close", "stage00"))[1];
+        StageMaskMotionCommandSpec a = (StageMaskMotionCommandSpec)Parse(NewParser(), Cmd("tx", "daze_close", "stage00"))[0];
         Assert.AreEqual("daze_close", a.presetKey);
         Assert.AreEqual("stage00", a.stage);
         Assert.AreEqual(-1f, a.durationOverride, "시간이 비면 프리셋 자체 시간");
 
-        StageMaskMotionCommandSpec b = (StageMaskMotionCommandSpec)Parse(NewParser(), Cmd("tx", "iris_in", "", "12fr"))[1];
+        StageMaskMotionCommandSpec b = (StageMaskMotionCommandSpec)Parse(NewParser(), Cmd("tx", "iris_in", "", "12fr"))[0];
         Assert.AreEqual("stage01", b.stage, "무대 생략값은 stage01");
         Assert.AreEqual(0.5f, b.durationOverride, 1e-6f);
+    }
+
+    [Test]
+    public void tx와_마스크_지우기는_마스크_커맨드_하나만_낸다()
+    {
+        // tx는 마스크만 움직인다 — 틀(컷인 창)을 모른다. 컷인 판 · 팝업 그림은 무대 안의 리그라 마스크가 함께 자른다(docs/PLAN_stage-visibility.md §3.1).
+        List<CommandSpecBase> tx = Parse(NewParser(), Cmd("tx", "daze_close", "stage01"));
+        Assert.AreEqual(1, tx.Count);
+        Assert.IsInstanceOf<StageMaskMotionCommandSpec>(tx[0]);
+
+        List<CommandSpecBase> clear = Parse(NewParser(), Cmd("tx_stage_mask_clear"));
+        Assert.AreEqual(1, clear.Count);
+        Assert.IsTrue(((StageMaskClearCommandSpec)clear[0]).allStages);
     }
 
     // ── 컷인 (docs/PLAN_cutin.md) ────────────────────────────────
