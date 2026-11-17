@@ -244,6 +244,16 @@ rrr
 <<mirror s2 toggle>>
 시구레: 됐어요.
 
+// 반대쪽 — 셋째 칸 flip이면 정의의 반대쪽에 세운다(docs/PLAN_emoji-side.md). 머리의 자리는 그대로이고 이모지가 거울에 비친다.
+// 인물이 뒤집혀 있으면 그 위에서 한 번 더 — 두 번 뒤집혀 정의의 쪽이다. question은 upright라 반대쪽에서도 글자가 바로 선다.
+<<emoji s1 star flip>>
+하린: 같은 별인데 이번엔 반대쪽에 띄웠어. 돌아서지 않아도 돼.
+
+<<emoji s2 question flip>>
+시구레: 물음표도 반대쪽으로 — 글자는 그대로예요.
+
+<<emoji_off s1 star>>
+
 시구레: 여기까지예요. 되감기(R)로 아무 줄이나 돌아갈 수 있고, 타이틀의 ‘이어하기’로 다시 올 수 있어요. #line:ln_6mq0fm7a
 
 <<fade_out s3 12fr>>
