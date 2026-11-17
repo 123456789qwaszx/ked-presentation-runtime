@@ -100,7 +100,9 @@ test
 <<face_swap s1 05 10fr>>
 하린: 이렇게 겹쳐 가며 바꿀 수도 있어. #line:ln_anizmf84
 
-하린: 말하는 도중에도 바꿀 수 있지. [cmd="face_swap s1 3 10fr"/]바로 여기서 바뀌고, [cmd="face_swap s1 05 10fr"/]여기서 돌아와. #line:ln_k7inl2cm
+<<at a face_swap s1 3 10fr>>
+<<at b face_swap s1 05 10fr>>
+하린: 말하는 도중에도 바꿀 수 있지. [beat=a/]바로 여기서 바뀌고, [beat=b/]여기서 돌아와. #line:ln_k7inl2cm
 
 <<pose s2 b>>
 <<motion s2 nod>>

@@ -3,32 +3,19 @@ using System.Collections.Generic;
 
 namespace Ked.Presentation.Core
 {
-    /// <summary>
-    /// 대사 줄의 글 안 표지 하나 — 글 순서대로 온다.
-    ///   [beat=a/]          자리 표지. 명령은 줄 앞의 &lt;&lt;at a 명령&gt;&gt;에 있다
-    ///   [cmd="명령"/]      명령을 글 안에 든 옛 마커 — 이행 동안만 받는다(docs/PLAN_line-beat.md L5에서 걷는다)
-    /// </summary>
-    public readonly struct LineMarker
+    /// <summary>대사 줄의 글 안 자리 표지 [beat=a/] 하나 — 글 순서대로 온다. 명령은 줄 앞의 &lt;&lt;at a 명령&gt;&gt;에 있다.</summary>
+    public readonly struct BeatMarker
     {
+        public readonly string Name;
+
         /// <summary>글자 자리 — 이 글자가 드러나기 직전에 실행한다. 글 끝이면 글 길이.</summary>
         public readonly int Position;
 
-        /// <summary>자리 표지의 이름. 옛 마커면 null.</summary>
-        public readonly string Beat;
-
-        /// <summary>옛 마커의 명령. 자리 표지면 쓰지 않는다.</summary>
-        public readonly StageCommand Command;
-
-        private LineMarker(int position, string beat, in StageCommand command)
+        public BeatMarker(string name, int position)
         {
+            Name = name ?? string.Empty;
             Position = position;
-            Beat = beat;
-            Command = command;
         }
-
-        public static LineMarker ForBeat(string name, int position) => new(position, name ?? string.Empty, default);
-
-        public static LineMarker ForCommand(in StageCommand command, int position) => new(position, null, command);
     }
 
     /// <summary>&lt;&lt;at 표지 명령 …&gt;&gt; 하나 — 다음 대사 줄의 그 표지 자리에서 실행할 명령.</summary>
@@ -51,16 +38,14 @@ namespace Ked.Presentation.Core
     {
         /// <summary>글자 자리. 타자기 끝(end · 자리를 잃은 것)은 LineBeatSchedule.LineEnd.</summary>
         public readonly int Position;
-        public readonly StageCommand Command;
 
-        /// <summary>대본에 쓴 꼴 — 로그용(&lt;&lt;at a …&gt;&gt; · [cmd="…"/]).</summary>
-        public readonly string Authored;
+        /// <summary>대본에 쓴 &lt;&lt;at&gt;&gt; — 명령과 로그용 글.</summary>
+        public readonly AtCommand At;
 
-        public ScheduledCommand(int position, in StageCommand command, string authored)
+        public ScheduledCommand(int position, in AtCommand at)
         {
             Position = position;
-            Command = command;
-            Authored = authored;
+            At = at;
         }
     }
 
@@ -134,64 +119,56 @@ namespace Ked.Presentation.Core
         /// markers는 글 순서, ats는 쓴 순서. 결과는 실행 순서다.
         /// </summary>
         public static List<ScheduledCommand> Build(
-            IReadOnlyList<LineMarker> markers,
+            IReadOnlyList<BeatMarker> markers,
             IReadOnlyList<AtCommand> ats,
             List<string> problems = null)
         {
-            List<Keyed> keyed = new();
-
             // 표지 이름 → (글자 자리, 글의 표지 순서). 같은 표지가 둘이면 앞의 것.
             Dictionary<string, (int Position, int TextOrder)> beats = new(StringComparer.Ordinal);
             HashSet<string> used = new(StringComparer.Ordinal);
 
             for (int k = 0; k < (markers?.Count ?? 0); k++)
             {
-                LineMarker marker = markers[k];
+                BeatMarker marker = markers[k];
 
-                if (marker.Beat == null)
+                if (!IsValidBeatName(marker.Name))
                 {
-                    keyed.Add(new Keyed(marker.Position, k, 0, new ScheduledCommand(
-                        marker.Position, marker.Command, $"[cmd=\"{Describe(marker.Command)}\"/]")));
-                    continue;
-                }
-
-                if (!IsValidBeatName(marker.Beat))
-                {
-                    problems?.Add(marker.Beat == EndBeat
+                    problems?.Add(marker.Name == EndBeat
                         ? "[beat=end/] — end는 타자기 끝의 예약 이름이라 글에 두지 않는다. 무시한다"
-                        : $"[beat={marker.Beat}/] — 표지 이름은 영문 소문자 · 숫자다. 무시한다");
+                        : $"[beat={marker.Name}/] — 표지 이름은 영문 소문자 · 숫자다. 무시한다");
                     continue;
                 }
 
-                if (beats.ContainsKey(marker.Beat))
+                if (beats.ContainsKey(marker.Name))
                 {
-                    problems?.Add($"[beat={marker.Beat}/]가 한 줄에 둘이다 — 앞의 것을 쓴다");
+                    problems?.Add($"[beat={marker.Name}/]가 한 줄에 둘이다 — 앞의 것을 쓴다");
                     continue;
                 }
 
-                beats.Add(marker.Beat, (marker.Position, k));
+                beats.Add(marker.Name, (marker.Position, k));
             }
+
+            List<Keyed> keyed = new();
 
             for (int w = 0; w < (ats?.Count ?? 0); w++)
             {
                 AtCommand at = ats[w];
-                string authored = at.ToString();
 
                 if (at.Beat == EndBeat)
                 {
-                    keyed.Add(new Keyed(LineEnd, int.MaxValue, w, new ScheduledCommand(LineEnd, at.Command, authored)));
+                    keyed.Add(new Keyed(LineEnd, int.MaxValue, w, new ScheduledCommand(LineEnd, at)));
                     continue;
                 }
 
                 if (beats.TryGetValue(at.Beat, out var beat))
                 {
                     used.Add(at.Beat);
-                    keyed.Add(new Keyed(beat.Position, beat.TextOrder, w, new ScheduledCommand(beat.Position, at.Command, authored)));
+                    keyed.Add(new Keyed(beat.Position, beat.TextOrder, w, new ScheduledCommand(beat.Position, at)));
                     continue;
                 }
 
-                problems?.Add($"{authored} — 줄에 [beat={at.Beat}/]가 없다. 줄 끝에서 실행한다");
-                keyed.Add(new Keyed(LineEnd, int.MaxValue, w, new ScheduledCommand(LineEnd, at.Command, authored)));
+                problems?.Add($"{at} — 줄에 [beat={at.Beat}/]가 없다. 줄 끝에서 실행한다");
+                keyed.Add(new Keyed(LineEnd, int.MaxValue, w, new ScheduledCommand(LineEnd, at)));
             }
 
             foreach (string name in beats.Keys)
@@ -200,7 +177,7 @@ namespace Ked.Presentation.Core
                     problems?.Add($"[beat={name}/]에 <<at {name} …>>가 없다 — 무시한다");
             }
 
-            // 열쇠가 모두 달라 순서가 하나로 정해진다(옛 마커는 글 순서, at은 쓴 순서가 가른다).
+            // 열쇠가 모두 달라(쓴 순서가 가른다) 순서가 하나로 정해진다.
             keyed.Sort((a, b) =>
             {
                 int c = a.Position.CompareTo(b.Position);
@@ -219,9 +196,6 @@ namespace Ked.Presentation.Core
 
             return schedule;
         }
-
-        private static string Describe(in StageCommand command)
-            => command.Args.Count == 0 ? command.Name : $"{command.Name} {string.Join(" ", command.Args)}";
 
         private readonly struct Keyed
         {

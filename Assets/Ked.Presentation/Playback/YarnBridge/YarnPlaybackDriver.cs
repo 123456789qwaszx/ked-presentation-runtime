@@ -46,7 +46,7 @@ public sealed class YarnPlaybackDriver
         _executor.PlaySpecs(specs, scope);
     }
 
-    // 지금 스텝에 덧붙여 실행한다 — 스텝 경계를 치지 않는다(인라인 명령). 쌓인 명령은 건드리지 않는다.
+    // 지금 스텝에 덧붙여 실행한다 — 스텝 경계를 치지 않는다(줄의 자리 — <<at>>). 쌓인 명령은 건드리지 않는다.
     public void PlayInStep(IReadOnlyList<CommandSpecBase> specs)
     {
         _executor.PlaySpecsInStep(new List<CommandSpecBase>(specs), CurrentScope);

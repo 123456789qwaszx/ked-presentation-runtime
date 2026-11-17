@@ -15,17 +15,17 @@ namespace Ked.Presentation.Tests
 
         private static AtCommand At(string beat, string tag) => new(beat, Cmd(tag));
 
-        private static string[] Order(List<ScheduledCommand> schedule) => schedule.Select(c => c.Command.Args[1]).ToArray();
+        private static string[] Order(List<ScheduledCommand> schedule) => schedule.Select(c => c.At.Command.Args[1]).ToArray();
 
         [Test]
         public void 글자_자리_다음_표지_순서_다음_쓴_순서이고_end가_마지막이다()
         {
             // 글: "가[beat=b/][beat=a/]나[beat=c/]다" — b와 a는 같은 자리(1), c는 2.
-            LineMarker[] markers =
+            BeatMarker[] markers =
             {
-                LineMarker.ForBeat("b", 1),
-                LineMarker.ForBeat("a", 1),
-                LineMarker.ForBeat("c", 2),
+                new BeatMarker("b", 1),
+                new BeatMarker("a", 1),
+                new BeatMarker("c", 2),
             };
 
             AtCommand[] ats =
@@ -44,24 +44,7 @@ namespace Ked.Presentation.Tests
             Assert.That(problems, Is.Empty);
             Assert.That(Order(schedule), Is.EqualTo(new[] { "b1", "a1", "a2", "c1", "e1", "e2" }));
             Assert.That(schedule.Select(c => c.Position), Is.EqualTo(new[] { 1, 1, 1, 2, LineBeatSchedule.LineEnd, LineBeatSchedule.LineEnd }));
-            Assert.That(schedule[1].Authored, Is.EqualTo("<<at a face s1 a1>>"));
-        }
-
-        [Test]
-        public void 옛_cmd_마커는_글_순서로_표지_사이에_선다()
-        {
-            LineMarker[] markers =
-            {
-                LineMarker.ForCommand(Cmd("x"), 0),
-                LineMarker.ForBeat("a", 0),
-                LineMarker.ForCommand(Cmd("y"), 0),
-                LineMarker.ForCommand(Cmd("z"), 5),
-            };
-
-            List<ScheduledCommand> schedule = LineBeatSchedule.Build(markers, new[] { At("a", "a1") });
-
-            Assert.That(Order(schedule), Is.EqualTo(new[] { "x", "a1", "y", "z" }));
-            Assert.That(schedule[0].Authored, Is.EqualTo("[cmd=\"face s1 x\"/]"));
+            Assert.That(schedule[1].At.ToString(), Is.EqualTo("<<at a face s1 a1>>"));
         }
 
         [Test]
@@ -70,7 +53,7 @@ namespace Ked.Presentation.Tests
             // 번역문이 표지를 빠뜨린 줄(R5) — 연출이 사라지지 않는다.
             List<string> problems = new();
             List<ScheduledCommand> schedule = LineBeatSchedule.Build(
-                new[] { LineMarker.ForBeat("a", 3) },
+                new[] { new BeatMarker("a", 3) },
                 new[] { At("end", "e1"), At("b", "b1"), At("a", "a1") },
                 problems);
 
@@ -84,7 +67,7 @@ namespace Ked.Presentation.Tests
         {
             List<string> problems = new();
             List<ScheduledCommand> schedule = LineBeatSchedule.Build(
-                new[] { LineMarker.ForBeat("a", 0), LineMarker.ForBeat("b", 2) },
+                new[] { new BeatMarker("a", 0), new BeatMarker("b", 2) },
                 new[] { At("a", "a1") },
                 problems);
 
@@ -97,7 +80,7 @@ namespace Ked.Presentation.Tests
         {
             List<string> problems = new();
             List<ScheduledCommand> schedule = LineBeatSchedule.Build(
-                new[] { LineMarker.ForBeat("a", 1), LineMarker.ForBeat("a", 4) },
+                new[] { new BeatMarker("a", 1), new BeatMarker("a", 4) },
                 new[] { At("a", "a1") },
                 problems);
 
@@ -113,7 +96,7 @@ namespace Ked.Presentation.Tests
         {
             List<string> problems = new();
             List<ScheduledCommand> schedule = LineBeatSchedule.Build(
-                new[] { LineMarker.ForBeat(name, 1) },
+                new[] { new BeatMarker(name, 1) },
                 new[] { At(name, "x") },
                 problems);
 
@@ -153,7 +136,7 @@ namespace Ked.Presentation.Tests
         public void 빈_줄은_빈_목록이다()
         {
             Assert.That(LineBeatSchedule.Build(null, null), Is.Empty);
-            Assert.That(LineBeatSchedule.Build(new LineMarker[0], new AtCommand[0]), Is.Empty);
+            Assert.That(LineBeatSchedule.Build(new BeatMarker[0], new AtCommand[0]), Is.Empty);
         }
     }
 }

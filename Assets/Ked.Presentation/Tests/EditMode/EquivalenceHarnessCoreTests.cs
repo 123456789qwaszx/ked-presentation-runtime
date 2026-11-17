@@ -125,47 +125,16 @@ namespace Ked.Presentation.Tests
         }
 
         [Test]
-        public void 인라인_명령은_줄_머리_커맨드_뒤에_글_순서대로_붙고_글에서_빠진다()
-        {
-            const string yarn =
-                "title: Inline_Sample\n" +
-                "---\n" +
-                "<<fade_in c1>>\n" +
-                "하린: 처음엔 [cmd=\"face c1 3\"/]이렇게, [cmd=\"motion c1 nod\"/][ cmd = \"face_swap c1 05 10fr\" / ]저렇게. #line:ln_a\n" +
-                "<<fade_out c1>>\n" +
-                "다음 대사다.\n" +
-                "===\n";
-
-            List<string> warnings = new();
-            List<YarnLineGroup> groups = YarnCommandTextExtractor.Extract(yarn, "inline.yarn", warnings);
-
-            Assert.That(warnings, Is.Empty);
-            Assert.That(groups.Count, Is.EqualTo(2));
-
-            Assert.That(groups[0].LineText, Is.EqualTo("하린: 처음엔 이렇게, 저렇게."));
-            Assert.That(groups[0].LineId, Is.EqualTo("line:ln_a"));
-            Assert.That(groups[0].Commands.Select(c => c.Name),
-                Is.EqualTo(new[] { "fade_in", "face", "motion", "face_swap" }));
-            Assert.That(groups[0].Commands[3].Args, Is.EqualTo(new[] { "c1", "05", "10fr" }));
-            Assert.That(groups[0].Commands[1].Source, Is.EqualTo("inline.yarn:4"));
-
-            Assert.That(groups[1].Commands.Select(c => c.Name), Is.EqualTo(new[] { "fade_out" }));
-        }
-
-        [Test]
         public void 표지가_아닌_대괄호는_글로_남는다()
         {
-            List<LineMarker> markers = new();
+            List<BeatMarker> markers = new();
 
             string text = YarnCommandTextExtractor.StripLineMarkers(
-                "[속삭임] 이건 [b]굵게[/b], [cmd=\"face c1 3\"/] 이건 명령, [beat=a/]여기[beatbox=1/].", "t", markers);
+                "[속삭임] 이건 [b]굵게[/b], [beat=a/]여기[beatbox=1/], [wave]물결[/wave][beat=b/].", markers);
 
-            Assert.That(text, Is.EqualTo("[속삭임] 이건 [b]굵게[/b], 이건 명령, 여기[beatbox=1/]."));
-            Assert.That(markers.Count, Is.EqualTo(2));
-            Assert.That(markers[0].Beat, Is.Null, "옛 [cmd]는 명령");
-            Assert.That(markers[0].Command.Name, Is.EqualTo("face"));
-            Assert.That(markers[1].Beat, Is.EqualTo("a"));
-            Assert.That(markers[1].Position, Is.EqualTo("[속삭임] 이건 [b]굵게[/b], 이건 명령, ".Length), "표지를 뺀 글의 자리");
+            Assert.That(text, Is.EqualTo("[속삭임] 이건 [b]굵게[/b], 여기[beatbox=1/], [wave]물결[/wave]."));
+            Assert.That(markers.Select(m => m.Name), Is.EqualTo(new[] { "a", "b" }));
+            Assert.That(markers[0].Position, Is.EqualTo("[속삭임] 이건 [b]굵게[/b], ".Length), "표지를 뺀 글의 자리");
         }
 
         [TestCase("[beat=a/]", "a")]
@@ -173,12 +142,12 @@ namespace Ked.Presentation.Tests
         [TestCase("[ beat = c / ]", "c")]
         public void 표지_이름은_따옴표가_있어도_없어도_읽는다(string marker, string name)
         {
-            List<LineMarker> markers = new();
+            List<BeatMarker> markers = new();
 
-            string text = YarnCommandTextExtractor.StripLineMarkers($"앞 {marker}뒤", "t", markers);
+            string text = YarnCommandTextExtractor.StripLineMarkers($"앞 {marker}뒤", markers);
 
             Assert.That(text, Is.EqualTo("앞 뒤"));
-            Assert.That(markers.Single().Beat, Is.EqualTo(name));
+            Assert.That(markers.Single().Name, Is.EqualTo(name));
             Assert.That(markers.Single().Position, Is.EqualTo(2));
         }
 
@@ -215,21 +184,6 @@ namespace Ked.Presentation.Tests
             Assert.That(groups[0].Commands[2].Source, Is.EqualTo("at.yarn:6"), "at 명령의 출처는 <<at>>를 쓴 행");
 
             Assert.That(groups[1].Commands.Select(c => c.Name), Is.EqualTo(new[] { "fade_out" }), "at은 다음 줄로 새지 않는다");
-        }
-
-        [Test]
-        public void 옛_cmd와_beat가_한_줄에_있으면_글_순서다()
-        {
-            const string yarn =
-                "title: Mixed\n" +
-                "---\n" +
-                "<<at a face s1 02>>\n" +
-                "하린: [cmd=\"face s1 01\"/]처음, [beat=a/]가운데, [cmd=\"face s1 03\"/]끝.\n" +
-                "===\n";
-
-            List<YarnLineGroup> groups = YarnCommandTextExtractor.Extract(yarn, "mixed.yarn");
-
-            Assert.That(groups[0].Commands.Select(c => c.Args[1]), Is.EqualTo(new[] { "01", "02", "03" }));
         }
 
         [TestCase("<<step>>", "무대 스텝")]

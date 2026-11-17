@@ -421,7 +421,7 @@ public sealed partial class YarnCommandBridge
         _playbackDriver.EnqueueAt(at);
     }
 
-    // 줄의 자리에 놓인 명령(<<at>> · 옛 [cmd="…"/])을 스펙으로 풀어 output 뒤에 붙인다. authored는 로그용 — 대본에 쓴 꼴.
+    // 줄의 자리에 놓인 명령(<<at>>)을 스펙으로 풀어 output 뒤에 붙인다. authored는 로그용 — 대본에 쓴 꼴.
     // output에 이미 든 것은 같은 자리의 앞 명령이다 — 대상 판정이 그 선언(actor · slot · cast)을 본다.
     // 전경 명령(wait — pause · screen_cover)은 받지 않는다 — 대사 줄은 타자기도 넘김도 멈추지 않는다(docs/PLAN_line-beat.md R8).
     public bool TryParseInline(in StageCommand command, string authored, List<CommandSpecBase> output)
