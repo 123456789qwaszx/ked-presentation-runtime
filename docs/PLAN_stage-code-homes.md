@@ -98,9 +98,13 @@ A의 새 커맨드 하나: `StageFrameResetCommand`(`Stage/StageFrame/`). 스펙
 
 - **블러.** `screen_blur` · `focus_on`과 `RigBlurIntentSystem`도 `Stage/ScreenEffect/`에 살았다. 화면 효과 리그가 아니라 캐릭터 리그마다 블러를 맞추는 시스템이다 — 같은 어긋남이었다.
   **2026-11-17 옮겼다**: `Stage/Blur/`(시스템) · `Stage/Blur/Commands/`(초점 · 층 블러 커맨드, `BlurCommandFactory`). 캐릭터 리그 팩토리와 화면 효과 팩토리는 블러 시스템을 받지 않는다. 동작 변경 없음.
-- **명령 이름.** 이번 정리는 이름을 바꾸지 않는다(§6).
+- **명령 이름.** 이번 정리는 이름을 바꾸지 않았다. 이름은 2026-11-17에 따로 정하고 바꿨다(§6).
 
-## 6. 정할 것 — 명령 이름
+## 6. 명령 이름 — 정했다 (소유자, 2026-11-17)
+
+**바꿨다**: `tx` → `stage_mask`, `tx_stage_mask_clear` → `stage_mask_reset`, `screen_dim` · `screen_dim_reset` → `stage_dim` · `stage_dim_reset`, `screen_blur` · `screen_blur_reset` → `stage_blur` · `stage_blur_reset`. 옛 이름은 받지 않는다. 원칙: `screen_`은 화면 전체(화면 효과 리그 — 덮개 · 플래시 · 비네트 · 노이즈), `stage_`는 무대 · 층 단위(무대 리그). 마스크 지우기는 끝말을 `_clear`에서 `_reset`으로 — `_clear`는 얹은 효과를 걷을 때, `_reset`은 원래 상태(다 보이는 모양 = 장면 경계의 기준 모양)로 돌릴 때 쓴다. 소비처가 할 일은 [stage-changes-handoff.md](stage-changes-handoff.md) §2.
+
+아래는 정하기 전의 기록이다.
 
 `tx`는 "transition"의 줄임이지만, 이 명령은 전환만 하지 않는다. 반으로 나눈 화면 · 띠처럼 모양을 세워 두고 머무는 데도 쓴다. 하는 일은 "그 무대의 마스크 모양을 움직인다"다.
 

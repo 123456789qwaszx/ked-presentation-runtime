@@ -289,14 +289,14 @@ public sealed partial class YarnCommandBridge
             "bg_scale", EnqueueScaleBackgroundDslSpec);
     }
     
-    // <<tx 프리셋 [무대] [시간]>> — 옛 tx_<이름> 18개를 접었다. 프리셋은 무대의 StageMaskMotionPresetDB 키.
+    // <<stage_mask 프리셋 [무대] [시간]>> — 무대의 마스크 모양을 움직인다. 프리셋은 무대의 StageMaskMotionPresetDB 키.
     private void BindTransition(DialogueRunner runner)
     {
         runner.AddCommandHandler<string, string, string>(
-            "tx", EnqueueStageMaskMotionPresetSpec);
+            "stage_mask", EnqueueStageMaskMotionPresetSpec);
 
         runner.AddCommandHandler(
-            "tx_stage_mask_clear",
+            "stage_mask_reset",
             EnqueueStageMaskClearSpec);
 
         // <<cutin_open 무대 판 x y [배율]>> · <<cutin_close 무대>> — docs/PLAN_cutin.md
@@ -367,16 +367,16 @@ public sealed partial class YarnCommandBridge
     private void BindStageDepthDefocus(DialogueRunner runner)
     {
         runner.AddCommandHandler<string, string, string>(
-            "screen_blur", EnqueueLayerBlurSpec);
+            "stage_blur", EnqueueLayerBlurSpec);
 
         runner.AddCommandHandler(
-            "screen_blur_reset", EnqueueStageLayerBlurClearSpec);
+            "stage_blur_reset", EnqueueStageLayerBlurClearSpec);
 
         // 어둡게 — 층마다 선 어둡기 판(docs/PLAN_screen-cover.md §3.2). 층 · 세기 · 길이 · 이징 · 무대.
         runner.AddCommandHandler<string, string, string, string, string>(
-            "screen_dim", EnqueueStageLayerDimSpec);
+            "stage_dim", EnqueueStageLayerDimSpec);
         runner.AddCommandHandler<string, string>(
-            "screen_dim_reset", EnqueueStageLayerDimResetSpec);
+            "stage_dim_reset", EnqueueStageLayerDimResetSpec);
     }
 
     /// <summary>

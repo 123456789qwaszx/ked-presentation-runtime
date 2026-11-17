@@ -7,7 +7,7 @@ namespace Ked.Presentation.Core
     ///   · 본 무대(stage00)에는 쓰지 않는다 — 런타임은 경고하고 건너뛰고, 여기서는 Unhandled로 소리를 낸다.
     ///   · 열지 않은 무대를 닫으면 런타임은 경고하고 건너뛴다 — 여기서도 Unhandled.
     ///   · 창 안의 리그는 그대로 접힌다 — 창은 무대 루트 바깥이라 리그 로컬 값이 바뀌지 않는다.
-    /// tx · 마스크 지우기는 런타임에서 컷인을 중립으로 돌리지만 폴드는 마스크를 모른다(target-boundary) — 그 축은 아직 없다.
+    /// 마스크(stage_mask · stage_mask_reset)는 컷인을 건드리지 않는다. 폴드는 마스크를 모른다(target-boundary) — 그 축은 아직 없다.
     /// </summary>
     public static partial class StageReducer
     {

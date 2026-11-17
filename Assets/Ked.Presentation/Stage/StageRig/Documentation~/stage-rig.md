@@ -70,18 +70,18 @@ StageViewportLayer                       (IStageMount — 무대가 서는 자�
       {stage}_Camera_Root … _Track       카메라 리그 — 노드 일곱의 사슬(CameraRigSchema · camera-rig.md §2)
         {stage}_Layer_{라벨|d}            깊이 층. 위치 · 배율을 이 한 노드에 쓴다. d 오름차순 = 형제 순서. 카메라 리그의 가장 안쪽(Mount) 아래
           {stage}_Layer_{…}_Content      리그가 붙는 곳. 블러 대상
-          {stage}_Layer_{…}_Dim          어둡기 판(screen_dim) — Content 다음 형제라 먼 층부터 이 층까지를 가린다. 층의 3배 크기
+          {stage}_Layer_{…}_Dim          어둡기 판(stage_dim) — Content 다음 형제라 먼 층부터 이 층까지를 가린다. 층의 3배 크기
     {stage}_MaskEdge_Root                마스크 테두리 그래픽. 마스크에 잘리지 않도록 Mask_Root의 형제
 ```
 
 | 노드 | 누가 쓰나 | 중립 | 샷 소유 |
 |---|---|---|---|
 | `Stage_Root` | 아무도 | 항등 | 아니다 |
-| `Mask_Root` · `MaskEdge_Root` | 마스크 커맨드(`tx` 등) — 트랜스폼이 아니라 마스크 그래픽 | 항등 | 아니다 |
+| `Mask_Root` · `MaskEdge_Root` | 마스크 커맨드(`stage_mask` 등) — 트랜스폼이 아니라 마스크 그래픽 | 항등 | 아니다 |
 | 카메라 리그의 노드 일곱 | 샷 시스템(축마다 하나) · 흔들림 재생기(`Camera_Shake`) | 항등 | 그렇다 |
 | `Layer_{d}` | 샷 시스템 | 항등 | 그렇다 |
 | `Layer_{d}_Content` | 아무도(리그의 부모일 뿐) | 항등 | 아니다 |
-| `Layer_{d}_Dim` | 어둡게(`screen_dim` — `StageLayerDimController`, 판의 투명도만) | 걷힘(투명도 0) · 앵커 −1~2 | 아니다 |
+| `Layer_{d}_Dim` | 어둡게(`stage_dim` — `StageLayerDimController`, 판의 투명도만) | 걷힘(투명도 0) · 앵커 −1~2 | 아니다 |
 
 - 노드 이름은 `{무대 키}_{노드}` — 한 씬에 무대가 셋이라 접두사로 가른다. 층 이름의 꼬리는 정본 라벨이 있으면 라벨, 없으면 d 숫자(`stage00_Layer_0.25`).
 - 모든 노드는 stretch 앵커 · 피벗 중앙 · 항등으로 선다. 그래서 각 노드의 원점이 부모의 중심이고, 중립값이 상수다.
@@ -133,11 +133,11 @@ StageViewportLayer                       (IStageMount — 무대가 서는 자�
 - 리그가 무대를 옮기지 않으면 측정 체인의 경계(`Stage.Root`)가 리그가 사는 동안 고정이고, 폴드의 부착(`SlotAttachment`)도 스폰 때 한 번 정해진다.
 - 연출로도 의도가 분명하다. "이 캐릭터가 저 화면에 나타난다"는 새 리그 하나다.
 
-### 2.5 tx — 무대를 어디까지 보여 줄지
+### 2.5 stage_mask — 무대를 어디까지 보여 줄지
 
-`<<tx 프리셋 [무대=stage01] [시간]>>`은 무대 하나의 마스크 모양을 움직인다(`StageMaskSlot`). 무대는 조립 순서대로 겹쳐
+`<<stage_mask 프리셋 [무대=stage01] [시간]>>`은 무대 하나의 마스크 모양을 움직인다(`StageMaskSlot`). 무대는 조립 순서대로 겹쳐
 그려지므로(stage02가 맨 위) 덮는 무대의 마스크를 열고 닫으면 그 모양만큼 본 무대 위에 다른 화면이 보인다. 생략값이
-stage01인 이유다. 본 무대의 마스크를 닫으면(`tx daze_close stage00`) 장면 자체가 닫힌다.
+stage01인 이유다. 본 무대의 마스크를 닫으면(`stage_mask daze_close stage00`) 장면 자체가 닫힌다.
 
 | 모양 | 프리셋 |
 |---|---|
@@ -148,15 +148,15 @@ stage01인 이유다. 본 무대의 마스크를 닫으면(`tx daze_close stage0
 | 원 | `iris_in` · `iris_out` |
 | 전체 | `strip_cover` · `strip_clear` |
 
-tx는 **보이는 범위만** 맡는다. 샷의 뜻(줌하며 열리기 같은)을 섞지 않고, 연출은 커맨드 순서로 조합한다.
+stage_mask는 **보이는 범위만** 맡는다. 샷의 뜻(줌하며 열리기 같은)을 섞지 않고, 연출은 커맨드 순서로 조합한다.
 마스크가 카메라 위라(§2.2) 패널 모양은 화면에 고정이고, 덮는 무대는 카메라도 고정이라(§2.1) 패널 안도 흔들리지 않는다.
 
 ```
 <<slot c1_cut stage01 mid>>                   인서트 리그를 덮는 무대에 새로
 <<show c1_cut …>>  <<size …>>  <<place …>>    내용은 열기 전에 확정한다
-<<tx slant_in stage01>>                       연다
+<<stage_mask slant_in stage01>>                       연다
 …
-<<tx slant_out stage01>>                      닫는다
+<<stage_mask slant_out stage01>>                      닫는다
 <<fade_out c1_cut>>                           치운다
 ```
 
@@ -164,7 +164,7 @@ tx는 **보이는 범위만** 맡는다. 샷의 뜻(줌하며 열리기 같은)�
 - 매치 컷(본 무대와 인서트를 같은 구도로 이어 보이기)은 저절로 되지 않는다. 필요하면 인서트 리그를 같은 자리 · 크기로 세운다. 샷을 복사하는 커맨드는 두지 않는다.
 - 폴드는 마스크를 모른다(무대 상태 모델 밖, [target-boundary.md](../../../Core/Documentation~/target-boundary.md)).
 - 코드는 `Mask/`(그래픽 · 슬롯 · 테두리 · 모양 종류 · 프리셋 DB)와 `Commands/`(`StageMaskMotionCommand` · `StageMaskClearCommand`, 팩토리 `StageRigCommandFactory`)다.
-- tx는 마스크만 움직인다. 무대에 그려지는 것은 모두 층의 리그라(배경 · 인물 · 컷인 판 · 팝업 그림) 마스크가 함께 자른다 — 보이기 · 숨기기는 마스크 하나가 정한다([docs/PLAN_stage-visibility.md](../../../../../docs/PLAN_stage-visibility.md)). tx는 틀(컷인 창)을 모른다 — 열린 컷인 위의 tx는 컷인을 연 채로 두고, 뒤의 `cutin_close`가 정리한다.
+- stage_mask는 마스크만 움직인다. 무대에 그려지는 것은 모두 층의 리그라(배경 · 인물 · 컷인 판 · 팝업 그림) 마스크가 함께 자른다 — 보이기 · 숨기기는 마스크 하나가 정한다([docs/PLAN_stage-visibility.md](../../../../../docs/PLAN_stage-visibility.md)). stage_mask는 틀(컷인 창)을 모른다 — 열린 컷인 위의 stage_mask는 컷인을 연 채로 두고, 뒤의 `cutin_close`가 정리한다.
 
 ### 2.6 무대 루트 바깥 — 무대 틀
 
@@ -293,17 +293,17 @@ shot_shake
   ShotShakeCommand        클립 + 세기
   CameraShakePlayer       본 무대의 Camera_Shake에 튼다. 끝나면 항등 — 의도를 쓰지 않는다
 
-tx
+stage_mask
   StageMaskSlot           그 무대의 마스크 모양만. 카메라 · 리그와 무관
 
 place / size / shot_focus_to 측정
   CaptureSettledChain(측정 노드 → rigRefs.Stage.Root)
     노드마다: 장부(리그 끝값) → 샷 중립(Solve(Default)) → 라이브
 
-블러 (screen_blur)
+블러 (stage_blur)
   RigBlurIntentSystem     (무대 키, d)로 층의 Content를 고른다
 
-어둡게 (screen_dim)
+어둡게 (stage_dim)
   StageLayerDimCommand    (무대 키, d)의 판 — all이면 그 무대의 가장 앞 층의 판. 판(StageLayerDimController)이 전환을 갖는다
   정지                    StageRigRegistry.ResetAllDimsToBaseline — 되감기는 정지 → 루트부터 시크라 판은 시크가 다시 세운다
 

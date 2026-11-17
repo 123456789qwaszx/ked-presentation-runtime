@@ -13,7 +13,7 @@ using UnityEngine;
 ///
 /// 판 그림은 배경처럼 그 무대의 far 층에 서는 리그다 — 무대 안이라 마스크가 판까지 함께 자른다(docs/PLAN_stage-visibility.md §3.2).
 /// 슬롯 키는 CutInPanelSlotKey(무대)로 정해져 있다. 닫아도 남는다(마스크가 숨긴다) — 다음 cutin_open이 다시 세우고,
-/// 같은 무대를 tx 인서트로 쓰기 전에는 대본이 인물처럼 치운다. 폴드 밖이다(outsideFold) — 코어는 컷인 표(CutIns)로만 안다.
+/// 같은 무대를 stage_mask 인서트로 쓰기 전에는 대본이 인물처럼 치운다. 폴드 밖이다(outsideFold) — 코어는 컷인 표(CutIns)로만 안다.
 /// </summary>
 public sealed partial class StageCommandParser
 {

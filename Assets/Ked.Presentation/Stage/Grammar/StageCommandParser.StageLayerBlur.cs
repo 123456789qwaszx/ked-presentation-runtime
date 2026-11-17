@@ -3,7 +3,7 @@ using UnityEngine;
 
 public sealed partial class StageCommandParser
 {
-    // <<screen_blur [층=mid] [양=1] [무대=stage00]>>
+    // <<stage_blur [층=mid] [양=1] [무대=stage00]>>
     private void EnqueueLayerBlurSpec(
         string stageKey,
         string layerKey,

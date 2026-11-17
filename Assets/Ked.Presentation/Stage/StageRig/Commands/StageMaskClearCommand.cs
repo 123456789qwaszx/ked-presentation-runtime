@@ -8,7 +8,7 @@ public sealed class StageMaskClearCommandSpec : CommandSpecBase
     [Header("Target")]
     public string stage = "stage01";
 
-    [Tooltip("true면 무대 전부(tx_stage_mask_clear). stage는 무시.")]
+    [Tooltip("true면 무대 전부(stage_mask_reset). stage는 무시.")]
     public bool allStages;
 
     [Header("Clear")]
@@ -16,8 +16,8 @@ public sealed class StageMaskClearCommandSpec : CommandSpecBase
     public bool hideEdge = true;
 }
 
-// 무대 마스크를 정해진 모양으로 바로 둔다 — 진행 중인 tx 모션은 슬롯이 끊는다.
-// 틀(컷인 · 팝업)을 중립으로 두는 일은 파서가 바로 앞에 낸 틀 되돌리기 커맨드가 한다 — 마스크는 틀을 모른다(stage-frame.md §4).
+// 무대 마스크를 정해진 모양으로 바로 둔다 — 진행 중인 stage_mask 모션은 슬롯이 끊는다.
+// 틀(컷인 창)을 모른다 — 컷인 판 · 팝업 그림은 무대 안의 리그라 마스크가 함께 자른다(stage-frame.md §4).
 public sealed class StageMaskClearCommand : CommandBase
 {
     private readonly StageMaskClearCommandSpec _spec;

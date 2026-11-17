@@ -1,7 +1,7 @@
 using System;
 
 // 화면 효과 리그의 커맨드 — 덮개 · 플래시 · 노이즈 · 비네트(모든 무대 위, 화면 전체).
-// 층 블러(screen_blur)는 블러 시스템의 것이다 — BlurCommandFactory(Stage/Blur/).
+// 층 블러(stage_blur)는 블러 시스템의 것이다 — BlurCommandFactory(Stage/Blur/).
 public sealed class ScreenEffectCommandFactory : INodeCommandFactory
 {
     private readonly ScreenEffectRig _screenEffects;

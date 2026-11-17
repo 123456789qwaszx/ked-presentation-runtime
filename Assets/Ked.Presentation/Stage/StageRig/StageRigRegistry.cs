@@ -43,7 +43,7 @@ public sealed class StageRigRegistry
     public StageLayerRefs EnsureLayer(string stageKey, float depth)
         => _builder.EnsureLayer(Get(stageKey), depth);
 
-    /// <summary>장면 경계 — 무대마다 층의 어둡기 판을 걷는다(screen_dim). 되감기는 정지 → 루트부터 시크라 판은 시크가 다시 세운다.</summary>
+    /// <summary>장면 경계 — 무대마다 층의 어둡기 판을 걷는다(stage_dim). 되감기는 정지 → 루트부터 시크라 판은 시크가 다시 세운다.</summary>
     public void ResetAllDimsToBaseline()
     {
         for (int i = 0; i < _ordered.Count; i++)

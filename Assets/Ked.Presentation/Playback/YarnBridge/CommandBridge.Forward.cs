@@ -189,10 +189,10 @@ public sealed partial class YarnCommandBridge
         => Forward("bg_scale", rigKey, scale, durationToken);
 
     private void EnqueueStageMaskMotionPresetSpec(string presetKey = null, string stageKey = null, string durationToken = null)
-        => Forward("tx", presetKey, stageKey, durationToken);
+        => Forward("stage_mask", presetKey, stageKey, durationToken);
 
     private void EnqueueStageMaskClearSpec()
-        => Forward("tx_stage_mask_clear");
+        => Forward("stage_mask_reset");
 
     private void EnqueueCutInOpenSpec(string stageKey = null, string panelKey = null, string xToken = null, string yToken = null, string scale = null)
         => Forward("cutin_open", stageKey, panelKey, xToken, yToken, scale);
@@ -225,10 +225,10 @@ public sealed partial class YarnCommandBridge
         => Forward("stop_voice");
 
     private void EnqueueStageLayerDimSpec(string layerKey = null, string amount = null, string durationToken = null, string easeToken = null, string stageKey = null)
-        => Forward("screen_dim", layerKey, amount, durationToken, easeToken, stageKey);
+        => Forward("stage_dim", layerKey, amount, durationToken, easeToken, stageKey);
 
     private void EnqueueStageLayerDimResetSpec(string durationToken = null, string easeToken = null)
-        => Forward("screen_dim_reset", durationToken, easeToken);
+        => Forward("stage_dim_reset", durationToken, easeToken);
 
     private void EnqueueScreenCoverSpec(string presetKey = null, string durationToken = null, string easeToken = null)
         => Forward("screen_cover", presetKey, durationToken, easeToken);
@@ -261,8 +261,8 @@ public sealed partial class YarnCommandBridge
         => Forward("focus_clear", durationToken);
 
     private void EnqueueLayerBlurSpec(string layerKey = null, string amount = null, string stageKey = null)
-        => Forward("screen_blur", layerKey, amount, stageKey);
+        => Forward("stage_blur", layerKey, amount, stageKey);
 
     private void EnqueueStageLayerBlurClearSpec()
-        => Forward("screen_blur_reset");
+        => Forward("stage_blur_reset");
 }

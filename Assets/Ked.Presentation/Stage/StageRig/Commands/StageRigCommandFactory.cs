@@ -1,7 +1,7 @@
 using System;
 
-// 무대 리그의 커맨드 — 마스크(tx · tx_stage_mask_clear)와 층의 어둡기 판(screen_dim)(stage-rig.md).
-// 틀(컷인 · 팝업)을 모른다 — tx가 틀을 끝내는 규칙은 파서가 틀 되돌리기 커맨드를 앞에 내어 드러낸다(StageFrameCommandFactory).
+// 무대 리그의 커맨드 — 마스크(stage_mask · stage_mask_reset)와 층의 어둡기 판(stage_dim)(stage-rig.md).
+// 틀(컷인 창)을 모른다 — 마스크만 움직인다. 컷인 판 · 팝업 그림은 무대 안의 리그라 마스크가 함께 자른다(stage-frame.md §4).
 public sealed class StageRigCommandFactory : INodeCommandFactory
 {
     private readonly StageMaskMotionPresetDBSO _stageMaskMotionPresetDb;

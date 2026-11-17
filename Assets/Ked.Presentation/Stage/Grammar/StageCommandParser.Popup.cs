@@ -11,8 +11,8 @@ using UnityEngine;
 /// 배율은 프리셋 배율(원본 실측 0.91)에 곱한다. 본 무대(stage00)에는 쓰지 않는다 — 경고하고 건너뛴다(폴드는 Unhandled).
 ///
 /// 그림은 배경처럼 그 무대의 close 층에 서는 리그다(슬롯 키 PopupSlotKey(무대)) — 무대 안이라 그 무대의 마스크 · 창을 따른다.
-/// 팝업은 그림 하나다. 뒤를 어둡게 까는 것은 대본(연출 카드)이 screen_dim으로 한다 — 그림 바로 뒤인 front 층의 판:
-///   <<screen_dim front 0.47 0.4s Linear stage02>>  <<popup stage02 sample_letter>>  …  <<popup_close stage02>>  <<screen_dim front 0 0.3s Linear stage02>>
+/// 팝업은 그림 하나다. 뒤를 어둡게 까는 것은 대본(연출 카드)이 stage_dim으로 한다 — 그림 바로 뒤인 front 층의 판:
+///   <<stage_dim front 0.47 0.4s Linear stage02>>  <<popup stage02 sample_letter>>  …  <<popup_close stage02>>  <<stage_dim front 0 0.3s Linear stage02>>
 /// 열린 팝업에 다시 popup을 쓰면 그림 리그를 새로 세운다 — 새 그림이 페이드 인한다.
 /// 폴드 밖이다(outsideFold) — 코어는 팝업 표(Popups)로만 안다.
 /// </summary>

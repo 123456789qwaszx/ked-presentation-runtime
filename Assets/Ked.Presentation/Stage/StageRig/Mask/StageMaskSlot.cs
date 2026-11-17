@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 // 무대 하나(s1·s2·s3)를 어디까지, 어떤 모양으로 보여줄지 — 장면 전역 의도다.
-// tx 모션은 이 슬롯이 하나만 소유한다. 새 모션·clear는 앞 모션을 확정 없이 끊는다(새 모션은 제 시작 모양부터 다시 세운다).
+// stage_mask 모션은 이 슬롯이 하나만 소유한다. 새 모션·clear는 앞 모션을 확정 없이 끊는다(새 모션은 제 시작 모양부터 다시 세운다).
 // 장면 경계(정지)에서는 ResetToBaseline으로 씬에 저장된 기준 모양으로 돌아간다.
 [DisallowMultipleComponent]
 public sealed class StageMaskSlot : MonoBehaviour
@@ -197,8 +197,8 @@ public sealed class StageMaskSlot : MonoBehaviour
     }
 
     /// <summary>
-    /// 숨김 — 모양과 상관없이 무대를 하나도 보이지 않게 한다. 도는 tx 모션은 끊는다(나중에 쓴 것이 이긴다).
-    /// 무대 rect만 한 사각형을 숨김 자리(HiddenOffsetPixels — tx 프리셋들이 쓰는 화면 밖)로 옮긴다.
+    /// 숨김 — 모양과 상관없이 무대를 하나도 보이지 않게 한다. 도는 stage_mask 모션은 끊는다(나중에 쓴 것이 이긴다).
+    /// 무대 rect만 한 사각형을 숨김 자리(HiddenOffsetPixels — stage_mask 프리셋들이 쓰는 화면 밖)로 옮긴다.
     /// 지금 모양을 옮기기만 하면 화면 밖까지 뻗은 모양(컷인의 네 점 — maskReachPixels)은 숨지 않는다.
     /// </summary>
     public void SetMaskedHidden()
@@ -215,7 +215,7 @@ public sealed class StageMaskSlot : MonoBehaviour
     }
 
     /// <summary>
-    /// 컷인 — 네 점 모양으로 자른다(판 아래 변 · 위는 열림). 진행 중인 tx 모션은 끊고 테두리는 끈다 —
+    /// 컷인 — 네 점 모양으로 자른다(판 아래 변 · 위는 열림). 진행 중인 stage_mask 모션은 끊고 테두리는 끈다 —
     /// 선이 필요하면 뒤에 ShowCustomQuadEdge. StageCutInSlot.Layout이 부른다.
     /// </summary>
     public void SetCustomQuad(Vector2 p0, Vector2 p1, Vector2 p2, Vector2 p3)

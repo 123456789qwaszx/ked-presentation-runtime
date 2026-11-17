@@ -25,7 +25,7 @@ public class StageCommandParserTests
     public void 표에_있는_이름을_안다()
     {
         Assert.IsTrue(StageCommandParser.Knows("move_by"));
-        Assert.IsTrue(StageCommandParser.Knows("tx"));
+        Assert.IsTrue(StageCommandParser.Knows("stage_mask"));
         Assert.IsTrue(StageCommandParser.Knows("pause"));
         Assert.IsFalse(StageCommandParser.Knows("1fr"), "프레임 별칭은 걷었다 — <<pause 1fr>>(docs/PLAN_line-beat.md D4)");
         Assert.IsFalse(StageCommandParser.Knows("24fr"));
@@ -37,12 +37,12 @@ public class StageCommandParserTests
     // 예외: place_left·center·right 셋, char_visual_<효과> 일곱.
     [TestCase("slot01")]
     [TestCase("bg_slot01")]
-    [TestCase("screen_blur_s1")]
+    [TestCase("stage_blur_s1")]
     [TestCase("place_tl")]
     [TestCase("place_inner_br")]
     [TestCase("size_close")]
-    [TestCase("tx_daze_in")]
-    [TestCase("tx_hstrip_open")]
+    [TestCase("stage_mask_daze_in")]
+    [TestCase("stage_mask_hstrip_open")]
     [TestCase("ui_patch")]
     public void 걷은_별칭은_모른다(string name)
     {
@@ -104,10 +104,10 @@ public class StageCommandParserTests
     [TestCase("screen_cover")]
     [TestCase("screen_cover white 0.3s")]
     [TestCase("screen_cover_clear 0.5s")]
-    [TestCase("screen_dim all 0.4")]
+    [TestCase("stage_dim all 0.4")]
     [TestCase("face c1 3")]
     [TestCase("fade_in c1")]
-    [TestCase("tx iris_in")]
+    [TestCase("stage_mask iris_in")]
     public void 기다리는_명령은_파서의_wait와_코어의_이름이_같다(string line)
     {
         string[] tokens = line.Split(' ');
@@ -146,27 +146,27 @@ public class StageCommandParserTests
     }
 
     [Test]
-    public void tx는_프리셋과_무대와_시간을_받는다()
+    public void stage_mask는_프리셋과_무대와_시간을_받는다()
     {
-        StageMaskMotionCommandSpec a = (StageMaskMotionCommandSpec)Parse(NewParser(), Cmd("tx", "daze_close", "stage00"))[0];
+        StageMaskMotionCommandSpec a = (StageMaskMotionCommandSpec)Parse(NewParser(), Cmd("stage_mask", "daze_close", "stage00"))[0];
         Assert.AreEqual("daze_close", a.presetKey);
         Assert.AreEqual("stage00", a.stage);
         Assert.AreEqual(-1f, a.durationOverride, "시간이 비면 프리셋 자체 시간");
 
-        StageMaskMotionCommandSpec b = (StageMaskMotionCommandSpec)Parse(NewParser(), Cmd("tx", "iris_in", "", "12fr"))[0];
+        StageMaskMotionCommandSpec b = (StageMaskMotionCommandSpec)Parse(NewParser(), Cmd("stage_mask", "iris_in", "", "12fr"))[0];
         Assert.AreEqual("stage01", b.stage, "무대 생략값은 stage01");
         Assert.AreEqual(0.5f, b.durationOverride, 1e-6f);
     }
 
     [Test]
-    public void tx와_마스크_지우기는_마스크_커맨드_하나만_낸다()
+    public void stage_mask와_마스크_지우기는_마스크_커맨드_하나만_낸다()
     {
-        // tx는 마스크만 움직인다 — 틀(컷인 창)을 모른다. 컷인 판 · 팝업 그림은 무대 안의 리그라 마스크가 함께 자른다(docs/PLAN_stage-visibility.md §3.1).
-        List<CommandSpecBase> tx = Parse(NewParser(), Cmd("tx", "daze_close", "stage01"));
-        Assert.AreEqual(1, tx.Count);
-        Assert.IsInstanceOf<StageMaskMotionCommandSpec>(tx[0]);
+        // stage_mask는 마스크만 움직인다 — 틀(컷인 창)을 모른다. 컷인 판 · 팝업 그림은 무대 안의 리그라 마스크가 함께 자른다(docs/PLAN_stage-visibility.md §3.1).
+        List<CommandSpecBase> mask = Parse(NewParser(), Cmd("stage_mask", "daze_close", "stage01"));
+        Assert.AreEqual(1, mask.Count);
+        Assert.IsInstanceOf<StageMaskMotionCommandSpec>(mask[0]);
 
-        List<CommandSpecBase> clear = Parse(NewParser(), Cmd("tx_stage_mask_clear"));
+        List<CommandSpecBase> clear = Parse(NewParser(), Cmd("stage_mask_reset"));
         Assert.AreEqual(1, clear.Count);
         Assert.IsTrue(((StageMaskClearCommandSpec)clear[0]).allStages);
     }
@@ -264,7 +264,7 @@ public class StageCommandParserTests
     [Test]
     public void popup은_그림_리그를_close_층에_세우고_페이드_인한다()
     {
-        // 팝업은 그림 하나다 — 배경처럼 그 무대의 close 층에 서는 리그(docs/PLAN_stage-visibility.md §3.3). 뒷막은 대본이 screen_dim으로 깐다.
+        // 팝업은 그림 하나다 — 배경처럼 그 무대의 close 층에 서는 리그(docs/PLAN_stage-visibility.md §3.3). 뒷막은 대본이 stage_dim으로 깐다.
         List<CommandSpecBase> specs = Parse(NewParser(), Cmd("popup", "stage02", "sample_letter", "2u", "-1.5u", "1.2"));
         string key = StageCommandParser.PopupSlotKey("stage02");
 
@@ -331,24 +331,24 @@ public class StageCommandParserTests
     }
 
     [Test]
-    public void tx는_프리셋이_없으면_경고하고_아무것도_내지_않는다()
+    public void stage_mask는_프리셋이_없으면_경고하고_아무것도_내지_않는다()
     {
-        LogAssert.Expect(LogType.Warning, new Regex("<<tx>>에 프리셋이 없다"));
+        LogAssert.Expect(LogType.Warning, new Regex("<<stage_mask>>에 프리셋이 없다"));
 
         List<CommandSpecBase> output = new();
-        Assert.IsTrue(NewParser().TryParse(Cmd("tx"), output), "이름은 안다");
+        Assert.IsTrue(NewParser().TryParse(Cmd("stage_mask"), output), "이름은 안다");
         Assert.AreEqual(0, output.Count);
     }
 
     [Test]
-    public void screen_blur는_셋째_인자로_무대를_받는다()
+    public void stage_blur는_셋째_인자로_무대를_받는다()
     {
-        StageLayerBlurCommandSpec a = (StageLayerBlurCommandSpec)Parse(NewParser(), Cmd("screen_blur", "back", "0.5"))[0];
+        StageLayerBlurCommandSpec a = (StageLayerBlurCommandSpec)Parse(NewParser(), Cmd("stage_blur", "back", "0.5"))[0];
         Assert.AreEqual("stage00", a.stage, "무대 생략값은 stage00");
         Assert.AreEqual(StageLayerLabels.Back, a.layerDepth);
         Assert.AreEqual(0.5f, a.amount, 1e-6f);
 
-        StageLayerBlurCommandSpec b = (StageLayerBlurCommandSpec)Parse(NewParser(), Cmd("screen_blur", "mid", "1", "stage02"))[0];
+        StageLayerBlurCommandSpec b = (StageLayerBlurCommandSpec)Parse(NewParser(), Cmd("stage_blur", "mid", "1", "stage02"))[0];
         Assert.AreEqual("stage02", b.stage);
     }
 

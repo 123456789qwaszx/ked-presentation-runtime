@@ -17,8 +17,8 @@ public sealed class StageMaskMotionCommandSpec : CommandSpecBase
     public float durationOverride = -1f;
 }
 
-// tx — 프리셋을 골라 무대 슬롯에 모션을 걸기만 한다. 모션은 슬롯이 소유한다(StageMaskSlot.PlayMotion).
-// 그 무대의 틀(컷인 · 팝업)을 중립으로 두는 일은 파서가 바로 앞에 낸 틀 되돌리기 커맨드가 한다 — 마스크는 틀을 모른다(stage-frame.md §4).
+// stage_mask — 프리셋을 골라 무대 슬롯에 모션을 걸기만 한다. 모션은 슬롯이 소유한다(StageMaskSlot.PlayMotion).
+// 틀(컷인 창)을 모른다 — 컷인 판 · 팝업 그림은 무대 안의 리그라 마스크가 함께 자른다(stage-frame.md §4).
 public sealed class StageMaskMotionCommand : CommandBase
 {
     private readonly StageMaskMotionCommandSpec _spec;

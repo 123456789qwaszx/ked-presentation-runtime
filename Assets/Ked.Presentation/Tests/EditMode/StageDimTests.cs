@@ -6,7 +6,7 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.UI;
 
-// 어둡게(screen_dim · screen_dim_reset) — 무대 리그의 층마다 선 어둡기 판. docs/PLAN_screen-cover.md §3.2.
+// 어둡게(stage_dim · stage_dim_reset) — 무대 리그의 층마다 선 어둡기 판. docs/PLAN_screen-cover.md §3.2.
 // 어느 판을 고르나(all = 가장 앞 층, 층 이름 = 그 층) · 압축 끝값 · 걷기 · 정지에서 0 · 문법의 생략값을 고정한다.
 public class StageDimTests
 {
@@ -149,7 +149,7 @@ public class StageDimTests
     [Test]
     public void 문법_층_세기_길이_이징_무대()
     {
-        StageLayerDimCommandSpec spec = (StageLayerDimCommandSpec)Parse("screen_dim", "far", "0.6", "1s", "OutSine", "stage01")[0];
+        StageLayerDimCommandSpec spec = (StageLayerDimCommandSpec)Parse("stage_dim", "far", "0.6", "1s", "OutSine", "stage01")[0];
 
         Assert.IsFalse(spec.allLayers);
         Assert.AreEqual(StageLayerLabels.Far, spec.layerDepth);
@@ -162,14 +162,14 @@ public class StageDimTests
     [Test]
     public void 문법_생략값_all_stage00_0점3초_Linear()
     {
-        StageLayerDimCommandSpec spec = (StageLayerDimCommandSpec)Parse("screen_dim", "all", "0.45")[0];
+        StageLayerDimCommandSpec spec = (StageLayerDimCommandSpec)Parse("stage_dim", "all", "0.45")[0];
 
         Assert.IsTrue(spec.allLayers);
         Assert.AreEqual("stage00", spec.stage);
         Assert.AreEqual(0.3f, spec.duration, 1e-4f);
         Assert.AreEqual(Ease.Linear, spec.ease);
 
-        StageLayerDimCommandSpec reset = (StageLayerDimCommandSpec)Parse("screen_dim_reset")[0];
+        StageLayerDimCommandSpec reset = (StageLayerDimCommandSpec)Parse("stage_dim_reset")[0];
         Assert.IsTrue(reset.resetAll);
         Assert.AreEqual(0.3f, reset.duration, 1e-4f);
     }
@@ -177,8 +177,8 @@ public class StageDimTests
     [Test]
     public void 문법_길이는_무대보다_앞이다()
     {
-        // <<screen_dim all 0.2 0fr>> — 0fr는 길이다(무대가 아니다).
-        StageLayerDimCommandSpec spec = (StageLayerDimCommandSpec)Parse("screen_dim", "all", "0.2", "0fr")[0];
+        // <<stage_dim all 0.2 0fr>> — 0fr는 길이다(무대가 아니다).
+        StageLayerDimCommandSpec spec = (StageLayerDimCommandSpec)Parse("stage_dim", "all", "0.2", "0fr")[0];
 
         Assert.AreEqual("stage00", spec.stage);
         Assert.AreEqual(0f, spec.duration, 1e-4f);
@@ -187,6 +187,6 @@ public class StageDimTests
     [Test]
     public void 문법_세기를_적지_않으면_건너뛴다()
     {
-        Assert.AreEqual(0, Parse("screen_dim", "all").Count, "걷으려면 0을 적는다 — 빈 세기를 짐작하지 않는다");
+        Assert.AreEqual(0, Parse("stage_dim", "all").Count, "걷으려면 0을 적는다 — 빈 세기를 짐작하지 않는다");
     }
 }

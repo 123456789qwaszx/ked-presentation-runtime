@@ -137,7 +137,7 @@ namespace Ked.Presentation.Tests.UnityParity
                 cutIn.SnapClose();
                 StageMaskGraphic mask = rig.MaskRoot.GetComponent<StageMaskGraphic>();
                 Assert.That(cutIn.IsOpen, Is.False);
-                Assert.That(cutIn.Window.localScale, Is.EqualTo(Vector3.one), "창을 배율 0으로 남기지 않는다 — 다음 tx가 그 무대를 열면 보여야 한다");
+                Assert.That(cutIn.Window.localScale, Is.EqualTo(Vector3.one), "창을 배율 0으로 남기지 않는다 — 다음 stage_mask가 그 무대를 열면 보여야 한다");
                 Assert.That(cutIn.Window.pivot, Is.EqualTo(new Vector2(0.5f, 0.5f)));
                 Assert.That(edge.enabled, Is.False, "숨은 무대에는 테두리도 없다");
                 Assert.That(mask.Kind, Is.EqualTo(StageMaskKind.FullRect), "네 점은 화면 밖까지 뻗어 옮기기만으로는 숨지 않는다 — 무대만 한 사각형으로 바꿔 숨긴다");

@@ -95,8 +95,8 @@ Yarn Spinner를 기반으로 제작한 **비주얼 노벨 화면 연출 런타�
 
 화면을 덮었다 걷는 일(암전)은 `screen_cover` · `screen_cover_clear`입니다. 덮개는 무대 셋과 컷인 · 팝업을 모두 덮고 대사창 · HUD는 덮지 않습니다.
 `screen_cover`는 다 덮일 때까지 기다리므로 그 뒤의 무대 정리는 늘 덮인 밑에서 일어나고, `screen_cover_clear`는 기다리지 않고 다음 줄로 넘어가도 제 길이로 걷힙니다.
-무대를 어둡게 하는 일은 `screen_dim <층|all> <세기> [길이] [이징] [무대]`입니다 — 층마다 선 검은 판의 투명도라 캐릭터는 그대로이고,
-`all`은 무대 전체(속말 · 회상), `far`는 배경만(인물을 띄울 때)입니다. 세기 0이 걷기, `screen_dim_reset`이 전부 걷기입니다([PLAN_screen-cover.md](docs/PLAN_screen-cover.md)).
+무대를 어둡게 하는 일은 `stage_dim <층|all> <세기> [길이] [이징] [무대]`입니다 — 층마다 선 검은 판의 투명도라 캐릭터는 그대로이고,
+`all`은 무대 전체(속말 · 회상), `far`는 배경만(인물을 띄울 때)입니다. 세기 0이 걷기, `stage_dim_reset`이 전부 걷기입니다([PLAN_screen-cover.md](docs/PLAN_screen-cover.md)).
 
 ```yarn
 <<screen_cover black 0.6s>>
@@ -104,9 +104,9 @@ Yarn Spinner를 기반으로 제작한 **비주얼 노벨 화면 연출 런타�
 <<pause 0.4s>>
 <<screen_cover_clear 0.5s>>
 <<step>>
-<<screen_dim all 0.45 0.27s>>
+<<stage_dim all 0.45 0.27s>>
 (정말 괜찮을까……)
-<<screen_dim all 0 0.23s>>
+<<stage_dim all 0 0.23s>>
 하린: 응, 괜찮아.
 ```
 

@@ -6,7 +6,7 @@ using UnityEngine;
 // 진행 · 저장을 모른다. 결과(PresentationRuntime)에 재생 호스트를 붙이면 돈다(Awake → InstallProgression).
 public partial class SampleBootstrap
 {
-    // 무대 키 — 대본의 slot · bg_spawn · tx · screen_blur가 부르는 이름. 역할은 키로 정한다(StageRoles):
+    // 무대 키 — 대본의 slot · bg_spawn · stage_mask · stage_blur가 부르는 이름. 역할은 키로 정한다(StageRoles):
     // stage00은 본 무대(샷이 움직인다, 생략값), stage01 · stage02는 덮는 무대(컷인 · 인서트 · 커튼, 카메라 고정).
     private static readonly string[] StageKeys = { "stage00", "stage01", "stage02" };
     
@@ -127,7 +127,7 @@ public partial class SampleBootstrap
 
     private void BootstrapPresentationSession()
     {
-        // 블러 의도(focus_on·screen_blur) — 커맨드는 의도만 넘기고, 줄 머리에서 시스템이 리그를 다시 맞춘다.
+        // 블러 의도(focus_on·stage_blur) — 커맨드는 의도만 넘기고, 줄 머리에서 시스템이 리그를 다시 맞춘다.
         _rigBlur = new RigBlurIntentSystem(_presentationStage, _stageRigs);
 
         // Character Rig
@@ -170,10 +170,10 @@ public partial class SampleBootstrap
         // Audio
         AudioCommandFactory audioFactory = new(audioSystem);
 
-        // 블러 — 초점(focus_on) · 층 블러(screen_blur). 커맨드는 의도만 넘기고 시스템이 줄 머리에서 리그마다 맞춘다
+        // 블러 — 초점(focus_on) · 층 블러(stage_blur). 커맨드는 의도만 넘기고 시스템이 줄 머리에서 리그마다 맞춘다
         BlurCommandFactory blurFactory = new(_rigBlur);
 
-        // 무대 리그 — 마스크(tx) · 층의 어둡기 판(screen_dim)(stage-rig.md)
+        // 무대 리그 — 마스크(stage_mask) · 층의 어둡기 판(stage_dim)(stage-rig.md)
         StageRigCommandFactory stageRigFactory = new(
             stageMaskMotionPresetDb,
             _stageRigs);

@@ -262,11 +262,11 @@ CharSlot_Track_Idle.anchoredPosition          접힘=(0,0)   vs 캡처=(0, 7.99)
 |---|---|---|
 | 시간 커맨드 (`pause` · `1fr`~`48fr`) | 19 | **접을 것이 없다** → 무해하게 접도록 고쳤다 |
 | 절차적 연기 (`tap`·`sway*`·`jolt`·`dip`·`idle_*`) | 38 | **이관 대상 아님** — 끝값이 정의되지 않는다 |
-| 화면 효과 (`screen_blur/vignette/noise/flash`) | 36 | 무대 상태 모델 밖 (포스트 이펙트 축). 단 `screen_blur`는 이후 리그마다 거는 셰이더 블러가 되어 `char_visual_*`과 같은 머티리얼 축이다(2026-11-03 주). 2026-11-17에 더한 화면 덮개(`screen_cover` · `screen_cover_clear`)와 층의 어둡기 판(`screen_dim` · `screen_dim_reset`)도 같은 경계로 접지 않는다(docs/PLAN_screen-cover.md §6) — 접는다면 화면 효과 전체를 함께 정한다 |
+| 화면 효과 (`screen_vignette/noise/flash`, 그리고 층 블러 — 지금 `stage_blur`) | 36 | 무대 상태 모델 밖 (포스트 이펙트 축). 단 `stage_blur`는 이후 리그마다 거는 셰이더 블러가 되어 `char_visual_*`과 같은 머티리얼 축이다(2026-11-03 주). 2026-11-17에 더한 화면 덮개(`screen_cover` · `screen_cover_clear`)와 층의 어둡기 판(`stage_dim` · `stage_dim_reset`)도 같은 경계로 접지 않는다(docs/PLAN_screen-cover.md §6) — 접는다면 화면 효과 전체를 함께 정한다 |
 | 배경 (`bg_*`) | 19 | **이관 완료 (2026-10-29)** — 배경은 캐스팅하지 않은 캐릭터 슬롯이 됐다. 아래 참조 |
 | 캐릭터 비주얼 (`char_visual_*`) | 14 | 무대 상태 모델 밖 (머티리얼 축) |
 | 오디오 (`bgm` · `stop_bgm` · `sfx`) | 14 | 무대 상태 모델 밖 |
-| 트랜지션 (`tx_*`) | 10 | 무대 상태 모델 밖 |
+| 무대 마스크 (그때 `stage_mask_*`, 지금 `stage_mask`) | 10 | 무대 상태 모델 밖 |
 | 캐릭터 리그 트랜스폼 (`slide_in`) | 2 | **이관 완료 (2026-08-24)** — 아래 참조 |
 | 대사창 (`surface_reset`) | 1 | 무대 상태 모델 밖 |
 

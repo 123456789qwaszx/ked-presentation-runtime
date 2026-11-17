@@ -19,9 +19,6 @@ public sealed class StageFrameRegistry
             ? slot
             : throw new InvalidOperationException($"[StageFrameRegistry] 무대 '{stageKey}'의 틀이 없다.");
 
-    /// <summary>그 무대의 틀을 중립으로. 도는 모션은 끝값 없이 끊는다.</summary>
-    public void Reset(string stageKey) => CutIn(stageKey).Reset();
-
     /// <summary>장면 경계 — 모든 무대의 틀을 중립으로.</summary>
     public void ResetAll()
     {

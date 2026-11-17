@@ -82,7 +82,7 @@ Bjørge, *Bandwidth-Efficient Rendering*, SIGGRAPH 2015 Mobile Graphics (ARM).
 **캐릭터 리그 그 자체**(캐스팅하지 않은 슬롯)라 공유할 것도 없다 — 같은 컨트롤러 하나다
 (재생 저장소 `docs/PLAN_background-as-slot.md`). `focus_on`은 배역 있는 슬롯만 보므로 배경은 여전히 대상이 아니다.
 
-`screen_blur <layer> <amount>`의 의미("그 레이어에 있는 것을 흐린다")는 그대로 두고
+`stage_blur <layer> <amount>`의 의미("그 레이어에 있는 것을 흐린다")는 그대로 두고
 기구만 바꿨다(`StageLayerBlurCommand`). far 레이어에는 배경만 있으므로 기존 저작이
 그대로 동작하고, 캐릭터를 그 레이어에 올리면 같이 흐려진다.
 
@@ -197,11 +197,11 @@ coc = saturate(|depthScale_char − depthScale_focus| × falloff) × maxBlur
 `falloff` 기본값 1.43은 depthScale 범위(Far 0.68 ~ Close 1.38, 간격 0.70)의 역수다 —
 무대 양 끝이 최대로 흐려진다.
 
-배경은 대상이 아니다. `screen_blur far`가 이미 레이어 단위로 처리한다.
+배경은 대상이 아니다. `stage_blur far`가 이미 레이어 단위로 처리한다.
 
 ### 블러를 쓰는 커맨드가 셋이다 — 출처를 나누고 가장 큰 값으로 합친다 (2026-11-03)
 
-`focus_on` · `screen_blur` · `char_visual_*`(프리셋의 `blur` 필드)가 모두 `_BlurAmount`에 닿는다.
+`focus_on` · `stage_blur` · `char_visual_*`(프리셋의 `blur` 필드)가 모두 `_BlurAmount`에 닿는다.
 예전에는 셋이 같은 값을 서로 다른 트윈 대상으로 써서 **동시에 걸면 매 프레임 싸웠고**,
 blur가 0인 `char_visual` 프리셋(dim·rim·clear …)은 앞서 걸린 초점·레이어 블러를 지웠다.
 
@@ -211,7 +211,7 @@ blur가 0인 `char_visual` 프리셋(dim·rim·clear …)은 앞서 걸린 초�
 |---|---|---|
 | 모양(Style)의 blur | `char_visual_*` | 그 리그 |
 | 초점 블러 | `focus_on` · `focus_clear` | 배역이 있는 리그 전부(CoC) |
-| 레이어 블러 | `screen_blur` · `screen_blur_reset` | 그 레이어 아래 리그 |
+| 레이어 블러 | `stage_blur` · `stage_blur_reset` | 그 레이어 아래 리그 |
 
 - **셰이더에 쓰는 값은 셋 중 가장 큰 값이다**(소유자 결정). 서로 덮어쓰지 않고, 흐림이 겹쳐도 더 흐려지지 않는다.
 - 각 출처의 전환은 컨트롤러가 하나씩 소유한다(`IntentTransition`). 커맨드는 목표만 넘기고,
@@ -221,7 +221,7 @@ blur가 0인 `char_visual` 프리셋(dim·rim·clear …)은 앞서 걸린 초�
 
 ### 초점·레이어 블러는 장면 전역 의도다 (2026-11-03)
 
-예전 `focus_on`·`screen_blur`는 실행 순간의 스냅숏이었다 — 그때 있던 리그만, 그때의 깊이로 흐렸다.
+예전 `focus_on`·`stage_blur`는 실행 순간의 스냅숏이었다 — 그때 있던 리그만, 그때의 깊이로 흐렸다.
 그래서 뒤에 등장한 캐릭터는 선명했고, `size`로 깊이가 바뀌어도, `char_to`로 블러 레이어를 드나들어도 따라가지 않았다.
 
 지금은 `RigBlurIntentSystem`이 의도(초점 대상·falloff·최대 흐림, 무대·레이어별 양)를 든다. 커맨드는 의도만 넘긴다.

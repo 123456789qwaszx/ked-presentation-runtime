@@ -12,7 +12,7 @@ using Object = UnityEngine.Object;
 // 이 리그의 비주얼은 출처 셋을 컨트롤러가 각각 의도로 들고 따라간다(IntentTransition) — 커맨드는 목표만 넘긴다.
 //   모양(Style)  char_visual_* — 어둡게·림·자체 블러
 //   초점 블러    focus_on / focus_clear — 깊이 차이만큼(CoC)
-//   레이어 블러  screen_blur — 이 리그가 선 레이어의 흐림
+//   레이어 블러  stage_blur — 이 리그가 선 레이어의 흐림
 // 셰이더의 _BlurAmount는 세 블러 중 가장 큰 값이다. 서로 덮어쓰지 않는다.
 public sealed class RigVisualEffectController : IDisposable
 {

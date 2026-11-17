@@ -303,7 +303,7 @@ public sealed class StageRigBuilder
         // 그 순간 Mask.OnEnable은 그림을 못 찾아 canvasRenderer.hasPopInstruction(아래를 다 그린 뒤 스텐실을 0으로 되돌리는 단계)을
         // 켜지 않고, 그림이 붙은 뒤에는 OnEnable이 다시 오지 않는다. 그러면 마스크는 스텐실에 1을 쓰기만 하고 지우지 않아,
         // 먼저 그린 무대(화면 전체 크기)가 남긴 1 위에서 뒤에 그리는 무대의 인물이 마스크 모양과 상관없이 어디서나 통과한다 —
-        // 컷인 판 아래로 인물 몸이 통째로 보이던 원인이다. 무대 마스크를 한 번 끄고 켜는 명령(tx_stage_mask_clear)을 지나면
+        // 컷인 판 아래로 인물 몸이 통째로 보이던 원인이다. 무대 마스크를 한 번 끄고 켜는 명령(stage_mask_reset)을 지나면
         // 그 뒤로는 맞았던 까닭도 이것이다(ked-vn-workspace에서 찾아 소유자가 Unity 화면으로 확인, 2026-11-14).
         // 비활성 계층에 세운 무대는 켜질 때 OnEnable이 그림과 함께 오므로 껐다 켜지 않아도 맞다.
         if (mask.isActiveAndEnabled)

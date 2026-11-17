@@ -163,7 +163,7 @@ public partial class SampleBootstrap : MonoBehaviour, IRigPrefabSource
     [Tooltip("컷인 판 모양 · 크기 · 등장/퇴장 모션. 비우면 코드 기본값(원본 게임 실측)으로 열고 경고한다.")]
     [SerializeField] private CutInPresetDBSO cutInPreset;
 
-    [Tooltip("그림 팝업 배율 · 페이드 길이 — 파서가 popup을 그림 리그로 풀 때 읽는다. 뒷막은 대본이 screen_dim으로 깐다. 비우면 코드 기본값으로 열고 경고한다.")]
+    [Tooltip("그림 팝업 배율 · 페이드 길이 — 파서가 popup을 그림 리그로 풀 때 읽는다. 뒷막은 대본이 stage_dim으로 깐다. 비우면 코드 기본값으로 열고 경고한다.")]
     [SerializeField] private PopupPresetDBSO popupPreset;
 
     [Header("NodeDebug")]

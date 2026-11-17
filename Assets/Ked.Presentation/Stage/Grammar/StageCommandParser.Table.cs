@@ -11,7 +11,7 @@ public sealed partial class StageCommandParser
     // 이름과 인자 수만 안다 — 뜻은 여기서 정해진다.
     //
     // 정본만 둔다. 같은 일을 인자 하나만 고정해 다시 부르는 이름(slotNN · bg_slotNN ·
-    // screen_blur_sN · place_* · size_<라벨> · tx_<프리셋>)은 두지 않는다 —
+    // stage_blur_sN · place_* · size_<라벨> · stage_mask_<프리셋>)은 두지 않는다 —
     // 대본은 저작 툴(ked-story-compositor)이 내고, 툴은 정본만 낸다. 변형은 이름이 아니라 인자로 받는다.
     // 예외: place_left · place_center · place_right, 그리고 char_visual_<효과> 일곱 — 캐릭터 비주얼은 커맨드 이름에서 어떤 효과인지 드러나야 한다(일반형 char_visual도 남김).
     private static readonly Dictionary<string, Handler> Table = new(StringComparer.Ordinal)
@@ -81,8 +81,8 @@ public sealed partial class StageCommandParser
         ["bg_fade_out"] = (p, c) => p.EnqueueFadeOutBackgroundDslSpec(c.Arg(0), c.Arg(1, "10fr")),
         ["bg_move"] = (p, c) => p.EnqueueMoveBackgroundDslSpec(c.Arg(0), c.Arg(1), c.Arg(2), c.Arg(3, "10fr")),
         ["bg_scale"] = (p, c) => p.EnqueueScaleBackgroundDslSpec(c.Arg(0), Float(c, 1, 0f), c.Arg(2, "10fr")),
-        ["tx"] = (p, c) => p.EnqueueStageMaskMotionPresetSpec(c.Arg(0), c.Arg(1, "stage01"), c.Arg(2, "")),
-        ["tx_stage_mask_clear"] = (p, c) => p.EnqueueStageMaskClearSpec(),
+        ["stage_mask"] = (p, c) => p.EnqueueStageMaskMotionPresetSpec(c.Arg(0), c.Arg(1, "stage01"), c.Arg(2, "")),
+        ["stage_mask_reset"] = (p, c) => p.EnqueueStageMaskClearSpec(),
         // 컷인 — 덮는 무대의 창 · 판 · 마스크(StageCommandParser.CutIn, docs/PLAN_cutin.md)
         ["cutin_open"] = (p, c) => p.EnqueueCutInOpenSpec(c.Arg(0, "stage01"), c.Arg(1), c.Arg(2, "0u"), c.Arg(3, "0u"), Float(c, 4, 1f)),
         ["cutin_close"] = (p, c) => p.EnqueueCutInCloseSpec(c.Arg(0, "stage01")),
@@ -105,12 +105,12 @@ public sealed partial class StageCommandParser
         ["screen_noise_clear"] = (p, c) => p.EnqueueScreenNoiseClearSpec(c.Arg(0, "0.35s")),
         ["focus_on"] = (p, c) => p.EnqueueDepthFocusOnSpec(c.Arg(0), Float(c, 1, 1f), c.Arg(2, "0.4s")),
         ["focus_clear"] = (p, c) => p.EnqueueDepthFocusClearSpec(c.Arg(0, "0.4s")),
-        ["screen_blur"] = (p, c) => p.EnqueueLayerBlurSpec(c.Arg(2, "stage00"), c.Arg(0, "mid"), Float(c, 1, 1f)),
-        ["screen_blur_reset"] = (p, c) => p.EnqueueStageLayerBlurClearSpec(),
+        ["stage_blur"] = (p, c) => p.EnqueueLayerBlurSpec(c.Arg(2, "stage00"), c.Arg(0, "mid"), Float(c, 1, 1f)),
+        ["stage_blur_reset"] = (p, c) => p.EnqueueStageLayerBlurClearSpec(),
         // 어둡게 — 층 · 세기 · 길이 · 이징 · 무대. 무대는 맨 뒤다: 길이는 거의 늘 적고 무대는 드물다
-        // (screen_blur처럼 무대가 길이 앞이면 <<screen_dim all 0.2 0fr>>의 0fr가 무대로 읽힌다). 세기는 적어야 한다.
-        ["screen_dim"] = (p, c) => p.EnqueueStageLayerDimSpec(c, c.Arg(4, "stage00"), c.Arg(0, "all"), c.Arg(1), c.Arg(2, "0.3s"), c.Arg(3, "")),
-        ["screen_dim_reset"] = (p, c) => p.EnqueueStageLayerDimResetSpec(c.Arg(0, "0.3s"), c.Arg(1, "")),
+        // (stage_blur처럼 무대가 길이 앞이면 <<stage_dim all 0.2 0fr>>의 0fr가 무대로 읽힌다). 세기는 적어야 한다.
+        ["stage_dim"] = (p, c) => p.EnqueueStageLayerDimSpec(c, c.Arg(4, "stage00"), c.Arg(0, "all"), c.Arg(1), c.Arg(2, "0.3s"), c.Arg(3, "")),
+        ["stage_dim_reset"] = (p, c) => p.EnqueueStageLayerDimResetSpec(c.Arg(0, "0.3s"), c.Arg(1, "")),
     };
 
     /// <summary>이 파서가 아는 커맨드 이름 전부. 브리지가 Yarn 등록에 쓴다.</summary>

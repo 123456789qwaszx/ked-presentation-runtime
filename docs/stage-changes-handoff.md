@@ -1,9 +1,9 @@
-# 런타임 밖에 반영할 것 — 화면 덮개 · 어둡게 · 컷인 · 팝업 · tx · 줄의 자리 (2026-11-17)
+# 런타임 밖에 반영할 것 — 화면 덮개 · 어둡게 · 컷인 · 팝업 · 무대 마스크 · 줄의 자리 · 명령 이름 (2026-11-17)
 
-> 상태: **반영 중** — 런타임은 끝났고(공개 런타임 `refactor/actor-view`), 작업공간이 포크 · 줄의 자리를 반영했다(§4, 2026-11-17). 덮개 · 어둡게 카드와 툴 · 추출기는 아직이다.
+> 상태: **반영 중** — 런타임은 끝났고(공개 런타임 `refactor/actor-view`), 작업공간이 포크 · 줄의 자리를 반영했다(§4, 2026-11-17). **명령 이름을 바꿨다(§2)** — 소비처는 아직이다. 덮개 · 어둡게 카드와 툴 · 추출기도 아직이다.
 > 반영하는 쪽은 이 문서 하나를 보고 일을 시작한다. 반영을 마치면 §4 표에 적는다.
 >
-> 근거 계획서: [PLAN_screen-cover.md](PLAN_screen-cover.md)(덮개 · 어둡게) · [PLAN_stage-visibility.md](PLAN_stage-visibility.md)(컷인 · 팝업 · tx) · [PLAN_stage-code-homes.md](PLAN_stage-code-homes.md)(코드의 집 · 이름 후보) · [PLAN_line-beat.md](PLAN_line-beat.md)(줄의 자리 — 진행 중, §1.4).
+> 근거 계획서: [PLAN_screen-cover.md](PLAN_screen-cover.md)(덮개 · 어둡게) · [PLAN_stage-visibility.md](PLAN_stage-visibility.md)(컷인 · 팝업 · 무대 마스크) · [PLAN_stage-code-homes.md](PLAN_stage-code-homes.md)(코드의 집 · 명령 이름 §6) · [PLAN_line-beat.md](PLAN_line-beat.md)(줄의 자리 — 진행 중, §1.4).
 
 ## 1. 대본에서 바뀐 것
 
@@ -12,23 +12,23 @@
 ```
 <<screen_cover [프리셋=black] [길이=0.5s] [이징]>>        화면 전체(무대 셋 · 컷인 · 팝업)를 한 색으로 덮는다 — 기다린다(덮일 때까지 다음으로 가지 않는다)
 <<screen_cover_clear [길이=0.5s] [이징]>>                   걷는다 — 기다리지 않는다
-<<screen_dim <층|all> <세기> [길이=0.3s] [이징] [무대=stage00]>>   층마다 선 검은 판 — all = 그 무대 전체, far = 배경만. 세기 0이면 걷는다
-<<screen_dim_reset [길이=0.3s] [이징]>>                     모든 무대 · 층의 판을 걷는다
+<<stage_dim <층|all> <세기> [길이=0.3s] [이징] [무대=stage00]>>   층마다 선 검은 판 — all = 그 무대 전체, far = 배경만. 세기 0이면 걷는다
+<<stage_dim_reset [길이=0.3s] [이징]>>                     모든 무대 · 층의 판을 걷는다
 ```
 
 - 프리셋은 `black` · `white`(`ScreenCoverPresetDB`). 덮인 동안 무대를 바꾸고 걷는다.
-- 어둡게는 캐릭터의 색을 바꾸지 않는다 — 판이 위에서 가린다. 그 무대의 마스크에 잘린다(tx로 좁힌 영역 안만 어둡게 할 수 있다).
+- 어둡게는 캐릭터의 색을 바꾸지 않는다 — 판이 위에서 가린다. 그 무대의 마스크에 잘린다(stage_mask로 좁힌 영역 안만 어둡게 할 수 있다).
 - 쓰는 법과 재생 방식(보통 · 빨리 넘기기 · 되감기)은 PLAN_screen-cover.md §3, 데모 대본의 "화면 덮개" · "어둡게" 절.
 
 ### 1.2 동작이 바뀐 것 — 같은 어휘, 다른 결과
 
 | 어휘 | 전 | 지금 | 대본이 할 일 |
 |---|---|---|---|
-| `popup` · `popup_close` | 뒷막(거의 검정 0.47)과 그림이 한 페이드로 함께 | **그림 하나**(그 무대의 close 층 리그). 뒷막 없다 | 뒤를 어둡게 깔려면 대본이 쓴다 — `<<screen_dim front 0.47 0.45s Linear 무대>>` 다음 `popup`, `popup_close` 다음 `<<screen_dim front 0 0.3s Linear 무대>>`. `all`은 그림 앞의 판이라 그림까지 어둡다 — `front`를 쓴다 |
+| `popup` · `popup_close` | 뒷막(거의 검정 0.47)과 그림이 한 페이드로 함께 | **그림 하나**(그 무대의 close 층 리그). 뒷막 없다 | 뒤를 어둡게 깔려면 대본이 쓴다 — `<<stage_dim front 0.47 0.45s Linear 무대>>` 다음 `popup`, `popup_close` 다음 `<<stage_dim front 0 0.3s Linear 무대>>`. `all`은 그림 앞의 판이라 그림까지 어둡다 — `front`를 쓴다 |
 | 열린 팝업에 다시 `popup` | 그림 · 자리만 바로 바뀜 | 그림 리그를 새로 세운다 — 새 그림이 페이드 인 | 없다(보이는 것이 조금 다르다) |
-| `cutin_close` | 창을 배율 0으로 남김 | 창은 원래 자세로, 그 무대는 **마스크가 숨긴다**. 컷인 판은 무대 안의 리그(`{무대}_cutin_panel`)로 **남는다** | 같은 무대를 `tx` 인서트로 다시 쓰기 전에 판을 치운다 — `<<bg_fade_out stage01_cutin_panel 0fr>>`(인물을 치우는 것과 같다) |
-| `tx` | 그 무대의 컷인 · 팝업을 먼저 껐다(퇴장 없이) | **마스크만** 움직인다. 컷인 판 · 팝업 그림도 무대 안이라 함께 잘린다. 열린 컷인은 연 채로 남는다 | 열린 컷인 · 팝업 위에 `tx`를 썼던 대본은 뒤에 `cutin_close` · `popup_close`가 있어야 정리된다 |
-| `tx_stage_mask_clear` | 모든 무대의 컷인 · 팝업을 껐다 | 마스크만 — 모든 무대가 다 보인다 | 덮는 무대에 남은 것(인물 · 컷인 판 · 팝업 그림)이 다 보인다 — 쓰기 전에 치운다 |
+| `cutin_close` | 창을 배율 0으로 남김 | 창은 원래 자세로, 그 무대는 **마스크가 숨긴다**. 컷인 판은 무대 안의 리그(`{무대}_cutin_panel`)로 **남는다** | 같은 무대를 `stage_mask` 인서트로 다시 쓰기 전에 판을 치운다 — `<<bg_fade_out stage01_cutin_panel 0fr>>`(인물을 치우는 것과 같다) |
+| `stage_mask`(옛 `tx`) | 그 무대의 컷인 · 팝업을 먼저 껐다(퇴장 없이) | **마스크만** 움직인다. 컷인 판 · 팝업 그림도 무대 안이라 함께 잘린다. 열린 컷인은 연 채로 남는다 | 열린 컷인 · 팝업 위에 `stage_mask`를 썼던 대본은 뒤에 `cutin_close` · `popup_close`가 있어야 정리된다 |
+| `stage_mask_reset`(옛 `tx_stage_mask_clear`) | 모든 무대의 컷인 · 팝업을 껐다 | 마스크만 — 모든 무대가 다 보인다 | 덮는 무대에 남은 것(인물 · 컷인 판 · 팝업 그림)이 다 보인다 — 쓰기 전에 치운다 |
 | 컷인 판 아래 외곽선 | 판 그림의 것 | 마스크 테두리가 다시 그린다(판이 마스크 안이라) | 없다 |
 
 ### 1.3 폴드(코어)에서 알아 둘 것
@@ -55,19 +55,25 @@ L3부터는 옛 대본이 그대로 돌지 않는다 — 대사 줄 머리의 `p
 - `<<at>>` 다음이 대사 줄이 아니면(무대 스텝 · 노드 끝) 경고하고 그 스텝의 머리 뒤에 실행한다. 선택지(`->`)를 건너면 다음 대사 줄로 간다 — 원문 검사(코어 추출기의 경고)가 막을 일이다.
 - 번역문에 표지가 빠지면 그 명령은 줄 끝에서 실행하고 경고한다. 원문의 표지 목록과 집합 · 순서가 같은지는 번역 검사 도구가 본다(PLAN_line-beat.md R4).
 
-## 2. 정해지지 않은 것 — 명령 이름
+## 2. 명령 이름 — 바꿨다 (소유자, 2026-11-17)
 
-반영하기 **전에** 정하면 카드 · 대본을 한 번만 고친다. 문법 표는 별칭을 두지 않으므로(옛 이름 · 새 이름을 함께 받지 않는다) 이름을 바꾸면 모든 소비처를 같은 날 바꾼다.
+무대 · 층 단위로 작동하는 명령의 이름을 `stage_`로 바꿨다. **옛 이름은 받지 않는다**(문법 표는 별칭을 두지 않는다) — 바꾼 런타임을 들이는 날 대본 · 카드 · 도구도 함께 바꾼다.
+원칙: `screen_`은 화면 전체(화면 효과 리그 — 덮개 · 플래시 · 비네트 · 노이즈, 그대로), `stage_`는 무대 · 층 단위(무대 리그).
 
-| 지금 | 후보 | 까닭 |
+| 옛 이름 | 새 이름 | 인자(그대로) |
 |---|---|---|
-| `tx <프리셋> [무대] [길이]` | `stage_mask` | 무대의 마스크 모양을 움직인다 — 전환만이 아니라 나눈 화면 · 띠로 머물기도 한다. 코드(`StageMask*`)와 같은 말 |
-| `tx_stage_mask_clear` | `stage_mask_clear` | 위와 짝 |
-| `screen_dim` · `screen_dim_reset` | `stage_dim` · `stage_dim_reset` | 화면 전체가 아니라 무대 · 층 단위로 작동하고 그 무대의 마스크에 잘린다 |
-| `screen_blur` · `screen_blur_reset` | `stage_blur` · `stage_blur_reset` | 같은 결 — 무대 · 층의 리그를 흐린다 |
+| `tx` | **`stage_mask`** | `<프리셋> [무대=stage01] [길이]` |
+| `tx_stage_mask_clear` | **`stage_mask_reset`** | 없음(모든 무대) |
+| `screen_dim` | **`stage_dim`** | `<층\|all> <세기> [길이=0.3s] [이징] [무대=stage00]` |
+| `screen_dim_reset` | **`stage_dim_reset`** | `[길이=0.3s] [이징]` |
+| `screen_blur` | **`stage_blur`** | `[층=mid] [양=1] [무대=stage00]` |
+| `screen_blur_reset` | **`stage_blur_reset`** | 없음 |
 
-- 런타임에서 고칠 곳: 문법 표(`StageCommandParser.Table.cs`) · Yarn 브리지 등록(`CommandBridge.cs`) · 프리셋 DB가 `tx_` 접두사를 걷어 내는 코드(`StageMaskMotionPresetDBSO.NormalizeKey`) · 데모 대본 · 문서 · 테스트.
-- 코어 폴드는 이 이름들을 따로 알지 않는다(모르는 이름은 Unhandled) — 이름을 바꿔도 코어 코드는 그대로다. `Core/Documentation~/target-boundary.md` 회계 표의 이름만 고친다.
+- 마스크 지우기는 끝말도 바꿨다(`_clear` → `_reset`). `_clear`는 얹은 효과를 걷을 때(`screen_*_clear` · `focus_clear`), `_reset`은 원래 상태로 돌릴 때(`shot_reset` · `size_reset` …) 쓴다 — 이 명령은 모든 무대를 다 보이는 모양(장면 경계의 기준 모양)으로 돌린다.
+- 마스크 프리셋 이름은 그대로다(`iris_in` · `slant_in` …). 프리셋 이름 앞의 `tx_`를 걷어 주던 코드(`StageMaskMotionPresetDBSO.NormalizeKey`)는 걷었다 — `<<stage_mask tx_iris_in>>`처럼 쓰면 모르는 프리셋이다.
+- 동작은 바뀌지 않았다. 런타임은 문법 표 · Yarn 브리지 등록 · 데모 대본 · 문서 · 시험을 바꿨다.
+- 코어 폴드는 이 이름들을 따로 알지 않는다(모르는 이름은 Unhandled) — 코어 코드는 그대로다(주석 · `target-boundary.md` 회계 표의 이름만).
+- 소비처에서 바꿀 곳(2026-11-17 셈): 작업공간 대본 `<<tx` 31 · `<<tx_stage_mask_clear` 1(`origin/dev`), `screen_dim` · `screen_blur` 0 · 무대 추출기 `effects.py`의 `screen_blur` · 저작 툴은 확인 못 함.
 
 ## 3. 소비처마다 할 일
 
@@ -84,12 +90,12 @@ L3부터는 옛 대본이 그대로 돌지 않는다 — 대사 줄 머리의 `p
 |---|---|---|
 | B01 장소 바꾸기 · B02 시간 건너뛰기 · B03 장제목 · 장소 카드(암전) | 검은 배경 슬롯(`bg_top`)을 `fade`로 흉내 낸다 | `screen_cover black <길이>` … `screen_cover_clear <길이>`. 장면 머리의 `bg_black` · `bg_dim` · `bg_top` 슬롯 세우기가 필요 없어진다. 잰 길이(덮이는 데 · 머무름 · 걷히는 데)는 카드 글의 값 그대로 |
 | W01 회상 넘나들기(흰 화면) | `screen_flash memory` | 머무는 흰 화면이면 `screen_cover white` … `screen_cover_clear`. 번쩍이고 끝나는 것이면 그대로 |
-| D01 속말 · D02 회상 · 설명 살짝 · D03 어두운 바탕에 자막 · D04 배경만 | 흉내 — 검은 슬롯 `bg_dim`을 `fade`로 올리거나(D01 · D02), 배경 `bg_main`을 투명하게 해 뒤의 검정을 비친다(D03 · D04) | `screen_dim all <세기>`(D01 · D02 · D03) · `screen_dim far <세기>`(D04 — 인물은 밝다). 잰 밝기 → 세기 = 1 − 밝기(선형 색 공간에서 판의 투명도 α는 밝기를 ×(1 − α)로 만든다). 배경을 투명하게 하는 흉내는 걷는다 |
-| 컷인 · 팝업 | 카드가 없다(대본에 직접 — 아래) | 쓸 것이면 카드로: 팝업은 `screen_dim front` 쌍과 함께, 컷인 뒤 인서트는 판 치우기와 함께 |
+| D01 속말 · D02 회상 · 설명 살짝 · D03 어두운 바탕에 자막 · D04 배경만 | 흉내 — 검은 슬롯 `bg_dim`을 `fade`로 올리거나(D01 · D02), 배경 `bg_main`을 투명하게 해 뒤의 검정을 비친다(D03 · D04) | `stage_dim all <세기>`(D01 · D02 · D03) · `stage_dim far <세기>`(D04 — 인물은 밝다). 잰 밝기 → 세기 = 1 − 밝기(선형 색 공간에서 판의 투명도 α는 밝기를 ×(1 − α)로 만든다). 배경을 투명하게 하는 흉내는 걷는다 |
+| 컷인 · 팝업 | 카드가 없다(대본에 직접 — 아래) | 쓸 것이면 카드로: 팝업은 `stage_dim front` 쌍과 함께, 컷인 뒤 인서트는 판 치우기와 함께 |
 
-**대본(`runtime/Assets/Workspace/Dialogue/`)** — 2026-11-17 셈: `cutin_open` 50 · `cutin_close` 50 · `tx` 31 · `popup` 18 · `popup_close` 18.
-- `popup` 18곳: 뒤가 어두웠던 자리면 `screen_dim front` 쌍을 더한다(원본에서 팝업 뒤는 어두웠다 — PLAN_popup.md §1).
-- `tx` 31곳 중 같은 무대에서 컷인 뒤 인서트를 여는 곳: 판 치우기를 더한다. 열린 컷인 · 팝업 위의 `tx`: 정리 줄이 있는지 본다.
+**대본(`runtime/Assets/Workspace/Dialogue/`)** — 2026-11-17 셈: `cutin_open` 50 · `cutin_close` 50 · `tx` 31(→ `stage_mask`, §2) · `popup` 18 · `popup_close` 18.
+- `popup` 18곳: 뒤가 어두웠던 자리면 `stage_dim front` 쌍을 더한다(원본에서 팝업 뒤는 어두웠다 — PLAN_popup.md §1).
+- `tx`(→ `stage_mask`) 31곳 중 같은 무대에서 컷인 뒤 인서트를 여는 곳: 판 치우기를 더한다. 열린 컷인 · 팝업 위의 `stage_mask`: 정리 줄이 있는지 본다.
 - 덮기 135곳 · 어둡게 223줄(PLAN_screen-cover.md §1)을 카드를 따라 새 어휘로.
 - 대본을 내는 도구(`tools/episode` · `tools/stage` · `tools/catalog`)가 카드 명령을 그대로 찍으므로 카드를 먼저 고친다.
 - 작업공간의 규칙대로 "통과"는 녹화 비교로만 판정한다.
@@ -102,14 +108,14 @@ L3부터는 옛 대본이 그대로 돌지 않는다 — 대사 줄 머리의 `p
 ### 3.2 저작 툴 — `ked-story-compositor`
 
 이 세션에서 접근하지 못했다(무엇을 고쳐야 하는지는 이 문서로 넘긴다).
-- 대본을 내는 쪽: 새 어휘(§1.1), 팝업 뒤 깔기 · 판 치우기(§1.2), 이름이 정해지면 새 이름(§2). 툴은 정본 어휘만 낸다(문법 표 주석).
+- 대본을 내는 쪽: 새 어휘(§1.1), 팝업 뒤 깔기 · 판 치우기(§1.2), 새 이름(§2 — 옛 이름은 받지 않는다). 툴은 정본 어휘만 낸다(문법 표 주석).
 - 미리보기: 컷인 · 팝업은 끝 상태 표(`CutIns` · `Popups`)로 그릴 수 있다 — 표는 바뀌지 않았다. 덮개 · 어둡기 판은 폴드 밖이다.
 
 ### 3.3 무대 추출기 — `ked-staging-extractor`
 
-- `ked_staging/effects.py`가 `screen_blur`를 낸다 — 이름을 바꾸면(§2) 함께 고친다.
+- `ked_staging/effects.py`가 `screen_blur`를 낸다 — `stage_blur`로 고친다(§2 — 옛 이름은 받지 않는다).
 - 줄 안의 시각(`timing.py`)을 낼 때 §1.4의 규칙을 따른다 — 대사 줄 머리에는 시간이 없다(표지 또는 줄 앞 무대 스텝), 자동 줄의 머무름은 `#auto=길이`.
-- 컷인 · 팝업 · `tx` · 덮개 · 어둡게는 내지 않는다(2026-11-17 확인). 원본의 암전 · 어둡게를 뽑게 되면 §1.1의 어휘로 낸다.
+- 컷인 · 팝업 · `stage_mask` · 덮개 · 어둡게는 내지 않는다(2026-11-17 확인). 원본의 암전 · 어둡게를 뽑게 되면 §1.1의 어휘로 낸다.
 
 ### 3.4 연출 감독 — `ked-story-director`
 
@@ -117,8 +123,8 @@ L3부터는 옛 대본이 그대로 돌지 않는다 — 대사 줄 머리의 `p
 
 ### 3.5 모션 툴 — `ked-motion-tool-characterRig`
 
-- 코어 사본이다. 덮개 · 컷인 · 팝업 · tx 일로는 코어의 코드가 바뀌지 않아 동기화할 것이 없다(§1.3). 이름을 바꿔도(§2) 코어 코드는 그대로다.
-- 줄의 자리(§1.4)는 코어를 바꾼다 — `AutoAdvanceTag`(새로) · `LineBeatSchedule`(새로 — `BeatMarker` · `AtCommand` · `ScheduledCommand`) · `YarnCommandTextExtractor`(`<<at>>` · `[beat]`, `StripInlineCommands` → `StripLineMarkers`, `InlineCommandMarker` 걷음, `IsWaitingCommand`) · `StageReducer`(`Nfr` 갈래 걷음) · 그 시험. L5까지 끝나 지금 맞출 수 있다(`Documentation~/vendoring.md`).
+- 코어 사본이다. 덮개 · 컷인 · 팝업 · 무대 마스크와 명령 이름 일로는 코어의 코드가 바뀌지 않았다(§1.3 · §2).
+- 줄의 자리(§1.4)는 코어를 바꿨다 — `AutoAdvanceTag` · `LineBeatSchedule`(새로) · `YarnCommandTextExtractor` · `StageReducer`(`Nfr` 갈래). 툴의 코드(`src/Mt.*`)는 이것들을 부르지 않는다(2026-11-17 확인) — 툴에서 할 일은 없다. 툴의 사본은 원래 옛 `ked-stage-runtime`(2026-10-29)에 이모지 파일만 더 들인 판이라, 통째로 맞출지는 툴 쪽에서 따로 정한다(툴의 `src/Ked.Presentation.Core/vendoring.md`).
 
 ## 4. 반영 기록
 

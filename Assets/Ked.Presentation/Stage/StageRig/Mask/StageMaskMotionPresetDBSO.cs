@@ -97,10 +97,6 @@ public sealed class StageMaskMotionPresetDBSO : ScriptableObject
         key = key.Replace(" ", "_");
         key = key.Replace("-", "_");
 
-        // Yarn 커맨드 네임스페이스 접두사 흡수: "tx_hstrip_open" -> "hstrip_open"
-        if (key.StartsWith("tx_"))
-            key = key.Substring(3);
-
         return key;
     }
 

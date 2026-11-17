@@ -10,7 +10,7 @@ public sealed class StageLayerBlurCommandSpec : CommandSpecBase
     public string stage = StageKeyParser.DefaultStage;
     public float layerDepth = Ked.Presentation.Core.StageLayerLabels.Far;
 
-    [Tooltip("true면 무대 · 층 전부의 레이어 블러를 걷는다(screen_blur_reset). stage · layerDepth는 무시.")]
+    [Tooltip("true면 무대 · 층 전부의 레이어 블러를 걷는다(stage_blur_reset). stage · layerDepth는 무시.")]
     public bool clearAll;
 
     [Header("Blur")]

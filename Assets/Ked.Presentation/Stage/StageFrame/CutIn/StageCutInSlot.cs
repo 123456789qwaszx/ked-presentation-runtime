@@ -13,8 +13,8 @@ using UnityEngine;
 /// 상태는 셋이다. 중립(창 항등 — 컷인을 안 쓰는 무대), 열림(Layout 뒤), 닫힘(퇴장 모션 끝 — 창 항등 · 마스크 숨김).
 /// 보이기 · 숨기기는 마스크 하나가 정한다 — 창은 자세(팝 · 회전)만 맡고 무대를 숨기지 않는다(docs/PLAN_stage-visibility.md §2).
 /// 창 모션(배율 · 회전 — 캐릭터 motion과 같은 식, MotionMath.Compose relative)은 이 슬롯이 하나만 소유한다
-/// (StageMaskSlot의 tx 모션과 같은 규율). 새 열기 · 닫기는 앞 모션을 먼저 확정한다.
-/// tx · 마스크 지우기 · 장면 경계가 Reset으로 끝값 없이 끊고 중립에 돌린다 — 마스크 모양은 그 커맨드의 것이 이긴다.
+/// (StageMaskSlot의 stage_mask 모션과 같은 규율). 새 열기 · 닫기는 앞 모션을 먼저 확정한다.
+/// 장면 경계(StageFrameRegistry.ResetAll)가 Reset으로 끝값 없이 끊고 중립에 돌린다. 마스크 커맨드는 창을 모른다.
 /// </summary>
 public sealed class StageCutInSlot
 {
@@ -109,7 +109,7 @@ public sealed class StageCutInSlot
     }
 
     // 닫힘 — 퇴장 모션의 끝(창 배율 0). 같은 순간 창을 항등으로 돌리고 무대는 마스크가 숨긴다 — 화면은 그대로다.
-    // 창을 배율 0으로 남기면 다음에 그 무대를 tx로 열어도 보이지 않는다(docs/PLAN_stage-visibility.md §1).
+    // 창을 배율 0으로 남기면 다음에 그 무대를 stage_mask로 열어도 보이지 않는다(docs/PLAN_stage-visibility.md §1).
     private void SetClosed()
     {
         SetWindowNeutral();

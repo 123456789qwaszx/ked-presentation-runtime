@@ -11,7 +11,7 @@ title: Demo_Presentation
 <<slot s3 stage00 mid>>
 <<cast s3 kasmi a 1>>
 <<surface_reset>>
-<<screen_blur_reset>>
+<<stage_blur_reset>>
 
 <<bg_sprite bg_main class_day>>
 <<bg_fade_in bg_main 24fr>>
@@ -75,7 +75,7 @@ test
 <<rotate_reset s1 0fr>>
 정리.
 
-<<screen_blur front 0.5>>
+<<stage_blur front 0.5>>
 <<char_visual_dim s1 2 6fr>>
 하린: 지금부터 보이는 건 전부 이 대본 한 장에 적힌 명령이야. #line:ln_cydaj9ym
 
@@ -125,12 +125,12 @@ test
 <<char_visual_dim s2 0.5 20fr>>
 하린: 말하는 사람에게 빛을 모으고, 듣는 사람은 한 톤 낮춰. #line:ln_5ag43erq
 
-<<screen_blur far 1>>
+<<stage_blur far 1>>
 <<shot_focus_to s1 face center 1.25 30fr>>
 하린: 배경을 흐리고, 카메라를 얼굴 쪽으로 당기면… #line:ln_01mhdu3v
 
 <<shot_reset 20fr>>
-<<screen_blur_reset>>
+<<stage_blur_reset>>
 <<char_visual_clear s1 10fr>>
 <<char_visual_clear s2 10fr>>
 시구레: 다시 넓게. 원래 무대로 돌아왔어요. #line:ln_9nyveem8
@@ -166,12 +166,12 @@ test
 <<screen_flash soft 0.45>>
 하린: 그리고 번쩍! 효과음과 함께. #line:ln_8bpnwdqw
 
-<<tx daze_close stage00 14fr>>
+<<stage_mask daze_close stage00 14fr>>
 <<bg_sprite bg_main studio_evening>>
 <<place_center s3 bust 0fr>>
 <<size s3 mid bust 0fr>>
 <<fade_in s3 0fr>>
-<<tx daze_open stage00 16fr>>
+<<stage_mask daze_open stage00 16fr>>
 카스미: …장면이 넘어갔네. 해 질 녘 작업실이야. #line:ln_z94y5hi1
 
 카스미: 무대는 그대로라서, 둘 다 아까 그 자리에 있어. #line:ln_nkr0mbcc
@@ -209,16 +209,16 @@ rrr
 <<fade_out c2 0fr>>
 
 // ── 그림 팝업 (docs/PLAN_stage-visibility.md §3.3) — 덮는 무대의 close 층에 그림 하나를 띄운다 ──
-// 팝업은 그림 하나다. 뒤를 어둡게 까는 것은 대본이 screen_dim으로 한다 — 그림 바로 뒤인 front 층의 판(그 무대의 far ~ front와 아래 무대를 덮는다).
-<<screen_dim front 0.47 0.45s Linear stage02>>
+// 팝업은 그림 하나다. 뒤를 어둡게 까는 것은 대본이 stage_dim으로 한다 — 그림 바로 뒤인 front 층의 판(그 무대의 far ~ front와 아래 무대를 덮는다).
+<<stage_dim front 0.47 0.45s Linear stage02>>
 <<popup stage02 sample_letter>>
-하린: 그림 팝업이야. 뒤는 screen_dim으로 깔았고, 그림은 가운데에 떠.
+하린: 그림 팝업이야. 뒤는 stage_dim으로 깔았고, 그림은 가운데에 떠.
 
 <<popup stage02 sample_seedling>>
 하린: 열린 채로 다시 쓰면 그림을 새로 세워 — 새 그림이 페이드 인해.
 
 <<popup_close stage02>>
-<<screen_dim front 0 0.3s Linear stage02>>
+<<stage_dim front 0 0.3s Linear stage02>>
 하린: 닫을 때 깔아 둔 뒤도 같이 걷어.
 
 // ── 이모지 (docs/emoji-rig.md · docs/emoji-format.md) — 슬롯에 딸려 서는 작은 연출. 정의와 움직임은 emojis.json ──
@@ -343,7 +343,7 @@ rrr
 하린: 검은 동안 카메라를 기울이고 넓히고 흔들었어. 덮개는 끝까지 화면 전체였어?
 
 // ── 어둡게 (docs/PLAN_screen-cover.md §3.2) — 무대 리그의 층마다 선 검은 판. 캐릭터는 그대로이고, 판이 위에서 가린다 ──
-// <<screen_dim 층|all 세기 [길이] [이징] [무대]>> — all = 그 무대의 가장 앞 층의 판(무대 전체), far = 먼 층의 판(배경만 — 배경은 far,
+// <<stage_dim 층|all 세기 [길이] [이징] [무대]>> — all = 그 무대의 가장 앞 층의 판(무대 전체), far = 먼 층의 판(배경만 — 배경은 far,
 // 인물은 mid · front에 선다). 세기 0이면 걷는다.
 // 기다리지 않고 줄을 넘는다. 이 절도 보통 · Ctrl · 빠른 클릭 · R로 한 번씩 지나가 본다.
 <<place_left s1 bust 0fr>>
@@ -352,24 +352,24 @@ rrr
 시구레: 다시 나왔어요.
 
 // ① 속말 — 무대 전체(배경 + 인물)를 어둡게, 두 줄 이어서. 줄이 바뀌어도 끊기지 않아야 한다.
-<<screen_dim all 0.45 0.27s>>
+<<stage_dim all 0.45 0.27s>>
 (정말 괜찮을까……)
 (티 내지 말자.)
-<<screen_dim all 0 0.23s>>
+<<stage_dim all 0 0.23s>>
 하린: 응, 괜찮아.
 
 // ② 판정 — 배경만 가라앉고 두 사람은 밝다.
-<<screen_dim far 0.6 0.3s>>
+<<stage_dim far 0.6 0.3s>>
 시구레: 합격이에요.
 
 // 판은 곱해진다 — 배경만 어두운 위에 무대 전체를 더하면 배경은 더 어둡다.
-<<screen_dim all 0.45 0.3s>>
+<<stage_dim all 0.45 0.3s>>
 (합격……? 정말로?)
-<<screen_dim_reset 0.3s>>
+<<stage_dim_reset 0.3s>>
 하린: 정말?
 
 // ③ 어두운 동안 들어온 인물 · 이모지 · 바뀐 배경도 같이 어둡다.
-<<screen_dim all 0.45 0.3s>>
+<<stage_dim all 0.45 0.3s>>
 시구레: 어두운 동안에…
 <<place_center s3 bust 0fr>>
 <<fade_in s3 0.4s>>
@@ -377,7 +377,7 @@ rrr
 카스미: 들어와도 같이 어두워. 이모지도.
 <<bg_sprite bg_main class_day>>
 카스미: 배경을 바꿔도.
-<<screen_dim all 0 0.3s>>
+<<stage_dim all 0 0.3s>>
 카스미: 걷었어.
 
 // ④ 컷인은 그 무대에 걸 때만 어둡다 — 본 무대 배경만 가라앉히고, 다음 줄에서 컷인 창 안만 어둡게.
@@ -387,14 +387,14 @@ rrr
 <<place c4 face left 0fr>>
 <<fade_in c4 0fr>>
 <<cutin_open stage01 pink_stars -11.5u -3.25u>>
-<<screen_dim far 0.6 0.3s>>
+<<stage_dim far 0.6 0.3s>>
 시구레: 컷인은 밝고, 본 무대 배경만 가라앉았어요.
 
-<<screen_dim far 0 0.3s>>
-<<screen_dim all 0.45 0.3s Linear stage01>>
+<<stage_dim far 0 0.3s>>
+<<stage_dim all 0.45 0.3s Linear stage01>>
 시구레: 이번엔 컷인 창 안만 어두워요.
 
-<<screen_dim_reset 0.2s>>
+<<stage_dim_reset 0.2s>>
 <<cutin_close stage01>>
 시구레: 닫을게요.
 
@@ -403,32 +403,32 @@ rrr
 // ⑤ 회상 — 흰 화면으로 들어가 한 톤 낮추고, 흰 화면으로 돌아온다.
 <<screen_cover white 0.5s>>
 <<bg_sprite bg_main studio_evening>>
-<<screen_dim all 0.2 0fr>>
+<<stage_dim all 0.2 0fr>>
 <<screen_cover_clear 0.6s>>
 <<step>>
 하린: 회상 안은 한 톤 낮춰.
 
 <<screen_cover white 0.5s>>
-<<screen_dim_reset 0fr>>
+<<stage_dim_reset 0fr>>
 <<bg_sprite bg_main class_day>>
 <<screen_cover_clear 0.6s>>
 <<step>>
 하린: 돌아왔어.
 
 // ⑥ 어두운 채 넓히고 기울인다 — 판은 층과 함께 움직이지만 넉넉히 커서, 무대 창 안에 판의 가장자리가 드러나면 안 된다.
-<<screen_dim all 0.5 0.3s>>
+<<stage_dim all 0.5 0.3s>>
 <<shot_zoom -4 0.6s>>
 <<shot_roll 6 0.6s>>
 하린: 어두운 채 넓히고 기울여도 고르게 어두워?
 
 <<shot_reset_all 0.4s>>
-<<screen_dim_reset 0.3s>>
+<<stage_dim_reset 0.3s>>
 하린: 원래대로.
 
-// ── tx와 컷인 · 팝업 (docs/PLAN_stage-visibility.md) — 보이는 범위는 마스크 하나, 무대에 그려지는 것은 모두 리그 ──
-// 컷인 판 · 팝업 그림도 무대 안의 리그라 tx(마스크)가 함께 자른다. tx는 틀(컷인 창)을 모른다 — 열린 컷인은 뒤의 cutin_close가 정리한다.
+// ── stage_mask와 컷인 · 팝업 (docs/PLAN_stage-visibility.md) — 보이는 범위는 마스크 하나, 무대에 그려지는 것은 모두 리그 ──
+// 컷인 판 · 팝업 그림도 무대 안의 리그라 stage_mask(마스크)가 함께 자른다. stage_mask는 틀(컷인 창)을 모른다 — 열린 컷인은 뒤의 cutin_close가 정리한다.
 
-// ① 정상 순서 — 컷인을 닫으면 창은 항등으로 돌아오고 그 무대는 마스크가 숨긴다. 같은 무대를 tx로 다시 열면 그대로 보인다 — 되돌릴 것이 없어 경고도 없다.
+// ① 정상 순서 — 컷인을 닫으면 창은 항등으로 돌아오고 그 무대는 마스크가 숨긴다. 같은 무대를 stage_mask로 다시 열면 그대로 보인다 — 되돌릴 것이 없어 경고도 없다.
 //    컷인 판은 무대 안의 리그라 닫아도 남는다(마스크가 숨긴다) — 같은 무대를 인서트로 쓰기 전에 인물처럼 치운다(stage01_cutin_panel).
 <<slot c5 stage01 mid>>
 <<cast c5 kasmi a 1>>
@@ -442,30 +442,30 @@ rrr
 카스미: 닫았어.
 
 <<bg_fade_out stage01_cutin_panel 0fr>>
-<<tx slant_in stage01>>
+<<stage_mask slant_in stage01>>
 카스미: 같은 무대를 사선 패널로 다시 열었어. 왼쪽 패널 안에 내가 보여? 컷인 판은 없어야 해.
 
-<<tx slant_out stage01>>
+<<stage_mask slant_out stage01>>
 카스미: 패널을 닫을게.
 
-// ② 열린 컷인 위에 tx — iris_out(화면 전체 원이 가운데로 줄어든다).
-//    볼 것: 판과 인물이 함께 원 모양으로 닫힌다. 마스크는 하나라 tx가 시작하면 네 점 대신 원이 자른다 — 판 아래 잘려 있던 몸도 원 안에서는 보인다.
+// ② 열린 컷인 위에 stage_mask — iris_out(화면 전체 원이 가운데로 줄어든다).
+//    볼 것: 판과 인물이 함께 원 모양으로 닫힌다. 마스크는 하나라 stage_mask가 시작하면 네 점 대신 원이 자른다 — 판 아래 잘려 있던 몸도 원 안에서는 보인다.
 <<cutin_open stage01 pink_stars -11.5u -3.25u>>
 카스미: 이번엔 컷인을 연 채로…
 
-<<tx iris_out stage01>>
-카스미: tx로 닫았어.
+<<stage_mask iris_out stage01>>
+카스미: stage_mask로 닫았어.
 
 <<cutin_close stage01>>
 카스미: 정리.
 
-// ③ 열린 팝업 위에 tx — 팝업 그림은 그 무대(stage02) 안의 리그라 tx 모양대로 잘린다.
+// ③ 열린 팝업 위에 stage_mask — 팝업 그림은 그 무대(stage02) 안의 리그라 stage_mask 모양대로 잘린다.
 //    볼 것: 그림이 띠가 닫히는 모양대로 함께 닫히나.
 <<popup stage02 sample_letter>>
 하린: 팝업을 열고…
 
-<<tx daze_close stage02>>
-하린: 같은 무대를 tx로 닫았어.
+<<stage_mask daze_close stage02>>
+하린: 같은 무대를 stage_mask로 닫았어.
 
 <<popup_close stage02>>
 하린: 정리.
@@ -475,7 +475,7 @@ rrr
 <<cutin_open stage01 pink_stars -11.5u -3.25u>>
 시구레: 컷인을 열고…
 
-<<tx_stage_mask_clear>>
+<<stage_mask_reset>>
 시구레: 마스크를 모두 지웠어요.
 
 <<fade_out c5 0fr>>

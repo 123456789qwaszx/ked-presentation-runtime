@@ -14,10 +14,10 @@ public sealed class StageLayerDimCommandSpec : CommandSpecBase
     [Tooltip("이 층의 판 — 먼 층부터 이 층까지 어두워진다. allLayers면 쓰지 않는다.")]
     public float layerDepth = StageLayerLabels.Far;
 
-    [Tooltip("true면 그 무대의 가장 앞 층의 판 — 무대 전체(screen_dim all).")]
+    [Tooltip("true면 그 무대의 가장 앞 층의 판 — 무대 전체(stage_dim all).")]
     public bool allLayers;
 
-    [Tooltip("true면 모든 무대 · 층의 판을 걷는다(screen_dim_reset). stage · layerDepth · amount는 쓰지 않는다.")]
+    [Tooltip("true면 모든 무대 · 층의 판을 걷는다(stage_dim_reset). stage · layerDepth · amount는 쓰지 않는다.")]
     public bool resetAll;
 
     [Header("Dim")]
