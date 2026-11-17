@@ -17,22 +17,20 @@ public sealed class StageMaskClearCommandSpec : CommandSpecBase
 }
 
 // 무대 마스크를 정해진 모양으로 바로 둔다 — 진행 중인 tx 모션은 슬롯이 끊는다.
+// 틀(컷인 · 팝업)을 중립으로 두는 일은 파서가 바로 앞에 낸 틀 되돌리기 커맨드가 한다 — 마스크는 틀을 모른다(stage-frame.md §4).
 public sealed class StageMaskClearCommand : CommandBase
 {
     private readonly StageMaskClearCommandSpec _spec;
     private readonly StageRigRegistry _stages;
-    private readonly StageFrameRegistry _frames;
 
     public override bool WaitForCompletion => false;
 
     public StageMaskClearCommand(
         StageMaskClearCommandSpec spec,
-        StageRigRegistry stages,
-        StageFrameRegistry frames)
+        StageRigRegistry stages)
     {
         _spec = spec;
         _stages = stages;
-        _frames = frames;
     }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
@@ -48,15 +46,11 @@ public sealed class StageMaskClearCommand : CommandBase
 
     private void Apply()
     {
-        // 마스크를 지우면 틀도 끝난다 — 컷인 창 · 판과 그림 팝업을 중립으로(docs/PLAN_cutin.md §5 · PLAN_popup.md §6).
         if (!_spec.allStages)
         {
-            _frames.Reset(_spec.stage);
             _stages.Get(_spec.stage).Mask.Clear(_spec.mode, _spec.hideEdge);
             return;
         }
-
-        _frames.ResetAll();
 
         for (int i = 0; i < _stages.All.Count; i++)
             _stages.All[i].Mask.Clear(_spec.mode, _spec.hideEdge);

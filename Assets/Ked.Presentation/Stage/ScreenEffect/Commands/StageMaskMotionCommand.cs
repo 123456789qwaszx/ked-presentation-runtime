@@ -18,12 +18,12 @@ public sealed class StageMaskMotionCommandSpec : CommandSpecBase
 }
 
 // tx — 프리셋을 골라 무대 슬롯에 모션을 걸기만 한다. 모션은 슬롯이 소유한다(StageMaskSlot.PlayMotion).
+// 그 무대의 틀(컷인 · 팝업)을 중립으로 두는 일은 파서가 바로 앞에 낸 틀 되돌리기 커맨드가 한다 — 마스크는 틀을 모른다(stage-frame.md §4).
 public sealed class StageMaskMotionCommand : CommandBase
 {
     private readonly StageMaskMotionCommandSpec _spec;
     private readonly StageMaskMotionPresetDBSO _presetDb;
     private readonly StageRigRegistry _stages;
-    private readonly StageFrameRegistry _frames;
 
     private StageMaskMotionPresetDBSO.Entry _entry;
     private float _duration;
@@ -36,13 +36,11 @@ public sealed class StageMaskMotionCommand : CommandBase
     public StageMaskMotionCommand(
         StageMaskMotionCommandSpec spec,
         StageMaskMotionPresetDBSO presetDb,
-        StageRigRegistry stages,
-        StageFrameRegistry frames)
+        StageRigRegistry stages)
     {
         _spec = spec;
         _presetDb = presetDb;
         _stages = stages;
-        _frames = frames;
     }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
@@ -77,21 +75,6 @@ public sealed class StageMaskMotionCommand : CommandBase
             : _entry.duration;
 
         _slot = _stages.Get(_spec.stage).Mask;
-        StageCutInSlot cutIn = _frames.CutIn(_spec.stage);
-        StagePopupSlot popup = _frames.Popup(_spec.stage);
-
-        // tx는 무대를 어디까지 보여 줄지를 새로 정한다 — 열려 있던(또는 닫힌 채 남은) 컷인 창 · 판은 중립으로.
-        // 마스크 모양은 tx의 것이 이긴다(docs/PLAN_cutin.md §5).
-        if (cutIn.IsOpen || cutIn.Window.localScale != Vector3.one)
-            Debug.LogWarning($"[StageMaskMotionCommand] {_spec.stage}의 컷인을 tx '{_spec.presetKey}'가 덮는다 — 컷인 창을 중립으로 돌린다.");
-
-        cutIn.Reset();
-
-        // 그림 팝업도 같은 규칙 — 그 무대를 새로 보여 주는 전환이 덮는다(docs/PLAN_popup.md §6).
-        if (popup.IsOpen)
-            Debug.LogWarning($"[StageMaskMotionCommand] {_spec.stage}의 그림 팝업을 tx '{_spec.presetKey}'가 덮는다 — 팝업을 닫는다.");
-
-        popup.Reset();
     }
 
     private StageMaskMotionPresetDBSO.Entry ResolvePresetEntry()

@@ -171,6 +171,12 @@ public partial class SampleBootstrap
         // Audio
         AudioCommandFactory audioFactory = new(audioSystem);
 
+        // 무대 틀 — 컷인 창 · 그림 팝업, tx가 앞에 내는 틀 되돌리기(stage-frame.md)
+        StageFrameCommandFactory stageFrameFactory = new(
+            _stageFrames,
+            cutInPreset,
+            popupPreset);
+
         ScreenEffectCommandFactory screenEffectFactory = new(
             _screenEffectRig,
             screenFlashPresetDb,
@@ -178,10 +184,7 @@ public partial class SampleBootstrap
             screenVignettePresetDb,
             stageMaskMotionPresetDb,
             _stageRigs,
-            _stageFrames,
             _rigBlur,
-            cutInPreset,
-            popupPreset,
             screenCoverPresetDb);
 
         CompositeCommandFactory factory = new(
@@ -190,6 +193,7 @@ public partial class SampleBootstrap
             presentationShotFactory,
             presentationControlFactory,
             audioFactory,
+            stageFrameFactory,
             screenEffectFactory);
 
         commandExecutor.Initialize(factory);

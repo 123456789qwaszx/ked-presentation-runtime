@@ -129,12 +129,13 @@ public class StageCommandParserTests
     [Test]
     public void tx는_프리셋과_무대와_시간을_받는다()
     {
-        StageMaskMotionCommandSpec a = (StageMaskMotionCommandSpec)Parse(NewParser(), Cmd("tx", "daze_close", "stage00"))[0];
+        // [0]은 그 무대의 틀 되돌리기다(StageFrameResetTests) — 마스크 모션은 그 뒤.
+        StageMaskMotionCommandSpec a = (StageMaskMotionCommandSpec)Parse(NewParser(), Cmd("tx", "daze_close", "stage00"))[1];
         Assert.AreEqual("daze_close", a.presetKey);
         Assert.AreEqual("stage00", a.stage);
         Assert.AreEqual(-1f, a.durationOverride, "시간이 비면 프리셋 자체 시간");
 
-        StageMaskMotionCommandSpec b = (StageMaskMotionCommandSpec)Parse(NewParser(), Cmd("tx", "iris_in", "", "12fr"))[0];
+        StageMaskMotionCommandSpec b = (StageMaskMotionCommandSpec)Parse(NewParser(), Cmd("tx", "iris_in", "", "12fr"))[1];
         Assert.AreEqual("stage01", b.stage, "무대 생략값은 stage01");
         Assert.AreEqual(0.5f, b.durationOverride, 1e-6f);
     }
