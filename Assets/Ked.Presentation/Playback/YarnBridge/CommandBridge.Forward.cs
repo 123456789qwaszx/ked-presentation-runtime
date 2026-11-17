@@ -224,6 +224,12 @@ public sealed partial class YarnCommandBridge
     private void EnqueueStopVoiceSpec()
         => Forward("stop_voice");
 
+    private void EnqueueScreenCoverSpec(string presetKey = null, string durationToken = null, string easeToken = null)
+        => Forward("screen_cover", presetKey, durationToken, easeToken);
+
+    private void EnqueueScreenCoverClearSpec(string durationToken = null, string easeToken = null)
+        => Forward("screen_cover_clear", durationToken, easeToken);
+
     private void EnqueueScreenFlashPresetSpec(string presetKey = null, string intensity = null)
         => Forward("screen_flash", presetKey, intensity);
 

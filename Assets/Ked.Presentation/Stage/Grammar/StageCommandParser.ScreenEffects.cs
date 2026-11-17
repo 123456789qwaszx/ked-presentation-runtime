@@ -1,6 +1,23 @@
 using Ked.Presentation.Core;
 public sealed partial class StageCommandParser
 {
+    // 덮개 — 이징을 적지 않으면 Linear(덮기 · 걷기는 투명도가 고르게 가는 것이 기본이다).
+    private void EnqueueScreenCoverSpec(string presetKey, string durationToken, string easeToken)
+        => Emit(new ScreenCoverCommandSpec
+        {
+            presetKey = ScreenCoverPresetDBSO.NormalizeKey(presetKey),
+            duration = YarnDurationParser.Parse(durationToken),
+            ease = YarnEaseParser.Parse(easeToken, DG.Tweening.Ease.Linear),
+        });
+
+    private void EnqueueScreenCoverClearSpec(string durationToken, string easeToken)
+        => Emit(new ScreenCoverCommandSpec
+        {
+            clear = true,
+            duration = YarnDurationParser.Parse(durationToken),
+            ease = YarnEaseParser.Parse(easeToken, DG.Tweening.Ease.Linear),
+        });
+
     private void EnqueueScreenFlashPresetSpec(string presetKey, float intensity)
         => Emit(new ScreenFlashCommandSpec
         {

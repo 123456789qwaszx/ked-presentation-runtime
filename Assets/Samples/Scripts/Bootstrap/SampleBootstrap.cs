@@ -154,6 +154,8 @@ public partial class SampleBootstrap : MonoBehaviour, IRigPrefabSource
     [SerializeField] private ScreenVignettePresetDBSO screenVignettePresetDb;
     [FormerlySerializedAs("screenFlashPresetDbso")]
     [SerializeField] private ScreenFlashPresetDBSO screenFlashPresetDb;
+    [Tooltip("화면 덮개(screen_cover)의 색 프리셋. 비우면 코드 기본값(black · white)으로 덮고 경고한다.")]
+    [SerializeField] private ScreenCoverPresetDBSO screenCoverPresetDb;
 
     [FormerlySerializedAs("stageMaskMotionPresetDbSo")]
     [SerializeField] private StageMaskMotionPresetDBSO stageMaskMotionPresetDb;

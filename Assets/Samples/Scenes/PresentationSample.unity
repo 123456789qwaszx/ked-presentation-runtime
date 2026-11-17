@@ -844,6 +844,7 @@ MonoBehaviour:
   screenNoisePresetDb: {fileID: 11400000, guid: afb4892f90a1eff46b623bfa3c11a55d, type: 2}
   screenVignettePresetDb: {fileID: 11400000, guid: 53356775219299c42981714a7e8b025e, type: 2}
   screenFlashPresetDb: {fileID: 11400000, guid: fd8b0b7eceef6c549952782158c076ed, type: 2}
+  screenCoverPresetDb: {fileID: 11400000, guid: d84ceb937baf49efb0fccbabb10e5af1, type: 2}
   stageMaskMotionPresetDb: {fileID: 11400000, guid: 5e92252f243dfe94fbce20f08a326a2b, type: 2}
   cutInPreset: {fileID: 11400000, guid: be32cae4a2356db4c821f4d5d1698993, type: 2}
   popupPreset: {fileID: 11400000, guid: 2f018c6cbaa99114992e4c2649dbc24e, type: 2}

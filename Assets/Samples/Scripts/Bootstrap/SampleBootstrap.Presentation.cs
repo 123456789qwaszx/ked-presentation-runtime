@@ -181,7 +181,8 @@ public partial class SampleBootstrap
             _stageFrames,
             _rigBlur,
             cutInPreset,
-            popupPreset);
+            popupPreset,
+            screenCoverPresetDb);
 
         CompositeCommandFactory factory = new(
             charRigFactory,

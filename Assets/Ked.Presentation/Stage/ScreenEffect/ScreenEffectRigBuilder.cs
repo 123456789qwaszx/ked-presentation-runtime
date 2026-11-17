@@ -107,6 +107,10 @@ public sealed class ScreenEffectRigBuilder
     {
         switch (kind)
         {
+            case ScreenEffectRigSchema.ControllerKind.Cover:
+                EnsureEffectController<ScreenCoverEffectController>(go, image, materialResourcesPath);
+                break;
+
             case ScreenEffectRigSchema.ControllerKind.Vignette:
                 EnsureEffectController<ScreenVignetteEffectController>(go, image, materialResourcesPath);
                 break;
@@ -236,9 +240,14 @@ public sealed class ScreenEffectRigBuilder
 
         refs.ScreenOverlay_Root = GetRt(ScreenEffectRigSchema.Refs.ScreenOverlay_Root);
 
+        refs.Cover_Image = GetImg(ScreenEffectRigSchema.Refs.Cover_Image);
         refs.Vignette_Image = GetImg(ScreenEffectRigSchema.Refs.Vignette_Image);
         refs.Noise_Image = GetImg(ScreenEffectRigSchema.Refs.Noise_Image);
         refs.Flash_Image = GetImg(ScreenEffectRigSchema.Refs.Flash_Image);
+
+        refs.Cover = refs.Cover_Image != null
+            ? refs.Cover_Image.GetComponent<ScreenCoverEffectController>()
+            : null;
 
         refs.Vignette = refs.Vignette_Image != null
             ? refs.Vignette_Image.GetComponent<ScreenVignetteEffectController>()

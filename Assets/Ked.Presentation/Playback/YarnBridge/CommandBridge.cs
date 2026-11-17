@@ -334,6 +334,11 @@ public sealed partial class YarnCommandBridge
     
     private void BindScreenEffects(DialogueRunner runner)
     {
+        runner.AddCommandHandler<string, string, string>(
+            "screen_cover", EnqueueScreenCoverSpec);
+        runner.AddCommandHandler<string, string>(
+            "screen_cover_clear", EnqueueScreenCoverClearSpec);
+
         runner.AddCommandHandler<string, string>(
             "screen_flash", EnqueueScreenFlashPresetSpec);
         runner.AddCommandHandler(
@@ -394,7 +399,7 @@ public sealed partial class YarnCommandBridge
 
     // 인라인 명령([cmd="…"/])의 글을 스펙으로 풀어 output 뒤에 붙인다. 글은 대본 명령의 << >> 안과 같다.
     // output에 이미 든 것은 같은 자리의 앞 명령이다 — 대상 판정이 그 선언(actor · slot · cast)을 본다.
-    // 전경 명령(pause · Nfr)은 받지 않는다 — 인라인 명령은 타자기도 넘김도 멈추지 않는다.
+    // 전경 명령(pause · Nfr · screen_cover)은 받지 않는다 — 인라인 명령은 타자기도 넘김도 멈추지 않는다.
     public bool TryParseInline(string commandText, List<CommandSpecBase> output)
     {
         if (!YarnCommandTextExtractor.TryParseCommand($"<<{commandText}>>", "inline", out StageCommand command))
@@ -413,9 +418,10 @@ public sealed partial class YarnCommandBridge
 
         for (int i = 0; i < _parsed.Count; i++)
         {
-            if (_parsed[i] is WaitCommandSpec)
+            // 덮기(screen_cover)도 전경이다 — 다 덮일 때까지 기다린다(docs/PLAN_screen-cover.md §3.1).
+            if (_parsed[i] is WaitCommandSpec || _parsed[i] is ScreenCoverCommandSpec { clear: false })
             {
-                Debug.LogError($"[인라인 명령] 전경 명령(pause · Nfr)은 글 안에 쓸 수 없다: [cmd=\"{commandText}\"/]. 실행하지 않는다.");
+                Debug.LogError($"[인라인 명령] 전경 명령(pause · Nfr · screen_cover)은 글 안에 쓸 수 없다: [cmd=\"{commandText}\"/]. 실행하지 않는다.");
                 return false;
             }
         }

@@ -96,6 +96,8 @@ public sealed partial class StageCommandParser
         ["stop_all_sfx"] = (p, c) => p.EnqueueStopAllSfxSpec(),
         ["voice"] = (p, c) => p.EnqueuePlayVoiceSpec(c.Arg(0)),
         ["stop_voice"] = (p, c) => p.EnqueueStopVoiceSpec(),
+        ["screen_cover"] = (p, c) => p.EnqueueScreenCoverSpec(c.Arg(0, ScreenCoverPresetDBSO.DefaultPresetKey), c.Arg(1, "0.5s"), c.Arg(2, "")),
+        ["screen_cover_clear"] = (p, c) => p.EnqueueScreenCoverClearSpec(c.Arg(0, "0.5s"), c.Arg(1, "")),
         ["screen_flash"] = (p, c) => p.EnqueueScreenFlashPresetSpec(c.Arg(0), Float(c, 1, 1f)),
         ["screen_flash_clear"] = (p, c) => p.EnqueueScreenFlashClearSpec(),
         ["screen_vignette"] = (p, c) => p.EnqueueScreenVignettePresetSpec(c.Arg(0), Float(c, 1, 1f), c.Arg(2, "0.35s")),

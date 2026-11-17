@@ -8,6 +8,7 @@ public sealed class ScreenEffectRig : MonoBehaviour
 
     public ScreenEffectRigRefs Refs { get; private set; }
 
+    public ScreenCoverEffectController Cover => Refs?.Cover;
     public ScreenVignetteEffectController Vignette => Refs?.Vignette;
     public ScreenNoiseEffectController Noise => Refs?.Noise;
     public ScreenFlashEffectController Flash => Refs?.Flash;
@@ -23,6 +24,7 @@ public sealed class ScreenEffectRig : MonoBehaviour
 
     public void KillAllTweens(bool complete)
     {
+        Cover?.KillTween(complete);
         Vignette?.KillTween(complete);
         Noise?.KillTween(complete);
         Flash?.KillTween(complete);
@@ -30,12 +32,13 @@ public sealed class ScreenEffectRig : MonoBehaviour
 
     public void ClearAllImmediate()
     {
+        Cover?.ClearImmediate();
         Vignette?.ClearImmediate();
         Noise?.ClearImmediate();
         Flash?.ClearImmediate();
     }
 
-    // 조립 때와 장면 경계(정지)에서 — 진행 중인 전환·플래시를 확정 없이 끊고 세기를 0으로.
+    // 조립 때와 장면 경계(정지)에서 — 진행 중인 전환·플래시를 확정 없이 끊고 세기를 0으로(덮개는 걷힌다).
     public void ResetToBaselineImmediate()
     {
         ClearAllImmediate();
