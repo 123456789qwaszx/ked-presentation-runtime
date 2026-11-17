@@ -5,6 +5,7 @@ using Yarn.Unity;
 public sealed class StageStepFlow
 {
     private readonly StepHead _stepHead;
+    private readonly InlineCommandTrack _inlineCommands;
     private readonly LineDisplayState _lineDisplayState;
     private readonly SeekState _seekState;
     private readonly DialogueBoxPresentationController _boxPresentation;
@@ -13,6 +14,7 @@ public sealed class StageStepFlow
 
     public StageStepFlow(
         StepHead stepHead,
+        InlineCommandTrack inlineCommands,
         LineDisplayState lineDisplayState,
         SeekState seekState,
         DialogueBoxPresentationController boxPresentation,
@@ -20,6 +22,7 @@ public sealed class StageStepFlow
         ICommandRunScopeProvider scopeProvider)
     {
         _stepHead = stepHead;
+        _inlineCommands = inlineCommands;
         _lineDisplayState = lineDisplayState;
         _seekState = seekState;
         _boxPresentation = boxPresentation;
@@ -38,7 +41,7 @@ public sealed class StageStepFlow
         if (!_seekState.IsSeeking)
             return false;
 
-        _stepHead.PlayStageStep(snap: true, seekPassThrough: true);
+        PlayHead(snap: true, seekPassThrough: true);
         return true;
     }
 
@@ -53,7 +56,7 @@ public sealed class StageStepFlow
             CommandRunScope scope = _scopeProvider.CurrentScope;
             bool rapidSkip = _playbackState.IsRapidSkipMode;
 
-            _stepHead.PlayStageStep(snap: rapidSkip, seekPassThrough: false);
+            PlayHead(snap: rapidSkip, seekPassThrough: false);
 
             await _boxPresentation.HideForStageStepAsync(
                 run,
@@ -69,6 +72,13 @@ public sealed class StageStepFlow
         {
             _lineDisplayState.MarkStageStepExited();
         }
+    }
+
+    // 머리 — 쌓인 명령, 그 뒤에 붙을 대사 줄이 없던 <<at>>(docs/PLAN_line-beat.md R1).
+    private void PlayHead(bool snap, bool seekPassThrough)
+    {
+        _stepHead.Play(snap, seekPassThrough);
+        _inlineCommands.PlayStrayAt();
     }
 
     // 이 스텝을 연 세션이 살아 있고 그 전경이 아직 도는가. 세션이 끝났거나 바뀌었으면 기다릴 것이 없다.

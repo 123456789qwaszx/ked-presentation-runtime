@@ -12,6 +12,7 @@ public sealed class LinePresentationFlow
     private readonly DialogueBoxPresentationController _boxPresentation;
     private readonly EllipsisBreathTypewriter _typewriter;
     private readonly StepHead _stepHead;
+    private readonly InlineCommandTrack _inlineCommands;
     private readonly LineHurrySpeedController _lineHurrySpeed;
 
     public LinePresentationFlow(
@@ -21,6 +22,7 @@ public sealed class LinePresentationFlow
         DialogueBoxPresentationController boxPresentation,
         EllipsisBreathTypewriter typewriter,
         StepHead stepHead,
+        InlineCommandTrack inlineCommands,
         LineHurrySpeedController lineHurrySpeed)
     {
         _yarnLineBoundary = yarnLineBoundary;
@@ -29,6 +31,7 @@ public sealed class LinePresentationFlow
         _boxPresentation = boxPresentation;
         _typewriter = typewriter;
         _stepHead = stepHead;
+        _inlineCommands = inlineCommands;
         _lineHurrySpeed = lineHurrySpeed;
     }
 
@@ -66,12 +69,10 @@ public sealed class LinePresentationFlow
             _seekState.End(SeekEndReason.Arrived);
 
         bool seekPassThrough = ctx.SeekDecision == SeekLineDecision.SkipVisualAndDispatchSeekNext;
+        _stepHead.Play(snap: ctx.IsRapidSkip || seekPassThrough, seekPassThrough: seekPassThrough);
 
-        // 머리 명령은 대사와 함께 시작한다. 표지 자리의 명령(<<at>>)은 이 줄의 스텝에 덧붙는다 — 글자 자리에서 타자기가 실행한다.
-        ctx.Beats = _stepHead.PlayLine(
-            ctx.Line.TextWithoutCharacterName,
-            snap: ctx.IsRapidSkip || seekPassThrough,
-            seekPassThrough: seekPassThrough);
+        // 표지 자리의 명령(<<at>> · 옛 [cmd])은 이 줄의 스텝에 덧붙는다. 글자 자리에서 타자기가 실행한다.
+        _inlineCommands.Begin(ctx.Line.TextWithoutCharacterName);
         SetPhase(ctx, LinePresentationPhase.LineEnteredCommitted);
         
         if (seekPassThrough) {
@@ -130,8 +131,8 @@ public sealed class LinePresentationFlow
         }
 
         // 타자기가 닿지 않은 자리 — <<at end>>, 표지를 잃은 것, 글 끝의 표지, 다 보이기 전에 넘어간 줄, 글 칸이 없는 줄.
-        // 넘김을 기다리기 전에 돈다 — 넘어간 줄의 끝 상태는 접힘과 같아야 한다. 끊긴 줄(위)은 실행하지 않는다 — 장면을 다시 접는다.
-        ctx.Beats.PlayRemaining();
+        // 넘어간 줄의 끝 상태는 접힘과 같아야 한다. 끊긴 줄(위)은 실행하지 않는다 — 장면을 다시 접는다.
+        _inlineCommands.PlayRemaining();
 
         // Phase: DisplayCommitted
         _lineDisplayState.MarkLineDisplayCompleted("normal");
@@ -152,7 +153,7 @@ public sealed class LinePresentationFlow
         SetPhase(ctx, LinePresentationPhase.SeekPassThrough);
 
         // 타자기가 돌지 않는다 — 표지 자리의 명령은 줄 머리 명령 바로 뒤에 실행 순서대로 압축 실행된다.
-        ctx.Beats.PlayRemaining();
+        _inlineCommands.PlayRemaining();
 
         _boxPresentation.CloseAll();
         _lineDisplayState.MarkLineDisplayCompleted("passThrough");
@@ -164,7 +165,6 @@ public sealed class LinePresentationFlow
     {
         SetPhase(ctx, LinePresentationPhase.Stale);
 
-        ctx.Beats.Discard();
         _boxPresentation.CleanupStale();
         _lineDisplayState.MarkLineTornDown("StaleAfterBox");
 
@@ -180,7 +180,6 @@ public sealed class LinePresentationFlow
     {
         SetPhase(ctx, LinePresentationPhase.Stale);
 
-        ctx.Beats.Discard();
         _typewriter.ContentWillDismiss();
         _lineDisplayState.MarkLineTornDown("StaleAfterTypewriter");
 

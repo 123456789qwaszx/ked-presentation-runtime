@@ -13,8 +13,7 @@ public sealed class YarnPlaybackDriver
     // 줄의 머리가 그 줄의 목록으로 가져간다(InlineCommandTrack.Begin). 무대 스텝이면 머리 뒤에(PlayStrayAt).
     private readonly List<AtCommand> _collectedAt = new();
 
-    // 지금의 실행 세대 — 정지에서 끝나고 다시 재생할 때 새로 선다. 줄의 표지 목록이 이것으로 제 세대를 확인한다.
-    public CommandRunScope CurrentScope => _scopeProvider?.CurrentScope;
+    private CommandRunScope CurrentScope => _scopeProvider?.CurrentScope;
 
     public YarnPlaybackDriver(CommandExecutor executor, ICommandRunScopeProvider scopeProvider)
     {

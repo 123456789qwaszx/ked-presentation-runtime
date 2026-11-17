@@ -261,16 +261,15 @@ public partial class SampleBootstrap
         _lineVoice = new LineVoiceController(audioSystem.Voice);
         _sceneBgm = new SceneBgmController(audioSystem.Bgm);
 
-        // 대사 줄의 자리(<<at>> · [beat]) — 줄 머리가 줄마다 목록을 짓고, 타자기가 글자 자리에서 지난다.
-        InlineCommandTrack inlineCommands = new(commandBridge, yarnPlaybackDriver);
-
         StepHead stepHead = new(
             yarnPlaybackDriver,
             _playbackState,
             _lineVoice,
             _sceneBgm,
-            _rigBlur,
-            inlineCommands);
+            _rigBlur);
+
+        // 대사 줄의 자리(<<at>> · [beat]) — 줄에 들어갈 때 목록을 짓고, 타자기가 글자 자리에서 지난다.
+        InlineCommandTrack inlineCommands = new(commandBridge, yarnPlaybackDriver);
 
         _linePresentationFlow = new LinePresentationFlow(
             yarnLineBoundary,
@@ -279,10 +278,12 @@ public partial class SampleBootstrap
             dialogueBoxPresentationController,
             ellipsisBreathTypewriter,
             stepHead,
+            inlineCommands,
             lineHurrySpeed);
 
         StageStepFlow stageStepFlow = new(
             stepHead,
+            inlineCommands,
             _lineDisplayState,
             _seekState,
             dialogueBoxPresentationController,
