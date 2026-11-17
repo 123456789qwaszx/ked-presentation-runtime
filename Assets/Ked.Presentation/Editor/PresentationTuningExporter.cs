@@ -220,6 +220,19 @@ public static class PresentationTuningExporter
 
                 Object.DestroyImmediate(emoji.Emoji_Locator.gameObject);
             }
+
+            // Camera — 무대마다 하나씩 서는 카메라 리그의 견본. 프리팹이 없다.
+            // 루트(__root)는 Camera_Root다. 무대 키 없이 세워 노드 이름이 스키마 id 그대로다.
+            // 흔들림 클립(motions.json의 rig: "camera")이 이 스키마로 검증된다.
+            {
+                CameraRigRefs camera = new CameraRigBuilder().Build(stage, "");
+
+                dump.rigs.Add(CaptureRig(
+                    CameraRigSchema.RigKind, null, camera.Root,
+                    CameraSchemaNodes(), warnings));
+
+                Object.DestroyImmediate(camera.Root.gameObject);
+            }
         }
         finally
         {
@@ -363,6 +376,23 @@ public static class PresentationTuningExporter
                 continue;
 
             string parent = n.Parent == EmojiRigSchema.Refs.Emoji_Locator ? null : n.Parent?.ToString();
+            nodes.Add((n.Id.ToString(), parent));
+        }
+
+        return nodes;
+    }
+
+    /// <summary>Camera_Root는 루트(__root)로 담기므로 뺀다 — 그 밑의 노드만 낸다.</summary>
+    private static List<(string, string)> CameraSchemaNodes()
+    {
+        List<(string, string)> nodes = new(CameraRigSchema.Nodes.Length);
+
+        foreach (CameraRigSchema.NodeDef n in CameraRigSchema.Nodes)
+        {
+            if (n.Id == CameraRigNode.Camera_Root)
+                continue;
+
+            string parent = n.Parent == CameraRigNode.Camera_Root ? null : n.Parent?.ToString();
             nodes.Add((n.Id.ToString(), parent));
         }
 

@@ -458,14 +458,14 @@ namespace Ked.Presentation.Tests
         private static StageViewSnapshot ViewSolvedFrom(in ShotIntentState intent, string stageKey, float[] depths)
         {
             StageViewSnapshot view = new();
-            ShotLayoutMath.SolveCamera(in intent, out float scale, out Vec2 pan);
-            view.Cameras.Add(new StageViewSnapshot.CameraEntry(stageKey, pan, scale));
+            CameraPose camera = ShotLayoutMath.SolveCamera(in intent);
+            view.Cameras.Add(new StageViewSnapshot.CameraEntry(stageKey, camera, Vec2.Zero, 0f));
 
             foreach (float d in depths)
             {
                 LayerResponse r = ShotLayoutMath.SolveLayer(in intent, d, LayerProfileCurve.Default);
                 view.Layers.Add(new StageViewSnapshot.LayerEntry(
-                    stageKey, d, ShotLayoutMath.ProjectToRigSpace(Vec2.Zero, scale, pan, in r), r.Scale * scale));
+                    stageKey, d, ShotLayoutMath.ProjectToRigSpace(Vec2.Zero, in camera, in r), r.Scale * camera.Scale, camera.Roll));
             }
 
             return view;
@@ -501,6 +501,63 @@ namespace Ked.Presentation.Tests
         }
 
         [Test]
+        public void 무대_뷰는_카메라의_몸과_헤드까지_본다()
+        {
+            // 트랙 · 달리 · 롤이 든 샷 — 카메라 노드 다섯과 층의 중심 · 배율 · 기울기가 접힌 샷과 맞아야 한다.
+            ShotIntentState folded = new(3f, new Vec2(80f, -20f), new Vec2(100f, 0f), new Vec2(240f, 60f), 4f, 12f);
+
+            StageStateComparer.Result same = new();
+            StageStateComparer.CompareStageView(
+                in folded, ViewSolvedFrom(in folded, "stage00", StageLayerLabels.Depths), LayerProfileCurve.Default, same);
+
+            Assert.That(same.IsEquivalent, Is.True, string.Join("\n", same.Mismatches));
+
+            // 롤만 다른 화면 — 카메라 노드와 층의 기울기가 함께 어긋난다.
+            ShotIntentState level = new(
+                folded.Zoom, folded.PanInRigSpace, folded.FocusPointInRigSpace, folded.Track, folded.Dolly, 0f);
+
+            StageStateComparer.Result tilted = new();
+            StageStateComparer.CompareStageView(
+                in folded, ViewSolvedFrom(in level, "stage00", new[] { StageLayerLabels.Mid }), LayerProfileCurve.Default, tilted);
+
+            Assert.That(tilted.Mismatches.Any(m => m.StartsWith("stage:stage00.cameraRoll")), Is.True, string.Join("\n", tilted.Mismatches));
+            Assert.That(tilted.Mismatches.Any(m => m.StartsWith("stage:stage00/layer:0.rotation")), Is.True, string.Join("\n", tilted.Mismatches));
+        }
+
+        [Test]
+        public void 한_바퀴_넘겨_읽힌_기울기는_같은_기울기다()
+        {
+            // 유니티는 −10도를 350으로 읽어 준다. 같은 화면이다.
+            ShotIntentState folded = new(0f, Vec2.Zero, Vec2.Zero, Vec2.Zero, 0f, -10f);
+
+            StageViewSnapshot view = new();
+            view.Cameras.Add(new StageViewSnapshot.CameraEntry(
+                "stage00", new CameraPose(Vec2.Zero, 1f, 350f, 1f, Vec2.Zero), Vec2.Zero, 0f));
+
+            StageStateComparer.Result result = new();
+            StageStateComparer.CompareStageView(in folded, view, LayerProfileCurve.Default, result);
+
+            Assert.That(result.IsEquivalent, Is.True, string.Join("\n", result.Mismatches));
+        }
+
+        [Test]
+        public void 정착한_프레임에_흔들림이_남아_있으면_불일치다()
+        {
+            // 흔들림은 접히지 않는다 — 끝나면 0이어야 한다. 남아 있으면 연기가 구도를 더럽힌 것이다.
+            ShotIntentState folded = ShotIntentState.Default;
+
+            StageViewSnapshot view = new();
+            view.Cameras.Add(new StageViewSnapshot.CameraEntry(
+                "stage00", ShotLayoutMath.SolveCamera(in folded), new Vec2(6f, 0f), 0f));
+
+            StageStateComparer.Result result = new();
+            StageStateComparer.CompareStageView(in folded, view, LayerProfileCurve.Default, result);
+
+            Assert.That(result.Mismatches.Count, Is.EqualTo(1), string.Join("\n", result.Mismatches));
+            Assert.That(result.Mismatches[0], Does.StartWith("stage:stage00.cameraShake"));
+        }
+
+        [Test]
         public void 덮는_무대의_기대값은_중립이다()
         {
             // 샷은 본 무대만 움직인다(StageRoles). 덮는 무대가 샷을 따랐으면 불일치다.
@@ -519,7 +576,7 @@ namespace Ked.Presentation.Tests
                 LayerProfileCurve.Default, followingOverlay);
 
             Assert.That(followingOverlay.IsEquivalent, Is.False);
-            Assert.That(followingOverlay.Mismatches.Any(m => m.StartsWith("stage:stage01.cameraScale")), Is.True);
+            Assert.That(followingOverlay.Mismatches.Any(m => m.StartsWith("stage:stage01.cameraZoom")), Is.True);
         }
 
         private static RigSchemaNodeDto NodeDto(string id, string parent) => new()

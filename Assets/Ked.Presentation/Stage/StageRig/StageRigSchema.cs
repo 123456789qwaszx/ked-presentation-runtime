@@ -7,15 +7,15 @@ using Ked.Presentation.Core;
 /// 노드의 자리가 그 노드의 뜻이다:
 ///   Stage_Root      세상의 자리. 안 움직인다. 리그 좌표 계산의 경계(RigSpaceRoot)
 ///     Mask_Root     장면 전환 마스크. 카메라 위에 있어야 카메라가 밀어낸 내용을 자른다
-///       Camera_Pan  샷의 팬. 중립 (0,0)
-///         Camera_Zoom   샷의 줌. 중립 배율 1
-///           Layer_{d}   깊이 층. 샷에 d만큼 반응한다(ShotLayoutMath). 위치·배율을 이 한 노드에 쓴다. 중립 항등
-///             …_Content   리그가 붙는 곳. 블러 대상
+///       (카메라 리그) 샷의 축마다 노드 하나 — CameraRigSchema가 소유한다. 이 리그는 그 가장 안쪽(Mount)만 안다
+///         Layer_{d}   깊이 층. 샷에 d만큼 반응한다(ShotLayoutMath). 위치·배율을 이 한 노드에 쓴다. 중립 항등
+///           …_Content   리그가 붙는 곳. 블러 대상
 ///     MaskEdge_Root 마스크 테두리 그래픽. Mask_Root의 형제(마스크에 잘리지 않아야 한다)
 ///
 /// 무대 루트 바깥(창 · 컷인 판 · 그림 팝업)은 무대 틀이다 — StageFrameBuilder. 틀은 이 리그를 알고, 리그는 틀을 모른다.
+/// 카메라 리그와도 같은 방향이다 — 무대 리그가 카메라 리그를 마스크 아래에 세우고 층을 그 Mount에 건다. 카메라 리그는 무대를 모른다.
 ///
-/// 카메라가 무대 **아래**에 있어서 무대마다 카메라가 있다. 어느 무대의 카메라를 샷이 움직이는지는 역할(StageRoles)이
+/// 카메라가 무대 **아래**에 있어서 무대마다 카메라 리그가 있다. 어느 무대의 카메라를 샷이 움직이는지는 역할(StageRoles)이
 /// 정한다 — 지금은 본 무대만이다. 구조가 아니라 정책이다(2026-11-06 D2).
 ///
 /// 층은 고정 노드가 아니다. 깊이 값 d로 식별하고 처음 참조될 때 세운다(StageRigBuilder.EnsureLayer).
@@ -31,8 +31,6 @@ public static class StageRigSchema
         Stage_Root,
         Mask_Root,
         MaskEdge_Root,
-        Camera_Pan,
-        Camera_Zoom,
     }
 
     public sealed class NodeDef
@@ -46,8 +44,6 @@ public static class StageRigSchema
         new() { Id = Refs.Stage_Root, Parent = null },
         new() { Id = Refs.Mask_Root, Parent = Refs.Stage_Root },
         new() { Id = Refs.MaskEdge_Root, Parent = Refs.Stage_Root },
-        new() { Id = Refs.Camera_Pan, Parent = Refs.Mask_Root },
-        new() { Id = Refs.Camera_Zoom, Parent = Refs.Camera_Pan },
     };
 
     public const string LayerPrefix = "Layer_";

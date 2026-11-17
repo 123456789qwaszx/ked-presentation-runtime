@@ -84,12 +84,12 @@ namespace Ked.Presentation.Tests
 
         // ── shot_focus_to: 명중 ──────────────────────────────────────
 
-        // 접은 샷에서 층 d 안의 점이 보이는 자리 — 런타임 계층(Pan → Zoom → Layer)과 같은 정방향 식.
+        // 접은 샷에서 층 d 안의 점이 보이는 자리 — 런타임 계층(카메라 리그 → Layer)과 같은 정방향 식.
         private static Vec2 SeenAt(in ShotIntentState shot, Vec2 pointInLayer, float depth)
         {
-            ShotLayoutMath.SolveCamera(in shot, out float cameraScale, out Vec2 pan);
+            CameraPose camera = ShotLayoutMath.SolveCamera(in shot);
             LayerResponse layer = ShotLayoutMath.SolveLayer(in shot, depth, Curve);
-            return ShotLayoutMath.ProjectToRigSpace(pointInLayer, cameraScale, pan, in layer);
+            return ShotLayoutMath.ProjectToRigSpace(pointInLayer, in camera, in layer);
         }
 
         private static readonly float[] Depths =

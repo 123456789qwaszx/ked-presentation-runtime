@@ -518,9 +518,9 @@ namespace Ked.Presentation.Tests
             Assert.That(state.Shot.FocusPointInRigSpace.X, Is.EqualTo(focus.X).Within(Eps), "논리 focus = 무대 위 자리");
             Assert.That(state.Shot.FocusPointInRigSpace.Y, Is.EqualTo(focus.Y).Within(Eps), "논리 focus = 무대 위 자리");
 
-            ShotLayoutMath.SolveCamera(state.Shot, out float cameraScale, out Vec2 pan);
+            CameraPose camera = ShotLayoutMath.SolveCamera(state.Shot);
             LayerResponse response = ShotLayoutMath.SolveLayer(state.Shot, depth, LayerProfileCurve.Default);
-            Vec2 seen = ShotLayoutMath.ProjectToRigSpace(focus, cameraScale, pan, in response);
+            Vec2 seen = ShotLayoutMath.ProjectToRigSpace(focus, in camera, in response);
 
             Assert.That(seen.X, Is.EqualTo(0f).Within(Eps), $"{layer} center에 명중 — seen={seen}");
             Assert.That(seen.Y, Is.EqualTo(0f).Within(Eps), $"{layer} center에 명중 — seen={seen}");

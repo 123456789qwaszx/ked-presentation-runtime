@@ -11,6 +11,8 @@ using Object = UnityEngine.Object;
 /// </summary>
 public sealed class StageRigBuilder
 {
+    private readonly CameraRigBuilder _camera = new();
+
     /// <summary>mount 아래에 무대 하나를 세운다. 층은 initialDepths만큼 미리 세운다(없어도 된다 — 참조될 때 선다).</summary>
     public StageRigRefs Build(RectTransform mount, string stageKey, ReadOnlySpan<float> initialDepths)
     {
@@ -66,18 +68,17 @@ public sealed class StageRigBuilder
         {
             MaskRoot = map[StageRigSchema.Refs.Mask_Root],
             MaskEdgeRoot = map[StageRigSchema.Refs.MaskEdge_Root],
-            CameraPan = map[StageRigSchema.Refs.Camera_Pan],
-            CameraZoom = map[StageRigSchema.Refs.Camera_Zoom],
         };
 
         refs.Mask = EnsureMask(refs.MaskRoot, refs.MaskEdgeRoot);
+        refs.Camera = _camera.Build(refs.MaskRoot, stageKey);
 
         // 이미 서 있는 층을 거둔다(검증 통과한 계층이거나, 방금 다시 세워 비어 있다).
-        RectTransform zoom = refs.CameraZoom;
+        RectTransform mount = refs.Camera.Mount;
 
-        for (int i = 0; i < zoom.childCount; i++)
+        for (int i = 0; i < mount.childCount; i++)
         {
-            RectTransform child = (RectTransform)zoom.GetChild(i);
+            RectTransform child = (RectTransform)mount.GetChild(i);
 
             if (!StageRigSchema.TryParseLayerName(stageKey, child.name, out float depth))
                 continue;
@@ -97,7 +98,7 @@ public sealed class StageRigBuilder
         if (refs.TryGetLayer(depth, out StageLayerRefs existing))
             return existing;
 
-        RectTransform rect = EnsureRect(refs.CameraZoom, StageRigSchema.LayerName(refs.StageKey, depth));
+        RectTransform rect = EnsureRect(refs.Camera.Mount, StageRigSchema.LayerName(refs.StageKey, depth));
         RectTransform content = EnsureRect(rect, StageRigSchema.ContentName(refs.StageKey, depth));
 
         StageLayerRefs layer = new(depth, rect, content);
@@ -118,7 +119,7 @@ public sealed class StageRigBuilder
 
     // ── 검증 ─────────────────────────────────────────────────────────
 
-    private static bool IsValidGraph(RectTransform root, string stageKey, Dictionary<StageRigSchema.Refs, RectTransform> map)
+    private bool IsValidGraph(RectTransform root, string stageKey, Dictionary<StageRigSchema.Refs, RectTransform> map)
     {
         foreach (StageRigSchema.NodeDef node in StageRigSchema.Nodes)
         {
@@ -140,10 +141,8 @@ public sealed class StageRigBuilder
         if (!ChildrenAreExactly(root, map[StageRigSchema.Refs.Mask_Root], map[StageRigSchema.Refs.MaskEdge_Root]))
             return false;
 
-        if (!ChildrenAreExactly(map[StageRigSchema.Refs.Mask_Root], map[StageRigSchema.Refs.Camera_Pan]))
-            return false;
-
-        if (!ChildrenAreExactly(map[StageRigSchema.Refs.Camera_Pan], map[StageRigSchema.Refs.Camera_Zoom]))
+        // 마스크 아래는 카메라 리그 하나다 — 사슬이 스키마 그대로인지는 카메라 리그 빌더가 본다.
+        if (!_camera.IsValid(map[StageRigSchema.Refs.Mask_Root], stageKey, out RectTransform mount))
             return false;
 
         if (map[StageRigSchema.Refs.MaskEdge_Root].childCount != 0)
@@ -157,12 +156,10 @@ public sealed class StageRigBuilder
         if (!map[StageRigSchema.Refs.MaskEdge_Root].TryGetComponent(out StageMaskEdgeGraphic _))
             return false;
 
-        // 줌 루트의 자식은 전부 층이어야 하고, 층은 Content 하나를 가진다.
-        RectTransform zoom = map[StageRigSchema.Refs.Camera_Zoom];
-
-        for (int i = 0; i < zoom.childCount; i++)
+        // 카메라 리그의 가장 안쪽(Mount)의 자식은 전부 층이어야 하고, 층은 Content 하나를 가진다.
+        for (int i = 0; i < mount.childCount; i++)
         {
-            RectTransform child = (RectTransform)zoom.GetChild(i);
+            RectTransform child = (RectTransform)mount.GetChild(i);
 
             if (!StageRigSchema.TryParseLayerName(stageKey, child.name, out float depth))
                 return false;

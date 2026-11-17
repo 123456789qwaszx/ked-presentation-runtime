@@ -1456,6 +1456,299 @@
                     "repeatsPerRig": true
                 }
             ]
+        },
+        {
+            "rigKind": "camera",
+            "sourcePrefab": "",
+            "nodes": [
+                {
+                    "id": "__root",
+                    "parent": "",
+                    "anchoredPosition": {
+                        "x": 0.0,
+                        "y": 0.0
+                    },
+                    "anchorMin": {
+                        "x": 0.0,
+                        "y": 0.0
+                    },
+                    "anchorMax": {
+                        "x": 1.0,
+                        "y": 1.0
+                    },
+                    "pivot": {
+                        "x": 0.5,
+                        "y": 0.5
+                    },
+                    "sizeDelta": {
+                        "x": 0.0,
+                        "y": 0.0
+                    },
+                    "localScale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "localEulerAngles": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "measuredRectSize": {
+                        "x": 1920.0,
+                        "y": 1080.0
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0,
+                    "repeatsPerRig": false
+                },
+                {
+                    "id": "Camera_Shake",
+                    "parent": "__root",
+                    "anchoredPosition": {
+                        "x": 0.0,
+                        "y": 0.0
+                    },
+                    "anchorMin": {
+                        "x": 0.0,
+                        "y": 0.0
+                    },
+                    "anchorMax": {
+                        "x": 1.0,
+                        "y": 1.0
+                    },
+                    "pivot": {
+                        "x": 0.5,
+                        "y": 0.5
+                    },
+                    "sizeDelta": {
+                        "x": 0.0,
+                        "y": 0.0
+                    },
+                    "localScale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "localEulerAngles": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "measuredRectSize": {
+                        "x": 1920.0,
+                        "y": 1080.0
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0,
+                    "repeatsPerRig": false
+                },
+                {
+                    "id": "Camera_Pan",
+                    "parent": "Camera_Shake",
+                    "anchoredPosition": {
+                        "x": 0.0,
+                        "y": 0.0
+                    },
+                    "anchorMin": {
+                        "x": 0.0,
+                        "y": 0.0
+                    },
+                    "anchorMax": {
+                        "x": 1.0,
+                        "y": 1.0
+                    },
+                    "pivot": {
+                        "x": 0.5,
+                        "y": 0.5
+                    },
+                    "sizeDelta": {
+                        "x": 0.0,
+                        "y": 0.0
+                    },
+                    "localScale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "localEulerAngles": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "measuredRectSize": {
+                        "x": 1920.0,
+                        "y": 1080.0
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0,
+                    "repeatsPerRig": false
+                },
+                {
+                    "id": "Camera_Zoom",
+                    "parent": "Camera_Pan",
+                    "anchoredPosition": {
+                        "x": 0.0,
+                        "y": 0.0
+                    },
+                    "anchorMin": {
+                        "x": 0.0,
+                        "y": 0.0
+                    },
+                    "anchorMax": {
+                        "x": 1.0,
+                        "y": 1.0
+                    },
+                    "pivot": {
+                        "x": 0.5,
+                        "y": 0.5
+                    },
+                    "sizeDelta": {
+                        "x": 0.0,
+                        "y": 0.0
+                    },
+                    "localScale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "localEulerAngles": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "measuredRectSize": {
+                        "x": 1920.0,
+                        "y": 1080.0
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0,
+                    "repeatsPerRig": false
+                },
+                {
+                    "id": "Camera_Roll",
+                    "parent": "Camera_Zoom",
+                    "anchoredPosition": {
+                        "x": 0.0,
+                        "y": 0.0
+                    },
+                    "anchorMin": {
+                        "x": 0.0,
+                        "y": 0.0
+                    },
+                    "anchorMax": {
+                        "x": 1.0,
+                        "y": 1.0
+                    },
+                    "pivot": {
+                        "x": 0.5,
+                        "y": 0.5
+                    },
+                    "sizeDelta": {
+                        "x": 0.0,
+                        "y": 0.0
+                    },
+                    "localScale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "localEulerAngles": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "measuredRectSize": {
+                        "x": 1920.0,
+                        "y": 1080.0
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0,
+                    "repeatsPerRig": false
+                },
+                {
+                    "id": "Camera_Dolly",
+                    "parent": "Camera_Roll",
+                    "anchoredPosition": {
+                        "x": 0.0,
+                        "y": 0.0
+                    },
+                    "anchorMin": {
+                        "x": 0.0,
+                        "y": 0.0
+                    },
+                    "anchorMax": {
+                        "x": 1.0,
+                        "y": 1.0
+                    },
+                    "pivot": {
+                        "x": 0.5,
+                        "y": 0.5
+                    },
+                    "sizeDelta": {
+                        "x": 0.0,
+                        "y": 0.0
+                    },
+                    "localScale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "localEulerAngles": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "measuredRectSize": {
+                        "x": 1920.0,
+                        "y": 1080.0
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0,
+                    "repeatsPerRig": false
+                },
+                {
+                    "id": "Camera_Track",
+                    "parent": "Camera_Dolly",
+                    "anchoredPosition": {
+                        "x": 0.0,
+                        "y": 0.0
+                    },
+                    "anchorMin": {
+                        "x": 0.0,
+                        "y": 0.0
+                    },
+                    "anchorMax": {
+                        "x": 1.0,
+                        "y": 1.0
+                    },
+                    "pivot": {
+                        "x": 0.5,
+                        "y": 0.5
+                    },
+                    "sizeDelta": {
+                        "x": 0.0,
+                        "y": 0.0
+                    },
+                    "localScale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "localEulerAngles": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "measuredRectSize": {
+                        "x": 1920.0,
+                        "y": 1080.0
+                    },
+                    "hasCanvasGroup": false,
+                    "canvasGroupAlpha": 1.0,
+                    "repeatsPerRig": false
+                }
+            ]
         }
     ]
 }

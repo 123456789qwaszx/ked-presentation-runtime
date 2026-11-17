@@ -10,7 +10,7 @@ using UnityEngine;
 // 중립(IStageViewNeutral)은 같은 식에 Default를 넣은 값이다 — 따로 적은 정의가 없다.
 // 어느 노드가 샷 소유인지는 StageRigRefs(빌더 출력)가 안다. 참조 비교 분기를 따로 두지 않는다.
 //
-// 카메라는 무대마다 있다(StageRigSchema). 샷은 본 무대만 움직인다(StageRoles) — 덮는 무대(컷인 · 인서트 · 커튼)의
+// 카메라 리그는 무대마다 있다(CameraRigSchema). 샷은 본 무대만 움직인다(StageRoles) — 덮는 무대(컷인 · 인서트 · 커튼)의
 // 카메라와 층은 빌더가 세운 항등, 곧 중립에 고정이다(2026-11-06 D2). 무대별 intent가 필요해지면 이 클래스가 무대 키를 받으면 된다.
 public sealed class PresentationShotResponseSystem : IStageViewNeutral
 {
@@ -73,7 +73,7 @@ public sealed class PresentationShotResponseSystem : IStageViewNeutral
         Snap(PresentationIntentState.Default);
     }
 
-    // ── 적용 — 숫자 셋 → 무대 노드 ───────────────────────────────────
+    // ── 적용 — 의도 한 벌 → 카메라 노드 · 층 ─────────────────────────
 
     private void Apply(in PresentationIntentState state)
     {
@@ -83,12 +83,18 @@ public sealed class PresentationShotResponseSystem : IStageViewNeutral
         ApplyToStage(in intent, _main);
     }
 
+    // 코어가 노드 로컬 값을 그대로 낸다 — 여기서는 받아 쓰기만 한다. 좌표 변환도 하지 않는다.
+    // Camera_Shake는 쓰지 않는다 — 의도가 아니라 연기라서, 흔들림을 트는 쪽이 따로 쓴다.
     private void ApplyToStage(in ShotIntentState intent, StageRigRefs stage)
     {
-        ShotLayoutMath.SolveCamera(in intent, out float cameraScale, out Vec2 pan);
+        CameraPose pose = ShotLayoutMath.SolveCamera(in intent);
+        CameraRigRefs camera = stage.Camera;
 
-        stage.CameraZoom.localScale = new Vector3(cameraScale, cameraScale, 1f);
-        stage.CameraPan.anchoredPosition = pan.ToUnity();
+        camera.Pan.anchoredPosition = pose.Pan.ToUnity();
+        camera.Zoom.localScale = new Vector3(pose.ZoomScale, pose.ZoomScale, 1f);
+        camera.Roll.localEulerAngles = new Vector3(0f, 0f, pose.Roll);
+        camera.Dolly.localScale = new Vector3(pose.DollyScale, pose.DollyScale, 1f);
+        camera.Track.anchoredPosition = pose.TrackPosition.ToUnity();
 
         IReadOnlyList<StageLayerRefs> layers = stage.Layers;
 
@@ -97,21 +103,14 @@ public sealed class PresentationShotResponseSystem : IStageViewNeutral
             StageLayerRefs layer = layers[i];
             LayerResponse response = ShotLayoutMath.SolveLayer(in intent, layer.Depth, _profile);
 
-            layer.Rect.anchoredPosition = OffsetInLayerParentSpace(stage, layer, response);
+            layer.Rect.anchoredPosition = response.LocalPosition.ToUnity();
             layer.Rect.localScale = new Vector3(response.Scale.X, response.Scale.Y, 1f);
         }
     }
 
-    // 층 오프셋은 rig space(무대 루트) 벡터다. 층의 부모(줌 루트)는 그 아래라 배율이 다르다 —
-    // 점이 아니라 벡터로 옮겨 translation을 빼면 공통 카메라의 팬이 상쇄되고 배율만 남는다.
-    private static Vector2 OffsetInLayerParentSpace(StageRigRefs stage, StageLayerRefs layer, in LayerResponse response)
-        => PresentationCoordinateMath.ConvertVectorFromRigSpaceToTargetPositionParentSpace(
-            response.OffsetInRigSpace.ToUnity(),
-            stage.Root,
-            (RectTransform)layer.Rect.parent);
-
     // ── 중립 = Solve(Default) ────────────────────────────────────────
-    // 샷 소유는 구조다(무대마다 카메라 둘 · 층 전부). 덮는 무대의 것도 중립을 답한다 — 샷이 쓰지 않으니 라이브도 같은 항등이다.
+    // 샷 소유는 구조다(무대마다 카메라 리그 · 층 전부). 덮는 무대의 것도 중립을 답한다 — 샷이 쓰지 않으니 라이브도 같은 항등이다.
+    // 카메라 노드의 중립은 전부 항등이다(흔들림도 — 흔들리는 중에 재도 값이 같다). 회전의 중립은 언제나 0이라 내지 않는다.
 
     public bool TryGetNeutral(RectTransform rect, out Vector2 anchoredPosition, out Vector3 localScale)
     {
@@ -124,25 +123,17 @@ public sealed class PresentationShotResponseSystem : IStageViewNeutral
         {
             StageRigRefs stage = stages[i];
 
-            if (!stage.IsShotOwned(rect, out bool isPan, out bool isZoom, out StageLayerRefs layer))
+            if (!stage.IsShotOwned(rect, out StageLayerRefs layer))
                 continue;
+
+            // 카메라 노드 — 항등(위에서 넣어 둔 값 그대로).
+            if (layer == null)
+                return true;
 
             ShotIntentState neutral = ShotIntentState.Default;
 
-            if (isPan || isZoom)
-            {
-                ShotLayoutMath.SolveCamera(in neutral, out float cameraScale, out Vec2 pan);
-
-                if (isPan)
-                    anchoredPosition = pan.ToUnity();
-                else
-                    localScale = new Vector3(cameraScale, cameraScale, 1f);
-
-                return true;
-            }
-
             LayerResponse response = ShotLayoutMath.SolveLayer(in neutral, layer.Depth, _profile);
-            anchoredPosition = OffsetInLayerParentSpace(stage, layer, response);
+            anchoredPosition = response.LocalPosition.ToUnity();
             localScale = new Vector3(response.Scale.X, response.Scale.Y, 1f);
 
             return true;

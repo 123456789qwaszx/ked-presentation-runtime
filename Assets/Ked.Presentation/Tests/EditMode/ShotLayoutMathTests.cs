@@ -29,8 +29,8 @@ namespace Ked.Presentation.Tests
             // 중립의 정의: 식에 Default를 넣은 값. 카메라 배율 1 · 팬 0 · 층 오프셋 0 · 층 배율 1.
             ShotLayout layout = ShotLayoutMath.Solve(ShotIntentState.Default, StageLayerLabels.Depths, Curve);
 
-            Assert.That(layout.CameraScale, Is.EqualTo(1f).Within(Eps));
-            AssertVec2(layout.Pan, Vec2.Zero, "pan");
+            Assert.That(layout.Camera.ZoomScale, Is.EqualTo(1f).Within(Eps));
+            AssertVec2(layout.Camera.Pan, Vec2.Zero, "pan");
             Assert.That(layout.Layers.Length, Is.EqualTo(5));
 
             for (int i = 0; i < layout.Layers.Length; i++)
@@ -43,14 +43,18 @@ namespace Ked.Presentation.Tests
         // ── 카메라 루트 ───────────────────────────────────────────────
 
         [Test]
-        public void 카메라는_배율과_팬_둘이다()
+        public void 카메라_노드는_축마다_의도_그대로다()
         {
-            ShotIntentState intent = new(6f, new Vec2(250f, -30f), Vec2.Zero);
+            ShotIntentState intent = new(6f, new Vec2(250f, -30f), Vec2.Zero, new Vec2(120f, 40f), -4f, 15f);
 
-            ShotLayoutMath.SolveCamera(in intent, out float cameraScale, out Vec2 pan);
+            CameraPose camera = ShotLayoutMath.SolveCamera(in intent);
 
-            Assert.That(cameraScale, Is.EqualTo(1.3f).Within(Eps), "1 + 0.05 × 6");
-            AssertVec2(pan, new Vec2(250f, -30f), "팬은 의도 그대로");
+            AssertVec2(camera.Pan, new Vec2(250f, -30f), "팬은 의도 그대로");
+            Assert.That(camera.ZoomScale, Is.EqualTo(1.3f).Within(Eps), "1 + 0.05 × 6");
+            Assert.That(camera.Roll, Is.EqualTo(15f).Within(Eps), "롤은 도 그대로");
+            Assert.That(camera.DollyScale, Is.EqualTo(0.8f).Within(Eps), "1 + 0.05 × −4");
+            AssertVec2(camera.TrackPosition, new Vec2(-120f, -40f), "트랙 노드는 카메라의 자리의 반대다");
+            Assert.That(camera.Scale, Is.EqualTo(1.3f * 0.8f).Within(Eps), "카메라 배율 = 줌 × 달리");
         }
 
         // ── 층 반응 ───────────────────────────────────────────────────
@@ -137,18 +141,18 @@ namespace Ked.Presentation.Tests
             // 줌 6(1.3) · 팬 (250, −30) · 초점 +100 — Close: 오프셋 (45.2, 0), 배율 1.3^0.16.
             ShotIntentState intent = new(6f, new Vec2(250f, -30f), new Vec2(100f, 0f));
             LayerResponse close = ShotLayoutMath.SolveLayer(in intent, StageLayerLabels.Close, Curve);
-            ShotLayoutMath.SolveCamera(in intent, out float cameraScale, out Vec2 pan);
+            CameraPose camera = ShotLayoutMath.SolveCamera(in intent);
 
             Vec2 p = new(100f, 200f);
-            Vec2 actual = ShotLayoutMath.ProjectToRigSpace(p, cameraScale, pan, in close);
+            Vec2 actual = ShotLayoutMath.ProjectToRigSpace(p, in camera, in close);
 
             float k = (float)Math.Pow(1.3, 0.16);
             AssertVec2(actual, new Vec2(250f + 45.2f + 1.3f * k * 100f, -30f + 0f + 1.3f * k * 200f), "Close의 (100, 200)");
 
             // 중립에서는 항등이다.
-            ShotLayoutMath.SolveCamera(ShotIntentState.Default, out float s0, out Vec2 pan0);
+            CameraPose camera0 = ShotLayoutMath.SolveCamera(ShotIntentState.Default);
             LayerResponse mid0 = ShotLayoutMath.SolveLayer(ShotIntentState.Default, StageLayerLabels.Mid, Curve);
-            AssertVec2(ShotLayoutMath.ProjectToRigSpace(p, s0, pan0, in mid0), p, "중립");
+            AssertVec2(ShotLayoutMath.ProjectToRigSpace(p, in camera0, in mid0), p, "중립");
         }
 
         // ── 역 — 그 점을 화면 지점에 놓는 팬 ───────────────────────────
@@ -171,10 +175,10 @@ namespace Ked.Presentation.Tests
                 Vec2 pan = ShotLayoutMath.SolvePanToPlace(zoom, focus, focus, desired, depth, curve);
 
                 ShotIntentState placed = new(zoom, pan, focus);
-                ShotLayoutMath.SolveCamera(in placed, out float cameraScale, out Vec2 cameraPan);
+                CameraPose camera = ShotLayoutMath.SolveCamera(in placed);
                 LayerResponse layer = ShotLayoutMath.SolveLayer(in placed, depth, curve);
 
-                Vec2 seen = ShotLayoutMath.ProjectToRigSpace(focus, cameraScale, cameraPan, in layer);
+                Vec2 seen = ShotLayoutMath.ProjectToRigSpace(focus, in camera, in layer);
 
                 Assert.That(seen.X, Is.EqualTo(desired.X).Within(1e-3f), $"d={depth} zoom={zoom} X — seen={seen}");
                 Assert.That(seen.Y, Is.EqualTo(desired.Y).Within(1e-3f), $"d={depth} zoom={zoom} Y — seen={seen}");

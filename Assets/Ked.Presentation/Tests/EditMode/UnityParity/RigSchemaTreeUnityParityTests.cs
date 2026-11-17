@@ -124,6 +124,10 @@ namespace Ked.Presentation.Tests.UnityParity
                     return builder.BuildTemplate(stage).Emoji_Locator;
                 }
 
+                // 카메라 리그의 견본 — Camera_Root가 루트(__root)다. 익스포터와 같이 무대 키 없이 세운다.
+                case CameraRigSchema.RigKind:
+                    return new CameraRigBuilder().Build(stage, "").Root;
+
                 default:
                     Assert.Fail($"모르는 rigKind: {rig.rigKind}");
                     return null;
@@ -166,6 +170,7 @@ namespace Ked.Presentation.Tests.UnityParity
         [TestCase("character")]
         [TestCase("screenEffect")]
         [TestCase(EmojiRigSchema.RigKind)]
+        [TestCase(CameraRigSchema.RigKind)]
         public void 덤프로_세운_트리가_실제_리그와_같다(string rigKind)
         {
             RigSchemasFileDto file = LoadDump();

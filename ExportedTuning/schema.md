@@ -40,7 +40,7 @@
 
 ## 2. `rig-schemas.json`
 
-리그 3종(character · screenEffect · emoji)의 **노드 트리 초기 상태**. 빌더 로직을 전사한 것이 아니라,
+리그 4종(character · screenEffect · emoji · camera)의 **노드 트리 초기 상태**. 빌더 로직을 전사한 것이 아니라,
 실제 프리팹·실제 빌더로 리그를 세운 뒤 **실물 `RectTransform`에서 읽은 값**이다
 (`BindRefsFromRoot`의 그래프 검증·복구까지 지난 뒤의 상태 — 런타임과 같은 경로).
 
@@ -67,7 +67,7 @@ new RectSpace(capturedUnderParentSize, Vec2.Half)
 
 | 필드 | 뜻 |
 |---|---|
-| `rigKind` | `character` · `screenEffect` — 익스포터가 내보내는 두 종류다. 배경은 캐스팅하지 않은 `character` 슬롯이라 따로 없다(2026-10-29까지는 `background`가 있었다). 노드 수는 스키마를 따라 변하므로 여기 적지 않는다 |
+| `rigKind` | `character` · `screenEffect` · `emoji` · `camera`. 배경은 캐스팅하지 않은 `character` 슬롯이라 따로 없다(2026-10-29까지는 `background`가 있었다). 노드 수는 스키마를 따라 변하므로 여기 적지 않는다 |
 | `sourcePrefab` | 세울 때 쓴 프리팹 에셋 경로. **빈 문자열이면 프리팹 없이 스키마 베이크로 세웠다는 뜻** |
 | `nodes` | 부모가 항상 자식보다 먼저 온다 — 순서대로 넣으면 트리가 세워진다 |
 
@@ -76,6 +76,11 @@ new RectSpace(capturedUnderParentSize, Vec2.Half)
 > 이모지에 리그가 몇 개 서고 이름이 무엇인가는 이모지의 구성(모션 툴)이 정한다. 재생 저장소 `docs/emoji-rig.md`.
 > `sourcePrefab`은 비어 있다(프리팹이 없다).
 
+> **`camera`는 카메라 리그의 견본이다**(2026-11-17). 카메라 리그는 무대마다 하나씩 서고(노드 이름 `{무대 키}_{id}`),
+> 덤프에는 무대 키 없이 세운 것 하나가 든다. 루트(`__root`)는 `Camera_Root`다. 노드마다 샷의 축 하나를 맡는다
+> (`Camera_Pan` · `Camera_Zoom` · `Camera_Roll` · `Camera_Dolly` · `Camera_Track`) — 값은 샷 식의 해라 키를 주지 않는다.
+> 모션 클립이 키를 줄 수 있는 노드는 `Camera_Shake` 하나다(화면 흔들림). 재생 저장소 `docs/PLAN_camera-rig.md`.
+>
 > `screenEffect`의 `sourcePrefab`이 비어 있는 것은 정상이다. 프리팹 필드 자체가 없어
 > **부트스트랩도 `null`을 넘긴다** — 스키마 베이크가 곧 런타임 경로다.
 

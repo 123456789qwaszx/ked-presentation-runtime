@@ -20,7 +20,7 @@ public sealed class StageLayerRefs
 
 /// <summary>
 /// 무대 하나의 노드 참조. 빌더가 만들고 보장한다 — null 검사하지 않는다.
-/// 샷이 쓰는 노드(카메라 둘 · 층 전부)의 소유 목록이 곧 이 객체다: IsShotOwned.
+/// 샷이 쓰는 노드(카메라 리그 · 층 전부)의 소유 목록이 곧 이 객체다: IsShotOwned.
 /// </summary>
 public sealed class StageRigRefs
 {
@@ -32,9 +32,10 @@ public sealed class StageRigRefs
     public RectTransform Root { get; }
     public RectTransform MaskRoot { get; internal set; }
     public RectTransform MaskEdgeRoot { get; internal set; }
-    public RectTransform CameraPan { get; internal set; }
-    public RectTransform CameraZoom { get; internal set; }
     public StageMaskSlot Mask { get; internal set; }
+
+    /// <summary>이 무대의 카메라 리그 — 마스크 아래에 서고, 층은 그 Mount 아래에 선다.</summary>
+    public CameraRigRefs Camera { get; internal set; }
 
     // d 오름차순 = 멀리서 가까이로 = 형제 순서(먼 층이 뒤에 그려진다).
     private readonly SortedDictionary<float, StageLayerRefs> _layers = new();
@@ -77,14 +78,15 @@ public sealed class StageRigRefs
         }
     }
 
-    /// <summary>샷이 쓰는 노드인가 — 카메라 둘 또는 어느 층의 Rect. 중립값 조회(IStageViewNeutral)의 근거다.</summary>
-    public bool IsShotOwned(RectTransform rect, out bool isCameraPan, out bool isCameraZoom, out StageLayerRefs layer)
+    /// <summary>
+    /// 샷이 쓰는 노드인가 — 카메라 리그의 노드 또는 어느 층의 Rect. 중립값 조회(IStageViewNeutral)의 근거다.
+    /// 카메라 노드면 layer는 null이다(중립이 항등이라 어느 노드인지는 가리지 않는다).
+    /// </summary>
+    public bool IsShotOwned(RectTransform rect, out StageLayerRefs layer)
     {
-        isCameraPan = rect == CameraPan;
-        isCameraZoom = rect == CameraZoom;
         layer = null;
 
-        if (isCameraPan || isCameraZoom)
+        if (Camera.Owns(rect))
             return true;
 
         for (int i = 0; i < _layerArray.Length; i++)

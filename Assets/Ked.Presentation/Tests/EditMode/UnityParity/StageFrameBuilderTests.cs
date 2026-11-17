@@ -65,10 +65,10 @@ namespace Ked.Presentation.Tests.UnityParity
             StageRigRefs rig = BuildRig("stage01");
             RectTransform after = NewChild(_mount, "After");
 
-            RectTransform pan = rig.CameraPan;
+            RectTransform pan = rig.Camera.Pan;
             StageCutInSlot cutIn = StageFrameBuilder.Build(rig).CutIn;
 
-            Assert.That(rig.CameraPan, Is.SameAs(pan), "무대 계층은 그대로");
+            Assert.That(rig.Camera.Pan, Is.SameAs(pan), "무대 계층은 그대로");
             Assert.That(rig.Root.parent, Is.EqualTo(cutIn.Window));
             Assert.That(cutIn.Window.parent, Is.EqualTo(_mount));
             Assert.That(before.GetSiblingIndex(), Is.LessThan(cutIn.Window.GetSiblingIndex()));
@@ -85,7 +85,7 @@ namespace Ked.Presentation.Tests.UnityParity
             StageCutInSlot again = StageFrameBuilder.Build(rebound).CutIn;
 
             Assert.That(again.Window, Is.SameAs(first.Window), "창을 새로 끼우지 않는다");
-            Assert.That(rebound.CameraPan, Is.SameAs(rig.CameraPan), "창 안의 리그도 그대로 묶인다");
+            Assert.That(rebound.Camera.Pan, Is.SameAs(rig.Camera.Pan), "창 안의 리그도 그대로 묶인다");
             Assert.That(first.Window.childCount, Is.EqualTo(2), "판과 무대 루트뿐");
         }
 

@@ -195,7 +195,8 @@ public sealed class CharacterPlacementTargetLedger : ICommitRelease
             pivot: live.Pivot,
             sizeDelta: live.SizeDelta,
             localScale: localScale.ToCore(),
-            localEulerAngles: live.LocalEulerAngles);
+            // 샷이 움직이는 노드의 중립 회전은 0이다(IStageViewNeutral) — 화면이 기울어 있거나 흔들리는 중에 재도 같은 값이 나온다.
+            localEulerAngles: Vec3.Zero);
     }
 
     private static RectNodeState CaptureLive(RectTransform rect)

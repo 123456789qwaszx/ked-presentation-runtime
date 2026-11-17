@@ -265,10 +265,6 @@ namespace Ked.Presentation.Core
             Camera = camera;
             Layers = layers;
         }
-
-        // 종전 꼴(줌 배율 · 팬) — 카메라 리그가 서면 걷는다.
-        public float CameraScale => Camera.ZoomScale;
-        public Vec2 Pan => Camera.Pan;
     }
 
     public static class ShotLayoutMath
@@ -281,13 +277,6 @@ namespace Ked.Presentation.Core
                 intent.Roll,
                 ShotIntentMath.EvaluateDollyScale(intent.Dolly),
                 -intent.Track);
-
-        // 종전 꼴(줌 배율 · 팬) — 카메라 리그가 서면 걷는다.
-        public static void SolveCamera(in ShotIntentState intent, out float cameraScale, out Vec2 pan)
-        {
-            cameraScale = ShotIntentMath.EvaluateCameraScale(intent.Zoom);
-            pan = intent.PanInRigSpace;
-        }
 
         /// <summary>
         /// 깊이 d인 층 하나의 반응.
@@ -357,10 +346,6 @@ namespace Ked.Presentation.Core
 
             return camera.Pan + Rotate(layer.OffsetInRigSpace + scaled, camera.Roll);
         }
-
-        // 종전 꼴(줌 배율 · 팬) — 카메라 리그가 서면 걷는다.
-        public static Vec2 ProjectToRigSpace(Vec2 pointInLayer, float cameraScale, Vec2 pan, in LayerResponse layer)
-            => pan + layer.OffsetInRigSpace + Vec2.Scale(pointInLayer, layer.Scale) * cameraScale;
 
         /// <summary>
         /// 층 d 안의 점이 화면(rig space)의 desired에 보이게 하는 팬 — ProjectToRigSpace의 팬에 대한 역.

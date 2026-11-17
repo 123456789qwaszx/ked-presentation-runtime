@@ -97,14 +97,19 @@ namespace Ked.Presentation.Core
             foreach (StageViewSnapshot.CameraEntry camera in captured.Cameras)
             {
                 ShotIntentState shot = ShotOf(camera.StageKey, in foldedShot);
-                ShotLayoutMath.SolveCamera(in shot, out float cameraScale, out Vec2 pan);
+                CameraPose expected = ShotLayoutMath.SolveCamera(in shot);
 
                 string key = $"stage:{camera.StageKey}";
 
-                if (Math.Abs(camera.Scale - cameraScale) > ScalarEpsilon)
-                    result.Mismatches.Add(Diff(key, "cameraScale", cameraScale, camera.Scale));
+                CompareVec2(key, "cameraPan", expected.Pan, camera.Pose.Pan, PositionEpsilon, result);
+                CompareScalar(key, "cameraZoom", expected.ZoomScale, camera.Pose.ZoomScale, ScalarEpsilon, result);
+                CompareDegrees(key, "cameraRoll", expected.Roll, camera.Pose.Roll, result);
+                CompareScalar(key, "cameraDolly", expected.DollyScale, camera.Pose.DollyScale, ScalarEpsilon, result);
+                CompareVec2(key, "cameraTrack", expected.TrackPosition, camera.Pose.TrackPosition, PositionEpsilon, result);
 
-                CompareVec2(key, "cameraPan", pan, camera.Pan, PositionEpsilon, result);
+                // 흔들림은 접히지 않는다 — 정착한 프레임에서는 항등이어야 한다.
+                CompareVec2(key, "cameraShake", Vec2.Zero, camera.ShakePosition, PositionEpsilon, result);
+                CompareDegrees(key, "cameraShakeRotation", 0f, camera.ShakeRotation, result);
             }
 
             foreach (StageViewSnapshot.LayerEntry layer in captured.Layers)
@@ -112,16 +117,17 @@ namespace Ked.Presentation.Core
                 result.ComparedLayers++;
 
                 ShotIntentState shot = ShotOf(layer.StageKey, in foldedShot);
-                ShotLayoutMath.SolveCamera(in shot, out float cameraScale, out Vec2 pan);
+                CameraPose camera = ShotLayoutMath.SolveCamera(in shot);
                 LayerResponse response = ShotLayoutMath.SolveLayer(in shot, layer.Depth, curve);
 
-                Vec2 expectedCenter = ShotLayoutMath.ProjectToRigSpace(Vec2.Zero, cameraScale, pan, in response);
-                Vec2 expectedScale = response.Scale * cameraScale;
+                Vec2 expectedCenter = ShotLayoutMath.ProjectToRigSpace(Vec2.Zero, in camera, in response);
+                Vec2 expectedScale = response.Scale * camera.Scale;
 
                 string key = string.Format(CultureInfo.InvariantCulture, "stage:{0}/layer:{1}", layer.StageKey, layer.Depth);
 
                 CompareVec2(key, "center", expectedCenter, layer.CenterInRigSpace, PositionEpsilon, result);
                 CompareVec2(key, "totalScale", expectedScale, layer.TotalScale, ScalarEpsilon, result);
+                CompareDegrees(key, "rotation", camera.Roll, layer.Rotation, result);
             }
         }
 
@@ -148,6 +154,30 @@ namespace Ked.Presentation.Core
 
             CompareVec2("shot", "panInRigSpace", folded.PanInRigSpace, captured.PanInRigSpace, PositionEpsilon, result);
             CompareVec2("shot", "focusPointInRigSpace", folded.FocusPointInRigSpace, captured.FocusPointInRigSpace, PositionEpsilon, result);
+            CompareVec2("shot", "track", folded.Track, captured.Track, PositionEpsilon, result);
+            CompareScalar("shot", "dolly", folded.Dolly, captured.Dolly, ScalarEpsilon, result);
+            CompareDegrees("shot", "roll", folded.Roll, captured.Roll, result);
+        }
+
+        private static void CompareScalar(
+            string key, string field, float folded, float captured, float epsilon, Result result)
+        {
+            if (Math.Abs(folded - captured) > epsilon)
+                result.Mismatches.Add(Diff(key, field, folded, captured));
+        }
+
+        // 각도는 한 바퀴를 넘겨 적혀도 같은 기울기다(−10 = 350).
+        private static void CompareDegrees(string key, string field, float folded, float captured, Result result)
+        {
+            float delta = (folded - captured) % 360f;
+
+            if (delta > 180f)
+                delta -= 360f;
+            else if (delta < -180f)
+                delta += 360f;
+
+            if (Math.Abs(delta) > DegreesEpsilon)
+                result.Mismatches.Add(Diff(key, field, folded, captured));
         }
 
         private static void CompareVec2(
