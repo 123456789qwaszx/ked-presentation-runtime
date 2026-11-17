@@ -23,6 +23,10 @@ public sealed class EmojiPlaybackSystem
         public EmojiDefinition Definition;
         public EmojiPlayback Playback;
 
+        // 대본이 반대쪽을 골랐는가(<<emoji 누구 이름 flip>>). 세울 때 정해지고 서 있는 동안 그대로다 —
+        // 인물이 뒤집히는 것은 프레임마다 로케이터에서 다시 읽는다.
+        public bool Flip;
+
         // 리그마다 지금 넣어 둔 스프라이트 키 — 바뀔 때만 다시 푼다.
         public string[] AppliedSprites;
     }
@@ -45,8 +49,9 @@ public sealed class EmojiPlaybackSystem
     /// 세운 이모지의 재생을 시작한다. settle이면 건너뛴 뒤의 모습으로 바로 간다 —
     /// 머무는 이모지는 머묾의 처음, 머묾 없는 이모지는 끝이라 그 자리에서 부순다.
     /// 정의의 값(오프셋 · 기본 자리 · 기본 스프라이트)은 부르는 쪽이 이미 넣었다(SetEmojiCommand.ApplyDefinition).
+    /// flip이면 정의의 반대쪽에 세운다(EmojiSide).
     /// </summary>
-    public void Play(EmojiRefs emoji, EmojiDefinition definition, bool settle)
+    public void Play(EmojiRefs emoji, EmojiDefinition definition, bool settle, bool flip = false)
     {
         Forget(emoji);
 
@@ -66,6 +71,7 @@ public sealed class EmojiPlaybackSystem
             Emoji = emoji,
             Definition = definition,
             Playback = playback,
+            Flip = flip,
             AppliedSprites = new string[definition.Rigs.Count],
         };
 
@@ -153,9 +159,10 @@ public sealed class EmojiPlaybackSystem
         float frame = entry.Playback.Frame;
 
         // 좌우 — 인물이 뒤집혀 있으면 로케이터가 뒤집혀 있다(EmojiLocatorSystem). 이모지는 그대로 두면 통째로 거울에 비친다.
-        // 예외 둘만 한 번 더 뒤집는다(EmojiSide): 방향을 따르지 않는 이모지는 오프셋에서, 바로 서야 하는 그림은 리그의 기본 자리에서.
+        // 그 위에서 한 번 더 뒤집는 것은 셋이다(EmojiSide): 방향을 따르지 않는 이모지와 대본의 flip은 오프셋에서,
+        // 바로 서야 하는 그림은 리그의 기본 자리에서.
         bool locatorFlipped = emoji.Emoji_Locator != null && emoji.Emoji_Locator.localScale.x < 0f;
-        float offsetSign = EmojiSide.OffsetSign(definition, locatorFlipped);
+        float offsetSign = EmojiSide.OffsetSign(definition, locatorFlipped, entry.Flip);
 
         // 이모지 전체 — 자리의 키는 오프셋 값에 더한다(오프셋을 옮겨도 키를 다시 잡지 않는다).
         EmojiNodePose whole = EmojiClipMath.SampleNode(clip, "", frame);
@@ -178,7 +185,7 @@ public sealed class EmojiPlaybackSystem
             if (rigEntry.Upright)
             {
                 // 가로 배율과 회전에 부호를 곱한다 — 그림과 이 리그의 키가 만든 그대로 보인다(자리는 부모를 따라 거울 쪽).
-                float placeSign = EmojiSide.PlaceSign(definition, rigEntry, locatorFlipped);
+                float placeSign = EmojiSide.PlaceSign(definition, rigEntry, locatorFlipped, entry.Flip);
 
                 rig.EmojiRig_Place.localScale = new Vector3(placeSign * rigEntry.Scale, rigEntry.Scale, 1f);
                 rig.EmojiRig_Place.localEulerAngles = new Vector3(0f, 0f, placeSign * rigEntry.Rotation);

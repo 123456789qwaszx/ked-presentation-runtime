@@ -141,6 +141,22 @@ namespace Ked.Presentation.Tests
         }
 
         [Test]
+        public void emoji의_셋째_칸은_쪽이다_생략하면_정의의_쪽_flip이면_반대쪽()
+        {
+            Assert.That(((SetEmojiCommandSpec)Parse(Cmd("emoji", "harin", "star"))[0]).flip, Is.False);
+            Assert.That(((SetEmojiCommandSpec)Parse(Cmd("emoji", "harin", "star", "flip"))[0]).flip, Is.True);
+        }
+
+        [Test]
+        public void emoji의_쪽이_모르는_낱말이면_소리_내고_세우지_않는다()
+        {
+            // left · right는 받지 않는다 — 기준이 정의 하나라 인물이 어느 쪽을 보든 뜻이 같은 flip만 둔다(PLAN_emoji-side.md Q1).
+            LogAssert.Expect(LogType.Error, new System.Text.RegularExpressions.Regex("StageCommandParser.*쪽은 생략하거나 'flip'"));
+
+            Assert.That(Parse(Cmd("emoji", "harin", "star", "left")), Is.Empty);
+        }
+
+        [Test]
         public void emoji에_이름이_없으면_경고하고_건너뛴다()
         {
             LogAssert.Expect(LogType.Warning, new System.Text.RegularExpressions.Regex("emoji.*이름이 없다"));
@@ -262,6 +278,25 @@ namespace Ked.Presentation.Tests
                 Cmd("emoji", "s1", "star"),
                 Cmd("slot", "s1"));
 
+            Assert.That(state.EmojisOf("s1"), Is.Empty);
+        }
+
+        [Test]
+        public void 쪽은_접지_않는다_flip이어도_서_있는가만_남는다()
+        {
+            StageState plain = Fold(Cmd("slot", "s1"), Cmd("emoji", "s1", "star"));
+            StageState flipped = Fold(Cmd("slot", "s1"), Cmd("emoji", "s1", "star", "flip"));
+
+            Assert.That(flipped.Unhandled, Is.Empty);
+            Assert.That(flipped.EmojisOf("s1"), Is.EqualTo(plain.EmojisOf("s1")));
+        }
+
+        [Test]
+        public void 모르는_쪽_낱말은_Unhandled로_남고_세우지_않는다()
+        {
+            StageState state = Fold(Cmd("slot", "s1"), Cmd("emoji", "s1", "star", "left"));
+
+            Assert.That(state.Unhandled, Has.Count.EqualTo(1));
             Assert.That(state.EmojisOf("s1"), Is.Empty);
         }
 

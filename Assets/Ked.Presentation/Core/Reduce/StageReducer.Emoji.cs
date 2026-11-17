@@ -14,6 +14,8 @@ namespace Ked.Presentation.Core
     ///     이름이 있는데 서 있지 않으면 런타임은 경고하고 건너뛴다 — 여기서는 Unhandled.
     ///   · 슬롯을 다시 선언하면 함께 사라진다(StageReducer.Slot.SpawnSlot).
     ///   · 인물의 fade와는 묶지 않는다 — 내리는 것은 emoji_off와 슬롯의 재선언뿐이다.
+    ///   · 쪽(셋째 인자 — 생략 · flip)은 접지 않는다 — 서 있는가만 끝 상태다. 되감기 · 이어하기는 커맨드를 다시 실행해 세우므로
+    ///     쪽이 따라온다(docs/PLAN_emoji-side.md Q3). 모르는 낱말은 런타임이 세우지 않는 줄이라 Unhandled.
     ///
     /// 이모지의 노드는 리그 노드 트리에 넣지 않는다 — 머무는 이모지는 되풀이하는 중이라 "끝값"이 없다.
     /// 서 있는가만이 끝 상태다.
@@ -37,6 +39,12 @@ namespace Ked.Presentation.Core
             if (tuning.Emojis == null || !tuning.Emojis.TryGetValue(emojiName, out EmojiDefinition definition))
             {
                 reason = $"이모지 '{emojiName}'이 정의(emojis.json)에 없다";
+                return false;
+            }
+
+            if (!EmojiSideToken.TryParse(cmd.Arg(2), out _))
+            {
+                reason = $"이모지의 쪽은 생략하거나 '{EmojiSideToken.Flip}'이어야 한다 ('{cmd.Arg(2)}')";
                 return false;
             }
 

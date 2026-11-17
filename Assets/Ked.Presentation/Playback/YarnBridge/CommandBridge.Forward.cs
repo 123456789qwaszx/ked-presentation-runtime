@@ -11,8 +11,8 @@ public sealed partial class YarnCommandBridge
     private void EnqueueSetupCharRigSpec(string roleKey = null, string stageKey = null, string layerKey = null)
         => Forward("slot", roleKey, stageKey, layerKey);
 
-    private void EnqueueSetEmojiSpec(string roleKey = null, string emojiName = null)
-        => Forward("emoji", roleKey, emojiName);
+    private void EnqueueSetEmojiSpec(string roleKey = null, string emojiName = null, string side = null)
+        => Forward("emoji", roleKey, emojiName, side);
 
     private void EnqueueClearEmojiSpec(string roleKey = null, string emojiName = null)
         => Forward("emoji_off", roleKey, emojiName);

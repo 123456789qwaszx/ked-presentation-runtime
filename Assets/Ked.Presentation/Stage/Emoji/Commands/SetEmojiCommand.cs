@@ -4,17 +4,19 @@ using Ked.Presentation.Core;
 using UnityEngine;
 
 /// <summary>
-/// emoji {누구} {이름} — 슬롯에 이모지를 세운다(docs/PLAN_emoji.md §4).
+/// emoji {누구} {이름} [flip] — 슬롯에 이모지를 세운다(docs/PLAN_emoji.md §4). flip이면 정의의 반대쪽(docs/PLAN_emoji-side.md).
 /// </summary>
 [Serializable]
 public sealed class SetEmojiCommandSpec : EmojiRigCommandSpecBase
 {
+    [Tooltip("정의의 반대쪽에 세운다 — Emoji_Offset에서 거울을 한 번 더 비춘다(EmojiSide). 인물이 뒤집힌 것과 겹친다.")]
+    public bool flip;
 }
 
 // 슬롯을 풀고 · 정의를 찾고 · 빌더로 세우고 · 정의의 값을 넣고 · 재생을 맡긴다(EmojiPlaybackSystem).
 //   Emoji_Locator   ← RootSpace — 그 슬롯에 선 캐릭터 + 포즈의 자리와 인물의 방향(EmojiLocatorSystem). 바뀌면 따라간다
 //                     (인물이 뒤집혀 있으면 로케이터가 뒤집혀 이모지가 통째로 거울에 비친다 — 예외의 부호는 재생이 쓴다)
-//   Emoji_Offset    ← 정의의 offset
+//   Emoji_Offset    ← 정의의 offset (flip이면 재생이 이 노드에서 한 번 더 거울에 비춘다 — 머리의 자리는 그대로)
 //   EmojiRig_Place  ← 리그의 place · scale · rotation(기본 자리 · 배율 · 회전)
 //   EmojiRig_Image  ← 리그의 sprite(Resources/Emojis/{키}), 크기는 원본 픽셀
 // 같은 이름이 서 있으면 부수고 새로 세운다. 모르는 이모지는 경고하고 건너뛴다(폴드는 Unhandled).
@@ -89,7 +91,7 @@ public sealed class SetEmojiCommand : CommandBase
         if (definition.Stays)
             _stage.emojis.Register(slotKey, charSlotScale, emoji);
 
-        _playback.Play(emoji, definition, settle);
+        _playback.Play(emoji, definition, settle, _spec.flip);
 
         if (!_spec.wait || definition.Stays)
             yield break;

@@ -576,5 +576,68 @@ namespace Ked.Presentation.Tests
             Assert.That(emoji.Emoji_Offset.anchoredPosition, Is.EqualTo(new Vector2(100f, 50f)));
             Assert.That(emoji.Emoji_Offset.localScale.x, Is.EqualTo(1f).Within(Eps));
         }
+
+        // ── 대본의 쪽 — flip (docs/PLAN_emoji-side.md) ───────────────
+
+        [Test]
+        public void flip이면_뒤집히지_않은_인물에서도_오프셋이_반대쪽으로_거울에_비친다()
+        {
+            EmojiRigBuilder builder = new();
+            EmojiPlaybackSystem system = new(builder);
+            EmojiDefinition definition = One(Sided(fixedSide: false));
+            EmojiRefs emoji = Stand(builder, definition);
+
+            SetEmojiCommand.ApplyDefinition(emoji, definition);
+            system.Play(emoji, definition, settle: false, flip: true);
+
+            // 머리의 자리(로케이터)는 그대로다 — 오프셋에서 거울을 비춘다.
+            Assert.That(emoji.Emoji_Locator.localScale.x, Is.EqualTo(1f).Within(Eps));
+            Assert.That(emoji.Emoji_Offset.anchoredPosition, Is.EqualTo(new Vector2(-100f, 50f)));
+            Assert.That(emoji.Emoji_Offset.localScale.x, Is.EqualTo(-1f).Within(Eps));
+            Assert.That(emoji.Emoji_Offset.localScale.y, Is.EqualTo(1f).Within(Eps));
+
+            // 이모지가 거울에 비쳤으므로 바로 서야 하는 그림만 한 번 더 뒤집힌다.
+            Assert.That(emoji.Rigs[0].EmojiRig_Place.localScale.x, Is.EqualTo(0.5f).Within(Eps));
+            Assert.That(emoji.Rigs[1].EmojiRig_Place.localScale.x, Is.EqualTo(-0.5f).Within(Eps));
+            Assert.That(Mathf.DeltaAngle(emoji.Rigs[1].EmojiRig_Place.localEulerAngles.z, -10f), Is.EqualTo(0f).Within(1e-2f));
+        }
+
+        [Test]
+        public void flip한_이모지는_인물이_뒤집히면_두_번_뒤집혀_제_쪽으로_돌아온다()
+        {
+            EmojiRigBuilder builder = new();
+            EmojiPlaybackSystem system = new(builder);
+            EmojiDefinition definition = One(Sided(fixedSide: false));
+            EmojiRefs emoji = Stand(builder, definition);
+
+            SetEmojiCommand.ApplyDefinition(emoji, definition);
+            system.Play(emoji, definition, settle: false, flip: true);
+
+            // 서 있는 동안 인물이 돌아선다 — 로케이터가 뒤집히고 오프셋이 그것을 되돌린다.
+            Flip(emoji, true);
+            system.Tick(0f);
+
+            Assert.That(emoji.Emoji_Offset.anchoredPosition, Is.EqualTo(new Vector2(-100f, 50f)));
+            Assert.That(emoji.Emoji_Offset.localScale.x, Is.EqualTo(-1f).Within(Eps));
+
+            // 화면에서는 거울에 비치지 않았다 — 바로 서야 하는 그림도 더 뒤집지 않는다.
+            Assert.That(emoji.Rigs[1].EmojiRig_Place.localScale.x, Is.EqualTo(0.5f).Within(Eps));
+        }
+
+        [Test]
+        public void flip이_없으면_종전_그대로다()
+        {
+            EmojiRigBuilder builder = new();
+            EmojiPlaybackSystem system = new(builder);
+            EmojiDefinition definition = One(Sided(fixedSide: false));
+            EmojiRefs emoji = Stand(builder, definition);
+
+            SetEmojiCommand.ApplyDefinition(emoji, definition);
+            system.Play(emoji, definition, settle: false);
+
+            Assert.That(emoji.Emoji_Offset.anchoredPosition, Is.EqualTo(new Vector2(100f, 50f)));
+            Assert.That(emoji.Emoji_Offset.localScale.x, Is.EqualTo(1f).Within(Eps));
+            Assert.That(emoji.Rigs[1].EmojiRig_Place.localScale.x, Is.EqualTo(0.5f).Within(Eps));
+        }
     }
 }

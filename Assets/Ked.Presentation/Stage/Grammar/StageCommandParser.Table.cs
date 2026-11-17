@@ -32,7 +32,7 @@ public sealed partial class StageCommandParser
         ["rotate_reset"] = (p, c) => p.EnqueueRotateResetSpec(c.Arg(0), c.Arg(1, "0.4s"), c.Arg(2, "")),
         ["scale_reset"] = (p, c) => p.EnqueueSizeResetSpec(c.Arg(0), c.Arg(1, "0.4s"), c.Arg(2, "")),
         ["motion"] = (p, c) => p.EnqueueMotionSpec(c.Arg(0), c.Arg(1), c.Arg(2, MotionModeToken.Relative)),
-        ["emoji"] = (p, c) => p.EnqueueSetEmojiSpec(c.Arg(0), c.Arg(1)),
+        ["emoji"] = (p, c) => p.EnqueueSetEmojiSpec(c.Arg(0), c.Arg(1), c.Arg(2, "")),
         ["emoji_off"] = (p, c) => p.EnqueueClearEmojiSpec(c.Arg(0), c.Arg(1, "")),
         ["sibling_front"] = (p, c) => p.EnqueueCharacterSiblingFrontSpec(c.Arg(0)),
         ["sibling_back"] = (p, c) => p.EnqueueCharacterSiblingBackSpec(c.Arg(0)),

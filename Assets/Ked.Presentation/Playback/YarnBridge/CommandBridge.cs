@@ -78,7 +78,7 @@ public sealed partial class YarnCommandBridge
     
     private void BindEmoji(DialogueRunner runner)
     {
-        runner.AddCommandHandler<string, string>(
+        runner.AddCommandHandler<string, string, string>(
             "emoji", EnqueueSetEmojiSpec);
 
         runner.AddCommandHandler<string, string>(
