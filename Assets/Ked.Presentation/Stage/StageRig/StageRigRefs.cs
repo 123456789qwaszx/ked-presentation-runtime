@@ -3,18 +3,23 @@ using System.Collections.Generic;
 using Ked.Presentation.Core;
 using UnityEngine;
 
-/// <summary>한 깊이 층. Rect에 샷 반응(위치 · 배율)을 쓰고, Content에 리그를 붙인다.</summary>
+/// <summary>
+/// 한 깊이 층. Rect에 샷 반응(위치 · 배율)을 쓰고, Content에 리그를 붙인다.
+/// Dim은 Content 다음에 서는 어둡기 판 — 먼 층부터 이 층까지 그려진 것을 어둡게 한다(screen_dim).
+/// </summary>
 public sealed class StageLayerRefs
 {
     public readonly float Depth;
     public readonly RectTransform Rect;
     public readonly RectTransform Content;
+    public readonly StageLayerDimController Dim;
 
-    public StageLayerRefs(float depth, RectTransform rect, RectTransform content)
+    public StageLayerRefs(float depth, RectTransform rect, RectTransform content, StageLayerDimController dim)
     {
         Depth = depth;
         Rect = rect;
         Content = content;
+        Dim = dim;
     }
 }
 

@@ -84,7 +84,8 @@ public sealed class StageRigBuilder
                 continue;
 
             RectTransform content = EnsureRect(child, StageRigSchema.ContentName(stageKey, depth));
-            refs.AddLayer(new StageLayerRefs(depth, child, content));
+            StageLayerDimController dim = EnsureDim(child, content, StageRigSchema.DimName(stageKey, depth));
+            refs.AddLayer(new StageLayerRefs(depth, child, content, dim));
         }
 
         SortLayers(refs);
@@ -100,8 +101,9 @@ public sealed class StageRigBuilder
 
         RectTransform rect = EnsureRect(refs.Camera.Mount, StageRigSchema.LayerName(refs.StageKey, depth));
         RectTransform content = EnsureRect(rect, StageRigSchema.ContentName(refs.StageKey, depth));
+        StageLayerDimController dim = EnsureDim(rect, content, StageRigSchema.DimName(refs.StageKey, depth));
 
-        StageLayerRefs layer = new(depth, rect, content);
+        StageLayerRefs layer = new(depth, rect, content, dim);
         refs.AddLayer(layer);
 
         SortLayers(refs);
@@ -156,7 +158,7 @@ public sealed class StageRigBuilder
         if (!map[StageRigSchema.Refs.MaskEdge_Root].TryGetComponent(out StageMaskEdgeGraphic _))
             return false;
 
-        // 카메라 리그의 가장 안쪽(Mount)의 자식은 전부 층이어야 하고, 층은 Content 하나를 가진다.
+        // 카메라 리그의 가장 안쪽(Mount)의 자식은 전부 층이어야 하고, 층은 Content와 그 다음의 어둡기 판(Dim) 둘을 가진다.
         for (int i = 0; i < mount.childCount; i++)
         {
             RectTransform child = (RectTransform)mount.GetChild(i);
@@ -168,8 +170,12 @@ public sealed class StageRigBuilder
                 return false;
 
             RectTransform content = FindDirectChild(child, StageRigSchema.ContentName(stageKey, depth));
+            RectTransform dim = FindDirectChild(child, StageRigSchema.DimName(stageKey, depth));
 
-            if (content == null || !IsIdentityStretch(content) || !ChildrenAreExactly(child, content))
+            if (content == null || !IsIdentityStretch(content) || dim == null || !IsDimPlate(dim) || !ChildrenAreExactly(child, content, dim))
+                return false;
+
+            if (content.GetSiblingIndex() != 0)
                 return false;
         }
 
@@ -201,6 +207,17 @@ public sealed class StageRigBuilder
         return true;
     }
 
+    private static bool IsDimPlate(RectTransform rect)
+        => rect.anchorMin == DimAnchorMin
+           && rect.anchorMax == DimAnchorMax
+           && rect.pivot == new Vector2(0.5f, 0.5f)
+           && rect.anchoredPosition == Vector2.zero
+           && rect.sizeDelta == Vector2.zero
+           && rect.localScale == Vector3.one
+           && rect.localEulerAngles == Vector3.zero
+           && rect.TryGetComponent(out Image _)
+           && rect.TryGetComponent(out StageLayerDimController _);
+
     private static bool IsIdentityStretch(RectTransform rect)
         => rect.anchorMin == Vector2.zero
            && rect.anchorMax == Vector2.one
@@ -225,6 +242,39 @@ public sealed class StageRigBuilder
             RectTransform parent = map[node.Parent.Value];
             map[node.Id] = EnsureRect(parent, StageRigSchema.NodeName(stageKey, node.Id));
         }
+    }
+
+    // 어둡기 판 — 층 크기의 가로세로 3배(가운데 맞춤). 층은 카메라를 타므로 넓히기(줌 · 달리 −) · 기울이기 · 옮기기에도
+    // 판의 가장자리가 무대 창 안에 드러나지 않게 넉넉히 둔다. 창 밖은 무대 마스크가 자른다.
+    private static readonly Vector2 DimAnchorMin = new(-1f, -1f);
+    private static readonly Vector2 DimAnchorMax = new(2f, 2f);
+
+    // 판은 Content의 다음 형제다 — 형제 차례가 그리는 차례라, 이 층과 그 뒤의 층을 모두 가린다. 처음은 걷힌 채(세기 0).
+    private static StageLayerDimController EnsureDim(RectTransform layer, RectTransform content, string name)
+    {
+        RectTransform rt = EnsureRect(layer, name);
+
+        rt.anchorMin = DimAnchorMin;
+        rt.anchorMax = DimAnchorMax;
+        rt.sizeDelta = Vector2.zero;
+        rt.anchoredPosition = Vector2.zero;
+
+        if (!rt.TryGetComponent(out Image image))
+        {
+            image = rt.gameObject.AddComponent<Image>();
+            image.color = new Color(0f, 0f, 0f, 0f);
+            image.raycastTarget = false;
+        }
+
+        if (!rt.TryGetComponent(out StageLayerDimController dim))
+            dim = rt.gameObject.AddComponent<StageLayerDimController>();
+
+        dim.Bind(image);
+
+        content.SetSiblingIndex(0);
+        rt.SetAsLastSibling();
+
+        return dim;
     }
 
     // 마스크 컴포넌트는 코드 기본값으로 선다 — 씬 값이 세 무대 모두 기본값과 같았다(2026-11-05 확인).

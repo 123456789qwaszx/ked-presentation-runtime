@@ -163,6 +163,7 @@ public sealed class ScenePresentation : IPlaybackStage
             _screenEffects.ResetToBaselineImmediate();
 
         _stages.ResetAllMasksToBaseline();
+        _stages.ResetAllDimsToBaseline();
         _frames.ResetAll();
 
         if (_audio != null)

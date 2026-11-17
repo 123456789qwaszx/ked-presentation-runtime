@@ -49,6 +49,9 @@ public static class StageRigSchema
     public const string LayerPrefix = "Layer_";
     public const string ContentSuffix = "_Content";
 
+    // 층마다 Content 다음에 서는 어둡기 판(docs/PLAN_screen-cover.md §3.2).
+    public const string DimSuffix = "_Dim";
+
     public static string NodeName(string stageKey, Refs id) => $"{stageKey}_{id}";
 
     public static string LayerName(string stageKey, float depth)
@@ -56,6 +59,9 @@ public static class StageRigSchema
 
     public static string ContentName(string stageKey, float depth)
         => LayerName(stageKey, depth) + ContentSuffix;
+
+    public static string DimName(string stageKey, float depth)
+        => LayerName(stageKey, depth) + DimSuffix;
 
     /// <summary>"{무대}_Layer_{라벨|숫자}" 이름에서 d를 읽는다. 층 이름이 아니면 false.</summary>
     public static bool TryParseLayerName(string stageKey, string nodeName, out float depth)
@@ -67,7 +73,8 @@ public static class StageRigSchema
         if (nodeName == null || !nodeName.StartsWith(prefix, System.StringComparison.Ordinal))
             return false;
 
-        if (nodeName.EndsWith(ContentSuffix, System.StringComparison.Ordinal))
+        if (nodeName.EndsWith(ContentSuffix, System.StringComparison.Ordinal)
+            || nodeName.EndsWith(DimSuffix, System.StringComparison.Ordinal))
             return false;
 
         string label = nodeName.Substring(prefix.Length);

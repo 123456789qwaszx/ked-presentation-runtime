@@ -371,6 +371,12 @@ public sealed partial class YarnCommandBridge
 
         runner.AddCommandHandler(
             "screen_blur_reset", EnqueueStageLayerBlurClearSpec);
+
+        // 어둡게 — 층마다 선 어둡기 판(docs/PLAN_screen-cover.md §3.2). 층 · 세기 · 길이 · 이징 · 무대.
+        runner.AddCommandHandler<string, string, string, string, string>(
+            "screen_dim", EnqueueStageLayerDimSpec);
+        runner.AddCommandHandler<string, string>(
+            "screen_dim_reset", EnqueueStageLayerDimResetSpec);
     }
 
     /// <summary>

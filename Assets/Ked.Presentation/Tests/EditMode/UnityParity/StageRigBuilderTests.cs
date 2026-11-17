@@ -182,6 +182,51 @@ namespace Ked.Presentation.Tests.UnityParity
         }
 
         [Test]
+        public void 층마다_Content_다음에_걷힌_어둡기_판이_선다()
+        {
+            // 판은 층의 맨 앞에 그려져 먼 층부터 그 층까지를 가린다(docs/PLAN_screen-cover.md §3.2). 캐릭터는 Content에만 붙는다.
+            StageRigRefs refs = _builder.Build(_mount, "stage00", StageLayerLabels.Depths);
+
+            foreach (StageLayerRefs layer in refs.Layers)
+            {
+                RectTransform plate = (RectTransform)layer.Dim.transform;
+
+                Assert.That(plate.parent, Is.EqualTo(layer.Rect));
+                Assert.That(layer.Content.GetSiblingIndex(), Is.EqualTo(0));
+                Assert.That(plate.GetSiblingIndex(), Is.EqualTo(1), "판은 Content 다음 — 그 층의 모든 것 위에 그려진다");
+                Assert.That(layer.Rect.childCount, Is.EqualTo(2));
+                Assert.That(plate.anchorMin, Is.EqualTo(new Vector2(-1f, -1f)), "무대보다 넉넉히 — 카메라가 넓히거나 기울여도 가장자리가 안 드러나게");
+                Assert.That(plate.anchorMax, Is.EqualTo(new Vector2(2f, 2f)));
+                Assert.That(layer.Dim.Amount, Is.EqualTo(0f));
+
+                Image image = plate.GetComponent<Image>();
+                Assert.That(image.enabled, Is.False, "걷힌 판은 그리지 않는다");
+                Assert.That(image.raycastTarget, Is.False);
+            }
+
+            Assert.That(refs.Layers[0].Dim.name, Is.EqualTo("stage00_Layer_far_Dim"));
+            Assert.That(_builder.EnsureLayer(refs, 0.25f).Dim, Is.Not.Null, "나중에 선 층에도 판이 선다");
+        }
+
+        [Test]
+        public void 있는_판은_그대로_묶고_판이_빠진_층은_다시_세운다()
+        {
+            StageRigRefs first = _builder.Build(_mount, "stage00", StageLayerLabels.Depths);
+            StageLayerDimController farDim = first.Layers[0].Dim;
+            RectTransform pan = first.Camera.Pan;
+
+            StageRigRefs again = _builder.BindRefsFromRoot(first.Root, "stage00");
+            Assert.That(again.Layers[0].Dim, Is.SameAs(farDim), "멀쩡한 계층은 같은 판을 묶는다");
+
+            Transform plate = first.Layers[2].Dim.transform;
+            plate.SetParent(null, false);
+            Object.DestroyImmediate(plate.gameObject);
+
+            StageRigRefs rebuilt = _builder.BindRefsFromRoot(first.Root, "stage00");
+            Assert.That(rebuilt.Camera.Pan, Is.Not.SameAs(pan), "판이 빠진 층은 스키마와 다르다 — 부수고 새로 세운다");
+        }
+
+        [Test]
         public void 샷_소유는_카메라_리그의_노드와_층의_Rect뿐이다()
         {
             StageRigRefs refs = _builder.Build(_mount, "stage00", StageLayerLabels.Depths);
@@ -194,6 +239,7 @@ namespace Ked.Presentation.Tests.UnityParity
 
             Assert.That(refs.IsShotOwned(refs.Layers[3].Rect, out StageLayerRefs layer) && layer == refs.Layers[3]);
             Assert.That(refs.IsShotOwned(refs.Layers[3].Content, out _), Is.False);
+            Assert.That(refs.IsShotOwned((RectTransform)refs.Layers[3].Dim.transform, out _), Is.False, "판은 층의 자식 — 샷이 쓰지 않는다");
             Assert.That(refs.IsShotOwned(refs.Root, out _), Is.False);
             Assert.That(refs.IsShotOwned(refs.MaskRoot, out _), Is.False);
         }

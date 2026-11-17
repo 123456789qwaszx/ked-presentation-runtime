@@ -224,6 +224,12 @@ public sealed partial class YarnCommandBridge
     private void EnqueueStopVoiceSpec()
         => Forward("stop_voice");
 
+    private void EnqueueStageLayerDimSpec(string layerKey = null, string amount = null, string durationToken = null, string easeToken = null, string stageKey = null)
+        => Forward("screen_dim", layerKey, amount, durationToken, easeToken, stageKey);
+
+    private void EnqueueStageLayerDimResetSpec(string durationToken = null, string easeToken = null)
+        => Forward("screen_dim_reset", durationToken, easeToken);
+
     private void EnqueueScreenCoverSpec(string presetKey = null, string durationToken = null, string easeToken = null)
         => Forward("screen_cover", presetKey, durationToken, easeToken);
 

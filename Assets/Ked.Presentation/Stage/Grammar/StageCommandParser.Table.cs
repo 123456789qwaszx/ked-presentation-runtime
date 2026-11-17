@@ -108,6 +108,10 @@ public sealed partial class StageCommandParser
         ["focus_clear"] = (p, c) => p.EnqueueDepthFocusClearSpec(c.Arg(0, "0.4s")),
         ["screen_blur"] = (p, c) => p.EnqueueLayerBlurSpec(c.Arg(2, "stage00"), c.Arg(0, "mid"), Float(c, 1, 1f)),
         ["screen_blur_reset"] = (p, c) => p.EnqueueStageLayerBlurClearSpec(),
+        // 어둡게 — 층 · 세기 · 길이 · 이징 · 무대. 무대는 맨 뒤다: 길이는 거의 늘 적고 무대는 드물다
+        // (screen_blur처럼 무대가 길이 앞이면 <<screen_dim all 0.2 0fr>>의 0fr가 무대로 읽힌다). 세기는 적어야 한다.
+        ["screen_dim"] = (p, c) => p.EnqueueStageLayerDimSpec(c, c.Arg(4, "stage00"), c.Arg(0, "all"), c.Arg(1), c.Arg(2, "0.3s"), c.Arg(3, "")),
+        ["screen_dim_reset"] = (p, c) => p.EnqueueStageLayerDimResetSpec(c.Arg(0, "0.3s"), c.Arg(1, "")),
     };
 
     static StageCommandParser()

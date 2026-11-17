@@ -81,6 +81,9 @@ public sealed class ScreenEffectCommandFactory : INodeCommandFactory
             ScreenVignetteCommandSpec s => new ScreenVignetteCommand(s, _screenEffects, _vignettePresetDb),
             
             StageLayerBlurCommandSpec s => new StageLayerBlurCommand(_rigBlur, s),
+
+            // 어둡게 — 무대 리그의 층마다 선 어둡기 판(docs/PLAN_screen-cover.md §3.2)
+            StageLayerDimCommandSpec s => new StageLayerDimCommand(s, _stages),
             
             // Stage-local Mask
             StageMaskMotionCommandSpec s => new StageMaskMotionCommand(s, _stageMaskMotionPresetDb, _stages, _frames),
