@@ -135,18 +135,29 @@ public sealed partial class YarnCommandBridge
     
     private void BindShotStaging(DialogueRunner runner)
     {
+        // 묶음 — 줌 + 팬
         runner.AddCommandHandler<string, string, string, string, string, string>(
-            "shot_focus_to", EnqueueShotZoomFocusSpec);
+            "shot_focus_to", EnqueueShotFocusToSpec);
         runner.AddCommandHandler<string, string, string, string, string>(
             "shot_to", EnqueueShotToSpec);
-        
+
+        // 축마다 하나 — 렌즈(줌 · 팬) · 헤드(롤) · 몸(달리 · 트랙)
         runner.AddCommandHandler<string, string, string>(
             "shot_zoom", EnqueueShotZoomSpec);
         runner.AddCommandHandler<string, string, string, string>(
+            "shot_pan", EnqueueShotPanSpec);
+        runner.AddCommandHandler<string, string, string>(
+            "shot_roll", EnqueueShotRollSpec);
+        runner.AddCommandHandler<string, string, string>(
+            "shot_dolly", EnqueueShotDollySpec);
+        runner.AddCommandHandler<string, string, string, string>(
             "shot_track", EnqueueShotTrackSpec);
-        
+
+        // 되돌리기 — 렌즈만 / 통째로
         runner.AddCommandHandler<string, string>(
             "shot_reset", EnqueueShotResetSpec);
+        runner.AddCommandHandler<string, string>(
+            "shot_reset_all", EnqueueShotResetAllSpec);
     }
     
     private void RegisterCharRigPlacementCommands(DialogueRunner runner)

@@ -64,7 +64,7 @@ public sealed class CommandRoleGate
                 roleKey = cast.roleKey;
                 return true;
 
-            case ShotZoomFocusCommandSpec shotFocus:
+            case ShotFocusToCommandSpec shotFocus:
                 roleKey = shotFocus.focusRoleKey;
                 return true;
         }

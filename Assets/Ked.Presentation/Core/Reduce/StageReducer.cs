@@ -79,7 +79,7 @@ namespace Ked.Presentation.Core
     ///
     /// 현재 어휘(v1): slot 계열(리그 스폰) · cast/actor(배역·별칭) ·
     ///   show(리셋+앵커+사이징+가시성) · fade_in/out · fade · slide_in/out · place/size 계열 ·
-    ///   nudge/move/scale/rotate 계열 · shot 5종 ·
+    ///   nudge/move/scale/rotate 계열 · shot 계열 ·
     ///   초상 축(pose/face/face_swap) · motion(채널마다 마지막 키) · 시간 커맨드(pause·Nfr — 접을 것이 없다) ·
     ///   배경 bg_*(캐스팅하지 않은 슬롯 — spawn/sprite/fade/move/scale).
     /// 명시적 한계: 오버레이/이펙트/오디오/트랜지션 리그, 대사창,
@@ -97,7 +97,7 @@ namespace Ked.Presentation.Core
     ///   StageReducer.Show.cs      show · fade
     ///   StageReducer.Placement.cs place · size
     ///   StageReducer.Staging.cs   nudge · move · scale · rotate
-    ///   StageReducer.Shot.cs      shot 5종
+    ///   StageReducer.Shot.cs      shot 계열
     ///   StageReducer.Background.cs bg_* (배경 = 캐스팅하지 않은 슬롯)
     /// </summary>
     public static partial class StageReducer
@@ -211,12 +211,21 @@ namespace Ked.Presentation.Core
                 // motion — 채널마다 마지막 키가 타깃이다. 샘플링하지 않는다(MotionMath.TargetFor).
                 case "motion": return ApplyMotion(state, cmd, tuning, out reason);
 
-                // shot
+                // shot — 축마다 하나(shot_<축>)와 묶음 둘(shot_to · shot_focus_to), 되돌리기 둘.
                 case "shot_zoom":  return ApplyShotZoom(state, cmd, out reason);
+                case "shot_pan":   return ApplyShotPan(state, cmd, tuning, out reason);
                 case "shot_to":    return ApplyShotTo(state, cmd, tuning, out reason);
                 case "shot_track": return ApplyShotTrack(state, cmd, tuning, out reason);
+                case "shot_dolly": return ApplyShotDolly(state, cmd, out reason);
+                case "shot_roll":  return ApplyShotRoll(state, cmd, out reason);
+
+                // 렌즈만 되돌린다 — 카메라의 몸과 롤은 그대로다.
                 case "shot_reset":
-                    state.Shot = ShotIntents.Reset();
+                    state.Shot = ShotIntents.Reset(state.Shot);
+                    return true;
+
+                case "shot_reset_all":
+                    state.Shot = ShotIntents.ResetAll();
                     return true;
 
                 case "shot_focus_to": return ApplyShotFocusTo(state, cmd, tuning, out reason);

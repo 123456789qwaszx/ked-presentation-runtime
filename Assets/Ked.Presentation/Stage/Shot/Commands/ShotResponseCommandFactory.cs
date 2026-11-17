@@ -24,10 +24,15 @@ public sealed class ShotResponseCommandFactory : INodeCommandFactory
             
             ShotResetCommandSpec s => new ShotResetCommand(_presentationResponseRig, s),
 
-            ShotZoomFocusCommandSpec s => new ShotZoomFocusCommand(_stage, _presentationResponseRig, s, _focusTuningDB),
+            // 묶음 — 줌 + 팬
+            ShotFocusToCommandSpec s => new ShotFocusToCommand(_stage, _presentationResponseRig, s, _focusTuningDB),
             ShotToCommandSpec s => new ShotToCommand(_presentationResponseRig, s),
 
+            // 축마다 하나 — 렌즈 · 헤드 · 몸
             ShotZoomCommandSpec s => new ShotZoomCommand(_presentationResponseRig, s),
+            ShotPanCommandSpec s => new ShotPanCommand(_presentationResponseRig, s),
+            ShotRollCommandSpec s => new ShotRollCommand(_presentationResponseRig, s),
+            ShotDollyCommandSpec s => new ShotDollyCommand(_presentationResponseRig, s),
             ShotTrackCommandSpec s => new ShotTrackCommand(_presentationResponseRig, s),
 
             _ => null

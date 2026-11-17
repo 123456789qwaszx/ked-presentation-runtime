@@ -692,22 +692,54 @@ namespace Ked.Presentation.Tests
         [Test]
         public void shot_계열은_샷_축에_접힌다()
         {
-            // 브리지 기본값: shot_zoom(zoom=1) / shot_to(zoom=1, x=2.5u, y=0u) / shot_track(x=2.5u, y=0u).
+            // shot_<축>은 그 축 하나를 절대값으로 놓는다 — 같은 명령을 두 번 적어도 더해지지 않는다.
             StageState state = Fold(
                 Cmd("shot_zoom", "3"),
+                Cmd("shot_pan", "2u", "-0.5u"),
                 Cmd("shot_track", "1u", "-0.5u"),
-                Cmd("shot_track", "1u", "0u"));
+                Cmd("shot_track", "1u", "0u"),
+                Cmd("shot_dolly", "4"),
+                Cmd("shot_roll", "-8"));
 
+            Assert.That(state.Unhandled, Is.Empty);
             Assert.That(state.Shot.Zoom, Is.EqualTo(3f));
             Assert.That(state.Shot.PanInRigSpace, Is.EqualTo(new Vec2(80f, -20f)));
+            Assert.That(state.Shot.Track, Is.EqualTo(new Vec2(40f, 0f)), "트랙은 절대값이다 — 마지막 것이 남는다");
+            Assert.That(state.Shot.Dolly, Is.EqualTo(4f));
+            Assert.That(state.Shot.Roll, Is.EqualTo(-8f));
 
             StageState to = StageReducer.Apply(state, Cmd("shot_to", "5", "-2u", "1u"), NewTuning());
             Assert.That(to.Shot.Zoom, Is.EqualTo(5f));
             Assert.That(to.Shot.PanInRigSpace, Is.EqualTo(new Vec2(-80f, 40f)));
+            Assert.That(to.Shot.Track, Is.EqualTo(new Vec2(40f, 0f)), "shot_to는 몸을 건드리지 않는다");
 
+            // shot_reset은 렌즈만 — 카메라의 몸과 롤은 그대로다.
             StageState reset = StageReducer.Apply(to, Cmd("shot_reset"), NewTuning());
             Assert.That(reset.Shot.Zoom, Is.EqualTo(0f));
             Assert.That(reset.Shot.PanInRigSpace, Is.EqualTo(Vec2.Zero));
+            Assert.That(reset.Shot.Track, Is.EqualTo(new Vec2(40f, 0f)));
+            Assert.That(reset.Shot.Dolly, Is.EqualTo(4f));
+            Assert.That(reset.Shot.Roll, Is.EqualTo(-8f));
+
+            StageState all = StageReducer.Apply(reset, Cmd("shot_reset_all"), NewTuning());
+            Assert.That(all.Shot.ToString(), Is.EqualTo(ShotIntentState.Default.ToString()));
+        }
+
+        [Test]
+        public void shot_계열의_값_인자에는_생략값이_없다()
+        {
+            // 값이 빠졌거나 읽지 못하면 접지 않고 남긴다 — 뜻 없는 생략값(zoom 1 · x 2.5u)으로 조용히 가지 않는다.
+            StageState state = Fold(
+                Cmd("shot_zoom"),
+                Cmd("shot_zoom", "abc"),
+                Cmd("shot_to", "3"),
+                Cmd("shot_pan", "1u"),
+                Cmd("shot_track"),
+                Cmd("shot_dolly"),
+                Cmd("shot_roll", "x"));
+
+            Assert.That(state.Unhandled.Count, Is.EqualTo(7), string.Join("\n", state.Unhandled));
+            Assert.That(state.Shot.ToString(), Is.EqualTo(ShotIntentState.Default.ToString()), "아무것도 접히지 않았다");
         }
 
         [Test]

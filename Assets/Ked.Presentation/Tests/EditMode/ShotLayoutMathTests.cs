@@ -172,7 +172,8 @@ namespace Ked.Presentation.Tests
             foreach (float depth in new[] { StageLayerLabels.Far, StageLayerLabels.Mid, StageLayerLabels.Close, 0.25f })
             foreach (float zoom in new[] { 0f, 2.5f, -4f })
             {
-                Vec2 pan = ShotLayoutMath.SolvePanToPlace(zoom, focus, focus, desired, depth, curve);
+                ShotIntentState basis = new(zoom, Vec2.Zero, focus);
+                Vec2 pan = ShotLayoutMath.SolvePanToPlace(in basis, focus, desired, depth, curve);
 
                 ShotIntentState placed = new(zoom, pan, focus);
                 CameraPose camera = ShotLayoutMath.SolveCamera(in placed);

@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 
 [Serializable]
-public sealed class ShotZoomFocusCommandSpec : ShotIntentCommandSpecBase
+public sealed class ShotFocusToCommandSpec : ShotIntentCommandSpecBase
 {
     [Header("Character Focus")]
     [Tooltip("캐릭터 key 또는 slot key입니다.")]
@@ -25,15 +25,15 @@ public sealed class ShotZoomFocusCommandSpec : ShotIntentCommandSpecBase
     public float zoom = 0f;
 }
 
-public sealed class ShotZoomFocusCommand : ShotIntentCommandBase<ShotZoomFocusCommandSpec>
+public sealed class ShotFocusToCommand : ShotIntentCommandBase<ShotFocusToCommandSpec>
 {
     private readonly PresentationStage _stage;
     CharacterFocusTuningDBSO _focusTuningDB;
     
-    public ShotZoomFocusCommand(
+    public ShotFocusToCommand(
         PresentationStage stage,
         PresentationShotResponseSystem rig, 
-        ShotZoomFocusCommandSpec spec, 
+        ShotFocusToCommandSpec spec, 
         CharacterFocusTuningDBSO focusTuningDB)
         : base(rig, spec)
     {
@@ -60,7 +60,7 @@ public sealed class ShotZoomFocusCommand : ShotIntentCommandBase<ShotZoomFocusCo
         if (focus.Stage.Role != Ked.Presentation.Core.StageRole.Main)
         {
             Debug.LogWarning(
-                $"[ShotZoomFocusCommand] '{spec.focusRoleKey}'는 덮는 무대 '{focus.Stage.StageKey}'에 서 있다. " +
+                $"[ShotFocusToCommand] '{spec.focusRoleKey}'는 덮는 무대 '{focus.Stage.StageKey}'에 서 있다. " +
                 "샷은 본 무대만 움직이므로 건너뛴다.");
 
             return from;
@@ -71,9 +71,11 @@ public sealed class ShotZoomFocusCommand : ShotIntentCommandBase<ShotZoomFocusCo
 
         // 목표 배율에서, 리그가 선 층의 반응까지 넣어 그 자리가 화면 지점에 보이는 pan을 푼다.
         // 코어 폴드(StageReducer.Shot)와 같은 목표 계산이고 같은 곡선(샷 시스템이 쓰는 것)을 본다.
-        // 결과는 무대 위 자리와 층만으로 정해진다 — 지금 카메라 · 샷의 진행도와 무관.
+        // 렌즈는 입력이 아니다 — 지금 줌 · 팬과 샷의 진행도와 무관하게 풀린다. 카메라의 몸과 롤(from)은 입력이다:
+        // 카메라가 옮겨 서 있거나 기울어 있으면 같은 대상이라도 팬이 달라진다.
         return Ked.Presentation.Core.ShotIntents
             .FocusTo(
+                from.ToCore(),
                 spec.zoom,
                 focus.FocusPointInRigSpace.ToCore(),
                 desiredPoint.ToCore(),

@@ -38,7 +38,7 @@ namespace Ked.Presentation.Tests
             Assert.That(ShotIntentMath.EvaluateCameraScale(-4f), Is.EqualTo(0.8f).Within(Eps));
         }
 
-        // ── 단순 목표 계산 4종 ──────────────────────────────────────────
+        // ── 단순 목표 계산 — shot_<축>은 그 축 하나만 바꾼다 ───────────
 
         [Test]
         public void shot_zoom은_zoom만_바꾼다()
@@ -50,14 +50,55 @@ namespace Ked.Presentation.Tests
             AssertVec2(to.FocusPointInRigSpace, From.FocusPointInRigSpace, "focus 유지");
         }
 
-        [Test]
-        public void shot_track은_현재_pan에_더한다()
-        {
-            ShotIntentState to = ShotIntents.Track(From, new Vec2(20f, 5f));
+        // 여섯 축이 모두 0이 아닌 출발점 — 어느 축이 "그대로"인지 드러난다.
+        private static readonly ShotIntentState Full = new(
+            2f, new Vec2(30f, -10f), new Vec2(100f, 50f), new Vec2(240f, 60f), 4f, 12f);
 
-            Assert.That(to.Zoom, Is.EqualTo(From.Zoom));
-            AssertVec2(to.PanInRigSpace, new Vec2(50f, -5f), "pan 가산");
-            AssertVec2(to.FocusPointInRigSpace, From.FocusPointInRigSpace, "focus 유지");
+        private static void AssertOnlyChanged(in ShotIntentState to, in ShotIntentState from, string changed)
+        {
+            if (changed != "zoom") Assert.That(to.Zoom, Is.EqualTo(from.Zoom), "zoom 유지");
+            if (changed != "pan") AssertVec2(to.PanInRigSpace, from.PanInRigSpace, "pan 유지");
+            if (changed != "focus") AssertVec2(to.FocusPointInRigSpace, from.FocusPointInRigSpace, "focus 유지");
+            if (changed != "track") AssertVec2(to.Track, from.Track, "track 유지");
+            if (changed != "dolly") Assert.That(to.Dolly, Is.EqualTo(from.Dolly), "dolly 유지");
+            if (changed != "roll") Assert.That(to.Roll, Is.EqualTo(from.Roll), "roll 유지");
+        }
+
+        [Test]
+        public void shot_축_명령은_그_축만_절대값으로_바꾼다()
+        {
+            ShotIntentState zoom = ShotIntents.Zoom(Full, 5f);
+            Assert.That(zoom.Zoom, Is.EqualTo(5f));
+            AssertOnlyChanged(in zoom, Full, "zoom");
+
+            ShotIntentState pan = ShotIntents.Pan(Full, new Vec2(-80f, 60f));
+            AssertVec2(pan.PanInRigSpace, new Vec2(-80f, 60f), "pan 절대");
+            AssertOnlyChanged(in pan, Full, "pan");
+
+            ShotIntentState track = ShotIntents.Track(Full, new Vec2(-120f, 0f));
+            AssertVec2(track.Track, new Vec2(-120f, 0f), "track 절대 — 지금 값에 더하지 않는다");
+            AssertOnlyChanged(in track, Full, "track");
+
+            ShotIntentState dolly = ShotIntents.Dolly(Full, -3f);
+            Assert.That(dolly.Dolly, Is.EqualTo(-3f));
+            AssertOnlyChanged(in dolly, Full, "dolly");
+
+            ShotIntentState roll = ShotIntents.Roll(Full, -8f);
+            Assert.That(roll.Roll, Is.EqualTo(-8f));
+            AssertOnlyChanged(in roll, Full, "roll");
+        }
+
+        [Test]
+        public void shot_to는_몸과_롤을_건드리지_않는다()
+        {
+            ShotIntentState to = ShotIntents.To(Full, 4f, new Vec2(-80f, 60f));
+
+            Assert.That(to.Zoom, Is.EqualTo(4f));
+            AssertVec2(to.PanInRigSpace, new Vec2(-80f, 60f), "pan 절대");
+            AssertVec2(to.FocusPointInRigSpace, Full.FocusPointInRigSpace, "focus 유지");
+            AssertVec2(to.Track, Full.Track, "track 유지");
+            Assert.That(to.Dolly, Is.EqualTo(Full.Dolly));
+            Assert.That(to.Roll, Is.EqualTo(Full.Roll));
         }
 
         [Test]
@@ -73,13 +114,26 @@ namespace Ked.Presentation.Tests
         }
 
         [Test]
-        public void shot_reset은_기본_샷이다()
+        public void shot_reset은_렌즈만_중립으로_돌린다()
         {
-            ShotIntentState to = ShotIntents.Reset();
+            // 장면의 구도(몸)와 기울기는 두고, 그 자리의 중립 렌즈로 돌아온다.
+            ShotIntentState to = ShotIntents.Reset(Full);
 
             Assert.That(to.Zoom, Is.EqualTo(0f));
             AssertVec2(to.PanInRigSpace, Vec2.Zero, "pan 0");
             AssertVec2(to.FocusPointInRigSpace, Vec2.Zero, "focus 0");
+            AssertVec2(to.Track, Full.Track, "track 유지");
+            Assert.That(to.Dolly, Is.EqualTo(Full.Dolly), "dolly 유지");
+            Assert.That(to.Roll, Is.EqualTo(Full.Roll), "roll 유지");
+
+            // 새 축을 쓰지 않는 대본에서는 종전 그대로 — 기본 샷이다.
+            Assert.That(ShotIntents.Reset(From).ToString(), Is.EqualTo(ShotIntentState.Default.ToString()));
+        }
+
+        [Test]
+        public void shot_reset_all은_카메라를_통째로_중립으로_돌린다()
+        {
+            Assert.That(ShotIntents.ResetAll().ToString(), Is.EqualTo(ShotIntentState.Default.ToString()));
         }
 
         // ── shot_focus_to: 명중 ──────────────────────────────────────
@@ -110,7 +164,7 @@ namespace Ked.Presentation.Tests
             foreach (Vec2 desired in desireds)
             foreach (float zoom in new[] { 2.5f, 6f, -4f })
             {
-                ShotIntentState to = ShotIntents.FocusTo(zoom, focus, desired, depth, Curve);
+                ShotIntentState to = ShotIntents.FocusTo(ShotIntentState.Default, zoom, focus, desired, depth, Curve);
 
                 // 값이 수백 px이라 float 왕복 오차를 1e-3까지 둔다.
                 AssertVec2(SeenAt(in to, focus, depth), desired, $"d={depth} focus={focus} desired={desired} zoom={zoom}", 1e-3f);
@@ -124,7 +178,7 @@ namespace Ked.Presentation.Tests
             // 층 산개의 기준이 되는 점이다. 카메라를 벗길 것이 없다 — 입력이 이미 무대 좌표다.
             Vec2 focus = new(250f, 380f);
 
-            ShotIntentState to = ShotIntents.FocusTo(6f, focus, Vec2.Zero, StageLayerLabels.Close, Curve);
+            ShotIntentState to = ShotIntents.FocusTo(ShotIntentState.Default, 6f, focus, Vec2.Zero, StageLayerLabels.Close, Curve);
 
             AssertVec2(to.FocusPointInRigSpace, focus, "논리 focus");
         }
@@ -137,7 +191,7 @@ namespace Ked.Presentation.Tests
             Vec2 desired = new(-460.8f, 0f);
             float scale = ShotIntentMath.EvaluateCameraScale(6f);
 
-            ShotIntentState to = ShotIntents.FocusTo(6f, focus, desired, StageLayerLabels.Mid, Curve);
+            ShotIntentState to = ShotIntents.FocusTo(ShotIntentState.Default, 6f, focus, desired, StageLayerLabels.Mid, Curve);
 
             AssertVec2(to.PanInRigSpace, desired - focus * scale, "mid 팬");
         }
@@ -150,9 +204,45 @@ namespace Ked.Presentation.Tests
             float scale = ShotIntentMath.EvaluateCameraScale(2.5f);
             Vec2 cameraOnly = Vec2.Zero - focus * scale;
 
-            ShotIntentState to = ShotIntents.FocusTo(2.5f, focus, Vec2.Zero, StageLayerLabels.Close, Curve);
+            ShotIntentState to = ShotIntents.FocusTo(ShotIntentState.Default, 2.5f, focus, Vec2.Zero, StageLayerLabels.Close, Curve);
 
             Assert.That(Math.Abs(to.PanInRigSpace.X - cameraOnly.X), Is.GreaterThan(1f), $"close 팬={to.PanInRigSpace} 카메라만={cameraOnly}");
+        }
+
+        [Test]
+        public void 카메라가_옮겨_서고_기울어_있어도_그_점은_원하는_지점에_보인다()
+        {
+            // 몸과 롤은 입력이다 — 같은 대상이라도 카메라가 선 자리에 따라 팬이 달라지고, 몸과 롤은 그대로 남는다.
+            Vec2 focus = new(-460.8f, 300f);
+            Vec2 desired = new(300f, 200f);
+
+            foreach (float depth in Depths)
+            foreach (float roll in new[] { 0f, 10f, -25f })
+            {
+                ShotIntentState from = new(1f, new Vec2(999f, 999f), new Vec2(5f, 5f), new Vec2(240f, -60f), 4f, roll);
+                ShotIntentState to = ShotIntents.FocusTo(from, 2.5f, focus, desired, depth, Curve);
+
+                AssertVec2(SeenAt(in to, focus, depth), desired, $"d={depth} roll={roll}", 5e-2f);
+                AssertVec2(to.Track, from.Track, "track 유지");
+                Assert.That(to.Dolly, Is.EqualTo(from.Dolly), "dolly 유지");
+                Assert.That(to.Roll, Is.EqualTo(from.Roll), "roll 유지");
+                Assert.That(to.Zoom, Is.EqualTo(2.5f));
+                AssertVec2(to.FocusPointInRigSpace, focus, "논리 focus");
+            }
+        }
+
+        [Test]
+        public void 렌즈는_입력이_아니다_지금_줌과_팬이_달라도_같은_결과다()
+        {
+            Vec2 focus = new(120f, 90f);
+            Vec2 desired = new(50f, -20f);
+
+            ShotIntentState a = new(0f, Vec2.Zero, Vec2.Zero, new Vec2(100f, 0f), 2f, 5f);
+            ShotIntentState b = new(7f, new Vec2(-300f, 80f), new Vec2(40f, 40f), new Vec2(100f, 0f), 2f, 5f);
+
+            Assert.That(
+                ShotIntents.FocusTo(a, 3f, focus, desired, StageLayerLabels.Front, Curve).ToString(),
+                Is.EqualTo(ShotIntents.FocusTo(b, 3f, focus, desired, StageLayerLabels.Front, Curve).ToString()));
         }
 
         [Test]
@@ -162,8 +252,8 @@ namespace Ked.Presentation.Tests
             Vec2 focus = new(120f, 90f);
             Vec2 desired = new(50f, -20f);
 
-            ShotIntentState a = ShotIntents.FocusTo(3f, focus, desired, StageLayerLabels.Front, Curve);
-            ShotIntentState b = ShotIntents.FocusTo(3f, focus, desired, StageLayerLabels.Front, Curve);
+            ShotIntentState a = ShotIntents.FocusTo(ShotIntentState.Default, 3f, focus, desired, StageLayerLabels.Front, Curve);
+            ShotIntentState b = ShotIntents.FocusTo(ShotIntentState.Default, 3f, focus, desired, StageLayerLabels.Front, Curve);
 
             Assert.That(b.Zoom, Is.EqualTo(a.Zoom));
             AssertVec2(b.PanInRigSpace, a.PanInRigSpace, "pan");

@@ -288,9 +288,63 @@ public class StageCommandParserTests
     {
         LogAssert.Expect(LogType.Warning, new Regex("StageCommandParser.*숫자가 아니다"));
 
-        List<CommandSpecBase> specs = Parse(NewParser(), Cmd("shot_zoom", "abc"));
+        List<CommandSpecBase> specs = Parse(NewParser(), Cmd("rotate_by", "c1", "abc"));
 
-        Assert.AreEqual(1f, ((ShotZoomCommandSpec)specs[0]).zoom, 1e-6f);
+        Assert.AreEqual(0f, ((RotateToCommandSpecCharR)specs[0]).toEuler.z, 1e-6f);
+    }
+
+    // ── shot — 축마다 하나, 값 인자에는 생략값이 없다 ─────────────────────
+
+    [Test]
+    public void shot_축_명령은_그_축의_값을_절대값으로_싣는다()
+    {
+        StageCommandParser parser = NewParser();
+
+        Assert.AreEqual(3f, ((ShotZoomCommandSpec)Parse(parser, Cmd("shot_zoom", "3"))[0]).zoom, 1e-6f);
+        Assert.AreEqual(new Vector2(80f, -20f), ((ShotPanCommandSpec)Parse(parser, Cmd("shot_pan", "2u", "-0.5u"))[0]).pan);
+        Assert.AreEqual(new Vector2(120f, 40f), ((ShotTrackCommandSpec)Parse(parser, Cmd("shot_track", "3u", "1u"))[0]).track);
+        Assert.AreEqual(4f, ((ShotDollyCommandSpec)Parse(parser, Cmd("shot_dolly", "4"))[0]).dolly, 1e-6f);
+        Assert.AreEqual(-8f, ((ShotRollCommandSpec)Parse(parser, Cmd("shot_roll", "-8"))[0]).roll, 1e-6f);
+
+        ShotToCommandSpec to = (ShotToCommandSpec)Parse(parser, Cmd("shot_to", "5", "-2u", "1u", "24fr"))[0];
+        Assert.AreEqual(5f, to.zoom, 1e-6f);
+        Assert.AreEqual(new Vector2(-80f, 40f), to.pan);
+        Assert.AreEqual(1f, to.duration, 1e-6f, "24fr = 1초");
+    }
+
+    [Test]
+    public void shot_reset은_렌즈만_shot_reset_all은_통째로다()
+    {
+        StageCommandParser parser = NewParser();
+
+        Assert.IsFalse(((ShotResetCommandSpec)Parse(parser, Cmd("shot_reset", "0fr"))[0]).all);
+        Assert.IsTrue(((ShotResetCommandSpec)Parse(parser, Cmd("shot_reset_all", "0fr"))[0]).all);
+        Assert.IsFalse(((ShotResetCommandSpec)Parse(parser, Cmd("shot_reset"))[0]).all, "길이는 생략할 수 있다");
+    }
+
+    [Test]
+    public void 값이_빠진_shot_명령은_소리_내고_아무것도_내지_않는다()
+    {
+        // 뜻 없는 생략값(zoom 1 · x 2.5u)으로 조용히 가지 않는다. 코어 폴드도 같은 줄을 Unhandled로 남긴다.
+        StageCommandParser parser = NewParser();
+
+        StageCommand[] broken =
+        {
+            Cmd("shot_zoom"),
+            Cmd("shot_zoom", "abc"),
+            Cmd("shot_to", "3"),
+            Cmd("shot_pan", "1u"),
+            Cmd("shot_track"),
+            Cmd("shot_dolly"),
+            Cmd("shot_roll", "x"),
+        };
+
+        foreach (StageCommand cmd in broken)
+        {
+            LogAssert.Expect(LogType.Error, new Regex("StageCommandParser.*이 커맨드는 실행하지 않는다"));
+
+            Assert.AreEqual(0, Parse(parser, cmd).Count, cmd.ToString());
+        }
     }
 
     [Test]

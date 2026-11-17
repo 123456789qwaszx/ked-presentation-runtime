@@ -59,7 +59,7 @@ public sealed partial class YarnCommandBridge
     private void EnqueueCharacterSiblingBackSpec(string roleKey = null)
         => Forward("sibling_back", roleKey);
 
-    private void EnqueueShotZoomFocusSpec(string roleKey = null, string focusName = null, string screenPointName = null, string zoom = null, string durationToken = null, string easeToken = null)
+    private void EnqueueShotFocusToSpec(string roleKey = null, string focusName = null, string screenPointName = null, string zoom = null, string durationToken = null, string easeToken = null)
         => Forward("shot_focus_to", roleKey, focusName, screenPointName, zoom, durationToken, easeToken);
 
     private void EnqueueShotToSpec(string zoom = null, string xToken = null, string yToken = null, string durationToken = null, string easeToken = null)
@@ -71,8 +71,20 @@ public sealed partial class YarnCommandBridge
     private void EnqueueShotTrackSpec(string xToken = null, string yToken = null, string durationToken = null, string easeToken = null)
         => Forward("shot_track", xToken, yToken, durationToken, easeToken);
 
+    private void EnqueueShotPanSpec(string xToken = null, string yToken = null, string durationToken = null, string easeToken = null)
+        => Forward("shot_pan", xToken, yToken, durationToken, easeToken);
+
+    private void EnqueueShotRollSpec(string degrees = null, string durationToken = null, string easeToken = null)
+        => Forward("shot_roll", degrees, durationToken, easeToken);
+
+    private void EnqueueShotDollySpec(string dolly = null, string durationToken = null, string easeToken = null)
+        => Forward("shot_dolly", dolly, durationToken, easeToken);
+
     private void EnqueueShotResetSpec(string durationToken = null, string easeToken = null)
         => Forward("shot_reset", durationToken, easeToken);
+
+    private void EnqueueShotResetAllSpec(string durationToken = null, string easeToken = null)
+        => Forward("shot_reset_all", durationToken, easeToken);
 
     private void EnqueueShowAtSpec(string roleKey = null, string faceToken = null, string durationToken = null)
         => Forward("show", roleKey, faceToken, durationToken);

@@ -1,9 +1,11 @@
 namespace Ked.Presentation.Core
 {
     /// <summary>
-    /// shot — 카메라 의도(zoom·pan). 노드가 아니라 StageState.Shot 한 장을 갈아끼운다.
+    /// shot — 카메라 의도. 노드가 아니라 StageState.Shot 한 장을 갈아끼운다.
     ///
-    /// shot_reset은 인자가 없어 디스패치에서 바로 접는다 — 여기 있는 건 인자를 읽는 넷이다.
+    /// shot_&lt;축&gt;은 그 축 하나를 절대값으로 놓고 나머지 축은 그대로 둔다(ShotIntents). 값 인자에는 생략값이 없다 —
+    /// 빠졌거나 읽지 못하면 접지 않고 Unhandled로 남긴다(런타임도 그 줄을 건너뛴다).
+    /// shot_reset · shot_reset_all은 값 인자가 없어 디스패치에서 바로 접는다. shot_shake는 접을 것이 없다.
     /// </summary>
     public static partial class StageReducer
     {
@@ -59,6 +61,7 @@ namespace Ked.Presentation.Core
                 chain, state.Nodes.RootSpace, focusOffset);
 
             state.Shot = ShotIntents.FocusTo(
+                state.Shot,
                 zoom,
                 focus,
                 desired,
@@ -70,47 +73,114 @@ namespace Ked.Presentation.Core
 
         private static bool ApplyShotZoom(StageState state, in StageCommand cmd, out string reason)
         {
-            // 브리지: shot_zoom(zoom=1f, duration).
-            if (!NumberToken.TryParseFloat(cmd.Arg(0, "1"), out float zoom))
-            {
-                reason = $"zoom을 읽지 못했다: '{cmd.Arg(0)}'";
+            // 파서 표: shot_zoom(zoom, duration="0.45s", ease).
+            if (!TryReadNumber(cmd, 0, "zoom", out float zoom, out reason))
                 return false;
-            }
 
             state.Shot = ShotIntents.Zoom(state.Shot, zoom);
-            reason = null;
+            return true;
+        }
+
+        private static bool ApplyShotPan(
+            StageState state, in StageCommand cmd, StageReducerTuning tuning, out string reason)
+        {
+            // 파서 표: shot_pan(x, y, duration="0.45s", ease).
+            if (!TryReadUnits(cmd, 0, tuning, out Vec2 pan, out reason))
+                return false;
+
+            state.Shot = ShotIntents.Pan(state.Shot, pan);
             return true;
         }
 
         private static bool ApplyShotTo(
             StageState state, in StageCommand cmd, StageReducerTuning tuning, out string reason)
         {
-            // 브리지: shot_to(zoom=1f, x="2.5u", y="0u", duration).
-            if (!NumberToken.TryParseFloat(cmd.Arg(0, "1"), out float zoom) ||
-                !UnitToken.TryParseSignedPixels(cmd.Arg(1, "2.5u"), tuning.ReferenceStageWidth, out float x) ||
-                !UnitToken.TryParseSignedPixels(cmd.Arg(2, "0u"), tuning.ReferenceStageWidth, out float y))
+            // 파서 표: shot_to(zoom, x, y, duration="0.45s", ease).
+            if (!TryReadNumber(cmd, 0, "zoom", out float zoom, out reason) ||
+                !TryReadUnits(cmd, 1, tuning, out Vec2 pan, out reason))
             {
-                reason = $"shot_to 인자를 읽지 못했다: {cmd}";
                 return false;
             }
 
-            state.Shot = ShotIntents.To(state.Shot, zoom, new Vec2(x, y));
-            reason = null;
+            state.Shot = ShotIntents.To(state.Shot, zoom, pan);
             return true;
         }
 
         private static bool ApplyShotTrack(
             StageState state, in StageCommand cmd, StageReducerTuning tuning, out string reason)
         {
-            // 브리지: shot_track(x="2.5u", y="0u", duration).
-            if (!UnitToken.TryParseSignedPixels(cmd.Arg(0, "2.5u"), tuning.ReferenceStageWidth, out float x) ||
-                !UnitToken.TryParseSignedPixels(cmd.Arg(1, "0u"), tuning.ReferenceStageWidth, out float y))
+            // 파서 표: shot_track(x, y, duration="0.45s", ease) — 카메라가 서는 자리(절대값).
+            if (!TryReadUnits(cmd, 0, tuning, out Vec2 track, out reason))
+                return false;
+
+            state.Shot = ShotIntents.Track(state.Shot, track);
+            return true;
+        }
+
+        private static bool ApplyShotDolly(StageState state, in StageCommand cmd, out string reason)
+        {
+            // 파서 표: shot_dolly(n, duration="0.45s", ease).
+            if (!TryReadNumber(cmd, 0, "dolly", out float dolly, out reason))
+                return false;
+
+            state.Shot = ShotIntents.Dolly(state.Shot, dolly);
+            return true;
+        }
+
+        private static bool ApplyShotRoll(StageState state, in StageCommand cmd, out string reason)
+        {
+            // 파서 표: shot_roll(도, duration="0.45s", ease).
+            if (!TryReadNumber(cmd, 0, "roll", out float roll, out reason))
+                return false;
+
+            state.Shot = ShotIntents.Roll(state.Shot, roll);
+            return true;
+        }
+
+        // 값 인자 하나(숫자). 생략값이 없다.
+        private static bool TryReadNumber(in StageCommand cmd, int index, string what, out float value, out string reason)
+        {
+            value = 0f;
+            string token = cmd.Arg(index);
+
+            if (token == null)
             {
-                reason = $"shot_track 인자를 읽지 못했다: {cmd}";
+                reason = $"{cmd.Name}에 {what} 값이 없다 — 값 인자는 꼭 적는다";
                 return false;
             }
 
-            state.Shot = ShotIntents.Track(state.Shot, new Vec2(x, y));
+            if (!NumberToken.TryParseFloat(token, out value))
+            {
+                reason = $"{cmd.Name}의 {what}을 읽지 못했다: '{token}'";
+                return false;
+            }
+
+            reason = null;
+            return true;
+        }
+
+        // 값 인자 둘(x · y, 단위 토큰). 생략값이 없다.
+        private static bool TryReadUnits(
+            in StageCommand cmd, int index, StageReducerTuning tuning, out Vec2 value, out string reason)
+        {
+            value = Vec2.Zero;
+            string xToken = cmd.Arg(index);
+            string yToken = cmd.Arg(index + 1);
+
+            if (xToken == null || yToken == null)
+            {
+                reason = $"{cmd.Name}에 x · y 값이 없다 — 값 인자는 꼭 적는다";
+                return false;
+            }
+
+            if (!UnitToken.TryParseSignedPixels(xToken, tuning.ReferenceStageWidth, out float x) ||
+                !UnitToken.TryParseSignedPixels(yToken, tuning.ReferenceStageWidth, out float y))
+            {
+                reason = $"{cmd.Name}의 x · y를 읽지 못했다: '{xToken}' '{yToken}'";
+                return false;
+            }
+
+            value = new Vec2(x, y);
             reason = null;
             return true;
         }

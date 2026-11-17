@@ -398,20 +398,6 @@ namespace Ked.Presentation.Core
                 (float)((a11 * remaining.Y - a21 * remaining.X) / det));
         }
 
-        // 종전 꼴(줌 · 초점만) — shot_focus_to가 지금 의도를 받게 되면 걷는다.
-        public static Vec2 SolvePanToPlace(
-            float zoom,
-            Vec2 focusPointInRigSpace,
-            Vec2 pointInLayer,
-            Vec2 desiredInRigSpace,
-            float depth,
-            LayerProfileCurve curve)
-        {
-            ShotIntentState basis = new(zoom, Vec2.Zero, focusPointInRigSpace);
-
-            return SolvePanToPlace(in basis, pointInLayer, desiredInRigSpace, depth, curve);
-        }
-
         /// <summary>무대 전체. 층 배열은 depths와 같은 순서.</summary>
         public static ShotLayout Solve(in ShotIntentState intent, ReadOnlySpan<float> depths, LayerProfileCurve curve)
         {

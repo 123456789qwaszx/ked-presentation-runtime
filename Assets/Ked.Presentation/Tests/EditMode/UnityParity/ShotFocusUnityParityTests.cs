@@ -11,7 +11,7 @@ namespace Ked.Presentation.Tests.UnityParity
     /// 샷 시스템 적용 → Unity 트랜스폼으로 본 그 점의 자리가 화면 지점이어야 한다. 리그가 어느 층에 서도.
     ///
     /// 무대는 StageRigBuilder, 샷은 PresentationShotResponseSystem, 리그는 CharacterRigBuilder — 조립과 같은 셋이다.
-    /// 커맨드(ShotZoomFocusCommand)는 이 사슬을 잇기만 한다(측정 · 화면 지점 해석 · 목표 계산 · Follow).
+    /// 커맨드(ShotFocusToCommand)는 이 사슬을 잇기만 한다(측정 · 화면 지점 해석 · 목표 계산 · Follow).
     /// </summary>
     public sealed class ShotFocusUnityParityTests
     {
@@ -96,9 +96,10 @@ namespace Ked.Presentation.Tests.UnityParity
             return new Vector2(local.x, local.y);
         }
 
-        // ShotZoomFocusCommand.BuildTargetState의 목표 계산 부분.
+        // ShotFocusToCommand.BuildTargetState의 목표 계산 부분.
         private ShotIntentState FocusTo(CharacterRigRefs refs, Vector2 desired, float zoom)
             => ShotIntents.FocusTo(
+                _system.Intent.ToCore(),
                 zoom,
                 MeasureInStageSpace(refs).ToCore(),
                 desired.ToCore(),
