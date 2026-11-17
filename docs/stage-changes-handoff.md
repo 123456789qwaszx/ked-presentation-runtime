@@ -1,6 +1,6 @@
 # 런타임 밖에 반영할 것 — 화면 덮개 · 어둡게 · 컷인 · 팝업 · tx · 줄의 자리 (2026-11-17)
 
-> 상태: **기록만 한다** — 런타임은 끝났고(공개 런타임 `refactor/actor-view` · `dev`), 연출 카드 · 작업공간 · 툴에는 아직 반영하지 않았다(소유자, 2026-11-17).
+> 상태: **반영 중** — 런타임은 끝났고(공개 런타임 `refactor/actor-view`), 작업공간이 포크 · 줄의 자리를 반영했다(§4, 2026-11-17). 덮개 · 어둡게 카드와 툴 · 추출기는 아직이다.
 > 반영하는 쪽은 이 문서 하나를 보고 일을 시작한다. 반영을 마치면 §4 표에 적는다.
 >
 > 근거 계획서: [PLAN_screen-cover.md](PLAN_screen-cover.md)(덮개 · 어둡게) · [PLAN_stage-visibility.md](PLAN_stage-visibility.md)(컷인 · 팝업 · tx) · [PLAN_stage-code-homes.md](PLAN_stage-code-homes.md)(코드의 집 · 이름 후보) · [PLAN_line-beat.md](PLAN_line-beat.md)(줄의 자리 — 진행 중, §1.4).
@@ -124,4 +124,10 @@ L3부터는 옛 대본이 그대로 돌지 않는다 — 대사 줄 머리의 `p
 
 | 날 | 소비처 | 무엇을 | 어디(커밋) |
 |---|---|---|---|
-| | | | |
+| 11-17 | 작업공간 `ked-vn-workspace` | 런타임 포크를 `85d7dc4..bc167638`(L2까지, 35커밋) 들였다 — 둘 다 고친 9개는 3-way, 충돌 4(`LinePresentationFlow` 주석 · `StageCutInSlot` · `ScreenEffectCommandFactory` · `StageCommandParser.CutIn`). 포크의 `cutin_panel`은 V2에서 판이 무대 안의 리그가 되어 `StageCutInSlot.SetPanel`을 걷고, 파서가 `{무대}_cutin_panel`에 `SetSpriteCommandSpecCharR`을 내게 다시 이었다(`cutin_open`의 판 그림과 같은 스펙). 작업공간 씬 20개에 `screenCoverPresetDb`, 작업공간 팝업 프리셋을 새 칸으로(`openSeconds` · `closeSeconds` 0.3 — 뒷막은 원래 투명도 0이라 모습은 같다). Unity 확인 전 | `b87341f` |
+| 11-17 | 작업공간 `ked-vn-workspace` | 줄의 자리 L4 — 대본을 내는 도구(`tools/stage/script.py` · `drafts/*/compose.py`)를 고쳐 다시 냈다. `[cmd]` → `<<at>>` + `[beat]`(재현 14편 표지 620 · `<<at>>` 1,110 — 그중 `end` 244, 9장 두 편 표지 83). 대사 줄 머리의 시각 → 0.5초 안은 머리, 그 뒤는 표지, 덮개 · 흰 화면 아래에서 무대를 바꾸는 묶음은 줄 앞 `<<step>>`(31 — 흰 화면은 스텝 경계에서 끊기지 않게 끝날 때까지). 자동 줄의 머무름 → `#auto=길이`(60). 손 대본(`ch05_01`)과 시험 대본도 옮겼다. 연출 카드의 커맨드 예도 새 꼴로. 대본 21개의 대사 줄 머리 기다림 · `[cmd]` · `<<Nfr>>` 0 | `8dee2fd` |
+| 11-17 | 작업공간 `ked-vn-workspace` | 런타임 포크에 L3(`bcbe5d8a`)을 L4 대본 다음 커밋으로 들였다 — 충돌 0. 포크 코드가 기다리는 스펙을 직접 만드는 곳은 없다(`wait`를 넣을 자리 없음). Unity 확인 전 | `8c18efd` |
+
+- 커밋 해시는 작업공간 저장소(비공개)의 것이다.
+- 작업공간의 `[cmd]`는 0곳이다 — 작업공간 쪽에서는 L5(`[cmd]` 걷기)를 막지 않는다. 다른 소비처(모션 툴의 코어 사본 · 추출기 · 저작 툴)는 따로 본다.
+- 작업공간에 아직 반영하지 않은 것: §1.1 덮개(`screen_cover` — B01~B03 · W01, 작업공간 Unity 확인 뒤에 한다) · 어둡게(`screen_dim` — §2 이름이 정해진 뒤). §1.2는 지금 대본에 걸리는 곳이 없다 — 열린 컷인 · 팝업 위의 `tx` 0, 컷인을 쓴 무대를 `tx` 인서트로 다시 여는 곳 0, `tx_stage_mask_clear`는 시험 대본 한 곳뿐.
