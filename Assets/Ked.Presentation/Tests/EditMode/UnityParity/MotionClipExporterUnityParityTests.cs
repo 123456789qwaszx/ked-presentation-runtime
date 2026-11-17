@@ -231,7 +231,7 @@ namespace Ked.Presentation.Tests.UnityParity
             Assert.IsTrue(MotionClipExporter.TryConvert(clip, "step", "character", MotionEnd.Commit, CharacterRig(), out MotionClip motion, out List<string> errors), string.Join("\n", errors));
 
             string json = MotionClipExporter.ToJson(new[] { motion });
-            MotionLibrary library = MotionLibrary.Parse(json, "test", CharacterRigSchema.NodeIds());
+            MotionLibrary library = MotionLibrary.Parse(json, "test", MotionLibrary.StageRigNodeIds);
 
             Assert.AreEqual(1, library.Count);
             Assert.IsTrue(library.TryGet("step", out MotionClip back));
