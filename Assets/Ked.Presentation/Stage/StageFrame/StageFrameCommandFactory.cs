@@ -7,12 +7,17 @@ public sealed class StageFrameCommandFactory : INodeCommandFactory
     private readonly CutInPresetDBSO _cutInPreset;
     private readonly PopupPresetDBSO _popupPreset;
 
+    // 실험 A — 틀 되돌리기가 열린 틀을 닫지 않는다(StageFrameResetCommand). 소유자가 정하면 지운다.
+    private readonly bool _keepOpenFramesOnTx;
+
     public StageFrameCommandFactory(
         StageFrameRegistry frames,
         CutInPresetDBSO cutInPreset = null,
-        PopupPresetDBSO popupPreset = null)
+        PopupPresetDBSO popupPreset = null,
+        bool keepOpenFramesOnTx = false)
     {
         _frames = frames ?? throw new ArgumentNullException(nameof(frames));
+        _keepOpenFramesOnTx = keepOpenFramesOnTx;
 
         // 프리셋 에셋이 없으면 코드 기본값(원본 게임 실측)으로 — 조용히 넘기지 않는다.
         if (cutInPreset == null)
@@ -49,7 +54,7 @@ public sealed class StageFrameCommandFactory : INodeCommandFactory
             PopupCloseCommandSpec s => new PopupCloseCommand(s, _popupPreset, _frames),
 
             // 틀 되돌리기 — tx · tx_stage_mask_clear가 마스크 커맨드 앞에 낸다(stage-frame.md §4)
-            StageFrameResetCommandSpec s => new StageFrameResetCommand(s, _frames),
+            StageFrameResetCommandSpec s => new StageFrameResetCommand(s, _frames, _keepOpenFramesOnTx),
 
             _ => null
         };

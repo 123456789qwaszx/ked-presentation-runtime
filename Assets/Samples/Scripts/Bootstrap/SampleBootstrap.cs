@@ -166,6 +166,11 @@ public partial class SampleBootstrap : MonoBehaviour, IRigPrefabSource
     [Tooltip("그림 팝업 배율 · 뒷막 색과 세기 · 등장/퇴장 페이드. 비우면 코드 기본값(원본 게임 실측)으로 열고 경고한다.")]
     [SerializeField] private PopupPresetDBSO popupPreset;
 
+    [Header("실험 — tx와 열린 틀 (docs/PLAN_stage-code-homes.md §8, 정하면 지운다)")]
+    [Tooltip("끄면 지금 규칙 — tx · tx_stage_mask_clear가 그 무대의 컷인 · 팝업을 먼저 닫는다. " +
+             "켜면 실험 A — 열린 컷인 · 팝업은 그대로 두고 경고만, 닫힌 채 남은 컷인 창만 되돌린다. Play 전에 정한다.")]
+    [SerializeField] private bool txKeepsOpenFrames;
+
     [Header("NodeDebug")]
     [SerializeField] private CharacterFocusDebugView characterFocusDebugView;
 

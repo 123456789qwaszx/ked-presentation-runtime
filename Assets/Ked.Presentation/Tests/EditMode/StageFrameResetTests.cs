@@ -58,9 +58,9 @@ public class StageFrameResetTests
         _frames.Popup(stage).SnapOpen(popup, null, Vector2.zero, 1f);
     }
 
-    private void Run(StageFrameResetCommandSpec spec, bool compress = false)
+    private void Run(StageFrameResetCommandSpec spec, bool compress = false, bool keepOpenFrames = false)
     {
-        IEnumerator run = new StageFrameResetCommand(spec, _frames).Execute(new CommandRunScope(new Pace { Compress = compress }));
+        IEnumerator run = new StageFrameResetCommand(spec, _frames, keepOpenFrames).Execute(new CommandRunScope(new Pace { Compress = compress }));
 
         while (run.MoveNext())
         {
@@ -128,6 +128,35 @@ public class StageFrameResetTests
         Assert.IsTrue(IsNeutral("stage00"));
         Assert.IsTrue(IsNeutral("stage01"));
         Assert.IsTrue(IsNeutral("stage02"));
+    }
+
+    // ── 실험 A — 열린 틀은 그대로(docs/PLAN_stage-code-homes.md §8, 정하면 지운다) ──
+
+    [Test]
+    public void 실험A_열린_컷인과_팝업은_그대로_두고_경고만_한다()
+    {
+        Open("stage01");
+
+        LogAssert.Expect(LogType.Warning, new Regex("stage01의 열린 컷인 위에 tx 'iris_out'"));
+        LogAssert.Expect(LogType.Warning, new Regex("stage01의 열린 그림 팝업 위에 tx 'iris_out'"));
+
+        Run(new StageFrameResetCommandSpec { stage = "stage01", cause = "tx 'iris_out'" }, keepOpenFrames: true);
+
+        Assert.IsTrue(_frames.CutIn("stage01").IsOpen);
+        Assert.IsTrue(_frames.Popup("stage01").IsOpen);
+    }
+
+    [Test]
+    public void 실험A_닫힌_채_남은_컷인_창은_되돌린다()
+    {
+        Open("stage01");
+        _frames.CutIn("stage01").SnapClose();
+        _frames.Popup("stage01").SnapClose();
+        Assert.AreEqual(new Vector3(0f, 0f, 1f), _frames.CutIn("stage01").Window.localScale, "닫힌 컷인 창은 배율 0 — 그 무대가 통째로 안 보인다");
+
+        Run(new StageFrameResetCommandSpec { allStages = true }, keepOpenFrames: true);
+
+        Assert.IsTrue(IsNeutral("stage01"), "다음 tx가 그 무대를 열면 보여야 한다");
     }
 
     [Test]

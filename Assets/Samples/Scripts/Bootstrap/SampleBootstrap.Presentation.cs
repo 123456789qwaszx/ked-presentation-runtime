@@ -180,7 +180,8 @@ public partial class SampleBootstrap
         StageFrameCommandFactory stageFrameFactory = new(
             _stageFrames,
             cutInPreset,
-            popupPreset);
+            popupPreset,
+            txKeepsOpenFrames);
 
         ScreenEffectCommandFactory screenEffectFactory = new(
             _screenEffectRig,

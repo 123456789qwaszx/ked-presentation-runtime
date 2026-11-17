@@ -14,6 +14,9 @@ public sealed class StageFrameRegistry
             _frames[stage.StageKey] = StageFrameBuilder.Build(stage);
     }
 
+    /// <summary>틀이 선 무대의 키.</summary>
+    public IReadOnlyCollection<string> StageKeys => _frames.Keys;
+
     public StageCutInSlot CutIn(string stageKey) => Get(stageKey).CutIn;
 
     public StagePopupSlot Popup(string stageKey) => Get(stageKey).Popup;

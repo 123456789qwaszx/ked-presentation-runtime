@@ -23,12 +23,17 @@ public sealed class StageFrameResetCommand : CommandBase
     private readonly StageFrameResetCommandSpec _spec;
     private readonly StageFrameRegistry _frames;
 
+    // 실험 A(docs/PLAN_stage-code-homes.md §8) — 열린 컷인 · 팝업은 닫지 않고 경고만, 닫힌 채 남은 컷인 창만 되돌린다.
+    // Unity에서 지금 규칙과 견주어 보려고 둔다. 소유자가 정하면 지운다.
+    private readonly bool _keepOpenFrames;
+
     public override bool WaitForCompletion => false;
 
-    public StageFrameResetCommand(StageFrameResetCommandSpec spec, StageFrameRegistry frames)
+    public StageFrameResetCommand(StageFrameResetCommandSpec spec, StageFrameRegistry frames, bool keepOpenFrames = false)
     {
         _spec = spec;
         _frames = frames;
+        _keepOpenFrames = keepOpenFrames;
     }
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
@@ -44,6 +49,12 @@ public sealed class StageFrameResetCommand : CommandBase
 
     private void Apply()
     {
+        if (_keepOpenFrames)
+        {
+            ApplyKeepingOpenFrames();
+            return;
+        }
+
         if (_spec.allStages)
         {
             _frames.ResetAll();
@@ -52,6 +63,35 @@ public sealed class StageFrameResetCommand : CommandBase
 
         WarnIfOpen();
         _frames.Reset(_spec.stage);
+    }
+
+    private void ApplyKeepingOpenFrames()
+    {
+        if (!_spec.allStages)
+        {
+            ResetClosedOnly(_spec.stage);
+            return;
+        }
+
+        foreach (string stage in _frames.StageKeys)
+            ResetClosedOnly(stage);
+    }
+
+    // 닫힌 채 남은 컷인 창(배율 0)은 그 무대를 통째로 가리므로 되돌린다 — 이미 안 보이는 상태라 티가 나지 않는다.
+    // 열린(닫히는 중인) 컷인 · 팝업은 그대로 둔다. 판 그림과 팝업은 마스크 밖이라 tx로는 가려지지 않는다.
+    private void ResetClosedOnly(string stage)
+    {
+        string cause = string.IsNullOrEmpty(_spec.cause) ? "tx_stage_mask_clear" : _spec.cause;
+
+        StageCutInSlot cutIn = _frames.CutIn(stage);
+
+        if (cutIn.IsOpen)
+            Debug.LogWarning($"[StageFrameResetCommand] {stage}의 열린 컷인 위에 {cause} — 컷인은 그대로 둔다(실험 A).");
+        else
+            cutIn.Reset();
+
+        if (_frames.Popup(stage).IsOpen)
+            Debug.LogWarning($"[StageFrameResetCommand] {stage}의 열린 그림 팝업 위에 {cause} — 팝업은 그대로 둔다(실험 A).");
     }
 
     // 열려 있던(또는 닫힌 채 남은) 컷인 창 · 열린 팝업을 덮는 것은 대본의 실수일 수 있다 — 까닭을 적어 알린다(docs/PLAN_cutin.md §5 · PLAN_popup.md §6).
