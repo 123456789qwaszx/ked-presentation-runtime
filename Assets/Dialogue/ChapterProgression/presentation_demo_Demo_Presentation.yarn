@@ -427,6 +427,7 @@ rrr
 // 정리 줄의 cutin_close · popup_close는 이미 닫혀 있으면 경고하고 건너뛴다.
 
 // ① 정상 순서 — 컷인을 닫으면 창은 항등으로 돌아오고 그 무대는 마스크가 숨긴다. 같은 무대를 tx로 다시 열면 그대로 보인다 — 되돌릴 것이 없어 경고도 없다.
+//    컷인 판은 무대 안의 리그라 닫아도 남는다(마스크가 숨긴다) — 같은 무대를 인서트로 쓰기 전에 인물처럼 치운다(stage01_cutin_panel).
 <<slot c5 stage01 mid>>
 <<cast c5 kasmi a 1>>
 <<size c5 mid face 0fr>>
@@ -438,8 +439,9 @@ rrr
 <<cutin_close stage01>>
 카스미: 닫았어.
 
+<<bg_fade_out stage01_cutin_panel 0fr>>
 <<tx slant_in stage01>>
-카스미: 같은 무대를 사선 패널로 다시 열었어. 왼쪽 패널 안에 내가 보여?
+카스미: 같은 무대를 사선 패널로 다시 열었어. 왼쪽 패널 안에 내가 보여? 컷인 판은 없어야 해.
 
 <<tx slant_out stage01>>
 카스미: 패널을 닫을게.

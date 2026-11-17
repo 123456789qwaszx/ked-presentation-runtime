@@ -145,24 +145,63 @@ public class StageCommandParserTests
     [Test]
     public void cutin_open은_무대_판_자리_배율을_받는다()
     {
-        CutInOpenCommandSpec s = (CutInOpenCommandSpec)Parse(
-            NewParser(), Cmd("cutin_open", "stage02", "pink_stars", "-16u", "1.25u", "0.86"))[0];
+        List<CommandSpecBase> specs = Parse(NewParser(), Cmd("cutin_open", "stage02", "pink_stars", "-16u", "1.25u", "0.86"));
+        CutInOpenCommandSpec s = (CutInOpenCommandSpec)specs[specs.Count - 1];
 
         Assert.AreEqual("stage02", s.stage);
-        Assert.AreEqual("pink_stars", s.panelKey);
         Assert.AreEqual(-640f, s.center.x, 1e-3f, "1u = 40px, 음수 그대로");
         Assert.AreEqual(50f, s.center.y, 1e-3f);
         Assert.AreEqual(0.86f, s.scale, 1e-6f);
     }
 
     [Test]
+    public void cutin_open은_판_리그를_먼저_세우고_창을_연다()
+    {
+        // 판 그림은 배경처럼 그 무대의 far 층에 서는 리그다 — 무대 안이라 마스크가 판까지 자른다(docs/PLAN_stage-visibility.md §3.2).
+        List<CommandSpecBase> specs = Parse(NewParser(), Cmd("cutin_open", "stage02", "pink_stars", "-16u", "1.25u", "0.86"));
+        string key = StageCommandParser.CutInPanelSlotKey("stage02");
+
+        Assert.AreEqual(6, specs.Count);
+
+        SetupCharRigCommandSpec setup = (SetupCharRigCommandSpec)specs[0];
+        Assert.AreEqual(key, setup.roleKey);
+        Assert.AreEqual("stage02", setup.stage);
+        Assert.AreEqual(StageLayerLabels.Far, setup.layerDepth, "인물(mid · front)보다 뒤");
+        Assert.IsTrue(setup.asBackground);
+        Assert.IsTrue(setup.outsideFold, "폴드 밖 — 하네스가 캡처하지 않는다");
+
+        SetSpriteCommandSpecCharR sprite = (SetSpriteCommandSpecCharR)specs[1];
+        Assert.AreEqual(key, sprite.roleKey);
+        Assert.AreEqual(CutInPresetDBSO.PanelResourcesRoot, sprite.resourcesRoot);
+        Assert.AreEqual("pink_stars", sprite.spriteKey);
+        Assert.AreEqual(CharRigImageSizingMode.SourcePixels, sprite.sizingMode);
+
+        MoveByCommandSpecCharR move = (MoveByCommandSpecCharR)specs[2];
+        Assert.IsTrue(move.useAbsolutePosition);
+        Assert.AreEqual(new Vector2(-640f, 50f), move.delta, "판 중심 = 창의 자리");
+        Assert.AreEqual(0f, move.duration);
+
+        ScaleToCommandSpecCharR scale = (ScaleToCommandSpecCharR)specs[3];
+        Assert.AreEqual(CharacterRigNode.CharacterPortrait_ActingScale, scale.node);
+        Assert.AreEqual(0.86f / CutInPresetDBSO.PanelPictureResolution, scale.toScale.x, 1e-6f, "판 그림은 캔버스의 2배 해상도");
+
+        FadeCommandSpecCharR show = (FadeCommandSpecCharR)specs[4];
+        Assert.AreEqual(1f, show.targetAlpha);
+        Assert.AreEqual(0f, show.duration);
+
+        Assert.IsInstanceOf<CutInOpenCommandSpec>(specs[5], "창은 판 다음");
+    }
+
+    [Test]
     public void cutin_open의_생략값은_stage01_가운데_배율_1이다()
     {
-        CutInOpenCommandSpec s = (CutInOpenCommandSpec)Parse(NewParser(), Cmd("cutin_open", "", "blue_question"))[0];
+        List<CommandSpecBase> specs = Parse(NewParser(), Cmd("cutin_open", "", "blue_question"));
+        CutInOpenCommandSpec s = (CutInOpenCommandSpec)specs[specs.Count - 1];
 
         Assert.AreEqual("stage01", s.stage);
         Assert.AreEqual(Vector2.zero, s.center);
         Assert.AreEqual(1f, s.scale);
+        Assert.AreEqual("stage01_cutin_panel", ((SetupCharRigCommandSpec)specs[0]).roleKey);
     }
 
     [Test]

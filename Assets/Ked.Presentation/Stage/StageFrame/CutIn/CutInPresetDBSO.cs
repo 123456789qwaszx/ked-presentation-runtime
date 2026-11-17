@@ -19,6 +19,12 @@ public sealed class CutInPresetDBSO : ScriptableObject
     /// <summary>판 그림의 Resources 뿌리. 대본의 판 키 = 이 아래 스프라이트 이름.</summary>
     public const string PanelResourcesRoot = "CutInPanels";
 
+    /// <summary>
+    /// 판 그림의 해상도 — 캔버스 1px에 그림 몇 px인가(CutInPanelGenerator가 이 값으로 그린다).
+    /// 판은 배경처럼 원본 픽셀 크기로 서는 리그라, 파서가 판 리그의 배율에 1/이 값을 곱한다(docs/PLAN_stage-visibility.md §3.2).
+    /// </summary>
+    public const int PanelPictureResolution = 2;
+
     /// <summary>창 모션 클립의 리그 이름 — 캐릭터 리그 모션(motions.json)과 섞이지 않게.</summary>
     public const string WindowRig = "stageWindow";
     public const string WindowNode = "Window";
@@ -36,6 +42,9 @@ public sealed class CutInPresetDBSO : ScriptableObject
     [Header("Mask")]
     [Tooltip("아래 변을 판 외곽선 안쪽으로 올리는 양(px). 인물이 외곽선을 덮지 않게 — 그림의 외곽선 두께와 같다.")]
     public float maskInsetPixels = 3.5f;
+
+    [Tooltip("판 아래 외곽선의 색 — 판 그림의 외곽선 색이다(생성기가 이 색으로 그린다). 판도 마스크 안이라 아래 외곽선 띠가 같이 잘리므로, 마스크 테두리가 이 색 · maskInsetPixels 두께로 다시 그린다.")]
+    public Color outlineColor = new(34f / 255f, 30f / 255f, 38f / 255f, 1f);
 
     [Tooltip("양옆도 판 모서리 선으로 자르나. 끄면 아래 변의 연장선 아래만 자른다(원본: 머리 · 옆머리가 판 밖으로 나온다).")]
     public bool clipSides;
@@ -100,6 +109,21 @@ public sealed class CutInPresetDBSO : ScriptableObject
         tl = origin + Vector2.Scale(cornerTopLeft, size);
         tr = origin + Vector2.Scale(cornerTopRight, size);
         br = origin + Vector2.Scale(cornerBottomRight, size);
+    }
+
+    /// <summary>
+    /// 판 아래 외곽선 띠의 가운데 선(무대 중심 기준 px) — 판 바깥 아래 변과 마스크 아래 변(외곽선 안쪽 maskInsetPixels) 사이.
+    /// maskInsetPixels 두께로 그리면 마스크가 자른 외곽선 띠를 그대로 덮는다. 판 너비만큼만이다(마스크 아래 변은 화면 끝까지 뻗는다).
+    /// </summary>
+    public void GetOutlineSegment(Vector2 center, float scale, out Vector2 a, out Vector2 b)
+    {
+        GetCorners(center, scale, out Vector2 bl, out _, out _, out Vector2 br);
+
+        Vector2 along = (br - bl).normalized;
+        Vector2 halfInset = new Vector2(-along.y, along.x) * (maskInsetPixels * 0.5f);
+
+        a = bl + halfInset;
+        b = br + halfInset;
     }
 
     /// <summary>

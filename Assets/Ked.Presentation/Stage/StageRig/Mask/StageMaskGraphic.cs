@@ -37,6 +37,14 @@ public sealed class StageMaskGraphic : Graphic
     [Header("Custom Quad")]
     [SerializeField] private Vector2[] _customQuad = new Vector2[4];
 
+    // 네 점의 테두리 선 — 모양의 변이 아니라 따로 받은 선 하나(컷인 판 아래 외곽선). 런타임 상태라 직렬화하지 않는다.
+    private Vector2 _customQuadEdgeA;
+    private Vector2 _customQuadEdgeB;
+    private bool _hasCustomQuadEdge;
+
+    // 네 점 · 그 선이 바뀔 때마다 는다 — 테두리 그래픽이 다시 그릴지 본다(네 점은 다른 모양처럼 값 하나로 비교할 수 없다).
+    private int _customQuadVersion;
+
     [Header("Circle Iris")]
     [SerializeField] private float _irisRadiusPixels = 720f;
     [SerializeField] private float _irisAspect = 1f;
@@ -356,9 +364,23 @@ public sealed class StageMaskGraphic : Graphic
         _customQuad[2] = p2;
         _customQuad[3] = p3;
 
+        _hasCustomQuadEdge = false;
+        _customQuadVersion++;
+
         _kind = StageMaskKind.CustomQuad;
         SetVerticesDirty();
     }
+
+    /// <summary>네 점의 테두리 선 하나(로컬 px) — SetCustomQuad 뒤에 부른다. 네 점의 변은 화면 밖까지 뻗어 테두리로 그리지 않는다.</summary>
+    public void SetCustomQuadEdge(Vector2 a, Vector2 b)
+    {
+        _customQuadEdgeA = a;
+        _customQuadEdgeB = b;
+        _hasCustomQuadEdge = true;
+        _customQuadVersion++;
+    }
+
+    public int CustomQuadVersion => _customQuadVersion;
 
     public void SetSlanted(
         float slantPixels,
@@ -487,6 +509,15 @@ public sealed class StageMaskGraphic : Graphic
         if (_kind == StageMaskKind.CircleIris)
         {
             CollectCircleOutlineSegments(results);
+            return;
+        }
+
+        // 네 점 — 따로 받은 선 하나만(없으면 그리지 않는다).
+        if (_kind == StageMaskKind.CustomQuad)
+        {
+            if (_hasCustomQuadEdge)
+                results.Add(new StageMaskLineSegment(_customQuadEdgeA + _shapeOffsetPixels, _customQuadEdgeB + _shapeOffsetPixels));
+
             return;
         }
 

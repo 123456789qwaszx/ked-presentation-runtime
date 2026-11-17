@@ -27,6 +27,10 @@ public sealed class SetupCharRigCommandSpec : CommandSpecBase
              "배역 있는 슬롯을 덮으면 배역을 풀고 경고한다.")]
     public bool asBackground;
 
+    [Tooltip("폴드 밖 — 코어가 접지 않는 리그(컷인 판 · 팝업 그림). 등가성 하네스가 캡처하지 않는다. " +
+             "대본 어휘가 아니다 — 파서가 cutin_open · popup을 풀 때만 켠다(docs/PLAN_stage-visibility.md §3.5).")]
+    public bool outsideFold;
+
     public string ResolvedRolePrefix
     {
         get
@@ -127,7 +131,7 @@ public sealed class SetupCharRigCommand : CommandBase
             sourceMaterial,
             refs.CharacterPortraitSpriteOverlay_Image);
 
-        _stage.characterRigs.Register(rigKey, refs);
+        _stage.characterRigs.Register(rigKey, refs, spec.outsideFold);
 
         //StripRolePrefixForBake(rigRoot, rolePrefix, spec.rigRootName);
         yield break;

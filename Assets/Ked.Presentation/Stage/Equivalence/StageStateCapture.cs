@@ -30,7 +30,13 @@ public static class StageStateCapture
         characterRigs.CollectAliveRigEntries(rigs);
 
         foreach (KeyValuePair<string, CharacterRigRefs> pair in rigs)
+        {
+            // 폴드 밖 리그(컷인 판 · 팝업 그림)는 코어가 접지 않는다 — 비교할 짝이 없다.
+            if (characterRigs.IsOutsideFold(pair.Key))
+                continue;
+
             CaptureRig(state, pair.Key, pair.Value);
+        }
 
         // 샷 축은 "저작된 의도"를 그대로 읽는다 — 카메라 트랜스폼이 아니라.
         if (shotSystem != null)

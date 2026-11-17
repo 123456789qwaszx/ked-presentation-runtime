@@ -9,17 +9,29 @@ public sealed class CharacterRigRegistry
 {
     private readonly Dictionary<string, CharacterRigRefs> _rigs = new(StringComparer.Ordinal);
 
+    // 폴드 밖 리그 — 코어가 접지 않는다(컷인 판 · 팝업 그림). 하네스의 캡처가 건너뛴다(docs/PLAN_stage-visibility.md §3.5).
+    private readonly HashSet<string> _outsideFold = new(StringComparer.Ordinal);
+
     /// <summary>
     /// 같은 키로 다시 등록하면 옛 리그를 부수고 새 리그로 바꾼다 — 재선언(`slot`·`bg_spawn`)의 의미다(그림만 바꾸는 것은 `bg_sprite`).
     /// 코어 StageReducer.SpawnSlot도 같은 규칙으로 접는다(노드·α가 스키마로, 배역은 남는다).
+    /// outsideFold는 다시 등록할 때마다 새로 정한다.
     /// </summary>
-    public void Register(string rigKey, CharacterRigRefs rigRefs)
+    public void Register(string rigKey, CharacterRigRefs rigRefs, bool outsideFold = false)
     {
         if (_rigs.TryGetValue(rigKey, out CharacterRigRefs existingRig))
             DestroyRig(existingRig);
 
         _rigs[rigKey] = rigRefs;
+
+        if (outsideFold)
+            _outsideFold.Add(rigKey);
+        else
+            _outsideFold.Remove(rigKey);
     }
+
+    /// <summary>폴드 밖으로 세운 리그인가 — 등가성 하네스의 캡처가 건너뛴다.</summary>
+    public bool IsOutsideFold(string rigKey) => rigKey != null && _outsideFold.Contains(rigKey);
 
     public bool TryGetRig(string rigKey, out CharacterRigRefs rigRefs)
     {
@@ -41,6 +53,7 @@ public sealed class CharacterRigRegistry
             DestroyRig(rigRefs);
 
         _rigs.Clear();
+        _outsideFold.Clear();
     }
     
     public bool TryPeekRig(string rigKey, out CharacterRigRefs rigRefs)

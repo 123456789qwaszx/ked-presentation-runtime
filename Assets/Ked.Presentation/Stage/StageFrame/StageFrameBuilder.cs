@@ -3,12 +3,11 @@ using UnityEngine.UI;
 using Object = UnityEngine.Object;
 
 /// <summary>
-/// 무대 틀 — 무대 루트 바깥의 창 · 컷인 판 · 그림 팝업을 세우고, 있는 것은 다시 묶어 슬롯 둘을 돌려준다.
+/// 무대 틀 — 무대 루트 바깥의 창 · 그림 팝업을 세우고, 있는 것은 다시 묶어 슬롯 둘을 돌려준다.
 /// 무대 리그가 먼저 서 있어야 한다 — 창이 그 무대 루트를 감싼다. 틀은 리그를 알고, 리그는 틀을 모른다.
 ///
 ///   {stage}_Window              무대 전체를 들고 팝 · 회전한다(컷인). 중립 항등 — 무대 루트와 같은 rect
-///     {stage}_Panel             컷인 판 그림. 무대 루트보다 뒤(형제 0)
-///     {stage}_Stage_Root        (무대 리그)
+///     {stage}_Stage_Root        (무대 리그) — 컷인 판 그림은 이 안의 리그다(docs/PLAN_stage-visibility.md)
 ///   {stage}_Popup               창의 다음 형제. 뒷막과 그림을 한 덩어리로(CanvasGroup)
 ///     {stage}_Popup_Backdrop    화면 전체 어두운 막
 ///     {stage}_Popup_Image       그림
@@ -28,7 +27,6 @@ public static class StageFrameBuilder
     }
 
     private static string WindowName(string stageKey) => $"{stageKey}_Window";
-    private static string PanelName(string stageKey) => $"{stageKey}_Panel";
     private static string PopupName(string stageKey) => $"{stageKey}_Popup";
     private static string PopupBackdropName(string stageKey) => $"{stageKey}_Popup_Backdrop";
     private static string PopupImageName(string stageKey) => $"{stageKey}_Popup_Image";
@@ -57,32 +55,22 @@ public static class StageFrameBuilder
         return window;
     }
 
-    // 창 아래는 판과 무대 루트 둘뿐이다. 판이 뒤(형제 0), 무대가 앞(형제 1). 묶을 때마다 닫힌 중립으로 돌린다.
+    // 창 아래는 무대 루트 하나뿐이다. 묶을 때마다 중립으로 돌린다.
     private static StageCutInSlot EnsureCutIn(RectTransform window, RectTransform root, string stageKey, StageMaskSlot mask)
     {
-        RectTransform panel = EnsureRect(window, PanelName(stageKey));
-
-        // 스키마에 없는 자식은 경고하고 치운다 — 창 아래는 판과 무대 루트뿐이다.
+        // 스키마에 없는 자식은 경고하고 치운다 — 창 아래는 무대 루트뿐이다(컷인 판 그림은 무대 안의 리그다).
         for (int i = window.childCount - 1; i >= 0; i--)
         {
             Transform child = window.GetChild(i);
 
-            if (child == panel || child == root)
+            if (child == root)
                 continue;
 
             Debug.LogWarning($"[StageFrameBuilder] 창 아래에 스키마에 없는 '{child.name}'가 있다. 치운다. stage='{stageKey}'.", window);
             DestroyNode(child);
         }
 
-        panel.SetSiblingIndex(0);
-        root.SetSiblingIndex(1);
-
-        if (!panel.TryGetComponent(out Image image))
-            image = panel.gameObject.AddComponent<Image>();
-
-        image.raycastTarget = false;
-
-        StageCutInSlot slot = new(stageKey, window, panel, image, mask);
+        StageCutInSlot slot = new(stageKey, window, mask);
         slot.Reset();
 
         return slot;

@@ -54,7 +54,7 @@ public class StageFrameResetTests
         _spawned.Add(cutIn);
         _spawned.Add(popup);
 
-        _frames.CutIn(stage).SnapOpen(cutIn, null, new Vector2(-640f, 50f), 1f, null);
+        _frames.CutIn(stage).SnapOpen(cutIn, new Vector2(-640f, 50f), 1f, null);
         _frames.Popup(stage).SnapOpen(popup, null, Vector2.zero, 1f);
     }
 

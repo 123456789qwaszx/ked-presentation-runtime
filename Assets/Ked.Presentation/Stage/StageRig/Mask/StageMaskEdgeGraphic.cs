@@ -27,6 +27,7 @@ public sealed class StageMaskEdgeGraphic : Graphic
     private float _lastIrisRadiusPixels;
     private float _lastIrisAspect;
     private int _lastIrisSegments;
+    private int _lastCustomQuadVersion;
 
     public StageMaskGraphic Source
     {
@@ -184,7 +185,8 @@ public sealed class StageMaskEdgeGraphic : Graphic
                _lastDiagonalBandToRight != _source.DiagonalBandToRight ||
                !Mathf.Approximately(_lastIrisRadiusPixels, _source.IrisRadiusPixels) ||
                !Mathf.Approximately(_lastIrisAspect, _source.IrisAspect) ||
-               _lastIrisSegments != _source.IrisSegments;
+               _lastIrisSegments != _source.IrisSegments ||
+               _lastCustomQuadVersion != _source.CustomQuadVersion;
     }
 
     private void CacheSourceState()
@@ -208,5 +210,6 @@ public sealed class StageMaskEdgeGraphic : Graphic
         _lastIrisRadiusPixels = _source.IrisRadiusPixels;
         _lastIrisAspect = _source.IrisAspect;
         _lastIrisSegments = _source.IrisSegments;
+        _lastCustomQuadVersion = _source.CustomQuadVersion;
     }
 }

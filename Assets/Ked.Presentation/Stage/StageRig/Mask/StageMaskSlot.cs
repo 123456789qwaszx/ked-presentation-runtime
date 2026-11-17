@@ -215,8 +215,8 @@ public sealed class StageMaskSlot : MonoBehaviour
     }
 
     /// <summary>
-    /// 컷인 — 네 점 모양으로 자른다(판 아래 변 · 위는 열림). 진행 중인 tx 모션은 끊고 테두리는 끈다
-    /// (판 그림이 제 외곽선을 갖는다). StageCutInSlot.Layout이 부른다.
+    /// 컷인 — 네 점 모양으로 자른다(판 아래 변 · 위는 열림). 진행 중인 tx 모션은 끊고 테두리는 끈다 —
+    /// 선이 필요하면 뒤에 ShowCustomQuadEdge. StageCutInSlot.Layout이 부른다.
     /// </summary>
     public void SetCustomQuad(Vector2 p0, Vector2 p1, Vector2 p2, Vector2 p3)
     {
@@ -229,6 +229,20 @@ public sealed class StageMaskSlot : MonoBehaviour
         _graphic.SetCustomQuad(p0, p1, p2, p3);
         _graphic.SetShapeOffsetImmediate(Vector2.zero);
         SetEdgeVisible(false);
+    }
+
+    /// <summary>
+    /// 네 점 모양에 테두리 선 하나 — 컷인 판 아래 외곽선. 판도 마스크 안이라 아래 외곽선 띠가 같이 잘리므로 테두리가 다시 그린다
+    /// (테두리는 마스크의 형제라 잘리지 않고, 창 안이라 팝 · 회전을 같이 탄다 — docs/PLAN_stage-visibility.md §3.2).
+    /// </summary>
+    public void ShowCustomQuadEdge(Vector2 a, Vector2 b, Color color, float thickness)
+    {
+        if (!HasMask)
+            return;
+
+        _graphic.SetCustomQuadEdge(a, b);
+        ConfigureEdge(StageMaskEdgeMode.Leading, color, thickness);
+        SetEdgeVisible(true);
     }
 
     public void SetMaskOffsetImmediate(Vector2 offset)

@@ -19,7 +19,7 @@ public static class CutInPanelGenerator
 {
     private const string MenuPath = "Ked/Cut-in/판 그림 만들기";
     private const string DefaultFolder = "Assets/Samples/Content/Resources/CutInPanels";
-    private const int Resolution = 2;
+    private const int Resolution = CutInPresetDBSO.PanelPictureResolution;
 
     private enum Pattern { Stars, Questions, Rays }
 
@@ -37,8 +37,6 @@ public static class CutInPanelGenerator
         new() { Key = "blue_question", A = Rgb(40, 72, 150),   B = Rgb(92, 150, 215),  C = Rgb(205, 232, 250), Pattern = Pattern.Questions, Seed = 11 },
         new() { Key = "yellow_burst",  A = Rgb(255, 190, 60),  B = Rgb(255, 220, 120), C = Rgb(255, 246, 214), Pattern = Pattern.Rays,      Seed = 13 },
     };
-
-    private static readonly Color Outline = Rgb(34, 30, 38);
 
     [MenuItem(MenuPath)]
     public static void Generate()
@@ -121,7 +119,7 @@ public static class CutInPanelGenerator
                     c = Color.Lerp(c, Color.white, features[i].Alpha * features[i].Coverage(p));
 
                 float edge = Mathf.Clamp01(outline - sd + 0.5f);
-                c = Color.Lerp(c, Outline, edge);
+                c = Color.Lerp(c, preset.outlineColor, edge);
                 c.a = coverage;
 
                 pixels[y * w + x] = c;
