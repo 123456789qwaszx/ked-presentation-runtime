@@ -1,6 +1,6 @@
 # 카메라 리그 — 몸(트랙 · 달리) · 헤드(롤) · 렌즈(줌 · 팬) · 흔들림 — 계획 (2026-11-17)
 
-기준: `refactor/actor-view` @ `8b60c733`. 상태: **계획 — 구조의 물음 일곱은 정했다(§10). 명령 어휘(§7)의 확인을 기다린다.** 코드는 고치지 않았다.
+기준: `refactor/actor-view` @ `8b60c733`. 상태: **진행 중 — C1 끝.** 구조의 물음 일곱(§10)과 명령 어휘(§7)를 정했고 단계(§9)대로 간다.
 앞 문서: [PLAN_shot-layers.md](PLAN_shot-layers.md) — 트랙만 넣는 첫 안(§2–§8)은 버렸고, 그 §9(이어받기)가 이 계획의 출발점이다. 조사한 사실은 그 §9.3에 있다.
 
 ## 0. 한 문장
@@ -170,7 +170,7 @@ Layer_{d}.pos      = 층 오프셋 ÷ (s × g)  +  track × ( 1 − r(d) × (1 +
 
 값 인자에도 생략값이 박혀 있다(`shot_to`의 zoom 1 · x `2.5u`, `shot_zoom`의 1, `shot_track`의 `2.5u`). 뜻이 있는 값이 아니고, 생략해 쓰는 대본도 없다.
 
-### 7.2 바뀐 뒤 — 열
+### 7.2 바뀐 뒤 — 열 (정함)
 
 | 겹 | 명령 | 인자 (생략값) | 조준하는 축 | 뜻 | 지금과 |
 |---|---|---|---|---|---|
@@ -239,7 +239,7 @@ Layer_{d}.pos      = 층 오프셋 ÷ (s × g)  +  track × ( 1 − r(d) × (1 +
 
 | # | 일 | 동작 변화 |
 |---|---|---|
-| C1 | **Core 식** — `ShotIntentState`(+트랙 · 달리 · 롤) · `LayerProfile`(+`TrackResponse` · `DollyScaleResponse`, DTO는 없으면 0) · `ShotLayoutMath`(§4 · 노드 로컬 출력 · `SolvePanToPlace`) + EditMode 테스트(새 축 0이면 종전 식과 비트 단위로 같다 · 달리는 mid에서 줌과 같다 · 트랙의 점이 화면 가운데에 온다 · 롤은 강체다) | 없음 |
+| C1 ✅ | **Core 식** — `ShotIntentState`(+트랙 · 달리 · 롤) · `LayerProfile`(+`TrackResponse` · `DollyScaleResponse`, DTO는 없으면 0) · `ShotLayoutMath`(§4 · 노드 로컬 출력 · `SolvePanToPlace`) + EditMode 테스트(새 축 0이면 종전 식과 비트 단위로 같다 · 달리는 mid에서 줌과 같다 · 트랙의 점이 화면 가운데에 온다 · 롤은 강체다) | 없음 |
 | C2 | **카메라 리그** — `CameraRigSchema` · `Builder` · `Refs`. `StageRigSchema`에서 카메라 둘을 빼고 층을 `Mount` 아래에 건다. 샷 소유 · 중립 · 적용(노드 로컬 값을 그대로 쓴다) · 하네스 스냅숏. `rig-schemas.json`에 `camera` 덤프. 씬의 무대는 빌더가 다시 세운다 | 없음(새 노드 항등) |
 | C3 | **전환을 축마다** — 다섯 전환 · 적용 합성 · 명령이 제 축만 조준한다 | 없음(쓰이는 대본 기준 — §5) |
 | C4 | **명령(몸 · 헤드)** — `shot_track`(새 뜻) · `shot_dolly` · `shot_roll` · `shot_pan` · `shot_reset_all` · `shot_focus_to`(지금 의도 입력) + 파서 표 · 브리지 · 폴드 · 비교. 값 인자의 생략값을 걷고 클래스 이름을 맞춘다(§7.4) | 새 축이 생긴다 |
@@ -264,7 +264,7 @@ C1–C3은 화면이 바뀌지 않는 구조 작업이다. 재현 대본으로 �
 | Q6 | 흔들림을 폴드에서 어떻게 보나 | `restore` 모션 클립으로 두고 **무변으로 접는다**(§6) |
 | Q7 | `shot_track`의 지금 뜻(팬에 더하기) | **지운다.** 이름을 새 트랙이 쓴다 |
 
-명령 어휘(§7)는 제안이다 — 확인을 기다린다.
+명령 어휘(§7)도 제안대로 정했다 — 상대값 명령 없음 · 묶음은 지금 있는 둘뿐 · 값 인자의 생략값을 걷는다.
 
 ## 11. 하지 않는 것 · 열어 둔 것
 
@@ -275,3 +275,10 @@ C1–C3은 화면이 바뀌지 않는 구조 작업이다. 재현 대본으로 �
 | 대상 앞으로 카메라를 옮기기(`shot_focus_to`의 트랙판) | 지금은 팬으로 푼다. 트랙으로 푸는 명령은 쓸 자리가 보이면 더한다 |
 | 덮는 무대의 카메라 연출 | 구조는 열려 있다(무대마다 카메라 리그). `shot_*`의 무대 인자와 무대별 의도가 필요하다 — `stage-rig.md` §11 그대로 |
 | ked-vn-workspace의 재현 대본 | 바로 바꿀 것이 없다. "배경만 track"(`ch05_01` 99 · 108) · 화면 흔들림(R8) · 다가갔다 돌아오는 짝(K01 · K02)을 새 축으로 다시 잴지는 그쪽 결정이다 |
+
+## 12. 진행
+
+| 단계 | 한 일 | 확인 |
+|---|---|---|
+| C1 | `ShotIntentState`(+`Track` · `Dolly` · `Roll`) · `LayerProfile`(+`TrackResponse` · `DollyScaleResponse`) · `CameraPose` · `LayerResponse`(+`AxisInLayer` · `LocalPosition`) · `ShotLayoutMath`(새 식 · 팬 역산 2×2). `panResponse`의 검증이 (−1, 1)로 좁아졌다 — 기운 화면에서 팬을 푸는 2×2가 언제나 풀리게. `layer-profile.json`에 새 반응 둘의 출발값을 손으로 넣었다(Unity로 다시 덤프하면 숫자 끝자리 표기만 달라질 수 있다). 종전 꼴의 진입점(`SolveCamera(out, out)` · `ProjectToRigSpace(p, 배율, 팬, 층)` · `SolvePanToPlace(zoom, focus, …)` · `ShotLayout.CameraScale` · `Pan`)은 런타임이 아직 쓰므로 남겼다 — C2 · C4에서 걷는다 | `ShotCameraAxesTests` 17개 — 새 축 0에서 종전 식과 허용 오차 없이 같다(무작위 2000) 등. 유니티 밖에서 Core 순수 테스트 455개 통과, Stage 어셈블리 컴파일 통과. **Unity의 EditMode · UnityParity 테스트는 돌리지 못했다** |
+

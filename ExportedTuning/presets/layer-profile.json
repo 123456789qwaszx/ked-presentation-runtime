@@ -10,7 +10,12 @@
                 "x": -0.03999999910593033,
                 "y": 0.0
             },
-            "zoomScaleResponse": -0.15000000596046449
+            "zoomScaleResponse": -0.15000000596046449,
+            "trackResponse": {
+                "x": -0.5,
+                "y": -0.5
+            },
+            "dollyScaleResponse": -0.6000000238418579
         },
         {
             "depth": -0.5,
@@ -22,7 +27,12 @@
                 "x": -0.019999999552965165,
                 "y": 0.0
             },
-            "zoomScaleResponse": -0.07999999821186066
+            "zoomScaleResponse": -0.07999999821186066,
+            "trackResponse": {
+                "x": -0.25,
+                "y": -0.25
+            },
+            "dollyScaleResponse": -0.30000001192092896
         },
         {
             "depth": 0.0,
@@ -34,7 +44,12 @@
                 "x": 0.0,
                 "y": 0.0
             },
-            "zoomScaleResponse": 0.0
+            "zoomScaleResponse": 0.0,
+            "trackResponse": {
+                "x": 0.0,
+                "y": 0.0
+            },
+            "dollyScaleResponse": 0.0
         },
         {
             "depth": 0.5,
@@ -46,7 +61,12 @@
                 "x": 0.019999999552965165,
                 "y": 0.0
             },
-            "zoomScaleResponse": 0.03999999910593033
+            "zoomScaleResponse": 0.03999999910593033,
+            "trackResponse": {
+                "x": 0.25,
+                "y": 0.25
+            },
+            "dollyScaleResponse": 0.30000001192092896
         },
         {
             "depth": 1.0,
@@ -58,7 +78,12 @@
                 "x": 0.20000000298023225,
                 "y": 0.0
             },
-            "zoomScaleResponse": 0.1599999964237213
+            "zoomScaleResponse": 0.1599999964237213,
+            "trackResponse": {
+                "x": 0.6000000238418579,
+                "y": 0.6000000238418579
+            },
+            "dollyScaleResponse": 0.800000011920929
         }
     ]
 }

@@ -20,5 +20,9 @@ namespace Ked.Presentation.Core
         public Float2Dto focusSpreadPerZoom;
         public Float2Dto panResponse;
         public float zoomScaleResponse;
+
+        // 트랙 · 달리의 층 반응. 옛 파일에는 없다 — 없으면 0이다(트랙 · 달리에 mid처럼 반응한다).
+        public Float2Dto trackResponse;
+        public float dollyScaleResponse;
     }
 }
