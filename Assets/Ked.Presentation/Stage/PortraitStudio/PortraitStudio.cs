@@ -25,9 +25,8 @@ public sealed class PortraitStudio : MonoBehaviour
     // 화면 밖의 자리. 다른 카메라의 시야(원점 근처)에 들지 않게 멀리 둔다.
     private static readonly Vector3 Origin = new(20000f, 20000f, 0f);
 
-    // 촬영소 캔버스의 크기. 카메라가 리그를 따라가므로 화면 크기와 맞출 까닭이 없다 —
-    // 무대 마스크(캔버스만 한 사각형)가 머리를 자르지 않게 넉넉히 둔다.
-    private static readonly Vector2 Size = new(4096f, 4096f);
+    // 무대 캔버스를 받지 못했을 때의 촬영소 크기. 받았으면 그 캔버스의 크기를 따른다(FitSizeToStage).
+    private static readonly Vector2 FallbackSize = new(1920f, 1080f);
 
     private const float CameraDistance = 100f;
 
@@ -41,6 +40,7 @@ public sealed class PortraitStudio : MonoBehaviour
     private PortraitFrame _frame;
     private StageRigRefs _stageRig;
     private Canvas _referenceCanvas;
+    private RectTransform _rect;
     private Camera _camera;
     private RenderTexture _texture;
 
@@ -85,7 +85,7 @@ public sealed class PortraitStudio : MonoBehaviour
         }
 
         RectTransform rect = (RectTransform)root.transform;
-        rect.sizeDelta = Size;
+        rect.sizeDelta = FallbackSize;
         rect.position = Origin;
         rect.localRotation = Quaternion.identity;
         rect.localScale = Vector3.one;
@@ -95,11 +95,32 @@ public sealed class PortraitStudio : MonoBehaviour
         studio._focusTuning = focusTuning;
         studio._frame = frame.Sanitized();
         studio._referenceCanvas = referenceCanvas;
+        studio._rect = rect;
+        studio.FitSizeToStage();
         studio._texture = CreateTexture(studio.TextureSize());
         studio._camera = CreateCamera(rect, studio._texture, canvas);
         studio._stageRig = stages.BuildOffscreen(rect, StageKey);
 
+        // 촬영소의 마스크는 끈다 — 무대만 한 사각형이라 켜 두면 화면 위 끝에서 머리가 잘린다(본 무대에서는 그것이 화면 끝이다).
+        // 화면 밖 무대라 화면 전체에 걸리는 명령 · 장면 경계가 다시 켜지 않는다.
+        studio._stageRig.Mask.SetFullVisible();
+
         return studio;
+    }
+
+    // 촬영소는 화면의 무대와 크기가 같아야 한다. 리그 안의 그림은 무대 크기로 늘어난 rect를 기준으로 자리를 잡는다 —
+    // 크기가 다르면 그림이 포커스 점에서 그만큼 어긋나 카메라가 엉뚱한 곳(발)을 찍는다.
+    private void FitSizeToStage()
+    {
+        if (_referenceCanvas == null)
+            return;
+
+        Vector2 stageSize = ((RectTransform)_referenceCanvas.transform).rect.size;
+
+        if (stageSize.x <= 0f || stageSize.y <= 0f || _rect.sizeDelta == stageSize)
+            return;
+
+        _rect.sizeDelta = stageSize;
     }
 
     // 텍스처의 px 수 = 범위(캔버스 px) × 화면 배율(캔버스 px → 화면 px) × 구도의 배율.
@@ -187,6 +208,7 @@ public sealed class PortraitStudio : MonoBehaviour
     // 트윈(Update) · 커맨드 코루틴이 지난 뒤, 캔버스가 그려지기 전에 카메라를 맞춘다 — 같은 프레임의 연기가 찍힌다.
     private void LateUpdate()
     {
+        FitSizeToStage();
         FitTextureToScreen();
 
         if (!TryFindSubject(out string slotKey, out CharacterRigRefs rig))

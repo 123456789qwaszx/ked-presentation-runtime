@@ -30,7 +30,7 @@
 | **대사창 종류 `Portrait`** | 이 줄은 초상 칸을 켜고 글을 들여 쓴다. **이미 있던 종류다**(배치 항목 `portrait_narrow`) | 누가 찍히는가 | `DialogueBoxPresentationController.ApplyPortraitFor` |
 
 ```
-[PortraitStudio]  월드 공간 캔버스 · 원점에서 멀리(20000, 20000) · 4096×4096
+[PortraitStudio]  월드 공간 캔버스 · 원점에서 멀리(20000, 20000) · 크기는 무대 캔버스와 같다
 ├ PortraitStudio_Camera        직교 → RenderTexture(범위 × 배율, 스텐실 있음)
 └ studio_Stage_Root            무대 리그(화면 밖 무대 — StageRigRegistry.BuildOffscreen)
    └ … Layer_mid_Content
@@ -49,6 +49,8 @@
 
 - `StageRigRegistry.All`은 "화면에 그려지는 무대"다. 화면 전체에 걸리는 일 — 마스크 지우기(`stage_mask_reset`) · 어둡게(`stage_dim all`) · 샷의 중립 조회 · 무대 틀 · 장면 경계의 되돌리기 · 하네스의 무대 캡처 — 이 모두 이것을 돈다. 촬영소가 여기 없으므로 그 일들이 촬영소를 건드리지 않는다.
 - 키로는 꺼낼 수 있다(`Get("studio")`) — `slot pov studio`가 그 길로 선다.
+- **크기는 화면의 무대와 같아야 한다.** 리그 안의 그림은 무대 크기로 늘어난 rect를 기준으로 자리를 잡는다. 처음에는 넉넉히 4096×4096으로 세웠다가 그림이 포커스 점에서 그만큼 어긋나 카메라가 발을 찍었다(소유자 Unity 확인, 11-18). 무대 캔버스의 크기를 프레임마다 따른다.
+- **마스크는 끈다.** 무대만 한 사각형이라 켜 두면 화면 위 끝에서 머리가 잘린다.
 - 무대 틀(창)이 없다. `cutin_open studio`는 틀을 찾지 못해 예외다 — P3에서 경고로 바꾼다.
 
 ### 1.2 카메라를 어디에 묶나

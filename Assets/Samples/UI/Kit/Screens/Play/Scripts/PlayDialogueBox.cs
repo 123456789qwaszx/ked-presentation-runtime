@@ -167,7 +167,22 @@ namespace Ked.Samples.UI
             _portrait.texture = texture;
             _portrait.material = material;
             _portrait.rectTransform.sizeDelta = size * PortraitScale;
+            PlacePortraitCell();
             _portrait.enabled = true;
+        }
+
+        // 대사창 그림의 왼쪽 아래 귀에 맞춘다. 켤 때마다 다시 잰다 — 칸을 세운 때에는 대사창의 자리가 아직 안 잡혔을 수 있다.
+        private void PlacePortraitCell()
+        {
+            Vector2 corner = Vector2.zero;
+
+            if (_box != null)
+            {
+                RectTransform boxRect = _box.rectTransform;
+                corner = (Vector2)boxRect.localPosition + boxRect.rect.min;
+            }
+
+            _portrait.rectTransform.localPosition = corner + PortraitOffset;
         }
 
         private RawImage CreatePortraitCell()
@@ -181,18 +196,8 @@ namespace Ked.Samples.UI
             rect.SetParent(parent, false);
             rect.SetSiblingIndex(siblingIndex);
 
-            // 대사창 그림의 왼쪽 아래 귀에 맞춘다.
-            Vector2 corner = Vector2.zero;
-
-            if (_box != null)
-            {
-                RectTransform boxRect = _box.rectTransform;
-                corner = (Vector2)boxRect.localPosition + boxRect.rect.min;
-            }
-
             rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 0.5f);
             rect.pivot = Vector2.zero;
-            rect.localPosition = corner + PortraitOffset;
 
             RawImage image = go.GetComponent<RawImage>();
             image.raycastTarget = false;
