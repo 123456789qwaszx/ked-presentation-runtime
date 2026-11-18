@@ -38,6 +38,11 @@ test
 <<move_by s1 -6u 0u 38fr>>
 <<place_center s1 bust 25fr>>
 1. move_by + place — 하린이 옆으로 밀리는 중이지만, 가슴은 정확히 가운데에서 멈춰야 한다.
+<<slot povr studio>>
+<<cast povr harin a 1>>
+<<down povr 14>>
+<<fade_in povr 0fr>>
+하린: 초상이 보이는가. #portrait
 
 <<size s1 22 bust 38fr>>
 <<place_center s1 face 25fr>>

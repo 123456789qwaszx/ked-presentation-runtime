@@ -848,6 +848,7 @@ MonoBehaviour:
   stageMaskMotionPresetDb: {fileID: 11400000, guid: 5e92252f243dfe94fbce20f08a326a2b, type: 2}
   cutInPreset: {fileID: 11400000, guid: be32cae4a2356db4c821f4d5d1698993, type: 2}
   popupPreset: {fileID: 11400000, guid: 2f018c6cbaa99114992e4c2649dbc24e, type: 2}
+  portraitFramePreset: {fileID: 11400000, guid: d40cbc0bb2d3b244f95ed8aac09f5088, type: 2}
   characterFocusDebugView: {fileID: 1719686628}
 --- !u!1 &608895336
 GameObject:
