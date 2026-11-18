@@ -62,7 +62,12 @@ public sealed class CastRegistry
     private readonly Dictionary<string, CastBinding> _slotToBinding = new(StringComparer.Ordinal);
     private readonly Dictionary<string, string> _characterToSlot = new(StringComparer.Ordinal);
 
-    public void CastCharRig(string slotKey, string characterKey)
+    /// <summary>
+    /// 슬롯에 캐릭터를 묶는다. claimCharacterKey가 꺼져 있으면 "캐릭터 키 → 슬롯"은 건드리지 않는다 —
+    /// 그 슬롯은 슬롯 키로만 불린다. 대사창 초상이 그렇다: 같은 캐릭터가 무대에도 서 있을 때
+    /// `face harin 3`은 무대의 인물로 가야 한다(docs/PLAN_portrait-capture.md §1.6).
+    /// </summary>
+    public void CastCharRig(string slotKey, string characterKey, bool claimCharacterKey = true)
     {
         slotKey = (slotKey ?? "").Trim();
         characterKey = PresentationKeyNormalizer.NormalizeCharacterKey(characterKey);
@@ -81,7 +86,9 @@ public sealed class CastRegistry
         }
 
         _slotToBinding[slotKey] = new CastBinding(characterKey, "", previousFacing);
-        _characterToSlot[characterKey] = slotKey;
+
+        if (claimCharacterKey)
+            _characterToSlot[characterKey] = slotKey;
     }
 
     public bool SetVariant(string slotKey, string variantKey)
@@ -161,7 +168,13 @@ public sealed class CastRegistry
             return false;
         }
 
-        _characterToSlot.Remove(binding.character);
+        // 캐릭터 키가 이 슬롯을 가리킬 때만 지운다 — 같은 캐릭터를 묶은 다른 슬롯(무대의 인물)의 이름을 끊지 않는다.
+        if (_characterToSlot.TryGetValue(binding.character, out string claimedSlot) &&
+            string.Equals(claimedSlot, slotKey, StringComparison.Ordinal))
+        {
+            _characterToSlot.Remove(binding.character);
+        }
+
         return true;
     }
 

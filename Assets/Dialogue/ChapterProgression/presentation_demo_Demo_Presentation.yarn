@@ -38,11 +38,10 @@ test
 <<move_by s1 -6u 0u 38fr>>
 <<place_center s1 bust 25fr>>
 1. move_by + place — 하린이 옆으로 밀리는 중이지만, 가슴은 정확히 가운데에서 멈춰야 한다.
-<<slot povr studio>>
-<<cast povr harin a 1>>
-<<down povr 14>>
-<<fade_in povr 0fr>>
+<<portrait harin a 1>>
 하린: 초상이 보이는가. #portrait
+<<face portrait 2>>
+하린: 초상의 표정은 슬롯 portrait에 쓴다 — 무대의 하린은 그대로다. #portrait
 나: 화자가 '나'이면 태그 없이도 초상 줄이다 — 화자 정책 표가 고른다.
 하린: 태그도 없고 표에도 없는 화자의 줄은 보통 대사창이다.
 

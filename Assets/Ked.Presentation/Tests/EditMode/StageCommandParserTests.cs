@@ -599,4 +599,61 @@ public class StageCommandParserTests
         LogAssert.Expect(LogType.Error, new Regex("StageCommandParser.*Unknown shake"));
         Assert.IsEmpty(Parse(parser, Cmd("shot_shake", "nope")), "기본 흔들림은 없다");
     }
+
+    // ── 대사창 초상 (docs/PLAN_portrait-capture.md) ───────────────────────────
+
+    [Test]
+    public void portrait는_초상_리그를_촬영소에_세우고_슬롯만_묶어_바로_보인다()
+    {
+        // 팝업 · 컷인과 같은 결 — 대본은 뜻만 말하고, 슬롯 키 · 서는 자리는 파서가 정한다.
+        List<CommandSpecBase> specs = Parse(NewParser(), Cmd("portrait", "harin", "b", "3"));
+
+        SetupCharRigCommandSpec setup = (SetupCharRigCommandSpec)specs[0];
+        Assert.AreEqual(PortraitStudio.SlotKey, setup.roleKey);
+        Assert.AreEqual(PortraitStudio.StageKey, setup.stage, "촬영소 — 대본의 무대가 아니다");
+        Assert.IsFalse(setup.asBackground);
+        Assert.IsTrue(setup.outsideFold, "폴드 밖 — 코어는 초상 인물을 모른다");
+
+        CastCharacterCommandSpec cast = (CastCharacterCommandSpec)specs[1];
+        Assert.AreEqual(PortraitStudio.SlotKey, cast.roleKey);
+        Assert.AreEqual("harin", cast.characterKey);
+        Assert.IsTrue(cast.slotOnly, "캐릭터 키는 무대의 인물 것이다");
+
+        FadeCommandSpecCharR fade = (FadeCommandSpecCharR)specs[specs.Count - 1];
+        Assert.AreEqual(PortraitStudio.SlotKey, fade.roleKey);
+        Assert.AreEqual(CharacterRigNode.CharacterPortraitSprite_Root, fade.node);
+        Assert.AreEqual(1f, fade.targetAlpha);
+        Assert.AreEqual(0f, fade.duration, "페이드는 대사창의 것이다");
+
+        // 그 사이의 포즈 · 표정 · 앵커는 보통 cast가 내는 것과 같다(슬롯 키만 다르다).
+        List<CommandSpecBase> plainCast = Parse(NewParser(), Cmd("cast", PortraitStudio.SlotKey, "harin", "b", "3"));
+        Assert.AreEqual(plainCast.Count + 2, specs.Count);
+    }
+
+    [Test]
+    public void portrait는_캐릭터가_없으면_경고하고_아무것도_내지_않는다()
+    {
+        LogAssert.Expect(LogType.Warning, new Regex("<<portrait>>에 캐릭터 키가 없다"));
+        Assert.AreEqual(0, Parse(NewParser(), Cmd("portrait")).Count);
+    }
+
+    [Test]
+    public void portrait_close는_초상_리그를_숨긴다()
+    {
+        List<CommandSpecBase> specs = Parse(NewParser(), Cmd("portrait_close"));
+
+        Assert.AreEqual(1, specs.Count);
+
+        FadeCommandSpecCharR fade = (FadeCommandSpecCharR)specs[0];
+        Assert.AreEqual(PortraitStudio.SlotKey, fade.roleKey);
+        Assert.AreEqual(0f, fade.targetAlpha);
+        Assert.AreEqual(0f, fade.duration);
+    }
+
+    [Test]
+    public void 촬영소에는_대본이_직접_세우지_않는다()
+    {
+        LogAssert.Expect(LogType.Warning, new Regex("촬영소\\(studio\\)에는 대본이 직접 세우지 않는다"));
+        Assert.AreEqual(0, Parse(NewParser(), Cmd("slot", "pov", PortraitStudio.StageKey)).Count);
+    }
 }

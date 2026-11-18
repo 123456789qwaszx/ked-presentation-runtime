@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -8,7 +7,7 @@ using UnityEngine;
 ///
 ///   PortraitStudio              월드 공간 캔버스. 화면 캔버스(Overlay)는 카메라가 찍지 못해 따로 둔다
 ///     PortraitStudio_Camera     직교 카메라 → 텍스처. 프레임마다 인물의 캐스팅 축을 따라간다
-///     studio_Stage_Root …       무대 리그 하나(키 studio) — 인물은 `slot 키 studio`로 여기에 선다
+///     studio_Stage_Root …       무대 리그 하나(키 studio) — 초상 인물은 `portrait`가 여기에 세운다(슬롯 키 portrait)
 ///
 /// 무대 리그로 세우는 까닭: 캐릭터 리그는 무대와 층 위에 선다(CharacterRigRefs.StandOn) — 세우기 · 재기 · 폴드가
 /// 그것을 전제한다. 촬영소는 그 전제를 그대로 채우되 화면의 무대 목록(StageRigRegistry.All)에는 들지 않는다.
@@ -19,8 +18,11 @@ using UnityEngine;
 [DisallowMultipleComponent]
 public sealed class PortraitStudio : MonoBehaviour
 {
-    /// <summary>대본이 부르는 무대 키 — `slot pov studio`.</summary>
+    /// <summary>촬영소의 무대 키. 대본의 어휘가 아니다 — 파서가 portrait를 풀 때 쓴다.</summary>
     public const string StageKey = "studio";
+
+    /// <summary>초상 인물의 슬롯 키. `portrait`가 이 키로 세우고, 대본은 표정 · 몸짓을 이 키에 쓴다(`face portrait 2`).</summary>
+    public const string SlotKey = "portrait";
 
     // 화면 밖의 자리. 다른 카메라의 시야(원점 근처)에 들지 않게 멀리 둔다.
     private static readonly Vector3 Origin = new(20000f, 20000f, 0f);
@@ -33,8 +35,6 @@ public sealed class PortraitStudio : MonoBehaviour
     // 텍스처 한 변의 상한(px) — 화면 배율이 튀어도 터무니없는 텍스처를 만들지 않는다.
     private const int MaxTextureSide = 4096;
 
-    private readonly List<KeyValuePair<string, CharacterRigRefs>> _rigScratch = new();
-
     private PresentationStage _stage;
     private CharacterFocusTuningDBSO _focusTuning;
     // 구도의 집 — 프레임마다 다시 읽는다(재생 중에 에셋을 고치면 바로 보인다).
@@ -44,9 +44,6 @@ public sealed class PortraitStudio : MonoBehaviour
     private RectTransform _rect;
     private Camera _camera;
     private RenderTexture _texture;
-
-    // 초상 칸의 인물은 하나다 — 둘째로 선 리그를 한 번만 알린다(같은 키로 프레임마다 떠들지 않는다).
-    private string _warnedExtraSlotKey;
 
     /// <summary>찍힌 그림. 인물이 서 있는 동안 프레임마다 새로 찍힌다. 해상도가 바뀌어도 같은 객체다.</summary>
     public Texture Texture => _texture;
@@ -217,7 +214,7 @@ public sealed class PortraitStudio : MonoBehaviour
         FitSizeToStage();
         FitTextureToScreen(frame);
 
-        if (!TryFindSubject(out string slotKey, out CharacterRigRefs rig))
+        if (!TryFindSubject(out CharacterRigRefs rig))
         {
             if (HasSubject)
                 Clear(_texture);
@@ -227,11 +224,11 @@ public sealed class PortraitStudio : MonoBehaviour
             return;
         }
 
-        string tuningKey = _stage.castRegistry.TryPeekCharacter(slotKey, out string characterKey)
+        string tuningKey = _stage.castRegistry.TryPeekCharacter(SlotKey, out string characterKey)
             ? characterKey
-            : slotKey;
+            : SlotKey;
 
-        CharacterFacing facing = _stage.castRegistry.TryPeekFacing(slotKey, out CharacterFacing castFacing)
+        CharacterFacing facing = _stage.castRegistry.TryPeekFacing(SlotKey, out CharacterFacing castFacing)
             ? castFacing
             : CharacterFacing.Right;
 
@@ -263,52 +260,11 @@ public sealed class PortraitStudio : MonoBehaviour
         _camera.enabled = true;
     }
 
-    // 초상 칸의 인물은 하나다 — 촬영소에 선 첫 리그를 찍는다(docs/PLAN_portrait-capture.md §3 규칙 7).
-    // 둘째가 서 있으면 대본의 실수다 — 조용히 두지 않고 그 키로 한 번 알린다.
-    private bool TryFindSubject(out string slotKey, out CharacterRigRefs rig)
-    {
-        slotKey = null;
-        rig = null;
-
-        string extraSlotKey = null;
-
-        _rigScratch.Clear();
-        _stage.characterRigs.CollectAliveRigEntries(_rigScratch);
-
-        for (int i = 0; i < _rigScratch.Count; i++)
-        {
-            CharacterRigRefs candidate = _rigScratch[i].Value;
-
-            if (candidate.Stage != _stageRig || candidate.CharacterPortrait_VisualOffset == null)
-                continue;
-
-            if (rig == null)
-            {
-                slotKey = _rigScratch[i].Key;
-                rig = candidate;
-                continue;
-            }
-
-            extraSlotKey = _rigScratch[i].Key;
-            break;
-        }
-
-        if (extraSlotKey == null)
-        {
-            _warnedExtraSlotKey = null;
-        }
-        else if (!string.Equals(extraSlotKey, _warnedExtraSlotKey, StringComparison.Ordinal))
-        {
-            _warnedExtraSlotKey = extraSlotKey;
-
-            Debug.LogWarning(
-                $"[촬영소] 촬영소에 리그가 둘 이상 서 있다 — '{slotKey}'만 찍고 '{extraSlotKey}'는 찍지 않는다. " +
-                "초상 칸의 인물은 하나다. 앞의 인물을 치우지 않고 다음 인물을 세운 것이 아닌지 대본을 확인할 것.",
-                this);
-        }
-
-        return rig != null;
-    }
+    // 찍는 인물은 정해진 슬롯 하나다 — portrait가 세운 슬롯(SlotKey). "촬영소에 서 있는 아무나"를 찾지 않는다.
+    private bool TryFindSubject(out CharacterRigRefs rig)
+        => _stage.characterRigs.TryGetRig(SlotKey, out rig)
+           && rig.Stage == _stageRig
+           && rig.CharacterPortrait_VisualOffset != null;
 
     private void OnDestroy()
     {

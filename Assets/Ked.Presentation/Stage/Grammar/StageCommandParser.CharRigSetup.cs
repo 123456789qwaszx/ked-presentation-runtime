@@ -5,21 +5,35 @@ using UnityEngine;
 public sealed partial class StageCommandParser
 {
     private void EnqueueSetupCharRigSpec(string roleKey, string stageKey, string layerKey)
-        => Emit(new SetupCharRigCommandSpec
+    {
+        string stage = StageKeyParser.ParseStage(stageKey);
+
+        // 촬영소는 대본의 무대가 아니다 — 거기에 세운 슬롯은 아무도 찍지 않는다. 초상은 <<portrait>>가 세운다.
+        if (string.Equals(stage, PortraitStudio.StageKey, System.StringComparison.Ordinal))
+        {
+            Debug.LogWarning(
+                $"[StageCommandParser] <<slot {roleKey} {stage}>> 촬영소({stage})에는 대본이 직접 세우지 않는다 — " +
+                "대사창 초상은 <<portrait 캐릭터 [포즈] [표정]>>로 세운다. 건너뛴다.");
+            return;
+        }
+
+        Emit(new SetupCharRigCommandSpec
         {
             roleKey = roleKey,
             rigPrefab = _charRigPrefab,
 
-            stage = StageKeyParser.ParseStage(stageKey),
+            stage = stage,
             layerDepth = StageKeyParser.ParseLayerDepth(layerKey)
         });
+    }
 
-    private void EnqueueCastCharacterSpec(string roleKey, string characterKey, string variantKey, string emotionKey)
+    private void EnqueueCastCharacterSpec(string roleKey, string characterKey, string variantKey, string emotionKey, bool slotOnly = false)
     {
         var castSpec = new CastCharacterCommandSpec
         {
             roleKey = roleKey,
-            characterKey = characterKey
+            characterKey = characterKey,
+            slotOnly = slotOnly
         };
 
         Emit(castSpec);

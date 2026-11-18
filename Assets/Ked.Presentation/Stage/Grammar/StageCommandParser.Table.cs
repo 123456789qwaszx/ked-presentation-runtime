@@ -97,6 +97,9 @@ public sealed partial class StageCommandParser
         ["stop_voice"] = (p, c) => p.EnqueueStopVoiceSpec(),
         ["screen_cover"] = (p, c) => p.EnqueueScreenCoverSpec(c.Arg(0, ScreenCoverPresetDBSO.DefaultPresetKey), c.Arg(1, "0.5s"), c.Arg(2, "")),
         ["screen_cover_clear"] = (p, c) => p.EnqueueScreenCoverClearSpec(c.Arg(0, "0.5s"), c.Arg(1, "")),
+        // 대사창 초상 — 촬영소에 초상 인물을 세운다(StageCommandParser.Portrait). 표정 · 몸짓은 슬롯 키 portrait에 보통 명령으로.
+        ["portrait"] = (p, c) => p.EnqueuePortraitOpenSpec(c.Arg(0), c.Arg(1, "a"), c.Arg(2, "1")),
+        ["portrait_close"] = (p, c) => p.EnqueuePortraitCloseSpec(),
         ["screen_flash"] = (p, c) => p.EnqueueScreenFlashPresetSpec(c.Arg(0), Float(c, 1, 1f)),
         ["screen_flash_clear"] = (p, c) => p.EnqueueScreenFlashClearSpec(),
         ["screen_vignette"] = (p, c) => p.EnqueueScreenVignettePresetSpec(c.Arg(0), Float(c, 1, 1f), c.Arg(2, "0.35s")),
