@@ -14,7 +14,7 @@ using UnityEngine;
 /// 그것을 전제한다. 촬영소는 그 전제를 그대로 채우되 화면의 무대 목록(StageRigRegistry.All)에는 들지 않는다.
 ///
 /// 카메라는 배치 축이 아니라 캐스팅 축(CharacterPortrait_VisualOffset)의 포커스 점을 본다 — 인물이 촬영소의 어디에
-/// 서 있든 구도가 같고, 그 아래의 연기(표정 · 몸짓 · 반전 · 이모지)는 그대로 찍힌다. 구도는 PortraitFrame이 정한다.
+/// 서 있든 구도가 같고, 그 아래의 연기(표정 · 몸짓 · 반전 · 이모지)는 그대로 찍힌다. 구도는 프리셋(PortraitFramePresetDBSO)이 정한다.
 /// </summary>
 [DisallowMultipleComponent]
 public sealed class PortraitStudio : MonoBehaviour
@@ -37,9 +37,8 @@ public sealed class PortraitStudio : MonoBehaviour
 
     private PresentationStage _stage;
     private CharacterFocusTuningDBSO _focusTuning;
-    // 구도. 조립이 넘긴 값으로 시작하고, 재생 중에는 이 오브젝트의 인스펙터에서 바로 고쳐 볼 수 있다 —
-    // 맞춘 값은 조립(SampleBootstrap의 Portrait Frame)에 옮겨 적는다(재생을 멈추면 여기 값은 사라진다).
-    [SerializeField] private PortraitFrame _frame;
+    // 구도의 집 — 프레임마다 다시 읽는다(재생 중에 에셋을 고치면 바로 보인다).
+    private PortraitFramePresetDBSO _preset;
     private StageRigRefs _stageRig;
     private Canvas _referenceCanvas;
     private RectTransform _rect;
@@ -53,10 +52,10 @@ public sealed class PortraitStudio : MonoBehaviour
     public Texture Texture => _texture;
 
     /// <summary>
-    /// 찍는 범위의 크기 — 무대 캔버스의 px. 초상 칸은 이 크기(에 제 배율)로 그린다.
-    /// 텍스처의 px 수는 화면 배율을 따라 바뀌므로 칸의 크기로 쓰지 않는다.
+    /// 초상 칸의 자리와 크기(캔버스 px, 대사창 그림의 왼쪽 아래 귀 기준) — 지금의 프리셋 값.
+    /// 초상 칸이 프레임마다 읽는다. 텍스처의 px 수는 화면 배율을 따라 바뀌므로 칸의 크기로 쓰지 않는다.
     /// </summary>
-    public Vector2 FrameSize => _frame.size;
+    public Rect ReadCellRect() => _preset.Frame.CellRect;
 
     /// <summary>촬영소에 선 인물이 있는가 — 없으면 카메라는 쉬고 텍스처는 투명이다.</summary>
     public bool HasSubject { get; private set; }
@@ -70,8 +69,11 @@ public sealed class PortraitStudio : MonoBehaviour
         PresentationStage stage,
         CharacterFocusTuningDBSO focusTuning,
         Canvas referenceCanvas,
-        PortraitFrame frame)
+        PortraitFramePresetDBSO preset)
     {
+        if (preset == null)
+            throw new InvalidOperationException("[촬영소] 구도 프리셋(PortraitFramePresetDBSO)이 없다 — 조립이 기본값 에셋이라도 넘겨야 한다.");
+
         if (focusTuning == null)
             throw new InvalidOperationException("[촬영소] 포커스 튜닝(CharacterFocusTuningDBSO)이 없다 — 카메라가 볼 점을 정할 수 없다.");
 
@@ -95,11 +97,11 @@ public sealed class PortraitStudio : MonoBehaviour
         PortraitStudio studio = root.AddComponent<PortraitStudio>();
         studio._stage = stage;
         studio._focusTuning = focusTuning;
-        studio._frame = frame.Sanitized();
+        studio._preset = preset;
         studio._referenceCanvas = referenceCanvas;
         studio._rect = rect;
         studio.FitSizeToStage();
-        studio._texture = CreateTexture(studio.TextureSize());
+        studio._texture = CreateTexture(studio.TextureSize(preset.Frame));
         studio._camera = CreateCamera(rect, studio._texture, canvas);
         studio._stageRig = stages.BuildOffscreen(rect, StageKey);
 
@@ -125,25 +127,25 @@ public sealed class PortraitStudio : MonoBehaviour
         _rect.sizeDelta = stageSize;
     }
 
-    // 텍스처의 px 수 = 범위(캔버스 px) × 화면 배율(캔버스 px → 화면 px) × 구도의 배율.
+    // 텍스처의 px 수 = 범위(캔버스 px) × 칸의 배율 × 화면 배율(캔버스 px → 화면 px) × 해상도 배율.
     // 칸이 화면에 그려지는 px 수에 맞춘다 — 고정해 두면 큰 화면에서 흐려지고 작은 화면에서 낭비다.
-    private Vector2Int TextureSize()
+    private Vector2Int TextureSize(in PortraitFrame frame)
     {
         float screenScale = _referenceCanvas != null && _referenceCanvas.scaleFactor > 0f
             ? _referenceCanvas.scaleFactor
             : 1f;
 
-        float scale = screenScale * _frame.textureScale;
+        float scale = screenScale * frame.cellScale * frame.textureScale;
 
         return new Vector2Int(
-            Mathf.Clamp(Mathf.CeilToInt(_frame.size.x * scale), 1, MaxTextureSide),
-            Mathf.Clamp(Mathf.CeilToInt(_frame.size.y * scale), 1, MaxTextureSide));
+            Mathf.Clamp(Mathf.CeilToInt(frame.size.x * scale), 1, MaxTextureSide),
+            Mathf.Clamp(Mathf.CeilToInt(frame.size.y * scale), 1, MaxTextureSide));
     }
 
-    // 화면 크기가 바뀌면 텍스처를 다시 잡는다. 객체는 그대로다 — 초상 칸이 든 참조가 끊기지 않는다.
-    private void FitTextureToScreen()
+    // 화면 크기나 구도가 바뀌면 텍스처를 다시 잡는다. 객체는 그대로다 — 초상 칸이 든 참조가 끊기지 않는다.
+    private void FitTextureToScreen(in PortraitFrame frame)
     {
-        Vector2Int size = TextureSize();
+        Vector2Int size = TextureSize(frame);
 
         if (_texture.width == size.x && _texture.height == size.y)
             return;
@@ -210,11 +212,10 @@ public sealed class PortraitStudio : MonoBehaviour
     // 트윈(Update) · 커맨드 코루틴이 지난 뒤, 캔버스가 그려지기 전에 카메라를 맞춘다 — 같은 프레임의 연기가 찍힌다.
     private void LateUpdate()
     {
-        // 인스펙터에서 고치는 도중의 값(범위 0 등)을 그대로 쓰지 않는다.
-        _frame = _frame.Sanitized();
+        PortraitFrame frame = _preset.Frame;
 
         FitSizeToStage();
-        FitTextureToScreen();
+        FitTextureToScreen(frame);
 
         if (!TryFindSubject(out string slotKey, out CharacterRigRefs rig))
         {
@@ -238,8 +239,8 @@ public sealed class PortraitStudio : MonoBehaviour
         CharacterFocusPointResolver.ResolveFocusMeasureInputs(
             rig,
             tuningKey,
-            _frame.focus,
-            _frame.centerOffset,
+            frame.focus,
+            frame.centerOffset,
             _focusTuning,
             facing,
             mirrorCommandOffset: true,
@@ -255,8 +256,8 @@ public sealed class PortraitStudio : MonoBehaviour
             center - rotation * Vector3.forward * CameraDistance,
             rotation);
 
-        _camera.orthographicSize = _frame.size.y * 0.5f * Mathf.Abs(scale.y);
-        _camera.aspect = (_frame.size.x * Mathf.Abs(scale.x)) / (_frame.size.y * Mathf.Abs(scale.y));
+        _camera.orthographicSize = frame.size.y * 0.5f * Mathf.Abs(scale.y);
+        _camera.aspect = (frame.size.x * Mathf.Abs(scale.x)) / (frame.size.y * Mathf.Abs(scale.y));
 
         HasSubject = true;
         _camera.enabled = true;

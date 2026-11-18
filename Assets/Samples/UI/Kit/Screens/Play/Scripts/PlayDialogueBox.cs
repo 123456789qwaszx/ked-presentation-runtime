@@ -1,3 +1,4 @@
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -19,11 +20,6 @@ namespace Ked.Samples.UI
         private static readonly Vector2 PlatePadMin = new(26f, 13f);
         private static readonly Vector2 PlatePadMax = new(56f, 5f);
 
-        // 초상 칸 — 대사창 그림의 왼쪽 아래 귀에서 얼마나 들어와 서는가, 찍힌 범위(앱이 넘기는 크기)를 몇 배로 보이는가.
-        // 아래 · 옆은 찍힌 범위의 변에서 잘려 있고, 위로는 칸이 대사창 밖으로 솟는다(머리). 값은 눈대중이다.
-        private static readonly Vector2 PortraitOffset = new(24f, 0f);
-        private const float PortraitScale = 1f;
-
         private readonly RectTransform _root;
         private readonly CanvasGroup _group;
         private readonly Image _box;
@@ -35,6 +31,7 @@ namespace Ked.Samples.UI
 
         // 초상 칸은 처음 쓰일 때 세운다 — 프리팹에 두지 않는다(초상을 안 쓰는 대본에는 없다).
         private RawImage _portrait;
+        private PlayPortraitCell _portraitCell;
 
         private bool _usesName = true;
         private bool _clearNameWhenHidden = true;
@@ -148,12 +145,13 @@ namespace Ked.Samples.UI
         }
 
         /// <summary>
-        /// 초상 칸에 그림을 보인다. null이면 끈다. 칸은 대사창 그림 바로 위(글자 · 이름표 아래)에 서고,
-        /// 대사창의 자식이라 대사창과 함께 보이고 숨는다. 크기(캔버스 px) · 재질은 앱이 넘긴다(재질이 없으면 기본 UI 재질).
+        /// 초상 칸에 그림을 보인다. null이면 끈다. 칸은 대사창 그림 바로 위에 서고, 대사창의 자식이라 대사창과 함께 보이고 숨는다.
+        /// 자리와 크기는 앱이 넘긴 readCell이 정한다(대사창 그림의 왼쪽 아래 귀 기준, 캔버스 px) — 칸이 프레임마다 다시 읽는다.
+        /// 아래 · 옆은 찍힌 범위의 변에서 잘려 있고, 위로는 칸이 대사창 밖으로 솟는다(머리). 재질이 없으면 기본 UI 재질이다.
         /// </summary>
-        public void SetPortrait(Texture texture, Vector2 size, Material material)
+        public void SetPortrait(Texture texture, Func<Rect> readCell, Material material)
         {
-            if (texture == null)
+            if (texture == null || readCell == null)
             {
                 if (_portrait != null)
                     _portrait.enabled = false;
@@ -162,36 +160,21 @@ namespace Ked.Samples.UI
             }
 
             if (_portrait == null)
-                _portrait = CreatePortraitCell();
+                CreatePortraitCell();
 
             _portrait.texture = texture;
             _portrait.material = material;
-            _portrait.rectTransform.sizeDelta = size * PortraitScale;
-            PlacePortraitCell();
+            _portraitCell.Bind(_box != null ? _box.rectTransform : null, readCell);
             _portrait.enabled = true;
         }
 
-        // 대사창 그림의 왼쪽 아래 귀에 맞춘다. 켤 때마다 다시 잰다 — 칸을 세운 때에는 대사창의 자리가 아직 안 잡혔을 수 있다.
-        private void PlacePortraitCell()
-        {
-            Vector2 corner = Vector2.zero;
-
-            if (_box != null)
-            {
-                RectTransform boxRect = _box.rectTransform;
-                corner = (Vector2)boxRect.localPosition + boxRect.rect.min;
-            }
-
-            _portrait.rectTransform.localPosition = corner + PortraitOffset;
-        }
-
-        private RawImage CreatePortraitCell()
+        private void CreatePortraitCell()
         {
             // 대사창 그림이 있으면 그 형제로, 바로 다음 순서에 선다 — 그림보다 위, 뒤의 형제(이름표 · 글자)보다 아래.
             Transform parent = _box != null ? _box.transform.parent : _root;
             int siblingIndex = _box != null ? _box.transform.GetSiblingIndex() + 1 : 0;
 
-            GameObject go = new("PortraitCell", typeof(RectTransform), typeof(RawImage));
+            GameObject go = new("PortraitCell", typeof(RectTransform), typeof(RawImage), typeof(PlayPortraitCell));
             RectTransform rect = (RectTransform)go.transform;
             rect.SetParent(parent, false);
             rect.SetSiblingIndex(siblingIndex);
@@ -199,10 +182,9 @@ namespace Ked.Samples.UI
             rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 0.5f);
             rect.pivot = Vector2.zero;
 
-            RawImage image = go.GetComponent<RawImage>();
-            image.raycastTarget = false;
-
-            return image;
+            _portrait = go.GetComponent<RawImage>();
+            _portrait.raycastTarget = false;
+            _portraitCell = go.GetComponent<PlayPortraitCell>();
         }
 
         public void SetVisibleImmediate(bool visible)

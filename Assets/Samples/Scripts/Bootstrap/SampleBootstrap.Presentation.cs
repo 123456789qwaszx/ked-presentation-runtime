@@ -92,12 +92,21 @@ public partial class SampleBootstrap
         _stageFrames = new StageFrameRegistry(_stageRigs);
 
         // 촬영소 — 대사창 초상의 인물이 서는 화면 밖 무대(키 studio). 화면의 무대 목록에 들지 않는다.
+        if (portraitFramePreset == null)
+        {
+            Debug.LogWarning(
+                "[연출 조립] 초상 프리셋(PortraitFramePresetDBSO)이 연결되지 않았다. 코드 기본값으로 연다 — " +
+                "Create › Ked › Presentation › Portrait Frame Preset으로 에셋을 만들어 조립에 연결하면 재생 중에 고친 값이 남는다.");
+
+            portraitFramePreset = ScriptableObject.CreateInstance<PortraitFramePresetDBSO>();
+        }
+
         _portraitStudio = PortraitStudio.Build(
             _stageRigs,
             _presentationStage,
             characterFocusTuningDb,
             stage.StageMount.GetComponentInParent<Canvas>(),
-            portraitFrame);
+            portraitFramePreset);
 
         _presentationResponseRig = new PresentationShotResponseSystem(_stageRigs, LayerProfileCurve.Default);
         _screenEffectRig = EnsureScreenEffectRig();

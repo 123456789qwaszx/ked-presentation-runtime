@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 using TMPro;
 using UnityEngine;
@@ -39,7 +40,7 @@ namespace Ked.Samples.UI
         public void PrimeText(string text, string characterName, bool hasCharacterName) =>
             _box.PrimeText(text, characterName, hasCharacterName);
 
-        public void SetPortrait(Texture portrait, Vector2 size) => _box.SetPortrait(portrait, size, PortraitMaterial());
+        public void SetPortrait(Texture portrait, Func<Rect> readCell) => _box.SetPortrait(portrait, readCell, PortraitMaterial());
 
         public void SetVisibleImmediate(bool visible) => _box.SetVisibleImmediate(visible);
 
