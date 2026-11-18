@@ -28,15 +28,15 @@ public struct PortraitFrame
     [Tooltip("칸의 크기 = 찍는 범위 × 이 값. 찍히는 내용은 그대로 두고 화면에서만 키우고 줄인다.")]
     public float cellScale;
 
-    /// <summary>가슴 위 — 머리 위로 여유를 두고 아래는 가슴께에서 자른다. 값은 눈대중이다(Unity에서 맞춘다).</summary>
+    /// <summary>가슴 위 — 소유자가 예제 대사창에서 맞춘 값이다(2026-11-18, Samples/Settings/PortraitFramePreset.asset과 같다).</summary>
     public static PortraitFrame Default => new()
     {
         focus = CharacterFocusPreset.Face,
-        centerOffset = new Vector2(0f, -60f),
-        size = new Vector2(520f, 620f),
+        centerOffset = new Vector2(0f, 400f),
+        size = new Vector2(800f, 820f),
         textureScale = 1f,
-        cellOffset = Vector2.zero,
-        cellScale = 1f,
+        cellOffset = new Vector2(-160f, 14f),
+        cellScale = 0.8f,
     };
 
     /// <summary>칸의 자리(대사창 그림의 왼쪽 아래 귀 기준)와 크기 — 캔버스 px. 모양은 찍는 범위와 같아 그림이 찌그러지지 않는다.</summary>
