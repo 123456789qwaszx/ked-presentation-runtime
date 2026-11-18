@@ -278,6 +278,10 @@ CharSlot_Track_Idle.anchoredPosition          접힘=(0,0)   vs 캡처=(0, 7.99)
 (`CutIns` · `Popups`)에 이미 있다. 런타임이 세울 때 표시(`outsideFold`)를 달아 하네스의 캡처가 건너뛴다 — 리듀서는 그대로다.
 대본이 판을 치우는 줄(`bg_fade_out stage01_cutin_panel`)은 폴드가 그 슬롯을 몰라 Unhandled로 남는다(불일치가 아니다).
 
+**예외 — 대사창 초상의 인물(2026-11-18).** 초상 인물도 캐릭터 리그로 서지만 **폴드 밖**이다 — 화면 밖 촬영소에 서고
+그 그림을 대사창이 보인다. 코어가 알 필요가 없는 리그다(소유자). `portrait` · `portrait_close`와 슬롯 키 `portrait`에 쓴 명령은
+접지 못한 명령으로 남고, 하네스의 캡처는 같은 표시(`outsideFold`)로 건너뛴다 — 리듀서는 그대로다(docs/PLAN_portrait-capture.md §5).
+
 **배경(`bg_*`)은 2026-10-29에 모델 안으로 들어왔다.** 별도 배경 리그를 지우고 배경을 **캐스팅하지 않은
 캐릭터 슬롯**으로 세우기로 했기 때문이다(재생 저장소 `docs/PLAN_background-as-slot.md`). 그래서 `StageState`가
 "캐릭터 리그만 담는다"는 문장은 더 정확히 "캐릭터 리그 *스키마*만 담는다"가 됐고, 배경 슬롯은 그 스키마의

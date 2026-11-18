@@ -110,6 +110,20 @@ Yarn Spinner를 기반으로 제작한 **비주얼 노벨 화면 연출 런타�
 하린: 응, 괜찮아.
 ```
 
+대사창 안에 인물의 초상을 띄우려면 `portrait <캐릭터> [포즈] [표정]`으로 초상 인물을 세웁니다. 초상은 화면 밖에서 찍은 그림이라
+무대의 마스크 · 어둡게 · 덮개를 받지 않고 대사창과 함께 보이고 숨습니다. 초상 칸이 켜지는 줄은 화자 정책 표가 고르고(예제의 화자 `나`),
+표에 없는 화자의 줄은 줄 태그 `#portrait`로 켭니다. 표정 · 몸짓은 슬롯 키 `portrait`에 보통 명령으로 씁니다 — 같은 캐릭터가 무대에 서 있어도
+캐릭터 키는 무대의 인물 것입니다. 구도와 칸의 자리는 대본이 아니라 프리셋 에셋의 값입니다([PLAN_portrait-capture.md](docs/PLAN_portrait-capture.md)).
+
+```yarn
+<<portrait harin a 1>>
+나: 내 얼굴이 대사창 안에 보여.
+<<face portrait 2>>
+나: 표정은 portrait에 쓰고,
+하린: 무대의 나는 그대로야.
+<<portrait_close>>
+```
+
 진행·저장 예제의 대본은 `Assets/Dialogue/ChapterProgression/festival_eve_*.yarn`(카드 하나에 파일 하나, 챕터 JSON은 곁의 `festival_eve.progression.json`)입니다.
 챕터 하나(축제 전날)에 장면 둘 — 진행 선택지와 스탯, 숨는 · 잠기는 선택지, 자동 간선,
 조건 분기(`<<detour>>`로 다녀가는 카드가 제 첫머리에서 스탯을 본다), 장면 확정과 지난 장면에서 갈라지기, 챕터 끝(끝 카드)을 한 번씩 지나갑니다.

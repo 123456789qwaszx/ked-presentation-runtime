@@ -2,6 +2,7 @@
 
 > 상태: **반영 중** — 런타임은 끝났고(공개 런타임 `refactor/actor-view`), 작업공간이 포크 · 줄의 자리를 반영했다(§4, 2026-11-17). **명령 이름을 바꿨다(§2)** — 소비처는 아직이다. 덮개 · 어둡게 카드와 툴 · 추출기도 아직이다.
 > 반영하는 쪽은 이 문서 하나를 보고 일을 시작한다. 반영을 마치면 §4 표에 적는다.
+> 대사창 초상(2026-11-18 — `portrait` · `#portrait`)은 따로 적었다: [portrait-handoff.md](portrait-handoff.md).
 >
 > 근거 계획서: [PLAN_screen-cover.md](PLAN_screen-cover.md)(덮개 · 어둡게) · [PLAN_stage-visibility.md](PLAN_stage-visibility.md)(컷인 · 팝업 · 무대 마스크) · [PLAN_stage-code-homes.md](PLAN_stage-code-homes.md)(코드의 집 · 명령 이름 §6) · [PLAN_line-beat.md](PLAN_line-beat.md)(줄의 자리 — 진행 중, §1.4).
 
