@@ -8,7 +8,7 @@
 
 | | |
 |---|---|
-| 들이는 때 | 공개 쪽에서 **속말(P4)** 이 선 뒤 한 번에. 소유자가 알린다 |
+| 들이는 때 | 공개 쪽 **속말(P4)** 의 Unity 확인이 끝난 뒤 한 번에. 소유자가 알린다(속말 코드는 들어갔다 — 확인 전) |
 | 까닭 | 재현 대본의 속말이 83줄이다. 지금 들이면 `#thought`를 임시로 풀었다가 다시 내야 한다. 초상이 없어도 점수 · 카드에는 영향이 없다 |
 | 그 전에 해도 되는 것 | 이 문서를 읽고 시험으로 합쳐 보는 것. 포크 · 대본은 바꾸지 않는다 |
 | 하면 안 되는 것 | 대본만 먼저 바꾸는 것 — 포크에 `portrait` 명령이 없어 "모르는 명령"이 된다 |
@@ -20,8 +20,8 @@
 | 범위 | 내용 | 상태 |
 |---|---|---|
 | `0faca84..1a046a7` | 촬영소 · 카메라 · 초상 칸 · 프리셋 에셋. **`.meta`와 에셋이 들어 있다**(`1a046a7`) | `dev`에 있다. Unity 확인 끝 |
-| `1a046a7..d33c2d5` | 화자 `나`, 명령 `portrait` · `portrait_close`, 슬롯만 묶는 캐스팅 | Unity 확인 전 |
-| 그 뒤(예정) | 속말 — 종류 `Thought`, 배치 항목의 값 | 설계만 정했다(PLAN §1.5) |
+| `1a046a7..ba5020b` | 화자 `나`, 명령 `portrait` · `portrait_close`(Yarn 등록 포함), 슬롯만 묶는 캐스팅 | `dev`에 있다. Unity 확인 끝 |
+| 그 뒤 | 속말 — 종류 `Thought`, 배치 항목의 `usePortrait` · 창 색 · 글자색(PLAN §1.5) | 코드 — Unity 확인 전 |
 
 들일 때는 그때의 맨 위까지 한 번에 들인다. 중간 상태(대본이 `slot pov studio`로 세우던 P1)는 걷힌 어휘다 — 그 상태로 들이지 않는다.
 
@@ -41,7 +41,7 @@
 | `<<move_by pov -15.75u -8.5u 0fr>>` 등 자리 · 크기 | **쓰지 않는다** | 구도는 프리셋 에셋의 값이다. 써도 보이는 것이 없다 |
 | `<<face pov 05>>` · `<<motion pov …>>` | `<<face portrait 05>>` · `<<motion portrait …>>` | 슬롯 키가 `portrait` 하나로 정해져 있다 |
 | `#protagonist` | `#portrait` | 대사창 종류 `Portrait`(공개 런타임에 이미 있던 종류) |
-| `#thought` | `#thought` | 그대로 — 공개 쪽 속말이 선 뒤 |
+| `#thought` | `#thought` | 그대로. 종류 `Thought` — 어두운 창 · 흰 글자 · 초상 칸 |
 | (주인공을 치우는 줄이 있으면) | `<<portrait_close>>` | 초상 인물을 숨긴다 |
 
 - **`studio` · `pov`는 대본에 쓰지 않는다.** 촬영소의 무대 키는 파서의 것이다 — `<<slot … studio>>`는 경고하고 건너뛴다.
@@ -69,6 +69,7 @@
 | 파일 | |
 |---|---|
 | `Playback/DialoguePresenter/Box/DialogueBoxPresentationController.cs` | 겹친다 |
+| `Playback/DialoguePresenter/Box/DialogueBoxKind.cs` · `DialogueSurfaceLayoutPresetDBSO.cs` | 겹친다 — 종류 `Thought`(포크의 것과 값이 같은지 본다 — 공개 쪽은 6), 배치 항목의 새 칸 다섯 |
 | `Playback/DialoguePresenter/Box/IPresentationDialogueBoxView.cs` | 겹친다 — `SetPortrait(Texture, Func<Rect>)` |
 | `Samples/Scripts/Bootstrap/SampleBootstrap.Presentation.cs` · `SampleBootstrap.cs` | 겹친다 — 촬영소 조립, `portraitFramePreset` 칸 |
 | `Samples/UI/App/Runtime/Flow/KedDialogueBoxView.cs` · `Samples/UI/Kit/Screens/Play/Scripts/PlayDialogueBox.cs` | 겹친다 |
@@ -80,6 +81,7 @@
 지킬 것:
 
 - **`.meta`는 공개 쪽 것을 그대로 들인다.** Unity가 새로 만들게 두면 GUID가 달라져 프리셋 에셋이 스크립트를 잃는다. `1a046a7` 뒤에 생긴 파일(`StageCommandParser.Portrait.cs` · `CastRegistrySlotOnlyTests.cs`)의 `.meta`는 소유자가 공개 쪽에서 커밋한 뒤에 들인다.
+- **포크의 대사창 배치 DB에 값을 넣는다.** 초상 칸은 종류 이름이 아니라 배치 항목의 값으로 켜진다 — 초상 줄의 항목(`portrait_narrow`)에 `usePortrait`를 켜고, 속말 항목(`thought_narrow`, 종류 `Thought`, `usePortrait` · 창 색 · 글자색)을 더한다. 공개 예제의 값은 `Samples/Settings/KedSurfaceLayoutPresetDB.asset`. 넣지 않으면 초상이 보이지 않는다.
 - **프리셋 에셋은 포크 것을 따로 둔다.** 공개 예제의 값(`Samples/Settings/PortraitFramePreset.asset`)은 예제 대사창과 예제 인물에 맞춘 것이다. 포크의 대사창 · 주인공 그림에 맞는 값은 `Workspace/Presets/`에 에셋을 하나 두고 조립의 `Portrait Frame Preset`에 잇는다. 값은 재생 중에 에셋을 고치면 바로 보이고 남는다.
 - 코어는 바뀌지 않았다 — 코어 사본을 맞출 것이 없다.
 - 들인 뒤 `runtime/FORK.md`의 주인공 대사창 절을 "걷음 → 공개 런타임의 초상"으로 고치고, `runtime/docs/PLAN_actor-view.md` 첫머리에 "가 · 나 모두 하지 않는다 — 공개 런타임 `PLAN_portrait-capture.md`가 대신한다"를 적는다.

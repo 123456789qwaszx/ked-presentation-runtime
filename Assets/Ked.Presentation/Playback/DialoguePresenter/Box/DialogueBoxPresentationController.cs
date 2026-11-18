@@ -14,7 +14,7 @@ public partial class DialogueBoxPresentationController
     private readonly DialogueSurfaceLayoutPresetDBSO _surfaceLayoutDb;
     private readonly DialogueSpeakerPresentationPolicyDBSO _speakerPolicyDb;
 
-    // 초상 줄(DialogueBoxKind.Portrait)의 그림을 내는 촬영소. 없으면(null) 초상 칸은 늘 꺼져 있다.
+    // 초상 칸을 켜는 배치(Entry.usePortrait)의 줄에 그림을 내는 촬영소. 없으면(null) 초상 칸은 늘 꺼져 있다.
     private readonly PortraitStudio _portraitStudio;
 
     public DialogueBoxPresentationController(
@@ -114,8 +114,8 @@ public partial class DialogueBoxPresentationController
     {
         _box.ResetPresentationTransform();
 
-        ApplySurfaceLayoutFor(_box, kind);
-        ApplyPortraitFor(kind);
+        DialogueSurfaceLayoutPresetDBSO.Entry layout = ApplySurfaceLayoutFor(_box, kind);
+        ApplyPortraitFor(layout);
 
         _box.PrimeText(
             ctx.Text,
@@ -123,20 +123,22 @@ public partial class DialogueBoxPresentationController
             ctx.HasCharacterName);
     }
 
-    private void ApplySurfaceLayoutFor(IPresentationDialogueBoxView box, DialogueBoxKind kind)
+    private DialogueSurfaceLayoutPresetDBSO.Entry ApplySurfaceLayoutFor(IPresentationDialogueBoxView box, DialogueBoxKind kind)
     {
         DialogueSurfaceLayoutPresetDBSO.Entry entry = _surfaceState.HasOverride
             ? _surfaceLayoutDb.FindOrDefault(_surfaceState.OverrideLayoutKey)
             : _surfaceLayoutDb.FindByKind(kind);
 
         box.ApplySurfaceLayout(entry);
+
+        return entry;
     }
 
-    // 초상 칸은 줄의 종류가 켜고 끈다 — 무대 커맨드가 아니다. 내용을 얹는 자리(ApplyContent)에서 함께 바뀌므로
-    // 종류가 바뀌는 줄에서는 대사창이 사라진 틈에 켜지고 꺼진다.
-    private void ApplyPortraitFor(DialogueBoxKind kind)
+    // 초상 칸은 그 줄의 배치가 켜고 끈다(Entry.usePortrait) — 무대 커맨드가 아니고, 종류 이름을 여기서 가려 쓰지도 않는다.
+    // 내용을 얹는 자리(ApplyContent)에서 함께 바뀌므로 종류가 바뀌는 줄에서는 대사창이 사라진 틈에 켜지고 꺼진다.
+    private void ApplyPortraitFor(in DialogueSurfaceLayoutPresetDBSO.Entry layout)
     {
-        if (kind != DialogueBoxKind.Portrait || _portraitStudio == null)
+        if (!layout.usePortrait || _portraitStudio == null)
         {
             _box.SetPortrait(null, null);
             return;

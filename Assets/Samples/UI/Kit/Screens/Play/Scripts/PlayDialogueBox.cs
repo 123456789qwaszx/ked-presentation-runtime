@@ -40,6 +40,14 @@ namespace Ked.Samples.UI
         private float _textScale = 1f;
         private float _opacity = 1f;
 
+        // 레이아웃이 정한 색(속말 등). 덮기 직전의 색을 기억해 두었다가 덮지 않는 레이아웃이 오면 되돌린다 —
+        // 평소의 색은 프리팹 · 테마의 것이라 여기서 정해 두지 않는다.
+        private bool _boxColorOverridden;
+        private Color _boxColorBefore;
+        private float _boxAlpha = 1f;
+        private bool _lineColorOverridden;
+        private Color _lineColorBefore;
+
         public PlayDialogueBox(
             RectTransform root,
             CanvasGroup group,
@@ -102,6 +110,7 @@ namespace Ked.Samples.UI
         {
             ApplyLineLayout(layout);
             ApplyNameLayout(layout);
+            ApplyColors(layout);
 
             _lineBaseSize = layout.lineFontSize;
             _nameBaseSize = layout.nameFontSize;
@@ -290,20 +299,68 @@ namespace Ked.Samples.UI
             KedUIUtil.SetActive(_plate, visible);
         }
 
+        // 박스 그림의 불투명도 = 레이아웃이 정한 알파(정하지 않았으면 1) × 사용자의 대사창 불투명도.
         private void ApplyOpacity(Image image)
         {
             if (image == null)
                 return;
 
             Color color = image.color;
-            color.a = _opacity;
+            color.a = (image == _box ? _boxAlpha : 1f) * _opacity;
             image.color = color;
+        }
+
+        private void ApplyColors(in PlayDialogueLayout layout)
+        {
+            if (_box != null)
+            {
+                if (layout.overrideBoxColor)
+                {
+                    if (!_boxColorOverridden)
+                        _boxColorBefore = _box.color;
+
+                    _boxColorOverridden = true;
+                    _boxAlpha = layout.boxColor.a;
+                    _box.color = layout.boxColor;
+                }
+                else if (_boxColorOverridden)
+                {
+                    _boxColorOverridden = false;
+                    _boxAlpha = 1f;
+                    _box.color = _boxColorBefore;
+                }
+
+                ApplyOpacity(_box);
+            }
+
+            if (_line != null)
+            {
+                if (layout.overrideLineColor)
+                {
+                    if (!_lineColorOverridden)
+                        _lineColorBefore = _line.color;
+
+                    _lineColorOverridden = true;
+                    _line.color = layout.lineColor;
+                }
+                else if (_lineColorOverridden)
+                {
+                    _lineColorOverridden = false;
+                    _line.color = _lineColorBefore;
+                }
+            }
         }
     }
 
     /// <summary>대사창 글자의 자리 · 크기 · 정렬. 앱이 연출 프리셋(ked: 대사창 배치 DB의 한 항목)에서 채워 넘긴다.</summary>
     public struct PlayDialogueLayout
     {
+        // 박스 그림 · 줄 글자의 색. override가 꺼져 있으면 건드리지 않는다(프리팹 · 테마의 색).
+        public bool overrideBoxColor;
+        public Color boxColor;
+        public bool overrideLineColor;
+        public Color lineColor;
+
         public Vector2 lineAnchorMin;
         public Vector2 lineAnchorMax;
         public Vector2 linePivot;

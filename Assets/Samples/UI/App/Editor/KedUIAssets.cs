@@ -116,6 +116,10 @@ namespace Ked.Samples.UI.Editor
             DialogueSurfaceLayoutPresetDBSO.Entry portrait = DialogueSurfaceLayoutPresetDBSO.Entry.CreatePortraitNarrow();
             ApplyBox(ref portrait, line: new Rect(512, 693, 874, 106), name: new Rect(512, 610, 250, 40), lineSize: 26f, nameSize: 24f);
 
+            // 속말: 초상 줄과 같은 글 자리. 어두운 창 · 흰 글자 · 초상 칸은 코드 기본값(CreateThoughtNarrow)이 든다.
+            DialogueSurfaceLayoutPresetDBSO.Entry thought = DialogueSurfaceLayoutPresetDBSO.Entry.CreateThoughtNarrow();
+            ApplyBox(ref thought, line: new Rect(512, 693, 874, 106), name: new Rect(512, 610, 250, 40), lineSize: 26f, nameSize: 24f);
+
             // 레터박스: 박스 안 한 줄, 세로 가운데.
             DialogueSurfaceLayoutPresetDBSO.Entry letterbox = DialogueSurfaceLayoutPresetDBSO.Entry.CreateLetterboxBottom();
             ApplyBox(ref letterbox, line: new Rect(156, 693, 1230, 106), name: new Rect(156, 610, 250, 40), lineSize: 24f, nameSize: 24f);
@@ -130,7 +134,7 @@ namespace Ked.Samples.UI.Editor
             book.lineFontSize = 26f;
             book.nameFontSize = 24f;
 
-            DialogueSurfaceLayoutPresetDBSO.Entry[] entries = { bottom, speaker, portrait, letterbox, full, book };
+            DialogueSurfaceLayoutPresetDBSO.Entry[] entries = { bottom, speaker, portrait, letterbox, full, book, thought };
 
             FieldInfo field = typeof(DialogueSurfaceLayoutPresetDBSO).GetField(
                 "entries",

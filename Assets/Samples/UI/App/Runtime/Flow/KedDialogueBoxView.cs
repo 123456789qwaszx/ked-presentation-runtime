@@ -14,6 +14,7 @@ namespace Ked.Samples.UI
     /// - 줄·이름 글자의 자리·크기·정렬은 연출 DB(DialogueSurfaceLayoutPresetDBSO)가 정한다. 새 UI는 새 박스에 맞춘
     ///   프리셋 DB를 쓴다(빌더가 만든 KedSurfaceLayoutPresetDB). 대본의 surface_layout이 그대로 동작한다.
     /// - 그림(박스·이름표)·글꼴·불투명도·글자 배율은 UI가 정한다. 프리셋의 overrideImage는 쓰지 않는다.
+    /// - 박스 그림의 색 · 줄 글자의 색은 프리셋이 정할 수 있다(overrideBoxColor · overrideLineColor — 속말). 끄면 UI의 색 그대로다.
     /// - 보이기·감추기(CanvasGroup)는 본체 컨트롤러가 부른다. UI 숨김(퀵메뉴)은 바깥 층(HudRoot)이 맡아 서로 겹치지 않는다.
     /// </summary>
     internal sealed class KedDialogueBoxView : IPresentationDialogueBoxView
@@ -113,6 +114,11 @@ namespace Ked.Samples.UI
 
         private static PlayDialogueLayout ToLayout(DialogueSurfaceLayoutPresetDBSO.Entry entry) => new()
         {
+            overrideBoxColor = entry.overrideBoxColor,
+            boxColor = entry.boxColor,
+            overrideLineColor = entry.overrideLineColor,
+            lineColor = entry.lineColor,
+
             lineAnchorMin = entry.lineAnchorMin,
             lineAnchorMax = entry.lineAnchorMax,
             linePivot = entry.linePivot,

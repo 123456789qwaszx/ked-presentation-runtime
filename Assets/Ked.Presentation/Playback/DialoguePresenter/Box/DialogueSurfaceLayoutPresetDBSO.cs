@@ -27,6 +27,25 @@ public sealed class DialogueSurfaceLayoutPresetDBSO : ScriptableObject
             "비워 두면 이미지를 끈다 — 텍스트만 있는 종류(OnlyText 계열)가 이 모양이다.")]
         public Sprite image;
 
+        [Header("Portrait")]
+        [Tooltip(
+            "이 배치의 줄에서 초상 칸을 켜는가(촬영소가 찍은 그림 — <<portrait>>가 세운 인물). " +
+            "초상 칸도 대사창 모양의 일부다: 무대 명령이 아니라 종류(배치)가 켜고 끈다.")]
+        public bool usePortrait;
+
+        [Header("Colors")]
+        [Tooltip("이 배치가 박스 그림의 색을 정하는가. 끄면 건드리지 않는다(UI 테마의 색 그대로) — overrideImage와 같은 꼴이다.")]
+        public bool overrideBoxColor;
+
+        [Tooltip("overrideBoxColor가 켜져 있을 때 박스 그림에 곱할 색. 알파는 박스의 불투명도다(사용자의 대사창 불투명도 설정이 여기에 곱해진다).")]
+        public Color boxColor;
+
+        [Tooltip("이 배치가 줄 글자의 색을 정하는가. 끄면 건드리지 않는다(UI 테마의 색 그대로).")]
+        public bool overrideLineColor;
+
+        [Tooltip("overrideLineColor가 켜져 있을 때 줄 글자의 색.")]
+        public Color lineColor;
+
         [Tooltip(
             "이 프리셋이 담당하는 박스 종류. 박스가 하나뿐이므로 kind는 '어느 뷰인가'가 아니라 " +
             "'어느 레이아웃인가'를 뜻한다. 같은 kind가 여러 개면 첫 번째를 쓴다.")]
@@ -160,6 +179,7 @@ public sealed class DialogueSurfaceLayoutPresetDBSO : ScriptableObject
             {
                 key = "portrait_narrow",
                 kind = DialogueBoxKind.Portrait,
+                usePortrait = true,
 
                 // 왼쪽 30%를 컷인 자리로 비운다.
                 lineAnchorMin = new Vector2(0.32f, 0.08f),
@@ -191,6 +211,25 @@ public sealed class DialogueSurfaceLayoutPresetDBSO : ScriptableObject
                 nameOverflowMode = TextOverflowModes.Overflow,
                 nameTextWrappingMode = TextWrappingModes.NoWrap,
             };
+        }
+
+        /// <summary>
+        /// 속말 — 초상 줄과 같은 글 자리에 어두운 창 · 흰 글자. 초상 칸도 켠다.
+        /// 달라지는 것은 색뿐이라 초상 줄의 배치에서 시작한다(창 모양이 바뀌는 연출은 종류 사이의 전환의 일이다).
+        /// </summary>
+        public static Entry CreateThoughtNarrow()
+        {
+            Entry entry = CreatePortraitNarrow();
+
+            entry.key = "thought_narrow";
+            entry.kind = DialogueBoxKind.Thought;
+
+            entry.overrideBoxColor = true;
+            entry.boxColor = new Color(0.10f, 0.11f, 0.16f, 0.82f);
+            entry.overrideLineColor = true;
+            entry.lineColor = Color.white;
+
+            return entry;
         }
 
         public static Entry CreateLetterboxBottom()
@@ -308,7 +347,7 @@ public sealed class DialogueSurfaceLayoutPresetDBSO : ScriptableObject
         }
     }
 
-    // kind 6종에 하나씩 대응한다 — 박스가 하나뿐이므로 이 배열이 곧 "박스 종류의 정의"다.
+    // kind 7종에 하나씩 대응한다 — 박스가 하나뿐이므로 이 배열이 곧 "박스 종류의 정의"다.
     [SerializeField] private Entry[] entries =
     {
         Entry.CreateBottom(),          // Surface
@@ -317,6 +356,7 @@ public sealed class DialogueSurfaceLayoutPresetDBSO : ScriptableObject
         Entry.CreateLetterboxBottom(), // LetterBox
         Entry.CreateFullTopLeft(),     // OnlyText
         Entry.CreateBlackBookPage(),   // BlackBook
+        Entry.CreateThoughtNarrow(),   // Thought
     };
 
     public Entry FindOrDefault(string key)
