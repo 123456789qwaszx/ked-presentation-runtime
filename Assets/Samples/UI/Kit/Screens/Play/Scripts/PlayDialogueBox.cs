@@ -19,7 +19,7 @@ namespace Ked.Samples.UI
         private static readonly Vector2 PlatePadMin = new(26f, 13f);
         private static readonly Vector2 PlatePadMax = new(56f, 5f);
 
-        // 초상 칸 — 대사창 그림의 왼쪽 아래 귀에서 얼마나 들어와 서는가, 찍힌 그림(텍스처 px)을 몇 배로 보이는가.
+        // 초상 칸 — 대사창 그림의 왼쪽 아래 귀에서 얼마나 들어와 서는가, 찍힌 범위(앱이 넘기는 크기)를 몇 배로 보이는가.
         // 아래 · 옆은 찍힌 범위의 변에서 잘려 있고, 위로는 칸이 대사창 밖으로 솟는다(머리). 값은 눈대중이다.
         private static readonly Vector2 PortraitOffset = new(24f, 0f);
         private const float PortraitScale = 1f;
@@ -149,9 +149,9 @@ namespace Ked.Samples.UI
 
         /// <summary>
         /// 초상 칸에 그림을 보인다. null이면 끈다. 칸은 대사창 그림 바로 위(글자 · 이름표 아래)에 서고,
-        /// 대사창의 자식이라 대사창과 함께 보이고 숨는다. 재질은 앱이 넘긴다(없으면 기본 UI 재질).
+        /// 대사창의 자식이라 대사창과 함께 보이고 숨는다. 크기(캔버스 px) · 재질은 앱이 넘긴다(재질이 없으면 기본 UI 재질).
         /// </summary>
-        public void SetPortrait(Texture texture, Material material)
+        public void SetPortrait(Texture texture, Vector2 size, Material material)
         {
             if (texture == null)
             {
@@ -166,7 +166,7 @@ namespace Ked.Samples.UI
 
             _portrait.texture = texture;
             _portrait.material = material;
-            _portrait.rectTransform.sizeDelta = new Vector2(texture.width, texture.height) * PortraitScale;
+            _portrait.rectTransform.sizeDelta = size * PortraitScale;
             _portrait.enabled = true;
         }
 

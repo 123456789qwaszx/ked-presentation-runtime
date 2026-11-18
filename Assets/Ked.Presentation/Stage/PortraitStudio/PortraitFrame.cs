@@ -18,7 +18,7 @@ public struct PortraitFrame
     [Tooltip("보는 범위의 크기(리그 로컬 px). 이 범위의 아래 · 옆 변에서 인물이 잘린다.")]
     public Vector2 size;
 
-    [Tooltip("텍스처 해상도 = 범위 × 이 값. 대사창의 초상 칸이 범위보다 크게 보이면 올린다.")]
+    [Tooltip("텍스처 해상도 = 범위 × 화면 배율 × 이 값. 초상 칸을 범위보다 크게 그리면(칸의 배율) 그만큼 올린다.")]
     public float textureScale;
 
     /// <summary>가슴 위 — 머리 위로 여유를 두고 아래는 가슴께에서 자른다. 값은 눈대중이다(Unity에서 맞춘다).</summary>

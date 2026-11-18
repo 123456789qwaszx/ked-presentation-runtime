@@ -31,17 +31,30 @@ public sealed class PortraitStudio : MonoBehaviour
 
     private const float CameraDistance = 100f;
 
+    // 텍스처 한 변의 상한(px) — 화면 배율이 튀어도 터무니없는 텍스처를 만들지 않는다.
+    private const int MaxTextureSide = 4096;
+
     private readonly List<KeyValuePair<string, CharacterRigRefs>> _rigScratch = new();
 
     private PresentationStage _stage;
     private CharacterFocusTuningDBSO _focusTuning;
     private PortraitFrame _frame;
     private StageRigRefs _stageRig;
+    private Canvas _referenceCanvas;
     private Camera _camera;
     private RenderTexture _texture;
 
-    /// <summary>찍힌 그림. 인물이 서 있는 동안 프레임마다 새로 찍힌다.</summary>
+    // 초상 칸의 인물은 하나다 — 둘째로 선 리그를 한 번만 알린다(같은 키로 프레임마다 떠들지 않는다).
+    private string _warnedExtraSlotKey;
+
+    /// <summary>찍힌 그림. 인물이 서 있는 동안 프레임마다 새로 찍힌다. 해상도가 바뀌어도 같은 객체다.</summary>
     public Texture Texture => _texture;
+
+    /// <summary>
+    /// 찍는 범위의 크기 — 무대 캔버스의 px. 초상 칸은 이 크기(에 제 배율)로 그린다.
+    /// 텍스처의 px 수는 화면 배율을 따라 바뀌므로 칸의 크기로 쓰지 않는다.
+    /// </summary>
+    public Vector2 FrameSize => _frame.size;
 
     /// <summary>촬영소에 선 인물이 있는가 — 없으면 카메라는 쉬고 텍스처는 투명이다.</summary>
     public bool HasSubject { get; private set; }
@@ -81,20 +94,48 @@ public sealed class PortraitStudio : MonoBehaviour
         studio._stage = stage;
         studio._focusTuning = focusTuning;
         studio._frame = frame.Sanitized();
-        studio._texture = CreateTexture(studio._frame);
+        studio._referenceCanvas = referenceCanvas;
+        studio._texture = CreateTexture(studio.TextureSize());
         studio._camera = CreateCamera(rect, studio._texture, canvas);
         studio._stageRig = stages.BuildOffscreen(rect, StageKey);
 
         return studio;
     }
 
-    private static RenderTexture CreateTexture(PortraitFrame frame)
+    // 텍스처의 px 수 = 범위(캔버스 px) × 화면 배율(캔버스 px → 화면 px) × 구도의 배율.
+    // 칸이 화면에 그려지는 px 수에 맞춘다 — 고정해 두면 큰 화면에서 흐려지고 작은 화면에서 낭비다.
+    private Vector2Int TextureSize()
     {
-        int width = Mathf.Max(1, Mathf.RoundToInt(frame.size.x * frame.textureScale));
-        int height = Mathf.Max(1, Mathf.RoundToInt(frame.size.y * frame.textureScale));
+        float screenScale = _referenceCanvas != null && _referenceCanvas.scaleFactor > 0f
+            ? _referenceCanvas.scaleFactor
+            : 1f;
 
+        float scale = screenScale * _frame.textureScale;
+
+        return new Vector2Int(
+            Mathf.Clamp(Mathf.CeilToInt(_frame.size.x * scale), 1, MaxTextureSide),
+            Mathf.Clamp(Mathf.CeilToInt(_frame.size.y * scale), 1, MaxTextureSide));
+    }
+
+    // 화면 크기가 바뀌면 텍스처를 다시 잡는다. 객체는 그대로다 — 초상 칸이 든 참조가 끊기지 않는다.
+    private void FitTextureToScreen()
+    {
+        Vector2Int size = TextureSize();
+
+        if (_texture.width == size.x && _texture.height == size.y)
+            return;
+
+        _texture.Release();
+        _texture.width = size.x;
+        _texture.height = size.y;
+        _texture.Create();
+        Clear(_texture);
+    }
+
+    private static RenderTexture CreateTexture(Vector2Int size)
+    {
         // 깊이 24 = 스텐실 8 — 무대 마스크(UI Mask)가 스텐실을 쓴다.
-        RenderTexture texture = new(width, height, 24, RenderTextureFormat.ARGB32)
+        RenderTexture texture = new(size.x, size.y, 24, RenderTextureFormat.ARGB32)
         {
             name = "PortraitStudio_Texture",
             useMipMap = false,
@@ -146,6 +187,8 @@ public sealed class PortraitStudio : MonoBehaviour
     // 트윈(Update) · 커맨드 코루틴이 지난 뒤, 캔버스가 그려지기 전에 카메라를 맞춘다 — 같은 프레임의 연기가 찍힌다.
     private void LateUpdate()
     {
+        FitTextureToScreen();
+
         if (!TryFindSubject(out string slotKey, out CharacterRigRefs rig))
         {
             if (HasSubject)
@@ -193,8 +236,14 @@ public sealed class PortraitStudio : MonoBehaviour
     }
 
     // 초상 칸의 인물은 하나다 — 촬영소에 선 첫 리그를 찍는다(docs/PLAN_portrait-capture.md §3 규칙 7).
+    // 둘째가 서 있으면 대본의 실수다 — 조용히 두지 않고 그 키로 한 번 알린다.
     private bool TryFindSubject(out string slotKey, out CharacterRigRefs rig)
     {
+        slotKey = null;
+        rig = null;
+
+        string extraSlotKey = null;
+
         _rigScratch.Clear();
         _stage.characterRigs.CollectAliveRigEntries(_rigScratch);
 
@@ -205,14 +254,32 @@ public sealed class PortraitStudio : MonoBehaviour
             if (candidate.Stage != _stageRig || candidate.CharacterPortrait_VisualOffset == null)
                 continue;
 
-            slotKey = _rigScratch[i].Key;
-            rig = candidate;
-            return true;
+            if (rig == null)
+            {
+                slotKey = _rigScratch[i].Key;
+                rig = candidate;
+                continue;
+            }
+
+            extraSlotKey = _rigScratch[i].Key;
+            break;
         }
 
-        slotKey = null;
-        rig = null;
-        return false;
+        if (extraSlotKey == null)
+        {
+            _warnedExtraSlotKey = null;
+        }
+        else if (!string.Equals(extraSlotKey, _warnedExtraSlotKey, StringComparison.Ordinal))
+        {
+            _warnedExtraSlotKey = extraSlotKey;
+
+            Debug.LogWarning(
+                $"[촬영소] 촬영소에 리그가 둘 이상 서 있다 — '{slotKey}'만 찍고 '{extraSlotKey}'는 찍지 않는다. " +
+                "초상 칸의 인물은 하나다. 앞의 인물을 치우지 않고 다음 인물을 세운 것이 아닌지 대본을 확인할 것.",
+                this);
+        }
+
+        return rig != null;
     }
 
     private void OnDestroy()
