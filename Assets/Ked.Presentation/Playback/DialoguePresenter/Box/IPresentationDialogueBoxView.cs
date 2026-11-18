@@ -1,5 +1,6 @@
 using System.Threading;
 using TMPro;
+using UnityEngine;
 using Yarn.Unity;
 
 public interface IPresentationDialogueBoxView
@@ -11,6 +12,10 @@ public interface IPresentationDialogueBoxView
 
     void ResetPresentationTransform();
     void PrimeText(string text, string characterName, bool hasCharacterName);
+
+    // 초상 칸 — 촬영소가 찍은 그림(PortraitStudio.Texture)을 보인다. null이면 칸을 끈다.
+    // 대사창은 리그를 모른다: 받는 것은 그림 한 장이다. 칸은 대사창과 함께 보이고 숨는다(docs/PLAN_portrait-capture.md).
+    void SetPortrait(Texture portrait);
 
     void SetVisibleImmediate(bool visible);
     void PrepareHidden();

@@ -14,18 +14,23 @@ public partial class DialogueBoxPresentationController
     private readonly DialogueSurfaceLayoutPresetDBSO _surfaceLayoutDb;
     private readonly DialogueSpeakerPresentationPolicyDBSO _speakerPolicyDb;
 
+    // 초상 줄(DialogueBoxKind.Portrait)의 그림을 내는 촬영소. 없으면(null) 초상 칸은 늘 꺼져 있다.
+    private readonly PortraitStudio _portraitStudio;
+
     public DialogueBoxPresentationController(
         DialogueBoxCurrentState dialogueBoxState,
         IPresentationDialogueBoxView box,
         DialogueSurfaceState surfaceState,
         DialogueSurfaceLayoutPresetDBSO surfaceLayoutDb,
-        DialogueSpeakerPresentationPolicyDBSO speakerPolicyDb)
+        DialogueSpeakerPresentationPolicyDBSO speakerPolicyDb,
+        PortraitStudio portraitStudio)
     {
         _boxState = dialogueBoxState;
         _box = box;
         _surfaceState = surfaceState;
         _surfaceLayoutDb = surfaceLayoutDb;
         _speakerPolicyDb = speakerPolicyDb;
+        _portraitStudio = portraitStudio;
     }
 
     // 타이프라이터가 글자를 채워 넣을 대상.
@@ -110,6 +115,7 @@ public partial class DialogueBoxPresentationController
         _box.ResetPresentationTransform();
 
         ApplySurfaceLayoutFor(_box, kind);
+        ApplyPortraitFor(kind);
 
         _box.PrimeText(
             ctx.Text,
@@ -124,6 +130,21 @@ public partial class DialogueBoxPresentationController
             : _surfaceLayoutDb.FindByKind(kind);
 
         box.ApplySurfaceLayout(entry);
+    }
+
+    // 초상 칸은 줄의 종류가 켜고 끈다 — 무대 커맨드가 아니다. 내용을 얹는 자리(ApplyContent)에서 함께 바뀌므로
+    // 종류가 바뀌는 줄에서는 대사창이 사라진 틈에 켜지고 꺼진다.
+    private void ApplyPortraitFor(DialogueBoxKind kind)
+    {
+        if (kind != DialogueBoxKind.Portrait || _portraitStudio == null)
+        {
+            _box.SetPortrait(null);
+            return;
+        }
+
+        // 촬영소의 인물은 줄 머리의 명령으로 이미 서 있다. 아직 한 프레임도 찍히지 않았어도 칸은 켠다 —
+        // 그 프레임 끝에 찍힌다. 인물이 없다는 판정(HasSubject)은 촬영소가 다음 LateUpdate에야 알므로 여기서 묻지 않는다.
+        _box.SetPortrait(_portraitStudio.Texture);
     }
 
     private async YarnTask ApplyTransitionAsync(
@@ -230,6 +251,7 @@ public partial class DialogueBoxPresentationController
     public void CloseAll()
     {
         _box.SetVisibleImmediate(false);
+        _box.SetPortrait(null);
         _boxState.Reset();
     }
 

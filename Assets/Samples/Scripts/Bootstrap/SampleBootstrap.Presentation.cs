@@ -35,6 +35,7 @@ public partial class SampleBootstrap
 
     private StageRigRegistry _stageRigs;
     private StageFrameRegistry _stageFrames;
+    private PortraitStudio _portraitStudio;
     private PresentationShotResponseSystem _presentationResponseRig;
     private ScreenEffectRig _screenEffectRig;
 
@@ -89,6 +90,14 @@ public partial class SampleBootstrap
             _stageRigs.Build(stage.StageMount, stageKey, StageLayerLabels.Depths);
 
         _stageFrames = new StageFrameRegistry(_stageRigs);
+
+        // 촬영소 — 대사창 초상의 인물이 서는 화면 밖 무대(키 studio). 화면의 무대 목록에 들지 않는다.
+        _portraitStudio = PortraitStudio.Build(
+            _stageRigs,
+            _presentationStage,
+            characterFocusTuningDb,
+            stage.StageMount.GetComponentInParent<Canvas>(),
+            portraitFrame);
 
         _presentationResponseRig = new PresentationShotResponseSystem(_stageRigs, LayerProfileCurve.Default);
         _screenEffectRig = EnsureScreenEffectRig();
@@ -226,7 +235,8 @@ public partial class SampleBootstrap
             dialogueSurfaceBox,
             _dialogueSurfaceState,
             _kedUI.SurfaceLayoutDb,
-            speakerPolicyDb);
+            speakerPolicyDb,
+            _portraitStudio);
         _dialogueBoxPresentation = dialogueBoxPresentationController;
 
         _motions = LoadMotions();

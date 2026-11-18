@@ -19,6 +19,11 @@ namespace Ked.Samples.UI
         private static readonly Vector2 PlatePadMin = new(26f, 13f);
         private static readonly Vector2 PlatePadMax = new(56f, 5f);
 
+        // 초상 칸 — 대사창 그림의 왼쪽 아래 귀에서 얼마나 들어와 서는가, 찍힌 그림(텍스처 px)을 몇 배로 보이는가.
+        // 아래 · 옆은 찍힌 범위의 변에서 잘려 있고, 위로는 칸이 대사창 밖으로 솟는다(머리). 값은 눈대중이다.
+        private static readonly Vector2 PortraitOffset = new(24f, 0f);
+        private const float PortraitScale = 1f;
+
         private readonly RectTransform _root;
         private readonly CanvasGroup _group;
         private readonly Image _box;
@@ -27,6 +32,9 @@ namespace Ked.Samples.UI
         private readonly TMP_Text _line;
         private readonly TMP_Text _name;
         private readonly GameObject _nextMarker;
+
+        // 초상 칸은 처음 쓰일 때 세운다 — 프리팹에 두지 않는다(초상을 안 쓰는 대본에는 없다).
+        private RawImage _portrait;
 
         private bool _usesName = true;
         private bool _clearNameWhenHidden = true;
@@ -137,6 +145,59 @@ namespace Ked.Samples.UI
                 _name.text = string.Empty;
 
             SetNameVisible(false);
+        }
+
+        /// <summary>
+        /// 초상 칸에 그림을 보인다. null이면 끈다. 칸은 대사창 그림 바로 위(글자 · 이름표 아래)에 서고,
+        /// 대사창의 자식이라 대사창과 함께 보이고 숨는다. 재질은 앱이 넘긴다(없으면 기본 UI 재질).
+        /// </summary>
+        public void SetPortrait(Texture texture, Material material)
+        {
+            if (texture == null)
+            {
+                if (_portrait != null)
+                    _portrait.enabled = false;
+
+                return;
+            }
+
+            if (_portrait == null)
+                _portrait = CreatePortraitCell();
+
+            _portrait.texture = texture;
+            _portrait.material = material;
+            _portrait.rectTransform.sizeDelta = new Vector2(texture.width, texture.height) * PortraitScale;
+            _portrait.enabled = true;
+        }
+
+        private RawImage CreatePortraitCell()
+        {
+            // 대사창 그림이 있으면 그 형제로, 바로 다음 순서에 선다 — 그림보다 위, 뒤의 형제(이름표 · 글자)보다 아래.
+            Transform parent = _box != null ? _box.transform.parent : _root;
+            int siblingIndex = _box != null ? _box.transform.GetSiblingIndex() + 1 : 0;
+
+            GameObject go = new("PortraitCell", typeof(RectTransform), typeof(RawImage));
+            RectTransform rect = (RectTransform)go.transform;
+            rect.SetParent(parent, false);
+            rect.SetSiblingIndex(siblingIndex);
+
+            // 대사창 그림의 왼쪽 아래 귀에 맞춘다.
+            Vector2 corner = Vector2.zero;
+
+            if (_box != null)
+            {
+                RectTransform boxRect = _box.rectTransform;
+                corner = (Vector2)boxRect.localPosition + boxRect.rect.min;
+            }
+
+            rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 0.5f);
+            rect.pivot = Vector2.zero;
+            rect.localPosition = corner + PortraitOffset;
+
+            RawImage image = go.GetComponent<RawImage>();
+            image.raycastTarget = false;
+
+            return image;
         }
 
         public void SetVisibleImmediate(bool visible)

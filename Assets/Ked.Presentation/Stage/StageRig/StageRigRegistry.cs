@@ -18,6 +18,10 @@ public sealed class StageRigRegistry
         _builder = builder;
     }
 
+    /// <summary>
+    /// 화면에 그려지는 무대 — 조립이 세운 순서(뒤가 위). 화면 전체에 걸리는 일(마스크 지우기 · 어둡게 · 샷 · 틀 · 캡처)이 이것을 돈다.
+    /// 화면 밖 무대(BuildOffscreen — 촬영소)는 여기에 없다.
+    /// </summary>
     public IReadOnlyList<StageRigRefs> All => _ordered;
 
     /// <summary>mount 아래에 무대를 세우고 등록한다. 같은 키가 이미 있으면 예외 — 무대는 한 번만 선다.</summary>
@@ -30,6 +34,22 @@ public sealed class StageRigRegistry
 
         _stages[stageKey] = refs;
         _ordered.Add(refs);
+
+        return refs;
+    }
+
+    /// <summary>
+    /// 화면 밖 무대를 세운다 — 키로는 꺼낼 수 있지만(리그가 선다) All에는 들지 않는다.
+    /// 화면의 무대가 아니므로 화면 전체에 걸리는 명령 · 장면 경계의 되돌리기 · 샷이 건드리지 않는다(docs/PLAN_portrait-capture.md).
+    /// </summary>
+    public StageRigRefs BuildOffscreen(RectTransform mount, string stageKey)
+    {
+        if (_stages.ContainsKey(stageKey))
+            throw new InvalidOperationException($"[StageRigRegistry] 무대 '{stageKey}'는 이미 서 있다.");
+
+        StageRigRefs refs = _builder.Build(mount, stageKey, ReadOnlySpan<float>.Empty);
+
+        _stages[stageKey] = refs;
 
         return refs;
     }

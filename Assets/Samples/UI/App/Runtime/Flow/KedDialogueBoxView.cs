@@ -1,5 +1,6 @@
 using System.Threading;
 using TMPro;
+using UnityEngine;
 using Yarn.Unity;
 
 namespace Ked.Samples.UI
@@ -16,7 +17,12 @@ namespace Ked.Samples.UI
     /// </summary>
     internal sealed class KedDialogueBoxView : IPresentationDialogueBoxView
     {
+        // 초상 칸의 셰이더 — 촬영소의 텍스처는 알파가 곱해진 색이라 기본 UI 셰이더로는 가장자리가 어두워진다.
+        private const string PortraitShaderPath = "KedUI/PortraitCapture";
+
         private readonly PlayDialogueBox _box;
+        private Material _portraitMaterial;
+        private bool _portraitMaterialTried;
 
         public KedDialogueBoxView(PlayDialogueBox box)
         {
@@ -32,6 +38,8 @@ namespace Ked.Samples.UI
 
         public void PrimeText(string text, string characterName, bool hasCharacterName) =>
             _box.PrimeText(text, characterName, hasCharacterName);
+
+        public void SetPortrait(Texture portrait) => _box.SetPortrait(portrait, PortraitMaterial());
 
         public void SetVisibleImmediate(bool visible) => _box.SetVisibleImmediate(visible);
 
@@ -74,6 +82,32 @@ namespace Ked.Samples.UI
                 return;
 
             _box.SetShown(false);
+        }
+
+        // 처음 쓰일 때 한 번 만든다. 셰이더가 없으면 기본 UI 재질로 그리고 알린다(가장자리가 어둡게 보인다).
+        private Material PortraitMaterial()
+        {
+            if (_portraitMaterialTried)
+                return _portraitMaterial;
+
+            _portraitMaterialTried = true;
+
+            Shader shader = Resources.Load<Shader>(PortraitShaderPath);
+
+            if (shader == null)
+            {
+                Debug.LogWarning(
+                    $"[Ked UI] 초상 칸의 셰이더(Resources/{PortraitShaderPath})가 없다. 기본 UI 재질로 그린다 — 가장자리가 어둡게 보일 수 있다.");
+                return null;
+            }
+
+            _portraitMaterial = new Material(shader)
+            {
+                name = "PortraitCapture (runtime)",
+                hideFlags = HideFlags.DontSave,
+            };
+
+            return _portraitMaterial;
         }
 
         private static PlayDialogueLayout ToLayout(DialogueSurfaceLayoutPresetDBSO.Entry entry) => new()
