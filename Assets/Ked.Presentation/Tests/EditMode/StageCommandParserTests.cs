@@ -91,8 +91,8 @@ public class StageCommandParserTests
         Assert.AreEqual(0.18f, ((WaitCommandSpec)specs[0]).duration, 1e-6f);
         Assert.IsTrue(specs[0].wait, "pause는 기다린다(전경)");
 
-        specs = Parse(NewParser(), Cmd("pause", "24fr"));
-        Assert.AreEqual(1f, ((WaitCommandSpec)specs[0]).duration, 1e-6f, "24fps 기준 24fr = 1초 — 다른 커맨드와 같은 시간 토큰");
+        specs = Parse(NewParser(), Cmd("pause", "30fr"));
+        Assert.AreEqual(1f, ((WaitCommandSpec)specs[0]).duration, 1e-6f, "30fps 기준 30fr = 1초 — 다른 커맨드와 같은 시간 토큰");
 
         specs = Parse(NewParser(), Cmd("pause", "0.5"));
         Assert.AreEqual(0.5f, ((WaitCommandSpec)specs[0]).duration, 1e-6f, "맨 숫자는 초");
@@ -153,7 +153,7 @@ public class StageCommandParserTests
         Assert.AreEqual("stage00", a.stage);
         Assert.AreEqual(-1f, a.durationOverride, "시간이 비면 프리셋 자체 시간");
 
-        StageMaskMotionCommandSpec b = (StageMaskMotionCommandSpec)Parse(NewParser(), Cmd("stage_mask", "iris_in", "", "12fr"))[0];
+        StageMaskMotionCommandSpec b = (StageMaskMotionCommandSpec)Parse(NewParser(), Cmd("stage_mask", "iris_in", "", "15fr"))[0];
         Assert.AreEqual("stage01", b.stage, "무대 생략값은 stage01");
         Assert.AreEqual(0.5f, b.durationOverride, 1e-6f);
     }
@@ -403,10 +403,10 @@ public class StageCommandParserTests
         Assert.AreEqual(4f, ((ShotDollyCommandSpec)Parse(parser, Cmd("shot_dolly", "4"))[0]).dolly, 1e-6f);
         Assert.AreEqual(-8f, ((ShotRollCommandSpec)Parse(parser, Cmd("shot_roll", "-8"))[0]).roll, 1e-6f);
 
-        ShotToCommandSpec to = (ShotToCommandSpec)Parse(parser, Cmd("shot_to", "5", "-2u", "1u", "24fr"))[0];
+        ShotToCommandSpec to = (ShotToCommandSpec)Parse(parser, Cmd("shot_to", "5", "-2u", "1u", "30fr"))[0];
         Assert.AreEqual(5f, to.zoom, 1e-6f);
         Assert.AreEqual(new Vector2(-80f, 40f), to.pan);
-        Assert.AreEqual(1f, to.duration, 1e-6f, "24fr = 1초");
+        Assert.AreEqual(1f, to.duration, 1e-6f, "30fr = 1초");
     }
 
     [Test]
@@ -447,10 +447,10 @@ public class StageCommandParserTests
     [Test]
     public void fade는_목표_alpha를_싣고_범위_밖은_경고하고_자른다()
     {
-        FadeCommandSpecCharR half = (FadeCommandSpecCharR)Parse(NewParser(), Cmd("fade", "c1", "0.5", "12fr"))[0];
+        FadeCommandSpecCharR half = (FadeCommandSpecCharR)Parse(NewParser(), Cmd("fade", "c1", "0.5", "15fr"))[0];
         Assert.AreEqual(0.5f, half.targetAlpha, 1e-6f);
         Assert.AreEqual(CharacterRigNode.CharacterPortraitSprite_Root, half.node, "fade_in · fade_out과 같은 표적");
-        Assert.AreEqual(0.5f, half.duration, 1e-5f, "12fr");
+        Assert.AreEqual(0.5f, half.duration, 1e-5f, "15fr");
 
         LogAssert.Expect(LogType.Warning, new Regex("fade.*밖이다"));
         FadeCommandSpecCharR clamped = (FadeCommandSpecCharR)Parse(NewParser(), Cmd("fade", "c1", "-0.2"))[0];
@@ -539,7 +539,7 @@ public class StageCommandParserTests
         FadeCommandSpecCharR fade = (FadeCommandSpecCharR)Parse(NewParser(), Cmd("bg_fade_out", "bg_main"))[0];
         Assert.AreEqual(CharacterRigNode.CharacterPortraitSprite_Root, fade.node);
         Assert.AreEqual(NodeTargets.FadeOutAlpha, fade.targetAlpha);
-        Assert.AreEqual(10f / 24f, fade.duration, 1e-5f, "생략값 10fr");
+        Assert.AreEqual(13f / 30f, fade.duration, 1e-5f, "생략값 13fr");
 
         MoveByCommandSpecCharR move = (MoveByCommandSpecCharR)Parse(NewParser(), Cmd("bg_move", "bg_main", "2u", "-1u"))[0];
         Assert.AreEqual(CharacterRigNode.CharSlot_Track, move.node, "move_by와 같은 축");

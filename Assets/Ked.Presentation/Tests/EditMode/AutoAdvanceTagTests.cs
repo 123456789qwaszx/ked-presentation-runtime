@@ -10,7 +10,7 @@ namespace Ked.Presentation.Tests
     {
         [TestCase("auto", 0f)]
         [TestCase("auto=1.8s", 1.8f)]
-        [TestCase("auto=54fr", 2.25f)]
+        [TestCase("auto=54fr", 1.8f)]
         [TestCase("auto=0.27s", 0.27f)]
         [TestCase("auto=2", 2f)]        // 단위 없는 숫자는 초(DurationToken과 같다)
         public void auto_태그와_머무름을_읽는다(string tag, float hold)

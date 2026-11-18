@@ -14,59 +14,59 @@ title: Demo_Presentation
 <<stage_blur_reset>>
 
 <<bg_sprite bg_main class_day>>
-<<bg_fade_in bg_main 24fr>>
+<<bg_fade_in bg_main 30fr>>
 <<bgm audio/bgm_idoberg-relaxing-guitar-loop-v5-245859 2s>>
-<<pause 12fr>>
+<<pause 15fr>>
 <<step>>
 <<place_center s1 bust 0fr>>
 <<size s1 mid bust 0fr>>
-<<fade_in s1 18fr>>
+<<fade_in s1 23fr>>
 하린: 배경이 들어오고, 음악이 깔리고, 내가 걸어 들어왔어. #line:ln_7u3jtu6n
 
 // ── 장부 확인 (붙여 넣어 보고 지울 것) ──────────────────────────
-<<fade_out s3 8fr>>
-<<place_left s2 bust 12fr>>
-<<place_right s1 bust 12fr>>
-<<size s1 mid bust 12fr>>
-<<size s2 mid bust 12fr>>
+<<fade_out s3 10fr>>
+<<place_left s2 bust 15fr>>
+<<place_right s1 bust 15fr>>
+<<size s1 mid bust 15fr>>
+<<size s2 mid bust 15fr>>
 준비. 하린은 오른쪽, 시구레는 왼쪽.
 
 <<actor @2 s1>>
 <<place @2 face left>>
 test
 
-<<move_by s1 -6u 0u 30fr>>
-<<place_center s1 bust 20fr>>
+<<move_by s1 -6u 0u 38fr>>
+<<place_center s1 bust 25fr>>
 1. move_by + place — 하린이 옆으로 밀리는 중이지만, 가슴은 정확히 가운데에서 멈춰야 한다.
 
-<<size s1 22 bust 30fr>>
-<<place_center s1 face 20fr>>
-<<up s1 2u 20fr>>
+<<size s1 22 bust 38fr>>
+<<place_center s1 face 25fr>>
+<<up s1 2u 25fr>>
 <<shot_to 3 4 4 24>>
 2. size + place — 커지는 중에도 얼굴이 가운데에 와야 한다.
 
-<<rotate_by s1 12 30fr>>
-<<place_center s1 face 20fr>>
+<<rotate_by s1 12 38fr>>
+<<place_center s1 face 25fr>>
 3. rotate_by + place — 기우는 중에도 얼굴이 가운데에 와야 한다.
 
 <<mirror s1 toggle>>
-<<place_center s1 face 20fr>>
+<<place_center s1 face 25fr>>
 <<shot_reset >>
 4. mirror + place — 좌우가 바뀌어도 얼굴이 가운데에 와야 한다.
 
-<<slide_in s2 left 4u 30fr>>
-<<place_left s2 bust 20fr>>
+<<slide_in s2 left 4u 38fr>>
+<<place_left s2 bust 25fr>>
 5. slide_in + place — 시구레가 미끄러져 들어오는 중에도 가슴이 왼쪽 지점에서 멈춰야 한다.
 
-<<move_by s1 3u 0u 40fr>>
+<<move_by s1 3u 0u 50fr>>
 6-1. 이 줄은 하린이 움직이는 도중에 바로 넘긴다.
 
-<<move_by s1 3u 0u 40fr>>
+<<move_by s1 3u 0u 50fr>>
 6-2. 앞 이동이 끝값으로 확정된 뒤 이어서 간다 — 합쳐 6u 움직였어야 한다.
 
-<<size s1 mid bust 48fr>>
-<<rotate_by s1 -12 48fr>>
-<<place_right s1 bust 48fr>>
+<<size s1 mid bust 60fr>>
+<<rotate_by s1 -12 60fr>>
+<<place_right s1 bust 60fr>>
 7. 이 줄도 도중에 바로 넘긴다(스텝 경계 가속). 다음 줄에서 하린의 가슴이 오른쪽 지점에 있어야 한다.
 
 8. 확인 줄. 여기서 되감기(R)로 1~7 줄에 돌아가 본다 — 일반 재생 때와 같은 자리에 서야 한다.
@@ -76,32 +76,32 @@ test
 정리.
 
 <<stage_blur front 0.5>>
-<<char_visual_dim s1 2 6fr>>
+<<char_visual_dim s1 2 8fr>>
 하린: 지금부터 보이는 건 전부 이 대본 한 장에 적힌 명령이야. #line:ln_cydaj9ym
 
 
 <<place_left s2 bust 0fr>>
 <<size s2 mid bust 0fr>>
-<<slide_in s2 left 2u 14fr>>
-<<fade_in s2 14fr>>
-<<place_right s1 bust 16fr>>
+<<slide_in s2 left 2u 18fr>>
+<<fade_in s2 18fr>>
+<<place_right s1 bust 20fr>>
 시구레: 옆으로 미끄러져 들어오면, 먼저 있던 사람은 자리를 비켜 줘요. #line:ln_4m8a87j3
 
-<<size s2 front bust 16fr>>
+<<size s2 front bust 20fr>>
 시구레: 한 걸음 앞으로. 크기는 거리를 말해요. #line:ln_prgac1qy
 
-<<size s2 mid bust 16fr>>
+<<size s2 mid bust 20fr>>
 <<sibling_front s1>>
 하린: 겹칠 때 누가 앞에 설지도 정할 수 있어. #line:ln_hdksazhc
 
 <<face s1 3>>
 하린: 표정은 이렇게 바꾸고, #line:ln_n44jexpj
 
-<<face_swap s1 05 10fr>>
+<<face_swap s1 05 13fr>>
 하린: 이렇게 겹쳐 가며 바꿀 수도 있어. #line:ln_anizmf84
 
-<<at a face_swap s1 3 10fr>>
-<<at b face_swap s1 05 10fr>>
+<<at a face_swap s1 3 13fr>>
+<<at b face_swap s1 05 13fr>>
 하린: 말하는 도중에도 바꿀 수 있지. [beat=a/]바로 여기서 바뀌고, [beat=b/]여기서 돌아와. #line:ln_k7inl2cm
 
 <<pose s2 b>>
@@ -114,64 +114,64 @@ test
 <<motion s1 bow absolute>>
 하린: 이건 숙인 채로 남는 모션(bow). 끝나도 자세가 그대로야. 셋째 인자가 relative(기본)·absolute를 정해. #line:ln_nrmvr5n2
 
-<<place_center s1 bust 16fr>>
+<<place_center s1 bust 20fr>>
 하린: 자리를 옮겨도 숙인 채로 가. 장부가 기울기를 알아서 얼굴 자리가 맞아. #line:ln_cjzch0sn
 
-<<char_rotate_to s1 0 10fr>>
-<<place_right s1 bust 16fr>>
+<<char_rotate_to s1 0 13fr>>
+<<place_right s1 bust 20fr>>
 하린: 같은 축을 다른 명령이 잡으면 그게 이어받아. 이제 똑바로. #line:ln_x8r45cck
 
-<<char_visual_focus s1 1 14fr>>
-<<char_visual_dim s2 0.5 20fr>>
+<<char_visual_focus s1 1 18fr>>
+<<char_visual_dim s2 0.5 25fr>>
 하린: 말하는 사람에게 빛을 모으고, 듣는 사람은 한 톤 낮춰. #line:ln_5ag43erq
 
 <<stage_blur far 1>>
-<<shot_focus_to s1 face center 1.25 30fr>>
+<<shot_focus_to s1 face center 1.25 38fr>>
 하린: 배경을 흐리고, 카메라를 얼굴 쪽으로 당기면… #line:ln_01mhdu3v
 
-<<shot_reset 20fr>>
+<<shot_reset 25fr>>
 <<stage_blur_reset>>
-<<char_visual_clear s1 10fr>>
-<<char_visual_clear s2 10fr>>
+<<char_visual_clear s1 13fr>>
+<<char_visual_clear s2 13fr>>
 시구레: 다시 넓게. 원래 무대로 돌아왔어요. #line:ln_9nyveem8
 
 // ── 카메라의 몸 · 롤 · 흔들림 ───────────────────────────────────
-<<shot_dolly 4 72fr>>
+<<shot_dolly 4 90fr>>
 시구레: 이번엔 카메라가 몸째로 다가가요. 줌과 달리 가까운 사람이 더 크게, 먼 배경은 덜 커져요.
 
-<<shot_track 1.5u 0u 60fr>>
+<<shot_track 1.5u 0u 75fr>>
 시구레: 옆으로 걸어가면 가까운 것이 더 많이 밀려요. 이 줄을 넘겨도 카메라는 제 속도로 가요.
 
-<<shot_zoom 2 10fr>>
+<<shot_zoom 2 13fr>>
 <<shot_shake shake_hit>>
 하린: 쾅! 걸어가는 중에 렌즈로 한 번 더 당기고, 화면을 흔들었어.
 
-<<shot_roll 3 12fr>>
+<<shot_roll 3 15fr>>
 하린: 화면을 기울일 수도 있고.
 
-<<shot_roll 0 12fr>>
-<<shot_reset 12fr>>
+<<shot_roll 0 15fr>>
+<<shot_reset 15fr>>
 하린: shot_reset은 렌즈만 되돌려. 카메라는 아직 다가서서 옆에 선 채야.
 
-<<shot_reset_all 20fr>>
+<<shot_reset_all 25fr>>
 시구레: 통째로 되돌리면 처음 자리예요.
 
-<<screen_vignette dream 0.6 20fr>>
-<<screen_noise memory 0.4 20fr>>
+<<screen_vignette dream 0.6 25fr>>
+<<screen_noise memory 0.4 25fr>>
 시구레: 가장자리를 어둡게, 화면을 조금 거칠게 — 회상 같은 분위기. #line:ln_jam87iua
 
 <<screen_noise_clear 0.35s>>
-<<screen_vignette_clear 12fr>>
+<<screen_vignette_clear 15fr>>
 <<sfx audio/sfx_dragon-studio-notification-sound-effect-372475>>
 <<screen_flash soft 0.45>>
 하린: 그리고 번쩍! 효과음과 함께. #line:ln_8bpnwdqw
 
-<<stage_mask daze_close stage00 14fr>>
+<<stage_mask daze_close stage00 18fr>>
 <<bg_sprite bg_main studio_evening>>
 <<place_center s3 bust 0fr>>
 <<size s3 mid bust 0fr>>
 <<fade_in s3 0fr>>
-<<stage_mask daze_open stage00 16fr>>
+<<stage_mask daze_open stage00 20fr>>
 카스미: …장면이 넘어갔네. 해 질 녘 작업실이야. #line:ln_z94y5hi1
 
 카스미: 무대는 그대로라서, 둘 다 아까 그 자리에 있어. #line:ln_nkr0mbcc
@@ -348,7 +348,7 @@ rrr
 // 기다리지 않고 줄을 넘는다. 이 절도 보통 · Ctrl · 빠른 클릭 · R로 한 번씩 지나가 본다.
 <<place_left s1 bust 0fr>>
 <<place_right s2 bust 0fr>>
-<<fade_in s2 12fr>>
+<<fade_in s2 15fr>>
 시구레: 다시 나왔어요.
 
 // ① 속말 — 무대 전체(배경 + 인물)를 어둡게, 두 줄 이어서. 줄이 바뀌어도 끊기지 않아야 한다.
@@ -492,9 +492,9 @@ rrr
 // 번역문은 표지만 옮긴다 — 명령은 모든 언어에 하나다. at 없는 명령은 머리(대사와 함께), 표지는 그 글자가 드러나기 직전,
 // end는 타자기가 끝날 때. 같은 표지는 쓴 순서다. 빨리 넘기기 · 되감기로 지나가도 같은 순서로 끝값이 놓인다.
 <<face s1 3>>
-<<at a face_swap s1 05 10fr>>
+<<at a face_swap s1 05 13fr>>
 <<at b motion s1 nod>>
-<<at b face_swap s1 3 10fr>>
+<<at b face_swap s1 3 13fr>>
 <<at end emoji s1 star>>
 하린: 머리에서 표정이 바뀌고, [beat=a/]여기서 돌아오고, [beat=b/]여기서 끄덕이며 다시 바뀌어. 다 보이면 별이 떠.
 
@@ -503,11 +503,11 @@ rrr
 
 시구레: 여기까지예요. 되감기(R)로 아무 줄이나 돌아갈 수 있고, 타이틀의 ‘이어하기’로 다시 올 수 있어요. #line:ln_6mq0fm7a
 
-<<fade_out s3 12fr>>
-<<fade_out s2 12fr>>
-<<fade_out s1 12fr>>
+<<fade_out s3 15fr>>
+<<fade_out s2 15fr>>
+<<fade_out s1 15fr>>
 <<stop_bgm 2s>>
-<<bg_fade_out bg_main 20fr>>
-<<pause 24fr>>
+<<bg_fade_out bg_main 25fr>>
+<<pause 30fr>>
 
 ===

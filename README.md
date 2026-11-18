@@ -58,10 +58,10 @@ Yarn Spinner를 기반으로 제작한 **비주얼 노벨 화면 연출 런타�
 
 ```yarn
 <<bg_sprite bg_main class_day>>
-<<bg_fade_in bg_main 24fr>>
+<<bg_fade_in bg_main 30fr>>
 <<bgm audio/bgm_idoberg-relaxing-guitar-loop-v5-245859 2s>>
 <<place_center s1 bust 0fr>>
-<<fade_in s1 18fr>>
+<<fade_in s1 23fr>>
 하린: 배경이 들어오고, 음악이 깔리고, 내가 걸어 들어왔어.
 ```
 
@@ -72,10 +72,10 @@ Yarn Spinner를 기반으로 제작한 **비주얼 노벨 화면 연출 런타�
 "배경이 들어오고 조금 뒤에 인물"처럼 시간으로 짜는 일은 줄 앞의 `<<step>>`에서 합니다.
 
 ```yarn
-<<fade_out s1 12fr>>
-<<pause 12fr>>
+<<fade_out s1 15fr>>
+<<pause 15fr>>
 <<step>>
-<<fade_in s2 12fr>>
+<<fade_in s2 15fr>>
 시구레: 자리를 바꿨어요.
 ```
 
@@ -86,7 +86,7 @@ Yarn Spinner를 기반으로 제작한 **비주얼 노벨 화면 연출 런타�
 
 ```yarn
 <<face s1 3>>
-<<at a face_swap s1 05 10fr>>
+<<at a face_swap s1 05 13fr>>
 <<at end emoji s1 star>>
 하린: 말하는 도중에도 바꿀 수 있지. [beat=a/]바로 여기서 바뀌어.
 ```
