@@ -28,7 +28,8 @@ Playback을 뺀 전부)는 반대다 — 이 저장소가 원본이고 ked-comma
 | 원본 | `ked-progression-runtime` · `dev` @ `7cc2703` 위의 2026-11-07 배치 맞춤 (아래 줄). 코어 코드는 `99677cb`, 저장은 `fb5c4cb`에서 맞춤 |
 | 마지막 동기화 | 2026-11-07 · **사본 → 원본** (역반입) |
 | 맞춘 것 | `Runtime/` 전체(Spec · State · Transition · Vocabulary · Loading · Scene · Contracts · Response · `ProgressionDriver` · `ISceneRunner`) + `Save/`(`Ked.Progression.Save`) + EditMode 테스트 |
-| 일치 | `.meta` 포함 `diff -r` 0건 (아래 "대조" 명령) |
+| 일치 | `.meta` 포함 `diff -r` 0건 (아래 "대조" 명령) — 2026-11-07까지. 2026-11-18부터 세 파일이 갈린다(아래 줄) |
+| 2026-11-18 | **사본이 앞섰다 — 원본에 보내지 않았다(소유자).** 자동 간선의 같은 장면 규칙을 걷었다(`docs/PLAN_auto-edge-across-scenes.md`). 갈린 파일: `Core/Spec/ChapterInvariants.cs` · `Core/Spec/EpisodeOption.cs` · `Tests/EditMode/AutoEdgeTests.cs`. 원본에서 다시 반입하면 이 변경이 지워진다 — 그 전에 역반입할 것 |
 | 2026-11-07 | **사본 → 원본, 배치 맞춤.** 원본도 `Assets/Progression/` → `Assets/Ked.Progression/`, `Runtime/` → `Core/`(`.meta` 그대로), `Runtime/Save/` → `Save/`, `Runtime/Scene/` → `Core/SceneRun/`. 주석 세 곳을 사본대로 고치고, 두 저장소가 각자 GUID를 쓰던 `.meta` 다섯(`Ked.Progression.asmdef` · `Spec` · `State` · `Vocabulary` · 테스트 asmdef)과 `Tests` · `Tests/EditMode` · 뿌리 폴더 `.meta`도 사본 것으로 맞췄다 — 원본 asmdef 참조는 모두 이름이라 GUID가 바뀌어도 끊기지 않는다. 원본 `tests/ProgressionSave`의 컴파일 경로와 README 구조도도 함께 |
 | 2026-11-06 | **사본 배치를 어셈블리 단위로.** 뿌리에 펼쳐 두던 코드를 `Core/`(코어 어셈블리)와 `Save/`(저장 어셈블리, 원본에선 `Runtime/Save/`)로 나눴다(.meta 그대로, `Core.meta`는 원본 `Runtime.meta`). 모든 Ked 모듈이 같은 규칙(폴더 = 어셈블리)을 따르게 한 것이다. 같은 날 `Core/Scene/`은 `Core/SceneRun/`으로 이름을 바꿨다(Unity의 `Scenes`와 헷갈려서). 원본은 11-07에 같은 배치로 따라왔다 |
 | 2026-11-04 | **사본 → 원본, `Save/` 배치.** 사본에서 먼저 `Coordinator/` · `Fork/` · `Maintenance/` · `Slots/`를 걷고 다섯 파일(`SaveCoordinator` · `PlaythroughSaveSnapshot` · `SaveSlotService` · `PlaythroughForkService` · `LocalSaveMaintenance`)을 `Save/` 바로 아래로 옮겼고, 원본도 같게 옮겼다(.meta 그대로). 원본 `tests/ProgressionSave` 25/25 |
@@ -73,7 +74,7 @@ diff -r -q --strip-trailing-cr \
   ../ked-progression-runtime/Assets/Ked.Progression Assets/Ked.Progression
 ```
 
-2026-11-07 기준 출력은 **0줄**이다. `.meta`가 하나라도 갈리면 그것도 표류다.
+2026-11-07 기준 출력은 **0줄**이었다. 2026-11-18부터는 사본이 앞선 세 파일이 나온다(스냅샷의 2026-11-18 줄). `.meta`가 하나라도 갈리면 그것도 표류다.
 
 ## 반입 — 원본 → 사본
 
