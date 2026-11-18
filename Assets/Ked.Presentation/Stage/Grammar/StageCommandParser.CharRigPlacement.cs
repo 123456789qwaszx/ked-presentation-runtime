@@ -5,9 +5,9 @@ using UnityEngine;
 public sealed partial class StageCommandParser
 {
     private const string DefaultShowFaceToken = "e1";
-    private const string DefaultShowDurationToken = "14fr";
+    private const string DefaultShowDurationToken = "18fr";
     
-    private const string DefaultNudgeDurationToken = "8fr";
+    private const string DefaultNudgeDurationToken = "10fr";
     
     #region Show
     private void EnqueueShowAtSpec(string roleKey, string faceToken, string durationToken)

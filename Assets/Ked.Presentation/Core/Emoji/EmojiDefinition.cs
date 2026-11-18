@@ -65,7 +65,8 @@ namespace Ked.Presentation.Core
     /// <summary>이모지 하나.</summary>
     public sealed class EmojiDefinition
     {
-        public const float DefaultFps = 24f;
+        /// <summary>파일에 fps가 없을 때 — 대본의 프레임(DurationToken.FramesPerSecond)과 같은 30. 2026-11-18 전에는 24였다.</summary>
+        public const float DefaultFps = 30f;
 
         /// <summary>대본이 부르는 이름.</summary>
         public string Name { get; }

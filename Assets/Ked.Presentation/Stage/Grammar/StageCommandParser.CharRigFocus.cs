@@ -8,7 +8,7 @@ public sealed partial class StageCommandParser
     private const string DefaultFocusPlacementDurationToken = "0fr";
     
     private const string DefaultFocusDepthPresetToken = "bust";
-    private const string DefaultFocusDepthDurationToken = "10fr";
+    private const string DefaultFocusDepthDurationToken = "13fr";
     
     #region CharFocusPlacement
     private void EnqueueFocusToLeftSpec(string roleKey, string focus, string durationToken, string easeToken)

@@ -7,14 +7,14 @@ title: Festival_Staffroom
 <<slot s2 stage00 mid>>
 <<cast s2 sigure a 1>>
 
-<<bg_fade_in bg_main 24fr>>
+<<bg_fade_in bg_main 30fr>>
 <<bgm audio/voice_bgm_uhhknoxpro-piano-loop-432112 2s>>
 <<place_right s1 bust 0fr>>
 <<size s1 mid bust 0fr>>
 <<place_left s2 bust 0fr>>
 <<size s2 mid bust 0fr>>
-<<fade_in s1 18fr>>
-<<fade_in s2 18fr>>
+<<fade_in s1 23fr>>
+<<fade_in s2 23fr>>
 하린: 저녁의 교무실 앞. 장면이 바뀌었어. #line:ln_ngjwdzsb
 
 시구레: 교실 장면은 확정돼서 저장됐어요. 되감기로는 거기까지 돌아가지 않아요. #line:ln_f70g3xzg
@@ -31,10 +31,10 @@ title: Festival_Staffroom
 
 시구레: 그럼요. 오늘은 여기까지예요. #line:ln_g2hh953n
 
-<<fade_out s2 12fr>>
-<<fade_out s1 12fr>>
+<<fade_out s2 15fr>>
+<<fade_out s1 15fr>>
 <<stop_bgm 2s>>
-<<bg_fade_out bg_main 20fr>>
-<<pause 24fr>>
+<<bg_fade_out bg_main 25fr>>
+<<pause 30fr>>
 
 ===
