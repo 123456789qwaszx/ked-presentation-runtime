@@ -1,9 +1,9 @@
 # 장면을 넘는 자동 간선 — 장면 경계에 선택지를 강요하지 않는다 (2026-11-18)
 
-> 상태: **런타임 끝(A1 · A2)** — 남은 것은 저작 툴(B1~B4)과 Unity 확인(U1 · U2). 진행은 §7.
+> 상태: **런타임 끝(A1 · A2)** — 저작 툴은 이번에 건드리지 않는다(소유자, §5). 남은 것은 Unity 확인(U1 · U2). 진행은 §7.
 > 출발: 소유자 "장면을 넘을 때 항상 선택지가 필요하다 — 그걸 고친다"(2026-11-18).
 > 뒤집는 결정: [scene-boundary-plan.md](scene-boundary-plan.md) G6의 넷째 규칙과 결정 #6("자동 간선은 같은 장면 안으로 제한").
-> 범위: 이 저장소와 ked-story-director. 진행 코어의 원본(ked-progression-runtime)과 ked-vn-workspace는 이번에 고치지 않는다(소유자, §6).
+> 범위: 이 저장소만(소유자, 2026-11-18). 진행 코어의 원본(ked-progression-runtime) · ked-story-director · ked-vn-workspace는 이번에 고치지 않는다(§6).
 
 ## 1. 왜
 
@@ -44,16 +44,16 @@
 
 예제(`festival_eve`)는 툴이 낸 것이라 여기서 손으로 고치지 않는다 — B4.
 
-### 저작 툴 — ked-story-director (런타임 뒤)
+### 저작 툴 — ked-story-director (이번에 하지 않는다)
 
-툴의 계획 · 단계는 그 저장소의 관습대로 거기서 다시 적는다. 여기는 무엇을 따라가야 하는지만.
+**소유자(2026-11-18): 툴은 건드리지 않는다 — 런타임만.** 툴이 따라올 때 할 일을 적어 둔다. 그때까지 툴은 장면을 넘는 자동 길을 만들지 않는다 — [대본]에서 거절하고, [구성] 검증이 `AutoEdgeCrossesScene`으로 짚고, 내보내기는 툴의 코어 사본(옛 규칙)이 거부한다. 그래서 툴로 쓴 챕터에는 이 변경이 아직 닿지 않는다.
 
 | # | 일 |
 |---|---|
 | B1 | **코어 사본을 맞춘다** — `src/Ked.Progression`의 `ChapterInvariants.cs` · `EpisodeOption.cs`를 이 저장소 것으로, `runtime-sync.txt`의 해시 · `UPSTREAM.md` |
 | B2 | **미리 알림을 걷는다** — `ChapterAutoEdgeCheck`의 `AutoEdgeCrossesScene`(진단 코드까지), [대본]에서 문구를 지울 때의 거절(`MainWindow.LineInspector`), 문구 없는 칸을 다른 장면 카드로 끌 때의 거절(`GraphEditorView`), 그 테스트 |
 | B3 | **문서** — `runtime-contract.md`의 ④, `chapter-layer-guide.md`, `design/two-graphs.md`, `ChapterGraphModel`의 주석 |
-| B4 | **정할 것** — ① 「에피소드 추가」 · 「장면 추가」가 앞 에피소드의 유일한 길로 이을 때 지금처럼 「계속」인가, 자동 길인가 ② 예제(`samples/RuntimeSamples`)에 장면을 넘는 자동 간선 하나를 두고 다시 내는가(그러면 이 저장소의 `festival_eve`가 바뀌고 U1 · U2에 쓴다) |
+| B4 | **툴이 따라올 때 정할 것** — ① 「에피소드 추가」 · 「장면 추가」가 앞 에피소드의 유일한 길로 이을 때 지금처럼 「계속」인가, 자동 길인가 ② 예제(`samples/RuntimeSamples`)에 장면을 넘는 자동 간선 하나를 두고 다시 내는가(그러면 이 저장소의 `festival_eve`가 바뀌고 U1 · U2에 쓴다) |
 
 ### Unity 확인 — 소유자
 
@@ -65,6 +65,7 @@
 ## 6. 범위 밖
 
 - **ked-progression-runtime(진행 코어의 원본)** — 소유자가 이번에 다루지 않기로 했다(2026-11-18). 그 사이 대조(`vendoring.md` "대조")는 A1의 세 파일을 갈린 것으로 보인다.
+- **ked-story-director** — 소유자가 이번에 다루지 않기로 했다(2026-11-18). 따라올 일은 §5 B1~B4.
 - **ked-vn-workspace** — 반입본(`runtime/`)과 자기 문서 `docs/progression-structure.md`의 "같은 장면"은 다음 반입 때.
 - **장면 경계 무대 승계**([scene-future-plan.md](scene-future-plan.md) §3) — 덮개 · 무대를 장면을 넘어 이어 가는 일은 그쪽 몫이다. 이 계획은 경계에서 일어나는 일을 바꾸지 않는다(D3).
 - **ked-motion-tool-characterRig** — 진행 코어를 쓰지 않는다.
@@ -75,7 +76,6 @@
 |---|---|---|
 | 계획 | 끝 | — |
 | A1 규칙 걷기 | 끝 — 코어 28/28 · 호스트 하네스 25/25 · 저장 13/13 | `119b626` |
-| A2 문서 | 끝 | 이 커밋 |
-| B1~B3 툴 | | |
-| B4 정할 것 | | |
+| A2 문서 | 끝 | `94db3a9` |
+| B1~B4 툴 | 이번에 하지 않음(소유자) | — |
 | U1 · U2 | | |
