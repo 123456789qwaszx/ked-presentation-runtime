@@ -43,6 +43,8 @@ test
 <<down povr 14>>
 <<fade_in povr 0fr>>
 하린: 초상이 보이는가. #portrait
+나: 화자가 '나'이면 태그 없이도 초상 줄이다 — 화자 정책 표가 고른다.
+하린: 태그도 없고 표에도 없는 화자의 줄은 보통 대사창이다.
 
 <<size s1 22 bust 38fr>>
 <<place_center s1 face 25fr>>

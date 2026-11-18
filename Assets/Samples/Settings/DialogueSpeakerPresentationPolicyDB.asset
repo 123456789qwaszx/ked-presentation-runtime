@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: DialogueSpeakerPresentationPolicyDB
   m_EditorClassIdentifier: Assembly-CSharp::DialogueSpeakerPresentationPolicyDBSO
   entries:
-  - speakerKey: tyrant
+  - speakerKey: "\uB098"
     displayNameKey: 
     fallbackDisplayName: "\uB098"
     useBoxKindOverride: 1
