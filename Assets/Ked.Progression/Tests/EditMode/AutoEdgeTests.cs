@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using Ked.Progression;
 using NUnit.Framework;
 
-// 자동 간선 — 묻지 않고 지나가는 길. 규칙은 넷: 유일 · 조건 없음 · 스탯 변화 없음 · 같은 장면.
+// 자동 간선 — 묻지 않고 지나가는 길. 규칙은 셋: 유일 · 조건 없음 · 스탯 변화 없음. 장면은 넘어도 된다.
 public sealed class AutoEdgeTests
 {
     [Test]
@@ -83,13 +83,17 @@ public sealed class AutoEdgeTests
     }
 
     [Test]
-    public void 장면을_나가는_자동_간선은_거부된다()
+    public void 장면을_넘는_자동_간선도_묻지_않는다()
     {
-        ProgressionLoadResult result = ProgressionLoader.Load(
+        // 장면 경계에서 일어나는 일(확정 · 저장 · 무대 비우기)은 묻는 선택지로 넘을 때와 같다 — 박스만 뜨지 않는다.
+        ChapterDefinition chapter = Load(
             Chapter("A", Node("A", "교실", AutoTo("B")), Node("B", "복도")));
 
-        Assert.That(result.IsValid, Is.False);
-        Assert.That(Messages(result), Does.Contain("장면을 나갈 수 없다"));
+        ChapterAdvance advance = ChapterTransition.Resolve(chapter, chapter.CreateEntryState());
+
+        Assert.That(chapter.IsSameScene("A", "B"), Is.False);
+        Assert.That(advance.Kind, Is.EqualTo(ChapterAdvanceKind.AutoAdvance));
+        Assert.That(advance.Options[0].Option.TargetEpisodeId, Is.EqualTo("B"));
     }
 
     // ── 재료 ────────────────────────────────────────────────────────────────

@@ -123,6 +123,25 @@ internal static class Program
             Check(Choices(rig.Persistence.Commits.Single().Result) == "ep-1:0 ep-1b:0", "자동 간선이 기록되지 않았다");
         });
 
+        await Test("장면을 넘는 자동 간선은 묻지 않고 그 장면을 확정한다", async () =>
+        {
+            var rig = new Rig();
+            ChapterDefinition chapter = Build("ep-1",
+                Node("ep-1", "scene-1", Auto("ep-2")),
+                Node("ep-2", "scene-2"));
+
+            SceneRunResult result = await rig.Runner.RunAsync(NewSession(chapter), CancellationToken.None);
+
+            Check(result.Outcome == SceneRunOutcome.SceneEnded, "결과가 SceneEnded가 아니다");
+            Check(result.ExitState.CurrentEpisodeId == "ep-2", "다음 장면 시작점이 ep-2가 아니다");
+            Same(rig.Log.Snapshot(), new[]
+            {
+                "stop", "begin", "enter:ep-1", "play:N_ep-1", "commit:SceneEnded:1",
+            }, "장면 하나의 순서가 다르다");
+            Check(rig.Options.Asks.Length == 0, "자동 간선에서 물었다");
+            Check(Choices(rig.Persistence.Commits.Single().Result) == "ep-1:0", "자동 간선이 확정 기록에 없다");
+        });
+
         await Test("다음 간선이 없으면 챕터가 끝나고 그 장면을 확정한다", async () =>
         {
             var rig = new Rig();
@@ -155,6 +174,27 @@ internal static class Program
             Check(rig.Driver.CurrentState == null, "끝난 드라이버가 상태를 쥐고 있다");
         });
 
+        await Test("드라이버: 자동 간선으로 장면을 이어도 경계마다 정지 → 시작 → 진입 기록 → 재생 → 확정", async () =>
+        {
+            var rig = new Rig();
+            ChapterDefinition chapter = Build("ep-1",
+                Node("ep-1", "scene-1", Auto("ep-2")),
+                Node("ep-2", "scene-2", Auto("ep-3")),
+                Node("ep-3", "scene-3"));
+
+            rig.Driver.Start(chapter, chapter.CreateEntryState());
+            await Until(() => !rig.Driver.IsRunning, "챕터 끝");
+
+            Same(rig.Log.Snapshot(), new[]
+            {
+                "stop", "begin", "enter:ep-1", "play:N_ep-1", "commit:SceneEnded:1",
+                "stop", "begin", "enter:ep-2", "play:N_ep-2", "commit:SceneEnded:1",
+                "stop", "begin", "enter:ep-3", "play:N_ep-3", "commit:ChapterEnded:0",
+            }, "챕터 순서가 다르다");
+            Check(rig.Options.Asks.Length == 0, "자동 간선에서 물었다");
+            Check(!rig.DriverLog.Has("E", "FAULTED"), "드라이버가 실패를 기록했다");
+        });
+
         await Test("장면 진입 때 백로그 경계와 롤백 좌표가 함께 0에서 시작한다", async () =>
         {
             var rig = new Rig();
@@ -173,6 +213,25 @@ internal static class Program
                 "현재 장면 첫 줄의 롤백 좌표가 0이 아니다");
             Check(rig.Backlog.GetCurrentSceneHistoryIndex(backlog[3]) == rig.Rollback.Points[1].historyIndex,
                 "백로그 좌표와 롤백 좌표가 어긋났다");
+        });
+
+        await Test("자동 간선으로 장면을 넘어도 백로그 경계와 롤백 좌표가 새 장면에서 0부터", async () =>
+        {
+            var rig = new Rig();
+            ChapterDefinition chapter = Build("ep-1",
+                Node("ep-1", "scene-1", Auto("ep-2")),
+                Node("ep-2", "scene-2"));
+
+            rig.Driver.Start(chapter, chapter.CreateEntryState());
+            await Until(() => !rig.Driver.IsRunning, "챕터 끝");
+
+            IReadOnlyList<DialogueLogEntry> backlog = rig.Backlog.Entries;
+            Check(backlog.Count == 4, "백로그는 장면을 넘어도 이어져야 한다");
+            Check(!rig.Backlog.IsInCurrentScene(backlog[1]), "앞 장면 줄이 현재 장면으로 읽힌다");
+            Check(rig.Backlog.GetCurrentSceneHistoryIndex(backlog[2]) == 0, "현재 장면 첫 줄의 백로그 좌표가 0이 아니다");
+            Check(rig.Rollback.Points.Count == 2, "롤백 기록이 장면 진입에서 비워지지 않았다");
+            Check(rig.Rollback.Points[0].lineId == "N_ep-2#0" && rig.Rollback.Points[0].historyIndex == 0,
+                "현재 장면 첫 줄의 롤백 좌표가 0이 아니다");
         });
 
         #endregion
