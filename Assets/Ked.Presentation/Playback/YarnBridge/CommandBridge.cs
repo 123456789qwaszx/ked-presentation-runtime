@@ -312,6 +312,13 @@ public sealed partial class YarnCommandBridge
 
         runner.AddCommandHandler<string>(
             "popup_close", EnqueuePopupCloseSpec);
+
+        // <<portrait 캐릭터 [포즈] [표정]>> · <<portrait_close>> — docs/PLAN_portrait-capture.md
+        runner.AddCommandHandler<string, string, string>(
+            "portrait", EnqueuePortraitOpenSpec);
+
+        runner.AddCommandHandler(
+            "portrait_close", EnqueuePortraitCloseSpec);
     }
     
     private void BindAudio(DialogueRunner runner)
