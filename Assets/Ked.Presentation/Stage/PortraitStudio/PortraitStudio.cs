@@ -37,7 +37,9 @@ public sealed class PortraitStudio : MonoBehaviour
 
     private PresentationStage _stage;
     private CharacterFocusTuningDBSO _focusTuning;
-    private PortraitFrame _frame;
+    // 구도. 조립이 넘긴 값으로 시작하고, 재생 중에는 이 오브젝트의 인스펙터에서 바로 고쳐 볼 수 있다 —
+    // 맞춘 값은 조립(SampleBootstrap의 Portrait Frame)에 옮겨 적는다(재생을 멈추면 여기 값은 사라진다).
+    [SerializeField] private PortraitFrame _frame;
     private StageRigRefs _stageRig;
     private Canvas _referenceCanvas;
     private RectTransform _rect;
@@ -208,6 +210,9 @@ public sealed class PortraitStudio : MonoBehaviour
     // 트윈(Update) · 커맨드 코루틴이 지난 뒤, 캔버스가 그려지기 전에 카메라를 맞춘다 — 같은 프레임의 연기가 찍힌다.
     private void LateUpdate()
     {
+        // 인스펙터에서 고치는 도중의 값(범위 0 등)을 그대로 쓰지 않는다.
+        _frame = _frame.Sanitized();
+
         FitSizeToStage();
         FitTextureToScreen();
 
