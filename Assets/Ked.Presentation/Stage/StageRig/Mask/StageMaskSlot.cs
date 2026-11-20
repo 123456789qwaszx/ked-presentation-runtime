@@ -198,7 +198,7 @@ public sealed class StageMaskSlot : MonoBehaviour
 
     /// <summary>
     /// 숨김 — 모양과 상관없이 무대를 하나도 보이지 않게 한다. 도는 stage_mask 모션은 끊는다(나중에 쓴 것이 이긴다).
-    /// 무대 rect만 한 사각형을 숨김 자리(HiddenOffsetPixels — stage_mask 프리셋들이 쓰는 화면 밖)로 옮긴다.
+    /// 무대 rect만 한 사각형을 숨김 자리(HiddenOffsetPixels — 무대 rect 폭 + 여유만큼 왼쪽, 지금 폭에서 센다)로 옮긴다.
     /// 지금 모양을 옮기기만 하면 화면 밖까지 뻗은 모양(컷인의 네 점 — maskReachPixels)은 숨지 않는다.
     /// </summary>
     public void SetMaskedHidden()

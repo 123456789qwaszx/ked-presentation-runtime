@@ -9,11 +9,17 @@ public sealed class StageMaskGraphic : Graphic
     private const int MinCircleSegments = 12;
     private const int MaxCircleSegments = 128;
 
+    // 숨김 자리의 여유 — 무대 rect 폭에 더한다. 반올림으로 한 줄이 비치지 않게.
+    private const float HiddenMarginPixels = 64f;
+
     [Header("Common")]
     [SerializeField] private StageMaskKind _kind = StageMaskKind.FullRect;
     [SerializeField] private Vector2 _shapeOffsetPixels;
-    [SerializeField] private Vector2 _hiddenOffsetPixels = new(-2200f, 0f);
     [SerializeField] private bool _hideMaskGraphic = true;
+
+    // 숨김 자리에 있다 — 오프셋을 저장된 값이 아니라 지금 무대 rect 폭에서 센다(숨은 채 폭이 바뀌어도 따라간다).
+    // 오프셋을 새로 주면 풀린다. 런타임 상태라 직렬화하지 않는다.
+    private bool _parkedHidden;
 
     [Header("Slanted")]
     [SerializeField] private float _slantPixels = 220f;
@@ -66,9 +72,15 @@ public sealed class StageMaskGraphic : Graphic
 
     public Vector2 ShapeOffsetPixels
     {
-        get => _shapeOffsetPixels;
+        get => _parkedHidden ? HiddenOffsetPixels : _shapeOffsetPixels;
         set
         {
+            if (_parkedHidden)
+            {
+                _parkedHidden = false;
+                SetVerticesDirty();
+            }
+
             if (_shapeOffsetPixels == value)
                 return;
 
@@ -77,11 +89,11 @@ public sealed class StageMaskGraphic : Graphic
         }
     }
 
-    public Vector2 HiddenOffsetPixels
-    {
-        get => _hiddenOffsetPixels;
-        set => _hiddenOffsetPixels = value;
-    }
+    /// <summary>
+    /// 숨김 자리 — 무대 rect만 한 사각형을 왼쪽으로 rect 폭 + 여유만큼 민 자리. 화면(= 무대 rect) 폭에서 센다:
+    /// 예전의 고정 2200px은 무대가 그보다 넓으면(2560 등) 오른쪽 끝이 비쳤다.
+    /// </summary>
+    public Vector2 HiddenOffsetPixels => new(-(rectTransform.rect.width + HiddenMarginPixels), 0f);
 
     public bool HideMaskGraphic
     {
@@ -339,7 +351,9 @@ public sealed class StageMaskGraphic : Graphic
 
     public void ResetToHiddenOffset()
     {
-        ShapeOffsetPixels = _hiddenOffsetPixels;
+        _shapeOffsetPixels = HiddenOffsetPixels;
+        _parkedHidden = true;
+        SetVerticesDirty();
     }
 
     public void SetShapeOffsetImmediate(Vector2 offset)
@@ -516,7 +530,7 @@ public sealed class StageMaskGraphic : Graphic
         if (_kind == StageMaskKind.CustomQuad)
         {
             if (_hasCustomQuadEdge)
-                results.Add(new StageMaskLineSegment(_customQuadEdgeA + _shapeOffsetPixels, _customQuadEdgeB + _shapeOffsetPixels));
+                results.Add(new StageMaskLineSegment(_customQuadEdgeA + ShapeOffsetPixels, _customQuadEdgeB + ShapeOffsetPixels));
 
             return;
         }
@@ -707,7 +721,7 @@ public sealed class StageMaskGraphic : Graphic
     {
         Rect rect = rectTransform.rect;
 
-        Vector2 center = rect.center + _shapeOffsetPixels;
+        Vector2 center = rect.center + ShapeOffsetPixels;
 
         float radiusX = _irisRadiusPixels * _irisAspect;
         float radiusY = _irisRadiusPixels;
@@ -750,7 +764,7 @@ public sealed class StageMaskGraphic : Graphic
     {
         Rect rect = rectTransform.rect;
 
-        Vector2 center = rect.center + _shapeOffsetPixels;
+        Vector2 center = rect.center + ShapeOffsetPixels;
 
         float radiusX = _irisRadiusPixels * _irisAspect;
         float radiusY = _irisRadiusPixels;
@@ -860,10 +874,12 @@ public sealed class StageMaskGraphic : Graphic
         ref Vector2 p2,
         ref Vector2 p3)
     {
-        p0 += _shapeOffsetPixels;
-        p1 += _shapeOffsetPixels;
-        p2 += _shapeOffsetPixels;
-        p3 += _shapeOffsetPixels;
+        Vector2 offset = ShapeOffsetPixels;
+
+        p0 += offset;
+        p1 += offset;
+        p2 += offset;
+        p3 += offset;
     }
 
     private void ApplyMaskGraphicVisibility()

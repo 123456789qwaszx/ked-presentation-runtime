@@ -243,5 +243,34 @@ namespace Ked.Presentation.Tests.UnityParity
             Assert.That(refs.IsShotOwned(refs.Root, out _), Is.False);
             Assert.That(refs.IsShotOwned(refs.MaskRoot, out _), Is.False);
         }
+
+        [Test]
+        public void 마스크_숨김_자리는_무대_폭에서_센다_넓은_무대도_비치지_않고_숨은_채_폭이_바뀌어도_따라간다()
+        {
+            _mount.sizeDelta = new Vector2(2560f, 1080f);
+            StageRigRefs refs = _builder.Build(_mount, "stage00", StageLayerLabels.Depths);
+            StageMaskGraphic graphic = refs.MaskRoot.GetComponent<StageMaskGraphic>();
+
+            refs.Mask.SetMaskedHidden();
+            AssertQuadLeftOfRect(graphic, "2560 무대 — 예전 고정 2200px로는 오른쪽 360px이 비쳤다");
+
+            _mount.sizeDelta = new Vector2(3440f, 1440f);
+            AssertQuadLeftOfRect(graphic, "숨은 채 무대가 넓어져도 숨김 자리를 새 폭으로 센다");
+            Assert.That(graphic.ShapeOffsetPixels, Is.EqualTo(graphic.HiddenOffsetPixels));
+
+            refs.Mask.SetMaskedVisible();
+            Assert.That(graphic.ShapeOffsetPixels, Is.EqualTo(Vector2.zero), "오프셋을 새로 주면 숨김 자리를 놓는다");
+
+            _mount.sizeDelta = new Vector2(1920f, 1080f);
+            Assert.That(graphic.ShapeOffsetPixels, Is.EqualTo(Vector2.zero), "풀린 뒤에는 폭이 바뀌어도 그대로다");
+        }
+
+        private static void AssertQuadLeftOfRect(StageMaskGraphic graphic, string message)
+        {
+            Assert.That(graphic.TryGetQuadPoints(out Vector2 p0, out Vector2 p1, out Vector2 p2, out Vector2 p3), Is.True);
+
+            float right = Mathf.Max(Mathf.Max(p0.x, p1.x), Mathf.Max(p2.x, p3.x));
+            Assert.That(right, Is.LessThan(graphic.rectTransform.rect.xMin), message);
+        }
     }
 }
