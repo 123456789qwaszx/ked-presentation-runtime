@@ -4,8 +4,11 @@ using UnityEngine;
 /// <summary>
 /// 컷인 — 덮는 무대 하나를 판 모양으로 띄운다(docs/PLAN_cutin.md).
 ///
-///   cutin_open  {무대=stage01} {판} {x=0u} {y=0u} {배율=1}  →  판 리그(세우기 · 그림 · 자리 · 배율 · 보임) + CutInOpenCommandSpec(창 피벗 · 마스크 → 팝 인)
-///   cutin_close {무대=stage01}                               →  CutInCloseCommandSpec (팝 아웃 → 마스크 숨김)
+///   cutin_open  {무대=stage01} {판} {x=0u} {y=0u} {배율=1} {모션=cutin_pop_in}  →  판 리그(세우기 · 그림 · 자리 · 배율 · 보임) + CutInOpenCommandSpec(창 피벗 · 마스크 → 등장)
+///   cutin_close {무대=stage01} {모션=cutin_pop_out}                               →  CutInCloseCommandSpec (퇴장 → 마스크 숨김)
+///
+/// 모션은 여닫는 모양이다 — 열림 cutin_pop_in(튀어나옴) · cutin_flash_in(흰빛), 닫힘 cutin_pop_out(튀어 닫힘) · cutin_fade_out(흐려짐).
+/// 모르는 이름은 경고하고 기본값으로 간다. 폴드(끝 상태)는 모션을 모른다.
 ///
 /// x y는 판 중심 — 무대 중심 기준 u(bg_move와 같은 단위, 1u = 40px). 판은 Resources/CutInPanels의 키.
 /// 본 무대(stage00)에는 쓰지 않는다 — 경고하고 건너뛴다(폴드는 Unhandled).
@@ -20,7 +23,12 @@ public sealed partial class StageCommandParser
     /// <summary>그 무대의 컷인 판 리그의 슬롯 키. 대본이 판을 치울 때 이 키를 쓴다(예: stage01_cutin_panel).</summary>
     public static string CutInPanelSlotKey(string stageKey) => $"{stageKey}_cutin_panel";
 
-    private void EnqueueCutInOpenSpec(string stage, string panelKey, string xToken, string yToken, float scale)
+    public const string CutInPopInMotion = "cutin_pop_in";
+    public const string CutInFlashInMotion = "cutin_flash_in";
+    public const string CutInPopOutMotion = "cutin_pop_out";
+    public const string CutInFadeOutMotion = "cutin_fade_out";
+
+    private void EnqueueCutInOpenSpec(string stage, string panelKey, string xToken, string yToken, float scale, string motion = null)
     {
         string stageKey = StageKeyParser.ParseStage(stage);
 
@@ -51,7 +59,42 @@ public sealed partial class StageCommandParser
             stage = stageKey,
             center = center,
             scale = scale,
+            motion = ParseCutInOpenMotion(motion),
         });
+    }
+
+    private static CutInOpenMotion ParseCutInOpenMotion(string token)
+    {
+        switch ((token ?? "").Trim().ToLowerInvariant())
+        {
+            case "":
+            case CutInPopInMotion:
+                return CutInOpenMotion.PopIn;
+
+            case CutInFlashInMotion:
+                return CutInOpenMotion.FlashIn;
+
+            default:
+                Debug.LogWarning($"[StageCommandParser] <<cutin_open>> 모르는 모션 '{token}' — {CutInPopInMotion} · {CutInFlashInMotion} 중 하나다. {CutInPopInMotion}으로 간다.");
+                return CutInOpenMotion.PopIn;
+        }
+    }
+
+    private static CutInCloseMotion ParseCutInCloseMotion(string token)
+    {
+        switch ((token ?? "").Trim().ToLowerInvariant())
+        {
+            case "":
+            case CutInPopOutMotion:
+                return CutInCloseMotion.PopOut;
+
+            case CutInFadeOutMotion:
+                return CutInCloseMotion.FadeOut;
+
+            default:
+                Debug.LogWarning($"[StageCommandParser] <<cutin_close>> 모르는 모션 '{token}' — {CutInPopOutMotion} · {CutInFadeOutMotion} 중 하나다. {CutInPopOutMotion}으로 간다.");
+                return CutInCloseMotion.PopOut;
+        }
     }
 
     // 판 리그 — 배경과 같은 방식(bg_spawn · bg_sprite)으로 그 무대의 far 층에 세우고, 판 중심 · 배율로 두고, 바로 보인다.
@@ -107,7 +150,7 @@ public sealed partial class StageCommandParser
         });
     }
 
-    private void EnqueueCutInCloseSpec(string stage)
+    private void EnqueueCutInCloseSpec(string stage, string motion = null)
     {
         string stageKey = StageKeyParser.ParseStage(stage);
 
@@ -117,6 +160,6 @@ public sealed partial class StageCommandParser
             return;
         }
 
-        Emit(new CutInCloseCommandSpec { stage = stageKey });
+        Emit(new CutInCloseCommandSpec { stage = stageKey, motion = ParseCutInCloseMotion(motion) });
     }
 }

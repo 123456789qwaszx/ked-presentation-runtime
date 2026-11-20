@@ -3,6 +3,16 @@ using System.Collections;
 using Ked.Presentation.Core;
 using UnityEngine;
 
+/// <summary>컷인을 여는 모양 — cutin_open의 끝 인자(docs/PLAN_cutin.md §5.1).</summary>
+public enum CutInOpenMotion
+{
+    /// <summary>cutin_pop_in — 작은 점에서 튀어나온다(창의 배율 · 회전 클립). 기본값.</summary>
+    PopIn = 0,
+
+    /// <summary>cutin_flash_in — 흰 선이 긋고 흰 판이 된 뒤 흰빛이 걷히며 드러난다. 창은 움직이지 않는다.</summary>
+    FlashIn = 1,
+}
+
 [Serializable]
 public sealed class CutInOpenCommandSpec : CommandSpecBase
 {
@@ -16,6 +26,10 @@ public sealed class CutInOpenCommandSpec : CommandSpecBase
 
     [Tooltip("판 기본 크기(프리셋)에 곱한다.")]
     public float scale = 1f;
+
+    [Header("Motion")]
+    [Tooltip("여는 모양. 길이 · 키는 프리셋(CutInPresetDBSO)에 있다.")]
+    public CutInOpenMotion motion = CutInOpenMotion.PopIn;
 }
 
 // cutin_open의 창 — 창 피벗 · 마스크를 세우고 등장 모션을 걸기만 한다. 모션은 슬롯이 소유한다(StageCutInSlot.PlayOpen).
@@ -48,7 +62,10 @@ public sealed class CutInOpenCommand : CommandBase
         if (!_resolveAttempted)
             ResolveRefs();
 
-        _slot.PlayOpen(_preset, _spec.center, _spec.scale, _clip);
+        if (_spec.motion == CutInOpenMotion.FlashIn)
+            _slot.PlayFlashOpen(_preset, _spec.center, _spec.scale);
+        else
+            _slot.PlayOpen(_preset, _spec.center, _spec.scale, _clip);
 
         if (!_spec.wait)
             yield break;
@@ -70,6 +87,10 @@ public sealed class CutInOpenCommand : CommandBase
         _resolveAttempted = true;
 
         _slot = _frames.CutIn(_spec.stage);
+
+        // 흰빛 열림은 창 클립을 쓰지 않는다 — 끝 상태도 창 1 · 0이다(SnapOpen에 클립 없이).
+        if (_spec.motion == CutInOpenMotion.FlashIn)
+            return;
 
         _clip = _preset.PopIn;
 

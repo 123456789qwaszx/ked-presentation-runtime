@@ -257,6 +257,41 @@ public class StageCommandParserTests
     {
         CutInCloseCommandSpec s = (CutInCloseCommandSpec)Parse(NewParser(), Cmd("cutin_close"))[0];
         Assert.AreEqual("stage01", s.stage, "무대 생략값은 stage01");
+        Assert.AreEqual(CutInCloseMotion.PopOut, s.motion, "모션 생략값은 튀어 닫힘");
+    }
+
+    [Test]
+    public void cutin의_끝_인자는_여닫는_모양이다()
+    {
+        List<CommandSpecBase> specs = Parse(NewParser(), Cmd("cutin_open", "stage01", "pink_stars", "-16u", "1.25u", "1"));
+        Assert.AreEqual(CutInOpenMotion.PopIn, ((CutInOpenCommandSpec)specs[specs.Count - 1]).motion, "모션 생략값은 튀어나옴");
+
+        specs = Parse(NewParser(), Cmd("cutin_open", "stage01", "pink_stars", "-16u", "1.25u", "1", "cutin_pop_in"));
+        Assert.AreEqual(CutInOpenMotion.PopIn, ((CutInOpenCommandSpec)specs[specs.Count - 1]).motion);
+
+        specs = Parse(NewParser(), Cmd("cutin_open", "stage01", "pink_stars", "-16u", "1.25u", "1.4", "cutin_flash_in"));
+        CutInOpenCommandSpec open = (CutInOpenCommandSpec)specs[specs.Count - 1];
+        Assert.AreEqual(CutInOpenMotion.FlashIn, open.motion);
+        Assert.AreEqual(1.4f, open.scale, 1e-6f, "모션을 줘도 앞 인자는 그대로");
+        Assert.AreEqual(6, specs.Count, "흰빛 열림도 판 리그 다섯 + 창 하나");
+
+        CutInCloseCommandSpec close = (CutInCloseCommandSpec)Parse(NewParser(), Cmd("cutin_close", "stage01", "cutin_fade_out"))[0];
+        Assert.AreEqual(CutInCloseMotion.FadeOut, close.motion);
+
+        close = (CutInCloseCommandSpec)Parse(NewParser(), Cmd("cutin_close", "stage01", "cutin_pop_out"))[0];
+        Assert.AreEqual(CutInCloseMotion.PopOut, close.motion);
+    }
+
+    [Test]
+    public void cutin은_모르는_모션이면_경고하고_기본값으로_간다()
+    {
+        LogAssert.Expect(LogType.Warning, new Regex("<<cutin_open>> 모르는 모션 'cutin_spin_in'"));
+        List<CommandSpecBase> specs = Parse(NewParser(), Cmd("cutin_open", "stage01", "pink_stars", "0u", "0u", "1", "cutin_spin_in"));
+        Assert.AreEqual(CutInOpenMotion.PopIn, ((CutInOpenCommandSpec)specs[specs.Count - 1]).motion);
+
+        LogAssert.Expect(LogType.Warning, new Regex("<<cutin_close>> 모르는 모션 'cutin_flash_in'"));
+        CutInCloseCommandSpec close = (CutInCloseCommandSpec)Parse(NewParser(), Cmd("cutin_close", "stage01", "cutin_flash_in"))[0];
+        Assert.AreEqual(CutInCloseMotion.PopOut, close.motion, "여는 모션 이름은 닫는 모션이 아니다");
     }
 
     // ── 그림 팝업 (docs/PLAN_popup.md) ───────────────────────────

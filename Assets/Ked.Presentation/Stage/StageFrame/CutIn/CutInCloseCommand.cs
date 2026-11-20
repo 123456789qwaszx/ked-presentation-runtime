@@ -3,11 +3,25 @@ using System.Collections;
 using Ked.Presentation.Core;
 using UnityEngine;
 
+/// <summary>컷인을 닫는 모양 — cutin_close의 끝 인자(docs/PLAN_cutin.md §5.1). 끝 상태는 같다.</summary>
+public enum CutInCloseMotion
+{
+    /// <summary>cutin_pop_out — 살짝 커졌다가 튀어 닫힌다(창의 배율 · 회전 클립). 기본값.</summary>
+    PopOut = 0,
+
+    /// <summary>cutin_fade_out — 판과 그 무대의 내용이 함께 투명해진다. 창은 움직이지 않는다.</summary>
+    FadeOut = 1,
+}
+
 [Serializable]
 public sealed class CutInCloseCommandSpec : CommandSpecBase
 {
     [Header("Target")]
     public string stage = "stage01";
+
+    [Header("Motion")]
+    [Tooltip("닫는 모양. 길이 · 키는 프리셋(CutInPresetDBSO)에 있다.")]
+    public CutInCloseMotion motion = CutInCloseMotion.PopOut;
 }
 
 // cutin_close — 무대 슬롯에 퇴장 모션을 걸기만 한다. 끝에서 슬롯이 닫힘(창 항등 · 마스크 숨김)으로 둔다(StageCutInSlot.PlayClose).
@@ -42,7 +56,10 @@ public sealed class CutInCloseCommand : CommandBase
         if (!HasCutInToClose())
             yield break;
 
-        _slot.PlayClose(_clip);
+        if (_spec.motion == CutInCloseMotion.FadeOut)
+            _slot.PlayFadeClose(_preset.fadeOutSeconds);
+        else
+            _slot.PlayClose(_clip);
 
         if (!_spec.wait)
             yield break;
@@ -67,6 +84,11 @@ public sealed class CutInCloseCommand : CommandBase
         _resolveAttempted = true;
 
         _slot = _frames.CutIn(_spec.stage);
+
+        // 흐려져 닫힘은 창 클립을 쓰지 않는다.
+        if (_spec.motion == CutInCloseMotion.FadeOut)
+            return;
+
         _clip = _preset.PopOut;
 
         if (!MotionRules.TryValidate(_clip, null, out string why))

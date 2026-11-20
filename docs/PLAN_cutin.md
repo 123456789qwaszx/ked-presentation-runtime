@@ -5,7 +5,7 @@
 | 브랜치 | `ked-presentation-runtime` · `feat/subSystem` |
 | 왜 | 영상 재현 — 원본 게임의 컷인을 이 런타임으로 그대로 재생한다 |
 | 결정 | 아미야(소유자) 2026-11-09: 이 방향으로 설계한다. 판 그림은 직접 만든다. 옛 컷인 창(06-09, 08-18 `3a75d4f6`에서 지움)은 반입하지 않는다 |
-| 상태 | **구현** (2026-11-09) — 설계에서 바뀐 곳 둘: 창의 자리(§2) · 모션의 집(§4). **2026-11-17 다시 바뀌었다** — 판 그림은 그 무대의 far 층에 서는 리그(폴드 밖), 판 아래 외곽선은 마스크 테두리가 그린다, 닫힘은 창 배율 0이 아니라 마스크 숨김, `tx`는 틀을 모른다([PLAN_stage-visibility.md](PLAN_stage-visibility.md) §3.2). 아래 §2 · §5의 판 노드 · 닫힘 설명은 그때의 기록이다 |
+| 상태 | **구현** (2026-11-09) — 설계에서 바뀐 곳 둘: 창의 자리(§2) · 모션의 집(§4). **2026-11-17 다시 바뀌었다** — 판 그림은 그 무대의 far 층에 서는 리그(폴드 밖), 판 아래 외곽선은 마스크 테두리가 그린다, 닫힘은 창 배율 0이 아니라 마스크 숨김, `tx`는 틀을 모른다([PLAN_stage-visibility.md](PLAN_stage-visibility.md) §3.2). 아래 §2 · §5의 판 노드 · 닫힘 설명은 그때의 기록이다. **2026-11-20 여닫는 모양이 둘씩이 됐다** — 흰빛 열림 `cutin_flash_in` · 흐려져 닫힘 `cutin_fade_out`(§5.1). 기본값과 폴드는 그대로다 |
 
 ## 목표 한 문장
 
@@ -102,8 +102,8 @@ relative로 건다 — 배율은 곱, 회전은 덧셈이라 레이아웃의 기
 ## 5. 어휘
 
 ```
-<<cutin_open  {무대} {판} {x} {y} [배율=1] [모션=cutin_pop_in]>>
-<<cutin_close {무대} [모션=cutin_pop_out]>>
+<<cutin_open  {무대} {판} {x} {y} [배율=1] [모션=cutin_pop_in | cutin_flash_in]>>
+<<cutin_close {무대} [모션=cutin_pop_out | cutin_fade_out]>>
 ```
 
 - `x` · `y` — 판 중심. 화면 중심 기준, `u`(1u = 40px — `bg_move`와 같은 단위). 기준 장면이면 `-16u 1.25u`.
@@ -126,6 +126,54 @@ relative로 건다 — 배율은 곱, 회전은 덧셈이라 레이아웃의 기
 <<fade_out c1_cut 0fr>>
 ```
 
+### 5.1 여닫는 모양 — 끝 인자 (2026-11-20)
+
+원본의 컷인 카드는 열리는 모양이 둘이다(ked-vn-workspace가 스물한 편 · 열림 83건을 30fps로 보고 낸 작업지시서 — 잰 값과 모양의 설명만 받았다).
+작은 카드는 곁에서 끼어드는 반응이라 튀어나오고, 큰 카드는 흰빛으로 "지금 이 사람"을 찍어 그 순간을 쥔다. 큰 카드는 닫힘도 흐려져 사라진다.
+
+| 모션 | 무엇 | 어디에 |
+|---|---|---|
+| `cutin_pop_in` (기본) | 작은 점에서 튀어나온다 — 창의 배율 · 회전 클립(§4) | `StageCutInSlot.PlayOpen` |
+| `cutin_flash_in` | 흰 선이 긋고 → 흰 판이 되고 → 머물다 → 흰빛이 걷힌다. **창은 움직이지 않는다** | `StageCutInSlot.PlayFlashOpen` |
+| `cutin_pop_out` (기본) | 살짝 커졌다가 튀어 닫힌다 — 창 클립 | `StageCutInSlot.PlayClose` |
+| `cutin_fade_out` | 판과 그 무대의 내용이 함께 투명해진다. 배율 · 회전 없음 | `StageCutInSlot.PlayFadeClose` |
+
+**흰빛 열림의 차례**(30fps 실측 — 열 건이 같다. 시각은 흰 선이 처음 보인 프레임부터):
+
+| 구간 | 실측 | 프리셋(기본) | 런타임이 하는 일 |
+|---|---|---|---|
+| ① 흰 선 | 4 ~ 5프레임 | `flashLineSeconds` 0.15 | 판 왼쪽 변 가운데 → 오른쪽 변 가운데로 가는 선(판의 기울기) 위에서 왼쪽부터 자라며 굵어진다(`flashLineThickness`의 30% → 100%). 이 동안 그 무대는 **마스크가 숨긴다** |
+| ② 흰 판 | 한 프레임에 | (길이 없음) | 마스크를 판 모양으로 연다 — 카드가 처음부터 다 선 크기 · 제자리. 같은 프레임에 흰 덮개가 판 네 모서리를 꽉 채운다(판 안의 사람까지 덮는다) |
+| ③ 머묾 | 2 ~ 3프레임 | `flashHoldSeconds` 0.08 | 흰 정도 1 |
+| ④ 걷힘 | 8 ~ 10프레임 | `flashClearSeconds` 0.3 | 흰 정도 1 → 0으로 고르게(선형) |
+
+- **흰 덮개**는 `{stage}_CutInFlash` — 창 아래, 무대 루트 다음에 서는 네 점 그래픽(`StageCutInFlashGraphic`). 마스크 밖이라 잘리지 않고 그 무대의 내용 위를 덮는다. 흰빛 컷인을 **처음 쓸 때** 슬롯이 세운다 — 쓰지 않는 무대 · 대본은 계층도 화면도 그대로다. 빌더는 이 이름의 노드를 치우지 않는다.
+- ①에서 무대를 숨기는 까닭 — 대본은 판 · 사람을 `cutin_open` 앞에서 세운다(§5). 튀어나옴은 같은 프레임에 마스크가 서지만, 흰빛은 선이 긋는 0.15초가 있어 그 사이 내용이 먼저 보이면 안 된다.
+- 판 밖으로 나온 것(작은 카드의 머리 — 마스크는 위로 열려 있다)은 ②에서 흰 덮개 밖에 바로 보인다. 큰 카드는 머리까지 판 안이라 다 덮인다.
+- 흰 선의 검은 테두리 · 어느 쪽에서 자라는지 · 굵기는 재지 않은 어림이다 — 테두리는 그리지 않고, 왼쪽에서 자란다.
+- **흐려져 닫힘**은 창의 `CanvasGroup` 불투명도 1 → 0(`fadeOutSeconds` 0.3 — 실측 0.2 ~ 0.6초). 끝나면 튀어 닫힘과 같은 끝 상태(창 항등 · 마스크 숨김)이고 불투명도는 1로 돌아간다. 안의 리그는 대본이 치운다.
+- 도중에 줄을 넘기면 끝 상태로 간다 — 다 드러난 카드 / 닫힘. 건너뛰기 · 이어하기도 모션 없이 끝 상태다.
+- 모르는 모션 이름은 파서가 경고하고 기본값으로 간다. **폴드는 모션을 모른다**(§6) — 끝 상태가 같다.
+
+확인 대본(예제 판 · 예제 인물):
+
+```
+<<slot c1_cut stage01 mid>>
+<<cast c1_cut harin a 1>>
+<<place_left c1_cut bust 0fr>>
+<<size c1_cut close bust 0fr>>
+<<fade_in c1_cut 0fr>>
+<<cutin_open stage01 pink_stars -16u 1.25u 1.4 cutin_flash_in>>
+하린: 흰빛으로 열린다.
+<<cutin_close stage01 cutin_fade_out>>
+하린: 흐려져 닫혔다.
+<<fade_out c1_cut 0fr>>
+```
+
+보는 것: 흰 선(약 5프레임) → 판 모양의 흰 판이 한 프레임에(크기 · 자리가 끝과 같다) → 온통 흰 2 ~ 3프레임 → 8 ~ 10프레임에 걸쳐 걷힘 · 닫힘은 배율 · 회전 없이 투명해짐 · 인자 없는 `cutin_open` · `cutin_close`는 예전 그대로.
+
+**하지 않은 것 — 큰 카드의 모양**(작업지시서 3절 나, 따로 정한다): 판의 기울기와 좌우 거울(8.6°) · 가로세로를 따로 키우기 · 카드를 본 무대의 사람 뒤에 두기. 지금 큰 카드는 "큰 배율의 보통 판"으로 선다.
+
 ## 6. 폴드 — 끝 상태만
 
 창의 모션 도중은 접지 않는다(다른 커맨드처럼 끝값만). 무대마다 컷인 상태 하나를 둔다:
@@ -144,7 +192,8 @@ relative로 건다 — 배율은 곱, 회전은 덧셈이라 레이아웃의 기
 | 코어 | `CutInState`, `StageState.CutIns`, `StageReducer.CutIn.cs` |
 | 프리셋 | `CutInPresetDBSO`(판 크기 · 모서리 · 마스크 · 모션 둘) — 에셋이 없으면 코드 기본값 + 경고. 조립(`SampleBootstrap.cutInPreset`)에 연결 |
 | 판 그림 | `Samples/Content/Resources/CutInPanels/` `pink_stars` · `blue_question` · `yellow_burst` — 직접 그림. 메뉴 `Ked › Cut-in › 판 그림 만들기`(`Editor/CutInPanelGenerator.cs`)가 프리셋의 판 크기 · 모서리 · 외곽선을 읽어 그린다 — 값이 한 곳(프리셋)에만 있다 |
-| 테스트 | `CutInTests`(폴드 · 프리셋), `StageCommandParserTests`(컷인 다섯), `StageRigBuilderTests`(창 · 옛 씬 감싸기 · Layout) |
+| 테스트 | `CutInTests`(폴드 · 프리셋 · 흰빛 열림의 차례), `StageCommandParserTests`(컷인 — 모션 인자 포함), `StageFrameBuilderTests`(창 · 옛 씬 감싸기 · Layout · 흰 덮개 노드) |
+| 여닫는 모양(2026-11-20) | `CutInOpenMotion` · `CutInCloseMotion`(스펙의 `motion`), `StageCutInSlot.PlayFlashOpen · PlayFadeClose`, `StageCutInFlashGraphic`, 프리셋의 `flash*` · `fadeOutSeconds` — §5.1 |
 
 ## 8. 하지 않는 것
 
