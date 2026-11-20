@@ -32,7 +32,8 @@ public enum ETouchEvent
 // A drag that nobody here listens to (no BeginDrag/Drag/EndDrag subscriber — e.g. a ButtonFeedback button)
 // is passed on to the nearest parent drag handler, such as a ScrollRect. Because this component implements
 // the drag interfaces, the EventSystem would otherwise stop the drag here and a list would not scroll when
-// the drag starts on one of its buttons. The drag still suppresses the click.
+// the drag starts on one of its buttons. The drag still suppresses the click — for every click handler on this
+// object, including a Button's onClick (the press stops being eligible for a click once the drag is passed on).
 // A drag component on this same object (Slider, Scrollbar, ScrollRect) already takes the drag, so it is not passed on.
 public sealed class UI_EventHandler : MonoBehaviour,
     IPointerClickHandler,
@@ -139,7 +140,16 @@ public sealed class UI_EventHandler : MonoBehaviour,
 
         _dragForwardTarget = ForwardsDrag ? ParentHandler<IBeginDragHandler>() : null;
         if (_dragForwardTarget != null)
+        {
             ExecuteEvents.Execute(_dragForwardTarget, eventData, ExecuteEvents.beginDragHandler);
+
+            // The drag went to the parent (a list being scrolled), so this press is no longer a click — also for
+            // other click handlers on this object (a Button's onClick), which do not go through OnPointerClick above.
+            // Without this component the EventSystem would do the same: the drag would land on the parent directly,
+            // and a press whose drag belongs to another object loses its click. Releasing inside the button after
+            // scrolling must not press it.
+            eventData.eligibleForClick = false;
+        }
     }
 
     public void OnDrag(PointerEventData eventData)
