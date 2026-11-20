@@ -21,7 +21,35 @@ namespace Ked.Samples.UI.Editor
         public static string TextsPath => KedUIBuild.AppDir + "/Texts/KedUITexts.csv";
 
         // 대사창 배치 DB는 본체 형식(DialogueSurfaceLayoutPresetDBSO)이라 앱 쪽에 둔다.
-        public static string SurfaceLayoutDbPath => KedUIBuild.AppDir + "/Data/KedSurfaceLayoutPresetDB.asset";
+        // 자리는 이름으로 찾는다 — 에셋을 옮겨도(지금은 Samples/Settings) 빌드가 기본 자리에 새로 만들어 캔버스를 그쪽으로 돌리지 않게.
+        // 어디에도 없을 때만 기본 자리(App/Data)에 만든다.
+        private const string SurfaceLayoutDbName = "KedSurfaceLayoutPresetDB";
+
+        public static string DefaultSurfaceLayoutDbPath => KedUIBuild.AppDir + "/Data/" + SurfaceLayoutDbName + ".asset";
+
+        public static string SurfaceLayoutDbPath => FindSurfaceLayoutDbPath() ?? DefaultSurfaceLayoutDbPath;
+
+        // 같은 이름의 DB가 둘이면 기본 자리가 아닌 쪽 — 옮겨 둔 것이 원본이고, 기본 자리의 것은 옮긴 뒤의 빌드가 만든 사본이다.
+        private static string FindSurfaceLayoutDbPath()
+        {
+            string fallback = null;
+            string found = null;
+
+            foreach (string guid in AssetDatabase.FindAssets($"{SurfaceLayoutDbName} t:{nameof(DialogueSurfaceLayoutPresetDBSO)}"))
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+
+                if (System.IO.Path.GetFileNameWithoutExtension(path) != SurfaceLayoutDbName)
+                    continue;
+
+                if (path == DefaultSurfaceLayoutDbPath)
+                    fallback = path;
+                else if (found == null || string.CompareOrdinal(path, found) < 0)
+                    found = path;
+            }
+
+            return found ?? fallback;
+        }
 
         public static readonly Type[] ViewTypes =
         {
