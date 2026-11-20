@@ -154,6 +154,62 @@ namespace Ked.Presentation.Tests.UnityParity
             }
         }
 
+        [Test]
+        public void 길이_0의_흰빛_열림과_흐려져_닫힘은_튀는_모션과_끝_상태가_같다()
+        {
+            StageRigRefs rig = BuildRig("stage01");
+            StageCutInSlot cutIn = StageFrameBuilder.Build(rig);
+            CutInPresetDBSO preset = CutInPresetDBSO.CreateDefault();
+            StageMaskGraphic mask = rig.MaskRoot.GetComponent<StageMaskGraphic>();
+
+            try
+            {
+                // 길이를 0으로 — 에디트 모드에서 트윈 없이 끝 상태로 간다.
+                preset.flashLineSeconds = 0f;
+                preset.flashHoldSeconds = 0f;
+                preset.flashClearSeconds = 0f;
+
+                cutIn.PlayFlashOpen(preset, new Vector2(-640f, 50f), 1.4f);
+
+                Assert.That(cutIn.IsOpen, Is.True);
+                Assert.That(cutIn.IsPlayingMotion, Is.False);
+                Assert.That(cutIn.Window.localScale, Is.EqualTo(Vector3.one), "흰빛 열림은 창을 움직이지 않는다");
+                Assert.That(mask.Kind, Is.EqualTo(StageMaskKind.CustomQuad), "다 드러난 카드 — 마스크가 판 모양으로 열렸다");
+                Assert.That(cutIn.Window.childCount, Is.EqualTo(1), "길이 0이면 흰 덮개를 세우지도 않는다");
+
+                cutIn.PlayFadeClose(0f);
+
+                Assert.That(cutIn.IsOpen, Is.False);
+                Assert.That(cutIn.Window.pivot, Is.EqualTo(new Vector2(0.5f, 0.5f)));
+                Assert.That(mask.Kind, Is.EqualTo(StageMaskKind.FullRect));
+                Assert.That(mask.ShapeOffsetPixels, Is.EqualTo(mask.HiddenOffsetPixels), "튀어 닫힘과 같은 끝 — 마스크 숨김");
+            }
+            finally
+            {
+                Object.DestroyImmediate(preset);
+            }
+        }
+
+        [Test]
+        public void 창_아래의_흰_덮개_노드는_다시_묶어도_치우지_않고_끈다()
+        {
+            StageRigRefs rig = BuildRig("stage01");
+            StageCutInSlot first = StageFrameBuilder.Build(rig);
+
+            // 흰빛으로 연 적이 있는 무대 — 슬롯이 세운 덮개가 창 아래에 남아 있다(도중에 끊겨 켜진 채로).
+            GameObject go = new(StageCutInSlot.FlashNodeName("stage01"), typeof(RectTransform), typeof(CanvasRenderer), typeof(StageCutInFlashGraphic));
+            go.transform.SetParent(first.Window, false);
+            StageCutInFlashGraphic flash = go.GetComponent<StageCutInFlashGraphic>();
+            flash.enabled = true;
+
+            StageCutInSlot rebound = StageFrameBuilder.Build(rig);
+
+            Assert.That(rebound.Window, Is.SameAs(first.Window));
+            Assert.That(flash != null, Is.True, "경고 없이 남는다");
+            Assert.That(flash.transform.parent, Is.EqualTo(rebound.Window));
+            Assert.That(flash.enabled, Is.False, "묶을 때 중립 — 흰빛이 남지 않는다");
+        }
+
         private RectTransform NewChild(RectTransform parent, string name)
         {
             GameObject go = new(name, typeof(RectTransform));

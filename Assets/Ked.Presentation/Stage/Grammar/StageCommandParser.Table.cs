@@ -84,8 +84,8 @@ public sealed partial class StageCommandParser
         ["stage_mask"] = (p, c) => p.EnqueueStageMaskMotionPresetSpec(c.Arg(0), c.Arg(1, "stage01"), c.Arg(2, "")),
         ["stage_mask_reset"] = (p, c) => p.EnqueueStageMaskClearSpec(),
         // 컷인 — 덮는 무대의 창 · 판 · 마스크(StageCommandParser.CutIn, docs/PLAN_cutin.md)
-        ["cutin_open"] = (p, c) => p.EnqueueCutInOpenSpec(c.Arg(0, "stage01"), c.Arg(1), c.Arg(2, "0u"), c.Arg(3, "0u"), Float(c, 4, 1f)),
-        ["cutin_close"] = (p, c) => p.EnqueueCutInCloseSpec(c.Arg(0, "stage01")),
+        ["cutin_open"] = (p, c) => p.EnqueueCutInOpenSpec(c.Arg(0, "stage01"), c.Arg(1), c.Arg(2, "0u"), c.Arg(3, "0u"), Float(c, 4, 1f), c.Arg(5)),
+        ["cutin_close"] = (p, c) => p.EnqueueCutInCloseSpec(c.Arg(0, "stage01"), c.Arg(1)),
         // 그림 팝업 — 덮는 무대의 뒷막 + 그림(StageCommandParser.Popup, docs/PLAN_popup.md)
         ["popup"] = (p, c) => p.EnqueuePopupOpenSpec(c.Arg(0, "stage01"), c.Arg(1), c.Arg(2, "0u"), c.Arg(3, "0u"), Float(c, 4, 1f)),
         ["popup_close"] = (p, c) => p.EnqueuePopupCloseSpec(c.Arg(0, "stage01")),

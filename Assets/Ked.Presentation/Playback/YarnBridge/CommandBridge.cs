@@ -299,11 +299,11 @@ public sealed partial class YarnCommandBridge
             "stage_mask_reset",
             EnqueueStageMaskClearSpec);
 
-        // <<cutin_open 무대 판 x y [배율]>> · <<cutin_close 무대>> — docs/PLAN_cutin.md
-        runner.AddCommandHandler<string, string, string, string, string>(
+        // <<cutin_open 무대 판 x y [배율] [모션]>> · <<cutin_close 무대 [모션]>> — docs/PLAN_cutin.md
+        runner.AddCommandHandler<string, string, string, string, string, string>(
             "cutin_open", EnqueueCutInOpenSpec);
 
-        runner.AddCommandHandler<string>(
+        runner.AddCommandHandler<string, string>(
             "cutin_close", EnqueueCutInCloseSpec);
 
         // <<popup 무대 그림 [x y] [배율]>> · <<popup_close 무대>> — docs/PLAN_popup.md

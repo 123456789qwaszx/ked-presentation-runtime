@@ -56,6 +56,26 @@ public sealed class CutInPresetDBSO : ScriptableObject
     public MotionClip popIn = DefaultPopIn();
     public MotionClip popOut = DefaultPopOut();
 
+    [Header("Flash open — cutin_flash_in (흰 선 → 흰 판 → 걷힘)")]
+    [Tooltip("① 흰 선이 판 가운데 높이를 가로질러 자라는 길이(초). 원본 30fps 실측 4 ~ 5프레임.")]
+    [Min(0f)] public float flashLineSeconds = 0.15f;
+
+    [Tooltip("③ 온통 흰 판으로 머무는 길이(초). 실측 2 ~ 3프레임. 선이 판이 되는 것(②)은 한 프레임이다 — 길이가 없다.")]
+    [Min(0f)] public float flashHoldSeconds = 0.08f;
+
+    [Tooltip("④ 흰빛이 걷히는 길이(초) — 흰 정도가 1 → 0으로 고르게. 실측 8 ~ 10프레임.")]
+    [Min(0f)] public float flashClearSeconds = 0.3f;
+
+    [Tooltip("흰 덮개의 색.")]
+    public Color flashColor = Color.white;
+
+    [Tooltip("흰 선이 다 자랐을 때의 굵기(px — 대본의 배율이 곱해진다). 자라는 동안 이 값의 30%에서 시작한다. 눈으로 읽은 어림이다.")]
+    [Min(0f)] public float flashLineThickness = 10f;
+
+    [Header("Fade close — cutin_fade_out")]
+    [Tooltip("판과 그 무대의 내용이 함께 투명해지는 길이(초). 실측 0.2 ~ 0.6초.")]
+    [Min(0f)] public float fadeOutSeconds = 0.3f;
+
     /// <summary>재생에 쓰는 등장 클립 — 직렬화가 채운 빈 성분을 "성분 없음"으로 읽은 것(ReadClip).</summary>
     public MotionClip PopIn => ReadClip(popIn);
 
@@ -156,6 +176,57 @@ public sealed class CutInPresetDBSO : ScriptableObject
         p2 = p3 + up * reach;
     }
 
+    // ── 흰빛 열림(cutin_flash_in) — 30fps 실측(docs/PLAN_cutin.md §5.1) ────────────
+
+    /// <summary>흰빛 열림의 전체 길이 — 선 + 머묾 + 걷힘.</summary>
+    public float FlashDuration =>
+        Mathf.Max(0f, flashLineSeconds) + Mathf.Max(0f, flashHoldSeconds) + Mathf.Max(0f, flashClearSeconds);
+
+    /// <summary>
+    /// 흰빛 열림의 그 시각 — 선인가 판인가, 선이면 얼마나 자랐나(0 ~ 1), 판이면 얼마나 흰가(1 ~ 0).
+    /// 선(①)이 끝나는 순간 판(②)이다 — 그때부터 카드는 다 선 크기 · 제자리이고 흰 정도만 내려간다.
+    /// </summary>
+    public CutInFlashFrame EvaluateFlash(float seconds)
+    {
+        float line = Mathf.Max(0f, flashLineSeconds);
+        float hold = Mathf.Max(0f, flashHoldSeconds);
+        float clear = Mathf.Max(0f, flashClearSeconds);
+
+        if (seconds < line)
+            return new CutInFlashFrame(false, Mathf.Clamp01(seconds / line), 1f);
+
+        float sinceClear = seconds - line - hold;
+
+        if (sinceClear <= 0f)
+            return new CutInFlashFrame(true, 1f, 1f);
+
+        return new CutInFlashFrame(true, 1f, clear > 0f ? 1f - Mathf.Clamp01(sinceClear / clear) : 0f);
+    }
+
+    /// <summary>
+    /// 흰 선의 네 점(무대 중심 기준 px) — 판의 왼쪽 변 가운데에서 오른쪽 변 가운데로 가는 선 위에서, 왼쪽부터 progress만큼 자란 띠.
+    /// 판의 기울기를 따른다. 굵기는 자라며 flashLineThickness의 30% → 100%. 순서는 마스크의 사각형 규약.
+    /// </summary>
+    public void GetFlashLineQuad(Vector2 center, float scale, float progress, out Vector2 p0, out Vector2 p1, out Vector2 p2, out Vector2 p3)
+    {
+        GetCorners(center, scale, out Vector2 bl, out Vector2 tl, out Vector2 tr, out Vector2 br);
+
+        progress = Mathf.Clamp01(progress);
+
+        Vector2 left = (bl + tl) * 0.5f;
+        Vector2 right = (br + tr) * 0.5f;
+        Vector2 end = Vector2.LerpUnclamped(left, right, progress);
+
+        Vector2 along = (right - left).normalized;
+        Vector2 up = new(-along.y, along.x);
+        Vector2 half = up * (Mathf.Max(0f, flashLineThickness) * scale * Mathf.Lerp(0.3f, 1f, progress) * 0.5f);
+
+        p0 = left - half;
+        p1 = left + half;
+        p2 = end + half;
+        p3 = end - half;
+    }
+
     // ── 기본 모션 — GIF 실측(docs/PLAN_cutin.md §1) ─────────────────────────────
 
     /// <summary>등장: 0.45배 · −6.7°에서 튀어 1.19배를 지나 1배 · 0°로. 0.42초, commit.</summary>
@@ -190,5 +261,25 @@ public sealed class CutInPresetDBSO : ScriptableObject
                 new MotionChannel { Node = WindowNode, Kind = MotionChannelKind.Euler, Z = PresetCurveKeys.Smooth(times, rotationZ) },
             },
         };
+    }
+}
+
+/// <summary>흰빛 열림(cutin_flash_in)의 한 순간 — CutInPresetDBSO.EvaluateFlash.</summary>
+public readonly struct CutInFlashFrame
+{
+    /// <summary>흰 판인가(참) 아직 흰 선인가(거짓). 판이 되는 순간부터 카드(마스크 · 판 · 사람)가 선다.</summary>
+    public readonly bool IsPlate;
+
+    /// <summary>흰 선이 자란 정도 0 ~ 1. 판이면 1.</summary>
+    public readonly float LineProgress;
+
+    /// <summary>흰 정도 1(온통 흰) ~ 0(다 드러남). 선일 때는 1.</summary>
+    public readonly float Whiteness;
+
+    public CutInFlashFrame(bool isPlate, float lineProgress, float whiteness)
+    {
+        IsPlate = isPlate;
+        LineProgress = lineProgress;
+        Whiteness = whiteness;
     }
 }

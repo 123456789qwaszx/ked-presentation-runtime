@@ -45,7 +45,7 @@ public static class StageFrameBuilder
         return window;
     }
 
-    // 창 아래는 무대 루트 하나뿐이다. 묶을 때마다 중립으로 돌린다.
+    // 창 아래는 무대 루트 하나다(흰빛 컷인을 쓴 무대는 그 덮개 노드가 하나 더 있다). 묶을 때마다 중립으로 돌린다.
     private static StageCutInSlot EnsureCutIn(RectTransform window, RectTransform root, string stageKey, StageMaskSlot mask)
     {
         // 스키마에 없는 자식은 경고하고 치운다 — 창 아래는 무대 루트뿐이다(컷인 판 그림은 무대 안의 리그다).
@@ -54,6 +54,10 @@ public static class StageFrameBuilder
             Transform child = window.GetChild(i);
 
             if (child == root)
+                continue;
+
+            // 흰빛으로 여는 컷인의 덮개 — 슬롯이 처음 쓸 때 세우고, 다시 묶으면 이름으로 되찾는다(StageCutInSlot.EnsureFlash).
+            if (child.name == StageCutInSlot.FlashNodeName(stageKey))
                 continue;
 
             Debug.LogWarning($"[StageFrameBuilder] 창 아래에 스키마에 없는 '{child.name}'가 있다. 치운다. stage='{stageKey}'.", window);

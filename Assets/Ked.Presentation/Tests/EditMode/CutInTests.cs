@@ -42,6 +42,24 @@ namespace Ked.Presentation.Tests
         }
 
         [Test]
+        public void 폴드는_여닫는_모션을_모른다_끝_상태가_같다()
+        {
+            StageState pop = Fold(
+                Cmd("cutin_open", "stage01", "pink_stars", "-16u", "1.25u", "1.3"),
+                Cmd("cutin_close", "stage01"));
+
+            StageState flash = Fold(
+                Cmd("cutin_open", "stage01", "pink_stars", "-16u", "1.25u", "1.3", "cutin_flash_in"),
+                Cmd("cutin_close", "stage01", "cutin_fade_out"));
+
+            Assert.That(flash.Unhandled.Count, Is.EqualTo(0), "모션 인자는 폴드를 막지 않는다");
+            Assert.That(flash.TryGetCutIn("stage01", out CutInState a), Is.True);
+            Assert.That(pop.TryGetCutIn("stage01", out CutInState b), Is.True);
+            Assert.That(a.ToString(), Is.EqualTo(b.ToString()));
+            Assert.That(a.IsOpen, Is.False);
+        }
+
+        [Test]
         public void 닫으면_자리는_남고_닫힘이_된다()
         {
             StageState state = Fold(
@@ -113,6 +131,89 @@ namespace Ked.Presentation.Tests
 
             // 실측 지점을 지난다 — 등장 +140ms 1.19배.
             Assert.That(MotionMath.Sample(popIn.Channels[0], 0.14f).X, Is.EqualTo(1.19f).Within(1e-4f));
+        }
+
+        // ── 흰빛 열림(cutin_flash_in) ────────────────────────────────
+
+        [Test]
+        public void 흰빛_열림은_선_판_머묾_걷힘의_차례다()
+        {
+            CutInPresetDBSO preset = CutInPresetDBSO.CreateDefault();
+
+            try
+            {
+                Assert.That(preset.FlashDuration, Is.EqualTo(0.15f + 0.08f + 0.3f).Within(1e-5f));
+
+                // ① 선 — 자라는 중, 아직 판이 아니다.
+                CutInFlashFrame start = preset.EvaluateFlash(0f);
+                Assert.That(start.IsPlate, Is.False);
+                Assert.That(start.LineProgress, Is.EqualTo(0f).Within(1e-6f));
+
+                CutInFlashFrame line = preset.EvaluateFlash(0.075f);
+                Assert.That(line.IsPlate, Is.False);
+                Assert.That(line.LineProgress, Is.EqualTo(0.5f).Within(1e-4f));
+                Assert.That(line.Whiteness, Is.EqualTo(1f));
+
+                // ② · ③ 판 — 선이 끝난 순간부터 온통 흰 판으로 머문다.
+                Assert.That(preset.EvaluateFlash(0.15f).IsPlate, Is.True);
+                Assert.That(preset.EvaluateFlash(0.15f).Whiteness, Is.EqualTo(1f));
+                Assert.That(preset.EvaluateFlash(0.22f).Whiteness, Is.EqualTo(1f), "머묾 동안은 온통 희다");
+
+                // ④ 걷힘 — 1 → 0으로 고르게.
+                Assert.That(preset.EvaluateFlash(0.23f + 0.15f).Whiteness, Is.EqualTo(0.5f).Within(1e-3f));
+                Assert.That(preset.EvaluateFlash(0.23f + 0.3f).Whiteness, Is.EqualTo(0f).Within(1e-4f));
+                Assert.That(preset.EvaluateFlash(10f).Whiteness, Is.EqualTo(0f));
+
+                // 30fps로 찍으면: 온통 흰 프레임 2 ~ 3장 뒤, 8 ~ 10장에 걸쳐 내려간다(작업지시서의 기준).
+                int white = 0, clearing = 0;
+                for (int frame = 0; frame < 60; frame++)
+                {
+                    CutInFlashFrame f = preset.EvaluateFlash(frame / 30f);
+                    if (!f.IsPlate)
+                        continue;
+
+                    if (f.Whiteness >= 1f)
+                        white++;
+                    else if (f.Whiteness > 0f)
+                        clearing++;
+                }
+
+                Assert.That(white, Is.InRange(2, 3));
+                Assert.That(clearing, Is.InRange(8, 10));
+            }
+            finally
+            {
+                Object.DestroyImmediate(preset);
+            }
+        }
+
+        [Test]
+        public void 흰_선은_판_가운데_높이를_판의_기울기대로_왼쪽부터_긋는다()
+        {
+            CutInPresetDBSO preset = CutInPresetDBSO.CreateDefault();
+
+            try
+            {
+                Vector2 center = new(-640f, 50f);
+                preset.GetCorners(center, 1.4f, out Vector2 bl, out Vector2 tl, out Vector2 tr, out Vector2 br);
+
+                Vector2 left = (bl + tl) * 0.5f;
+                Vector2 right = (br + tr) * 0.5f;
+
+                preset.GetFlashLineQuad(center, 1.4f, 1f, out Vector2 p0, out Vector2 p1, out Vector2 p2, out Vector2 p3);
+
+                Assert.That(Vector2.Distance((p0 + p1) * 0.5f, left), Is.LessThan(1e-3f), "왼쪽 변 가운데에서 시작");
+                Assert.That(Vector2.Distance((p2 + p3) * 0.5f, right), Is.LessThan(1e-3f), "다 자라면 오른쪽 변 가운데까지");
+                Assert.That(Vector2.Distance(p0, p1), Is.EqualTo(preset.flashLineThickness * 1.4f).Within(1e-3f), "굵기에 배율이 곱해진다");
+
+                preset.GetFlashLineQuad(center, 1.4f, 0.5f, out _, out _, out Vector2 h2, out Vector2 h3);
+                Assert.That(Vector2.Distance((h2 + h3) * 0.5f, (left + right) * 0.5f), Is.LessThan(1e-3f), "반쯤 자라면 가운데까지");
+                Assert.That(Vector2.Distance(h2, h3), Is.LessThan(Vector2.Distance(p2, p3)), "자라며 굵어진다");
+            }
+            finally
+            {
+                Object.DestroyImmediate(preset);
+            }
         }
 
         [Test]

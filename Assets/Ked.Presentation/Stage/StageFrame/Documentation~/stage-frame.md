@@ -33,6 +33,7 @@
 
 `<<cutin_open 무대 판 x y [배율]>>`은 덮는 무대 하나를 판 모양으로 띄운다 — 창 피벗을 판 아래 가운데로, 마스크를 네 점(판 아래 변으로 자르고 위는 열림)으로, 그리고 창에 팝 인 모션을 건다. `<<cutin_close 무대>>`는 팝 아웃이 끝나면 창을 항등으로 돌리고 그 무대의 마스크를 숨김으로 둔다(닫힌 동안은 그 무대의 내용도 안 보인다). 창은 무대를 숨기지 않는다 — 보이기 · 숨기기는 마스크 하나가 정한다([docs/PLAN_stage-visibility.md](../../../../../docs/PLAN_stage-visibility.md)).
 
+- 여닫는 모양은 끝 인자로 고른다 — `<<cutin_open … [배율] cutin_flash_in>>`(흰 선 → 흰 판 → 걷힘, 창은 움직이지 않는다) · `<<cutin_close 무대 cutin_fade_out>>`(흐려져 닫힘). 생략하면 팝 인 · 팝 아웃이다. 흰 덮개는 창 아래 `{무대}_CutInFlash` — 흰빛 컷인을 처음 쓸 때만 선다([docs/PLAN_cutin.md](../../../../../docs/PLAN_cutin.md) §5.1).
 - 창 모션은 `StageCutInSlot`이 하나만 소유한다(stage_mask의 `StageMaskSlot`과 같은 규율). 커맨드는 프리셋을 골라 걸기만 한다.
 - **판 그림은 틀이 아니라 무대 안의 리그다.** 파서가 `cutin_open`을 [판 리그, 창]으로 푼다 — 판 리그는 배경처럼 그 무대의 far 층에 서고(슬롯 키 `{무대}_cutin_panel`, 원본 픽셀 × 배율 ÷ 그림 해상도 2), 무대 안이라 마스크가 판까지 함께 자른다. 열린 컷인 위의 `stage_mask`는 판과 인물을 함께 닫는다.
 - 판도 마스크 안이라 판 아래 외곽선 띠가 같이 잘린다 — 마스크 테두리가 그 띠를 판 너비만큼 다시 그린다(`CutInPresetDBSO.outlineColor` · `maskInsetPixels`). 테두리는 마스크의 형제라 잘리지 않고, 창 안이라 팝 · 회전을 같이 탄다.
