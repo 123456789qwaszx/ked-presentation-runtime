@@ -1,0 +1,411 @@
+{
+  "ChapterId": "ch04",
+  "DisplayName": "4편 · 출발, 샤통 님의 조사 군단",
+  "StartEpisodeId": "ch04_council_01",
+  "Stats": [
+    {
+      "Key": "shatong_trust",
+      "DisplayName": "shatong_trust",
+      "Type": "Number",
+      "Initial": 0,
+      "Minimum": 0,
+      "Maximum": 5
+    },
+    {
+      "Key": "kasimira_trust",
+      "DisplayName": "kasimira_trust",
+      "Type": "Number",
+      "Initial": 0,
+      "Minimum": 0,
+      "Maximum": 5
+    },
+    {
+      "Key": "benito_trust",
+      "DisplayName": "benito_trust",
+      "Type": "Number",
+      "Initial": 0,
+      "Minimum": 0,
+      "Maximum": 5
+    }
+  ],
+  "Nodes": [
+    {
+      "EpisodeId": "ch04_council_01",
+      "Title": "재능 낭비",
+      "IndexText": "",
+      "DialogueEntryId": "ch04_council_01",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch04_council_01a",
+          "ChoiceLabel": "베니토의 제안에 힘을 보탠다",
+          "Auto": false,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": [
+            {
+              "Key": "shatong_trust",
+              "Amount": 1,
+              "Op": "Add"
+            },
+            {
+              "Key": "benito_trust",
+              "Amount": 1,
+              "Op": "Add"
+            }
+          ]
+        },
+        {
+          "TargetEpisodeId": "ch04_council_01b",
+          "ChoiceLabel": "카시미라의 대답을 기다린다",
+          "Auto": false,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": [
+            {
+              "Key": "kasimira_trust",
+              "Amount": 1,
+              "Op": "Add"
+            }
+          ]
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "council",
+      "Position": {
+        "X": 0,
+        "Y": 0
+      }
+    },
+    {
+      "EpisodeId": "ch04_council_01a",
+      "Title": "손님의 한 표",
+      "IndexText": "",
+      "DialogueEntryId": "ch04_council_01a",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch04_council_02",
+          "ChoiceLabel": "",
+          "Auto": true,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "council",
+      "Position": {
+        "X": 0,
+        "Y": 204
+      }
+    },
+    {
+      "EpisodeId": "ch04_council_01b",
+      "Title": "모두의 시선",
+      "IndexText": "",
+      "DialogueEntryId": "ch04_council_01b",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch04_council_02",
+          "ChoiceLabel": "",
+          "Auto": true,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "council",
+      "Position": {
+        "X": 330,
+        "Y": 204
+      }
+    },
+    {
+      "EpisodeId": "ch04_council_02",
+      "Title": "드디어 운명이 강림하였도다",
+      "IndexText": "",
+      "DialogueEntryId": "ch04_council_02",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch04_council_03",
+          "ChoiceLabel": "",
+          "Auto": true,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "council",
+      "Position": {
+        "X": 0,
+        "Y": 408
+      }
+    },
+    {
+      "EpisodeId": "ch04_council_03",
+      "Title": "마음이 안 놓이는군",
+      "IndexText": "",
+      "DialogueEntryId": "ch04_council_03",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch04_departure_01",
+          "ChoiceLabel": "",
+          "Auto": true,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "council",
+      "Position": {
+        "X": 0,
+        "Y": 612
+      }
+    },
+    {
+      "EpisodeId": "ch04_departure_01",
+      "Title": "목걸이와 부하들",
+      "IndexText": "",
+      "DialogueEntryId": "ch04_departure_01",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch04_departure_02",
+          "ChoiceLabel": "",
+          "Auto": true,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "departure",
+      "Position": {
+        "X": 0,
+        "Y": 816
+      }
+    },
+    {
+      "EpisodeId": "ch04_departure_02",
+      "Title": "조사 내용은 기억하죠?",
+      "IndexText": "",
+      "DialogueEntryId": "ch04_departure_02",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch04_departure_02a",
+          "ChoiceLabel": "샤통 님의 부하를 자청한다",
+          "Auto": false,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": [
+            {
+              "Key": "shatong_trust",
+              "Amount": 1,
+              "Op": "Add"
+            }
+          ]
+        },
+        {
+          "TargetEpisodeId": "ch04_departure_02b",
+          "ChoiceLabel": "베니토에게 샤통을 지켜보겠다고 약속한다",
+          "Auto": false,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": [
+            {
+              "Key": "benito_trust",
+              "Amount": 1,
+              "Op": "Add"
+            }
+          ]
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "departure",
+      "Position": {
+        "X": 0,
+        "Y": 1020
+      }
+    },
+    {
+      "EpisodeId": "ch04_departure_02a",
+      "Title": "조사 군단의 특별 고문",
+      "IndexText": "",
+      "DialogueEntryId": "ch04_departure_02a",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch04_dunes_01",
+          "ChoiceLabel": "",
+          "Auto": true,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "departure",
+      "Position": {
+        "X": 0,
+        "Y": 1224
+      }
+    },
+    {
+      "EpisodeId": "ch04_departure_02b",
+      "Title": "베니토와의 약속",
+      "IndexText": "",
+      "DialogueEntryId": "ch04_departure_02b",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch04_dunes_01",
+          "ChoiceLabel": "",
+          "Auto": true,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "departure",
+      "Position": {
+        "X": 330,
+        "Y": 1224
+      }
+    },
+    {
+      "EpisodeId": "ch04_dunes_01",
+      "Title": "끊긴 운송로",
+      "IndexText": "",
+      "DialogueEntryId": "ch04_dunes_01",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch04_dunes_01a",
+          "ChoiceLabel": "샤통과 같은 바위 뒤에 숨는다",
+          "Auto": false,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": []
+        },
+        {
+          "TargetEpisodeId": "ch04_dunes_01b",
+          "ChoiceLabel": "바위 위에 올라 망을 본다",
+          "Auto": false,
+          "VisibleConditions": [],
+          "Conditions": [
+            {
+              "Kind": "Stat",
+              "Key": "shatong_trust",
+              "Op": "GreaterOrEqual",
+              "IntValue": 2
+            }
+          ],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "dunes",
+      "Position": {
+        "X": 0,
+        "Y": 1428
+      }
+    },
+    {
+      "EpisodeId": "ch04_dunes_01a",
+      "Title": "바위 그늘",
+      "IndexText": "",
+      "DialogueEntryId": "ch04_dunes_01a",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch04_dunes_02",
+          "ChoiceLabel": "",
+          "Auto": true,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "dunes",
+      "Position": {
+        "X": 0,
+        "Y": 1632
+      }
+    },
+    {
+      "EpisodeId": "ch04_dunes_01b",
+      "Title": "샤통 님의 눈",
+      "IndexText": "",
+      "DialogueEntryId": "ch04_dunes_01b",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch04_dunes_02",
+          "ChoiceLabel": "",
+          "Auto": true,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "dunes",
+      "Position": {
+        "X": 330,
+        "Y": 1632
+      }
+    },
+    {
+      "EpisodeId": "ch04_dunes_02",
+      "Title": "모래전갈과 여행가들",
+      "IndexText": "",
+      "DialogueEntryId": "ch04_dunes_02",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [],
+      "EventKey": "",
+      "SceneId": "dunes",
+      "Position": {
+        "X": 0,
+        "Y": 1836
+      }
+    }
+  ]
+}

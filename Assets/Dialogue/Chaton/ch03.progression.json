@@ -1,0 +1,354 @@
+{
+  "ChapterId": "ch03",
+  "DisplayName": "3편 · 얼마 전…… 천 탑의 공연",
+  "StartEpisodeId": "ch03_showtime_01",
+  "Stats": [
+    {
+      "Key": "shatong_trust",
+      "DisplayName": "shatong_trust",
+      "Type": "Number",
+      "Initial": 0,
+      "Minimum": 0,
+      "Maximum": 5
+    },
+    {
+      "Key": "kasimira_trust",
+      "DisplayName": "kasimira_trust",
+      "Type": "Number",
+      "Initial": 0,
+      "Minimum": 0,
+      "Maximum": 5
+    }
+  ],
+  "Nodes": [
+    {
+      "EpisodeId": "ch03_showtime_01",
+      "Title": "어둠의 극장",
+      "IndexText": "",
+      "DialogueEntryId": "ch03_showtime_01",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch03_patrol_01",
+          "ChoiceLabel": "",
+          "Auto": true,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "showtime",
+      "Position": {
+        "X": 0,
+        "Y": 0
+      }
+    },
+    {
+      "EpisodeId": "ch03_patrol_01",
+      "Title": "따분한 임무",
+      "IndexText": "",
+      "DialogueEntryId": "ch03_patrol_01",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch03_patrol_02",
+          "ChoiceLabel": "",
+          "Auto": true,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "patrol",
+      "Position": {
+        "X": 0,
+        "Y": 204
+      }
+    },
+    {
+      "EpisodeId": "ch03_patrol_02",
+      "Title": "연극 할 줄 알아?",
+      "IndexText": "",
+      "DialogueEntryId": "ch03_patrol_02",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch03_patrol_02a",
+          "ChoiceLabel": "샤통의 목소리가 달라졌다고 느낀다",
+          "Auto": false,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": [
+            {
+              "Key": "shatong_trust",
+              "Amount": 1,
+              "Op": "Add"
+            }
+          ]
+        },
+        {
+          "TargetEpisodeId": "ch03_patrol_02b",
+          "ChoiceLabel": "임무 중의 공연이 걱정된다",
+          "Auto": false,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": [
+            {
+              "Key": "kasimira_trust",
+              "Amount": 1,
+              "Op": "Add"
+            }
+          ]
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "patrol",
+      "Position": {
+        "X": 0,
+        "Y": 408
+      }
+    },
+    {
+      "EpisodeId": "ch03_patrol_02a",
+      "Title": "낮아진 목소리",
+      "IndexText": "",
+      "DialogueEntryId": "ch03_patrol_02a",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch03_stage_01",
+          "ChoiceLabel": "",
+          "Auto": true,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "patrol",
+      "Position": {
+        "X": 0,
+        "Y": 612
+      }
+    },
+    {
+      "EpisodeId": "ch03_patrol_02b",
+      "Title": "속이 타는 단원들",
+      "IndexText": "",
+      "DialogueEntryId": "ch03_patrol_02b",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch03_stage_01",
+          "ChoiceLabel": "",
+          "Auto": true,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "patrol",
+      "Position": {
+        "X": 330,
+        "Y": 612
+      }
+    },
+    {
+      "EpisodeId": "ch03_stage_01",
+      "Title": "진정한 어둠의 극장",
+      "IndexText": "",
+      "DialogueEntryId": "ch03_stage_01",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch03_stage_02",
+          "ChoiceLabel": "",
+          "Auto": true,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "stage",
+      "Position": {
+        "X": 0,
+        "Y": 816
+      }
+    },
+    {
+      "EpisodeId": "ch03_stage_02",
+      "Title": "원드 애시의 리더",
+      "IndexText": "",
+      "DialogueEntryId": "ch03_stage_02",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch03_stage_02a",
+          "ChoiceLabel": "샤통에게 마음속으로 박수를 보낸다",
+          "Auto": false,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": [
+            {
+              "Key": "shatong_trust",
+              "Amount": 1,
+              "Op": "Add"
+            }
+          ]
+        },
+        {
+          "TargetEpisodeId": "ch03_stage_02b",
+          "ChoiceLabel": "카시미라의 칭찬을 곱씹는다",
+          "Auto": false,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": [
+            {
+              "Key": "kasimira_trust",
+              "Amount": 1,
+              "Op": "Add"
+            }
+          ]
+        },
+        {
+          "TargetEpisodeId": "ch03_stage_02c",
+          "ChoiceLabel": "샤통이 무대를 연 까닭을 짐작한다",
+          "Auto": false,
+          "VisibleConditions": [
+            {
+              "Kind": "Stat",
+              "Key": "shatong_trust",
+              "Op": "GreaterOrEqual",
+              "IntValue": 1
+            }
+          ],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": [
+            {
+              "Key": "shatong_trust",
+              "Amount": 1,
+              "Op": "Add"
+            }
+          ]
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "stage",
+      "Position": {
+        "X": 0,
+        "Y": 1020
+      }
+    },
+    {
+      "EpisodeId": "ch03_stage_02a",
+      "Title": "마음속 박수",
+      "IndexText": "",
+      "DialogueEntryId": "ch03_stage_02a",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch03_stage_03",
+          "ChoiceLabel": "",
+          "Auto": true,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "stage",
+      "Position": {
+        "X": 0,
+        "Y": 1224
+      }
+    },
+    {
+      "EpisodeId": "ch03_stage_02b",
+      "Title": "끝까지 지켜본 사람",
+      "IndexText": "",
+      "DialogueEntryId": "ch03_stage_02b",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch03_stage_03",
+          "ChoiceLabel": "",
+          "Auto": true,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "stage",
+      "Position": {
+        "X": 330,
+        "Y": 1224
+      }
+    },
+    {
+      "EpisodeId": "ch03_stage_02c",
+      "Title": "무대를 연 까닭",
+      "IndexText": "",
+      "DialogueEntryId": "ch03_stage_02c",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch03_stage_03",
+          "ChoiceLabel": "",
+          "Auto": true,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "stage",
+      "Position": {
+        "X": 660,
+        "Y": 1224
+      }
+    },
+    {
+      "EpisodeId": "ch03_stage_03",
+      "Title": "인연이 닿으면",
+      "IndexText": "",
+      "DialogueEntryId": "ch03_stage_03",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [],
+      "EventKey": "",
+      "SceneId": "stage",
+      "Position": {
+        "X": 0,
+        "Y": 1428
+      }
+    }
+  ]
+}

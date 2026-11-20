@@ -1,0 +1,409 @@
+{
+  "ChapterId": "ch02",
+  "DisplayName": "2편 · 몇 달 전…… 창오의 전투",
+  "StartEpisodeId": "ch02_gate_01",
+  "Stats": [
+    {
+      "Key": "shatong_trust",
+      "DisplayName": "shatong_trust",
+      "Type": "Number",
+      "Initial": 0,
+      "Minimum": 0,
+      "Maximum": 5
+    },
+    {
+      "Key": "kasimira_trust",
+      "DisplayName": "kasimira_trust",
+      "Type": "Number",
+      "Initial": 0,
+      "Minimum": 0,
+      "Maximum": 5
+    }
+  ],
+  "Nodes": [
+    {
+      "EpisodeId": "ch02_gate_01",
+      "Title": "아무 일도 없는 호위",
+      "IndexText": "",
+      "DialogueEntryId": "ch02_gate_01",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch02_gate_02",
+          "ChoiceLabel": "",
+          "Auto": true,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "gate",
+      "Position": {
+        "X": 0,
+        "Y": 0
+      }
+    },
+    {
+      "EpisodeId": "ch02_gate_02",
+      "Title": "자잘한 의뢰라도",
+      "IndexText": "",
+      "DialogueEntryId": "ch02_gate_02",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch02_bureau_01",
+          "ChoiceLabel": "",
+          "Auto": true,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "gate",
+      "Position": {
+        "X": 0,
+        "Y": 204
+      }
+    },
+    {
+      "EpisodeId": "ch02_bureau_01",
+      "Title": "운명이 고른 의뢰",
+      "IndexText": "",
+      "DialogueEntryId": "ch02_bureau_01",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch02_forest_01",
+          "ChoiceLabel": "",
+          "Auto": true,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "bureau",
+      "Position": {
+        "X": 0,
+        "Y": 408
+      }
+    },
+    {
+      "EpisodeId": "ch02_forest_01",
+      "Title": "섬멸의 빛",
+      "IndexText": "",
+      "DialogueEntryId": "ch02_forest_01",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch02_forest_02",
+          "ChoiceLabel": "",
+          "Auto": true,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "forest",
+      "Position": {
+        "X": 0,
+        "Y": 612
+      }
+    },
+    {
+      "EpisodeId": "ch02_forest_02",
+      "Title": "나는 근거리, 너는 원거리",
+      "IndexText": "",
+      "DialogueEntryId": "ch02_forest_02",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch02_forest_02a",
+          "ChoiceLabel": "샤통의 패기에 마음이 기운다",
+          "Auto": false,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": [
+            {
+              "Key": "shatong_trust",
+              "Amount": 1,
+              "Op": "Add"
+            }
+          ]
+        },
+        {
+          "TargetEpisodeId": "ch02_forest_02b",
+          "ChoiceLabel": "카시미라의 지휘에 귀를 기울인다",
+          "Auto": false,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": [
+            {
+              "Key": "kasimira_trust",
+              "Amount": 1,
+              "Op": "Add"
+            }
+          ]
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "forest",
+      "Position": {
+        "X": 0,
+        "Y": 816
+      }
+    },
+    {
+      "EpisodeId": "ch02_forest_02a",
+      "Title": "앞만 보고 달리는 샤통",
+      "IndexText": "",
+      "DialogueEntryId": "ch02_forest_02a",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch02_forest_03",
+          "ChoiceLabel": "",
+          "Auto": true,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "forest",
+      "Position": {
+        "X": 0,
+        "Y": 1020
+      }
+    },
+    {
+      "EpisodeId": "ch02_forest_02b",
+      "Title": "자리를 만들어 주는 지휘",
+      "IndexText": "",
+      "DialogueEntryId": "ch02_forest_02b",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch02_forest_03",
+          "ChoiceLabel": "",
+          "Auto": true,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "forest",
+      "Position": {
+        "X": 330,
+        "Y": 1020
+      }
+    },
+    {
+      "EpisodeId": "ch02_forest_03",
+      "Title": "도망치는 여행가들",
+      "IndexText": "",
+      "DialogueEntryId": "ch02_forest_03",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch02_after_01",
+          "ChoiceLabel": "",
+          "Auto": true,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "forest",
+      "Position": {
+        "X": 0,
+        "Y": 1224
+      }
+    },
+    {
+      "EpisodeId": "ch02_after_01",
+      "Title": "이렇게나 많이요?",
+      "IndexText": "",
+      "DialogueEntryId": "ch02_after_01",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch02_after_01a",
+          "ChoiceLabel": "샤통의 억울함에 공감한다",
+          "Auto": false,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": [
+            {
+              "Key": "shatong_trust",
+              "Amount": 1,
+              "Op": "Add"
+            }
+          ]
+        },
+        {
+          "TargetEpisodeId": "ch02_after_01b",
+          "ChoiceLabel": "카시미라의 걱정을 헤아린다",
+          "Auto": false,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": [
+            {
+              "Key": "kasimira_trust",
+              "Amount": 1,
+              "Op": "Add"
+            }
+          ]
+        },
+        {
+          "TargetEpisodeId": "ch02_after_01c",
+          "ChoiceLabel": "여행가들이 본 두 사람을 떠올린다",
+          "Auto": false,
+          "VisibleConditions": [
+            {
+              "Kind": "Stat",
+              "Key": "kasimira_trust",
+              "Op": "GreaterOrEqual",
+              "IntValue": 1
+            }
+          ],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": [
+            {
+              "Key": "shatong_trust",
+              "Amount": 1,
+              "Op": "Add"
+            },
+            {
+              "Key": "kasimira_trust",
+              "Amount": 1,
+              "Op": "Add"
+            }
+          ]
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "after",
+      "Position": {
+        "X": 0,
+        "Y": 1428
+      }
+    },
+    {
+      "EpisodeId": "ch02_after_01a",
+      "Title": "인정받고 싶은 마음",
+      "IndexText": "",
+      "DialogueEntryId": "ch02_after_01a",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch02_after_02",
+          "ChoiceLabel": "",
+          "Auto": true,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "after",
+      "Position": {
+        "X": 0,
+        "Y": 1632
+      }
+    },
+    {
+      "EpisodeId": "ch02_after_01b",
+      "Title": "말이 짧은 걱정",
+      "IndexText": "",
+      "DialogueEntryId": "ch02_after_01b",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch02_after_02",
+          "ChoiceLabel": "",
+          "Auto": true,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "after",
+      "Position": {
+        "X": 330,
+        "Y": 1632
+      }
+    },
+    {
+      "EpisodeId": "ch02_after_01c",
+      "Title": "한 팀이었던 두 사람",
+      "IndexText": "",
+      "DialogueEntryId": "ch02_after_01c",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch02_after_02",
+          "ChoiceLabel": "",
+          "Auto": true,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "after",
+      "Position": {
+        "X": 660,
+        "Y": 1632
+      }
+    },
+    {
+      "EpisodeId": "ch02_after_02",
+      "Title": "애송이 취급",
+      "IndexText": "",
+      "DialogueEntryId": "ch02_after_02",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [],
+      "EventKey": "",
+      "SceneId": "after",
+      "Position": {
+        "X": 0,
+        "Y": 1836
+      }
+    }
+  ]
+}

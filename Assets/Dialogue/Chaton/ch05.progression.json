@@ -1,0 +1,458 @@
+{
+  "ChapterId": "ch05",
+  "DisplayName": "5편 · 잠입, 어둠에 잠식된 지하 소굴",
+  "StartEpisodeId": "ch05_tunnel_01",
+  "Stats": [
+    {
+      "Key": "shatong_trust",
+      "DisplayName": "shatong_trust",
+      "Type": "Number",
+      "Initial": 0,
+      "Minimum": 0,
+      "Maximum": 5
+    },
+    {
+      "Key": "kasimira_trust",
+      "DisplayName": "kasimira_trust",
+      "Type": "Number",
+      "Initial": 0,
+      "Minimum": 0,
+      "Maximum": 5
+    },
+    {
+      "Key": "benito_trust",
+      "DisplayName": "benito_trust",
+      "Type": "Number",
+      "Initial": 0,
+      "Minimum": 0,
+      "Maximum": 5
+    }
+  ],
+  "Nodes": [
+    {
+      "EpisodeId": "ch05_tunnel_01",
+      "Title": "6개월 계약",
+      "IndexText": "",
+      "DialogueEntryId": "ch05_tunnel_01",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch05_tunnel_02",
+          "ChoiceLabel": "",
+          "Auto": true,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "tunnel",
+      "Position": {
+        "X": 0,
+        "Y": 0
+      }
+    },
+    {
+      "EpisodeId": "ch05_tunnel_02",
+      "Title": "행운의 목걸이",
+      "IndexText": "",
+      "DialogueEntryId": "ch05_tunnel_02",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch05_tunnel_03",
+          "ChoiceLabel": "",
+          "Auto": true,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "tunnel",
+      "Position": {
+        "X": 0,
+        "Y": 204
+      }
+    },
+    {
+      "EpisodeId": "ch05_tunnel_03",
+      "Title": "부단장 미르사",
+      "IndexText": "",
+      "DialogueEntryId": "ch05_tunnel_03",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch05_tunnel_03a",
+          "ChoiceLabel": "샤통의 어깨를 붙잡는다",
+          "Auto": false,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": [
+            {
+              "Key": "kasimira_trust",
+              "Amount": 1,
+              "Op": "Add"
+            }
+          ]
+        },
+        {
+          "TargetEpisodeId": "ch05_tunnel_03b",
+          "ChoiceLabel": "숨을 죽이고 샤통의 판단을 기다린다",
+          "Auto": false,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": [
+            {
+              "Key": "shatong_trust",
+              "Amount": 1,
+              "Op": "Add"
+            }
+          ]
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "tunnel",
+      "Position": {
+        "X": 0,
+        "Y": 408
+      }
+    },
+    {
+      "EpisodeId": "ch05_tunnel_03a",
+      "Title": "붙잡은 어깨",
+      "IndexText": "",
+      "DialogueEntryId": "ch05_tunnel_03a",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch05_tunnel_04",
+          "ChoiceLabel": "",
+          "Auto": true,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "tunnel",
+      "Position": {
+        "X": 0,
+        "Y": 612
+      }
+    },
+    {
+      "EpisodeId": "ch05_tunnel_03b",
+      "Title": "방아쇠 위의 손가락",
+      "IndexText": "",
+      "DialogueEntryId": "ch05_tunnel_03b",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch05_tunnel_04",
+          "ChoiceLabel": "",
+          "Auto": true,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "tunnel",
+      "Position": {
+        "X": 330,
+        "Y": 612
+      }
+    },
+    {
+      "EpisodeId": "ch05_tunnel_04",
+      "Title": "그때 카시미라의 말을 들었더라면",
+      "IndexText": "",
+      "DialogueEntryId": "ch05_tunnel_04",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch05_hq_01",
+          "ChoiceLabel": "",
+          "Auto": true,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "tunnel",
+      "Position": {
+        "X": 0,
+        "Y": 816
+      }
+    },
+    {
+      "EpisodeId": "ch05_hq_01",
+      "Title": "빙산의 일각",
+      "IndexText": "",
+      "DialogueEntryId": "ch05_hq_01",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch05_hq_01a",
+          "ChoiceLabel": "샤통의 탐문에 따라나선다",
+          "Auto": false,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": [
+            {
+              "Key": "shatong_trust",
+              "Amount": 1,
+              "Op": "Add"
+            }
+          ]
+        },
+        {
+          "TargetEpisodeId": "ch05_hq_01b",
+          "ChoiceLabel": "베니토에게 샤통을 꼭 데려오겠다고 약속한다",
+          "Auto": false,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": [
+            {
+              "Key": "benito_trust",
+              "Amount": 1,
+              "Op": "Add"
+            }
+          ]
+        },
+        {
+          "TargetEpisodeId": "ch05_hq_01c",
+          "ChoiceLabel": "갱도에서 참아 낸 샤통을 칭찬한다",
+          "Auto": false,
+          "VisibleConditions": [
+            {
+              "Kind": "Stat",
+              "Key": "shatong_trust",
+              "Op": "GreaterOrEqual",
+              "IntValue": 1
+            }
+          ],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": [
+            {
+              "Key": "shatong_trust",
+              "Amount": 1,
+              "Op": "Add"
+            }
+          ]
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "hq",
+      "Position": {
+        "X": 0,
+        "Y": 1020
+      }
+    },
+    {
+      "EpisodeId": "ch05_hq_01a",
+      "Title": "탐문 부대 출격",
+      "IndexText": "",
+      "DialogueEntryId": "ch05_hq_01a",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch05_street_01",
+          "ChoiceLabel": "",
+          "Auto": true,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "hq",
+      "Position": {
+        "X": 0,
+        "Y": 1224
+      }
+    },
+    {
+      "EpisodeId": "ch05_hq_01b",
+      "Title": "데워 둔 저녁",
+      "IndexText": "",
+      "DialogueEntryId": "ch05_hq_01b",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch05_street_01",
+          "ChoiceLabel": "",
+          "Auto": true,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "hq",
+      "Position": {
+        "X": 330,
+        "Y": 1224
+      }
+    },
+    {
+      "EpisodeId": "ch05_hq_01c",
+      "Title": "참아 낸 방아쇠",
+      "IndexText": "",
+      "DialogueEntryId": "ch05_hq_01c",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch05_street_01",
+          "ChoiceLabel": "",
+          "Auto": true,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "hq",
+      "Position": {
+        "X": 660,
+        "Y": 1224
+      }
+    },
+    {
+      "EpisodeId": "ch05_street_01",
+      "Title": "단서를 찾아서",
+      "IndexText": "",
+      "DialogueEntryId": "ch05_street_01",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch05_street_01a",
+          "ChoiceLabel": "샤통과 함께 그 사람을 감싼다",
+          "Auto": false,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": [
+            {
+              "Key": "shatong_trust",
+              "Amount": 1,
+              "Op": "Add"
+            }
+          ]
+        },
+        {
+          "TargetEpisodeId": "ch05_street_01b",
+          "ChoiceLabel": "그 사람의 숨소리를 유심히 살핀다",
+          "Auto": false,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": [
+            {
+              "Key": "kasimira_trust",
+              "Amount": 1,
+              "Op": "Add"
+            }
+          ]
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "street",
+      "Position": {
+        "X": 0,
+        "Y": 1428
+      }
+    },
+    {
+      "EpisodeId": "ch05_street_01a",
+      "Title": "등 뒤의 안전",
+      "IndexText": "",
+      "DialogueEntryId": "ch05_street_01a",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch05_street_02",
+          "ChoiceLabel": "",
+          "Auto": true,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "street",
+      "Position": {
+        "X": 0,
+        "Y": 1632
+      }
+    },
+    {
+      "EpisodeId": "ch05_street_01b",
+      "Title": "고른 숨소리",
+      "IndexText": "",
+      "DialogueEntryId": "ch05_street_01b",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch05_street_02",
+          "ChoiceLabel": "",
+          "Auto": true,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "street",
+      "Position": {
+        "X": 330,
+        "Y": 1632
+      }
+    },
+    {
+      "EpisodeId": "ch05_street_02",
+      "Title": "위약금이라는 핑계",
+      "IndexText": "",
+      "DialogueEntryId": "ch05_street_02",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [],
+      "EventKey": "",
+      "SceneId": "street",
+      "Position": {
+        "X": 0,
+        "Y": 1836
+      }
+    }
+  ]
+}

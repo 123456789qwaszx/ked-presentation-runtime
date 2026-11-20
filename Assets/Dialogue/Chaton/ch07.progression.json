@@ -1,0 +1,522 @@
+{
+  "ChapterId": "ch07",
+  "DisplayName": "7편 · 칠흑의 힘이여, 쓸어버려라",
+  "StartEpisodeId": "ch07_core_01",
+  "Stats": [
+    {
+      "Key": "shatong_trust",
+      "DisplayName": "shatong_trust",
+      "Type": "Number",
+      "Initial": 0,
+      "Minimum": 0,
+      "Maximum": 5
+    },
+    {
+      "Key": "kasimira_trust",
+      "DisplayName": "kasimira_trust",
+      "Type": "Number",
+      "Initial": 0,
+      "Minimum": 0,
+      "Maximum": 5
+    }
+  ],
+  "Nodes": [
+    {
+      "EpisodeId": "ch07_core_01",
+      "Title": "우리는 백묘 극단이야",
+      "IndexText": "",
+      "DialogueEntryId": "ch07_core_01",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch07_core_02",
+          "ChoiceLabel": "",
+          "Auto": true,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "core",
+      "Position": {
+        "X": 0,
+        "Y": 0
+      }
+    },
+    {
+      "EpisodeId": "ch07_core_02",
+      "Title": "위장 신기",
+      "IndexText": "",
+      "DialogueEntryId": "ch07_core_02",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch07_core_03",
+          "ChoiceLabel": "",
+          "Auto": true,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "core",
+      "Position": {
+        "X": 0,
+        "Y": 204
+      }
+    },
+    {
+      "EpisodeId": "ch07_core_03",
+      "Title": "머릿속이 하얘",
+      "IndexText": "",
+      "DialogueEntryId": "ch07_core_03",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch07_core_03a",
+          "ChoiceLabel": "샤통의 떨리는 손을 붙잡아 준다",
+          "Auto": false,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": [
+            {
+              "Key": "shatong_trust",
+              "Amount": 1,
+              "Op": "Add"
+            }
+          ]
+        },
+        {
+          "TargetEpisodeId": "ch07_core_03b",
+          "ChoiceLabel": "쓰러진 카시미라 앞을 막아선다",
+          "Auto": false,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": [
+            {
+              "Key": "kasimira_trust",
+              "Amount": 1,
+              "Op": "Add"
+            }
+          ]
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "core",
+      "Position": {
+        "X": 0,
+        "Y": 408
+      }
+    },
+    {
+      "EpisodeId": "ch07_core_03a",
+      "Title": "떨리는 손",
+      "IndexText": "",
+      "DialogueEntryId": "ch07_core_03a",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch07_core_04",
+          "ChoiceLabel": "",
+          "Auto": true,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "core",
+      "Position": {
+        "X": 0,
+        "Y": 612
+      }
+    },
+    {
+      "EpisodeId": "ch07_core_03b",
+      "Title": "쓰러진 대장 앞에서",
+      "IndexText": "",
+      "DialogueEntryId": "ch07_core_03b",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch07_core_04",
+          "ChoiceLabel": "",
+          "Auto": true,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "core",
+      "Position": {
+        "X": 330,
+        "Y": 612
+      }
+    },
+    {
+      "EpisodeId": "ch07_core_04",
+      "Title": "오직 너만을 위한 부적",
+      "IndexText": "",
+      "DialogueEntryId": "ch07_core_04",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch07_core_05",
+          "ChoiceLabel": "",
+          "Auto": true,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "core",
+      "Position": {
+        "X": 0,
+        "Y": 816
+      }
+    },
+    {
+      "EpisodeId": "ch07_core_05",
+      "Title": "돌파구",
+      "IndexText": "",
+      "DialogueEntryId": "ch07_core_05",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch07_core_05a",
+          "ChoiceLabel": "카시미라와 여행가들은 맡겨 달라고 답한다",
+          "Auto": false,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": [
+            {
+              "Key": "kasimira_trust",
+              "Amount": 1,
+              "Op": "Add"
+            }
+          ]
+        },
+        {
+          "TargetEpisodeId": "ch07_core_05b",
+          "ChoiceLabel": "뒤에서 엄호하겠다고 나선다",
+          "Auto": false,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": [
+            {
+              "Key": "shatong_trust",
+              "Amount": 1,
+              "Op": "Add"
+            }
+          ]
+        },
+        {
+          "TargetEpisodeId": "ch07_core_05c",
+          "ChoiceLabel": "칠흑의 힘을 믿는다고 말해 준다",
+          "Auto": false,
+          "VisibleConditions": [
+            {
+              "Kind": "Stat",
+              "Key": "shatong_trust",
+              "Op": "GreaterOrEqual",
+              "IntValue": 1
+            }
+          ],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": [
+            {
+              "Key": "shatong_trust",
+              "Amount": 1,
+              "Op": "Add"
+            }
+          ]
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "core",
+      "Position": {
+        "X": 0,
+        "Y": 1020
+      }
+    },
+    {
+      "EpisodeId": "ch07_core_05a",
+      "Title": "여기는 우리가",
+      "IndexText": "",
+      "DialogueEntryId": "ch07_core_05a",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch07_core_06",
+          "ChoiceLabel": "",
+          "Auto": true,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "core",
+      "Position": {
+        "X": 0,
+        "Y": 1224
+      }
+    },
+    {
+      "EpisodeId": "ch07_core_05b",
+      "Title": "혼자 보낼 순 없어",
+      "IndexText": "",
+      "DialogueEntryId": "ch07_core_05b",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch07_core_06",
+          "ChoiceLabel": "",
+          "Auto": true,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "core",
+      "Position": {
+        "X": 330,
+        "Y": 1224
+      }
+    },
+    {
+      "EpisodeId": "ch07_core_05c",
+      "Title": "칠흑의 힘을 믿어",
+      "IndexText": "",
+      "DialogueEntryId": "ch07_core_05c",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch07_core_06",
+          "ChoiceLabel": "",
+          "Auto": true,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "core",
+      "Position": {
+        "X": 660,
+        "Y": 1224
+      }
+    },
+    {
+      "EpisodeId": "ch07_core_06",
+      "Title": "칠흑의 힘이여, 쓸어버려라",
+      "IndexText": "",
+      "DialogueEntryId": "ch07_core_06",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch07_exit_01",
+          "ChoiceLabel": "",
+          "Auto": true,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "core",
+      "Position": {
+        "X": 0,
+        "Y": 1428
+      }
+    },
+    {
+      "EpisodeId": "ch07_exit_01",
+      "Title": "샤통…",
+      "IndexText": "",
+      "DialogueEntryId": "ch07_exit_01",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch07_exit_01a",
+          "ChoiceLabel": "카시미라를 부축해 일으킨다",
+          "Auto": false,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": [
+            {
+              "Key": "kasimira_trust",
+              "Amount": 1,
+              "Op": "Add"
+            }
+          ]
+        },
+        {
+          "TargetEpisodeId": "ch07_exit_01b",
+          "ChoiceLabel": "홀로 남은 샤통을 돌아본다",
+          "Auto": false,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": [
+            {
+              "Key": "shatong_trust",
+              "Amount": 1,
+              "Op": "Add"
+            }
+          ]
+        },
+        {
+          "TargetEpisodeId": "ch07_exit_01c",
+          "ChoiceLabel": "샤통은 반드시 돌아온다고 말한다",
+          "Auto": false,
+          "VisibleConditions": [],
+          "Conditions": [
+            {
+              "Kind": "Stat",
+              "Key": "kasimira_trust",
+              "Op": "GreaterOrEqual",
+              "IntValue": 1
+            },
+            {
+              "Kind": "Stat",
+              "Key": "shatong_trust",
+              "Op": "GreaterOrEqual",
+              "IntValue": 1
+            }
+          ],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "exit",
+      "Position": {
+        "X": 0,
+        "Y": 1632
+      }
+    },
+    {
+      "EpisodeId": "ch07_exit_01a",
+      "Title": "부축",
+      "IndexText": "",
+      "DialogueEntryId": "ch07_exit_01a",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch07_exit_02",
+          "ChoiceLabel": "",
+          "Auto": true,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "exit",
+      "Position": {
+        "X": 0,
+        "Y": 1836
+      }
+    },
+    {
+      "EpisodeId": "ch07_exit_01b",
+      "Title": "작은 등",
+      "IndexText": "",
+      "DialogueEntryId": "ch07_exit_01b",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch07_exit_02",
+          "ChoiceLabel": "",
+          "Auto": true,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "exit",
+      "Position": {
+        "X": 330,
+        "Y": 1836
+      }
+    },
+    {
+      "EpisodeId": "ch07_exit_01c",
+      "Title": "한 번 한 말은",
+      "IndexText": "",
+      "DialogueEntryId": "ch07_exit_01c",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch07_exit_02",
+          "ChoiceLabel": "",
+          "Auto": true,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "exit",
+      "Position": {
+        "X": 660,
+        "Y": 1836
+      }
+    },
+    {
+      "EpisodeId": "ch07_exit_02",
+      "Title": "독초 전갈",
+      "IndexText": "",
+      "DialogueEntryId": "ch07_exit_02",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [],
+      "EventKey": "",
+      "SceneId": "exit",
+      "Position": {
+        "X": 0,
+        "Y": 2040
+      }
+    }
+  ]
+}

@@ -1,0 +1,375 @@
+{
+  "ChapterId": "ch01",
+  "DisplayName": "1편 · 칠흑의 힘의 부재",
+  "StartEpisodeId": "ch01_market_01",
+  "Stats": [
+    {
+      "Key": "shatong_trust",
+      "DisplayName": "shatong_trust",
+      "Type": "Number",
+      "Initial": 0,
+      "Minimum": 0,
+      "Maximum": 5
+    },
+    {
+      "Key": "kasimira_trust",
+      "DisplayName": "kasimira_trust",
+      "Type": "Number",
+      "Initial": 0,
+      "Minimum": 0,
+      "Maximum": 5
+    },
+    {
+      "Key": "benito_trust",
+      "DisplayName": "benito_trust",
+      "Type": "Number",
+      "Initial": 0,
+      "Minimum": 0,
+      "Maximum": 5
+    },
+    {
+      "Key": "went_hunting",
+      "DisplayName": "went_hunting",
+      "Type": "Bool",
+      "Initial": 0,
+      "Minimum": 0,
+      "Maximum": 1
+    }
+  ],
+  "Nodes": [
+    {
+      "EpisodeId": "ch01_market_01",
+      "Title": "치즈 나초 한 접시",
+      "IndexText": "",
+      "DialogueEntryId": "ch01_market_01",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch01_market_01a",
+          "ChoiceLabel": "샤통의 사냥에 따라나선다",
+          "Auto": false,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": [
+            {
+              "Key": "shatong_trust",
+              "Amount": 1,
+              "Op": "Add"
+            },
+            {
+              "Key": "went_hunting",
+              "Amount": 1,
+              "Op": "Set"
+            }
+          ]
+        },
+        {
+          "TargetEpisodeId": "ch01_market_01b",
+          "ChoiceLabel": "베니토의 장보기를 돕는다",
+          "Auto": false,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": [
+            {
+              "Key": "benito_trust",
+              "Amount": 1,
+              "Op": "Add"
+            }
+          ]
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "market",
+      "Position": {
+        "X": 0,
+        "Y": 0
+      }
+    },
+    {
+      "EpisodeId": "ch01_market_01a",
+      "Title": "사냥길 동행",
+      "IndexText": "",
+      "DialogueEntryId": "ch01_market_01a",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch01_welcome_01",
+          "ChoiceLabel": "",
+          "Auto": true,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "market",
+      "Position": {
+        "X": 0,
+        "Y": 204
+      }
+    },
+    {
+      "EpisodeId": "ch01_market_01b",
+      "Title": "장바구니 당번",
+      "IndexText": "",
+      "DialogueEntryId": "ch01_market_01b",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch01_welcome_01",
+          "ChoiceLabel": "",
+          "Auto": true,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "market",
+      "Position": {
+        "X": 330,
+        "Y": 204
+      }
+    },
+    {
+      "EpisodeId": "ch01_welcome_01",
+      "Title": "샤통 님 강림",
+      "IndexText": "",
+      "DialogueEntryId": "ch01_welcome_01",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch01_welcome_02",
+          "ChoiceLabel": "",
+          "Auto": true,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "welcome",
+      "Position": {
+        "X": 0,
+        "Y": 408
+      }
+    },
+    {
+      "EpisodeId": "ch01_welcome_02",
+      "Title": "플라비오 원정 이야기",
+      "IndexText": "",
+      "DialogueEntryId": "ch01_welcome_02",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch01_welcome_03",
+          "ChoiceLabel": "",
+          "Auto": true,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "welcome",
+      "Position": {
+        "X": 0,
+        "Y": 612
+      }
+    },
+    {
+      "EpisodeId": "ch01_welcome_03",
+      "Title": "되살아난 광맥",
+      "IndexText": "",
+      "DialogueEntryId": "ch01_welcome_03",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch01_welcome_04",
+          "ChoiceLabel": "",
+          "Auto": true,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "welcome",
+      "Position": {
+        "X": 0,
+        "Y": 816
+      }
+    },
+    {
+      "EpisodeId": "ch01_welcome_04",
+      "Title": "모래전갈의 그림자",
+      "IndexText": "",
+      "DialogueEntryId": "ch01_welcome_04",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch01_welcome_04a",
+          "ChoiceLabel": "샤통의 편을 들어 준다",
+          "Auto": false,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": [
+            {
+              "Key": "shatong_trust",
+              "Amount": 1,
+              "Op": "Add"
+            }
+          ]
+        },
+        {
+          "TargetEpisodeId": "ch01_welcome_04b",
+          "ChoiceLabel": "카시미라의 대답을 기다린다",
+          "Auto": false,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": [
+            {
+              "Key": "kasimira_trust",
+              "Amount": 1,
+              "Op": "Add"
+            }
+          ]
+        },
+        {
+          "TargetEpisodeId": "ch01_welcome_04c",
+          "ChoiceLabel": "사막에서 본 샤통의 솜씨를 이야기한다",
+          "Auto": false,
+          "VisibleConditions": [
+            {
+              "Kind": "Stat",
+              "Key": "went_hunting",
+              "Op": "Equal",
+              "IntValue": 1
+            }
+          ],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": [
+            {
+              "Key": "shatong_trust",
+              "Amount": 1,
+              "Op": "Add"
+            }
+          ]
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "welcome",
+      "Position": {
+        "X": 0,
+        "Y": 1020
+      }
+    },
+    {
+      "EpisodeId": "ch01_welcome_04a",
+      "Title": "샤통의 편",
+      "IndexText": "",
+      "DialogueEntryId": "ch01_welcome_04a",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch01_welcome_05",
+          "ChoiceLabel": "",
+          "Auto": true,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "welcome",
+      "Position": {
+        "X": 0,
+        "Y": 1224
+      }
+    },
+    {
+      "EpisodeId": "ch01_welcome_04b",
+      "Title": "카시미라의 침묵",
+      "IndexText": "",
+      "DialogueEntryId": "ch01_welcome_04b",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch01_welcome_05",
+          "ChoiceLabel": "",
+          "Auto": true,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "welcome",
+      "Position": {
+        "X": 330,
+        "Y": 1224
+      }
+    },
+    {
+      "EpisodeId": "ch01_welcome_04c",
+      "Title": "사막에서 본 솜씨",
+      "IndexText": "",
+      "DialogueEntryId": "ch01_welcome_04c",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch01_welcome_05",
+          "ChoiceLabel": "",
+          "Auto": true,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "welcome",
+      "Position": {
+        "X": 660,
+        "Y": 1224
+      }
+    },
+    {
+      "EpisodeId": "ch01_welcome_05",
+      "Title": "아직은 너무 일러",
+      "IndexText": "",
+      "DialogueEntryId": "ch01_welcome_05",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [],
+      "EventKey": "",
+      "SceneId": "welcome",
+      "Position": {
+        "X": 0,
+        "Y": 1428
+      }
+    }
+  ]
+}

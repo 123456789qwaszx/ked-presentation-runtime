@@ -1,0 +1,347 @@
+{
+  "ChapterId": "ch06",
+  "DisplayName": "6편 · 광산 기습",
+  "StartEpisodeId": "ch06_base_01",
+  "Stats": [
+    {
+      "Key": "shatong_trust",
+      "DisplayName": "shatong_trust",
+      "Type": "Number",
+      "Initial": 0,
+      "Minimum": 0,
+      "Maximum": 5
+    },
+    {
+      "Key": "kasimira_trust",
+      "DisplayName": "kasimira_trust",
+      "Type": "Number",
+      "Initial": 0,
+      "Minimum": 0,
+      "Maximum": 5
+    },
+    {
+      "Key": "doubted_miner",
+      "DisplayName": "doubted_miner",
+      "Type": "Bool",
+      "Initial": 0,
+      "Minimum": 0,
+      "Maximum": 1
+    }
+  ],
+  "Nodes": [
+    {
+      "EpisodeId": "ch06_base_01",
+      "Title": "서로 쌓은 벽",
+      "IndexText": "",
+      "DialogueEntryId": "ch06_base_01",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch06_base_02",
+          "ChoiceLabel": "",
+          "Auto": true,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "base",
+      "Position": {
+        "X": 0,
+        "Y": 0
+      }
+    },
+    {
+      "EpisodeId": "ch06_base_02",
+      "Title": "탈출한 광부",
+      "IndexText": "",
+      "DialogueEntryId": "ch06_base_02",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch06_base_02a",
+          "ChoiceLabel": "광부의 간절함을 믿는다",
+          "Auto": false,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": [
+            {
+              "Key": "shatong_trust",
+              "Amount": 1,
+              "Op": "Add"
+            }
+          ]
+        },
+        {
+          "TargetEpisodeId": "ch06_base_02b",
+          "ChoiceLabel": "탈출 경위가 마음에 걸린다",
+          "Auto": false,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": [
+            {
+              "Key": "kasimira_trust",
+              "Amount": 1,
+              "Op": "Add"
+            },
+            {
+              "Key": "doubted_miner",
+              "Amount": 1,
+              "Op": "Set"
+            }
+          ]
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "base",
+      "Position": {
+        "X": 0,
+        "Y": 204
+      }
+    },
+    {
+      "EpisodeId": "ch06_base_02a",
+      "Title": "간절한 목소리",
+      "IndexText": "",
+      "DialogueEntryId": "ch06_base_02a",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch06_base_03",
+          "ChoiceLabel": "",
+          "Auto": true,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "base",
+      "Position": {
+        "X": 0,
+        "Y": 408
+      }
+    },
+    {
+      "EpisodeId": "ch06_base_02b",
+      "Title": "하필 오늘",
+      "IndexText": "",
+      "DialogueEntryId": "ch06_base_02b",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch06_base_03",
+          "ChoiceLabel": "",
+          "Auto": true,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "base",
+      "Position": {
+        "X": 330,
+        "Y": 408
+      }
+    },
+    {
+      "EpisodeId": "ch06_base_03",
+      "Title": "3소대 수칙 제1조",
+      "IndexText": "",
+      "DialogueEntryId": "ch06_base_03",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch06_base_03a",
+          "ChoiceLabel": "기습에 찬성표를 던진다",
+          "Auto": false,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": [
+            {
+              "Key": "shatong_trust",
+              "Amount": 1,
+              "Op": "Add"
+            }
+          ]
+        },
+        {
+          "TargetEpisodeId": "ch06_base_03b",
+          "ChoiceLabel": "신중론에 한 표를 보탠다",
+          "Auto": false,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": [
+            {
+              "Key": "kasimira_trust",
+              "Amount": 1,
+              "Op": "Add"
+            }
+          ]
+        },
+        {
+          "TargetEpisodeId": "ch06_base_03c",
+          "ChoiceLabel": "찬성하되 안내인을 경계하자고 덧붙인다",
+          "Auto": false,
+          "VisibleConditions": [
+            {
+              "Kind": "Stat",
+              "Key": "doubted_miner",
+              "Op": "Equal",
+              "IntValue": 1
+            }
+          ],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": [
+            {
+              "Key": "shatong_trust",
+              "Amount": 1,
+              "Op": "Add"
+            },
+            {
+              "Key": "kasimira_trust",
+              "Amount": 1,
+              "Op": "Add"
+            }
+          ]
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "base",
+      "Position": {
+        "X": 0,
+        "Y": 612
+      }
+    },
+    {
+      "EpisodeId": "ch06_base_03a",
+      "Title": "찬성의 한 표",
+      "IndexText": "",
+      "DialogueEntryId": "ch06_base_03a",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch06_raid_01",
+          "ChoiceLabel": "",
+          "Auto": true,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "base",
+      "Position": {
+        "X": 0,
+        "Y": 816
+      }
+    },
+    {
+      "EpisodeId": "ch06_base_03b",
+      "Title": "신중론의 한 표",
+      "IndexText": "",
+      "DialogueEntryId": "ch06_base_03b",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch06_raid_01",
+          "ChoiceLabel": "",
+          "Auto": true,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "base",
+      "Position": {
+        "X": 330,
+        "Y": 816
+      }
+    },
+    {
+      "EpisodeId": "ch06_base_03c",
+      "Title": "안내인에게서 눈을 떼지 마라",
+      "IndexText": "",
+      "DialogueEntryId": "ch06_base_03c",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch06_raid_01",
+          "ChoiceLabel": "",
+          "Auto": true,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "base",
+      "Position": {
+        "X": 660,
+        "Y": 816
+      }
+    },
+    {
+      "EpisodeId": "ch06_raid_01",
+      "Title": "광산을 기습한다",
+      "IndexText": "",
+      "DialogueEntryId": "ch06_raid_01",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [
+        {
+          "TargetEpisodeId": "ch06_raid_02",
+          "ChoiceLabel": "",
+          "Auto": true,
+          "VisibleConditions": [],
+          "Conditions": [],
+          "LockedReasonText": "",
+          "StatChanges": []
+        }
+      ],
+      "EventKey": "",
+      "SceneId": "raid",
+      "Position": {
+        "X": 0,
+        "Y": 1020
+      }
+    },
+    {
+      "EpisodeId": "ch06_raid_02",
+      "Title": "거대한 울음소리",
+      "IndexText": "",
+      "DialogueEntryId": "ch06_raid_02",
+      "VisibleConditions": [],
+      "UnlockConditions": [],
+      "NextOptions": [],
+      "EventKey": "",
+      "SceneId": "raid",
+      "Position": {
+        "X": 0,
+        "Y": 1224
+      }
+    }
+  ]
+}
