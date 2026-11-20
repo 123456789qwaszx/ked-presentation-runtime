@@ -5,13 +5,14 @@
 
 ## 돌려 보기
 
-`Scenes/PresentationSample.unity`를 열고 재생한다. 예제는 둘이고, 하이어라키의 `SampleBootstrap` › **예제** 칸이나
+`Scenes/PresentationSample.unity`를 열고 재생한다. 예제는 셋이고, 하이어라키의 `SampleBootstrap` › **예제** 칸이나
 타이틀의 **[다른 예제로]**로 고른다.
 
 | 예제 | 챕터 JSON | 무엇을 보여 주나 |
 |---|---|---|
 | 축제 전야 | `Assets/Dialogue/ChapterProgression/festival_eve.progression.json` | 여러 장면 · 선택 · 스탯 · 저장과 갈라지기 |
 | 연출 데모 | `Assets/Dialogue/ChapterProgression/presentation_demo.progression.json` | 연출 커맨드를 한 번씩 지나가는 장면 하나 |
+| 스토리 | `SampleBootstrap` › Story Folder(기본 `Assets/Dialogue/Story`)의 `*.progression.json` 전부 | 폴더에 넣은 챕터가 카드로 서고, 카드를 누르면 그 챕터를 재생한다 — ked-story-director의 `exported/`를 넣는 자리([docs/PLAN_story-example.md](../../docs/PLAN_story-example.md)) |
 
 대본과 챕터 JSON은 `Samples/` 밖의 `Assets/Dialogue/`에 있다 — 저작 툴(ked-story-director · ked-story-compositor)이 내는 자리다.
 

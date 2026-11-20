@@ -57,6 +57,9 @@ namespace Ked.Samples.UI
 
             /// <summary>끝난 때의 스탯(정의 순서). 비면 결과 칸(제목 포함)을 감춘다.</summary>
             public IReadOnlyList<Stat> Stats = Array.Empty<Stat>();
+
+            /// <summary>나가는 버튼의 글자. 비면 표의 것("타이틀로") — 끝에서 돌아갈 곳이 타이틀이 아닌 호스트가 준다.</summary>
+            public string ReturnLabel;
         }
 
         public event Action TitleClicked;
@@ -97,6 +100,11 @@ namespace Ked.Samples.UI
 
             KedUIUtil.SetText(View.Text(Refs.EndKicker), KedUIUtil.Text(_texts, "end.chapter.kicker"));
             KedUIUtil.SetText(View.Text(Refs.EndTitle), _model.Title);
+
+            // 나가는 버튼의 글자 — 호스트가 주면 그것(끝에서 돌아갈 곳이 타이틀이 아닐 때), 없으면 표의 것.
+            KedUIUtil.SetText(View.Text(Refs.EndTitleReturnLabel), string.IsNullOrWhiteSpace(_model.ReturnLabel)
+                ? KedUIUtil.Text(_texts, "EpisodeEndPanel.EndTitleReturnLabel")
+                : _model.ReturnLabel);
             KedUIUtil.SetText(View.Text(Refs.EndBody), string.IsNullOrWhiteSpace(_model.LastEpisode)
                 ? KedUIUtil.Text(_texts, "end.chapter.body")
                 : KedUIUtil.Format(_texts, "end.lastEpisode", _model.LastEpisode));

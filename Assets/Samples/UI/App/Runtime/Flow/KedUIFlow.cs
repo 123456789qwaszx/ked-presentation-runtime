@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Ked.Progression;
 using UnityEngine;
 using Yarn.Unity;
 
@@ -57,7 +58,8 @@ namespace Ked.Samples.UI
             ManualSaveFlow saves,
             KedExampleCard example,
             Func<bool> hasResumePoint,
-            Action switchExample)
+            Action switchExample,
+            ScenarioDefinition story = null)
         {
             if (_configured)
                 throw new InvalidOperationException("[Ked UI] 흐름은 한 번만 잇는다.");
@@ -73,6 +75,7 @@ namespace Ked.Samples.UI
             _example = example;
             _hasResumePoint = hasResumePoint;
             _switchExample = switchExample;
+            _story = story;
             _configured = true;
 
             if (inputPoller != null)

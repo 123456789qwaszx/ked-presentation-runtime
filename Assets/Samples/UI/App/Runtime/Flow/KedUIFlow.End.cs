@@ -24,6 +24,15 @@ namespace Ked.Samples.UI
 
         private void ApplyBindings(EpisodeEndPanel panel)
         {
+            // 스토리 예제는 끝 카드에서 챕터 카드 화면으로 돌아간다(버튼 글자도 그렇게 바꾼다 — RefreshEnd).
+            if (IsStoryExample)
+            {
+                AddBinding(panel,
+                    p => p.TitleClicked += ReturnToStory,
+                    p => p.TitleClicked -= ReturnToStory);
+                return;
+            }
+
             AddBinding(panel,
                 p => p.TitleClicked += ReturnToTitle,
                 p => p.TitleClicked -= ReturnToTitle);
@@ -51,7 +60,7 @@ namespace Ked.Samples.UI
 
         #region Refresh
 
-        private static void RefreshEnd(
+        private void RefreshEnd(
             EpisodeEndPanel panel, 
             ChapterDefinition chapter, 
             EpisodeNode lastEpisode, 
@@ -64,6 +73,7 @@ namespace Ked.Samples.UI
                     : chapter.DisplayName,
                 LastEpisode = lastEpisode?.Title,
                 Stats = EndStats(chapter, state),
+                ReturnLabel = IsStoryExample ? Text("story.end.return") : null,
             });
         }
 

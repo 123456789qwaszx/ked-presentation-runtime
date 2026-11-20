@@ -83,6 +83,8 @@ EpisodeEndPanel.EndTitleReturnLabel,타이틀로,Return to title
 ExtraPanel.ExtraTitle,감상,Extras
 ExtraPanel.ExtraTabText_0,앨범,Album
 ExtraPanel.ExtraTabText_1,CG,CG
+StoryPanel.StoryTitle,스토리,Story
+StoryPanel.StoryEmpty,스토리 폴더에 챕터(*.progression.json)가 없습니다.,The story folder has no chapters (*.progression.json).
 # 코드가 쓰는 글자 — 소문자로 시작. {0}은 값,,
 play.speed.off,배속,Speed
 play.speed.on,{0}배속,{0}×
@@ -95,6 +97,12 @@ example.presentationDemo.summary,대사 · 연출 · 선택 · 되감기 · 이�
 example.progression.name,진행·저장,Progression & saves
 example.progression.title,챕터 진행,Chapter progression
 example.progression.summary,장면 저장 · 수동 슬롯 · 지난 장면에서 갈라지기,Scene saves · Manual slots · Branch from a past scene
+example.story.name,스토리,Story
+example.story.title,스토리 폴더,Story folder
+example.story.summary,폴더에 넣은 챕터를 카드로 골라 재생,Pick a chapter from the folder and play it
+story.subtitle,챕터 {0}개 · 카드를 누르면 그 챕터를 처음부터 재생합니다.,{0} chapters · Pick a card to play that chapter from the start.
+story.card.info,장면 {0} · 에피소드 {1},{0} scenes · {1} episodes
+story.end.return,챕터 목록으로,Back to chapters
 play.chapterTag,{0} · {1},{0} · {1}
 end.chapter.kicker,챕터 끝,END OF CHAPTER
 end.chapter.body,챕터를 끝까지 진행했습니다.,You finished the chapter.

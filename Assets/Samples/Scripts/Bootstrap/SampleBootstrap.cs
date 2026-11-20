@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using Ked.Progression;
 using Ked.Progression.Save;
@@ -14,7 +15,9 @@ using KedUI = Ked.Samples.UI;
 ///
 /// - 진행·저장: 여러 장면·선택·스탯이 있는 챕터(FestivalEve).
 /// - 연출 데모: 챕터 하나 · 장면 하나 · 에피소드 하나(Demo_Presentation).
-/// 둘 다 장면 경계 저장 → 슬롯·갈라지기를 쓰고, 연출 기억 문자열을 진행 저장의 HostState 칸에 둔다.
+/// - 스토리: 폴더 하나에 든 챕터 JSON 전부. 타이틀의 [처음부터]가 챕터 카드 화면을 열고, 카드를 누르면 그 챕터를 재생한다
+///   (docs/PLAN_story-example.md). ked-story-director가 낸 exported/를 그 폴더에 두면 된다.
+/// 모두 장면 경계 저장 → 슬롯·갈라지기를 쓰고, 연출 기억 문자열을 진행 저장의 HostState 칸에 둔다.
 /// 저장 폴더만 예제마다 나눈다 — 슬롯이 섞이지 않게.
 ///
 /// 연출 런타임의 조립은 부분 파일 SampleBootstrap.Presentation.cs(AssemblePresentation)가 직렬화 필드를 바로 읽어 한다.
@@ -40,6 +43,7 @@ public partial class SampleBootstrap : MonoBehaviour, IRigPrefabSource
     {
         FestivalEve = 0,
         PresentationDemo = 1,
+        Story = 2,
     }
 
     private PresentationRuntime _runtime;
@@ -75,6 +79,16 @@ public partial class SampleBootstrap : MonoBehaviour, IRigPrefabSource
     [Tooltip("연출 데모 챕터 JSON — 챕터·장면·에피소드 하나. 에피소드가 연출 데모 노드 Demo_Presentation" +
              "(Assets/Dialogue/ChapterProgression/presentation_demo_Demo_Presentation.yarn — ked-story-compositor가 낸 것)을 재생한다.")]
     [SerializeField] private TextAsset presentationDemoChapterJson;
+
+    [Header("스토리 예제 — 폴더의 챕터를 카드로")]
+    [Tooltip("스토리 폴더(프로젝트 경로, 예: Assets/Dialogue/Story). 에디터에서는 재생을 시작할 때마다 이 폴더(하위 폴더 포함)의 " +
+             "*.progression.json을 모두 모아 챕터 카드로 세운다 — 파일을 넣고 빼기만 하면 된다. 카드 순서는 ChapterId 순.\n" +
+             "대사 Yarn은 Yarn 프로젝트(Assets/Dialogue/YarnProject)가 컴파일하는 자리에 있어야 한다 — Assets/Dialogue 아래면 된다.")]
+    [SerializeField] private string storyFolder = "Assets/Dialogue/Story";
+
+    [Tooltip("빌드에서 쓰는 챕터 목록 — 빌드는 폴더를 훑지 못한다. 컴포넌트 메뉴(⋮)의 'Story/폴더의 챕터를 목록에 굽기'가 채운다. " +
+             "에디터에서는 폴더가 있으면 이 목록을 보지 않는다.")]
+    [SerializeField] private TextAsset[] storyChapters = Array.Empty<TextAsset>();
 
     [Header("무대")]
     [Tooltip("연출 무대(배경·인물·화면 효과). 씬의 무대 캔버스에 놓인 PresentationUIRoot. " +
@@ -177,6 +191,8 @@ public partial class SampleBootstrap : MonoBehaviour, IRigPrefabSource
 
     private bool IsPresentationDemo => _example == SampleExample.PresentationDemo;
 
+    private bool IsStory => _example == SampleExample.Story;
+
     private void Awake()
     {
         _example = SampleExampleSwitch.Resolve(example);
@@ -238,7 +254,7 @@ public partial class SampleBootstrap : MonoBehaviour, IRigPrefabSource
 
     private void ConfigureKedUI()
     {
-        SampleExample other = SampleExampleSwitch.Other(_example);
+        SampleExample next = SampleExampleSwitch.Next(_example);
 
         _kedUI.Flow.Configure(
             _runtime,
@@ -252,21 +268,27 @@ public partial class SampleBootstrap : MonoBehaviour, IRigPrefabSource
             _manualSaveFlow,
             ExampleCard(_example),
             HasProgressionResumePoint,
-            () => SampleExampleSwitch.SwitchTo(other));
+            () => SampleExampleSwitch.SwitchTo(next),
+            IsStory ? _scenarioDef : null);
     }
 
     // 타이틀 오른쪽 카드. 글자는 UI 글자 표의 키, 그림은 그 예제 대본이 실제로 쓰는 배경.
     private static KedUI.KedExampleCard ExampleCard(SampleExample example)
     {
         bool presentationDemo = example == SampleExample.PresentationDemo;
-        string prefix = presentationDemo ? "example.presentationDemo" : "example.progression";
+        bool story = example == SampleExample.Story;
+
+        string prefix = story ? "example.story"
+            : presentationDemo ? "example.presentationDemo"
+            : "example.progression";
 
         return new KedUI.KedExampleCard
         {
             NameKey = prefix + ".name",
             TitleKey = prefix + ".title",
             SummaryKey = prefix + ".summary",
-            Preview = Resources.Load<Sprite>(presentationDemo
+            // 스토리 폴더의 내용은 무엇이든 될 수 있어 고를 그림이 없다 — 중립 바탕.
+            Preview = story ? null : Resources.Load<Sprite>(presentationDemo
                 ? "Backgrounds/class_day"
                 : "Backgrounds/class_lunch"),
         };
@@ -278,10 +300,39 @@ public partial class SampleBootstrap : MonoBehaviour, IRigPrefabSource
 
     private bool TryBootstrapProgressionData()
     {
+        if (string.IsNullOrWhiteSpace(saveContentVersion))
+        {
+            Debug.LogError("[저장] Save Content Version을 지정해야 한다.");
+
+            enabled = false;
+            return false;
+        }
+
+        // 스토리 예제 — 폴더의 챕터들로 시나리오를 세운다. 세울 것이 없으면 빈 화면 대신 진행·저장 예제로 연다
+        // (타이틀의 [다른 예제로]로 들어왔을 때 돌아갈 길이 없어지지 않게).
+        if (IsStory)
+        {
+            _scenarioDef = ProgressionContentLoader.LoadChapters(CollectStoryChapters(), "story", "스토리");
+
+            if (_scenarioDef == null)
+            {
+                Debug.LogError(
+                    $"[스토리] 스토리 폴더 '{storyFolder}'에서 재생할 챕터를 찾지 못했다 — 진행·저장 예제로 연다. " +
+                    "폴더에 *.progression.json(ked-story-director의 exported/)을 넣거나 SampleBootstrap의 Story Folder를 고친다.");
+
+                _example = SampleExample.FestivalEve;
+            }
+        }
+
         // 예제가 챕터와 저장 폴더를 함께 정한다 — 실행 중 인스펙터를 바꿔도 둘이 엇갈리지 않게 여기서 한 번 읽는다.
         _saveRoot = Path.Combine(
             Application.persistentDataPath,
-            IsPresentationDemo ? "saves-presentation-demo" : "saves");
+            IsStory ? "saves-story"
+            : IsPresentationDemo ? "saves-presentation-demo"
+            : "saves");
+
+        if (IsStory)
+            return true;
 
         _chapterJson = IsPresentationDemo ? presentationDemoChapterJson : festivalEveChapterJson;
 
@@ -290,14 +341,6 @@ public partial class SampleBootstrap : MonoBehaviour, IRigPrefabSource
             Debug.LogError(
                 IsPresentationDemo ? "[연출 데모] Presentation Demo Chapter Json을 지정해야 한다."
                 : "[축제 전야] Festival Eve Chapter Json을 지정해야 한다.");
-
-            enabled = false;
-            return false;
-        }
-
-        if (string.IsNullOrWhiteSpace(saveContentVersion))
-        {
-            Debug.LogError("[저장] Save Content Version을 지정해야 한다.");
 
             enabled = false;
             return false;
@@ -314,6 +357,64 @@ public partial class SampleBootstrap : MonoBehaviour, IRigPrefabSource
 
         return true;
     }
+
+    // 스토리 폴더의 챕터 JSON. 에디터에서는 폴더를 매번 훑는다(넣고 빼면 다음 재생에 바로 보인다).
+    // 빌드에는 AssetDatabase가 없다 — 구워 둔 목록(storyChapters)을 쓴다.
+    private IReadOnlyList<TextAsset> CollectStoryChapters()
+    {
+#if UNITY_EDITOR
+        if (TryFindStoryChaptersInFolder(out List<TextAsset> found))
+            return found;
+
+        Debug.LogWarning($"[스토리] 스토리 폴더 '{storyFolder}'가 프로젝트에 없다 — 구워 둔 목록(Story Chapters)을 쓴다.");
+#endif
+        return storyChapters ?? Array.Empty<TextAsset>();
+    }
+
+#if UNITY_EDITOR
+    private const string ProgressionFileSuffix = ".progression.json";
+
+    private bool TryFindStoryChaptersInFolder(out List<TextAsset> found)
+    {
+        found = new List<TextAsset>();
+
+        string folder = (storyFolder ?? "").Trim().Replace('\\', '/').TrimEnd('/');
+
+        if (folder.Length == 0 || !UnityEditor.AssetDatabase.IsValidFolder(folder))
+            return false;
+
+        foreach (string guid in UnityEditor.AssetDatabase.FindAssets("t:TextAsset", new[] { folder }))
+        {
+            string path = UnityEditor.AssetDatabase.GUIDToAssetPath(guid);
+
+            if (!path.EndsWith(ProgressionFileSuffix, StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            TextAsset asset = UnityEditor.AssetDatabase.LoadAssetAtPath<TextAsset>(path);
+
+            if (asset != null)
+                found.Add(asset);
+        }
+
+        return true;
+    }
+
+    [ContextMenu("Story/폴더의 챕터를 목록에 굽기 (빌드용)")]
+    private void BakeStoryChapters()
+    {
+        if (!TryFindStoryChaptersInFolder(out List<TextAsset> found))
+        {
+            Debug.LogError($"[스토리] 스토리 폴더 '{storyFolder}'가 프로젝트에 없다 — 굽지 않았다.");
+            return;
+        }
+
+        UnityEditor.Undo.RecordObject(this, "Bake story chapters");
+        storyChapters = found.ToArray();
+        UnityEditor.EditorUtility.SetDirty(this);
+
+        Debug.Log($"[스토리] '{storyFolder}'의 챕터 {found.Count}개를 목록에 구웠다. 씬을 저장할 것.");
+    }
+#endif
 
     private IPlaybackHost InstallProgression()
     {

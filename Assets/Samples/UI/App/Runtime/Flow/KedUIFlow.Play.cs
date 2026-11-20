@@ -181,7 +181,11 @@ namespace Ked.Samples.UI
         }
 
         // 대사창 위 꼬리표: 예제 이름.
-        private string ChapterLabel() => Text(_example?.NameKey);
+        // 스토리 예제는 지금 재생하는 챕터의 이름, 그 밖에는 예제 이름.
+        private string ChapterLabel() =>
+            IsStoryExample && _launcher?.CurrentChapter != null
+                ? ChapterName(_launcher.CurrentChapter)
+                : Text(_example?.NameKey);
 
         #endregion
     }

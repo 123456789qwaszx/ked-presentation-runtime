@@ -39,6 +39,9 @@ public sealed class ProgressionLauncher : IPlaybackHost
     public bool IsRunning => _driver.IsRunning;
 
     public IReadOnlyList<CommittedChoice> PendingPath => _driver.PendingPath;
+
+    // 마지막으로 연 챕터(새 회차든 이어하기든). 아직 아무것도 열지 않았으면 null.
+    public ChapterDefinition CurrentChapter { get; private set; }
     
     public void StartNew()
     {
@@ -47,7 +50,25 @@ public sealed class ProgressionLauncher : IPlaybackHost
 
         _saveCoordinator.BeginNewPlaythrough();
 
-        LaunchNewGame();
+        LaunchNewGame(_scenarioDef.StartChapter);
+    }
+
+    // 시나리오의 그 챕터를 새 회차로 처음부터 — 챕터 카드 화면(스토리 예제)이 부른다.
+    // 챕터는 서로 독립이다: 스탯은 그 챕터의 초기값에서 시작한다.
+    public void StartChapter(string chapterId)
+    {
+        if (_isTransitioning)
+            return;
+
+        if (!_scenarioDef.TryGetChapter(chapterId, out ChapterDefinition chapterDef))
+        {
+            Debug.LogError($"[진행] 챕터 '{chapterId}'가 시나리오 {_scenarioDef}에 없다.");
+            return;
+        }
+
+        _saveCoordinator.BeginNewPlaythrough();
+
+        LaunchNewGame(chapterDef);
     }
     
     public void Resume()
@@ -108,10 +129,10 @@ public sealed class ProgressionLauncher : IPlaybackHost
     }
     
     
-    private void LaunchNewGame()
+    private void LaunchNewGame(ChapterDefinition chapterDef)
     {
-        ChapterDefinition chapterDef = _scenarioDef.StartChapter;
-        
+        CurrentChapter = chapterDef;
+
         ChapterState chapterState =
             chapterDef.CreateEntryState();
 
@@ -128,7 +149,7 @@ public sealed class ProgressionLauncher : IPlaybackHost
         if (!TryResolveResumeChapter(resume, out ChapterDefinition chapterDef))
         {
             _saveCoordinator.BeginNewPlaythrough();
-            LaunchNewGame();
+            LaunchNewGame(_scenarioDef.StartChapter);
             return;
         }
 
@@ -149,9 +170,11 @@ public sealed class ProgressionLauncher : IPlaybackHost
         {
             Debug.LogWarning($"[진행] 저장된 연출 상태를 읽지 못했다. 새로 시작. — {error.Message}");
             _saveCoordinator.BeginNewPlaythrough();
-            LaunchNewGame();
+            LaunchNewGame(_scenarioDef.StartChapter);
             return;
         }
+
+        CurrentChapter = chapterDef;
 
         _driver.Start(
             chapterDef,

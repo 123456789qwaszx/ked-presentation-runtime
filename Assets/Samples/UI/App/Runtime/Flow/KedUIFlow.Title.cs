@@ -15,6 +15,13 @@ namespace Ked.Samples.UI
                 {
                     BindView(root, ApplyBindings);
                     RefreshTitle(root);
+
+                    // 스토리 예제의 챕터 끝에서 왔으면 챕터 카드 화면을 다시 연다.
+                    if (_reopenStory)
+                    {
+                        _reopenStory = false;
+                        OpenStory();
+                    }
                 },
                 afterClosed: Unbind);
         }
@@ -52,8 +59,15 @@ namespace Ked.Samples.UI
 
         #region Handlers
 
+        // 스토리 예제는 챕터가 여럿이다 — 바로 시작하지 않고 챕터 카드 화면을 연다.
         private void HandleStartClicked()
         {
+            if (IsStoryExample)
+            {
+                OpenStory();
+                return;
+            }
+
             _launcher?.StartNew();
         }
 
