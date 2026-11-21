@@ -513,9 +513,9 @@ namespace Ked.Presentation.Tests
                 Is.EqualTo(expectedScale).Within(Eps));
 
             // Y는 커브의 값 그대로다(120 − 56 × 레벨) — 초점에 맞춰 보정하지 않는다.
-            Assert.That(after.Nodes.GetState("c1/CharacterPortrait_DepthOffset").AnchoredPosition,
-                Is.EqualTo(new Vec2(0f, 120f - 56f * level)).Using<Vec2>((a, b) =>
-                    System.Math.Abs(a.X - b.X) <= 1e-2f && System.Math.Abs(a.Y - b.Y) <= 1e-2f));
+            Vec2 depthOffset = after.Nodes.GetState("c1/CharacterPortrait_DepthOffset").AnchoredPosition;
+            Assert.That(depthOffset.X, Is.EqualTo(0f).Within(1e-2f));
+            Assert.That(depthOffset.Y, Is.EqualTo(120f - 56f * level).Within(1e-2f));
         }
 
         [Test]
