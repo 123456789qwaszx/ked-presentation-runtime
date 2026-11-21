@@ -1,6 +1,6 @@
 # 명세 표와 줄 읽기 — 커맨드의 종류 · 인자 칸, 줄을 스텝으로 읽는 함수 (2026-11-22)
 
-> 상태: **K1 · K2 코어 끝(Unity 밖 확인) — Unity 확인과 제안 셋의 확인이 남았다(§2 · §7)** · 브랜치 `feat/command-spec`(`dev` `b56a2ebc`에서)
+> 상태: **K1 · K2 끝(Unity 확인 — 소유자 2026-11-22). 제안 셋의 확인이 남았다(§2)** · 브랜치 `feat/command-spec`(`dev` `b56a2ebc`에서)
 > 설계: ked-story-tools `docs/PLAN.md` §4.1 · §4.2 · §6 → 넘겨받은 일: 그 저장소 `docs/handoff/runtime.md`
 > 앞선 일: [PLAN_line-anchor.md](PLAN_line-anchor.md)(줄의 앵커 — §11이 미뤄 둔 "종류의 표와 도구가 묻는 창구"가 이 일이다) · [PLAN_rig-layers.md](PLAN_rig-layers.md)(어휘 83개)
 
@@ -127,14 +127,16 @@ C1 · C2는 표의 한 줄씩이다 — 바꾸면 `StageCommandSpecTable.Core.cs
 
 코어가 바뀐다 — 코어 사본을 쓰는 곳(ked-story-tools · 작업공간 포크 · 모션 툴 · 추출기 · compositor의 오라클)은 다음에 들일 때 `Core/Spec` · `Core/Read`가 따라온다. 포크는 `StageCommandSpecTable.Fork.cs`에 제 어휘를 적어야 EditMode 시험이 지나간다.
 
-## 7. Unity에서 볼 것 (소유자)
+## 7. Unity에서 소유자가 본 것 (2026-11-22 확인)
 
 1. 컴파일 · EditMode 시험 — 새 시험 넷. `StageCommandSpecTableParserTests`가 파서 표의 원문을 찾는가(시험 파일의 자리에서 `../../Stage/Grammar/StageCommandParser.Table.cs`).
 2. 메뉴 `Ked/U12/Export Command Specs` — `ExportedTuning/command-specs.json`이 다시 나오고, 지금 든 파일과 내용이 같은가(공백 · 줄바꿈만 다르면 다시 낸 것을 쓴다).
 3. 재생은 볼 것이 없다 — 재생 경로를 고치지 않았다.
 
+Unity에서 다시 낸 `command-specs.json`은 든 파일과 내용이 같다(줄바꿈만 다르다).
+
 ## 8. 남은 것
 
-- §2의 확인(C1 – C3).
+- §2의 확인(C1 – C3) → `dev`로.
 - 타자기의 식을 한 곳으로(§4.1) — 할지 말지.
 - K5(도구 연결) · N5(옛 표기 걷기 — `at` 없는 명령의 오류는 `StageCommandSpecTable.IsImmediate`로 가린다) — 넘겨받은 문서 4절 · 5절.
