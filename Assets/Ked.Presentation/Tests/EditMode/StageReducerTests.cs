@@ -648,10 +648,12 @@ namespace Ked.Presentation.Tests
             Assert.That(state.Shot.Dolly, Is.EqualTo(4f));
             Assert.That(state.Shot.Roll, Is.EqualTo(-8f));
 
-            StageState to = StageReducer.Apply(state, Cmd("shot_to", "5", "-2u", "1u"), NewTuning());
+            // 줌과 팬을 나란히 적으면 둘 다 남는다 — 몸은 건드리지 않는다.
+            StageState to = StageReducer.Apply(
+                StageReducer.Apply(state, Cmd("shot_zoom", "5"), NewTuning()), Cmd("shot_pan", "-2u", "1u"), NewTuning());
             Assert.That(to.Shot.Zoom, Is.EqualTo(5f));
             Assert.That(to.Shot.PanInRigSpace, Is.EqualTo(new Vec2(-80f, 40f)));
-            Assert.That(to.Shot.Track, Is.EqualTo(new Vec2(40f, 0f)), "shot_to는 몸을 건드리지 않는다");
+            Assert.That(to.Shot.Track, Is.EqualTo(new Vec2(40f, 0f)), "렌즈 명령은 몸을 건드리지 않는다");
 
             // shot_reset은 렌즈만 — 카메라의 몸과 롤은 그대로다.
             StageState reset = StageReducer.Apply(to, Cmd("shot_reset"), NewTuning());
@@ -672,13 +674,12 @@ namespace Ked.Presentation.Tests
             StageState state = Fold(
                 Cmd("shot_zoom"),
                 Cmd("shot_zoom", "abc"),
-                Cmd("shot_to", "3"),
                 Cmd("shot_pan", "1u"),
                 Cmd("shot_track"),
                 Cmd("shot_dolly"),
                 Cmd("shot_roll", "x"));
 
-            Assert.That(state.Unhandled.Count, Is.EqualTo(7), string.Join("\n", state.Unhandled));
+            Assert.That(state.Unhandled.Count, Is.EqualTo(6), string.Join("\n", state.Unhandled));
             Assert.That(state.Shot.ToString(), Is.EqualTo(ShotIntentState.Default.ToString()), "아무것도 접히지 않았다");
         }
 

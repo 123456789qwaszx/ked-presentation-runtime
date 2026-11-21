@@ -432,12 +432,14 @@ namespace Ked.Presentation.Tests
 
             StageState plain = Fold(tuning,
                 Cmd("slot", "c1"),
-                Cmd("shot_to", "3", "1u", "0u", "24fr"),
+                Cmd("shot_zoom", "3", "24fr"),
+                Cmd("shot_pan", "1u", "0u", "24fr"),
                 Cmd("shot_focus_to", "c1", "bust", "left", "2", "1.2s"));
 
             StageState eased = Fold(tuning,
                 Cmd("slot", "c1"),
-                Cmd("shot_to", "3", "1u", "0u", "24fr", "InOutCubic"),
+                Cmd("shot_zoom", "3", "24fr", "InOutCubic"),
+                Cmd("shot_pan", "1u", "0u", "24fr", "InOutCubic"),
                 Cmd("shot_focus_to", "c1", "bust", "left", "2", "1.2s", "@push_in"));
 
             Assert.That(eased.Unhandled.Count, Is.EqualTo(0));
@@ -480,7 +482,8 @@ namespace Ked.Presentation.Tests
             // 카메라가 이미 움직인 상태에서 접어도 명중한다 — 입력은 무대 좌표다.
             StageState state = Fold(tuning,
                 Cmd("slot", "c1"),
-                Cmd("shot_to", "3", "1u", "0u"),
+                Cmd("shot_zoom", "3"),
+                Cmd("shot_pan", "1u", "0u"),
                 Cmd("shot_focus_to", "c1", "bust", "left", "2"));
 
             Assert.That(state.Unhandled, Is.Empty);
@@ -534,7 +537,8 @@ namespace Ked.Presentation.Tests
 
             StageState state = Fold(tuning,
                 Cmd("slot", "c1", "stage01", "mid"),
-                Cmd("shot_to", "3", "1u", "0u"),
+                Cmd("shot_zoom", "3"),
+                Cmd("shot_pan", "1u", "0u"),
                 Cmd("shot_focus_to", "c1", "bust", "center", "2.5"));
 
             Assert.That(state.Unhandled.Count, Is.EqualTo(1));

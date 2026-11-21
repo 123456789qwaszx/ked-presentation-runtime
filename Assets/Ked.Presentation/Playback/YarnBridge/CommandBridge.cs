@@ -142,8 +142,6 @@ public sealed partial class YarnCommandBridge
         // 묶음 — 줌 + 팬
         runner.AddCommandHandler<string, string, string, string, string, string>(
             "shot_focus_to", EnqueueShotFocusToSpec);
-        runner.AddCommandHandler<string, string, string, string, string>(
-            "shot_to", EnqueueShotToSpec);
 
         // 축마다 하나 — 렌즈(줌 · 팬) · 헤드(롤) · 몸(달리 · 트랙)
         runner.AddCommandHandler<string, string, string>(

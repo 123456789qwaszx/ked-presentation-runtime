@@ -50,7 +50,8 @@ test
 <<size s1 22 bust 38fr>>
 <<place_center s1 face 25fr>>
 <<up s1 2u 25fr>>
-<<shot_to 3 4 4 24>>
+<<shot_zoom 3 24>>
+<<shot_pan 4 4 24>>
 2. size + place — 커지는 중에도 얼굴이 가운데에 와야 한다.
 
 <<rotate_by s1 12 38fr>>

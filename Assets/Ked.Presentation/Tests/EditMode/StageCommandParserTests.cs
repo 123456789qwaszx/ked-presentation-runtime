@@ -436,10 +436,9 @@ public class StageCommandParserTests
         Assert.AreEqual(4f, ((ShotDollyCommandSpec)Parse(parser, Cmd("shot_dolly", "4"))[0]).dolly, 1e-6f);
         Assert.AreEqual(-8f, ((ShotRollCommandSpec)Parse(parser, Cmd("shot_roll", "-8"))[0]).roll, 1e-6f);
 
-        ShotToCommandSpec to = (ShotToCommandSpec)Parse(parser, Cmd("shot_to", "5", "-2u", "1u", "30fr"))[0];
-        Assert.AreEqual(5f, to.zoom, 1e-6f);
-        Assert.AreEqual(new Vector2(-80f, 40f), to.pan);
-        Assert.AreEqual(1f, to.duration, 1e-6f, "30fr = 1초");
+        ShotPanCommandSpec timed = (ShotPanCommandSpec)Parse(parser, Cmd("shot_pan", "-2u", "1u", "30fr"))[0];
+        Assert.AreEqual(new Vector2(-80f, 40f), timed.pan);
+        Assert.AreEqual(1f, timed.duration, 1e-6f, "30fr = 1초");
     }
 
     [Test]
@@ -462,7 +461,6 @@ public class StageCommandParserTests
         {
             Cmd("shot_zoom"),
             Cmd("shot_zoom", "abc"),
-            Cmd("shot_to", "3"),
             Cmd("shot_pan", "1u"),
             Cmd("shot_track"),
             Cmd("shot_dolly"),

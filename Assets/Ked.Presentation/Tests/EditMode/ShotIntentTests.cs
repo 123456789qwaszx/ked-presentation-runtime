@@ -89,28 +89,21 @@ namespace Ked.Presentation.Tests
         }
 
         [Test]
-        public void shot_to는_몸과_롤을_건드리지_않는다()
+        public void 줌과_팬을_나란히_적으면_둘_다_남는다()
         {
-            ShotIntentState to = ShotIntents.To(Full, 4f, new Vec2(-80f, 60f));
+            // 줌 + 팬의 묶음 명령은 없다 — 둘을 나란히 적는다. 어느 쪽을 먼저 적어도 같은 의도다.
+            ShotIntentState zoomThenPan = ShotIntents.Pan(ShotIntents.Zoom(Full, 4f), new Vec2(-80f, 60f));
+            ShotIntentState panThenZoom = ShotIntents.Zoom(ShotIntents.Pan(Full, new Vec2(-80f, 60f)), 4f);
 
-            Assert.That(to.Zoom, Is.EqualTo(4f));
-            AssertVec2(to.PanInRigSpace, new Vec2(-80f, 60f), "pan 절대");
-            AssertVec2(to.FocusPointInRigSpace, Full.FocusPointInRigSpace, "focus 유지");
-            AssertVec2(to.Track, Full.Track, "track 유지");
-            Assert.That(to.Dolly, Is.EqualTo(Full.Dolly));
-            Assert.That(to.Roll, Is.EqualTo(Full.Roll));
-        }
+            Assert.That(zoomThenPan.Zoom, Is.EqualTo(4f));
+            AssertVec2(zoomThenPan.PanInRigSpace, new Vec2(-80f, 60f), "pan 절대");
+            Assert.That(panThenZoom.ToString(), Is.EqualTo(zoomThenPan.ToString()));
 
-        [Test]
-        public void shot_to는_zoom과_pan을_절대값으로_바꾼다()
-        {
-            ShotIntentState to = ShotIntents.To(From, 4f, new Vec2(-80f, 60f));
-
-            Assert.That(to.Zoom, Is.EqualTo(4f));
-            AssertVec2(to.PanInRigSpace, new Vec2(-80f, 60f), "pan 절대");
-
-            // focus는 건드리지 않는다 — 논리 focus는 zoom_focus만 바꾼다.
-            AssertVec2(to.FocusPointInRigSpace, From.FocusPointInRigSpace, "focus 유지");
+            // 초점 · 몸 · 롤은 건드리지 않는다.
+            AssertVec2(zoomThenPan.FocusPointInRigSpace, Full.FocusPointInRigSpace, "focus 유지");
+            AssertVec2(zoomThenPan.Track, Full.Track, "track 유지");
+            Assert.That(zoomThenPan.Dolly, Is.EqualTo(Full.Dolly));
+            Assert.That(zoomThenPan.Roll, Is.EqualTo(Full.Roll));
         }
 
         [Test]

@@ -26,7 +26,6 @@ public sealed class ShotResponseCommandFactory : INodeCommandFactory
 
             // 묶음 — 줌 + 팬
             ShotFocusToCommandSpec s => new ShotFocusToCommand(_stage, _presentationResponseRig, s, _focusTuningDB),
-            ShotToCommandSpec s => new ShotToCommand(_presentationResponseRig, s),
 
             // 축마다 하나 — 렌즈 · 헤드 · 몸
             ShotZoomCommandSpec s => new ShotZoomCommand(_presentationResponseRig, s),
