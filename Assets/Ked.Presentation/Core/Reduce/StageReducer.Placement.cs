@@ -1,10 +1,10 @@
 namespace Ked.Presentation.Core
 {
     /// <summary>
-    /// place · size — focus 지점을 기준으로 삼는 배치.
+    /// place · size — 자리와 깊이.
     ///
-    /// 둘 다 "노드를 어디로"가 아니라 "focus 지점을 어디로"를 말한다.
-    /// 그 역산은 NodeTargets.TryPlaceFocus · TrySetDepth가 하고, 여기는 토큰 해석과 배선만 맡는다.
+    /// place는 "노드를 어디로"가 아니라 "focus 지점을 어디로"를 말한다 — 그 역산은 NodeTargets.TryPlaceFocus가 한다.
+    /// size는 깊이 레벨의 값을 그대로 놓는다(NodeTargets.TrySetDepth). 여기는 토큰 해석과 배선만 맡는다.
     /// </summary>
     public static partial class StageReducer
     {
@@ -36,16 +36,13 @@ namespace Ked.Presentation.Core
 
         private static bool ApplySize(
             StageState state, in StageCommand cmd, StageReducerTuning tuning,
-            string depthPresetKey, string preserveFocusToken, out string reason)
+            string depthToken, out string reason)
         {
             if (!TryGetSpawnedSlot(state, cmd, out string slotKey, out reason))
                 return false;
 
-            state.TryGetCharacter(slotKey, out string characterKey);
-
             if (!NodeTargets.TrySetDepth(
-                    state, slotKey, characterKey, depthPresetKey, preserveFocusToken,
-                    tuning.DepthLevel, tuning.FocusTuning,
+                    slotKey, depthToken, tuning.DepthLevel,
                     out NodeTarget depthYTarget, out NodeTarget depthScaleTarget,
                     out reason))
             {

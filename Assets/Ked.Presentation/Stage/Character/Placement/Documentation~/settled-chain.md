@@ -54,12 +54,11 @@
 
 `CaptureSettledChain(leaf, stopRoot, stageView)`가 leaf에서 `RigSpaceRoot`(= 리그가 선 무대의 `Stage_Root`)까지 부모를 타고 올라가며 노드마다 값을 고른다. 체인을 `RectChainMath`(순수 함수)에 넣어 rig space에서 풀고, 끝에서 월드로 바꾼다. 실제 트랜스폼은 손대지 않는다.
 
-**읽는 쪽 셋**
+**읽는 쪽 둘**
 
 | 호출자 | 커맨드 | 무엇을 재나 |
 |---|---|---|
 | `CharacterFocusPlacementSolver` | `place_*` | 초점이 무대 지점에 오도록 `Track_Focus`를 얼마나 옮길지 |
-| `CharacterDepthResolver` | `size_*` | 스케일을 바꿔도 초점이 제자리이도록 `DepthY` 보정 |
 | `CharacterFocusPointResolver` | `shot_focus_to` | 캐릭터 초점의 무대 좌표와 그 점이 선 층 |
 
 **쓰는 쪽**: 클레임-트윈 리그 커맨드 전부(move_by · scale_by · rotate_by · place · size · slide_in/out · mirror)가 `Reserve`으로, `MotionCommandCharR`(commit 모션)이 `Publish` · `Clear`로. 이 중 체인 위에 있어 실제로 읽히는 노드는 `Track` · `Track_Focus` · `DepthY` · `DepthScale` · `Scale` · `SwayPivot`이다.

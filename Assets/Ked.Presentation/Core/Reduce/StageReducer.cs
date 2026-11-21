@@ -32,7 +32,7 @@ namespace Ked.Presentation.Core
         /// <summary>presets/depth.json의 "level" 커브 — 숫자 레벨(size c1 5) 폴드. 없으면 그 커맨드만 Unhandled.</summary>
         public DepthLevelTuningDto DepthLevel;
 
-        /// <summary>presets/focus-tuning.json — place/size의 focus 오프셋. 없으면 base 0으로 접는다.</summary>
+        /// <summary>presets/focus-tuning.json — place · shot_focus_to의 focus 오프셋. 없으면 base 0으로 접는다.</summary>
         public FocusTuningBodyDto FocusTuning;
 
         /// <summary>portrait-dimensions.json — 초상 사이징의 그림 크기. 없으면 사이징은 Unhandled.</summary>
@@ -179,10 +179,10 @@ namespace Ked.Presentation.Core
                 case "place_center": return ApplyPlace(state, cmd, tuning, "center", "face", out reason);
                 case "place_right": return ApplyPlace(state, cmd, tuning, "right", "face", out reason);
 
-                // size 계열 — depth 프리셋 (focus 보존 보정 포함).
-                // 파서 표: size(role, depthArg, preserveFocus="bust").
-                case "size": return ApplySize(state, cmd, tuning, cmd.Arg(1), cmd.Arg(2, "bust"), out reason);
-                case "size_reset": return ApplySize(state, cmd, tuning, "mid", cmd.Arg(1, "bust"), out reason);
+                // size 계열 — depth 레벨의 Y와 배율을 그대로 놓는다(무대를 재지 않는다).
+                // 파서 표: size(role, depthArg, duration, ease) / size_reset(role, duration, ease) — mid로.
+                case "size": return ApplySize(state, cmd, tuning, cmd.Arg(1), out reason);
+                case "size_reset": return ApplySize(state, cmd, tuning, "mid", out reason);
 
                 // nudge (unitToken 필수 — 브리지에 기본값이 없다)
                 case "left":  return ApplyNudge(state, cmd, tuning, -1f, 0f, "CharSlot_Track_X", out reason);

@@ -55,7 +55,7 @@ public sealed class CharacterRigCommandFactory : INodeCommandFactory
 
             SetCharacterSiblingOrderCommandSpecCharR s => new SetCharacterSiblingOrderCommandCharR(_stage, s),
             
-            SetDepthCommandSpecCharR s => new SetDepthCommandCharR(_stage, _stageView, s, _characterDepthTuning, _characterFocusTuningDb),
+            SetDepthCommandSpecCharR s => new SetDepthCommandCharR(_stage, s, _characterDepthTuning),
 
             // Visibility / Root Layers
             FadeCommandSpecCharR s => new FadeCommandCharR(_stage, s),

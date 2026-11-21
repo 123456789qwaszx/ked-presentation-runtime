@@ -137,25 +137,24 @@ new RectSpace(capturedUnderParentSize, Vec2.Half)
 
 ### `depth.json` — `CharacterDepthTuningSO`
 
-`size` 계열 커맨드가 쓰는 depth 프리셋.
+`size` 계열 커맨드가 쓰는 depth 값. `size`는 이 값을 그대로 놓는다 — 초점을 재서 보정하지 않는다(2026-11-21, `docs/PLAN_command-prune.md` P3).
 
 ```
 MonoBehaviour
 ├─ presets : { far, back, mid, front, close, exp1, exp2 }
-│    └─ depthY(px, Vec2) · depthScale(무단위) ·
-│       preserveFocusPreset(int, 아래 표) · preserveFocusOffset(px, Vec2)
-└─ level   : { yCurve, scaleCurve, far/mid/close/frontPreserveFocus }
+│    └─ depthY(px, Vec2) · depthScale(무단위)
+└─ level   : { yCurve, scaleCurve }
 ```
 
 현재 값:
 
-| 프리셋 | `depthY.y` | `depthScale` | `preserveFocusPreset` |
-|---|---|---|---|
-| far | 480 | 1.00 | 0 (Feet) |
-| back | 240 | 1.14 | 20 (Bust) |
-| mid | 0 | 1.00 | 20 (Bust) |
-| front | −320 | 1.38 | 20 (Bust) |
-| close | 440 | 1.58 | 30 (Face) |
+| 프리셋 | `depthY.y` | `depthScale` |
+|---|---|---|
+| far | 480 | 1.00 |
+| back | 240 | 1.14 |
+| mid | 0 | 1.00 |
+| front | −320 | 1.38 |
+| close | 440 | 1.58 |
 
 > `level`은 `AnimationCurve` 기반이고, 코어 DTO가 `m_Curve` 키 배열을 그대로 읽는다
 > (`m_PreInfinity`/`m_PostInfinity`는 읽지 않는다 — 런타임이 쓰지 않고 직접 외삽한다).
@@ -166,7 +165,7 @@ MonoBehaviour
 
 ### `focus-tuning.json` — `CharacterFocusTuningDBSO`
 
-focus 지점의 로컬 오프셋. `place` · `size`의 focus 보존 · `shot_focus_to`가 쓴다.
+focus 지점의 로컬 오프셋. `place` · `shot_focus_to`가 쓴다.
 
 ```
 MonoBehaviour
@@ -186,7 +185,7 @@ offset = baseOffsets[preset]
 현재 `baseOffsets`: feet (0, 480) · body (0, 680) · bust (0, 820) · face (0, 950) ·
 faceAura (0, 950) · handLeft (−80, 0) · handRight (80, 0). 엔트리 6건.
 
-**`preserveFocusPreset` 정수 ↔ 이름 대응** (`CharacterFocusPreset`):
+**focus 프리셋의 정수 ↔ 이름 대응** (`CharacterFocusPreset`):
 
 | 값 | 이름 |
 |---|---|

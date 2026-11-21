@@ -9,14 +9,9 @@ public sealed class SetDepthCommandSpecCharR : CharacterRigCommandSpecBase
     [Header("Depth")]
     public CharacterDepthKey preset = CharacterDepthKey.Mid;
 
-    public CharacterFocusPreset focusPreset = CharacterFocusPreset.Bust;
-    
     [Tooltip("true이면 preset 대신 level을 사용합니다.")]
     public bool useLevel = false;
     public float level = 5f;
-
-    [Tooltip("preserve focus point에 추가로 더할 offset.")]
-    public Vector2 focusOffset = Vector2.zero;
 
     [Header("Nodes")]
     public CharacterRigNode depthYNode = CharacterRigNode.CharSlot_DepthY;
@@ -27,17 +22,19 @@ public sealed class SetDepthCommandSpecCharR : CharacterRigCommandSpecBase
     public Ease ease = Ease.OutCubic;
 }
 
+/// <summary>
+/// size — 깊이 레벨의 Y와 배율을 그대로 놓는다. 무대를 재지 않는다 — level 커브가 낸 값이 곧 목표다.
+/// 크기를 바꾸며 어느 지점을 제자리에 두려면 그 보정은 자리 명령으로 따로 적는다(docs/PLAN_command-prune.md P3).
+/// </summary>
 public sealed class SetDepthCommandCharR : ClaimTweenCommandBase
 {
     private readonly SetDepthCommandSpecCharR _spec;
     private readonly CharacterDepthTuningSO _globalTuning;
-    private readonly CharacterFocusTuningDBSO _focusTuningDb;
 
     private RectTransform _depthYRect;
     private RectTransform _depthScaleRect;
 
-    private Vector2 _destRawDepthY;
-    private Vector2 _destFinalDepthY;
+    private Vector2 _destDepthY;
     private Vector2 _destDepthScale;
 
     public override bool WaitForCompletion => _spec.wait;
@@ -45,21 +42,16 @@ public sealed class SetDepthCommandCharR : ClaimTweenCommandBase
     protected override float TweenDuration => _spec.duration;
 
     private readonly PresentationStage _stage;
-    private readonly IStageViewNeutral _stageView;
     private CharacterRigRefs _rig;
 
     public SetDepthCommandCharR(
         PresentationStage stage,
-        IStageViewNeutral stageView,
         SetDepthCommandSpecCharR spec,
-        CharacterDepthTuningSO globalTuning,
-        CharacterFocusTuningDBSO focusTuningDb)
+        CharacterDepthTuningSO globalTuning)
     {
         _stage = stage;
-        _stageView = stageView;
         _spec = spec;
         _globalTuning = globalTuning;
-        _focusTuningDb = focusTuningDb;
     }
 
     protected override void ResolveRefs()
@@ -75,39 +67,17 @@ public sealed class SetDepthCommandCharR : ClaimTweenCommandBase
         _depthYRect.DOKill(true);
         _depthScaleRect.DOKill(true);
 
-        CharacterDepthResolver.ResolveRawDepth(
-            _spec.preset,
-            _spec.useLevel,
-            _spec.level,
-            _globalTuning,
-            _spec.focusPreset,
-            _spec.focusOffset,
-            out CharacterDepthResult rawDepth);
+        CharacterDepthPresetValue depth = _spec.useLevel
+            ? _globalTuning.ResolveLevel(_spec.level)
+            : _globalTuning.ResolvePreset(_spec.preset);
 
-        _destRawDepthY = rawDepth.RawDepthYAnchoredPosition;
-        _destDepthScale = rawDepth.DepthScale;
+        _destDepthY = depth.depthY;
+        _destDepthScale = new Vector2(depth.depthScale, depth.depthScale);
 
         // 착란원 계산이 읽는 정지 프레임 값. 트윈 시작 시점에 확정된다.
         _rig.SettledDepthScale = _destDepthScale.x;
-        
-        CharacterDepthResolver.CalculateDepthYThatPreservesCurrentFocus(
-            _stage,
-            _stageView,
-            _spec.roleKey,
-            _depthYRect,
-            _depthScaleRect,
-            _destRawDepthY,
-            _destDepthScale,
-            rawDepth.PreserveFocusPreset,
-            rawDepth.PreserveFocusOffset,
-            _focusTuningDb,
-            out Vector2 destFinalDepthY);
-        
-        // 초점 보존이 실패해도 움직인다 — raw Y라는 의미 있는 대체값이 있어서다(크기는 바뀌고 초점만 보정 안 됨).
-        // 실패는 리졸버가 경로마다 경고한다. place는 대체값이 없어 움직이지 않는 것과 대비된다.
-        _destFinalDepthY = destFinalDepthY;
 
-        _rig.PlacementTargets.Reserve(_depthYRect, NodeTarget.AnchoredPosition(_depthYRect.name, _destFinalDepthY.ToCore()), Releases);
+        _rig.PlacementTargets.Reserve(_depthYRect, NodeTarget.AnchoredPosition(_depthYRect.name, _destDepthY.ToCore()), Releases);
         _rig.PlacementTargets.Reserve(_depthScaleRect, NodeTarget.LocalScaleXY(_depthScaleRect.name, _destDepthScale.ToCore()), Releases);
     }
 
@@ -119,7 +89,7 @@ public sealed class SetDepthCommandCharR : ClaimTweenCommandBase
 
         sequence.Join(
             _depthYRect
-                .DOAnchorPos(_destFinalDepthY, duration)
+                .DOAnchorPos(_destDepthY, duration)
                 .SetEase(_spec.ease)
                 .SetUpdate(true)
                 .SetTarget(_depthYRect));
@@ -136,7 +106,7 @@ public sealed class SetDepthCommandCharR : ClaimTweenCommandBase
 
     protected override void OnCommitFinalState()
     {
-        _depthYRect.anchoredPosition = _destFinalDepthY;
+        _depthYRect.anchoredPosition = _destDepthY;
         _depthScaleRect.localScale = new Vector3(_destDepthScale.x, _destDepthScale.y, 1f);
     }
 

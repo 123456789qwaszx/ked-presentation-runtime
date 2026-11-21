@@ -269,7 +269,7 @@ namespace Ked.Presentation.Tests
             Assert.That(state.Unhandled[0].Reason, Does.Contain("focus 프리셋"));
         }
 
-        // ── size: 보존 ───────────────────────────────────────────────
+        // ── size ─────────────────────────────────────────────────────
 
         // 라벨은 level 커브 위의 눈금이다(DepthLevelLabels):
         // far=0 · back=10 · mid=14 · front=16 · close=20.
@@ -278,61 +278,63 @@ namespace Ked.Presentation.Tests
         [TestCase("front", 1.872f)]
         [TestCase("close", 2.2f)]
         [TestCase("far", 0.86f)]
-        public void size는_배율을_적용하고_focus를_보존한다(string depthLabel, float expectedScale)
+        public void size는_레벨의_배율과_Y를_그대로_놓는다(string depthLabel, float expectedScale)
         {
             StageReducerTuning tuning = NewTuning();
 
-            StageState before = Fold(tuning, Cmd("slot", "c1"), Cmd("place_center", "c1", "bust"));
-            Vec2 focusBefore = FocusOf(before, "c1", "bust", tuning);
+            Assert.That(DepthLevelLabels.TryGetLevel(depthLabel, out float level), Is.True);
 
-            StageState after = StageReducer.Apply(before, Cmd("size", "c1", depthLabel, "bust"), tuning);
+            StageState before = Fold(tuning, Cmd("slot", "c1"));
+            StageState after = StageReducer.Apply(before, Cmd("size", "c1", depthLabel), tuning);
 
             Assert.That(after.Unhandled.Count, Is.EqualTo(before.Unhandled.Count), "접혀야 한다");
 
             Assert.That(after.Nodes.GetState("c1/CharSlot_DepthScale").LocalScale.X,
                 Is.EqualTo(expectedScale).Within(Eps));
 
-            // 보존: 배율이 바뀌어도 focus는 제자리.
-            Vec2 focusAfter = FocusOf(after, "c1", "bust", tuning);
-
-            Assert.That(focusAfter.X, Is.EqualTo(focusBefore.X).Within(Eps));
-            Assert.That(focusAfter.Y, Is.EqualTo(focusBefore.Y).Within(Eps));
+            // Y는 커브의 값 그대로다(120 − 56 × 레벨) — 초점에 맞춰 보정하지 않는다.
+            Assert.That(after.Nodes.GetState("c1/CharSlot_DepthY").AnchoredPosition,
+                Is.EqualTo(new Vec2(0f, 120f - 56f * level)).Using<Vec2>((a, b) =>
+                    System.Math.Abs(a.X - b.X) <= 1e-2f && System.Math.Abs(a.Y - b.Y) <= 1e-2f));
         }
 
         [Test]
-        public void 보존_focus는_커맨드_인자가_정한다_프리셋_필드가_아니다()
+        public void size는_무대를_재지_않는다()
         {
-            // 런타임 ResolveRawDepth가 프리셋의 preserveFocusPreset을 읽은 직후
-            // 커맨드 인자로 덮어쓴다 — 덤프의 그 필드는 사장 데이터다.
-            // close 프리셋 값은 30(face)이지만 셋째 인자 없이 부르면 파서 표 기본 "bust"가 된다.
+            // 같은 size는 인물이 어디에 어떻게 서 있든 같은 값을 놓는다 — 결과가 인자에 적혀 있다.
+            // 그래서 크기가 바뀌면 초점은 움직인다. 제자리에 두려면 자리 명령으로 따로 보정한다.
             StageReducerTuning tuning = NewTuning();
+
+            StageState plain = Fold(tuning, Cmd("slot", "c1"), Cmd("size", "c1", "close"));
+
+            StageState moved = Fold(tuning,
+                Cmd("slot", "c1"),
+                Cmd("move_by", "c1", "-6u", "2u"),
+                Cmd("rotate_by", "c1", "12"),
+                Cmd("size", "c1", "close"));
+
+            Assert.That(moved.Unhandled, Is.Empty);
+
+            Assert.That(moved.Nodes.GetState("c1/CharSlot_DepthY").AnchoredPosition,
+                Is.EqualTo(plain.Nodes.GetState("c1/CharSlot_DepthY").AnchoredPosition));
+
+            Assert.That(moved.Nodes.GetState("c1/CharSlot_DepthScale").LocalScale,
+                Is.EqualTo(plain.Nodes.GetState("c1/CharSlot_DepthScale").LocalScale));
 
             StageState before = Fold(tuning, Cmd("slot", "c1"));
 
-            StageState byDefault = StageReducer.Apply(before, Cmd("size", "c1", "close"), tuning);
-            StageState byFace = StageReducer.Apply(before, Cmd("size", "c1", "close", "face"), tuning);
-
-            float defaultY = byDefault.Nodes.GetState("c1/CharSlot_DepthY").AnchoredPosition.Y;
-            float faceY = byFace.Nodes.GetState("c1/CharSlot_DepthY").AnchoredPosition.Y;
-
-            Assert.That(System.Math.Abs(defaultY - faceY), Is.GreaterThan(1f),
-                "보존 대상이 다르면 보정도 달라야 한다");
-
-            // 각자 자기 기준으로 보존이 성립한다.
-            Assert.That(FocusOf(byDefault, "c1", "bust", tuning).Y,
-                Is.EqualTo(FocusOf(before, "c1", "bust", tuning).Y).Within(Eps),
-                "인자 없으면 bust 보존 (프리셋의 face가 아니다)");
-
-            Assert.That(FocusOf(byFace, "c1", "face", tuning).Y,
-                Is.EqualTo(FocusOf(before, "c1", "face", tuning).Y).Within(Eps));
+            Assert.That(
+                System.Math.Abs(FocusOf(plain, "c1", "bust", tuning).Y - FocusOf(before, "c1", "bust", tuning).Y),
+                Is.GreaterThan(1f),
+                "초점을 붙잡지 않는다");
         }
 
         [Test]
         public void size의_숫자_레벨이_커브로_접힌다()
         {
-            // 실제 원문이 쓴다: <<size c1 5>>, <<size @4 14 bust>>, <<size 22 face>>
+            // 숫자 레벨: <<size c1 5>>, <<size @4 14>>
             // 무릎(레벨 10) 위쪽도 거부하지 않는다 — 위 구간 기울기 0.082로 선다.
-            StageState state = Fold(NewTuning(), Cmd("slot", "c1"), Cmd("size", "c1", "14", "bust"));
+            StageState state = Fold(NewTuning(), Cmd("slot", "c1"), Cmd("size", "c1", "14"));
 
             Assert.That(state.Unhandled.Count, Is.EqualTo(0));
             Assert.That(state.Nodes.GetState("c1/CharSlot_DepthScale").LocalScale.XY.X,
@@ -352,14 +354,14 @@ namespace Ked.Presentation.Tests
                          ("mid", 1.708f), ("front", 1.872f), ("close", 2.2f),
                      })
             {
-                StageState state = Fold(tuning, Cmd("slot", "c1"), Cmd("size", "c1", label, "bust"));
+                StageState state = Fold(tuning, Cmd("slot", "c1"), Cmd("size", "c1", label));
 
                 Assert.That(state.Nodes.GetState("c1/CharSlot_DepthScale").LocalScale.XY.X,
                     Is.EqualTo(expected).Within(1e-3f), label);
             }
 
             // 무릎 위: 상한 20이 2.2다(직선 연장이면 1.9였을 자리).
-            StageState top = Fold(tuning, Cmd("slot", "c1"), Cmd("size", "c1", "20", "bust"));
+            StageState top = Fold(tuning, Cmd("slot", "c1"), Cmd("size", "c1", "20"));
 
             Assert.That(top.Nodes.GetState("c1/CharSlot_DepthScale").LocalScale.XY.X,
                 Is.EqualTo(2.2f).Within(1e-3f));
@@ -371,8 +373,8 @@ namespace Ked.Presentation.Tests
             // 라벨은 커브 위의 눈금일 뿐이다 — size front와 size 16은 같은 자리다.
             StageReducerTuning tuning = NewTuning();
 
-            StageState byLabel = Fold(tuning, Cmd("slot", "c1"), Cmd("size", "c1", "front", "bust"));
-            StageState byNumber = Fold(tuning, Cmd("slot", "c1"), Cmd("size", "c1", "16", "bust"));
+            StageState byLabel = Fold(tuning, Cmd("slot", "c1"), Cmd("size", "c1", "front"));
+            StageState byNumber = Fold(tuning, Cmd("slot", "c1"), Cmd("size", "c1", "16"));
 
             Assert.That(byNumber.Nodes.GetState("c1/CharSlot_DepthScale").LocalScale.XY.X,
                 Is.EqualTo(byLabel.Nodes.GetState("c1/CharSlot_DepthScale").LocalScale.XY.X).Within(1e-4f));

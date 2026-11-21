@@ -110,8 +110,8 @@ public sealed partial class YarnCommandBridge
     private void EnqueueFocusToRightSpec(string roleKey = null, string focus = null, string durationToken = null, string easeToken = null)
         => Forward("place_right", roleKey, focus, durationToken, easeToken);
 
-    private void EnqueueDepthAtPresetSpec(string roleKey = null, string depthArg = null, string preserveFocusArg = null, string durationToken = null, string easeToken = null)
-        => Forward("size", roleKey, depthArg, preserveFocusArg, durationToken, easeToken);
+    private void EnqueueDepthAtPresetSpec(string roleKey = null, string depthArg = null, string durationToken = null, string easeToken = null)
+        => Forward("size", roleKey, depthArg, durationToken, easeToken);
 
     private void EnqueueDepthResetSpec(string roleKey = null, string duration = null, string easeToken = null)
         => Forward("size_reset", roleKey, duration, easeToken);

@@ -312,8 +312,10 @@ CharSlot_Track_Focus          place 계열          ← 슬롯 축 (무대 배�
 그래서 focus 축만 계층 밖으로 빼고, **depth 보정을 수식이 지게 했다.** 그 대가가:
 
 * `SettledFocusMath.SolveFocusPlacement` — 계층이 안 해주는 보정을 손으로
-* `SetDepth`의 "focus 보존" 경로 — 깊이가 변해도 focus 지점을 유지
 * `CharacterRigRefs.SettledDepthScale` — 트윈이 도는 중에도 "끝나면 어느 배율인가"
+
+`size`는 이 보정을 하지 않는다(2026-11-21) — 깊이 레벨의 Y와 배율을 그대로 놓는다. 크기를 바꾸며 어느 지점을
+제자리에 두려면 자리 명령으로 따로 적는다(`docs/PLAN_command-prune.md` P3).
 
 마지막 것이 특히 이 대가의 증거다. 트윈 중에는 현재 스케일이 계속 변하므로, 착란원
 계산이 현재값을 읽으면 매 프레임 흔들린다. **정지 프레임의 배율을 따로 들고 있어야** 한다.

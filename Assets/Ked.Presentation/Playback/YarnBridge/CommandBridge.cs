@@ -197,10 +197,10 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler<string, string, string, string>(
             "place_right", EnqueueFocusToRightSpec);
 
-        // Char focus depth — <<size 슬롯 깊이 [프레이밍] [길이] [이징]>>
-        // <<size c1 close bust 12fr>>
+        // Char depth — <<size 슬롯 깊이 [길이] [이징]>>
+        // <<size c1 close 12fr>>
         // <<size c1 front>>
-        runner.AddCommandHandler<string, string, string, string, string>(
+        runner.AddCommandHandler<string, string, string, string>(
             "size", EnqueueDepthAtPresetSpec);
 
         runner.AddCommandHandler<string, string, string>(

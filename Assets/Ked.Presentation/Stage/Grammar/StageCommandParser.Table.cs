@@ -53,7 +53,7 @@ public sealed partial class StageCommandParser
         ["place_left"] = (p, c) => p.EnqueueFocusToLeftSpec(c.Arg(0), c.Arg(1, DefaultFocusPlacementFocusToken), c.Arg(2, DefaultFocusPlacementDurationToken), c.Arg(3, "")),
         ["place_center"] = (p, c) => p.EnqueueFocusToCenterSpec(c.Arg(0), c.Arg(1, DefaultFocusPlacementFocusToken), c.Arg(2, DefaultFocusPlacementDurationToken), c.Arg(3, "")),
         ["place_right"] = (p, c) => p.EnqueueFocusToRightSpec(c.Arg(0), c.Arg(1, DefaultFocusPlacementFocusToken), c.Arg(2, DefaultFocusPlacementDurationToken), c.Arg(3, "")),
-        ["size"] = (p, c) => p.EnqueueDepthAtPresetSpec(c.Arg(0), c.Arg(1), c.Arg(2, DefaultFocusDepthPresetToken), c.Arg(3, DefaultFocusDepthDurationToken), c.Arg(4, "")),
+        ["size"] = (p, c) => p.EnqueueDepthAtPresetSpec(c.Arg(0), c.Arg(1), c.Arg(2, DefaultDepthDurationToken), c.Arg(3, "")),
         ["size_reset"] = (p, c) => p.EnqueueDepthResetSpec(c.Arg(0), Float(c, 1, 0f), c.Arg(2, "")),
         ["fade_in"] = (p, c) => p.EnqueueFadeInSpec(c.Arg(0), c.Arg(1, "18fr")),
         ["fade_out"] = (p, c) => p.EnqueueFadeOutSpec(c.Arg(0), c.Arg(1, "18fr")),

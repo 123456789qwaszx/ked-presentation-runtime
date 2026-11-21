@@ -113,7 +113,7 @@ public static class RigTargets
 |---|---|---|
 | 순수 (스펙 + 현재 값) | MoveBy · ScaleTo · OverlaySize · ColorTo | 그대로 가능 |
 | 튜닝 값 필요 | SetDepth (depth 프리셋) | 파싱된 값을 `Args`에 담아 받는다 |
-| **현재 정착 상태 의존** | SetDepth(focus 보존) · PlaceCharacterFocus | solver 순수화가 선행 |
+| **현재 정착 상태 의존** | PlaceCharacterFocus | solver 순수화가 선행 |
 | **절차적 (시간·랜덤)** | Tremble · Sway · Breath · Walk · Hop · Bounce | **불가** (아래) |
 
 ### 축 ② — 상태 종류
@@ -183,9 +183,10 @@ yarn 4묶음 기준. "이관 안 함"은 **조용히 버린 것이 아니라 판
 
 ### depth
 
-`SetDepth` · `PlaceCharacterFocus`의 계산부가 `SettledFocusMath`로 갔다.
+`PlaceCharacterFocus`의 계산부가 `SettledFocusMath`로 갔다.
 이 묶음의 실작업은 solver 순수화 하나였고, `TryMeasureFocusWithTemporaryDepthTransform`
-("적용→측정→복원")도 함께 사라졌다.
+("적용→측정→복원")도 함께 사라졌다. `SetDepth`는 2026-11-21부터 초점을 재지 않는다 — 깊이 레벨의 값을
+그대로 놓는 순수 타깃이다(`NodeTargets.TrySetDepth`).
 
 ### shot
 

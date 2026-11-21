@@ -262,7 +262,7 @@ json은 다른 프리셋처럼 **런타임 값의 덤프**다(튜닝 덤프 메�
 
 ## 5. 중립 = `Solve(Default)` (D6)
 
-`place` · `size` · `shot_focus_to`는 무대 좌표로 잰다 — "카메라가 없을 때 리그가 무대의 어디에 있나"(`a9bc19f7`).
+`place` · `shot_focus_to`는 무대 좌표로 잰다 — "카메라가 없을 때 리그가 무대의 어디에 있나"(`a9bc19f7`).
 측정 체인(`CharacterPlacementTargetLedger.CaptureSettledChain`)이 샷 소유 노드를 지날 때는 라이브 대신 중립값을 쓴다.
 
 중립은 따로 적은 정의가 없다. 같은 식에 `ShotIntentState.Default`(모든 축 0)를 넣은 값이다:
@@ -303,7 +303,7 @@ shot_shake
 stage_mask
   StageMaskSlot           그 무대의 마스크 모양만. 카메라 · 리그와 무관
 
-place / size / shot_focus_to 측정
+place / shot_focus_to 측정
   CaptureSettledChain(측정 노드 → rigRefs.Stage.Root)
     노드마다: 장부(리그 끝값) → 샷 중립(Solve(Default)) → 라이브
 

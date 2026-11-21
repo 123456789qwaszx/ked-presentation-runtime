@@ -7,8 +7,7 @@ public sealed partial class StageCommandParser
     private const string DefaultFocusPlacementFocusToken = "face";
     private const string DefaultFocusPlacementDurationToken = "0fr";
     
-    private const string DefaultFocusDepthPresetToken = "bust";
-    private const string DefaultFocusDepthDurationToken = "13fr";
+    private const string DefaultDepthDurationToken = "13fr";
     
     #region CharFocusPlacement
     private void EnqueueFocusToLeftSpec(string roleKey, string focus, string durationToken, string easeToken)
@@ -56,8 +55,9 @@ public sealed partial class StageCommandParser
     }
     #endregion
     
-    #region CharFocusDepth
-    private void EnqueueDepthAtPresetSpec(string roleKey, string depthArg, string preserveFocusArg, string durationToken, string easeToken)
+    #region CharDepth
+    // size(slot, depth, dur, ease) — 깊이 레벨의 Y와 배율을 그대로 놓는다. 무대를 재지 않는다.
+    private void EnqueueDepthAtPresetSpec(string roleKey, string depthArg, string durationToken, string easeToken)
     {
         var spec = new SetDepthCommandSpecCharR
         {
@@ -85,17 +85,6 @@ public sealed partial class StageCommandParser
 
             spec.preset = preset;
         }
-
-        if (!CharacterFocusPresetParser.TryParse(preserveFocusArg, out CharacterFocusPreset focusPreset))
-        {
-            Debug.LogWarning(
-                $"[StageCommandParser] Unknown preserve focus preset '{preserveFocusArg}'. " +
-                $"Fallback to '{CharacterFocusPreset.Bust}'.");
-
-            focusPreset = CharacterFocusPreset.Bust;
-        }
-
-        spec.focusPreset = focusPreset;
 
         Ease ease = YarnEaseParser.Parse(easeToken);
         spec.ease = ease;

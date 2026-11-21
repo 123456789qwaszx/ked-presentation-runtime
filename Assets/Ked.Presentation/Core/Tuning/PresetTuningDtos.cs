@@ -60,11 +60,6 @@ namespace Ked.Presentation.Core
     {
         public Float2Dto depthY;
         public float depthScale;
-
-        /// <summary>CharacterFocusPreset 정수 값 (0/10/20/30/31/40/41).</summary>
-        public int preserveFocusPreset;
-
-        public Float2Dto preserveFocusOffset;
     }
 
 
@@ -80,9 +75,6 @@ namespace Ked.Presentation.Core
     {
         public AnimationCurveDto yCurve;
         public AnimationCurveDto scaleCurve;
-
-        // farPreserveFocus 등 보존 프리셋은 담지 않는다 — 프리셋 경로와 같은 이유로
-        // 런타임이 커맨드 인자로 덮어쓰는 사장 데이터다(NodeTargets.TrySetDepth 주석 참조).
 
         public bool TryResolve(float level, out float depthY, out float depthScale)
         {
@@ -215,24 +207,6 @@ namespace Ked.Presentation.Core
     /// </summary>
     public static class FocusPresetName
     {
-        /// <summary>덤프의 preserveFocusPreset 정수 → 이름. 모르면 false.</summary>
-        public static bool TryFromEnumValue(int value, out string name)
-        {
-            name = value switch
-            {
-                0 => "feet",
-                10 => "body",
-                20 => "bust",
-                30 => "face",
-                31 => "faceAura",
-                40 => "handLeft",
-                41 => "handRight",
-                _ => null,
-            };
-
-            return name != null;
-        }
-
         /// <summary>yarn 토큰("bust") 정규화. 모르면 false — 추측 보정하지 않는다.</summary>
         public static bool TryNormalizeToken(string token, out string name)
         {

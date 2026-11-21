@@ -5,7 +5,8 @@ title: Festival_Staffroom_Kasmi
     <<slot s3 stage00 mid>>
     <<cast s3 kasmi a 1>>
     <<place_center s3 bust 0fr>>
-    <<size s3 mid bust 0fr>>
+    <<size s3 mid 0fr>>
+    <<move_by s3 0u 2.679u 0fr>>
     <<fade_in s3 18fr>>
     카스미: 부탁한 마무리, 다 해서 갖다 놨어. #line:ln_m208n5x2
     <<fade_out s3 15fr>>
