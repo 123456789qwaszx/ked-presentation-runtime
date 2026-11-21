@@ -1,6 +1,6 @@
 # 명세 표와 줄 읽기 — 커맨드의 종류 · 인자 칸, 줄을 스텝으로 읽는 함수 (2026-11-22)
 
-> 상태: **K1 · K2 끝(Unity 확인 — 소유자 2026-11-22). 제안 셋의 확인이 남았다(§2)** · 브랜치 `feat/command-spec`(`dev` `b56a2ebc`에서)
+> 상태: **K1 · K2 끝 — Unity 확인 · 종류 배정 확정(소유자 2026-11-22). `dev`에 합쳤다** · 브랜치 `feat/command-spec`(`dev` `b56a2ebc`에서)
 > 설계: ked-story-tools `docs/PLAN.md` §4.1 · §4.2 · §6 → 넘겨받은 일: 그 저장소 `docs/handoff/runtime.md`
 > 앞선 일: [PLAN_line-anchor.md](PLAN_line-anchor.md)(줄의 앵커 — §11이 미뤄 둔 "종류의 표와 도구가 묻는 창구"가 이 일이다) · [PLAN_rig-layers.md](PLAN_rig-layers.md)(어휘 83개)
 
@@ -44,16 +44,16 @@
 
 계획서 §4.1의 초안 그대로다 — 카메라 9 · 자리와 구도 27 · 연기 9 · 화면 25 · 세우기 6(+2) · 소리 6 · 시간 1. 리그와 어긋나게 둔 것은 `StageCommandSpecTable.Core.cs`의 머리에 적었다.
 
-## 2. 제안 — 확인 받을 것 (소유자)
+## 2. 정한 것 (소유자, 2026-11-22 — 제안대로)
 
-| # | 물음 | 제안 | 까닭 | 다른 길 |
+| # | 물음 | 결정 | 까닭 | 고르지 않은 길 |
 |---|---|---|---|---|
 | C1 | `portrait` · `portrait_close`의 종류 | **세우기**(초안대로) | 촬영소에 리그를 세우고 캐스팅하는 일이다 — `slot` + `cast`와 같은 결이고, 줄의 앵커 Q2가 장면 세우기로 꼽았다. 초상의 표정 · 몸짓은 슬롯 키 `portrait`에 `face` · `motion`으로 쓰므로 연기 필터에는 그쪽이 오른다 | 화면(대사창의 그림이다) — 편 중간에 인물을 자주 바꾼다면 필터에 올라야 한다 |
 | C2 | `depth_focus_on` · `depth_focus_clear`의 종류 | **화면**(초안대로) | 슬롯을 인자로 받지만 바뀌는 것은 그 사람이 아니라 나머지 무대 전체의 흐림이다. `stage_blur`와 같은 블러 계통이라 한 필터에서 함께 보여야 한다 | 카메라(초점 · 피사계 심도는 렌즈의 일이다) · 자리와 구도(`char_visual_defocus`와 쓰임이 겹친다) |
 | C3 | 바로 실행하는 명령(`surface_layout` · `surface_reset`)의 표기 | **명세 표에 넣고 `Immediate`로 가린다. 종류는 세우기** | 모든 커맨드가 정확히 한 종류를 갖는다(P1). 툴은 `Immediate`를 보고 `<<at>>` 없이 적고, 줄 읽기는 앵커에 넣지 않고 따로 싣는다(`LineRead.Immediate`). N5의 "at 없는 명령은 오류"도 `IsImmediate`로 가린다. 포크의 `messenger_open` · `messenger_close`는 `.Fork.cs`에 `immediate: true`로 적는다 | 표 밖에 이름 목록만 둔다 — 종류 · 인자 칸이 없어 툴이 보여 줄 수 없다 |
 | C3b | `at` · `gap` · `step` | **표 밖**(계획서대로) — JSON에는 `lineStructure: [at, gap]` · `legacyStructure: [step]`로 이름만 낸다 | 커맨드가 아니라 줄의 구조다 | — |
 
-C1 · C2는 표의 한 줄씩이다 — 바꾸면 `StageCommandSpecTable.Core.cs`의 그 줄을 옮기고 JSON을 다시 낸다.
+뒤에 종류를 옮기려면 `StageCommandSpecTable.Core.cs`의 그 줄을 옮기고 JSON을 다시 낸다.
 
 ## 3. K1에서 알게 된 것
 
@@ -137,6 +137,5 @@ Unity에서 다시 낸 `command-specs.json`은 든 파일과 내용이 같다(�
 
 ## 8. 남은 것
 
-- §2의 확인(C1 – C3) → `dev`로.
 - 타자기의 식을 한 곳으로(§4.1) — 할지 말지.
 - K5(도구 연결) · N5(옛 표기 걷기 — `at` 없는 명령의 오류는 `StageCommandSpecTable.IsImmediate`로 가린다) — 넘겨받은 문서 4절 · 5절.
