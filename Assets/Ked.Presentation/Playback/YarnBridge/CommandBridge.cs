@@ -31,7 +31,7 @@ public sealed partial class YarnCommandBridge
 
     private void BindRunnerCommands(DialogueRunner runner)
     {
-        RegisterCharFocusPlacementCommands(runner);
+        RegisterCharDepthCommands(runner);
         RegisterCharRigPlacementCommands(runner);
         BindBackground(runner);
         
@@ -118,7 +118,7 @@ public sealed partial class YarnCommandBridge
             "scale_by", EnqueueSizeBySpec);
 
         runner.AddCommandHandler<string, string>(
-            "move_reset", EnqueueSetPlaceResetSpecs);
+            "move_reset", EnqueueMoveResetSpec);
         runner.AddCommandHandler<string, string, string>(
             "rotate_reset", EnqueueRotateResetSpec);
 
@@ -139,10 +139,6 @@ public sealed partial class YarnCommandBridge
     
     private void BindShotStaging(DialogueRunner runner)
     {
-        // 묶음 — 줌 + 팬
-        runner.AddCommandHandler<string, string, string, string, string, string>(
-            "shot_focus_to", EnqueueShotFocusToSpec);
-
         // 축마다 하나 — 렌즈(줌 · 팬) · 헤드(롤) · 몸(달리 · 트랙)
         runner.AddCommandHandler<string, string, string>(
             "shot_zoom", EnqueueShotZoomSpec);
@@ -182,21 +178,8 @@ public sealed partial class YarnCommandBridge
             "down", EnqueueNudgeDownSpec);
     }
     
-    private void RegisterCharFocusPlacementCommands(DialogueRunner runner)
+    private void RegisterCharDepthCommands(DialogueRunner runner)
     {
-        // Char focus placement
-        runner.AddCommandHandler<string, string, string, string, string>(
-            "place", EnqueuePlaceCharacterFocusSpec);
-        
-        runner.AddCommandHandler<string, string, string, string>(
-            "place_left", EnqueueFocusToLeftSpec);
-
-        runner.AddCommandHandler<string, string, string, string>(
-            "place_center", EnqueueFocusToCenterSpec);
-
-        runner.AddCommandHandler<string, string, string, string>(
-            "place_right", EnqueueFocusToRightSpec);
-
         // Char depth — <<size 슬롯 깊이 [길이] [이징]>>
         // <<size c1 close 12fr>>
         // <<size c1 front>>

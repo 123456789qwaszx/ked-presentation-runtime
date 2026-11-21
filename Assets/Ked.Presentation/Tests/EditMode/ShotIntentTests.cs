@@ -129,7 +129,7 @@ namespace Ked.Presentation.Tests
             Assert.That(ShotIntents.ResetAll().ToString(), Is.EqualTo(ShotIntentState.Default.ToString()));
         }
 
-        // ── shot_focus_to: 명중 ──────────────────────────────────────
+        // ── FocusTo(초점을 화면 지점에 오게 하는 줌 · 팬): 명중 ──────
 
         // 접은 샷에서 층 d 안의 점이 보이는 자리 — 런타임 계층(카메라 리그 → Layer)과 같은 정방향 식.
         private static Vec2 SeenAt(in ShotIntentState shot, Vec2 pointInLayer, float depth)
@@ -179,7 +179,7 @@ namespace Ked.Presentation.Tests
         [Test]
         public void mid에서는_종전_식_desired_빼기_focus_곱하기_배율이다()
         {
-            // mid의 반응은 항등이라 카메라만 남는다 — 종전 shot_focus_to와 같은 팬.
+            // mid의 반응은 항등이라 카메라만 남는다 — 카메라만 본 팬과 같다.
             Vec2 focus = new(250f, 380f);
             Vec2 desired = new(-460.8f, 0f);
             float scale = ShotIntentMath.EvaluateCameraScale(6f);

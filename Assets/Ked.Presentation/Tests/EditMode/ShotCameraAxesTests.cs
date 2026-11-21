@@ -324,7 +324,7 @@ namespace Ked.Presentation.Tests
         [Test]
         public void 팬_역산은_카메라가_옮겨_서고_기울어도_맞는다()
         {
-            // shot_focus_to의 식 — 지금 카메라의 몸 · 헤드가 입력이다. 푼 팬을 정방향 식에 넣으면 원하는 자리가 나온다.
+            // FocusTo의 식 — 지금 카메라의 몸 · 헤드가 입력이다. 푼 팬을 정방향 식에 넣으면 원하는 자리가 나온다.
             Random random = new(5);
 
             for (int i = 0; i < 500; i++)

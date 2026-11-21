@@ -9,12 +9,10 @@ title: Festival_Staffroom
 
 <<bg_fade_in bg_main 30fr>>
 <<bgm audio/voice_bgm_uhhknoxpro-piano-loop-432112 2s>>
-<<place_right s1 bust 0fr>>
 <<size s1 mid 0fr>>
-<<move_by s1 0u 2.679u 0fr>>
-<<place_left s2 bust 0fr>>
+<<move_by s1 6.745u 0.639u 0fr>>
 <<size s2 mid 0fr>>
-<<move_by s2 0u 2.679u 0fr>>
+<<move_by s2 -6.745u 0.639u 0fr>>
 <<fade_in s1 23fr>>
 <<fade_in s2 23fr>>
 하린: 저녁의 교무실 앞. 장면이 바뀌었어. #line:ln_ngjwdzsb

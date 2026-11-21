@@ -213,7 +213,7 @@ CharacterRigSchema.Nodes            코드      ← 유일한 소유자
 ### 3.2 전체 계층과 커맨드 대응
 
 ```
-CharSlot_Track_Focus          place 계열          ← 슬롯 축 (무대 배치)
+CharSlot_Track_Focus          (쓰는 명령 없음)    ← place 계열이 쓰던 축 — 2026-11-21에 걷었다
  └ CharSlot_DepthY            size 계열 (Y 오프셋)
     └ CharSlot_DepthScale     size 계열 (배율)      [bottom pivot]
        └ CharSlot_Track_Idle  (idle 연출)
@@ -302,6 +302,10 @@ CharSlot_Track_Focus          place 계열          ← 슬롯 축 (무대 배�
 ---
 
 ## 4. Depth를 위에 둔 대가 — `Track_Focus`가 밖에 있는 이유
+
+> 2026-11-21: `place` 계열 · `shot_focus_to`를 걷었다(`docs/PLAN_command-prune.md`). `Track_Focus`는 리그에 남아 있지만 쓰는 명령이 없다 — 자리는 `CharSlot_Track`(`move_by`)에 적는다.
+> `Track`은 `DepthScale` **아래**라서 적힌 이동이 깊이 배율만큼 곱해져 보인다(mid에서 `move_by 1u` = 화면 1.708u).
+> 도구의 보조 버튼이 화면 지점에서 거꾸로 풀어 주는 까닭이 이것이다. 아래는 이 축을 둔 까닭의 기록이다.
 
 원근이 계층에서 공짜로 나오는데, **공짜가 아닌 곳이 하나 있다.**
 

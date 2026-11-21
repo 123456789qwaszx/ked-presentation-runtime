@@ -48,7 +48,7 @@ public sealed class PresentationShotResponseSystem : IStageViewNeutral
     // 지금 화면에 적용된 값. 전환 중인 축만 Intent와 다르다.
     public PresentationIntentState Presented => _presented;
 
-    // 층이 샷에 반응하는 곡선 — Apply가 쓰는 것과 같다. shot_focus_to가 팬을 풀 때 같은 곡선을 본다.
+    // 층이 샷에 반응하는 곡선 — Apply가 쓰는 것과 같다. 초점을 화면 지점에 놓는 팬을 풀 때(코어 ShotIntents.FocusTo) 같은 곡선을 본다.
     public LayerProfileCurve LayerProfile => _profile;
 
     // 화면 흔들림 — 의도가 아니라 연기다. 본 무대의 Camera_Shake에 클립을 틀고, 끝나면 항등으로 돌아온다.

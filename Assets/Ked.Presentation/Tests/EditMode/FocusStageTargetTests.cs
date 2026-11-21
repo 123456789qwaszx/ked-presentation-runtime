@@ -126,6 +126,42 @@ namespace Ked.Presentation.Tests
         private static StageState Fold(StageReducerTuning tuning, params StageCommand[] commands)
             => StageReducer.ApplyAll(StageReducer.CreateInitialState(tuning), commands, tuning);
 
+        // 보조 버튼이 하는 일 — 초점이 화면 지점에 오는 자리 축의 끝값을 풀어 그대로 놓는다(대본에는 move_by로 적힌다).
+        private static StageState Place(
+            StageState state, string slotKey, string focusName, string screenPoint, StageReducerTuning tuning)
+        {
+            state.TryGetCharacter(slotKey, out string characterKey);
+
+            Assert.That(
+                NodeTargets.TryPlaceFocus(
+                    state, slotKey, characterKey, focusName, screenPoint, tuning.FocusTuning,
+                    out NodeTarget target, out string reason),
+                Is.True, reason);
+
+            StageState placed = state.Clone();
+            placed.Apply(target);
+            return placed;
+        }
+
+        // 보조 버튼이 하는 일 — 그 초점이 화면 지점에 오는 줌 · 팬(ShotIntents.FocusTo)을 샷에 놓는다.
+        private static StageState FocusTo(
+            StageState state, string slotKey, string focusName, string screenPoint, float zoom, StageReducerTuning tuning)
+        {
+            ScreenPointRatios.TryResolve(state.Nodes.RootSpace.Size, screenPoint, out Vec2 desired);
+
+            StageState focused = state.Clone();
+
+            focused.Shot = ShotIntents.FocusTo(
+                state.Shot,
+                zoom,
+                FocusOf(state, slotKey, focusName, tuning),
+                desired,
+                state.GetAttachment(slotKey).LayerDepth,
+                tuning.ResolveLayerProfileCurve());
+
+            return focused;
+        }
+
         private static Vec2 FocusOf(StageState state, string slotKey, string presetName, StageReducerTuning tuning)
         {
             state.TryGetCharacter(slotKey, out string characterKey);
@@ -196,18 +232,14 @@ namespace Ked.Presentation.Tests
                 Is.EqualTo(910f).Within(Eps));
         }
 
-        // ── place: 명중 ──────────────────────────────────────────────
+        // ── 초점을 화면 지점에 (보조 계산) ───────────────────────────
 
         [Test]
-        public void place_center를_접으면_focus가_원점에_온다()
+        public void 가운데로_풀면_focus가_원점에_온다()
         {
             StageReducerTuning tuning = NewTuning();
 
-            StageState state = Fold(tuning,
-                Cmd("slot", "c1"),
-                Cmd("place_center", "c1", "bust"));
-
-            Assert.That(state.Unhandled, Is.Empty);
+            StageState state = Place(Fold(tuning, Cmd("slot", "c1")), "c1", "bust", "center", tuning);
 
             Vec2 focus = FocusOf(state, "c1", "bust", tuning);
 
@@ -216,32 +248,26 @@ namespace Ked.Presentation.Tests
         }
 
         [Test]
-        public void place_left는_focus를_화면_왼쪽_지점으로_보낸다()
+        public void 왼쪽으로_풀면_focus가_화면_왼쪽_지점에_온다()
         {
             StageReducerTuning tuning = NewTuning();
 
-            StageState state = Fold(tuning,
-                Cmd("slot", "c1"),
-                Cmd("place_left", "c1", "bust"));
+            StageState state = Place(Fold(tuning, Cmd("slot", "c1")), "c1", "bust", "left", tuning);
 
-            Vec2 focus = FocusOf(state, "c1", "bust", tuning);
-
-            Assert.That(focus.X, Is.EqualTo(-460.8f).Within(Eps), "리포트에 나온 그 값");
+            Assert.That(FocusOf(state, "c1", "bust", tuning).X, Is.EqualTo(-460.8f).Within(Eps), "1920 × 0.24");
         }
 
         [Test]
-        public void place는_배역_오프셋을_반영한다()
+        public void 배역_오프셋을_반영한다()
         {
             // bandi는 bust 오프셋이 810(= 820-20+10)이라 이동량이 달라진다.
             StageReducerTuning tuning = NewTuning();
 
-            StageState plain = Fold(tuning, Cmd("slot", "c1"), Cmd("place_center", "c1", "bust"));
+            StageState plain = Place(Fold(tuning, Cmd("slot", "c1")), "c1", "bust", "center", tuning);
+            StageState cast = Place(Fold(tuning, Cmd("slot", "c1"), Cmd("cast", "c1", "bandi")), "c1", "bust", "center", tuning);
 
-            StageState cast = Fold(tuning,
-                Cmd("slot", "c1"), Cmd("cast", "c1", "bandi"), Cmd("place_center", "c1", "bust"));
-
-            Vec2 plainMove = plain.Nodes.GetState("c1/CharSlot_Track_Focus").AnchoredPosition;
-            Vec2 castMove = cast.Nodes.GetState("c1/CharSlot_Track_Focus").AnchoredPosition;
+            Vec2 plainMove = plain.Nodes.GetState("c1/CharSlot_Track").AnchoredPosition;
+            Vec2 castMove = cast.Nodes.GetState("c1/CharSlot_Track").AnchoredPosition;
 
             Assert.That(castMove.Y - plainMove.Y, Is.EqualTo(10f).Within(Eps),
                 "820 → 810이면 10만큼 덜 내려간다");
@@ -251,22 +277,86 @@ namespace Ked.Presentation.Tests
         }
 
         [Test]
-        public void place는_이동_축에만_타깃을_건다()
+        public void 끝값은_move_by가_쓰는_자리_축에_건다()
         {
-            StageState state = Fold(NewTuning(), Cmd("slot", "c1"), Cmd("place_right", "c1", "bust"));
+            // 버튼은 이 끝값과 지금 값의 차를 move_by로 적는다 — 쓰는 명령이 없는 Track_Focus는 건드리지 않는다.
+            StageState state = Place(Fold(NewTuning(), Cmd("slot", "c1")), "c1", "bust", "right", NewTuning());
 
-            Assert.That(state.Nodes.GetState("c1/CharSlot_Track").AnchoredPosition, Is.EqualTo(Vec2.Zero));
-            Assert.That(state.Nodes.GetState("c1/CharSlot_Track_Focus").AnchoredPosition, Is.Not.EqualTo(Vec2.Zero));
+            Assert.That(state.Nodes.GetState("c1/CharSlot_Track").AnchoredPosition, Is.Not.EqualTo(Vec2.Zero));
+            Assert.That(state.Nodes.GetState("c1/CharSlot_Track_Focus").AnchoredPosition, Is.EqualTo(Vec2.Zero));
         }
 
         [Test]
-        public void 모르는_focus_토큰은_Unhandled다()
+        public void 커지고_기운_뒤에도_명중한다()
         {
-            // 호스트 파서에는 별칭이 있지만 코어는 정규 이름만 안다 — 조용히 넘기지 않는다.
-            StageState state = Fold(NewTuning(), Cmd("slot", "c1"), Cmd("place_center", "c1", "torso"));
+            // 자리 축은 깊이 배율 아래에 있다 — 그 위의 배율과 그 아래의 회전까지 넣어 푼다.
+            StageReducerTuning tuning = NewTuning();
+
+            StageState before = Fold(tuning,
+                Cmd("slot", "c1"),
+                Cmd("size", "c1", "close"),
+                Cmd("move_by", "c1", "-3u", "1u"),
+                Cmd("rotate_by", "c1", "12"));
+
+            StageState state = Place(before, "c1", "face", "tr", tuning);
+
+            ScreenPointRatios.TryResolve(new Vec2(1920f, 1080f), "tr", out Vec2 desired);
+            Vec2 focus = FocusOf(state, "c1", "face", tuning);
+
+            Assert.That(focus.X, Is.EqualTo(desired.X).Within(Eps));
+            Assert.That(focus.Y, Is.EqualTo(desired.Y).Within(Eps));
+        }
+
+        [Test]
+        public void 풀린_값을_move_by로_적으면_같은_자리다()
+        {
+            // 대본에 남는 것은 풀린 값이다 — 끝값과 지금 값의 차를 move_by로 접으면 같은 무대가 나온다.
+            StageReducerTuning tuning = NewTuning();
+
+            StageState before = Fold(tuning, Cmd("slot", "c1"), Cmd("size", "c1", "front"), Cmd("move_by", "c1", "2u", "0u"));
+            StageState placed = Place(before, "c1", "bust", "left", tuning);
+
+            Vec2 delta = placed.Nodes.GetState("c1/CharSlot_Track").AnchoredPosition
+                         - before.Nodes.GetState("c1/CharSlot_Track").AnchoredPosition;
+
+            string x = (delta.X / 40f).ToString("0.######", System.Globalization.CultureInfo.InvariantCulture) + "u";
+            string y = (delta.Y / 40f).ToString("0.######", System.Globalization.CultureInfo.InvariantCulture) + "u";
+
+            StageState written = StageReducer.Apply(before, Cmd("move_by", "c1", x, y), tuning);
+
+            Assert.That(written.Unhandled, Is.Empty);
+            Assert.That(FocusOf(written, "c1", "bust", tuning).X, Is.EqualTo(-460.8f).Within(1e-2f));
+            Assert.That(FocusOf(written, "c1", "bust", tuning).Y, Is.EqualTo(0f).Within(1e-2f));
+        }
+
+        [Test]
+        public void 모르는_화면_지점은_풀지_않는다()
+        {
+            StageReducerTuning tuning = NewTuning();
+            StageState state = Fold(tuning, Cmd("slot", "c1"));
+
+            Assert.That(
+                NodeTargets.TryPlaceFocus(state, "c1", null, "bust", "그런곳없음", tuning.FocusTuning, out _, out string reason),
+                Is.False);
+
+            Assert.That(reason, Does.Contain("화면 지점"));
+        }
+
+        [TestCase("place")]
+        [TestCase("place_left")]
+        [TestCase("place_center")]
+        [TestCase("place_right")]
+        [TestCase("shot_focus_to")]
+        [TestCase("shot_to")]
+        [TestCase("show")]
+        public void 걷은_역산_묶음_명령은_접지_않는다(string name)
+        {
+            // 무대를 읽어 값을 푸는 것 · 이름 하나가 여럿을 내는 것은 커맨드가 아니다(docs/PLAN_command-prune.md).
+            StageState state = Fold(NewTuning(), Cmd("slot", "c1"), Cmd(name, "c1", "bust"));
 
             Assert.That(state.Unhandled.Count, Is.EqualTo(1));
-            Assert.That(state.Unhandled[0].Reason, Does.Contain("focus 프리셋"));
+            Assert.That(state.Nodes.GetState("c1/CharSlot_Track").AnchoredPosition, Is.EqualTo(Vec2.Zero));
+            Assert.That(state.Shot.ToString(), Is.EqualTo(ShotIntentState.Default.ToString()));
         }
 
         // ── size ─────────────────────────────────────────────────────
@@ -429,20 +519,18 @@ namespace Ked.Presentation.Tests
         {
             // 이징은 경로의 모양만 정한다 — 종점(shot intent)은 그대로다.
             // 이 테스트가 지키는 것은 인자 자리다: 이징 토큰이 붙어도
-            // zoom·pan·focus를 읽는 인덱스가 밀리지 않아야 한다.
+            // zoom·pan을 읽는 인덱스가 밀리지 않아야 한다.
             StageReducerTuning tuning = NewTuning();
 
             StageState plain = Fold(tuning,
                 Cmd("slot", "c1"),
                 Cmd("shot_zoom", "3", "24fr"),
-                Cmd("shot_pan", "1u", "0u", "24fr"),
-                Cmd("shot_focus_to", "c1", "bust", "left", "2", "1.2s"));
+                Cmd("shot_pan", "1u", "0u", "24fr"));
 
             StageState eased = Fold(tuning,
                 Cmd("slot", "c1"),
                 Cmd("shot_zoom", "3", "24fr", "InOutCubic"),
-                Cmd("shot_pan", "1u", "0u", "24fr", "InOutCubic"),
-                Cmd("shot_focus_to", "c1", "bust", "left", "2", "1.2s", "@push_in"));
+                Cmd("shot_pan", "1u", "0u", "24fr", "@push_in"));
 
             Assert.That(eased.Unhandled.Count, Is.EqualTo(0));
             Assert.That(eased.Shot.Zoom, Is.EqualTo(plain.Shot.Zoom).Within(Eps));
@@ -450,20 +538,17 @@ namespace Ked.Presentation.Tests
             Assert.That(eased.Shot.PanInRigSpace.Y, Is.EqualTo(plain.Shot.PanInRigSpace.Y).Within(Eps));
         }
 
-        // ── shot_focus_to ────────────────────────────────────────────
+        // ── 초점을 화면 지점에 오게 하는 줌 · 팬 (보조 계산) ─────────
 
         [Test]
-        public void shot_focus_to를_접으면_적용측_규약으로_화면_지점에_온다()
+        public void 줌과_팬을_풀면_적용측_규약으로_화면_지점에_온다()
         {
             // 명중 검산: slot 생략값은 mid라 층 반응이 항등이다 — 보이는 위치 = 논리 focus × 목표 배율 + pan.
             StageReducerTuning tuning = NewTuning();
 
-            StageState state = Fold(tuning,
-                Cmd("slot", "c1"),
-                Cmd("place_center", "c1", "bust"),
-                Cmd("shot_focus_to", "c1", "face", "center", "1.6"));
+            StageState placed = Place(Fold(tuning, Cmd("slot", "c1")), "c1", "bust", "center", tuning);
+            StageState state = FocusTo(placed, "c1", "face", "center", 1.6f, tuning);
 
-            Assert.That(state.Unhandled, Is.Empty);
             Assert.That(state.Shot.Zoom, Is.EqualTo(1.6f).Within(Eps));
 
             float scale = ShotIntentMath.EvaluateCameraScale(state.Shot.Zoom);
@@ -477,18 +562,17 @@ namespace Ked.Presentation.Tests
         }
 
         [Test]
-        public void shot_focus_to는_지금_카메라와_무관하게_무대_위_자리로_푼다()
+        public void 줌과_팬은_지금_카메라와_무관하게_무대_위_자리로_푼다()
         {
             StageReducerTuning tuning = NewTuning();
 
-            // 카메라가 이미 움직인 상태에서 접어도 명중한다 — 입력은 무대 좌표다.
-            StageState state = Fold(tuning,
+            // 카메라가 이미 움직인 상태에서 풀어도 명중한다 — 입력은 무대 좌표다.
+            StageState moved = Fold(tuning,
                 Cmd("slot", "c1"),
                 Cmd("shot_zoom", "3"),
-                Cmd("shot_pan", "1u", "0u"),
-                Cmd("shot_focus_to", "c1", "bust", "left", "2"));
+                Cmd("shot_pan", "1u", "0u"));
 
-            Assert.That(state.Unhandled, Is.Empty);
+            StageState state = FocusTo(moved, "c1", "bust", "left", 2f, tuning);
 
             float scale = ShotIntentMath.EvaluateCameraScale(2f);
 
@@ -506,17 +590,13 @@ namespace Ked.Presentation.Tests
         [TestCase("back")]
         [TestCase("front")]
         [TestCase("close")]
-        public void shot_focus_to는_슬롯이_선_층의_반응까지_넣어_명중한다(string layer)
+        public void 줌과_팬은_슬롯이_선_층의_반응까지_넣어_명중한다(string layer)
         {
             // 층 반응이 항등이 아닌 층. 정방향 식(SolveLayer → ProjectToRigSpace)으로 보이는 자리를 검산한다.
             StageReducerTuning tuning = NewTuning();
 
-            StageState state = Fold(tuning,
-                Cmd("slot", "c1", "stage00", layer),
-                Cmd("place_left", "c1", "bust"),
-                Cmd("shot_focus_to", "c1", "bust", "center", "2.5"));
-
-            Assert.That(state.Unhandled, Is.Empty);
+            StageState placed = Place(Fold(tuning, Cmd("slot", "c1", "stage00", layer)), "c1", "bust", "left", tuning);
+            StageState state = FocusTo(placed, "c1", "bust", "center", 2.5f, tuning);
 
             float depth = state.GetAttachment("c1").LayerDepth;
             Vec2 focus = FocusOf(state, "c1", "bust", tuning);
@@ -529,23 +609,6 @@ namespace Ked.Presentation.Tests
 
             Assert.That(seen.X, Is.EqualTo(0f).Within(Eps), $"{layer} center에 명중 — seen={seen}");
             Assert.That(seen.Y, Is.EqualTo(0f).Within(Eps), $"{layer} center에 명중 — seen={seen}");
-        }
-
-        [Test]
-        public void 덮는_무대에_선_슬롯에는_shot_focus_to를_걸_수_없다()
-        {
-            // 샷은 본 무대만 움직인다(StageRoles). 런타임은 경고하고 건너뛰고, 폴드는 Unhandled로 남긴다.
-            StageReducerTuning tuning = NewTuning();
-
-            StageState state = Fold(tuning,
-                Cmd("slot", "c1", "stage01", "mid"),
-                Cmd("shot_zoom", "3"),
-                Cmd("shot_pan", "1u", "0u"),
-                Cmd("shot_focus_to", "c1", "bust", "center", "2.5"));
-
-            Assert.That(state.Unhandled.Count, Is.EqualTo(1));
-            Assert.That(state.Unhandled[0].Reason, Does.Contain("덮는 무대"));
-            Assert.That(state.Shot.Zoom, Is.EqualTo(3f), "샷은 앞 커맨드 그대로");
         }
     }
 }

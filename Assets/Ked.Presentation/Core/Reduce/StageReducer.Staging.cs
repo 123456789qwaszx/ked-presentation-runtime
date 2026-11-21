@@ -3,7 +3,7 @@ namespace Ked.Presentation.Core
     /// <summary>
     /// nudge · move · scale · rotate — 현재 값에 얹는 상대 변형.
     ///
-    /// place/size와 달리 focus를 모른다. 표적 노드와 델타만 정하면 끝이라
+    /// 표적 노드와 델타만 정하면 끝이라
     /// 폴드 본문은 전부 "토큰 파싱 → 표적 노드 → 목표 계산 호출" 세 줄 모양이다.
     /// </summary>
     public static partial class StageReducer
@@ -89,9 +89,8 @@ namespace Ked.Presentation.Core
             if (!TryGetSpawnedSlot(state, cmd, out string slotKey, out reason))
                 return false;
 
-            // 브리지는 Track과 Track_Focus 두 노드에 절대 0을 건다.
+            // 브리지는 Track에 절대 0을 건다 — move_by가 쓰는 그 노드다.
             ApplyMoveTarget(state, slotKey, "CharSlot_Track", relative: false, Vec2.Zero);
-            ApplyMoveTarget(state, slotKey, "CharSlot_Track_Focus", relative: false, Vec2.Zero);
             return true;
         }
 

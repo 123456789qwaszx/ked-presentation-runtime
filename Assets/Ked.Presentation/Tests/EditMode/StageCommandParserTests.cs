@@ -34,12 +34,15 @@ public class StageCommandParserTests
     }
 
     // 인자 하나를 이름에 박아 다시 부르는 이름은 없다.
-    // 예외: place_left·center·right 셋, char_visual_<효과> 일곱.
+    // 예외: char_visual_<효과> 일곱.
     [TestCase("slot01")]
     [TestCase("bg_slot01")]
     [TestCase("stage_blur_s1")]
     [TestCase("place_tl")]
     [TestCase("place_inner_br")]
+    [TestCase("place_left")]
+    [TestCase("place_center")]
+    [TestCase("place_right")]
     [TestCase("size_close")]
     [TestCase("stage_mask_daze_in")]
     [TestCase("stage_mask_hstrip_open")]
@@ -57,9 +60,6 @@ public class StageCommandParserTests
         Assert.IsFalse(StageCommandParser.Knows("char_to_s1"));
     }
 
-    [TestCase("place_left")]
-    [TestCase("place_center")]
-    [TestCase("place_right")]
     [TestCase("char_visual")]
     [TestCase("char_visual_focus")]
     [TestCase("char_visual_defocus")]
@@ -120,29 +120,39 @@ public class StageCommandParserTests
         Assert.AreEqual(YarnCommandTextExtractor.IsWaitingCommand(tokens[0]), waits, line);
     }
 
-    [TestCase("tl", ScreenFocusPoint.TopLeft)]
-    [TestCase("bottom", ScreenFocusPoint.Bottom)]
-    [TestCase("inner_tl", ScreenFocusPoint.ThirdsUpperLeft)]
-    [TestCase("inner_br", ScreenFocusPoint.ThirdsLowerRight)]
-    public void place는_셋째_인자로_화면_지점을_받는다_코어와_같은_이름(string point, ScreenFocusPoint expected)
+    [TestCase("show")]
+    [TestCase("shot_to")]
+    [TestCase("place")]
+    [TestCase("shot_focus_to")]
+    public void 걷은_역산_묶음_명령은_모른다(string name)
     {
-        // 옛 place_tl · place_inner_tl … 은 이 인자로 내려왔다. 코어 ScreenPointRatios의 이름과 같아야
-        // 재생과 정지 프레임이 같은 자리를 본다(inner_tl을 런타임만 모르면 조용히 가운데로 간다).
-        PlaceCharacterFocusCommandSpecCharR place =
-            (PlaceCharacterFocusCommandSpecCharR)Parse(NewParser(), Cmd("place", "c1", "face", point))[0];
-
-        Assert.AreEqual(expected, place.screenPoint);
+        // 무대를 읽어 값을 푸는 것 · 이름 하나가 여럿을 내는 것은 커맨드가 아니다(docs/PLAN_command-prune.md).
+        Assert.IsFalse(StageCommandParser.Knows(name));
     }
 
     [Test]
-    public void place의_모르는_화면_지점은_경고하고_가운데로()
+    public void size는_깊이와_길이만_받는다()
     {
-        LogAssert.Expect(LogType.Warning, new Regex("화면 지점 'nowhere'을 모른다"));
+        // 셋째 칸은 길이다 — 보존할 초점을 받던 칸은 걷었다. 무대를 재지 않고 레벨의 값을 그대로 놓는다.
+        SetDepthCommandSpecCharR size = (SetDepthCommandSpecCharR)Parse(NewParser(), Cmd("size", "c1", "14", "30fr", "InOutCubic"))[0];
 
-        PlaceCharacterFocusCommandSpecCharR place =
-            (PlaceCharacterFocusCommandSpecCharR)Parse(NewParser(), Cmd("place", "c1", "face", "nowhere"))[0];
+        Assert.IsTrue(size.useLevel);
+        Assert.AreEqual(14f, size.level, 1e-6f);
+        Assert.AreEqual(1f, size.duration, 1e-6f, "30fr = 1초");
+        Assert.AreEqual(DG.Tweening.Ease.InOutCubic, size.ease);
+    }
 
-        Assert.AreEqual(ScreenFocusPoint.Center, place.screenPoint);
+    [Test]
+    public void move_reset은_move_by가_쓰는_노드_하나를_0으로_놓는다()
+    {
+        List<CommandSpecBase> specs = Parse(NewParser(), Cmd("move_reset", "c1", "12fr"));
+
+        Assert.AreEqual(1, specs.Count);
+
+        MoveByCommandSpecCharR reset = (MoveByCommandSpecCharR)specs[0];
+        Assert.AreEqual(CharacterRigNode.CharSlot_Track, reset.node);
+        Assert.IsTrue(reset.useAbsolutePosition);
+        Assert.AreEqual(Vector2.zero, reset.delta);
     }
 
     [Test]

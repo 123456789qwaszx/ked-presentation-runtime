@@ -35,8 +35,9 @@
 |---|---|---|
 | C1 | `show` 걷기 | 끝 — `a50034ea` |
 | C2 | `shot_to` 걷기 | 끝 — `c6a8aa3d` |
-| C3 | `size`에서 초점 보존 떼기 — 인자는 `size 슬롯 깊이 [길이] [이징]`. 데모 · 예제의 `size` 19곳에 보정 `move_by`를 풀어 적었다 | 끝 — 이 커밋 |
-| C4 | `place` 계열 · `shot_focus_to` 걷기 — 데모 · 예제의 값을 풀어 적은 뒤 | |
+| C3 | `size`에서 초점 보존 떼기 — 인자는 `size 슬롯 깊이 [길이] [이징]`. 데모 · 예제의 `size` 19곳에 보정 `move_by`를 풀어 적었다 | 끝 — `b688df44` |
+| C4 | `place` 계열 · `shot_focus_to` 걷기 — 데모 · 예제 4편의 `place` 31곳 · `shot_focus_to` 1곳을 `move_by` · `shot_zoom` + `shot_pan`으로 풀어 적었다. `move_reset`은 `Track` 하나만 0으로 놓는다 | 끝 — 이 커밋 |
+| C5 | 읽는 명령이 사라진 장치 걷기(§5의 ①) | 소유자가 정한 뒤 |
 
 **데모 · 예제의 값을 푸는 법(P6)**: 코어 위의 작은 변환기가 대본을 줄 차례로 접으면서, 옛 명령이 뜻하던 자리(그 초점이 그 화면 지점에 ·
 크기가 바뀌어도 그 초점이 제자리에)를 `SettledFocusMath.SolveFocusPlacement`로 `CharSlot_Track`의 이동으로 푼다 — 보조 버튼이 할 일과 같다.
@@ -56,3 +57,16 @@
 | `show` · `place` 계열 · `size` · `shot_focus_to` | 재현 대본에 쓰인 곳 없음 | 없음. 카드 원천(`catalog/cards.json`)의 글에 `place` · `size`가 나오는 곳은 문맥을 보고 고친다 |
 | `shot_to` | `ch05_01.yarn`에 7곳(도구 `tools/`는 내지 않는다) | `shot_zoom` + `shot_pan`으로 |
 | 걷은 이름 모두 | `tools/stage/yarn_check.py`의 이름 표에 있다 | 표에서 뺀다 — 쓰면 오류가 되게 |
+
+## 5. 남은 것 — 소유자가 정할 것
+
+C4까지 걷고 나니 드러난 것들이다. 어느 것도 지금 재생을 막지 않는다.
+
+| # | 무엇 | 지금 | 갈래 |
+|---|---|---|---|
+| ① | **정착 장부** — 리그 커맨드 일곱이 끝값을 적어 두는 곳(`CharacterRigRefs.PlacementTargets`) · 측정 사슬(`CaptureSettledChain`) · 무대 중립(`IStageViewNeutral`) | 값을 푸는 커맨드가 없어져, 읽는 쪽은 진단 뷰(`CharacterFocusDebugView`)와 Unity 대조 시험 셋뿐이다. `SettledFocusMath.SolveDepthYPreservingFocus`도 부르는 곳이 없다 | 걷는다(C5 — 커맨드 일곱의 예약 호출 · 장부 · 대조 시험을 함께) / 진단 뷰를 위해 둔다 |
+| ② | **샷의 초점 축** — `ShotIntentState.FocusPointInRigSpace`. 줌할 때 앞 · 뒤 층이 어느 쪽으로 벌어지는지(산개)의 기준 | 이 값을 놓던 것은 `shot_focus_to`뿐이었다. 이제 늘 0이라 산개가 일어나지 않는다(데모의 그 한 줄도 줌 · 팬만 남았다) | 축 하나를 놓는 보통 명령을 둔다(`shot_focus x y`) / 산개를 걷는다 / 그대로 둔다 |
+| ③ | **`CharSlot_Track_Focus`** — 리그의 맨 위 노드 | 쓰는 명령이 없는 빈 축이다(모션 클립도 키를 못 준다) | 리그 구조는 Unity 프리팹과 모션 툴의 스키마가 정한다 — 거기서 정한다 |
+| ④ | **자리 값이 깊이 배율 아래다** — `move_by`의 노드(`Track`)는 `DepthScale` 아래 | 적힌 이동이 깊이 배율만큼 곱해져 보인다(mid에서 `move_by 1u` = 화면 1.708u). `place`는 그 위(`Track_Focus`)에 써서 화면 값 그대로였다 | 도구가 풀어 준다(지금) / 화면 값 그대로 적는 자리 축을 `Track_Focus`에 둔다(`move_by`의 노드를 옮기는 일 — 대본의 값이 다 바뀐다) |
+| ⑤ | **좌우 반전이 코어 폴드에 없다** — `mirror`는 접히지 않고, 초점 오프셋의 X를 뒤집는 것은 런타임만 안다 | 보조 계산(`TryPlaceFocus`)이 반전된 인물을 풀면 X가 어긋난다. 데모의 세 줄은 변환기가 런타임의 식으로 따로 풀었다 | 도구를 만들 때 facing을 폴드에 올린다 |
+| ⑥ | **git 밖의 대본** — 소유자 컴퓨터의 `Assets/Dialogue/RealTest/real_test_Mirage_Tavern.yarn` | 걷은 명령이 27곳 남아 있다(`.gitignore`라 건드리지 않았다). 재생하면 Yarn이 모르는 명령으로 알린다 | 같은 변환기로 풀 수 있다 |

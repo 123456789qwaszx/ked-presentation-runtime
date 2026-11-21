@@ -165,7 +165,7 @@ MonoBehaviour
 
 ### `focus-tuning.json` — `CharacterFocusTuningDBSO`
 
-focus 지점의 로컬 오프셋. `place` · `shot_focus_to`가 쓴다.
+focus 지점의 로컬 오프셋. 초점을 화면 지점에 놓는 보조 계산(`NodeTargets.TryPlaceFocus` · `ShotIntents.FocusTo`)과 초상 촬영소 · 진단 뷰가 쓴다 — 이 값을 읽는 커맨드는 없다(2026-11-21).
 
 ```
 MonoBehaviour

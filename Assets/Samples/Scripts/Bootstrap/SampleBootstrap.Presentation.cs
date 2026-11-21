@@ -153,15 +153,12 @@ public partial class SampleBootstrap
         CharacterRigBuilder characterRigBuilder = new();
         PortraitResolver portraitResolver = new(portraitGeneratedDb);
 
-        // 배치는 무대 좌표 — 배치 계산이 샷이 움직이는 무대 노드를 지날 때 샷 시스템의 중립값을 쓴다.
         CharacterRigCommandFactory charRigFactory = new(
             _presentationStage,
-            _presentationResponseRig,
             charRigSlotResolver,
             characterRigBuilder,
             portraitResolver,
             roleTuningDb,
-            characterFocusTuningDb,
             characterVisualFocusPresetDb,
             characterDepthTuning);
 
@@ -179,8 +176,7 @@ public partial class SampleBootstrap
             _emojiPlayback,
             emojiLocators);
 
-        ShotResponseCommandFactory presentationShotFactory = new(
-            _presentationStage, _presentationResponseRig, characterFocusTuningDb);
+        ShotResponseCommandFactory presentationShotFactory = new(_presentationResponseRig);
 
         // Presentation Control
         PresentationControlCommandFactory presentationControlFactory = new(_presentationStage);

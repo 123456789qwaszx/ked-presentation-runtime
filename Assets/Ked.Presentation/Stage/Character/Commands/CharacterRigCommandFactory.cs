@@ -3,36 +3,30 @@ using System;
 public sealed class CharacterRigCommandFactory : INodeCommandFactory
 {
     private readonly PresentationStage _stage;
-    private readonly IStageViewNeutral _stageView;
     private readonly CharRigSlotResolver _rigSlotResolver;
     private readonly CharacterRigBuilder _rigBuilder;
     private readonly PortraitResolver _portraitResolver;
 
     private readonly RoleAnchorTuningDBSO _roleTuningDb;
-    
-    private readonly CharacterFocusTuningDBSO _characterFocusTuningDb;
+
     private readonly CharacterVisualFocusPresetDBSO _characterVisualFocusPresetDb;
     
     private readonly CharacterDepthTuningSO _characterDepthTuning;
 
     public CharacterRigCommandFactory(
         PresentationStage stage,
-        IStageViewNeutral stageView,
         CharRigSlotResolver charRigSlotResolver,
         CharacterRigBuilder charRigBuilder,
         PortraitResolver portraitResolver,
         RoleAnchorTuningDBSO roleTuningDb,
-        CharacterFocusTuningDBSO characterFocusTuningDb,
         CharacterVisualFocusPresetDBSO characterVisualFocusPresetDb,
         CharacterDepthTuningSO characterDepthTuning)
     {
         _stage = stage ?? throw new ArgumentNullException(nameof(stage));
-        _stageView = stageView;
         _rigSlotResolver = charRigSlotResolver ?? throw new ArgumentNullException(nameof(charRigSlotResolver));
         _rigBuilder = charRigBuilder ?? throw new ArgumentNullException(nameof(charRigBuilder));
         _portraitResolver = portraitResolver ?? throw new ArgumentNullException(nameof(portraitResolver));
         _roleTuningDb = roleTuningDb ? roleTuningDb : throw new ArgumentNullException(nameof(roleTuningDb));
-        _characterFocusTuningDb = characterFocusTuningDb ? characterFocusTuningDb : throw new ArgumentNullException(nameof(characterFocusTuningDb));
         _characterVisualFocusPresetDb = characterVisualFocusPresetDb ? characterVisualFocusPresetDb : throw new ArgumentNullException(nameof(characterVisualFocusPresetDb));
         _characterDepthTuning = characterDepthTuning ? characterDepthTuning : throw new ArgumentNullException(nameof(characterDepthTuning));
     }
@@ -68,9 +62,6 @@ public sealed class CharacterRigCommandFactory : INodeCommandFactory
             SlideCommandSpecCharR s => new SlideCommandCharR(_stage, s),
             SetPortraitSpriteCommandSpecCharR s => new SetPortraitSpriteCommandCharR(_stage, s, _portraitResolver),
             SetEmotionPortraitWipeCommandSpecCharR s => new SetEmotionPortraitWipeCommandCharR(_stage, s, _portraitResolver),
-            
-            // Composition / Focus-aware Placement
-            PlaceCharacterFocusCommandSpecCharR s => new PlaceCharacterFocusCommandCharR(_stage, _stageView, s, _characterFocusTuningDb),
 
             // Visual State
             SetSpriteCommandSpecCharR s => new SetSpriteCommandCharR(_stage, s),

@@ -3,11 +3,10 @@ using System.Collections.Generic;
 namespace Ked.Presentation.Core
 {
     /// <summary>
-    /// 화면 지점 프리셋의 rig-space 좌표 (호스트 ScreenFocusPointResolver의 비율 규약).
+    /// 화면 지점 프리셋의 rig-space 좌표 — 프레임 크기 × 비율. 이 표가 사는 유일한 자리다
+    /// (샘플의 격자 오버레이 ScreenFocusGridOverlay가 같은 값을 그린다).
     ///
-    /// 주의: 이 비율은 게임별 값이므로 원칙적으로는 tuning 데이터가 맞다
-    /// (target-boundary.md 백로그). 지금은 호스트에도 같은 상수가 있어 두 곳이다 —
-    /// 연출 기준값 덤프에 screen-focus-points.json을 추가할 때 여기를 지운다.
+    /// 주의: 이 비율은 게임별 값이므로 원칙적으로는 tuning 데이터가 맞다(target-boundary.md 백로그).
     /// </summary>
     public static class ScreenPointRatios
     {
@@ -83,17 +82,19 @@ namespace Ked.Presentation.Core
 
     public static partial class NodeTargets
     {
-        /// <summary>측정 사슬의 끝 — place가 focus를 재는 노드.</summary>
+        /// <summary>측정 사슬의 끝 — focus를 재는 노드.</summary>
         public const string FocusMeasureNodeId = "CharacterPortrait_VisualOffset";
 
-        // ── place ────────────────────────────────────────
+        // ── 초점을 화면 지점에 (보조 계산) ───────────────────────
         //
-        // place 계열 — focus 지점을 무대 지점으로 보내는 이동 축(Track_Focus) 목표.
+        // 커맨드가 아니다 — 도구의 보조 버튼이 부르는 계산이다(docs/PLAN_command-prune.md P4).
+        // 지금 무대에서 그 focus 지점이 그 화면 지점에 오려면 자리 축(CharSlot_Track — move_by가 쓰는 노드)이
+        // 어디여야 하는가를 낸다. 버튼은 이 끝값과 지금 값의 차를 move_by로 적는다 — 대본에는 풀린 값만 남는다.
         // 무대 지점은 카메라가 중립일 때 그 화면 지점과 겹치는 무대 위 자리다. 이 노드 트리에는 카메라 ·
-        // 깊이 층 프레이밍 노드가 없다 — 그것이 곧 카메라 중립이고, 런타임도 배치를 같은 중립으로 푼다(IStageViewNeutral).
+        // 깊이 층 프레이밍 노드가 없다 — 그것이 곧 카메라 중립이다.
 
-        /// <summary>스펙 기본 moveTarget (브리지: CharacterRigNode.CharSlot_Track_Focus).</summary>
-        public const string PlaceFocusMoveNodeId = "CharSlot_Track_Focus";
+        /// <summary>자리 축 — move_by가 쓰는 노드(브리지: CharacterRigNode.CharSlot_Track).</summary>
+        public const string PlaceMoveNodeId = "CharSlot_Track";
 
         public static bool TryPlaceFocus(
             StageState state,
@@ -116,7 +117,7 @@ namespace Ked.Presentation.Core
             Vec2 focusOffset = FocusOffsetMath.Resolve(focusTuning, characterKey, focusPresetName, Vec2.Zero);
 
             string measureKey = StageState.NodeKeyOf(slotKey, FocusMeasureNodeId);
-            string moveKey = StageState.NodeKeyOf(slotKey, PlaceFocusMoveNodeId);
+            string moveKey = StageState.NodeKeyOf(slotKey, PlaceMoveNodeId);
 
             List<string> chainKeys = new();
             RectNodeState[] chain = state.Nodes.BuildChainTo(measureKey, chainKeys);

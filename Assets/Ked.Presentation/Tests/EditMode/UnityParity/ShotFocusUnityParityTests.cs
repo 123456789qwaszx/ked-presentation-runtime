@@ -7,11 +7,11 @@ using Object = UnityEngine.Object;
 namespace Ked.Presentation.Tests.UnityParity
 {
     /// <summary>
-    /// shot_focus_to의 명중을 실제 계층에서 잰다. 측정(정착 사슬, 샷 노드는 중립) → 코어 목표 계산 →
+    /// 초점을 화면 지점에 오게 하는 줌 · 팬(코어 ShotIntents.FocusTo)의 명중을 실제 계층에서 잰다. 측정(정착 사슬, 샷 노드는 중립) → 코어 목표 계산 →
     /// 샷 시스템 적용 → Unity 트랜스폼으로 본 그 점의 자리가 화면 지점이어야 한다. 리그가 어느 층에 서도.
     ///
     /// 무대는 StageRigBuilder, 샷은 PresentationShotResponseSystem, 리그는 CharacterRigBuilder — 조립과 같은 셋이다.
-    /// 커맨드(ShotFocusToCommand)는 이 사슬을 잇기만 한다(측정 · 화면 지점 해석 · 목표 계산 · Follow).
+    /// 이 사슬(측정 · 화면 지점 해석 · 목표 계산 · Follow)은 도구의 보조 버튼이 줌 · 팬을 풀 때 밟는 길이다.
     /// </summary>
     public sealed class ShotFocusUnityParityTests
     {
@@ -20,7 +20,7 @@ namespace Ked.Presentation.Tests.UnityParity
         /// <summary>bust 상당 (ExportedTuning/presets/focus-tuning.json의 실값).</summary>
         private static readonly Vector3 BustOffset = new(0f, 820f, 0f);
 
-        /// <summary>place_left 상당 자리 — 1920 × 0.24 왼쪽.</summary>
+        /// <summary>왼쪽 지점 — 1920 × 0.24 왼쪽.</summary>
         private static readonly Vector2 LeftTrack = new(-460.8f, -520f);
 
         private readonly List<GameObject> _spawned = new();
@@ -78,7 +78,7 @@ namespace Ked.Presentation.Tests.UnityParity
             return refs;
         }
 
-        // CharacterFocusPointResolver(shot_focus_to)와 같은 측정 — 정착 월드 점을 무대 루트 로컬로.
+        // CharacterFocusPointResolver와 같은 측정 — 정착 월드 점을 무대 루트 로컬로.
         private Vector2 MeasureInStageSpace(CharacterRigRefs refs)
         {
             Vector3 world = refs.PlacementTargets.MeasureSettledWorldPoint(
@@ -96,7 +96,7 @@ namespace Ked.Presentation.Tests.UnityParity
             return new Vector2(local.x, local.y);
         }
 
-        // ShotFocusToCommand.BuildTargetState의 목표 계산 부분.
+        // 목표 계산 — 코어 ShotIntents.FocusTo.
         private ShotIntentState FocusTo(CharacterRigRefs refs, Vector2 desired, float zoom)
             => ShotIntents.FocusTo(
                 _system.Intent.ToCore(),

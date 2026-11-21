@@ -13,7 +13,7 @@ public sealed partial class StageCommandParser
     // 정본만 둔다. 같은 일을 인자 하나만 고정해 다시 부르는 이름(slotNN · bg_slotNN ·
     // stage_blur_sN · place_* · size_<라벨> · stage_mask_<프리셋>)은 두지 않는다 —
     // 대본은 저작 툴(ked-story-compositor)이 내고, 툴은 정본만 낸다. 변형은 이름이 아니라 인자로 받는다.
-    // 예외: place_left · place_center · place_right, 그리고 char_visual_<효과> 일곱 — 캐릭터 비주얼은 커맨드 이름에서 어떤 효과인지 드러나야 한다(일반형 char_visual도 남김).
+    // 예외: char_visual_<효과> 일곱 — 캐릭터 비주얼은 커맨드 이름에서 어떤 효과인지 드러나야 한다(일반형 char_visual도 남김).
     private static readonly Dictionary<string, Handler> Table = new(StringComparer.Ordinal)
     {
         ["pause"] = (p, c) => p.EnqueueWaitSpec(c.Arg(0)),
@@ -27,7 +27,7 @@ public sealed partial class StageCommandParser
         ["move_by"] = (p, c) => p.EnqueueSetAnchorOffsetSpecs(c.Arg(0), c.Arg(1, "0u"), c.Arg(2, "0u"), c.Arg(3, "0.4s"), c.Arg(4, "")),
         ["rotate_by"] = (p, c) => p.EnqueueRotateBySpec(c.Arg(0), Float(c, 1, 0f), c.Arg(2, "0.4s"), c.Arg(3, "")),
         ["scale_by"] = (p, c) => p.EnqueueSizeBySpec(c.Arg(0), Float(c, 1, 0f), c.Arg(2, "0.4s"), c.Arg(3, "")),
-        ["move_reset"] = (p, c) => p.EnqueueSetPlaceResetSpecs(c.Arg(0), c.Arg(1, "0.4s")),
+        ["move_reset"] = (p, c) => p.EnqueueMoveResetSpec(c.Arg(0), c.Arg(1, "0.4s")),
         ["rotate_reset"] = (p, c) => p.EnqueueRotateResetSpec(c.Arg(0), c.Arg(1, "0.4s"), c.Arg(2, "")),
         ["scale_reset"] = (p, c) => p.EnqueueSizeResetSpec(c.Arg(0), c.Arg(1, "0.4s"), c.Arg(2, "")),
         ["motion"] = (p, c) => p.EnqueueMotionSpec(c.Arg(0), c.Arg(1), c.Arg(2, MotionModeToken.Relative)),
@@ -36,7 +36,6 @@ public sealed partial class StageCommandParser
         ["sibling_front"] = (p, c) => p.EnqueueCharacterSiblingFrontSpec(c.Arg(0)),
         ["sibling_back"] = (p, c) => p.EnqueueCharacterSiblingBackSpec(c.Arg(0)),
         // shot — 값 인자(zoom · x · y · n · 도)에는 생략값이 없다. 빠지면 그 줄은 실행하지 않는다(StageCommandParser.ShotResponse).
-        ["shot_focus_to"] = (p, c) => p.EnqueueShotFocusToSpec(c.Arg(0), c.Arg(1, "body"), c.Arg(2, "center"), Float(c, 3, 2.5f), c.Arg(4, "1.2s"), c.Arg(5, "")),
         ["shot_zoom"] = (p, c) => p.EnqueueShotZoomSpec(c, c.Arg(0), c.Arg(1, "0.45s"), c.Arg(2, "")),
         ["shot_pan"] = (p, c) => p.EnqueueShotPanSpec(c, c.Arg(0), c.Arg(1), c.Arg(2, "0.45s"), c.Arg(3, "")),
         ["shot_track"] = (p, c) => p.EnqueueShotTrackSpec(c, c.Arg(0), c.Arg(1), c.Arg(2, "0.45s"), c.Arg(3, "")),
@@ -49,10 +48,6 @@ public sealed partial class StageCommandParser
         ["right"] = (p, c) => p.EnqueueNudgeRightSpec(c.Arg(0), c.Arg(1), c.Arg(2, DefaultNudgeDurationToken), c.Arg(3, "")),
         ["up"] = (p, c) => p.EnqueueNudgeUpSpec(c.Arg(0), c.Arg(1), c.Arg(2, DefaultNudgeDurationToken), c.Arg(3, "")),
         ["down"] = (p, c) => p.EnqueueNudgeDownSpec(c.Arg(0), c.Arg(1), c.Arg(2, DefaultNudgeDurationToken), c.Arg(3, "")),
-        ["place"] = (p, c) => p.EnqueuePlaceCharacterFocusSpec(c.Arg(0), c.Arg(1, "bust"), c.Arg(2, "center"), c.Arg(3, "0fr"), c.Arg(4, "")),
-        ["place_left"] = (p, c) => p.EnqueueFocusToLeftSpec(c.Arg(0), c.Arg(1, DefaultFocusPlacementFocusToken), c.Arg(2, DefaultFocusPlacementDurationToken), c.Arg(3, "")),
-        ["place_center"] = (p, c) => p.EnqueueFocusToCenterSpec(c.Arg(0), c.Arg(1, DefaultFocusPlacementFocusToken), c.Arg(2, DefaultFocusPlacementDurationToken), c.Arg(3, "")),
-        ["place_right"] = (p, c) => p.EnqueueFocusToRightSpec(c.Arg(0), c.Arg(1, DefaultFocusPlacementFocusToken), c.Arg(2, DefaultFocusPlacementDurationToken), c.Arg(3, "")),
         ["size"] = (p, c) => p.EnqueueDepthAtPresetSpec(c.Arg(0), c.Arg(1), c.Arg(2, DefaultDepthDurationToken), c.Arg(3, "")),
         ["size_reset"] = (p, c) => p.EnqueueDepthResetSpec(c.Arg(0), Float(c, 1, 0f), c.Arg(2, "")),
         ["fade_in"] = (p, c) => p.EnqueueFadeInSpec(c.Arg(0), c.Arg(1, "18fr")),

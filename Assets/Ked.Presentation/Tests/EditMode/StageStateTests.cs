@@ -48,8 +48,8 @@ namespace Ked.Presentation.Tests
         public void ToString은_출처를_함께_보여준다()
         {
             // Unhandled 목록을 사람이 읽고 고칠 수 있어야 한다.
-            Assert.That(Cmd("place_left", "c1", "bust").ToString(),
-                Is.EqualTo("<<place_left c1 bust>> @ test.yarn:1"));
+            Assert.That(Cmd("fade_in", "c1", "18fr").ToString(),
+                Is.EqualTo("<<fade_in c1 18fr>> @ test.yarn:1"));
         }
 
         // ── Unhandled ────────────────────────────────────────────────

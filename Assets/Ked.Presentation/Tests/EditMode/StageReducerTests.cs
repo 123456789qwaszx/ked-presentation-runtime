@@ -435,9 +435,9 @@ namespace Ked.Presentation.Tests
         }
 
         [Test]
-        public void move_by는_상대_move_reset은_두_노드_절대_0이다()
+        public void move_by는_상대_move_reset은_절대_0이다()
         {
-            // 브리지: move_by(slot, x="0u", y="0u") 상대 / move_reset은 Track과 Track_Focus에 절대 0.
+            // 브리지: move_by(slot, x="0u", y="0u") 상대 / move_reset은 같은 노드(Track)에 절대 0.
             StageState moved = Fold(
                 Cmd("slot", "c1"),
                 Cmd("move_by", "c1", "1u", "-2u"),
@@ -449,7 +449,6 @@ namespace Ked.Presentation.Tests
             StageState reset = StageReducer.Apply(moved, Cmd("move_reset", "c1"), NewTuning());
 
             Assert.That(reset.Nodes.GetState("c1/CharSlot_Track").AnchoredPosition, Is.EqualTo(Vec2.Zero));
-            Assert.That(reset.Nodes.GetState("c1/CharSlot_Track_Focus").AnchoredPosition, Is.EqualTo(Vec2.Zero));
         }
 
         [Test]
@@ -681,17 +680,6 @@ namespace Ked.Presentation.Tests
 
             Assert.That(state.Unhandled.Count, Is.EqualTo(6), string.Join("\n", state.Unhandled));
             Assert.That(state.Shot.ToString(), Is.EqualTo(ShotIntentState.Default.ToString()), "아무것도 접히지 않았다");
-        }
-
-        [Test]
-        public void shot_focus_to는_focus_튜닝_없이도_접힌다()
-        {
-            // 튜닝이 없으면 오프셋이 0일 뿐 폴드 자체는 성립한다.
-            // (오프셋 합의 정확성은 FocusStageTargetTests가 본다.)
-            StageState state = Fold(Cmd("slot", "c1"), Cmd("shot_focus_to", "c1", "body", "center", "2.5"));
-
-            Assert.That(state.Unhandled, Is.Empty);
-            Assert.That(state.Shot.Zoom, Is.EqualTo(2.5f));
         }
 
         // ── 시간 커맨드 (접을 것이 없다) ─────────────────────────────

@@ -18,28 +18,25 @@ title: Demo_Presentation
 <<bgm audio/bgm_idoberg-relaxing-guitar-loop-v5-245859 2s>>
 <<pause 15fr>>
 <<step>>
-<<place_center s1 bust 0fr>>
 <<size s1 mid 0fr>>
-<<move_by s1 0u 2.679u 0fr>>
+<<move_by s1 0u 0.639u 0fr>>
 <<fade_in s1 23fr>>
 하린: 배경이 들어오고, 음악이 깔리고, 내가 걸어 들어왔어. #line:ln_7u3jtu6n
 
-// ── 장부 확인 (붙여 넣어 보고 지울 것) ──────────────────────────
+// ── 자리 · 크기 확인 (붙여 넣어 보고 지울 것) ───────────────────
 <<fade_out s3 10fr>>
-<<place_left s2 bust 15fr>>
-<<place_right s1 bust 15fr>>
 <<size s1 mid 15fr>>
+<<move_by s1 6.745u 0u 15fr>>
 <<size s2 mid 15fr>>
-<<move_by s2 0u 2.679u 15fr>>
+<<move_by s2 -6.745u 0.639u 15fr>>
 준비. 하린은 오른쪽, 시구레는 왼쪽.
 
 <<actor @2 s1>>
-<<place @2 face left>>
+<<move_by @2 -13.49u -1.617u 0fr>>
 test
 
-<<move_by s1 -6u 0u 38fr>>
-<<place_center s1 bust 25fr>>
-1. move_by + place — 하린이 옆으로 밀리는 중이지만, 가슴은 정확히 가운데에서 멈춰야 한다.
+<<move_by s1 6.745u 1.617u 38fr>>
+1. move_by — 하린의 가슴이 가운데에 온다. 초점을 화면 지점에 놓는 값은 도구가 풀어서 move_by로 적는다.
 <<portrait harin a 1>>
 하린: 초상이 보이는가. #portrait
 <<face portrait 2>>
@@ -50,25 +47,22 @@ test
 하린: 태그도 없고 표에도 없는 화자의 줄은 보통 대사창이다.
 
 <<size s1 22 38fr>>
-<<move_by s1 1.665u -0.719u 38fr>>
-<<place_center s1 face 25fr>>
+<<move_by s1 0u -1.77u 38fr>>
 <<up s1 2u 25fr>>
 <<shot_zoom 3 24>>
 <<shot_pan 4 4 24>>
-2. size + place — 커지는 중에도 얼굴이 가운데에 와야 한다.
+2. size + move_by + up + shot_zoom + shot_pan — 커지면서 얼굴이 가운데로 오고, 줌과 팬이 함께 간다.
 
 <<rotate_by s1 12 38fr>>
-<<place_center s1 face 25fr>>
-3. rotate_by + place — 기우는 중에도 얼굴이 가운데에 와야 한다.
+<<move_by s1 3.867u -1.594u 25fr>>
+3. rotate_by + move_by — 기울어도 얼굴이 가운데에 온다.
 
 <<mirror s1 toggle>>
-<<place_center s1 face 25fr>>
 <<shot_reset >>
-4. mirror + place — 좌우가 바뀌어도 얼굴이 가운데에 와야 한다.
+4. mirror + shot_reset — 좌우가 바뀌어도 얼굴은 가운데 그대로다. 렌즈는 되돌린다.
 
 <<slide_in s2 left 4u 38fr>>
-<<place_left s2 bust 25fr>>
-5. slide_in + place — 시구레가 미끄러져 들어오는 중에도 가슴이 왼쪽 지점에서 멈춰야 한다.
+5. slide_in — 시구레가 미끄러져 들어와 왼쪽 지점에서 멈춘다.
 
 <<move_by s1 3u 0u 50fr>>
 6-1. 이 줄은 하린이 움직이는 도중에 바로 넘긴다.
@@ -77,9 +71,8 @@ test
 6-2. 앞 이동이 끝값으로 확정된 뒤 이어서 간다 — 합쳐 6u 움직였어야 한다.
 
 <<size s1 mid 60fr>>
-<<move_by s1 -0.717u 1.344u 60fr>>
 <<rotate_by s1 -12 60fr>>
-<<place_right s1 bust 60fr>>
+<<move_by s1 -3.122u 1.364u 60fr>>
 7. 이 줄도 도중에 바로 넘긴다(스텝 경계 가속). 다음 줄에서 하린의 가슴이 오른쪽 지점에 있어야 한다.
 
 8. 확인 줄. 여기서 되감기(R)로 1~7 줄에 돌아가 본다 — 일반 재생 때와 같은 자리에 서야 한다.
@@ -93,19 +86,17 @@ test
 하린: 지금부터 보이는 건 전부 이 대본 한 장에 적힌 명령이야. #line:ln_cydaj9ym
 
 
-<<place_left s2 bust 0fr>>
 <<size s2 mid 0fr>>
 <<slide_in s2 left 2u 18fr>>
 <<fade_in s2 18fr>>
-<<place_right s1 bust 20fr>>
 시구레: 옆으로 미끄러져 들어오면, 먼저 있던 사람은 자리를 비켜 줘요. #line:ln_4m8a87j3
 
 <<size s2 front 20fr>>
-<<move_by s2 0u -0.227u 20fr>>
+<<move_by s2 0.591u -0.048u 20fr>>
 시구레: 한 걸음 앞으로. 크기는 거리를 말해요. #line:ln_prgac1qy
 
 <<size s2 mid 20fr>>
-<<move_by s2 0u 0.227u 20fr>>
+<<move_by s2 -0.591u 0.048u 20fr>>
 <<sibling_front s1>>
 하린: 겹칠 때 누가 앞에 설지도 정할 수 있어. #line:ln_hdksazhc
 
@@ -129,11 +120,11 @@ test
 <<motion s1 bow absolute>>
 하린: 이건 숙인 채로 남는 모션(bow). 끝나도 자세가 그대로야. 셋째 인자가 relative(기본)·absolute를 정해. #line:ln_nrmvr5n2
 
-<<place_center s1 bust 20fr>>
-하린: 자리를 옮겨도 숙인 채로 가. 장부가 기울기를 알아서 얼굴 자리가 맞아. #line:ln_cjzch0sn
+<<move_by s1 -6.745u 0u 20fr>>
+하린: 자리를 옮겨도 숙인 채로 가. #line:ln_cjzch0sn
 
 <<char_rotate_to s1 0 13fr>>
-<<place_right s1 bust 20fr>>
+<<move_by s1 6.745u 0u 20fr>>
 하린: 같은 축을 다른 명령이 잡으면 그게 이어받아. 이제 똑바로. #line:ln_x8r45cck
 
 <<char_visual_focus s1 1 18fr>>
@@ -141,7 +132,8 @@ test
 하린: 말하는 사람에게 빛을 모으고, 듣는 사람은 한 톤 낮춰. #line:ln_5ag43erq
 
 <<stage_blur far 1>>
-<<shot_focus_to s1 face center 1.25 38fr>>
+<<shot_zoom 1.25 38fr>>
+<<shot_pan -12.03u -2.942u 38fr>>
 하린: 배경을 흐리고, 카메라를 얼굴 쪽으로 당기면… #line:ln_01mhdu3v
 
 <<shot_reset 25fr>>
@@ -183,9 +175,8 @@ test
 
 <<stage_mask daze_close stage00 18fr>>
 <<bg_sprite bg_main studio_evening>>
-<<place_center s3 bust 0fr>>
 <<size s3 mid 0fr>>
-<<move_by s3 0u 2.679u 0fr>>
+<<move_by s3 0u 0.639u 0fr>>
 <<fade_in s3 0fr>>
 <<stage_mask daze_open stage00 20fr>>
 카스미: …장면이 넘어갔네. 해 질 녘 작업실이야. #line:ln_z94y5hi1
@@ -197,8 +188,7 @@ test
 <<slot c1 stage01 mid>>
 <<cast c1 sigure a 1>>
 <<size c1 mid 0fr>>
-<<move_by c1 0u 2.008u 0fr>>
-<<place c1 face left 0fr>>
+<<move_by c1 -6.745u -0.978u 0fr>>
 <<fade_in c1 0fr>>
 <<cutin_open stage01 pink_stars -11.5u -3.25u>>
 시구레: 컷인이에요! 판은 튀어 오르고, 머리는 판 위로 나와요.
@@ -214,8 +204,7 @@ rrr
 <<slot c2 stage01 mid>>
 <<cast c2 kasmi a 1>>
 <<size c2 close 0fr>>
-<<move_by c2 0u 1.217u 0fr>>
-<<place c2 face right 0fr>>
+<<move_by c2 5.236u -1.101u 0fr>>
 <<fade_in c2 0fr>>
 <<cutin_open stage01 blue_question 11.5u -3.25u>>
 카스미: 오른쪽에도 열 수 있어. 판은 갸웃하는 파랑으로.
@@ -286,8 +275,8 @@ rrr
 
 // ① 짧게 끊기 — 같은 곳에서 자리만 바꾼다. 대사 없이 한 스텝. 바뀌는 과정이 보이면 안 된다.
 <<screen_cover black 0.3s>>
-<<place_left s1 bust 0fr>>
-<<place_right s2 bust 0fr>>
+<<move_by s1 -13.49u 0u 0fr>>
+<<move_by s2 13.49u 0u 0fr>>
 <<pause 0.1s>>
 <<screen_cover_clear 0.3s>>
 <<step>>
@@ -298,7 +287,7 @@ rrr
 <<bg_sprite bg_main class_day>>
 <<fade_out s2 0fr>>
 <<fade_out s3 0fr>>
-<<place_center s1 bust 0fr>>
+<<move_by s1 6.745u 0u 0fr>>
 <<pause 0.4s>>
 <<screen_cover_clear 0.5s>>
 <<step>>
@@ -333,8 +322,7 @@ rrr
 <<slot c3 stage01 mid>>
 <<cast c3 sigure a 1>>
 <<size c3 mid 0fr>>
-<<move_by c3 0u 2.008u 0fr>>
-<<place c3 face left 0fr>>
+<<move_by c3 -6.745u -0.978u 0fr>>
 <<fade_in c3 0fr>>
 <<cutin_open stage01 pink_stars -11.5u -3.25u>>
 시구레: 컷인을 열었어요.
@@ -365,8 +353,7 @@ rrr
 // <<stage_dim 층|all 세기 [길이] [이징] [무대]>> — all = 그 무대의 가장 앞 층의 판(무대 전체), far = 먼 층의 판(배경만 — 배경은 far,
 // 인물은 mid · front에 선다). 세기 0이면 걷는다.
 // 기다리지 않고 줄을 넘는다. 이 절도 보통 · Ctrl · 빠른 클릭 · R로 한 번씩 지나가 본다.
-<<place_left s1 bust 0fr>>
-<<place_right s2 bust 0fr>>
+<<move_by s1 -6.745u 0u 0fr>>
 <<fade_in s2 15fr>>
 시구레: 다시 나왔어요.
 
@@ -390,7 +377,6 @@ rrr
 // ③ 어두운 동안 들어온 인물 · 이모지 · 바뀐 배경도 같이 어둡다.
 <<stage_dim all 0.45 0.3s>>
 시구레: 어두운 동안에…
-<<place_center s3 bust 0fr>>
 <<fade_in s3 0.4s>>
 <<emoji s3 question>>
 카스미: 들어와도 같이 어두워. 이모지도.
@@ -403,8 +389,7 @@ rrr
 <<slot c4 stage01 mid>>
 <<cast c4 sigure a 1>>
 <<size c4 mid 0fr>>
-<<move_by c4 0u 2.008u 0fr>>
-<<place c4 face left 0fr>>
+<<move_by c4 -6.745u -0.978u 0fr>>
 <<fade_in c4 0fr>>
 <<cutin_open stage01 pink_stars -11.5u -3.25u>>
 <<stage_dim far 0.6 0.3s>>
@@ -453,8 +438,7 @@ rrr
 <<slot c5 stage01 mid>>
 <<cast c5 kasmi a 1>>
 <<size c5 mid 0fr>>
-<<move_by c5 0u 2.008u 0fr>>
-<<place c5 face left 0fr>>
+<<move_by c5 -6.745u -0.978u 0fr>>
 <<fade_in c5 0fr>>
 <<cutin_open stage01 pink_stars -11.5u -3.25u>>
 카스미: 컷인을 열고…

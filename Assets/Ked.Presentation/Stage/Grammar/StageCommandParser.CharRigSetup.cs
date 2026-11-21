@@ -199,31 +199,16 @@ public sealed partial class StageCommandParser
         });
     }
 
-    private void EnqueueSetPlaceResetSpecs(string roleKey, string durationToken)
-    {
-        float duration = YarnDurationParser.Parse(durationToken);
-
-        var slotOffsetSpec = new MoveByCommandSpecCharR
+    // move_reset — move_by가 쓰는 그 노드(Track)를 0으로.
+    private void EnqueueMoveResetSpec(string roleKey, string durationToken)
+        => Emit(new MoveByCommandSpecCharR
         {
             roleKey = roleKey,
             node = CharacterRigNode.CharSlot_Track,
             useAbsolutePosition = true,
             delta = new Vector2(0, 0),
-            duration = duration
-        };
-
-        var spec2 = new MoveByCommandSpecCharR
-        {
-            roleKey = roleKey,
-            node = CharacterRigNode.CharSlot_Track_Focus,
-            useAbsolutePosition = true,
-            delta = new Vector2(0, 0),
-            duration = duration
-        };
-
-        Emit(slotOffsetSpec);
-        Emit(spec2);
-    }
+            duration = YarnDurationParser.Parse(durationToken)
+        });
 
     private void EnqueueSizeResetSpec(string roleKey, string durationToken, string easeToken)
     {

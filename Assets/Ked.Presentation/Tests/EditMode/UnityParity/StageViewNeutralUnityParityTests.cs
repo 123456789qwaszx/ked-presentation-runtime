@@ -143,7 +143,7 @@ namespace Ked.Presentation.Tests.UnityParity
         private static RectTransform MoveRectOf(CharacterRigRefs refs)
             => refs.GetRect(CharacterRigNode.CharSlot_Track_Focus);
 
-        // CharacterFocusPlacementSolver와 같은 순서: 사슬 → 이동 축 색인 → SolveFocusPlacement.
+        // 배치 해의 순서: 사슬 → 이동 축 색인 → SolveFocusPlacement.
         private static Vector2 SolvePlace(
             CharacterPlacementTargetLedger ledger,
             CharacterRigRefs refs,

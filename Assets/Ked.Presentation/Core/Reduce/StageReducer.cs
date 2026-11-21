@@ -32,7 +32,7 @@ namespace Ked.Presentation.Core
         /// <summary>presets/depth.json의 "level" 커브 — 숫자 레벨(size c1 5) 폴드. 없으면 그 커맨드만 Unhandled.</summary>
         public DepthLevelTuningDto DepthLevel;
 
-        /// <summary>presets/focus-tuning.json — place · shot_focus_to의 focus 오프셋. 없으면 base 0으로 접는다.</summary>
+        /// <summary>presets/focus-tuning.json — focus 오프셋. 폴드는 읽지 않는다 — 보조 계산(NodeTargets.TryPlaceFocus)이 쓴다.</summary>
         public FocusTuningBodyDto FocusTuning;
 
         /// <summary>portrait-dimensions.json — 초상 사이징의 그림 크기. 없으면 사이징은 Unhandled.</summary>
@@ -77,7 +77,7 @@ namespace Ked.Presentation.Core
     /// 이 기록이 "아직 못 접는 것"의 유일한 진실이고, 수렴의 작업 목록이 된다.
     ///
     /// 현재 어휘(v1): slot 계열(리그 스폰) · cast/actor(배역·별칭) ·
-    ///   fade_in/out · fade · slide_in/out · place/size 계열 ·
+    ///   fade_in/out · fade · slide_in/out · size 계열 ·
     ///   nudge/move/scale/rotate 계열 · shot 계열 ·
     ///   초상 축(pose/face/face_swap) · motion(채널마다 마지막 키) · 시간 커맨드(pause — 접을 것이 없다) ·
     ///   배경 bg_*(캐스팅하지 않은 슬롯 — spawn/sprite/fade/move/scale).
@@ -94,7 +94,7 @@ namespace Ked.Presentation.Core
     /// 폴드 본문은 디스패치의 구획을 그대로 따라 partial로 나뉜다:
     ///   StageReducer.Slot.cs      슬롯 스폰 · 배역/별칭 · 구조 축
     ///   StageReducer.Anchor.cs    역할 앵커(cast) · fade
-    ///   StageReducer.Placement.cs place · size
+    ///   StageReducer.Placement.cs size
     ///   StageReducer.Staging.cs   nudge · move · scale · rotate
     ///   StageReducer.Shot.cs      shot 계열
     ///   StageReducer.Background.cs bg_* (배경 = 캐스팅하지 않은 슬롯)
@@ -171,14 +171,6 @@ namespace Ked.Presentation.Core
                 case "fade_out": return ApplyFade(state, cmd, visible: false, out reason);
                 case "fade":     return ApplyFadeTo(state, cmd, out reason);   // fade(slot, alpha="1", dur) — 반투명까지
 
-                // place 계열 — focus 지점을 화면 지점으로 (SettledFocusMath.SolveFocusPlacement).
-                // 파서 표: place(role, focus="bust", screenPoint="center") /
-                //          place_left·center·right(role, focus="face") — 화면 지점이 이름에 박힌 것은 이 셋뿐이다.
-                case "place": return ApplyPlace(state, cmd, tuning, cmd.Arg(2, "center"), "bust", out reason);
-                case "place_left": return ApplyPlace(state, cmd, tuning, "left", "face", out reason);
-                case "place_center": return ApplyPlace(state, cmd, tuning, "center", "face", out reason);
-                case "place_right": return ApplyPlace(state, cmd, tuning, "right", "face", out reason);
-
                 // size 계열 — depth 레벨의 Y와 배율을 그대로 놓는다(무대를 재지 않는다).
                 // 파서 표: size(role, depthArg, duration, ease) / size_reset(role, duration, ease) — mid로.
                 case "size": return ApplySize(state, cmd, tuning, cmd.Arg(1), out reason);
@@ -207,7 +199,7 @@ namespace Ked.Presentation.Core
                 // motion — 채널마다 마지막 키가 타깃이다. 샘플링하지 않는다(MotionMath.TargetFor).
                 case "motion": return ApplyMotion(state, cmd, tuning, out reason);
 
-                // shot — 축마다 하나(shot_<축>)와 묶음 하나(shot_focus_to), 되돌리기 둘.
+                // shot — 축마다 하나(shot_<축>), 되돌리기 둘.
                 case "shot_zoom":  return ApplyShotZoom(state, cmd, out reason);
                 case "shot_pan":   return ApplyShotPan(state, cmd, tuning, out reason);
                 case "shot_track": return ApplyShotTrack(state, cmd, tuning, out reason);
@@ -223,7 +215,6 @@ namespace Ked.Presentation.Core
                     state.Shot = ShotIntents.ResetAll();
                     return true;
 
-                case "shot_focus_to": return ApplyShotFocusTo(state, cmd, tuning, out reason);
 
                 // 흔들림 — 접을 것이 없다(끝나면 0). 클립만 본다.
                 case "shot_shake": return ApplyShotShake(state, cmd, tuning, out reason);

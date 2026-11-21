@@ -23,8 +23,8 @@ namespace Ked.Presentation.Core
         public const float Tolerance = 1e-4f;
 
         /// <summary>
-        /// 키잉 금지 노드. Track_Focus는 저작값이 아니라 해(解)다 — focus 프리셋 × ScreenPoint × 정착 체인에서
-        /// 풀려 나온다. 직접 키잉하면 place가 다음에 푸는 값과 싸운다.
+        /// 키잉 금지 노드. Track_Focus는 쓰는 명령이 없는 빈 축이다(place를 걷은 뒤 — docs/PLAN_command-prune.md).
+        /// 자리는 CharSlot_Track에 적는다. 여기에 키를 주면 되돌릴 명령이 없다.
         /// </summary>
         public static readonly IReadOnlyCollection<string> ForbiddenNodes = new[] { "CharSlot_Track_Focus" };
 

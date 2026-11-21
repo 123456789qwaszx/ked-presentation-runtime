@@ -9,68 +9,6 @@ namespace Ked.Presentation.Core
     /// </summary>
     public static partial class StageReducer
     {
-        /// <summary>
-        /// shot_focus_to (role, focus="body", screenPoint="center", zoom=2.5, duration).
-        ///
-        /// 런타임과 같은 목표 계산을 태운다: 무대 좌표의 focus와 그 슬롯이 선 층 d를 ShotIntents.FocusTo에 넘긴다.
-        /// 층 반응 곡선은 하네스가 무대 뷰를 판정할 때와 같은 것(ResolveLayerProfileCurve)이다.
-        /// </summary>
-        private static bool ApplyShotFocusTo(
-            StageState state, in StageCommand cmd, StageReducerTuning tuning, out string reason)
-        {
-            if (!TryGetSpawnedSlot(state, cmd, out string slotKey, out reason))
-                return false;
-
-            // 샷은 본 무대만 움직인다(StageRoles). 덮는 무대의 리그로는 본 무대의 카메라를 풀 수 없다 — 런타임은 경고하고 건너뛴다.
-            SlotAttachment attachment = state.GetAttachment(slotKey);
-
-            if (StageRoles.Of(attachment.StageKey) != StageRole.Main)
-            {
-                reason = $"슬롯 '{slotKey}'은 덮는 무대 '{attachment.StageKey}'에 서 있다 — 샷은 본 무대만 움직인다";
-                return false;
-            }
-
-            if (!FocusPresetName.TryNormalizeToken(cmd.Arg(1, "body"), out string focusName))
-            {
-                reason = $"focus 프리셋 토큰 '{cmd.Arg(1)}'을 모른다";
-                return false;
-            }
-
-            string screenPointName = cmd.Arg(2, "center");
-
-            if (!ScreenPointRatios.TryResolve(state.Nodes.RootSpace.Size, screenPointName, out Vec2 desired))
-            {
-                reason = $"화면 지점 '{screenPointName}'을 모른다";
-                return false;
-            }
-
-            if (!NumberToken.TryParseFloat(cmd.Arg(3, "2.5"), out float zoom))
-            {
-                reason = $"zoom을 읽지 못했다: '{cmd.Arg(3)}'";
-                return false;
-            }
-
-            state.TryGetCharacter(slotKey, out string characterKey);
-
-            Vec2 focusOffset = FocusOffsetMath.Resolve(tuning.FocusTuning, characterKey, focusName, Vec2.Zero);
-
-            RectNodeState[] chain = state.Nodes.BuildChainTo(
-                StageState.NodeKeyOf(slotKey, NodeTargets.FocusMeasureNodeId));
-
-            Vec2 focus = SettledFocusMath.FocusPointInRigSpace(
-                chain, state.Nodes.RootSpace, focusOffset);
-
-            state.Shot = ShotIntents.FocusTo(
-                state.Shot,
-                zoom,
-                focus,
-                desired,
-                attachment.LayerDepth,
-                tuning.ResolveLayerProfileCurve());
-
-            return true;
-        }
-
         private static bool ApplyShotZoom(StageState state, in StageCommand cmd, out string reason)
         {
             // 파서 표: shot_zoom(zoom, duration="0.45s", ease).

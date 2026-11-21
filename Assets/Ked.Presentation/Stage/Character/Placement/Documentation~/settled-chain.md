@@ -5,6 +5,10 @@
 
 > 2026-11-05 갱신: 무대 계층이 스키마로 바뀌었다([stage-rig.md](../../StageRig/Documentation~/stage-rig.md)). §3 · §4의 노드 이름과 중립의 정의가 바뀌었고, 장부와 샷이 한 노드를 같이 소유하면 이제 예외다.
 >
+> 2026-11-21 갱신: `place` 계열 · `shot_focus_to` · `size`의 초점 보존을 걷었다(`docs/PLAN_command-prune.md`). 정착 사슬을 읽어 값을 푸는 커맨드는 이제 없다 —
+> 장부에 끝값을 적는 쪽(리그 커맨드)과 측정 어댑터는 남아 있고, 읽는 쪽은 진단 뷰와 대조 시험뿐이다. 장부를 걷을지는 그 계획서의 남은 물음이다.
+> 아래는 장부와 샷 중립이 왜 그 꼴인지의 기록이다(커맨드 이름은 걷기 전의 것).
+>
 > 2026-11-06 갱신: 리그는 무대 · 층을 옮기지 않는다(char_to 제거). 샷은 본 무대만 움직인다 — 덮는 무대의 샷 노드는 늘 항등이라 중립과 라이브가 같다.
 
 ## 0. 두 문장
@@ -54,12 +58,11 @@
 
 `CaptureSettledChain(leaf, stopRoot, stageView)`가 leaf에서 `RigSpaceRoot`(= 리그가 선 무대의 `Stage_Root`)까지 부모를 타고 올라가며 노드마다 값을 고른다. 체인을 `RectChainMath`(순수 함수)에 넣어 rig space에서 풀고, 끝에서 월드로 바꾼다. 실제 트랜스폼은 손대지 않는다.
 
-**읽는 쪽 둘**
+**읽는 쪽**
 
-| 호출자 | 커맨드 | 무엇을 재나 |
+| 호출자 | 쓰는 곳 | 무엇을 재나 |
 |---|---|---|
-| `CharacterFocusPlacementSolver` | `place_*` | 초점이 무대 지점에 오도록 `Track_Focus`를 얼마나 옮길지 |
-| `CharacterFocusPointResolver` | `shot_focus_to` | 캐릭터 초점의 무대 좌표와 그 점이 선 층 |
+| `CharacterFocusPointResolver` | 진단 뷰(`CharacterFocusDebugView`) | 캐릭터 초점의 무대 좌표와 그 점이 선 층 |
 
 **쓰는 쪽**: 클레임-트윈 리그 커맨드 전부(move_by · scale_by · rotate_by · place · size · slide_in/out · mirror)가 `Reserve`으로, `MotionCommandCharR`(commit 모션)이 `Publish` · `Clear`로. 이 중 체인 위에 있어 실제로 읽히는 노드는 `Track` · `Track_Focus` · `DepthY` · `DepthScale` · `Scale` · `SwayPivot`이다.
 
