@@ -137,7 +137,7 @@ new RectSpace(capturedUnderParentSize, Vec2.Half)
 
 ### `depth.json` — `CharacterDepthTuningSO`
 
-`size` 계열 커맨드가 쓰는 depth 값. `size`는 이 값을 그대로 놓는다 — 초점을 재서 보정하지 않는다(2026-11-21, `docs/PLAN_command-prune.md` P3).
+`size` 계열 커맨드가 쓰는 depth 값. `size`는 이 값을 그대로 놓는다 — 초점을 재서 보정하지 않는다(2026-11-21, 재생 저장소 `docs/PLAN_rig-layers.md` L6). 놓는 노드는 초상의 깊이(`CharacterPortrait_DepthOffset` · `_DepthScale`)다.
 
 ```
 MonoBehaviour
@@ -165,7 +165,7 @@ MonoBehaviour
 
 ### `focus-tuning.json` — `CharacterFocusTuningDBSO`
 
-focus 지점의 로컬 오프셋. 초점을 화면 지점에 놓는 보조 계산(`NodeTargets.TryPlaceFocus` · `ShotIntents.FocusTo`)과 초상 촬영소 · 진단 뷰가 쓴다 — 이 값을 읽는 커맨드는 없다(2026-11-21).
+focus 지점의 로컬 오프셋. 초점을 화면 지점에 놓는 보조 계산(`NodeTargets.TrySolveFocusPlacement` · `ShotIntents.FocusTo`)과 초상 촬영소 · 진단 뷰가 쓴다 — 이 값을 읽는 커맨드는 없다(2026-11-21).
 
 ```
 MonoBehaviour
@@ -227,7 +227,7 @@ MonoBehaviour.entries[] : { key(캐릭터), offset(px, Vec2), visualScale(무단
 MonoBehaviour.entries[] : { character(캐릭터), variant(포즈 — 비면 그 캐릭터의 모든 포즈), position(px, Vec2) }
 ```
 
-- `position`은 인물의 발(`CharSlot_Scale`의 아래 가운데)에서 잰 px, y 위.
+- `position`은 인물의 발(`CharacterPortrait_DepthScale`의 아래 가운데)에서 잰 px, y 위. 깊이 밑이라 인물의 크기를 따라간다.
 - 찾는 순서: `character` + `variant` → `character`(`variant`가 빈 항목) → 없다(호스트의 기본값 — 예제는 (0, 800)).
 - 키는 초상과 같은 정규화(앞뒤 공백을 떼고 소문자)를 거친다. 같은 키가 둘이면 나중 것이 이긴다.
 - 아직 코어가 소비하지 않는다 — 접힌 상태는 이모지의 이름만 들고, 자리는 무대에서 푼다. 툴도 읽지 않는다(이모지는 캐릭터 없이 만든다).

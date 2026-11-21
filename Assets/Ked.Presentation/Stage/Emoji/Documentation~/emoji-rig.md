@@ -12,7 +12,7 @@
 ## 1. 계층
 
 ```
-CharSlot_Scale               (캐릭터 리그 — 이 스키마의 것이 아니다)
+CharacterPortrait_DepthScale (캐릭터 리그 — 이 스키마의 것이 아니다. 그 사람의 크기)
  └ Emoji_Locator             슬롯에 하나.   캐릭터 + 바리에이션이 정하는 RootSpace
     └ Emoji_Offset           이모지에 하나. 이모지별 오프셋 + 이모지 전체를 움직이는 키  [CanvasGroup]
        └ EmojiRig_Place      리그마다.      기본 자리 — 키를 받지 않는다
@@ -30,8 +30,8 @@ CharSlot_Scale               (캐릭터 리그 — 이 스키마의 것이 아�
 
 ## 2. 자리의 뜻
 
-- **`Emoji_Locator`가 발에 붙는다.** `CharSlot_Scale`은 무대 크기로 늘어난 rect이고 피벗이 발(아래 가운데)이다 — 서 있는 인물의 기준점은 발이다(`rig-axis-order.md` §3.6). RootSpace 값(머리가 어디인가)은 그 발에서 잰다. 캐릭터별 그림 보정(`CharacterPortrait_VisualOffset`)은 형제라 이모지에 전해지지 않으므로, 로케이터가 캐릭터 + 바리에이션별 값으로 그것을 대신한다.
-- **`Emoji_Locator`는 `CharSlot_Scale`의 마지막 자식이다.** 초상보다 뒤에 그려 인물 위에 보인다.
+- **`Emoji_Locator`가 발에 붙는다.** `CharacterPortrait_DepthScale`은 무대 크기로 늘어난 rect이고 피벗이 발(아래 가운데)이다 — 서 있는 인물의 기준점은 발이다(`rig-axis-order.md` §3.8). 깊이 밑이라 인물이 커지면(`size`) 이모지도 함께 커지고 머리 자리도 따라 올라간다. RootSpace 값(머리가 어디인가)은 그 발에서 잰다. 캐릭터별 그림 보정(`CharacterPortrait_VisualOffset`)은 형제라 이모지에 전해지지 않으므로, 로케이터가 캐릭터 + 바리에이션별 값으로 그것을 대신한다.
+- **`Emoji_Locator`는 `CharacterPortrait_DepthScale`의 마지막 자식이다.** 초상보다 뒤에 그려 인물 위에 보인다.
 - **`Emoji_Offset`이 경계다.** 그 위는 캐릭터의 것, 그 아래는 이모지의 것이다. 이모지 전체를 움직이는 키는 오프셋 값에 **더해서** 읽는다 — 값과 키가 한 노드에 있지만 오프셋을 옮겨도 키를 다시 잡지 않는다.
 - **`EmojiRig_Place` / `EmojiRig_Image`가 두 단이다.** 값을 든 노드(기본 자리)와 키를 받는 노드를 나눴다. 기본 자리를 옮겨도 키는 그대로다.
 - **축을 노드로 쪼개지 않았다.** 캐릭터 리그가 `Track_X` · `Track_Y`를 따로 둔 것은 커맨드마다 트윈이 따로 돌아 같은 프로퍼티를 두고 싸우기 때문이다. 이모지 리그는 타임라인 하나가 움직인다 — 한 노드가 위치 · 배율 · 회전 · 불투명도 · 그림을 전부 받는다.
@@ -76,7 +76,7 @@ CharSlot_Scale               (캐릭터 리그 — 이 스키마의 것이 아�
 
 - **정의는 `emojis.json`**(`emojis/1`) — 이름 · 오프셋 · 리그들(이름 · 스프라이트 키 · 기본 자리). 읽는 규칙은 코어의 `EmojiDefinitionLoader` · `EmojiRules`다. 스프라이트는 `Resources/Emojis/{키}`.
 - **세울 때 넣는 값**: `Emoji_Locator` ← RootSpace(그 슬롯에 선 캐릭터 + 포즈의 자리 — `EmojiLocatorSystem`이 표 `EmojiLocatorTuningDBSO`에서 풀고, 없으면 호스트의 기본값. 서 있는 동안 포즈가 바뀌면 `EmojiPlaybackSystem.Tick`이 다시 풀어 옮긴다. 인물이 뒤집혀 있으면 자리의 x와 가로 배율을 뒤집는다 — 이모지가 통째로 거울에 비친다. 방향을 따르지 않는 이모지(`fixedSide`)는 `Emoji_Offset`에서, 바로 서야 하는 그림(`upright`)은 `EmojiRig_Place`에서 재생이 한 번 더 뒤집는다 — 부호는 코어 `EmojiSide`), `Emoji_Offset` ← 정의의 오프셋, `EmojiRig_Place` ← 리그의 기본 자리 · 배율 · 회전, `EmojiRig_Image` ← 스프라이트(크기는 원본 픽셀).
-- **이모지는 슬롯의 리그 밑에 산다.** 슬롯이 다시 선언되거나 무대가 비워지면(되감기) 리그와 함께 부서진다. `EmojiRigRegistry`는 그것을 통보받지 않는다 — 읽고 쓸 때마다 "지금 그 슬롯의 `CharSlot_Scale` 밑에 선 것"만 남긴다. 그래서 캐릭터 쪽 코드가 이모지를 모른다.
+- **이모지는 슬롯의 리그 밑에 산다.** 슬롯이 다시 선언되거나 무대가 비워지면(되감기) 리그와 함께 부서진다. `EmojiRigRegistry`는 그것을 통보받지 않는다 — 읽고 쓸 때마다 "지금 그 슬롯의 `CharacterPortrait_DepthScale` 밑에 선 것"만 남긴다. 그래서 캐릭터 쪽 코드가 이모지를 모른다.
 - **인물의 페이드와 묶지 않는다.** 인물이 `fade_out`해도 이모지는 남는다.
 - **건너뛸 때도 세우고 내린다**(`ExecuteEvenIfSkipping`).
 - **폴드**: 슬롯마다 서 있는 이모지의 이름(`StageState.EmojisOf`) — **머무는 이모지만 남는다.** 노드는 리그 노드 트리에 넣지 않는다(머무는 이모지는 되풀이하는 중이라 끝값이 없다).

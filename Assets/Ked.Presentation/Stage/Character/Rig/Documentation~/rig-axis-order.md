@@ -1,6 +1,6 @@
 # 리그 축 순서 — 계층이 규약인 이유
 
-`CharacterRigSchema.Nodes`의 25줄짜리 배열은 **순서만 보여주고 순서의 이유는 보여주지 않는다.**
+`CharacterRigSchema.Nodes`의 20줄짜리 배열은 **순서만 보여주고 순서의 이유는 보여주지 않는다.**
 트랜스폼 계층은 결과만 남고 의도가 안 남는 구조라, 이유를 여기 남긴다.
 
 ## 0. 두 문장
@@ -88,7 +88,7 @@
 코드가 보장하면 기준값을 잴 필요가 없다. [stage-rig.md](../../StageRig/Documentation~/stage-rig.md).
 
 2026-11-11에는 **이모지 리그**가 같은 방식으로 섰다(`EmojiRigSchema` · `EmojiRigBuilder`) — 다만 틀은 고정이고
-리그의 수가 이모지마다 다르다. 캐릭터 리그의 `CharSlot_Scale` 밑에 서지만 이 스키마의 노드는 아니다.
+리그의 수가 이모지마다 다르다. 캐릭터 리그의 `CharacterPortrait_DepthScale` 밑에 서지만(인물의 크기를 따라간다) 이 스키마의 노드는 아니다.
 [emoji-rig.md](../../../Emoji/Documentation~/emoji-rig.md).
 
 ### 1.5 그리고 배경 리그가 캐릭터 리그로 합쳐졌다 — 2026-10-29
@@ -107,7 +107,7 @@ far 레이어에 이미지 한 장을 높이 맞춤으로 깔고·갈아 끼우�
 |---|---|
 | `bg_fade_in/out` | `CharacterPortraitSprite_Root` (α) |
 | `bg_move` | `CharSlot_Track` — `move_by`와 같은 축 |
-| `bg_scale` | `CharacterPortrait_ActingScale` — 가운데 피벗. `CharSlot_Scale`은 발 피벗이라 배경이 아래 가운데에서 커진다 |
+| `bg_scale` | `CharacterPortrait_ActingScale` — 가운데 피벗. 깊이(`CharacterPortrait_DepthScale`)는 발 피벗이라 배경이 아래 가운데에서 커진다 |
 | `bg_sprite` | `CharacterPortraitSprite_Image` — 종횡비는 초상 DB가 아니라 `background-dimensions.json`, 레이캐스트는 끈다 |
 
 캐릭터와 다른 점은 둘이다(세우는 방식은 같다 — 숨은 채 서고 `bg_fade_in`으로 들인다).
@@ -167,7 +167,7 @@ CharacterRigSchema.Nodes            코드      ← 유일한 소유자
 통째로 어긋난다.** 그리고 그건 에러를 안 낸다.
 
 이 검사가 통과한 뒤에는 모든 리그가 **정확히 같은 모양**이므로, 커맨드는
-`refs.CharSlot_Track_X`가 있는지 묻지 않고 그냥 쓴다. 리그마다 다른 예외 경로가 없다.
+`refs.CharFocus_Scale`이 있는지 묻지 않고 그냥 쓴다. 리그마다 다른 예외 경로가 없다.
 
 경고 메시지가 원인 후보를 셋 다 적는 이유도 여기 있다 —
 `broken, outdated, or saved with another role prefix`. 셋 다 실제로 겪은 것이다.
@@ -199,133 +199,126 @@ CharacterRigSchema.Nodes            코드      ← 유일한 소유자
 
 ## 3. 축 순서 — 자리가 뜻을 정한다
 
-### 3.1 왜 노드를 잘게 나누는가
+> 2026-11-21에 세 덩어리로 다시 세웠다(재생 저장소 `docs/PLAN_rig-layers.md`). 그 전의 계층(25노드 — 깊이가 맨 위에서 슬롯의 이동까지
+> 곱하고, 좌우 · 상하가 따로였다)은 그 계획서 §3에 있다.
 
-**한 노드 = 한 축이다.** 같은 프로퍼티를 두 트윈이 잡으면 서로를 덮으므로, 동시에 돌 수
-있는 축은 반드시 다른 노드로 나눈다.
+### 3.1 세 덩어리
 
-`Track_X`와 `Track_Y`가 따로인 이유가 이것이다. 합치면 좌우 이동 트윈과 상하 이동 트윈이
-같은 `anchoredPosition`을 두고 싸운다. 나눠 놓으면 **두 트윈이 물리적으로 다른 대상을 잡으므로
-충돌이 불가능**해진다. `ActingScale_X`/`_Y`, `Track_Move_X`/`_Y`도 같은 이유다.
+리그는 세 덩어리다. 커맨드는 이 계층에서 나온다 — 어느 덩어리의 어느 노드를 적힌 값으로 놓는가.
 
-그래서 25단은 "깊은 계층"이 아니라 **동시에 살아 있을 수 있는 연출 축의 개수**다.
+| 덩어리 | 노드 | 뜻 |
+|---|---|---|
+| **포커스** `CharFocus_*` | `_Track` · `_Rotation` · `_Scale` | 대화할 때만 서는 자리. 멀리 있던 인물이 말할 때만 나왔다가 본래 자리로 돌아간다. 실제 무대로는 표현하기 힘든 **작가 허용**의 공간이라 이동 · 회전 · 배율을 다 갖고, 쓰고 나면 `focus_reset`으로 0에 돌린다 |
+| **슬롯** `CharSlot_*` | `_Track` · `_Rotation` · `_SwayPivot` | 무대 위의 본래 자리 |
+| **초상** `CharacterPortrait_*` | 깊이 · 배역 앵커 · 연기 · 반전 · 그림 | 그 사람의 크기와 연기 |
 
-### 3.2 전체 계층과 커맨드 대응
+### 3.2 한 노드 = 한 축
+
+같은 프로퍼티를 두 트윈이 잡으면 서로를 덮는다. 리그 커맨드는 시작할 때 그 노드의 트윈을 끝값으로 보내고(`DOKill(true)`) 제 것을 건다.
+그래서 **동시에 돌아야 하는 축은 다른 노드로 나누고, 한 노드에서 겹쳐야 하는 움직임은 클립 하나로 짠다** — 좌우와 상하를 다른 박자로
+움직이는 일은 한 채널 안의 x · y 키다. 더하기만 하던 층(`Track_X` · `_Y` · `Track_Move_X` · `_Y`)은 이렇게 해서 걷었다.
+
+### 3.3 전체 계층과 커맨드 대응
 
 ```
-CharSlot_Track_Focus          (쓰는 명령 없음)    ← place 계열이 쓰던 축 — 2026-11-21에 걷었다
- └ CharSlot_DepthY            size 계열 (Y 오프셋)
-    └ CharSlot_DepthScale     size 계열 (배율)      [bottom pivot]
-       └ CharSlot_Track_Idle  (idle 연출)
-          └ CharSlot_Track    move_by · slide_in/out
-             └ CharSlot_Track_X    left · right
-                └ CharSlot_Track_Y up · down
-                   └ CharSlot_Rotation
-                      └ CharSlot_SwayPivot   rotate_by · rotate_reset   [bottom pivot]
-                         └ CharSlot_Scale    scale_by · scale_reset     [bottom pivot]
-                            │
-                            └ CharacterPortrait_VisualOffset   cast(set_anchor)   ← 배역 축 [bottom pivot]
-                               │
-                               └ CharacterPortrait_Track        ← 초상 연기 축
-                                  └ ..._Rotation
-                                     └ ..._Track_Move
-                                        └ ..._Track_Move_X
-                                           └ ..._Track_Move_Y
-                                              └ ..._SwayPivot   char_rotate_to   [bottom pivot]
-                                                 └ ..._Shake    gesture
-                                                    └ ..._ActingScale     char_scale_to
-                                                       └ ..._ActingScale_X   mirror
-                                                          └ ..._ActingScale_Y
-                                                             ├ Sprite_Root  fade_in/out  [CG α=0]
-                                                             │  └ Sprite_Image   cast · face · pose
-                                                             └ Overlay_Root  face_swap   [CG α=0]
-                                                                └ Overlay_Image
+CharFocus_Track                     focus_move                 ← 포커스: 맨 위 — 무대 값 그대로
+ └ CharSlot_Track                   place(절대) · move_by(상대) · slide_in/out · move_reset   ← 슬롯: 본래 자리
+    └ CharFocus_Rotation            focus_rotate               [발밑]   ← 포커스
+       └ CharFocus_Scale            focus_scale                [발밑]   ← 포커스
+          └ CharSlot_Rotation       (쓰는 커맨드 없음)
+             └ CharSlot_SwayPivot   rotate_by · rotate_reset   [발밑]
+                │
+                └ CharacterPortrait_DepthOffset   size의 Y                ← 초상: 그 사람의 크기
+                   └ CharacterPortrait_DepthScale size의 배율    [발밑]   ← 이모지가 서는 자리
+                      └ CharacterPortrait_VisualOffset   cast(set_anchor) [발밑]   ← 배역 앵커 · 초점을 재는 노드
+                         └ CharacterPortrait_Track         char_move_to — 놓고 머무는 자리
+                            └ ..._Rotation                 모션
+                               └ ..._Track_Move            모션 — 지나가는 몸짓
+                                  └ ..._SwayPivot          char_rotate_to · 모션   [발밑]
+                                     └ ..._Shake           모션
+                                        └ ..._ActingScale  char_scale_to · 모션
+                                           └ ..._Mirror    mirror
+                                              ├ Sprite_Root  fade_in/out  [CG α=0]
+                                              │  └ Sprite_Image   cast · face · pose
+                                              └ Overlay_Root  face_swap   [CG α=0]
+                                                 └ Overlay_Image
 ```
 
-### 3.3 스케일이 셋인 이유
+`focus_reset`은 포커스의 셋을 함께 되돌린다. `move_reset`은 슬롯의 자리만 걷는다. `cast`는 슬롯의 자리 · 회전과 초상의 연기 축을
+되돌리고, 포커스와 깊이는 건드리지 않는다.
+
+### 3.4 깊이가 초상에 있는 이유 — 슬롯을 곱하지 않는다
+
+깊이(`DepthOffset` · `DepthScale`)는 슬롯 아래, 배역 앵커 바로 위다. 곱하는 것은 **그 사람**(배역 앵커 · 연기 · 그림)이고, 슬롯의 자리는 곱하지 않는다.
+
+- `place` · `move_by`의 값은 어느 크기에서나 **화면 값 그대로**다. `move_by 1u`는 far에서도 close에서도 화면 1u다. 대본에 적힌 자리를 그대로 읽을 수 있다.
+- 크기를 바꾸면 그 사람이 발밑을 중심으로 커지고, 배역 앵커 · 몸짓의 진폭도 함께 커진다(멀리 있는 사람은 덜 흔들린다).
+- 이모지가 `DepthScale` 밑에 서므로 머리 위의 이모지도 인물의 크기를 따라간다.
+- 초점(가슴 · 얼굴 점)을 재는 노드(`VisualOffset`)가 깊이 아래이므로 크기를 바꾸면 초점도 따라온다.
+
+깊이가 배역 앵커의 **위**인 것도 정한 일이다. 아래에 두면 배역 앵커의 배율(인물마다 0.498 · 5 · 10 …)이 이모지와 크기의 중심에까지 곱해진다.
+
+`size`는 레벨(라벨)의 Y와 배율을 놓거나(`keep_y`면 배율만), 배율을 직접 받는다(`size 슬롯 x1.04` — Y는 건드리지 않는다). 무대를 재지 않는다 —
+크기를 바꾸며 어느 지점을 제자리에 두려면 자리 명령으로 따로 적는다. 깊이 배율의 진실은 `presets/depth.json`의 **`level` 커브** 한 장이다
+(`DepthLevelLabels` — 라벨은 커브 위의 눈금일 뿐이다).
+
+### 3.5 포커스의 이동은 맨 위, 회전 · 배율은 슬롯 아래
+
+맨 위 노드의 중심은 화면 아래 가운데다. 옆에 선 인물을 거기서 키우면 옆으로 밀리고, 돌리면 호를 그린다. 그래서 **회전 · 배율은 슬롯의 자리
+아래에 두어 중심이 그 인물의 발밑이 되게 했다.** 이동은 맨 위라 무대 값 그대로다. 노드는 셋이지만 계층은 하나다 — `focus_reset`이 셋을 함께 걷는다.
+
+### 3.6 스케일이 셋인 이유
 
 같은 곱셈인데 **무엇에 곱해져야 하는가**가 달라서 자리가 다르다.
 
-| 노드 | 자리 | 커맨드 | 아래에 곱해지는 것 |
-|---|---|---|---|
-| `CharSlot_DepthScale` | 최상단 | `size` 계열 | **전부** — 이동·넛지·idle·연기·몸짓 |
-| `CharSlot_Scale` | 슬롯 축 바닥 | `scale_by` | 연기 축 전체 — **화면상 이동은 그대로, 연기 진폭만 커진다** |
-| `CharacterPortrait_ActingScale` | 최하단 | `char_scale_to` | **스프라이트만** — 이동량 불변 |
+| 노드 | 커맨드 | 아래에 곱해지는 것 |
+|---|---|---|
+| `CharFocus_Scale` | `focus_scale` | 그 사람 전부(슬롯의 회전 · 깊이 · 연기) — 작가 허용으로 잠깐 키운다. 발밑 중심 |
+| `CharacterPortrait_DepthScale` | `size` | 배역 앵커 · 연기 · 그림 · 이모지 — 그 사람의 크기 |
+| `CharacterPortrait_ActingScale` | `char_scale_to` · 모션 | **그림만** — 몸짓의 이동량은 그대로 |
 
-**`DepthScale`이 위에 있는 것이 원근의 전부다.** 아래 전부에 곱해지므로, 멀리 있는 캐릭터는
-크기만 작아지는 게 아니라 **이동량도 줄고 몸짓 진폭도 준다.** `<<left 1u>>`가 far에서는
-1u만큼 화면을 못 간다. 이래야 "저 사람은 멀리 있다"가 성립한다.
+**`ActingScale`이 아래인 것도 의도다.** 연기용 확대가 이동량까지 키우면 "크게 그려진 채로 크게 움직이는" 것이 되어 연기가 아니라 확대가 된다.
+`Mirror`는 그 아래 따로 있다 — 합치면 배율 모션이 뒤집힌 부호를 덮는다.
 
-반대로 **`ActingScale`이 맨 아래인 것도 의도다.** 연기용 확대가 이동량까지 키우면
-"크게 그려진 채로 크게 움직이는" 것이 되어 연기가 아니라 확대가 된다.
-
-깊이 배율의 진실은 프리셋 표가 아니라 `presets/depth.json`의 **`level` 커브** 한 장이다
-(`DepthLevelLabels` 참조 — 라벨은 커브 위의 눈금일 뿐이다). far→close로 단조증가한다.
-
-### 3.4 회전이 둘인 이유
+### 3.7 회전이 여럿인 이유
 
 | 노드 | 자리 | 성질 |
 |---|---|---|
-| `CharSlot_Rotation` | `Track_X/Y`의 **아래** | 회전해도 슬롯 이동 방향은 무대 기준 그대로 |
+| `CharFocus_Rotation` | 슬롯의 자리 아래 | 작가 허용의 기울기. 발밑 중심 |
+| `CharSlot_SwayPivot` | 슬롯 축 바닥 | `rotate_by` — 무대의 자리는 그대로 두고 그 사람이 기운다 |
 | `CharacterPortrait_Rotation` | `Track_Move`의 **위** | 기울면 연기 움직임이 기울기를 **따라간다** |
 
-무대 배치에서는 회전이 이동에 새면 안 된다 — "오른쪽으로 100" 했는데 캐릭터가 기울어
-있다고 비스듬히 가면 배치가 무너진다. 그래서 `Track`을 위, `Rotation`을 아래에 뒀다.
+무대 배치에서는 회전이 이동에 새면 안 된다 — "오른쪽으로 100" 했는데 캐릭터가 기울어 있다고 비스듬히 가면 배치가 무너진다.
+그래서 슬롯의 `Track`이 회전들보다 위다. 연기에서는 정반대다. 몸이 기울었으면 그 위에서 일어나는 흔들림도 같이 기울어야 실제 몸처럼 보인다.
+그래서 초상의 `Rotation`이 위, `Track_Move`가 아래다. **같은 회전인데 요구가 반대라 자리가 반대다.**
 
-연기에서는 정반대다. 몸이 기울었으면 그 위에서 일어나는 흔들림도 같이 기울어야 실제
-몸처럼 보인다. 그래서 `Rotation`을 위, `Track_Move`를 아래에 뒀다.
+### 3.8 나머지 자리들
 
-**같은 회전인데 요구가 반대라 자리가 반대다.**
+**초상의 이동이 둘** — `CharacterPortrait_Track`(회전 **위**, 놓고 머무는 자리 — `char_move_to`)과 `Track_Move`(회전 **아래**, 지나가는 몸짓 — 모션).
+머무는 값 위에서 몸짓이 돌 수 있어야 하고, 몸짓은 기울기를 따라야 한다. idle 같은 되풀이 몸짓도 `Track_Move`의 클립으로 짠다.
 
-### 3.5 이동도 둘로 갈라져 있다
+**`VisualOffset`이 두 축의 이음매** — 깊이 아래, 연기 위. 스프라이트마다 그려진 중심이 다른 것을 보정하는 자리이고, 연기 **위**에 있어서
+연기가 보정된 위치를 기준으로 일어난다. `cast`가 내는 set_anchor가 여기를 잡는다.
 
-초상 축의 이동이 `CharacterPortrait_Track`(회전 **위**)과 `Track_Move`(회전 **아래**)로
-나뉜다. 위쪽은 캐릭터별 기본 보정(`ApplyTrackOffset`)이라 기울기와 무관해야 하고,
-아래쪽은 연기라 기울기를 따라야 한다. 3.4의 규칙을 이동에도 적용한 것이다.
+**bottom pivot 여섯 곳** (`CharFocus_Rotation` · `CharFocus_Scale` · `CharSlot_SwayPivot` · `DepthScale` · `VisualOffset` · `Portrait_SwayPivot`)
+— 서 있는 인물의 기준점은 발이다(이모지의 로케이터도 `DepthScale`의 발에 붙는다). 작아져도, 흔들려도, 커져도 발이 땅에 붙어 있어야 한다.
+`NeedsBottomPivot`이 스키마의 필드인 이유.
 
-### 3.6 나머지 자리들
-
-**`Track_Idle`이 `DepthScale` 아래, `Track` 위** — idle 흔들림이 깊이에 따라 줄어들면서
-(멀면 덜 흔들린다), 별도 노드라 `move_by`와 싸우지 않는다. 자리 하나로 두 성질을 얻는다.
-
-**`VisualOffset`이 두 축의 이음매** — 슬롯 축 끝, 연기 축 시작. 스프라이트마다 그려진
-중심이 다른 것을 보정하는 자리이고, 연기 **위**에 있어서 연기가 보정된 위치를 기준으로
-일어난다. `cast`가 내는 set_anchor가 여기를 잡는다.
-
-**bottom pivot 다섯 곳** (`DepthScale` · `CharSlot_SwayPivot` · `CharSlot_Scale` ·
-`VisualOffset` · `Portrait_SwayPivot`) — 서 있는 인물의 기준점은 발이다. 깊이로 작아져도,
-흔들려도, 커져도 발이 땅에 붙어 있어야 한다. `NeedsBottomPivot`이 스키마의 필드인 이유.
-
-**`Sprite_Root` / `Overlay_Root`가 형제이고 둘 다 초기 α=0** — `face_swap`이 위 층을
-페이드로 겹쳐 표정을 바꾼다. 등장 전에는 둘 다 안 보인다.
+**`Sprite_Root` / `Overlay_Root`가 형제이고 둘 다 초기 α=0** — `face_swap`이 위 층을 페이드로 겹쳐 표정을 바꾼다. 등장 전에는 둘 다 안 보인다.
 
 ---
 
-## 4. Depth를 위에 둔 대가 — `Track_Focus`가 밖에 있는 이유
+## 4. 초점을 지점에 두는 값은 도구가 푼다
 
-> 2026-11-21: `place` 계열 · `shot_focus_to`를 걷었다(`docs/PLAN_command-prune.md`). `Track_Focus`는 리그에 남아 있지만 쓰는 명령이 없다 — 자리는 `CharSlot_Track`(`move_by`)에 적는다.
-> `Track`은 `DepthScale` **아래**라서 적힌 이동이 깊이 배율만큼 곱해져 보인다(mid에서 `move_by 1u` = 화면 1.708u).
-> 도구의 보조 버튼이 화면 지점에서 거꾸로 풀어 주는 까닭이 이것이다. 아래는 이 축을 둔 까닭의 기록이다.
+옛 `place <초점> <지점>`은 "이 캐릭터의 얼굴을 화면 왼쪽 지점에"처럼 **무대를 읽어 값을 푸는** 커맨드였다. 2026-11-21에 걷었다 —
+커맨드는 한 노드를 인자에 적힌 값으로 놓는 것만 둔다. 그 값을 푸는 계산은 코어의 순수 함수 `NodeTargets.TrySolveFocusPlacement`
+(`SettledFocusMath.SolveFocusPlacement` 위)이고, 부르는 쪽은 저작 도구다. 대본에는 풀린 값이 적힌다:
+본래 자리면 `place 슬롯 x y`, 대화할 때만 서는 자리면 `focus_move 슬롯 x y`.
 
-원근이 계층에서 공짜로 나오는데, **공짜가 아닌 곳이 하나 있다.**
+깊이가 슬롯 아래로 내려가서 이 값은 읽기 쉬워졌다 — 화면 오른쪽 지점(1920 × 0.24 = 460.8px)에 가슴을 두는 `place`는 x가 `11.52u` 그대로다.
 
-`CharSlot_Track_Focus`가 `DepthY`/`DepthScale`보다 **위**에 있다. `place` 계열은
-"이 캐릭터의 얼굴을 화면 좌측 지점에" 같은 **화면 절대 좌표**를 겨누는데, depth 아래에
-있으면 depth가 바뀔 때마다 그 좌표가 배율만큼 어긋나기 때문이다.
-
-그래서 focus 축만 계층 밖으로 빼고, **depth 보정을 수식이 지게 했다.** 그 대가가:
-
-* `SettledFocusMath.SolveFocusPlacement` — 계층이 안 해주는 보정을 손으로
-* `CharacterRigRefs.SettledDepthScale` — 트윈이 도는 중에도 "끝나면 어느 배율인가"
-
-`size`는 이 보정을 하지 않는다(2026-11-21) — 깊이 레벨의 Y와 배율을 그대로 놓는다. 크기를 바꾸며 어느 지점을
-제자리에 두려면 자리 명령으로 따로 적는다(`docs/PLAN_command-prune.md` P3).
-
-마지막 것이 특히 이 대가의 증거다. 트윈 중에는 현재 스케일이 계속 변하므로, 착란원
-계산이 현재값을 읽으면 매 프레임 흔들린다. **정지 프레임의 배율을 따로 들고 있어야** 한다.
-
-> `SettledFocusMath`와 `SettledDepthScale`이 왜 존재하는지는 그 파일들만 봐서는 안 나온다.
-> **이유가 이 계층에 있다.**
+`CharacterRigRefs.SettledDepthScale`은 남는다 — 트윈이 도는 중에도 "끝나면 어느 배율인가"를 착란원(`depth_focus_on`) 계산이 읽는다.
+트윈 중에는 현재 스케일이 계속 변하므로, 현재값을 읽으면 매 프레임 흔들린다.
 
 ---
 
@@ -335,11 +328,12 @@ CharSlot_Track_Focus          (쓰는 명령 없음)    ← place 계열이 쓰�
 
 | 합치고 싶어지는 것 | 합치면 생기는 일 |
 |---|---|
-| `CharSlot_Scale` + `ActingScale` | 연기 확대가 이동량을 키운다 — 연기가 확대로 보인다 |
-| `DepthScale`을 아래로 | **원근이 사라진다.** 멀리 있는 캐릭터가 가까운 것만큼 크게 움직인다 |
-| `CharSlot_Rotation` + `Portrait_Rotation` | 슬롯 회전이 이동 방향을 비틀거나, 연기가 몸 기울기를 무시한다 |
-| `Track_X` + `Track_Y` | 좌우 트윈과 상하 트윈이 서로를 덮는다 |
-| `Track_Idle`을 `Track`에 | idle 루프가 `move_by`를 계속 덮어쓴다 |
+| `CharFocus_Track` + `CharSlot_Track` | 나온 자리와 본래 자리가 한 노드에 있으면 **돌아갈 곳이 사라진다** |
+| `DepthScale` + `ActingScale` | 연기 확대가 배역 앵커 · 이모지까지 키운다 — 연기가 확대로 보인다 |
+| `DepthScale`을 슬롯 위로 | 적힌 자리가 크기만큼 곱해진다 — `move_by 1u`가 크기마다 다른 거리가 된다 |
+| `ActingScale` + `Mirror` | 배율 모션이 뒤집힌 부호를 덮는다 |
+| `CharSlot_SwayPivot` + `Portrait_Rotation` | 슬롯 회전이 이동 방향을 비틀거나, 연기가 몸 기울기를 무시한다 |
+| 포커스의 회전 · 배율을 맨 위로 | 옆에 선 인물이 화면 아래 가운데를 중심으로 커지고 돈다 — 옆으로 밀리고 호를 그린다 |
 
 **이 사고는 전부 "에러"가 아니라 "연출이 좀 밋밋하다"로 나타난다.** 컴파일도 되고
 예외도 안 나고 캐릭터도 잘 움직인다. 그래서 원인 추적이 거의 불가능하다.
@@ -371,12 +365,12 @@ CharSlot_Track_Focus          (쓰는 명령 없음)    ← place 계열이 쓰�
 
 **이 반복은 중복이 아니라 의도다.** 넷은 서로 다른 것을 정한다:
 
-* **존재하는 노드 ≠ 겨눌 수 있는 노드.** 1과 3이 지금 25개로 겹치는 것은 우연이고,
+* **존재하는 노드 ≠ 겨눌 수 있는 노드.** 1과 3이 지금 20개로 겹치는 것은 우연이고,
   타입은 그 둘이 갈라질 수 있음을 표현한다. 하나로 합치면 구조용 보조 노드를 추가하는
   순간 **커맨드가 그것을 겨눌 수 있게 된다.** `CharacterRigNode`은 API 표면이다 —
   화면 효과 리그에 이 enum이 없는 것이 그 증거다(거기서는 `ControllerKind`로 겨눈다).
-* **필드 이름 = 하이어라키 오브젝트 이름.** `refs.CharSlot_Track_X`를 보고 하이어라키에서
-  `<role>CharSlot_Track_X`를 이름 대조만으로 찾을 수 있다. 딕셔너리로 접으면 이 성질이
+* **필드 이름 = 하이어라키 오브젝트 이름.** `refs.CharFocus_Scale`을 보고 하이어라키에서
+  `<role>CharFocus_Scale`을 이름 대조만으로 찾을 수 있다. 딕셔너리로 접으면 이 성질이
   사라지고, Unity에서 계층을 눈으로 좇는 디버깅이 어려워진다.
 * **레포 전체가 같은 관용구를 쓴다.** `UIBase`의 enum 키 참조 바인딩
   (`UIRefValidation.AppendMissing<TRef> where TRef : struct, Enum`)과 같은 모양이고,
@@ -391,6 +385,8 @@ CharSlot_Track_Focus          (쓰는 명령 없음)    ← place 계열이 쓰�
 ### 6.3 고친 뒤 확인할 것
 
 1. `PresentationTuningExporter`로 `rig-schemas.json` 재덤프 — 안 하면 코어 폴드가 옛 계층을 본다
+   (`Ked/U12/Export Presentation Tuning Dump`). 같은 때 고칠 것: 노드 이름이 든 코어의 상수(`NodeTargets` · `StageReducer.Anchor`의 리셋 목록 ·
+   `MotionRules`) · 시험의 합성 리그 · 모션 클립(`.anim`의 바인딩 경로 — `Ked/Motion/Create Authoring Rig`로 제작 리그를 다시 세운다) · `motions.json`
 2. `RigSchemaTreeUnityParityTests` — 덤프와 실제 리그가 같은지
 3. 등가성 하네스 랩드스킵 재판정 — 리포트가 변경 전과 같은지
    (절차적 축이 안 섞이도록 랩드스킵이 기준 프로토콜이다)

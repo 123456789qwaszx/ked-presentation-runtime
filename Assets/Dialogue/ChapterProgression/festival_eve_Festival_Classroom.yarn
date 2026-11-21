@@ -9,13 +9,13 @@ title: Festival_Classroom
 
 <<bg_fade_in bg_main 30fr>>
 <<bgm audio/bgm_idoberg-relaxing-guitar-loop-v5-245859 2s>>
-<<place_right s1 bust 0fr>>
-<<size s1 mid bust 0fr>>
+<<place s1 11.52u 1.092u 0fr>>
+<<size s1 mid 0fr>>
 <<fade_in s1 23fr>>
 하린: 축제가 내일인데, 우리 반 간판이 아직 반쯤 비어 있어. #line:ln_b76q68hg
 
-<<place_left s2 bust 0fr>>
-<<size s2 mid bust 0fr>>
+<<size s2 mid 0fr>>
+<<place s2 -11.52u 1.092u 0fr>>
 <<slide_in s2 left 2u 18fr>>
 <<fade_in s2 18fr>>
 시구레: 칠도 반쯤 말랐네요. 이대로 걸기엔 좀 애매해요. #line:ln_rxvmhx0i

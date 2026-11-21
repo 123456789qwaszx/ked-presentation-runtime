@@ -1,6 +1,6 @@
 # 리그의 계층 — 포커스 · 슬롯 · 초상
 
-2026-11-21 · 브랜치 `feat/rig-layers`(dev에서) · 상태: **설계 — 코드는 아직 손대지 않았다** · 앞선 일: [PLAN_line-anchor.md](PLAN_line-anchor.md)
+2026-11-21 · 브랜치 `feat/rig-layers`(dev에서) · 상태: **R1~R4 끝(코어 시험 · 대본 대조) — Unity 확인(R5)을 기다린다** · 앞선 일: [PLAN_line-anchor.md](PLAN_line-anchor.md)
 
 ## 0. 한 문장
 
@@ -192,3 +192,47 @@ Unity는 한 묶음이 함께 컴파일돼야 하므로, 커밋은 나누되 R1~
 | ④ | `size_reset`의 뜻 — 지금은 mid 레벨로 간다 | 그대로 둔다 |
 | ⑤ | 정착 장부(리그 커맨드가 끝값을 적어 두는 곳) — 역산 커맨드가 사라지면 읽는 쪽이 진단 뷰와 대조 시험뿐이다 | 이 일이 끝난 뒤 따로 정한다 |
 | ⑥ | 샷의 초점은 줌과 한 전환이다 — 한 줄에 `shot_zoom`과 `shot_focus`를 다른 길이로 적으면 뒤의 길이로 함께 간다 | 그대로 둔다. 거슬리면 초점을 제 축으로 나눈다 |
+
+## 10. 단계별 기록
+
+| 커밋 | 단계 | 한 일 |
+|---|---|---|
+| `f6a998fc` · `1c0661ed` | §8 | `show` · `shot_to`를 걷었다(`feat/command-prune`에서 가져왔다) |
+| `45e25d09` | R1 · R2 | 리그를 20노드로. 스키마 · 참조 · 빌더 · cast의 리셋 목록(런타임 · 코어) · 이모지의 설 자리 · 키잉 금지(포커스 셋) · 노드와 함께 사라지는 커맨드(`left` · `right` · `up` · `down` · `scale_by` · `scale_reset`). `rig-schemas.json` · 프리팹 · 제작 씬 · `nod.anim` · `bow.anim`은 손으로 맞췄다 — R5에서 Unity로 다시 낸다 |
+| `0d6c790e` | R1 · R3 | 커맨드 — `place x y` · `focus_move` · `focus_rotate` · `focus_scale` · `focus_reset` · `size`의 `keep_y` · `x배율`(코어 `SizeToken`) · `move_reset`은 슬롯만 · `depth_focus_on` · `depth_focus_clear` · `shot_focus x y`. 옛 `place` 계열 · `shot_focus_to` · 초점 보존을 걷었다. 보조 계산 `NodeTargets.TrySolveFocusPlacement` |
+| (이 커밋) | R4 | 데모 · 예제 4편을 새 어휘로, 문서 |
+
+### R4 — 대본을 옮긴 방법과 결과
+
+정답은 **옛 대본을 옛 코어(dev)로 접은 무대**다. 대사 · 스텝마다 슬롯의 측정 노드(`VisualOffset`)의 꼴(원점 · 두 축)과 샷을 적어 두고,
+새 대본을 새 코어로 접어 같은 무대가 나오게 슬롯의 자리를 풀었다(변환기는 저장소 밖 — 클라우드 작업 폴더). 리그가 바뀌어 같은 `move_by`도
+다른 자리를 내므로(깊이가 슬롯을 곱하지 않는다) 값을 그대로 옮길 수 없다.
+
+- 옛 `place` 계열 → `place 슬롯 x y`(그 묶음의 끝값, 절대값). 같은 때의 `move_by` · `up`은 하나로 합쳤다(한 노드에 트윈 하나).
+  화면의 지점이 그대로 읽힌다 — 오른쪽 가슴은 `place s1 11.52u 1.092u`(1920 × 0.24 = 460.8px).
+- 묶음에 `place`가 없으면 `move_by`로 다시 적었다. 옛 `move_by 3u`는 깊이 배율(2.364)만큼 곱해져 보였으므로 `move_by 7.092u`가 됐다.
+- `size 슬롯 깊이 초점 …` → `size 슬롯 깊이 …`. 초점 보존이 하던 자리 보정은 같은 묶음의 `place`에 들어갔다.
+- `shot_focus_to` → `shot_focus` · `shot_zoom` · `shot_pan`(정답의 샷 값 그대로).
+- 배역이 없는 슬롯(같은 인물을 다른 슬롯에 캐스팅해 배역이 빠진 `s2` · `s3`)의 `place` 세 곳은 무대에 그려지지 않아 대조할 수 없다 —
+  옛 뜻(초점을 그 지점에)대로 도구의 계산으로 풀었다.
+- `slide_in`과 같은 묶음의 `place`(두 곳)는 같은 노드라 `place`를 `slide_in` 앞에 적었다 — 놓은 자리로 미끄러져 들어온다.
+- 포커스 계층의 예를 하나 더했다(데모 L104~110 — 시구레가 말할 때만 앞으로 나왔다가 `focus_reset`으로 돌아간다).
+- 「장부 확인」 절의 설명 줄 · 하린의 한 줄(ln_cjzch0sn — "장부가 기울기를 알아서")은 걷은 동작을 말하고 있어 고쳤다.
+
+대조: 4편의 대사 · 스텝 136곳(데모 124 · 예제 12, 더한 두 줄 제외) — 135곳이 0.02px 안에서 같다. 한 곳(데모 #22, `size s2 front` 줄)은
+0.567px 어긋난다: 옛 초점 보존의 Y와 새 레벨 Y의 차이인데, 1px 미만이라 보정을 적지 않았다(`move_by s2 0u 0.014u`가 대본에 잡음으로 남는다).
+더한 포커스 예는 앞뒤의 무대를 바꾸지 않는다(그 두 줄을 빼면 나머지가 같다). 좌우 반전(`mirror`)과 모션은 두 코어가 다 접지 않아 대조에서 빠진다 —
+세 배역(harin · sigure · kasmi)은 초점 오프셋에 x가 없어 반전이 자리에 영향을 주지 않는다.
+
+`.gitignore`된 `Assets/Dialogue/RealTest/real_test_Mirage_Tavern.yarn`(옛 명령 27곳)은 손대지 않았다.
+
+### R5 — Unity에서 할 일(소유자)
+
+1. 컴파일 · EditMode 시험 전체(파서 · 브리지 · 실행 커맨드 · Unity 대조 시험은 클라우드에서 컴파일하지 못했다 — 고친 .cs는 Roslyn으로 문법만 읽었다).
+2. `Ked/U12/Export Presentation Tuning Dump` — `rig-schemas.json`이 손으로 맞춘 것과 같은지(같아야 한다: 스키마에서 그대로 나오는 값).
+3. 프리팹 `CharacterRig.prefab` · 제작 씬 `MotionAuthoring.unity`를 열어 계층을 본다(문서 단위로 다시 이었다 — 빌더가 경고 없이 받아야 한다).
+   `Ked/Motion/Create Authoring Rig`로 제작 리그를 다시 세워도 된다.
+4. `nod.anim` · `bow.anim`의 바인딩이 살아 있는지(경로와 그 CRC32를 새 계층으로 고쳤다). `Ked/Motion/Export motions.json` 뒤 `motions.json`이 지금 것과 같은지.
+5. 데모를 재생 · 되감기 · 빨리 넘기기 — 특히 「장부 확인」 1~7, 포커스 예, 컷인(`c1` · `c2`의 `place`).
+6. 등가성 하네스 랩드스킵 재판정.
+

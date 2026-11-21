@@ -329,7 +329,7 @@ stage_mask
 
 ## 7. 초점을 화면 지점에 — 층 반응까지 넣어 팬을 푼다
 
-> 2026-11-21: `place` 계열 · `shot_focus_to`를 걷었다(`docs/PLAN_command-prune.md`) — 아래의 식은 코어 함수(`ShotIntents.FocusTo`)로 남고, 도구의 보조 버튼이 풀어서 `shot_focus` · `shot_zoom` · `shot_pan`으로 적는다.
+> 2026-11-21: `place` 계열(역산) · `shot_focus_to`를 걷었다(재생 저장소 `docs/PLAN_rig-layers.md`) — 아래의 식은 코어 함수(`ShotIntents.FocusTo`)로 남고, 도구의 보조 버튼이 풀어서 `shot_focus` · `shot_zoom` · `shot_pan`으로 적는다.
 > 이 절은 그 식이 왜 층 반응을 넣는지의 기록이다(커맨드 이름은 걷기 전의 것).
 
 `shot_focus_to c1 bust center 2.5` — 캐릭터의 초점이 화면의 지점에 오는 zoom · pan.

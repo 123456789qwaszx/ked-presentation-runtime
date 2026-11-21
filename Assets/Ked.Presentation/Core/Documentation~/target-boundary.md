@@ -56,7 +56,7 @@ public static partial class NodeTargets         // Reduce/NodeTargets.*.cs
 ```
 
 무대 상태를 읽고 실패 사유를 낼 수 있는 것은 `Try`로 시작한다 —
-`TryPlaceFocus` · `TrySetDepth` · `TryPortraitSizing`(`out NodeTarget`, `out string reason`).
+`TrySolveFocusPlacement` · `TrySetDepth` · `TryPortraitSizing`(`out` 목표 · `out string reason`).
 
 - **순수**: 시간·랜덤·IO·전역 상태 없음. 트랜스폼을 **읽지도** 않는다 —
   현재 상태가 필요하면 값으로 받는다. 같은 입력은 언제나 같은 출력.
@@ -156,11 +156,11 @@ yarn 4묶음 기준. "이관 안 함"은 **조용히 버린 것이 아니라 판
 
 | 커맨드 | 처리 |
 |---|---|
-| `move_by` · `move_reset` | `NodeTargets.MoveBy` |
-| `scale_by` · `scale_reset` | `NodeTargets.ScaleTo` |
+| `move_by` · `move_reset` · `place` | `NodeTargets.MoveBy` — 슬롯의 자리(`CharSlot_Track`). `place`는 절대값 |
+| `focus_move` · `focus_rotate` · `focus_scale` · `focus_reset` | `NodeTargets.MoveBy` · `RotateTo` · `ScaleTo`(절대값) — 포커스 계층(`CharFocus_*`) |
 | `cast`(set_anchor) | `NodeTargets.SetAnchor` — 런타임 파서가 `cast`를 배역 → pose → face → SetAnchor로 팬아웃하므로 `cast`도 축 리셋 + 역할 앵커를 접는다(`StageReducer.ApplyRoleAnchor`) |
 | `fade_in` / `fade_out` | `NodeTargets.FadeIn` / `NodeTargets.FadeOut` (가시성 축) |
-| (보조 계산 — 커맨드 아님) | `NodeTargets.TryPlaceFocus` → `SettledFocusMath.SolveFocusPlacement`. 초점이 화면 지점에 오는 자리 축(`CharSlot_Track`)의 끝값 |
+| (보조 계산 — 커맨드 아님) | `NodeTargets.TrySolveFocusPlacement` → `SettledFocusMath.SolveFocusPlacement`. 초점이 화면 지점에 오는 이동 노드(`CharSlot_Track` · `CharFocus_Track`)의 값 — 도구가 부르고 대본에는 `place` · `focus_move`로 적힌다 |
 | `set_portrait_sprite` | `NodeTargets.SourcePixelsSizing` — 원본 픽셀 크기를 접는다(아래 참조) |
 
 ### 초상 (portrait)
@@ -186,7 +186,7 @@ yarn 4묶음 기준. "이관 안 함"은 **조용히 버린 것이 아니라 판
 `PlaceCharacterFocus`의 계산부가 `SettledFocusMath`로 갔다.
 이 묶음의 실작업은 solver 순수화 하나였고, `TryMeasureFocusWithTemporaryDepthTransform`
 ("적용→측정→복원")도 함께 사라졌다. `SetDepth`는 2026-11-21부터 초점을 재지 않는다 — 깊이 레벨의 값을
-그대로 놓는 순수 타깃이다(`NodeTargets.TrySetDepth`).
+그대로 놓는 순수 타깃이다(`NodeTargets.TrySetDepth`). `keep_y`면 배율만, `x배율`이면 배율을 직접 놓고 Y는 건드리지 않는다(`SizeToken`).
 
 ### shot
 
@@ -218,7 +218,6 @@ yarn 4묶음 기준. "이관 안 함"은 **조용히 버린 것이 아니라 판
 | 커맨드 | 스펙 클래스 | 처리 |
 |---|---|---|
 | `move_by` · `move_reset` | `MoveByCommandSpecCharR` | placement 목표 계산이 이미 덮는다 |
-| `scale_by` · `scale_reset` | `ScaleToCommandSpecCharR` | 동일 |
 | `rotate_by` · `rotate_reset` | `RotateToCommandSpecCharR` | `NodeTargets.RotateTo` |
 | `sibling_front` · `sibling_back` | — | **이관 안 함** (아래) |
 | `char_to` | — | **어휘에서 걷었다 (2026-11-06)** — 리그는 무대 · 층을 옮기지 않는다. 다른 자리는 fade_out 뒤 새 slot([stage-rig.md](../../Runtime/StageRig/Documentation~/stage-rig.md) §2.4). 무대를 이름에 박은 `char_to_s0/s1/s2`는 그 전 2026-11-03에 걷었다 |
@@ -241,7 +240,6 @@ yarn 4묶음 기준. "이관 안 함"은 **조용히 버린 것이 아니라 판
 
 ```
 CharacterPortrait_SwayPivot.localEulerAngles  접힘=(0,0,0) vs 캡처=(0,0,7.53) / (0,0,359.62) …
-CharSlot_Track_Idle.anchoredPosition          접힘=(0,0)   vs 캡처=(0, 7.99) …
 ```
 
 값이 매 라인 제각각인 것이 특징이다 — 끝값이 아니라 **시간 함수의 스냅샷**이라서.

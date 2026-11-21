@@ -104,7 +104,7 @@ Layer_{d}.pos      = 층 오프셋 ÷ (s × g)  +  track × ( 1 − r(d) × (1 +
 
 ### 3.3 초점을 화면 지점에 오게 하는 줌 · 팬 (보조 계산)
 
-> 2026-11-21: `place` 계열 · `shot_focus_to`를 걷었다(`docs/PLAN_command-prune.md`) — 이 계산은 커맨드가 아니라 코어 함수(`ShotIntents.FocusTo` · `ShotLayoutMath.SolvePanToPlace`)로 남는다.
+> 2026-11-21: `place` 계열(역산) · `shot_focus_to`를 걷었다(재생 저장소 `docs/PLAN_rig-layers.md`) — 이 계산은 커맨드가 아니라 코어 함수(`ShotIntents.FocusTo` · `ShotLayoutMath.SolvePanToPlace`)로 남는다.
 > 도구의 보조 버튼이 이것으로 렌즈를 풀어 `shot_focus` · `shot_zoom` · `shot_pan`으로 적는다.
 
 "대상의 초점이 화면 지점에 오는 줌 · 팬"을 푼다. **지금 카메라의 몸과 롤이 입력이다** — 같은 대상이라도 카메라가 옮겨 서 있거나 기울어 있으면 팬이 달라진다. 렌즈는 입력이 아니다(지금 줌 · 팬과 무관하게 풀린다).
