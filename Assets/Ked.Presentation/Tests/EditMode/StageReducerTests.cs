@@ -432,9 +432,9 @@ namespace Ked.Presentation.Tests
         }
 
         [Test]
-        public void move_by는_상대_move_reset은_두_노드_절대_0이다()
+        public void move_by는_상대_move_reset은_절대_0이다()
         {
-            // 브리지: move_by(slot, x="0u", y="0u") 상대 / move_reset은 Track과 Track_Focus에 절대 0.
+            // 브리지: move_by(slot, x="0u", y="0u") 상대 / move_reset은 같은 노드(Track)에 절대 0. 포커스는 focus_reset이 걷는다.
             StageState moved = Fold(
                 Cmd("slot", "c1"),
                 Cmd("move_by", "c1", "1u", "-2u"),
@@ -446,7 +446,6 @@ namespace Ked.Presentation.Tests
             StageState reset = StageReducer.Apply(moved, Cmd("move_reset", "c1"), NewTuning());
 
             Assert.That(reset.Nodes.GetState("c1/CharSlot_Track").AnchoredPosition, Is.EqualTo(Vec2.Zero));
-            Assert.That(reset.Nodes.GetState("c1/CharFocus_Track").AnchoredPosition, Is.EqualTo(Vec2.Zero));
         }
 
         [Test]
@@ -625,6 +624,7 @@ namespace Ked.Presentation.Tests
             StageState state = Fold(
                 Cmd("shot_zoom", "3"),
                 Cmd("shot_pan", "2u", "-0.5u"),
+                Cmd("shot_focus", "6u", "1u"),
                 Cmd("shot_track", "1u", "-0.5u"),
                 Cmd("shot_track", "1u", "0u"),
                 Cmd("shot_dolly", "4"),
@@ -633,6 +633,7 @@ namespace Ked.Presentation.Tests
             Assert.That(state.Unhandled, Is.Empty);
             Assert.That(state.Shot.Zoom, Is.EqualTo(3f));
             Assert.That(state.Shot.PanInRigSpace, Is.EqualTo(new Vec2(80f, -20f)));
+            Assert.That(state.Shot.FocusPointInRigSpace, Is.EqualTo(new Vec2(240f, 40f)), "초점은 무대 좌표의 절대값이다");
             Assert.That(state.Shot.Track, Is.EqualTo(new Vec2(40f, 0f)), "트랙은 절대값이다 — 마지막 것이 남는다");
             Assert.That(state.Shot.Dolly, Is.EqualTo(4f));
             Assert.That(state.Shot.Roll, Is.EqualTo(-8f));
@@ -643,11 +644,13 @@ namespace Ked.Presentation.Tests
             Assert.That(to.Shot.Zoom, Is.EqualTo(5f));
             Assert.That(to.Shot.PanInRigSpace, Is.EqualTo(new Vec2(-80f, 40f)));
             Assert.That(to.Shot.Track, Is.EqualTo(new Vec2(40f, 0f)), "렌즈 명령은 몸을 건드리지 않는다");
+            Assert.That(to.Shot.FocusPointInRigSpace, Is.EqualTo(new Vec2(240f, 40f)), "줌 · 팬은 초점을 건드리지 않는다");
 
             // shot_reset은 렌즈만 — 카메라의 몸과 롤은 그대로다.
             StageState reset = StageReducer.Apply(to, Cmd("shot_reset"), NewTuning());
             Assert.That(reset.Shot.Zoom, Is.EqualTo(0f));
             Assert.That(reset.Shot.PanInRigSpace, Is.EqualTo(Vec2.Zero));
+            Assert.That(reset.Shot.FocusPointInRigSpace, Is.EqualTo(Vec2.Zero), "초점도 렌즈다");
             Assert.That(reset.Shot.Track, Is.EqualTo(new Vec2(40f, 0f)));
             Assert.That(reset.Shot.Dolly, Is.EqualTo(4f));
             Assert.That(reset.Shot.Roll, Is.EqualTo(-8f));
@@ -664,23 +667,13 @@ namespace Ked.Presentation.Tests
                 Cmd("shot_zoom"),
                 Cmd("shot_zoom", "abc"),
                 Cmd("shot_pan", "1u"),
+                Cmd("shot_focus", "1u"),
                 Cmd("shot_track"),
                 Cmd("shot_dolly"),
                 Cmd("shot_roll", "x"));
 
-            Assert.That(state.Unhandled.Count, Is.EqualTo(6), string.Join("\n", state.Unhandled));
+            Assert.That(state.Unhandled.Count, Is.EqualTo(7), string.Join("\n", state.Unhandled));
             Assert.That(state.Shot.ToString(), Is.EqualTo(ShotIntentState.Default.ToString()), "아무것도 접히지 않았다");
-        }
-
-        [Test]
-        public void shot_focus_to는_focus_튜닝_없이도_접힌다()
-        {
-            // 튜닝이 없으면 오프셋이 0일 뿐 폴드 자체는 성립한다.
-            // (오프셋 합의 정확성은 FocusStageTargetTests가 본다.)
-            StageState state = Fold(Cmd("slot", "c1"), Cmd("shot_focus_to", "c1", "body", "center", "2.5"));
-
-            Assert.That(state.Unhandled, Is.Empty);
-            Assert.That(state.Shot.Zoom, Is.EqualTo(2.5f));
         }
 
         // ── 시간 커맨드 (접을 것이 없다) ─────────────────────────────

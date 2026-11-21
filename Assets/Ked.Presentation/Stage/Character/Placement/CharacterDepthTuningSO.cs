@@ -9,49 +9,34 @@ public struct CharacterDepthPresetValue
 
     public float depthScale;
 
-    [Header("Focus-Preserving Scale Pivot")]
-    public CharacterFocusPreset preserveFocusPreset;
-
-    public Vector2 preserveFocusOffset;
-
     public static CharacterDepthPresetValue Far => new()
     {
         depthY = new Vector2(0f, 480f),
         depthScale = 0.68f,
-        preserveFocusPreset = CharacterFocusPreset.Feet,
-        preserveFocusOffset = Vector2.zero,
     };
 
     public static CharacterDepthPresetValue Back => new()
     {
         depthY = new Vector2(0f, 240f),
         depthScale = 0.86f,
-        preserveFocusPreset = CharacterFocusPreset.Bust,
-        preserveFocusOffset = Vector2.zero,
     };
 
     public static CharacterDepthPresetValue Mid => new()
     {
         depthY = Vector2.zero,
         depthScale = 1f,
-        preserveFocusPreset = CharacterFocusPreset.Bust,
-        preserveFocusOffset = Vector2.zero,
     };
 
     public static CharacterDepthPresetValue Front => new()
     {
         depthY = new Vector2(0f, -320f),
         depthScale = 1.18f,
-        preserveFocusPreset = CharacterFocusPreset.Bust,
-        preserveFocusOffset = Vector2.zero,
     };
 
     public static CharacterDepthPresetValue Close => new()
     {
         depthY = new Vector2(0f, 440f),
         depthScale = 1.38f,
-        preserveFocusPreset = CharacterFocusPreset.Face,
-        preserveFocusOffset = Vector2.zero,
     };
 }
 
@@ -109,16 +94,8 @@ public struct CharacterDepthLevelTuningSet
     [Tooltip("depth level에 대한 Scale 커브입니다. 키 범위 밖의 값은 끝 키의 기울기로 외삽됩니다.")]
     public AnimationCurve scaleCurve;
 
-    [Header("Focus Pivot")]
-    public CharacterFocusPreset farPreserveFocus;
-    public CharacterFocusPreset midPreserveFocus;
-    public CharacterFocusPreset closePreserveFocus;
-    public CharacterFocusPreset frontPreserveFocus;
-
     public CharacterDepthPresetValue Resolve(float level)
     {
-        CharacterFocusPreset preserveFocus = ResolvePreserveFocus(level);
-
         float depthY = EvaluateUnclamped(yCurve, level);
         float depthScale = EvaluateUnclamped(scaleCurve, level);
 
@@ -126,24 +103,7 @@ public struct CharacterDepthLevelTuningSet
         {
             depthY = new Vector2(0f, depthY),
             depthScale = Mathf.Max(0.0001f, depthScale),
-
-            preserveFocusPreset = preserveFocus,
-            preserveFocusOffset = Vector2.zero,
         };
-    }
-
-    private CharacterFocusPreset ResolvePreserveFocus(float level)
-    {
-        if (level <= 2.5f)
-            return farPreserveFocus;
-
-        if (level <= 6.5f)
-            return midPreserveFocus;
-
-        if (level <= 8.5f)
-            return closePreserveFocus;
-
-        return frontPreserveFocus;
     }
 
     public static CharacterDepthLevelTuningSet Default => new()
@@ -157,11 +117,6 @@ public struct CharacterDepthLevelTuningSet
             new Keyframe(0f, 0.86f, 0f, 0.052f),
             new Keyframe(10f, 1.38f, 0.052f, 0.082f),
             new Keyframe(20f, 2.2f, 0.082f, 0f)),
-
-        farPreserveFocus = CharacterFocusPreset.Feet,
-        midPreserveFocus = CharacterFocusPreset.Bust,
-        closePreserveFocus = CharacterFocusPreset.Bust,
-        frontPreserveFocus = CharacterFocusPreset.Face,
     };
 
     #region Curve Math

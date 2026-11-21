@@ -16,38 +16,24 @@ MonoBehaviour:
     far:
       depthY: {x: 0, y: 480}
       depthScale: 1
-      preserveFocusPreset: 0
-      preserveFocusOffset: {x: 0, y: 0}
     back:
       depthY: {x: 0, y: 240}
       depthScale: 1.14
-      preserveFocusPreset: 20
-      preserveFocusOffset: {x: 0, y: 0}
     mid:
       depthY: {x: 0, y: 0}
       depthScale: 1
-      preserveFocusPreset: 20
-      preserveFocusOffset: {x: 0, y: 0}
     front:
       depthY: {x: 0, y: -320}
       depthScale: 1.38
-      preserveFocusPreset: 20
-      preserveFocusOffset: {x: 0, y: 0}
     close:
       depthY: {x: 0, y: 440}
       depthScale: 1.58
-      preserveFocusPreset: 30
-      preserveFocusOffset: {x: 0, y: 0}
     exp1:
       depthY: {x: 0, y: 0}
       depthScale: 1.8
-      preserveFocusPreset: 20
-      preserveFocusOffset: {x: 0, y: 0}
     exp2:
       depthY: {x: 0, y: 0}
       depthScale: 1
-      preserveFocusPreset: 20
-      preserveFocusOffset: {x: 0, y: 0}
   level:
     yCurve:
       serializedVersion: 2
@@ -106,7 +92,3 @@ MonoBehaviour:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
-    farPreserveFocus: 0
-    midPreserveFocus: 20
-    closePreserveFocus: 20
-    frontPreserveFocus: 30

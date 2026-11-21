@@ -105,8 +105,7 @@ StageViewportLayer                       (IStageMount — 무대가 서는 자�
 
 - 역할은 무대 키로 정한다(`StageRoles.Of`). 대본에서 무대를 생략하면 본 무대다(slot · bg_spawn). 런타임 샷 시스템과 코어 하네스가 이 한 곳을 본다.
 - 덮는 무대가 흔들리지 않는다. 종전(모든 무대에 같은 intent)에는 컷인이 열린 채 `shot_zoom`을 하면 패널 안의 내용까지 밀렸다.
-- 덮는 무대의 클로즈업에 카메라가 필요 없다. 그 무대에 세운 리그를 `size` · `place`로 크게 세운다.
-- 덮는 무대에 선 리그에 `shot_focus_to`를 걸 수 없다. 본 무대의 카메라를 다른 무대의 점으로 풀 수 없어서다 — 런타임은 경고하고 건너뛰고, 폴드는 Unhandled로 남긴다.
+- 덮는 무대의 클로즈업에 카메라가 필요 없다. 그 무대에 세운 리그를 `size` · `move_by`로 크게 세운다.
 - 포기한 것: 덮는 무대 안의 카메라 연출(켄 번스 같은 천천히 줌). 리그의 move · scale 트윈으로 대신한다. 필요해지면 `shot_*`에 무대 인자를 단다(생략값은 본 무대).
 
 ### 2.2 마스크가 카메라 위로 올라갔다 (동작 변경)
@@ -262,7 +261,7 @@ json은 다른 프리셋처럼 **런타임 값의 덤프**다(튜닝 덤프 메�
 
 ## 5. 중립 = `Solve(Default)` (D6)
 
-`place` · `size` · `shot_focus_to`는 무대 좌표로 잰다 — "카메라가 없을 때 리그가 무대의 어디에 있나"(`a9bc19f7`).
+초점은 무대 좌표로 잰다 — "카메라가 없을 때 리그가 무대의 어디에 있나"(`a9bc19f7`).
 측정 체인(`CharacterPlacementTargetLedger.CaptureSettledChain`)이 샷 소유 노드를 지날 때는 라이브 대신 중립값을 쓴다.
 
 중립은 따로 적은 정의가 없다. 같은 식에 `ShotIntentState.Default`(모든 축 0)를 넣은 값이다:
@@ -289,7 +288,7 @@ slot / bg_spawn
   CharRigSlotResolver     registry.Get(무대) + EnsureLayer(d)
   리그 루트 → Layer.Content,  CharacterRigRefs.StandOn(무대, 층) — 리그가 사는 동안 그대로
 
-shot_zoom / shot_pan / shot_track / shot_dolly / shot_roll / shot_reset(_all) / shot_focus_to
+shot_zoom / shot_pan / shot_focus / shot_track / shot_dolly / shot_roll / shot_reset(_all)
   ShotIntentCommandBase   BuildTargetState → 새 intent, Axes → 조준하는 축
   PresentationShotResponseSystem.Follow(intent, axes)
     → 그 축의 트윈이 intent의 제 조각을 보간(D9 · D12) → 한 벌을 통째로 다시 푼다
@@ -303,7 +302,7 @@ shot_shake
 stage_mask
   StageMaskSlot           그 무대의 마스크 모양만. 카메라 · 리그와 무관
 
-place / size / shot_focus_to 측정
+초점 측정(진단 뷰 · 보조 계산의 대조 시험)
   CaptureSettledChain(측정 노드 → rigRefs.Stage.Root)
     노드마다: 장부(리그 끝값) → 샷 중립(Solve(Default)) → 라이브
 
@@ -328,7 +327,10 @@ place / size / shot_focus_to 측정
 
 ---
 
-## 7. `shot_focus_to` — 층 반응까지 넣어 팬을 푼다
+## 7. 초점을 화면 지점에 — 층 반응까지 넣어 팬을 푼다
+
+> 2026-11-21: `place` 계열 · `shot_focus_to`를 걷었다(`docs/PLAN_command-prune.md`) — 아래의 식은 코어 함수(`ShotIntents.FocusTo`)로 남고, 도구의 보조 버튼이 풀어서 `shot_focus` · `shot_zoom` · `shot_pan`으로 적는다.
+> 이 절은 그 식이 왜 층 반응을 넣는지의 기록이다(커맨드 이름은 걷기 전의 것).
 
 `shot_focus_to c1 bust center 2.5` — 캐릭터의 초점이 화면의 지점에 오는 zoom · pan.
 

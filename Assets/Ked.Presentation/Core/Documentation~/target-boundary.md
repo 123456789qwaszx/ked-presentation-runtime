@@ -113,7 +113,7 @@ public static class RigTargets
 |---|---|---|
 | 순수 (스펙 + 현재 값) | MoveBy · ScaleTo · OverlaySize · ColorTo | 그대로 가능 |
 | 튜닝 값 필요 | SetDepth (depth 프리셋) | 파싱된 값을 `Args`에 담아 받는다 |
-| **현재 정착 상태 의존** | SetDepth(focus 보존) · PlaceCharacterFocus | solver 순수화가 선행 |
+| **현재 정착 상태 의존** | (없다 — 2026-11-21에 PlaceCharacterFocus를 걷었다) | 이런 계산은 커맨드가 아니라 도구의 보조 계산으로 둔다 |
 | **절차적 (시간·랜덤)** | Tremble · Sway · Breath · Walk · Hop · Bounce | **불가** (아래) |
 
 ### 축 ② — 상태 종류
@@ -160,7 +160,7 @@ yarn 4묶음 기준. "이관 안 함"은 **조용히 버린 것이 아니라 판
 | `scale_by` · `scale_reset` | `NodeTargets.ScaleTo` |
 | `cast`(set_anchor) | `NodeTargets.SetAnchor` — 런타임 파서가 `cast`를 배역 → pose → face → SetAnchor로 팬아웃하므로 `cast`도 축 리셋 + 역할 앵커를 접는다(`StageReducer.ApplyRoleAnchor`) |
 | `fade_in` / `fade_out` | `NodeTargets.FadeIn` / `NodeTargets.FadeOut` (가시성 축) |
-| `place_focus` | `SettledFocusMath.SolveFocusPlacement` |
+| (보조 계산 — 커맨드 아님) | `NodeTargets.TryPlaceFocus` → `SettledFocusMath.SolveFocusPlacement`. 초점이 화면 지점에 오는 자리 축(`CharSlot_Track`)의 끝값 |
 | `set_portrait_sprite` | `NodeTargets.SourcePixelsSizing` — 원본 픽셀 크기를 접는다(아래 참조) |
 
 ### 초상 (portrait)
@@ -183,13 +183,14 @@ yarn 4묶음 기준. "이관 안 함"은 **조용히 버린 것이 아니라 판
 
 ### depth
 
-`SetDepth` · `PlaceCharacterFocus`의 계산부가 `SettledFocusMath`로 갔다.
+`PlaceCharacterFocus`의 계산부가 `SettledFocusMath`로 갔다.
 이 묶음의 실작업은 solver 순수화 하나였고, `TryMeasureFocusWithTemporaryDepthTransform`
-("적용→측정→복원")도 함께 사라졌다.
+("적용→측정→복원")도 함께 사라졌다. `SetDepth`는 2026-11-21부터 초점을 재지 않는다 — 깊이 레벨의 값을
+그대로 놓는 순수 타깃이다(`NodeTargets.TrySetDepth`).
 
 ### shot
 
-`shot_zoom` · `shot_pan` · `shot_track` · `shot_dolly` · `shot_roll` · `shot_reset` · `shot_reset_all` · `shot_focus_to` 전부(2026-11-17 — 종전 5종).
+`shot_zoom` · `shot_pan` · `shot_focus` · `shot_track` · `shot_dolly` · `shot_roll` · `shot_reset` · `shot_reset_all` 전부(2026-11-17 — 종전 5종).
 `shot_<축>`은 그 축 하나를 절대값으로 놓고 나머지는 그대로 둔다 — `ShotIntents`의 함수가 전부 `from`을 받아 제 축만 바꾼다. 상대값 명령은 없다.
 `ShotIntentMath`가 zoom · dolly→배율 규약(0.05)의 유일한 자리다 — 커맨드와 적용측이 같이 본다.
 
@@ -206,7 +207,7 @@ yarn 4묶음 기준. "이관 안 함"은 **조용히 버린 것이 아니라 판
 | 폴드 `StageReducer.Shot` | 의도만 접는다. 층 반응은 상태에 저장하지 않는다 — 의도 + 부착 d에서 언제든 풀린다 |
 | 하네스 `StageStateComparer.CompareStageView` | 같은 식으로 기대값(카메라 · 층마다 중심 · 전체 배율)을 풀어 캡처와 비교한다. 샷은 본 무대만 움직이므로(`StageRoles`, 2026-11-06) 덮는 무대의 기대값은 `Solve(Default)` |
 
-`shot_focus_to`는 정방향 식의 역으로 팬을 푼다(`ShotLayoutMath.SolvePanToPlace`). 입력은 무대 좌표의 focus와 그 슬롯이 선 층 d다.
+보조 계산 `ShotIntents.FocusTo`(걷은 `shot_focus_to`의 식)는 정방향 식의 역으로 팬을 푼다(`ShotLayoutMath.SolvePanToPlace`). 입력은 무대 좌표의 focus와 그 슬롯이 선 층 d다.
 팬 1px당 그 점이 화면에서 움직이는 양이 층마다 일정(`1 + panResponse`)해서 축마다 나눗셈 한 번이다.
 종전에는 "지금 카메라를 씌웠다 벗기는" 왕복 뒤 카메라만 본 식(`desired − p × 배율`)이었고, mid가 아닌 층에서 층 반응만큼 빗나갔다
 (close에서 약 96px). 런타임과 코어가 똑같이 틀려 하네스가 잡지 못했다(`a7974fa2`에서 고침).
@@ -227,7 +228,7 @@ yarn 4묶음 기준. "이관 안 함"은 **조용히 버린 것이 아니라 판
 `SetSiblingIndex`)뿐이라 **코어로 옮길 계산이 없다.**
 이 구조 축(리그가 어느 스테이지/레이어에 어떤 순서로 붙는가) 중 **부착은 데이터 모델에 들어갔다** —
 `StageState`의 `SlotAttachment`(무대 키 · 층 라벨 · 깊이 d)를 slot · bg_spawn이 스폰 때 한 번 접는다.
-층 d는 2026-11-05부터 하네스의 층 판정과 `shot_focus_to`의 팬 역산이 읽는다. 형제 순서(`sibling_*`)는 아직 모델 밖이다.
+층 d는 2026-11-05부터 하네스의 층 판정과 `ShotIntents.FocusTo`의 팬 역산이 읽는다. 형제 순서(`sibling_*`)는 아직 모델 밖이다.
 
 ### 이관 대상이 아닌 부류 — 절차적 커맨드
 
@@ -313,8 +314,7 @@ fade·move·scale을 **같은 노드, 같은 목표 계산**으로 접는다. �
 
 - 구조 축 상태 모델의 형제 순서(`sibling_*`). 부착(stage/layer)은 `SlotAttachment`로 들어갔다
 - `SetPortraitSprite` (초상 축)
-- `ScreenFocusPoint` 비율표 — 게임별 값이므로 코어 코드가 아니라 **tuning 데이터**가 맞다.
-  지금은 호스트 `ScreenFocusPointResolver`에 있다. U12 덤프 추가 후보.
+- 화면 지점 비율표(`ScreenPointRatios`) — 게임별 값이므로 코어 코드가 아니라 **tuning 데이터**가 맞다. U12 덤프 추가 후보.
 - SO 저작 전용 스펙 — yarn 4묶음 밖. 필요하면 같은 규약으로. (`RotateByCommandCharR`는 대본이 낸 적이 없어 2026-11-06에 지웠다 — `rotate_by`는 `RotateToCommandCharR`의 상대 모드다.)
 - **커맨드 수명 통합** — **완료** (`PresentationCore/Base/ClaimTweenCommandBase.cs`).
   `ShotIntentCommandBase`가 shot 계열에 했던 통합의 일반화. 하네스가 오라클이므로

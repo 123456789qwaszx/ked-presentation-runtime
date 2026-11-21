@@ -30,7 +30,7 @@ namespace Ked.Presentation.Tests
             "<<cast c1 bandi a 3>>\n" +
             "<<actor @4 c1>>\n" +
             "//<<mirror @4>>\n" +
-            "<<place_center @4 bust 24fr>>\n" +
+            "<<move_by @4 2u 0u 24fr>>\n" +
             "\n" +
             "첫 번째 대사다.\n" +
             "\n" +
@@ -87,7 +87,7 @@ namespace Ked.Presentation.Tests
 
             Assert.That(story.Groups[0].LineText, Is.EqualTo("첫 번째 대사다."));
             Assert.That(story.Groups[0].Commands.Select(c => c.Name),
-                Is.EqualTo(new[] { "beat", "cast", "actor", "place_center" }));
+                Is.EqualTo(new[] { "beat", "cast", "actor", "move_by" }));
 
             Assert.That(story.Groups[1].LineText, Is.EqualTo("두 번째 대사다."));
             Assert.That(story.Groups[1].Commands.Select(c => c.Name),
@@ -523,10 +523,10 @@ namespace Ked.Presentation.Tests
         [Test]
         public void 인자가_순서대로_실린다()
         {
-            StageCommand place = ExtractSample()[1].Groups[0].Commands[3];
+            StageCommand move = ExtractSample()[1].Groups[0].Commands[3];
 
-            Assert.That(place.Name, Is.EqualTo("place_center"));
-            Assert.That(place.Args, Is.EqualTo(new[] { "@4", "bust", "24fr" }));
+            Assert.That(move.Name, Is.EqualTo("move_by"));
+            Assert.That(move.Args, Is.EqualTo(new[] { "@4", "2u", "0u", "24fr" }));
         }
 
         // ── 추출기: 라인 ID ──────────────────────────────────────────
@@ -747,7 +747,7 @@ namespace Ked.Presentation.Tests
         [Test]
         public void 접는_도중_실패해도_판정은_계속된다()
         {
-            // 원문에는 아직 못 접는 커맨드가 섞여 있다(bg_spawn·place_center·beat…).
+            // 원문에는 아직 못 접는 커맨드가 섞여 있다(beat…).
             // 그것들이 Unhandled로 남을 뿐, 접힌 상태 자체는 성립해야 한다.
             StageReducerTuning tuning = HarnessTuning();
 

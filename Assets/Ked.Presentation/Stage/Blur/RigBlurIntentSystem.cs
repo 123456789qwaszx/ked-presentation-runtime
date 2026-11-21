@@ -3,7 +3,7 @@ using DG.Tweening;
 using UnityEngine;
 
 /// <summary>
-/// 블러의 장면 전역 의도 — 초점(focus_on)과 레이어(stage_blur).
+/// 블러의 장면 전역 의도 — 초점(depth_focus_on)과 레이어(stage_blur).
 ///
 /// 커맨드는 의도만 넘기고, 이 시스템이 살아 있는 리그마다 목표 블러를 정해 리그의 RigVisualEffectController에 넘긴다.
 /// 줄 머리에서 커맨드가 다 돈 뒤(Reconcile — 줄 흐름 LinePresentationFlow가 부른다) 다시 맞춘다 — 뒤에 등장한 리그, size로 바뀐 깊이,

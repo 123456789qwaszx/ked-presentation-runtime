@@ -60,7 +60,8 @@ Yarn Spinner를 기반으로 제작한 **비주얼 노벨 화면 연출 런타�
 <<bg_sprite bg_main class_day>>
 <<bg_fade_in bg_main 30fr>>
 <<bgm audio/bgm_idoberg-relaxing-guitar-loop-v5-245859 2s>>
-<<place_center s1 bust 0fr>>
+<<size s1 mid 0fr>>
+<<move_by s1 0u 0.639u 0fr>>
 <<fade_in s1 23fr>>
 하린: 배경이 들어오고, 음악이 깔리고, 내가 걸어 들어왔어.
 ```

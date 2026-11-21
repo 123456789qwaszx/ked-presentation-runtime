@@ -7,7 +7,7 @@ namespace Ked.Presentation.Tests
     /// <summary>
     /// 샷 목표 계산. 기대값은 종전 BuildTargetState 본문에서 온다.
     ///
-    /// zoom_focus는 값보다 **명중**이 정의다: 접은 샷을 정방향 식(SolveLayer → ProjectToRigSpace)에 넣어
+    /// FocusTo(초점을 화면 지점에 오게 하는 렌즈)는 값보다 **명중**이 정의다: 접은 샷을 정방향 식(SolveLayer → ProjectToRigSpace)에 넣어
     /// 그 점이 원하는 화면 지점에 보이는지 본다. 층마다 반응이 달라도 명중해야 한다.
     /// </summary>
     public sealed class ShotIntentTests
@@ -75,6 +75,10 @@ namespace Ked.Presentation.Tests
             AssertVec2(pan.PanInRigSpace, new Vec2(-80f, 60f), "pan 절대");
             AssertOnlyChanged(in pan, Full, "pan");
 
+            ShotIntentState focus = ShotIntents.Focus(Full, new Vec2(240f, -40f));
+            AssertVec2(focus.FocusPointInRigSpace, new Vec2(240f, -40f), "focus 절대");
+            AssertOnlyChanged(in focus, Full, "focus");
+
             ShotIntentState track = ShotIntents.Track(Full, new Vec2(-120f, 0f));
             AssertVec2(track.Track, new Vec2(-120f, 0f), "track 절대 — 지금 값에 더하지 않는다");
             AssertOnlyChanged(in track, Full, "track");
@@ -129,7 +133,7 @@ namespace Ked.Presentation.Tests
             Assert.That(ShotIntents.ResetAll().ToString(), Is.EqualTo(ShotIntentState.Default.ToString()));
         }
 
-        // ── shot_focus_to: 명중 ──────────────────────────────────────
+        // ── FocusTo(초점을 화면 지점에 오게 하는 줌 · 팬): 명중 ──────
 
         // 접은 샷에서 층 d 안의 점이 보이는 자리 — 런타임 계층(카메라 리그 → Layer)과 같은 정방향 식.
         private static Vec2 SeenAt(in ShotIntentState shot, Vec2 pointInLayer, float depth)
@@ -148,7 +152,7 @@ namespace Ked.Presentation.Tests
         [Test]
         public void 접은_샷에서_그_점은_어느_층에_서도_원하는_지점에_보인다()
         {
-            // 이것이 zoom_focus의 정의다. 초점이 왼쪽 · 오른쪽 · 정확히 0인 축을 모두 지나게 한다(산개 부호).
+            // 이것이 FocusTo의 정의다. 초점이 왼쪽 · 오른쪽 · 정확히 0인 축을 모두 지나게 한다(산개 부호).
             Vec2[] focuses = { new(-460.8f, 300f), new(250f, -380f), new(0f, 820f) };
             Vec2[] desireds = { Vec2.Zero, new(-460.8f, 0f), new(300f, 200f) };
 
@@ -179,7 +183,7 @@ namespace Ked.Presentation.Tests
         [Test]
         public void mid에서는_종전_식_desired_빼기_focus_곱하기_배율이다()
         {
-            // mid의 반응은 항등이라 카메라만 남는다 — 종전 shot_focus_to와 같은 팬.
+            // mid의 반응은 항등이라 카메라만 남는다 — 카메라만 본 팬과 같다.
             Vec2 focus = new(250f, 380f);
             Vec2 desired = new(-460.8f, 0f);
             float scale = ShotIntentMath.EvaluateCameraScale(6f);

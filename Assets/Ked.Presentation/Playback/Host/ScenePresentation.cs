@@ -12,7 +12,7 @@ public sealed class ScenePresentation : IPlaybackStage
     private readonly ILineAborter _linePresentationAborter;
     private readonly IStageStepRunner _stageStep;
     private readonly PresentationShotResponseSystem _shotResponseSystem;
-    // 블러 의도(focus_on·stage_blur)도 샷처럼 정지에서 비운다 — 리플레이가 다시 건다.
+    // 블러 의도(depth_focus_on·stage_blur)도 샷처럼 정지에서 비운다 — 리플레이가 다시 건다.
     private readonly RigBlurIntentSystem _rigBlur;
     // 화면 효과(vignette·noise 의도, flash 이벤트)와 무대 마스크도 샷처럼 정지에서 기준으로 — 리플레이가 다시 건다.
     private readonly ScreenEffectRig _screenEffects;

@@ -31,7 +31,7 @@ public sealed class DepthFocusCommandSpecCharR : CharacterRigCommandSpecBase
 /// 렌즈에 자국이 남은 것처럼 보인다. 흐림이 깊이마다 달라야 디포커스로 읽힌다.
 /// 깊이는 레이어가 아니라 <see cref="CharacterRigRefs.SettledDepthScale"/>에서 온다.
 ///
-/// 배경은 대상이 아니다 — stage_blur가 레이어 단위로 처리한다. 배역이 있는 슬롯만 흐린다(focus_clear도 같다).
+/// 배경은 대상이 아니다 — stage_blur가 레이어 단위로 처리한다. 배역이 있는 슬롯만 흐린다(depth_focus_clear도 같다).
 ///
 /// 초점은 장면 전역 의도다 — 의도만 RigBlurIntentSystem에 넘기고, 리그마다 블러를 정하고 줄 머리에서 다시 맞추는 것은 시스템이 한다.
 /// 그래서 뒤에 등장한 캐릭터, size로 바뀐 깊이도 초점을 따라간다.

@@ -145,7 +145,7 @@ public partial class SampleBootstrap
 
     private void BootstrapPresentationSession()
     {
-        // 블러 의도(focus_on·stage_blur) — 커맨드는 의도만 넘기고, 줄 머리에서 시스템이 리그를 다시 맞춘다.
+        // 블러 의도(depth_focus_on·stage_blur) — 커맨드는 의도만 넘기고, 줄 머리에서 시스템이 리그를 다시 맞춘다.
         _rigBlur = new RigBlurIntentSystem(_presentationStage, _stageRigs);
 
         // Character Rig
@@ -153,15 +153,12 @@ public partial class SampleBootstrap
         CharacterRigBuilder characterRigBuilder = new();
         PortraitResolver portraitResolver = new(portraitGeneratedDb);
 
-        // 배치는 무대 좌표 — 배치 계산이 샷이 움직이는 무대 노드를 지날 때 샷 시스템의 중립값을 쓴다.
         CharacterRigCommandFactory charRigFactory = new(
             _presentationStage,
-            _presentationResponseRig,
             charRigSlotResolver,
             characterRigBuilder,
             portraitResolver,
             roleTuningDb,
-            characterFocusTuningDb,
             characterVisualFocusPresetDb,
             characterDepthTuning);
 
@@ -179,8 +176,7 @@ public partial class SampleBootstrap
             _emojiPlayback,
             emojiLocators);
 
-        ShotResponseCommandFactory presentationShotFactory = new(
-            _presentationStage, _presentationResponseRig, characterFocusTuningDb);
+        ShotResponseCommandFactory presentationShotFactory = new(_presentationResponseRig);
 
         // Presentation Control
         PresentationControlCommandFactory presentationControlFactory = new(_presentationStage);
@@ -188,7 +184,7 @@ public partial class SampleBootstrap
         // Audio
         AudioCommandFactory audioFactory = new(audioSystem);
 
-        // 블러 — 초점(focus_on) · 층 블러(stage_blur). 커맨드는 의도만 넘기고 시스템이 줄 머리에서 리그마다 맞춘다
+        // 블러 — 초점(depth_focus_on) · 층 블러(stage_blur). 커맨드는 의도만 넘기고 시스템이 줄 머리에서 리그마다 맞춘다
         BlurCommandFactory blurFactory = new(_rigBlur);
 
         // 무대 리그 — 마스크(stage_mask) · 층의 어둡기 판(stage_dim)(stage-rig.md)

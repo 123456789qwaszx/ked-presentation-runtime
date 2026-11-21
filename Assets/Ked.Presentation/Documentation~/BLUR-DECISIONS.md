@@ -80,7 +80,7 @@ Bjørge, *Bandwidth-Efficient Rendering*, SIGGRAPH 2015 Mobile Graphics (ARM).
 캐릭터와 같은 `RigVisualEffectController`를 공유했다 — 머티리얼 인스턴스화와
 `materialForRendering` 처리는 버그가 잦은 자리라 복제하지 않았다. 2026-10-29부터는 배경이
 **캐릭터 리그 그 자체**(캐스팅하지 않은 슬롯)라 공유할 것도 없다 — 같은 컨트롤러 하나다
-(재생 저장소 `docs/PLAN_background-as-slot.md`). `focus_on`은 배역 있는 슬롯만 보므로 배경은 여전히 대상이 아니다.
+(재생 저장소 `docs/PLAN_background-as-slot.md`). `depth_focus_on`은 배역 있는 슬롯만 보므로 배경은 여전히 대상이 아니다.
 
 `stage_blur <layer> <amount>`의 의미("그 레이어에 있는 것을 흐린다")는 그대로 두고
 기구만 바꿨다(`StageLayerBlurCommand`). far 레이어에는 배경만 있으므로 기존 저작이
@@ -172,13 +172,13 @@ v2 캡처 시스템의 경계 처리다. 유일한 writer였던 `StageDepthDefoc
 확실히 하려면 분기를 HLSL 안(`#ifdef _BLUR`)으로 옮기면 되고, 그러면 Keyword 노드 2개와
 베이스 샘플이 불필요해진다.
 
-## 7. CoC 정책 — focus_on
+## 7. CoC 정책 — depth_focus_on
 
 ```
-<<focus_on @1>>            @1에 초점. 나머지는 깊이 차이만큼 흐려진다
-<<focus_on @1 0.6>>        최대 흐림 0.6으로 제한
-<<focus_on @1 0.6 0.8s>>   0.8초에 걸쳐
-<<focus_clear>>            전원 복귀
+<<depth_focus_on @1>>            @1에 초점. 나머지는 깊이 차이만큼 흐려진다
+<<depth_focus_on @1 0.6>>        최대 흐림 0.6으로 제한
+<<depth_focus_on @1 0.6 0.8s>>   0.8초에 걸쳐
+<<depth_focus_clear>>            전원 복귀
 ```
 
 ```
@@ -201,7 +201,7 @@ coc = saturate(|depthScale_char − depthScale_focus| × falloff) × maxBlur
 
 ### 블러를 쓰는 커맨드가 셋이다 — 출처를 나누고 가장 큰 값으로 합친다 (2026-11-03)
 
-`focus_on` · `stage_blur` · `char_visual_*`(프리셋의 `blur` 필드)가 모두 `_BlurAmount`에 닿는다.
+`depth_focus_on` · `stage_blur` · `char_visual_*`(프리셋의 `blur` 필드)가 모두 `_BlurAmount`에 닿는다.
 예전에는 셋이 같은 값을 서로 다른 트윈 대상으로 써서 **동시에 걸면 매 프레임 싸웠고**,
 blur가 0인 `char_visual` 프리셋(dim·rim·clear …)은 앞서 걸린 초점·레이어 블러를 지웠다.
 
@@ -210,7 +210,7 @@ blur가 0인 `char_visual` 프리셋(dim·rim·clear …)은 앞서 걸린 초�
 | 출처 | 커맨드 | 대상 |
 |---|---|---|
 | 모양(Style)의 blur | `char_visual_*` | 그 리그 |
-| 초점 블러 | `focus_on` · `focus_clear` | 배역이 있는 리그 전부(CoC) |
+| 초점 블러 | `depth_focus_on` · `depth_focus_clear` | 배역이 있는 리그 전부(CoC) |
 | 레이어 블러 | `stage_blur` · `stage_blur_reset` | 그 레이어 아래 리그 |
 
 - **셰이더에 쓰는 값은 셋 중 가장 큰 값이다**(소유자 결정). 서로 덮어쓰지 않고, 흐림이 겹쳐도 더 흐려지지 않는다.
@@ -221,7 +221,7 @@ blur가 0인 `char_visual` 프리셋(dim·rim·clear …)은 앞서 걸린 초�
 
 ### 초점·레이어 블러는 장면 전역 의도다 (2026-11-03)
 
-예전 `focus_on`·`stage_blur`는 실행 순간의 스냅숏이었다 — 그때 있던 리그만, 그때의 깊이로 흐렸다.
+예전 `depth_focus_on`·`stage_blur`는 실행 순간의 스냅숏이었다 — 그때 있던 리그만, 그때의 깊이로 흐렸다.
 그래서 뒤에 등장한 캐릭터는 선명했고, `size`로 깊이가 바뀌어도, `char_to`로 블러 레이어를 드나들어도 따라가지 않았다.
 
 지금은 `RigBlurIntentSystem`이 의도(초점 대상·falloff·최대 흐림, 무대·레이어별 양)를 든다. 커맨드는 의도만 넘긴다.

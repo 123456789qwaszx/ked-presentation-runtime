@@ -69,9 +69,8 @@ namespace Ked.Presentation.Core
             if (!TryGetSpawnedSlot(state, cmd, out string slotKey, out reason))
                 return false;
 
-            // 브리지는 Track과 Track_Focus 두 노드에 절대 0을 건다.
+            // 브리지는 Track에 절대 0을 건다 — move_by가 쓰는 그 노드다. 포커스는 focus_reset이 걷는다.
             ApplyMoveTarget(state, slotKey, "CharSlot_Track", relative: false, Vec2.Zero);
-            ApplyMoveTarget(state, slotKey, "CharFocus_Track", relative: false, Vec2.Zero);
             return true;
         }
 

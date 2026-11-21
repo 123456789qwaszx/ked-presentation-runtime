@@ -18,6 +18,10 @@ namespace Ked.Presentation.Core
             => from.WithLens(from.Zoom, pan, from.FocusPointInRigSpace);
 
 
+        // shot_focus - 초점만 바꾼다. 초점은 줌할 때 앞 · 뒤 층이 벌어지는 쪽의 기준이다(무대 좌표) — 줌 · 팬은 그대로다.
+        public static ShotIntentState Focus(in ShotIntentState from, Vec2 focus)
+            => from.WithLens(from.Zoom, from.PanInRigSpace, focus);
+
         // shot_track - 카메라가 서는 자리를 절대값으로. mid 면의 그 무대 점이 화면 가운데에 온다.
         public static ShotIntentState Track(in ShotIntentState from, Vec2 track)
             => new(from.Zoom, from.PanInRigSpace, from.FocusPointInRigSpace, track, from.Dolly, from.Roll);
@@ -39,7 +43,8 @@ namespace Ked.Presentation.Core
         public static ShotIntentState ResetAll()
             => ShotIntentState.Default;
 
-        // shot_focus_to - 캐릭터 focus 지점이 화면의 지정 지점에 오는 zoom/pan.
+        // 캐릭터 focus 지점이 화면의 지정 지점에 오는 zoom/pan. 커맨드가 아니다 — 도구의 보조 버튼이 부르는 계산이다
+        // (docs/PLAN_command-prune.md P4. 버튼은 풀린 초점 · 줌 · 팬을 shot_focus · shot_zoom · shot_pan으로 적는다).
         //
         // focus는 무대 좌표다(카메라 중립). 런타임은 정착 사슬이 샷 노드를 중립으로 재고, 폴드는 상태가 곧 무대 좌표다.
         // 그 점이 선 층(d)의 반응까지 넣어, 목표 배율에서 원하는 지점에 보이는 팬을 푼다.

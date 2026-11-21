@@ -31,7 +31,7 @@ public sealed partial class YarnCommandBridge
 
     private void BindRunnerCommands(DialogueRunner runner)
     {
-        RegisterCharFocusPlacementCommands(runner);
+        BindCharRigPlacement(runner);
         BindBackground(runner);
         
         BindControl(runner);
@@ -114,7 +114,7 @@ public sealed partial class YarnCommandBridge
             "rotate_by", EnqueueRotateBySpec);
 
         runner.AddCommandHandler<string, string>(
-            "move_reset", EnqueueSetPlaceResetSpecs);
+            "move_reset", EnqueueMoveResetSpec);
         runner.AddCommandHandler<string, string, string>(
             "rotate_reset", EnqueueRotateResetSpec);
 
@@ -132,15 +132,13 @@ public sealed partial class YarnCommandBridge
     
     private void BindShotStaging(DialogueRunner runner)
     {
-        // 묶음 — 줌 + 팬
-        runner.AddCommandHandler<string, string, string, string, string, string>(
-            "shot_focus_to", EnqueueShotFocusToSpec);
-
-        // 축마다 하나 — 렌즈(줌 · 팬) · 헤드(롤) · 몸(달리 · 트랙)
+        // 축마다 하나 — 렌즈(줌 · 팬 · 초점) · 헤드(롤) · 몸(달리 · 트랙)
         runner.AddCommandHandler<string, string, string>(
             "shot_zoom", EnqueueShotZoomSpec);
         runner.AddCommandHandler<string, string, string, string>(
             "shot_pan", EnqueueShotPanSpec);
+        runner.AddCommandHandler<string, string, string, string>(
+            "shot_focus", EnqueueShotFocusSpec);
         runner.AddCommandHandler<string, string, string>(
             "shot_roll", EnqueueShotRollSpec);
         runner.AddCommandHandler<string, string, string>(
@@ -159,24 +157,25 @@ public sealed partial class YarnCommandBridge
             "shot_shake", EnqueueShotShakeSpec);
     }
     
-    private void RegisterCharFocusPlacementCommands(DialogueRunner runner)
+    // 리그의 세 덩어리가 받는 자리 · 크기(docs/PLAN_rig-layers.md §4) — 전부 절대값이다.
+    private void BindCharRigPlacement(DialogueRunner runner)
     {
-        // Char focus placement
+        // 슬롯 — <<place 슬롯 x y [길이] [이징]>> 본래 자리
         runner.AddCommandHandler<string, string, string, string, string>(
-            "place", EnqueuePlaceCharacterFocusSpec);
-        
-        runner.AddCommandHandler<string, string, string, string>(
-            "place_left", EnqueueFocusToLeftSpec);
+            "place", EnqueuePlaceSpec);
 
+        // 포커스 — 대화할 때만 서는 자리. focus_reset이 셋을 함께 걷는다
+        runner.AddCommandHandler<string, string, string, string, string>(
+            "focus_move", EnqueueFocusMoveSpec);
         runner.AddCommandHandler<string, string, string, string>(
-            "place_center", EnqueueFocusToCenterSpec);
-
+            "focus_rotate", EnqueueFocusRotateSpec);
         runner.AddCommandHandler<string, string, string, string>(
-            "place_right", EnqueueFocusToRightSpec);
+            "focus_scale", EnqueueFocusScaleSpec);
+        runner.AddCommandHandler<string, string, string>(
+            "focus_reset", EnqueueFocusResetSpec);
 
-        // Char focus depth — <<size 슬롯 깊이 [프레이밍] [길이] [이징]>>
-        // <<size c1 close bust 12fr>>
-        // <<size c1 front>>
+        // 초상의 깊이 — <<size 슬롯 <레벨·라벨·x배율> [keep_y] [길이] [이징]>>
+        // <<size c1 close 12fr>> · <<size c1 14 keep_y>> · <<size c1 x1.04 8fr>>
         runner.AddCommandHandler<string, string, string, string, string>(
             "size", EnqueueDepthAtPresetSpec);
 
@@ -338,10 +337,10 @@ public sealed partial class YarnCommandBridge
     private void BindDepthFocus(DialogueRunner runner)
     {
         runner.AddCommandHandler<string, string, string>(
-            "focus_on", EnqueueDepthFocusOnSpec);
+            "depth_focus_on", EnqueueDepthFocusOnSpec);
 
         runner.AddCommandHandler<string>(
-            "focus_clear", EnqueueDepthFocusClearSpec);
+            "depth_focus_clear", EnqueueDepthFocusClearSpec);
     }
 
     private void BindStageDepthDefocus(DialogueRunner runner)

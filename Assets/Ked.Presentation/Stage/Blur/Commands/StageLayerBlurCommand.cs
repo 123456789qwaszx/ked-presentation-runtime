@@ -32,7 +32,7 @@ public sealed class StageLayerBlurCommandSpec : CommandSpecBase
 ///
 /// 레이어 블러는 장면 전역 의도다 — 의도만 RigBlurIntentSystem에 넘기고, 줄 머리에서 다시 맞추는 것은 시스템이 한다.
 /// 그래서 뒤늦게 그 레이어에 붙은 리그도 흐려진다.
-/// 모양(char_visual)·초점(focus_on) 블러와는 리그 컨트롤러에서 가장 큰 값으로 합쳐진다.
+/// 모양(char_visual)·초점(depth_focus_on) 블러와는 리그 컨트롤러에서 가장 큰 값으로 합쳐진다.
 /// </summary>
 public sealed class StageLayerBlurCommand : CommandBase
 {

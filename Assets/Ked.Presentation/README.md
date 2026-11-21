@@ -26,7 +26,7 @@
 | `Character/` | 캐릭터 리그 — `Rig/` 스키마·빌더·레지스트리 · `Portrait/` 초상 · `Placement/` 정착 장부·초점·배치·깊이 계산 · `Visual/` 비주얼 · `Motion/` 모션 클립 · `Commands/` |
 | `Shot/` | 카메라 Pan·Zoom과 카메라 중립 계약, 샷 커맨드 |
 | `ScreenEffect/` | 화면 효과 리그(덮개 · flash · noise · vignette), 그 커맨드 |
-| `Blur/` | 블러 의도 — 초점(`focus_on`) · 층 블러(`stage_blur`)를 리그마다 맞추는 `RigBlurIntentSystem`, 그 커맨드 |
+| `Blur/` | 블러 의도 — 초점(`depth_focus_on`) · 층 블러(`stage_blur`)를 리그마다 맞추는 `RigBlurIntentSystem`, 그 커맨드 |
 | `Audio/` | BGM · SFX · 보이스, 그 커맨드 |
 | `Control/` | wait · actor 별칭 · 앞뒤 순서 |
 | `Equivalence/` · `CoreBridge/` · `Diagnostics/` | 실제 무대 캡처 · 유니티↔코어 변환 · 초점 디버그 뷰 |

@@ -66,7 +66,7 @@ namespace Ked.Presentation.Tests.UnityParity
 
         // ── 종전 알고리즘 오라클 ─────────────────────────────────────
         //
-        // CharacterDepthResolver / CharacterFocusPlacementSolver의 종전 본문 그대로.
+        // 지운 호스트 계산(깊이 보정 · 배치 해)의 종전 본문 그대로.
         // 고치지 말 것 — 이것이 "종전과 같다"의 기준이다.
 
         private Vector2 LegacyFocusInRigSpace(
@@ -236,14 +236,14 @@ namespace Ked.Presentation.Tests.UnityParity
             AssertVector2(actual, expected, "어질러진 라이브의 depth 보정");
         }
 
-        // ── place 등가성 ─────────────────────────────────────────────
+        // ── 배치 해 등가성 ─────────────────────────────────────────────
 
         [Test]
         public void 배치_해가_종전과_같다()
         {
             CharacterPlacementTargetLedger ledger = new();
 
-            Vector2 desired = new(-460.8f, 172.8f);   // place … tl 상당
+            Vector2 desired = new(-460.8f, 172.8f);   // tl 지점 상당
 
             Vector2 expected = LegacySolvePlacement(ledger, BustOffset, desired);
             Vector2 actual = CoreSolvePlacement(ledger, BustOffset, desired);
@@ -257,7 +257,7 @@ namespace Ked.Presentation.Tests.UnityParity
             CharacterPlacementTargetLedger ledger = new();
             ledger.Publish(DepthScale, NodeTarget.LocalScaleXY(DepthScale.name, new Vector2(1.58f, 1.58f).ToCore()));
 
-            Vector2 desired = new(268.8f, -172.8f);   // place … br 상당
+            Vector2 desired = new(268.8f, -172.8f);   // br 지점 상당
 
             Vector2 expected = LegacySolvePlacement(ledger, BustOffset, desired);
             Vector2 actual = CoreSolvePlacement(ledger, BustOffset, desired);
@@ -281,7 +281,7 @@ namespace Ked.Presentation.Tests.UnityParity
             foreach (RectTransform rect in _rigSpaceRoot.GetComponentsInChildren<RectTransform>(true))
             {
                 Assert.That(rect.hasChanged, Is.False,
-                    $"'{rect.name}'에 썼다 — depth/place 계산은 아무것도 쓰지 않아야 한다");
+                    $"'{rect.name}'에 썼다 — 계산은 아무것도 쓰지 않아야 한다");
             }
         }
 

@@ -182,31 +182,71 @@ public sealed partial class StageCommandParser
         });
     }
 
-    private void EnqueueSetPlaceResetSpecs(string roleKey, string durationToken)
-    {
-        float duration = YarnDurationParser.Parse(durationToken);
+    // ── 슬롯의 자리 · 포커스 (docs/PLAN_rig-layers.md §4) ──────────────
+    // 코어 폴드(StageReducer.Placement)가 접는 노드와 같아야 "재생 = 정지 프레임"이 유지된다.
 
-        var slotOffsetSpec = new MoveByCommandSpecCharR
+    // move_reset — move_by가 쓰는 그 노드(Track)를 0으로. 포커스는 focus_reset이 걷는다.
+    private void EnqueueMoveResetSpec(string roleKey, string durationToken)
+        => Emit(new MoveByCommandSpecCharR
         {
             roleKey = roleKey,
             node = CharacterRigNode.CharSlot_Track,
             useAbsolutePosition = true,
-            delta = new Vector2(0, 0),
-            duration = duration
-        };
+            delta = Vector2.zero,
+            duration = YarnDurationParser.Parse(durationToken)
+        });
 
-        var spec2 = new MoveByCommandSpecCharR
+    // place — 슬롯의 본래 자리를 절대값으로. move_by(상대)와 같은 노드다.
+    private void EnqueuePlaceSpec(string roleKey, string xToken, string yToken, string durationToken, string easeToken)
+        => EmitAbsoluteMove(roleKey, CharacterRigNode.CharSlot_Track, xToken, yToken, durationToken, easeToken);
+
+    // focus_move — 대화할 때만 서는 자리(포커스 계층의 맨 위). 0 0이 본래 자리다.
+    private void EnqueueFocusMoveSpec(string roleKey, string xToken, string yToken, string durationToken, string easeToken)
+        => EmitAbsoluteMove(roleKey, CharacterRigNode.CharFocus_Track, xToken, yToken, durationToken, easeToken);
+
+    // focus_rotate — 발밑을 중심으로 기운다. 0이 본래 각도다.
+    private void EnqueueFocusRotateSpec(string roleKey, float degree, string durationToken, string easeToken)
+        => Emit(new RotateToCommandSpecCharR
         {
             roleKey = roleKey,
-            node = CharacterRigNode.CharFocus_Track,
-            useAbsolutePosition = true,
-            delta = new Vector2(0, 0),
-            duration = duration
-        };
+            node = CharacterRigNode.CharFocus_Rotation,
+            toEuler = new Vector3(0f, 0f, degree),
+            relativeToCurrent = false,
+            duration = YarnDurationParser.Parse(durationToken),
+            ease = YarnEaseParser.Parse(easeToken)
+        });
 
-        Emit(slotOffsetSpec);
-        Emit(spec2);
+    // focus_scale — 발밑을 중심으로 커진다. 1이 본래 크기다.
+    private void EnqueueFocusScaleSpec(string roleKey, float scale, string durationToken, string easeToken)
+        => Emit(new ScaleToCommandSpecCharR
+        {
+            roleKey = roleKey,
+            node = CharacterRigNode.CharFocus_Scale,
+            toScale = new Vector2(scale, scale),
+            relativeToCurrent = false,
+            duration = YarnDurationParser.Parse(durationToken),
+            ease = YarnEaseParser.Parse(easeToken)
+        });
+
+    // focus_reset — 포커스의 셋을 함께 본래대로. 노드가 셋이라 스펙도 셋이다(한 노드에 트윈 하나).
+    private void EnqueueFocusResetSpec(string roleKey, string durationToken, string easeToken)
+    {
+        EnqueueFocusMoveSpec(roleKey, "0u", "0u", durationToken, easeToken);
+        EnqueueFocusRotateSpec(roleKey, 0f, durationToken, easeToken);
+        EnqueueFocusScaleSpec(roleKey, 1f, durationToken, easeToken);
     }
+
+    private void EmitAbsoluteMove(
+        string roleKey, CharacterRigNode node, string xToken, string yToken, string durationToken, string easeToken)
+        => Emit(new MoveByCommandSpecCharR
+        {
+            roleKey = roleKey,
+            node = node,
+            useAbsolutePosition = true,
+            delta = new Vector2(ParseSignedUnit(xToken), ParseSignedUnit(yToken)),
+            duration = YarnDurationParser.Parse(durationToken),
+            ease = YarnEaseParser.Parse(easeToken)
+        });
 
     private void EnqueueCharacterSiblingFrontSpec(string roleKey)
         => Emit(new SetCharacterSiblingOrderCommandSpecCharR

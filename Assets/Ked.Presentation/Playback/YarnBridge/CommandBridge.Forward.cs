@@ -38,7 +38,7 @@ public sealed partial class YarnCommandBridge
     private void EnqueueRotateBySpec(string roleKey = null, string degree = null, string durationToken = null, string easeToken = null)
         => Forward("rotate_by", roleKey, degree, durationToken, easeToken);
 
-    private void EnqueueSetPlaceResetSpecs(string roleKey = null, string durationToken = null)
+    private void EnqueueMoveResetSpec(string roleKey = null, string durationToken = null)
         => Forward("move_reset", roleKey, durationToken);
 
     private void EnqueueRotateResetSpec(string roleKey = null, string durationToken = null, string easeToken = null)
@@ -53,9 +53,6 @@ public sealed partial class YarnCommandBridge
     private void EnqueueCharacterSiblingBackSpec(string roleKey = null)
         => Forward("sibling_back", roleKey);
 
-    private void EnqueueShotFocusToSpec(string roleKey = null, string focusName = null, string screenPointName = null, string zoom = null, string durationToken = null, string easeToken = null)
-        => Forward("shot_focus_to", roleKey, focusName, screenPointName, zoom, durationToken, easeToken);
-
     private void EnqueueShotZoomSpec(string zoom = null, string durationToken = null, string easeToken = null)
         => Forward("shot_zoom", zoom, durationToken, easeToken);
 
@@ -64,6 +61,9 @@ public sealed partial class YarnCommandBridge
 
     private void EnqueueShotPanSpec(string xToken = null, string yToken = null, string durationToken = null, string easeToken = null)
         => Forward("shot_pan", xToken, yToken, durationToken, easeToken);
+
+    private void EnqueueShotFocusSpec(string xToken = null, string yToken = null, string durationToken = null, string easeToken = null)
+        => Forward("shot_focus", xToken, yToken, durationToken, easeToken);
 
     private void EnqueueShotRollSpec(string degrees = null, string durationToken = null, string easeToken = null)
         => Forward("shot_roll", degrees, durationToken, easeToken);
@@ -80,20 +80,24 @@ public sealed partial class YarnCommandBridge
     private void EnqueueShotShakeSpec(string shakeName = null, string intensity = null)
         => Forward("shot_shake", shakeName, intensity);
 
-    private void EnqueuePlaceCharacterFocusSpec(string roleKey = null, string focus = null, string screenPoint = null, string durationToken = null, string easeToken = null)
-        => Forward("place", roleKey, focus, screenPoint, durationToken, easeToken);
+    private void EnqueuePlaceSpec(string roleKey = null, string xToken = null, string yToken = null, string durationToken = null, string easeToken = null)
+        => Forward("place", roleKey, xToken, yToken, durationToken, easeToken);
 
-    private void EnqueueFocusToLeftSpec(string roleKey = null, string focus = null, string durationToken = null, string easeToken = null)
-        => Forward("place_left", roleKey, focus, durationToken, easeToken);
+    private void EnqueueFocusMoveSpec(string roleKey = null, string xToken = null, string yToken = null, string durationToken = null, string easeToken = null)
+        => Forward("focus_move", roleKey, xToken, yToken, durationToken, easeToken);
 
-    private void EnqueueFocusToCenterSpec(string roleKey = null, string focus = null, string durationToken = null, string easeToken = null)
-        => Forward("place_center", roleKey, focus, durationToken, easeToken);
+    private void EnqueueFocusRotateSpec(string roleKey = null, string degree = null, string durationToken = null, string easeToken = null)
+        => Forward("focus_rotate", roleKey, degree, durationToken, easeToken);
 
-    private void EnqueueFocusToRightSpec(string roleKey = null, string focus = null, string durationToken = null, string easeToken = null)
-        => Forward("place_right", roleKey, focus, durationToken, easeToken);
+    private void EnqueueFocusScaleSpec(string roleKey = null, string scale = null, string durationToken = null, string easeToken = null)
+        => Forward("focus_scale", roleKey, scale, durationToken, easeToken);
 
-    private void EnqueueDepthAtPresetSpec(string roleKey = null, string depthArg = null, string preserveFocusArg = null, string durationToken = null, string easeToken = null)
-        => Forward("size", roleKey, depthArg, preserveFocusArg, durationToken, easeToken);
+    private void EnqueueFocusResetSpec(string roleKey = null, string durationToken = null, string easeToken = null)
+        => Forward("focus_reset", roleKey, durationToken, easeToken);
+
+    // 셋째 칸은 keep_y이거나 길이다 — 뜻은 파서 표가 정한다(SizeToken).
+    private void EnqueueDepthAtPresetSpec(string roleKey = null, string depthArg = null, string third = null, string fourth = null, string fifth = null)
+        => Forward("size", roleKey, depthArg, third, fourth, fifth);
 
     private void EnqueueDepthResetSpec(string roleKey = null, string duration = null, string easeToken = null)
         => Forward("size_reset", roleKey, duration, easeToken);
@@ -237,10 +241,10 @@ public sealed partial class YarnCommandBridge
         => Forward("screen_noise_clear", durationToken);
 
     private void EnqueueDepthFocusOnSpec(string roleKey = null, string maxBlur = null, string durationToken = null)
-        => Forward("focus_on", roleKey, maxBlur, durationToken);
+        => Forward("depth_focus_on", roleKey, maxBlur, durationToken);
 
     private void EnqueueDepthFocusClearSpec(string durationToken = null)
-        => Forward("focus_clear", durationToken);
+        => Forward("depth_focus_clear", durationToken);
 
     private void EnqueueLayerBlurSpec(string layerKey = null, string amount = null, string stageKey = null)
         => Forward("stage_blur", layerKey, amount, stageKey);

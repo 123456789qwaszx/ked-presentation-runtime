@@ -34,12 +34,15 @@ public class StageCommandParserTests
     }
 
     // 인자 하나를 이름에 박아 다시 부르는 이름은 없다.
-    // 예외: place_left·center·right 셋, char_visual_<효과> 일곱.
+    // 예외: char_visual_<효과> 일곱.
     [TestCase("slot01")]
     [TestCase("bg_slot01")]
     [TestCase("stage_blur_s1")]
     [TestCase("place_tl")]
     [TestCase("place_inner_br")]
+    [TestCase("place_left")]
+    [TestCase("place_center")]
+    [TestCase("place_right")]
     [TestCase("size_close")]
     [TestCase("stage_mask_daze_in")]
     [TestCase("stage_mask_hstrip_open")]
@@ -57,9 +60,6 @@ public class StageCommandParserTests
         Assert.IsFalse(StageCommandParser.Knows("char_to_s1"));
     }
 
-    [TestCase("place_left")]
-    [TestCase("place_center")]
-    [TestCase("place_right")]
     [TestCase("char_visual")]
     [TestCase("char_visual_focus")]
     [TestCase("char_visual_defocus")]
@@ -120,29 +120,152 @@ public class StageCommandParserTests
         Assert.AreEqual(YarnCommandTextExtractor.IsWaitingCommand(tokens[0]), waits, line);
     }
 
-    [TestCase("tl", ScreenFocusPoint.TopLeft)]
-    [TestCase("bottom", ScreenFocusPoint.Bottom)]
-    [TestCase("inner_tl", ScreenFocusPoint.ThirdsUpperLeft)]
-    [TestCase("inner_br", ScreenFocusPoint.ThirdsLowerRight)]
-    public void place는_셋째_인자로_화면_지점을_받는다_코어와_같은_이름(string point, ScreenFocusPoint expected)
+    [TestCase("show")]
+    [TestCase("shot_to")]
+    [TestCase("shot_focus_to")]
+    [TestCase("left")]
+    [TestCase("right")]
+    [TestCase("up")]
+    [TestCase("down")]
+    [TestCase("scale_by")]
+    [TestCase("scale_reset")]
+    [TestCase("focus_on")]
+    [TestCase("focus_clear")]
+    public void 걷은_이름은_모른다(string name)
     {
-        // 옛 place_tl · place_inner_tl … 은 이 인자로 내려왔다. 코어 ScreenPointRatios의 이름과 같아야
-        // 재생과 정지 프레임이 같은 자리를 본다(inner_tl을 런타임만 모르면 조용히 가운데로 간다).
-        PlaceCharacterFocusCommandSpecCharR place =
-            (PlaceCharacterFocusCommandSpecCharR)Parse(NewParser(), Cmd("place", "c1", "face", point))[0];
-
-        Assert.AreEqual(expected, place.screenPoint);
+        // 무대를 읽어 값을 푸는 것 · 이름 하나가 여럿을 내는 것은 커맨드가 아니다. 노드와 함께 사라진 커맨드도 있다.
+        // 블러의 초점은 depth_focus_on · depth_focus_clear로 이름을 바꿨다(docs/PLAN_rig-layers.md §4).
+        Assert.IsFalse(StageCommandParser.Knows(name));
     }
 
     [Test]
-    public void place의_모르는_화면_지점은_경고하고_가운데로()
+    public void size는_깊이와_길이만_받는다()
     {
-        LogAssert.Expect(LogType.Warning, new Regex("화면 지점 'nowhere'을 모른다"));
+        // 셋째 칸은 길이다 — 보존할 초점을 받던 칸은 걷었다. 무대를 재지 않고 레벨의 값을 그대로 놓는다.
+        SetDepthCommandSpecCharR size = (SetDepthCommandSpecCharR)Parse(NewParser(), Cmd("size", "c1", "14", "30fr", "InOutCubic"))[0];
 
-        PlaceCharacterFocusCommandSpecCharR place =
-            (PlaceCharacterFocusCommandSpecCharR)Parse(NewParser(), Cmd("place", "c1", "face", "nowhere"))[0];
+        Assert.IsTrue(size.useLevel);
+        Assert.IsFalse(size.useScale);
+        Assert.IsFalse(size.keepY);
+        Assert.AreEqual(14f, size.level, 1e-6f);
+        Assert.AreEqual(1f, size.duration, 1e-6f, "30fr = 1초");
+        Assert.AreEqual(DG.Tweening.Ease.InOutCubic, size.ease);
+        Assert.AreEqual(CharacterRigNode.CharacterPortrait_DepthOffset, size.depthYNode);
+        Assert.AreEqual(CharacterRigNode.CharacterPortrait_DepthScale, size.depthScaleNode);
+    }
 
-        Assert.AreEqual(ScreenFocusPoint.Center, place.screenPoint);
+    [Test]
+    public void size의_셋째_칸이_keep_y면_길이는_그_뒤다()
+    {
+        SetDepthCommandSpecCharR size = (SetDepthCommandSpecCharR)Parse(NewParser(), Cmd("size", "c1", "front", "keep_y", "30fr", "OutCubic"))[0];
+
+        Assert.IsTrue(size.keepY);
+        Assert.IsFalse(size.useLevel);
+        Assert.AreEqual(CharacterDepthKey.Front, size.preset);
+        Assert.AreEqual(1f, size.duration, 1e-6f);
+        Assert.AreEqual(DG.Tweening.Ease.OutCubic, size.ease);
+    }
+
+    [Test]
+    public void size는_x배율을_직접_받는다()
+    {
+        SetDepthCommandSpecCharR size = (SetDepthCommandSpecCharR)Parse(NewParser(), Cmd("size", "c1", "x1.04", "15fr"))[0];
+
+        Assert.IsTrue(size.useScale);
+        Assert.AreEqual(1.04f, size.scale, 1e-6f);
+        Assert.IsFalse(size.keepY, "x배율은 keep_y 없이도 Y를 건드리지 않는다 — 실행 커맨드가 정한다");
+        Assert.AreEqual(0.5f, size.duration, 1e-6f);
+    }
+
+    [Test]
+    public void place와_focus_move는_제_노드를_절대값으로_놓는다()
+    {
+        MoveByCommandSpecCharR place = (MoveByCommandSpecCharR)Parse(NewParser(), Cmd("place", "c1", "-3u", "1.5u", "24fr", "OutBack"))[0];
+
+        Assert.AreEqual(CharacterRigNode.CharSlot_Track, place.node);
+        Assert.IsTrue(place.useAbsolutePosition);
+        Assert.AreEqual(new Vector2(-120f, 60f), place.delta);
+        Assert.AreEqual(0.8f, place.duration, 1e-6f);
+        Assert.AreEqual(DG.Tweening.Ease.OutBack, place.ease);
+
+        MoveByCommandSpecCharR focus = (MoveByCommandSpecCharR)Parse(NewParser(), Cmd("focus_move", "c1", "2u", "-1u"))[0];
+
+        Assert.AreEqual(CharacterRigNode.CharFocus_Track, focus.node);
+        Assert.IsTrue(focus.useAbsolutePosition);
+        Assert.AreEqual(new Vector2(80f, -40f), focus.delta);
+        Assert.AreEqual(0.4f, focus.duration, 1e-6f, "생략 0.4s — move_by와 같다");
+    }
+
+    [Test]
+    public void focus_rotate와_focus_scale은_제_노드를_절대값으로_놓는다()
+    {
+        RotateToCommandSpecCharR rotate = (RotateToCommandSpecCharR)Parse(NewParser(), Cmd("focus_rotate", "c1", "8"))[0];
+
+        Assert.AreEqual(CharacterRigNode.CharFocus_Rotation, rotate.node);
+        Assert.IsFalse(rotate.relativeToCurrent);
+        Assert.AreEqual(8f, rotate.toEuler.z, 1e-6f);
+
+        ScaleToCommandSpecCharR scale = (ScaleToCommandSpecCharR)Parse(NewParser(), Cmd("focus_scale", "c1", "1.25", "12fr"))[0];
+
+        Assert.AreEqual(CharacterRigNode.CharFocus_Scale, scale.node);
+        Assert.IsFalse(scale.relativeToCurrent);
+        Assert.AreEqual(new Vector2(1.25f, 1.25f), scale.toScale);
+    }
+
+    [Test]
+    public void focus_reset은_포커스의_셋을_본래대로_놓는다()
+    {
+        List<CommandSpecBase> specs = Parse(NewParser(), Cmd("focus_reset", "c1", "8fr"));
+
+        Assert.AreEqual(3, specs.Count, "노드가 셋 — 한 노드에 트윈 하나");
+
+        MoveByCommandSpecCharR move = (MoveByCommandSpecCharR)specs[0];
+        Assert.AreEqual(CharacterRigNode.CharFocus_Track, move.node);
+        Assert.IsTrue(move.useAbsolutePosition);
+        Assert.AreEqual(Vector2.zero, move.delta);
+
+        RotateToCommandSpecCharR rotate = (RotateToCommandSpecCharR)specs[1];
+        Assert.AreEqual(CharacterRigNode.CharFocus_Rotation, rotate.node);
+        Assert.AreEqual(Vector3.zero, rotate.toEuler);
+
+        ScaleToCommandSpecCharR scale = (ScaleToCommandSpecCharR)specs[2];
+        Assert.AreEqual(CharacterRigNode.CharFocus_Scale, scale.node);
+        Assert.AreEqual(Vector2.one, scale.toScale);
+
+        foreach (CommandSpecBase spec in specs)
+        {
+            Assert.AreEqual("c1", ((CharacterRigCommandSpecBase)spec).roleKey);
+            Assert.AreEqual(8f / 30f, Duration(spec), 1e-6f, "8fr");
+        }
+    }
+
+    private static float Duration(CommandSpecBase spec) => spec switch
+    {
+        MoveByCommandSpecCharR m => m.duration,
+        RotateToCommandSpecCharR r => r.duration,
+        ScaleToCommandSpecCharR s => s.duration,
+        _ => -1f,
+    };
+
+    [Test]
+    public void depth_focus_on은_블러의_초점이다()
+    {
+        Assert.IsTrue(StageCommandParser.Knows("depth_focus_on"));
+        Assert.IsTrue(StageCommandParser.Knows("depth_focus_clear"));
+        Assert.IsInstanceOf<DepthFocusCommandSpecCharR>(Parse(NewParser(), Cmd("depth_focus_on", "c1"))[0]);
+    }
+
+    [Test]
+    public void move_reset은_move_by가_쓰는_노드_하나를_0으로_놓는다()
+    {
+        List<CommandSpecBase> specs = Parse(NewParser(), Cmd("move_reset", "c1", "12fr"));
+
+        Assert.AreEqual(1, specs.Count);
+
+        MoveByCommandSpecCharR reset = (MoveByCommandSpecCharR)specs[0];
+        Assert.AreEqual(CharacterRigNode.CharSlot_Track, reset.node);
+        Assert.IsTrue(reset.useAbsolutePosition);
+        Assert.AreEqual(Vector2.zero, reset.delta);
     }
 
     [Test]
@@ -436,6 +559,8 @@ public class StageCommandParserTests
         Assert.AreEqual(4f, ((ShotDollyCommandSpec)Parse(parser, Cmd("shot_dolly", "4"))[0]).dolly, 1e-6f);
         Assert.AreEqual(-8f, ((ShotRollCommandSpec)Parse(parser, Cmd("shot_roll", "-8"))[0]).roll, 1e-6f);
 
+        Assert.AreEqual(new Vector2(240f, 40f), ((ShotFocusCommandSpec)Parse(parser, Cmd("shot_focus", "6u", "1u"))[0]).focus);
+
         ShotPanCommandSpec timed = (ShotPanCommandSpec)Parse(parser, Cmd("shot_pan", "-2u", "1u", "30fr"))[0];
         Assert.AreEqual(new Vector2(-80f, 40f), timed.pan);
         Assert.AreEqual(1f, timed.duration, 1e-6f, "30fr = 1초");
@@ -462,6 +587,7 @@ public class StageCommandParserTests
             Cmd("shot_zoom"),
             Cmd("shot_zoom", "abc"),
             Cmd("shot_pan", "1u"),
+            Cmd("shot_focus", "1u"),
             Cmd("shot_track"),
             Cmd("shot_dolly"),
             Cmd("shot_roll", "x"),

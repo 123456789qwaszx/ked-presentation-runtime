@@ -128,8 +128,7 @@ public static class CharacterFocusPointResolver
     /// <summary>
     /// focus 측정에 필요한 두 입력: 측정 노드와 그 로컬 오프셋.
     ///
-    /// 이 수식이 사는 유일한 자리다 — depth 보정(CharacterDepthResolver)과
-    /// 배치 해(CharacterFocusPlacementSolver)도 여기를 부른다. 사본을 만들지 말 것.
+    /// 이 수식이 사는 유일한 자리다 — 사본을 만들지 말 것.
     /// </summary>
     public static void ResolveFocusMeasureInputs(
         CharacterRigRefs rigRefs,

@@ -9,7 +9,7 @@ namespace Ked.Presentation.Core
     // - 순수 함수다: 시간·랜덤·IO·전역 상태 없음.
     //   현재 상태가 필요하면 인자로 명시해서 받는다(트랜스폼을 읽지 않는다).
     // - 출력은 NodeTarget — 호스트는 게시·트윈 종점으로 쓰고, 리듀서는 트리에 접는다.
-    // - 무대 상태를 읽고 실패 사유를 낼 수 있는 것은 Try로 시작한다(TryPlaceFocus 등).
+    // - 무대 상태를 읽고 실패 사유를 낼 수 있는 것은 Try로 시작한다(TrySetDepth 등).
     //
     // 경계(호스트에 남는 것): CommandBase(코루틴 호스트)·ResolveRefs·DOKill·
     // 트윈 실행·Commit의 트랜스폼 쓰기·HasClaimedTarget 수명 관리.

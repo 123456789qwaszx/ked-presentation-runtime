@@ -77,7 +77,7 @@ public sealed class SetupCharRigCommand : CommandBase
         string rolePrefix = spec.ResolvedRolePrefix;
 
         // 배경 = 캐스팅하지 않은 슬롯. 배역이 남으면 `fade_in harin`이 배경을 페이드하고
-        // focus_on이 배경을 초점면에 넣는다. 코어 StageReducer.Background도 같은 자리에서 배역을 푼다.
+        // depth_focus_on이 배경을 초점면에 넣는다. 코어 StageReducer.Background도 같은 자리에서 배역을 푼다.
         if (spec.asBackground && _stage.castRegistry.TryPeekCharacter(rigKey, out string castCharacter))
         {
             Debug.LogWarning(

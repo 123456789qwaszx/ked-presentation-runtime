@@ -111,7 +111,7 @@ far 레이어에 이미지 한 장을 높이 맞춤으로 깔고·갈아 끼우�
 | `bg_sprite` | `CharacterPortraitSprite_Image` — 종횡비는 초상 DB가 아니라 `background-dimensions.json`, 레이캐스트는 끈다 |
 
 캐릭터와 다른 점은 둘이다(세우는 방식은 같다 — 숨은 채 서고 `bg_fade_in`으로 들인다).
-- 배역이 없다 — 그래서 배역 기반 축(`focus_on`)이 배경을 건너뛴다. 배경이 배역 있는 슬롯을 덮으면 배역을 풀고 경고한다.
+- 배역이 없다 — 그래서 배역 기반 축(`depth_focus_on`)이 배경을 건너뛴다. 배경이 배역 있는 슬롯을 덮으면 배역을 풀고 경고한다.
 - 이미지가 클릭을 받지 않는다(화면 전체를 덮으므로).
 
 재선언(같은 키로 다시 세우기)은 캐릭터와 같다: 새 리그를 숨긴 채 세우고 옛 리그를 부순다 — 그림만 바꾸는 것은 `bg_sprite`다.
@@ -213,7 +213,7 @@ CharacterRigSchema.Nodes            코드      ← 유일한 소유자
 ### 3.2 전체 계층과 커맨드 대응
 
 ```
-CharSlot_Track_Focus          place 계열          ← 슬롯 축 (무대 배치)
+CharSlot_Track_Focus          (쓰는 명령 없음)    ← place 계열이 쓰던 축 — 2026-11-21에 걷었다
  └ CharSlot_DepthY            size 계열 (Y 오프셋)
     └ CharSlot_DepthScale     size 계열 (배율)      [bottom pivot]
        └ CharSlot_Track_Idle  (idle 연출)
@@ -303,6 +303,10 @@ CharSlot_Track_Focus          place 계열          ← 슬롯 축 (무대 배�
 
 ## 4. Depth를 위에 둔 대가 — `Track_Focus`가 밖에 있는 이유
 
+> 2026-11-21: `place` 계열 · `shot_focus_to`를 걷었다(`docs/PLAN_command-prune.md`). `Track_Focus`는 리그에 남아 있지만 쓰는 명령이 없다 — 자리는 `CharSlot_Track`(`move_by`)에 적는다.
+> `Track`은 `DepthScale` **아래**라서 적힌 이동이 깊이 배율만큼 곱해져 보인다(mid에서 `move_by 1u` = 화면 1.708u).
+> 도구의 보조 버튼이 화면 지점에서 거꾸로 풀어 주는 까닭이 이것이다. 아래는 이 축을 둔 까닭의 기록이다.
+
 원근이 계층에서 공짜로 나오는데, **공짜가 아닌 곳이 하나 있다.**
 
 `CharSlot_Track_Focus`가 `DepthY`/`DepthScale`보다 **위**에 있다. `place` 계열은
@@ -312,8 +316,10 @@ CharSlot_Track_Focus          place 계열          ← 슬롯 축 (무대 배�
 그래서 focus 축만 계층 밖으로 빼고, **depth 보정을 수식이 지게 했다.** 그 대가가:
 
 * `SettledFocusMath.SolveFocusPlacement` — 계층이 안 해주는 보정을 손으로
-* `SetDepth`의 "focus 보존" 경로 — 깊이가 변해도 focus 지점을 유지
 * `CharacterRigRefs.SettledDepthScale` — 트윈이 도는 중에도 "끝나면 어느 배율인가"
+
+`size`는 이 보정을 하지 않는다(2026-11-21) — 깊이 레벨의 Y와 배율을 그대로 놓는다. 크기를 바꾸며 어느 지점을
+제자리에 두려면 자리 명령으로 따로 적는다(`docs/PLAN_command-prune.md` P3).
 
 마지막 것이 특히 이 대가의 증거다. 트윈 중에는 현재 스케일이 계속 변하므로, 착란원
 계산이 현재값을 읽으면 매 프레임 흔들린다. **정지 프레임의 배율을 따로 들고 있어야** 한다.

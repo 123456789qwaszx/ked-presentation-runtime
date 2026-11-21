@@ -176,7 +176,7 @@ namespace Ked.Presentation.Tests
             StageState state = Fold(Cmd("bg_spawn", "bg_main", "class_day"));
 
             Assert.That(state.TryGetCharacter("bg_main", out _), Is.False,
-                "배경 = 캐스팅하지 않은 슬롯. 배역 기반 축(focus_on 등)이 여기서 갈린다");
+                "배경 = 캐스팅하지 않은 슬롯. 배역 기반 축(depth_focus_on 등)이 여기서 갈린다");
         }
 
         // ── 사이징 ───────────────────────────────────────────────────
@@ -358,7 +358,7 @@ namespace Ked.Presentation.Tests
         public void 배경이_배역_있는_슬롯을_덮으면_배역을_푼다()
         {
             // 배경 = 캐스팅하지 않은 슬롯. 배역이 남으면 fade_in harin이 배경을 페이드하고
-            // focus_on이 배경을 초점면에 넣는다. 런타임도 같은 자리에서 배역을 풀고 경고한다.
+            // depth_focus_on이 배경을 초점면에 넣는다. 런타임도 같은 자리에서 배역을 풀고 경고한다.
             StageState state = Fold(
                 Cmd("slot", "s1"),
                 Cmd("cast", "s1", "tyrant"),

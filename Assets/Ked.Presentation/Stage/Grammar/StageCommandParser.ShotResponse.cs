@@ -4,37 +4,16 @@ using UnityEngine;
 
 public sealed partial class StageCommandParser
 {
-    // shot 계열도 place·size와 같은 모양이다: 마지막 위치 인자가 이징이고,
+    // shot 계열도 size와 같은 모양이다: 마지막 위치 인자가 이징이고,
     // 미지정이면 스펙 기본값(OutCubic). 해석은 YarnEaseParser 한 자리를 함께 쓴다.
     //
-    // 어휘: shot_<축>은 그 축 하나를 절대값으로 놓는다(줌 · 팬 · 롤 · 달리 · 트랙). 묶음은 shot_focus_to(줌 + 팬을 풀어서)
-    // 하나뿐이고, 되돌리기는 shot_reset(렌즈만) · shot_reset_all(통째로)이다. 줌과 팬을 함께 놓으려면 둘을 나란히 적는다 —
-    // 전환이 축마다 따로라 서로 덮지 않는다.
+    // 어휘: shot_<축>은 그 축 하나를 절대값으로 놓는다(줌 · 팬 · 초점 · 롤 · 달리 · 트랙). 묶음은 없다 — 여러 축을 함께 놓으려면
+    // 나란히 적는다(전환이 축마다 따로라 서로 덮지 않는다). 되돌리기는 shot_reset(렌즈만) · shot_reset_all(통째로)이다.
+    // 인물의 초점을 화면 지점에 오게 하는 렌즈는 도구가 풀어서 shot_focus · shot_zoom · shot_pan으로 적는다(코어 ShotIntents.FocusTo).
     // shot_shake는 축이 아니다 — 구도 위에 얹혔다가 0으로 돌아오는 흔들림 클립을 튼다.
     //
     // 값 인자에는 생략값이 없다. 빠졌거나 읽지 못하면 소리 내고 아무것도 내지 않는다 — 대신 갈 뜻 있는 값이 없다
     // (motion의 모르는 이름과 같다). 코어 폴드도 같은 줄을 Unhandled로 남긴다. 생략할 수 있는 것은 길이 · 이징뿐이다.
-
-    private void EnqueueShotFocusToSpec(string roleKey, string focusName, string screenPointName, float zoom, string durationToken, string easeToken)
-    {
-        CharacterFocusPresetParser.TryParse(focusName, out CharacterFocusPreset focusPreset);
-
-        ScreenFocusPoint screenPoint = ParseScreenPoint("shot_focus_to", screenPointName);
-
-        Ease ease = YarnEaseParser.Parse(easeToken);
-
-        var spec = new ShotFocusToCommandSpec
-        {
-            focusRoleKey = roleKey,
-            focusPreset = focusPreset,
-            screenPoint = screenPoint,
-            zoom = zoom,
-            duration = YarnDurationParser.Parse(durationToken),
-            ease = ease,
-        };
-
-        Emit(spec);
-    }
 
     private void EnqueueShotZoomSpec(StageCommand c, string zoomToken, string durationToken, string easeToken)
     {
@@ -57,6 +36,20 @@ public sealed partial class StageCommandParser
         Emit(new ShotPanCommandSpec
         {
             pan = pan,
+            duration = YarnDurationParser.Parse(durationToken),
+            ease = YarnEaseParser.Parse(easeToken),
+        });
+    }
+
+    // shot_focus(x, y, dur, ease) — 렌즈의 초점(무대 좌표). 줌할 때 앞 · 뒤 층이 벌어지는 쪽의 기준이다.
+    private void EnqueueShotFocusSpec(StageCommand c, string xToken, string yToken, string durationToken, string easeToken)
+    {
+        if (!TryShotUnits(c, xToken, yToken, out Vector2 focus))
+            return;
+
+        Emit(new ShotFocusCommandSpec
+        {
+            focus = focus,
             duration = YarnDurationParser.Parse(durationToken),
             ease = YarnEaseParser.Parse(easeToken),
         });

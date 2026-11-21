@@ -22,7 +22,7 @@ namespace Ked.Presentation.Tests
         private static readonly RectSpace Space = RectSpace.Centered(1920f, 1080f);
 
         // 캐릭터 리그 모양의 체인.
-        //   0 Track_Focus (place의 이동 축)
+        //   0 이동 축     (초점을 화면 지점에 놓을 때 옮기는 노드 — 이 체인에서는 맨 위)
         //   1 DepthY      (size의 위치 축)
         //   2 DepthScale  (size의 배율 축, 바닥 pivot)
         //   3 Scale       (바닥 pivot)
@@ -86,13 +86,13 @@ namespace Ked.Presentation.Tests
             AssertVec2(scaled, new Vec2(0f, 1100f), "배율 2");
         }
 
-        // ── place: 명중 ──────────────────────────────────────────────
+        // ── 초점을 화면 지점에: 명중 ─────────────────────────────────
 
         [Test]
         public void 푼_배치를_적용하면_focus가_원하는_지점에_온다()
         {
             RectNodeState[] chain = RigChain(movePosition: new Vec2(37f, -12f));
-            Vec2 desired = new(-460.8f, 120f);   // place_left 상당 (1920 * 0.24)
+            Vec2 desired = new(-460.8f, 120f);   // 왼쪽 지점 상당 (1920 * 0.24)
 
             Vec2 solved = SettledFocusMath.SolveFocusPlacement(
                 chain, Space, MoveIndex, BustOffset, desired,
@@ -105,7 +105,7 @@ namespace Ked.Presentation.Tests
             AssertVec2(
                 SettledFocusMath.FocusPointInRigSpace(applied, Space, BustOffset),
                 desired,
-                "place 명중");
+                "화면 지점 명중");
         }
 
         [Test]

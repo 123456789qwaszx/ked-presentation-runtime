@@ -30,7 +30,7 @@ public sealed class ScreenFocusGridOverlay : MonoBehaviour
     private Texture2D _pixel;
     private GUIStyle _labelStyle;
 
-    // ScreenFocusPointResolver와 반드시 같은 값으로 유지.
+    // 코어 ScreenPointRatios와 반드시 같은 값으로 유지.
     // Outer: 9-point focus zone
     // Inner: thirds 계열 보조 focus zone
     private const float OuterXRatio = 0.24f;

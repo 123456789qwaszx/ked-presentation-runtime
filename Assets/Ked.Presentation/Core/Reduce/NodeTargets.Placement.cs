@@ -3,11 +3,10 @@ using System.Collections.Generic;
 namespace Ked.Presentation.Core
 {
     /// <summary>
-    /// 화면 지점 프리셋의 rig-space 좌표 (호스트 ScreenFocusPointResolver의 비율 규약).
+    /// 화면 지점 프리셋의 rig-space 좌표. 초점을 무대 지점에 놓는 값을 도구가 풀 때 쓴다(NodeTargets.TrySolveFocusPlacement).
     ///
-    /// 주의: 이 비율은 게임별 값이므로 원칙적으로는 tuning 데이터가 맞다
-    /// (target-boundary.md 백로그). 지금은 호스트에도 같은 상수가 있어 두 곳이다 —
-    /// 연출 기준값 덤프에 screen-focus-points.json을 추가할 때 여기를 지운다.
+    /// 주의: 이 비율은 게임별 값이므로 원칙적으로는 tuning 데이터가 맞다(target-boundary.md 백로그).
+    /// 같은 값을 눈금으로 그리는 곳이 하나 있다(Samples의 ScreenFocusGridOverlay) — 함께 고친다.
     /// </summary>
     public static class ScreenPointRatios
     {
@@ -52,8 +51,8 @@ namespace Ked.Presentation.Core
     /// focus 로컬 오프셋 해석 — 런타임 CharacterFocusTuningDBSO.ResolveOffset과 같은 합:
     ///   base[preset] + entry(character).defaultOffset + entry.offsets[preset] + 커맨드 오프셋
     ///
-    /// 주의: facing 미러 축은 아직 폴드에 없다(기본 Right = 항등).
-    /// mirror 커맨드를 쓰는 장면은 불일치로 드러난다 — 그때 facing 축을 폴드에 올린다.
+    /// 주의: 좌우 반전(mirror)은 폴드에 없다 — 뒤집힌 인물의 초점은 호출부가 오프셋의 x를 뒤집어 넘긴다
+    /// (NodeTargets.TrySolveFocusPlacement의 오프셋을 받는 꼴).
     /// </summary>
     public static class FocusOffsetMath
     {
@@ -83,29 +82,43 @@ namespace Ked.Presentation.Core
 
     public static partial class NodeTargets
     {
-        /// <summary>측정 사슬의 끝 — place·size가 focus를 재는 노드.</summary>
+        // ── 리그의 세 덩어리가 받는 커맨드의 표적 노드 (docs/PLAN_rig-layers.md §3 · §4) ──
+
+        /// <summary>포커스 — 대화할 때만 서는 자리. focus_move · focus_rotate · focus_scale이 절대값으로 놓는다.</summary>
+        public const string FocusTrackNodeId = "CharFocus_Track";
+        public const string FocusRotationNodeId = "CharFocus_Rotation";
+        public const string FocusScaleNodeId = "CharFocus_Scale";
+
+        /// <summary>슬롯 — 무대 위의 본래 자리. place(절대) · move_by(상대) · slide가 쓴다.</summary>
+        public const string SlotTrackNodeId = "CharSlot_Track";
+
+        /// <summary>초상의 깊이 — 그 사람의 크기. size가 놓는다.</summary>
+        public const string DepthOffsetNodeId = "CharacterPortrait_DepthOffset";
+        public const string DepthScaleNodeId = "CharacterPortrait_DepthScale";
+
+        /// <summary>초점(가슴 · 얼굴 점)을 재는 노드 — 깊이 아래다. 크기를 바꾸면 초점도 따라온다.</summary>
         public const string FocusMeasureNodeId = "CharacterPortrait_VisualOffset";
 
-        // ── place ────────────────────────────────────────
+        // ── 초점을 무대 지점에 놓는 값 — 도구의 보조 계산 ───────────────────
         //
-        // place 계열 — focus 지점을 무대 지점으로 보내는 이동 축(Track_Focus) 목표.
+        // 커맨드가 아니다(docs/PLAN_rig-layers.md L11). 대본에는 풀린 값이 적힌다 — place 슬롯 x y(본래 자리) 이거나
+        // focus_move 슬롯 x y(대화할 때만 서는 자리). 그 값을 내는 순수 함수가 이것이고, 부르는 쪽은 저작 도구다.
         // 무대 지점은 카메라가 중립일 때 그 화면 지점과 겹치는 무대 위 자리다. 이 노드 트리에는 카메라 ·
-        // 깊이 층 프레이밍 노드가 없다 — 그것이 곧 카메라 중립이고, 런타임도 배치를 같은 중립으로 푼다(IStageViewNeutral).
+        // 깊이 층 프레이밍 노드가 없다 — 그것이 곧 카메라 중립이다.
 
-        /// <summary>스펙 기본 moveTarget (브리지: CharacterRigNode.CharFocus_Track).</summary>
-        public const string PlaceFocusMoveNodeId = "CharFocus_Track";
-
-        public static bool TryPlaceFocus(
+        /// <param name="moveNodeId">값을 풀 이동 노드 — SlotTrackNodeId(place) 또는 FocusTrackNodeId(focus_move).</param>
+        public static bool TrySolveFocusPlacement(
             StageState state,
             string slotKey,
             string characterKey,
             string focusPresetName,
             string screenPointName,
             FocusTuningBodyDto focusTuning,
-            out NodeTarget target,
+            string moveNodeId,
+            out Vec2 anchoredPosition,
             out string reason)
         {
-            target = default;
+            anchoredPosition = Vec2.Zero;
 
             if (!ScreenPointRatios.TryResolve(state.Nodes.RootSpace.Size, screenPointName, out Vec2 desired))
             {
@@ -115,8 +128,23 @@ namespace Ked.Presentation.Core
 
             Vec2 focusOffset = FocusOffsetMath.Resolve(focusTuning, characterKey, focusPresetName, Vec2.Zero);
 
+            return TrySolveFocusPlacement(state, slotKey, focusOffset, desired, moveNodeId, out anchoredPosition, out reason);
+        }
+
+        /// <summary>초점의 로컬 오프셋과 무대 지점을 값으로 받는 꼴 — 좌우 반전처럼 호출부가 오프셋을 손본 뒤 부를 때.</summary>
+        public static bool TrySolveFocusPlacement(
+            StageState state,
+            string slotKey,
+            Vec2 focusLocalOffset,
+            Vec2 desiredInRigSpace,
+            string moveNodeId,
+            out Vec2 anchoredPosition,
+            out string reason)
+        {
+            anchoredPosition = Vec2.Zero;
+
             string measureKey = StageState.NodeKeyOf(slotKey, FocusMeasureNodeId);
-            string moveKey = StageState.NodeKeyOf(slotKey, PlaceFocusMoveNodeId);
+            string moveKey = StageState.NodeKeyOf(slotKey, moveNodeId);
 
             List<string> chainKeys = new();
             RectNodeState[] chain = state.Nodes.BuildChainTo(measureKey, chainKeys);
@@ -129,48 +157,49 @@ namespace Ked.Presentation.Core
                 return false;
             }
 
-            Vec2 solved = SettledFocusMath.SolveFocusPlacement(
+            anchoredPosition = SettledFocusMath.SolveFocusPlacement(
                 chain,
                 state.Nodes.RootSpace,
                 moveIndex,
-                focusOffset,
-                desired,
+                focusLocalOffset,
+                desiredInRigSpace,
                 state.Nodes.GetState(moveKey).AnchoredPosition);
 
-            target = NodeTarget.AnchoredPosition(moveKey, solved);
             reason = null;
             return true;
         }
 
         // ── size (depth) ────────────────────────────────────────
         //
-        // size 계열 — depth 프리셋 적용(focus 보존 보정 포함). DepthY 위치 + DepthScale 배율 두 장.
+        // size — 그 사람의 크기. 깊이의 Y(DepthOffset)와 배율(DepthScale)을 놓는다. 무대를 재지 않는다 —
+        // 커브가 낸 값(또는 적힌 배율)이 곧 목표다. 깊이는 초상만 곱한다: 슬롯의 자리(place · move_by)는 그대로다.
 
-        public const string DepthYNodeId = "CharacterPortrait_DepthOffset";
-        public const string DepthScaleNodeId = "CharacterPortrait_DepthScale";
-
-        /// <param name="preserveFocusToken">
-        /// 보존할 focus 프리셋 토큰. **항상 커맨드 인자에서 온다**(브리지 기본값 "bust").
-        ///
-        /// 덤프의 preset.preserveFocusPreset / preserveFocusOffset은 쓰지 않는다 —
-        /// 런타임 CharacterDepthResolver.ResolveRawDepth가 프리셋 값을 읽은 직후
-        /// 커맨드 인자로 무조건 덮어쓰기 때문이다(그 두 필드는 런타임에서 사장 데이터다).
-        /// 프리셋 값을 폴백으로 쓰면 재생과 갈라진다.
-        /// </param>
+        /// <param name="depthToken">레벨(숫자) · 라벨 · x배율(SizeToken).</param>
+        /// <param name="keepY">true면 Y를 지금 값 그대로 둔다(타깃을 내지 않는다). x배율은 늘 Y를 건드리지 않는다.</param>
+        /// <param name="movesY">Y 타깃을 냈는가 — false면 depthOffsetTarget은 쓰지 않는다.</param>
         public static bool TrySetDepth(
-            StageState state,
             string slotKey,
-            string characterKey,
             string depthToken,
-            string preserveFocusToken,
+            bool keepY,
             DepthLevelTuningDto depthLevel,
-            FocusTuningBodyDto focusTuning,
-            out NodeTarget depthYTarget,
+            out bool movesY,
+            out NodeTarget depthOffsetTarget,
             out NodeTarget depthScaleTarget,
             out string reason)
         {
-            depthYTarget = default;
+            movesY = false;
+            depthOffsetTarget = default;
             depthScaleTarget = default;
+
+            string scaleKey = StageState.NodeKeyOf(slotKey, DepthScaleNodeId);
+
+            // 배율을 직접 — 레벨이 없어 Y의 근거가 없다. 배율만 놓는다.
+            if (SizeToken.TryParseScale(depthToken, out float scale))
+            {
+                depthScaleTarget = NodeTarget.LocalScaleXY(scaleKey, new Vec2(scale, scale));
+                reason = null;
+                return true;
+            }
 
             // 깊이의 진실은 level 커브 하나다. 토큰은 숫자이거나 라벨이고,
             // 라벨은 커브 위에서 쓸 수치를 고르는 이름표일 뿐이다(DepthLevelLabels).
@@ -178,7 +207,7 @@ namespace Ked.Presentation.Core
             if (!NumberToken.TryParseFloat(depthToken, out float level) &&
                 !DepthLevelLabels.TryGetLevel(depthToken, out level))
             {
-                reason = $"depth 토큰 '{depthToken}'을 모른다 (숫자 레벨도, 라벨도 아니다)";
+                reason = $"depth 토큰 '{depthToken}'을 모른다 (숫자 레벨도, 라벨도, x배율도 아니다)";
                 return false;
             }
 
@@ -189,49 +218,14 @@ namespace Ked.Presentation.Core
                 return false;
             }
 
-            Vec2 rawDepthYSource = new(0f, levelY);
-            float depthScaleSource = levelScale;
-
-            if (!FocusPresetName.TryNormalizeToken(preserveFocusToken, out string preserveName))
+            if (!keepY)
             {
-                reason = $"focus 프리셋 토큰 '{preserveFocusToken}'을 모른다";
-                return false;
+                movesY = true;
+                depthOffsetTarget = NodeTarget.AnchoredPosition(
+                    StageState.NodeKeyOf(slotKey, DepthOffsetNodeId), new Vec2(0f, levelY));
             }
 
-            // 커맨드 오프셋은 0이다 — yarn 경로의 spec.focusOffset이 기본값이고,
-            // 런타임이 preserveFocusOffset을 그 값으로 덮어쓴다.
-            Vec2 focusOffset = FocusOffsetMath.Resolve(focusTuning, characterKey, preserveName, Vec2.Zero);
-
-            string measureKey = StageState.NodeKeyOf(slotKey, FocusMeasureNodeId);
-            string depthYKey = StageState.NodeKeyOf(slotKey, DepthYNodeId);
-            string depthScaleKey = StageState.NodeKeyOf(slotKey, DepthScaleNodeId);
-
-            List<string> chainKeys = new();
-            RectNodeState[] chain = state.Nodes.BuildChainTo(measureKey, chainKeys);
-
-            int depthYIndex = chainKeys.IndexOf(depthYKey);
-            int depthScaleIndex = chainKeys.IndexOf(depthScaleKey);
-
-            if (depthYIndex < 0 || depthScaleIndex < 0)
-            {
-                reason = "depth 축이 측정 체인에 없다";
-                return false;
-            }
-
-            Vec2 rawDepthY = rawDepthYSource;
-            Vec2 targetScale = new(depthScaleSource, depthScaleSource);
-
-            Vec2 solvedDepthY = SettledFocusMath.SolveDepthYPreservingFocus(
-                chain,
-                state.Nodes.RootSpace,
-                depthYIndex,
-                depthScaleIndex,
-                focusOffset,
-                rawDepthY,
-                targetScale);
-
-            depthYTarget = NodeTarget.AnchoredPosition(depthYKey, solvedDepthY);
-            depthScaleTarget = NodeTarget.LocalScaleXY(depthScaleKey, targetScale);
+            depthScaleTarget = NodeTarget.LocalScaleXY(scaleKey, new Vec2(levelScale, levelScale));
             reason = null;
             return true;
         }

@@ -63,10 +63,6 @@ public sealed class CommandRoleGate
             case CastCharacterCommandSpec cast:
                 roleKey = cast.roleKey;
                 return true;
-
-            case ShotFocusToCommandSpec shotFocus:
-                roleKey = shotFocus.focusRoleKey;
-                return true;
         }
 
         roleKey = null;
