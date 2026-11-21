@@ -151,28 +151,5 @@ namespace Ked.Presentation.Tests
             Assert.That(reason, Does.Contain("유효하지 않다"));
             Assert.That(wide.TryGetSize("tyrant", "a", "01", out _, out _), Is.False);
         }
-
-        // ── show의 faceToken 별칭 ────────────────────────────────────
-
-        [TestCase("e1", "1")]
-        [TestCase("E2", "2")]
-        [TestCase("emo3", "3")]
-        [TestCase("emotion4", "4")]
-        [TestCase("face5", "5")]
-        [TestCase("6", "6")]
-        public void faceToken은_별칭_접두사를_벗는다(string token, string expected)
-        {
-            Assert.That(PortraitKeyNormalizer.ParseShowFaceAlias(token), Is.EqualTo(expected));
-        }
-
-        [Test]
-        public void 빈_faceToken은_2다()
-        {
-            // 생략된 인자의 기본값("e1")과는 다른 규칙이다 — 런타임 ShowFaceAliasParser 그대로.
-            // 다만 원문 추출기가 빈 토큰을 버리므로 폴드에서 이 갈래는 닿지 않는다
-            // (target-boundary.md의 알려진 한계).
-            Assert.That(PortraitKeyNormalizer.ParseShowFaceAlias(""), Is.EqualTo("2"));
-            Assert.That(PortraitKeyNormalizer.ParseShowFaceAlias(null), Is.EqualTo("2"));
-        }
     }
 }

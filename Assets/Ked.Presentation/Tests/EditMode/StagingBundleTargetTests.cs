@@ -87,10 +87,10 @@ namespace Ked.Presentation.Tests
         }
 
         [Test]
-        public void show가_되돌리는_축과_rotate_by의_축이_다르다()
+        public void cast가_되돌리는_축과_rotate_by의_축이_다르다()
         {
-            // 런타임 실동작이다. set_anchor/show의 오일러 리셋 목록은 CharSlot_Rotation이고
-            // rotate_by의 표적은 CharSlot_SwayPivot이라, show는 rotate_by를 되돌리지 않는다.
+            // 런타임 실동작이다. cast가 내는 set_anchor의 오일러 리셋 목록은 CharSlot_Rotation이고
+            // rotate_by의 표적은 CharSlot_SwayPivot이라, cast는 rotate_by를 되돌리지 않는다.
             // 리듀서도 이 동작을 그대로 따라야 하므로 여기 못 박아 둔다.
             RectNodeTree tree = new(RectSpace.Centered(1000f, 500f));
             tree.Add("CharSlot_Rotation", null, RectNodeState.StretchFull);
@@ -101,21 +101,21 @@ namespace Ked.Presentation.Tests
                 .RotateTo("CharSlot_SwayPivot", new NodeTargets.RotateToArgs(true, new Vec3(0f, 0f, 30f)), Vec3.Zero)
                 .ApplyTo(tree);
 
-            // show 상당: 오일러 리셋 목록에 SwayPivot이 없다.
-            NodeTarget[] showTargets = NodeTargets.SetAnchor(
+            // set_anchor 상당: 오일러 리셋 목록에 SwayPivot이 없다.
+            NodeTarget[] anchorTargets = NodeTargets.SetAnchor(
                 "CharSlot_SwayPivot",
                 NodeTargets.RoleAnchorTuning.Default,
                 resetPositionKeys: null,
                 resetEulerKeys: new[] { "CharSlot_Rotation" },
                 resetScaleKeys: null);
 
-            foreach (NodeTarget target in showTargets)
+            foreach (NodeTarget target in anchorTargets)
                 target.ApplyTo(tree);
 
             Assert.That(
                 tree.GetState("CharSlot_SwayPivot").LocalEulerAngles.Z,
                 Is.EqualTo(30f).Within(Eps),
-                "show는 SwayPivot의 회전을 되돌리지 않는다");
+                "cast는 SwayPivot의 회전을 되돌리지 않는다");
         }
     }
 }

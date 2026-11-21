@@ -216,9 +216,9 @@ public class StageCommandParserTests
         Assert.AreEqual(CharacterRigNode.CharacterPortrait_ActingScale, scale.node);
         Assert.AreEqual(0.86f / CutInPresetDBSO.PanelPictureResolution, scale.toScale.x, 1e-6f, "판 그림은 캔버스의 2배 해상도");
 
-        FadeCommandSpecCharR show = (FadeCommandSpecCharR)specs[4];
-        Assert.AreEqual(1f, show.targetAlpha);
-        Assert.AreEqual(0f, show.duration);
+        FadeCommandSpecCharR appear = (FadeCommandSpecCharR)specs[4];
+        Assert.AreEqual(1f, appear.targetAlpha);
+        Assert.AreEqual(0f, appear.duration);
 
         Assert.IsInstanceOf<CutInOpenCommandSpec>(specs[5], "창은 판 다음");
     }
@@ -402,17 +402,15 @@ public class StageCommandParserTests
     [Test]
     public void 한_커맨드가_스펙_여럿으로_풀린다()
     {
-        // show = 앵커 리셋 · 초상 · 리그 페이드 · 초상 페이드, 이 순서.
-        List<CommandSpecBase> specs = Parse(NewParser(), Cmd("show", "c1"));
+        // cast = 배역 · 포즈 · 표정 · 앵커 리셋, 이 순서.
+        List<CommandSpecBase> specs = Parse(NewParser(), Cmd("cast", "c1", "tyrant"));
 
         Assert.AreEqual(4, specs.Count);
-        Assert.IsInstanceOf<SetAnchorCommandSpecCharR>(specs[0]);
-        Assert.IsInstanceOf<SetPortraitSpriteCommandSpecCharR>(specs[1]);
-        Assert.IsInstanceOf<FadeCommandSpecCharR>(specs[2]);
-        Assert.IsInstanceOf<FadeCommandSpecCharR>(specs[3]);
-        Assert.AreEqual(CharacterRigNode.RigRoot, ((FadeCommandSpecCharR)specs[2]).node);
-        Assert.AreEqual(CharacterRigNode.CharacterPortraitSprite_Root, ((FadeCommandSpecCharR)specs[3]).node);
-        Assert.AreEqual(NodeTargets.FadeInAlpha, ((FadeCommandSpecCharR)specs[2]).targetAlpha, "show는 끝까지 나타난다");
+        Assert.IsInstanceOf<CastCharacterCommandSpec>(specs[0]);
+        Assert.IsInstanceOf<SetPortraitPoseCommandSpecCharR>(specs[1]);
+        Assert.IsInstanceOf<SetPortraitSpriteCommandSpecCharR>(specs[2]);
+        Assert.IsInstanceOf<SetAnchorCommandSpecCharR>(specs[3]);
+        Assert.IsTrue(((SetAnchorCommandSpecCharR)specs[3]).resetSlotPos, "cast는 자리 축을 되돌린다");
     }
 
     [Test]

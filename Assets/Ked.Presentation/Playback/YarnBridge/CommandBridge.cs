@@ -11,7 +11,7 @@ public sealed partial class YarnCommandBridge
     private readonly CommandRoleGate _roleGate;
     private readonly DialogueBoxPresentationController _dialogueBoxPresentation;
 
-    // Forward가 쓰는 스크래치 — 커맨드 하나가 스펙 여럿을 낳는다(show·cast·bg_spawn).
+    // Forward가 쓰는 스크래치 — 커맨드 하나가 스펙 여럿을 낳는다(cast·bg_spawn).
     private readonly List<CommandSpecBase> _parsed = new();
 
     public YarnCommandBridge(
@@ -170,10 +170,6 @@ public sealed partial class YarnCommandBridge
     
     private void RegisterCharRigPlacementCommands(DialogueRunner runner)
     {
-        // Show
-        runner.AddCommandHandler<string, string, string>(
-            "show", EnqueueShowAtSpec);
-        
         // Nudge
         runner.AddCommandHandler<string, string, string, string>(
             "left", EnqueueNudgeLeftSpec);

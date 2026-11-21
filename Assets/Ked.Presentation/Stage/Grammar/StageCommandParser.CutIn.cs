@@ -12,7 +12,7 @@ using UnityEngine;
 ///
 /// x y는 판 중심 — 무대 중심 기준 u(bg_move와 같은 단위, 1u = 40px). 판은 Resources/CutInPanels의 키.
 /// 본 무대(stage00)에는 쓰지 않는다 — 경고하고 건너뛴다(폴드는 Unhandled).
-/// 창 안의 인물은 일반 슬롯이다: slot c1 stage01 mid → show · size · place → cutin_open.
+/// 창 안의 인물은 일반 슬롯이다: slot c1 stage01 mid → cast · fade_in → cutin_open.
 ///
 /// 판 그림은 배경처럼 그 무대의 far 층에 서는 리그다 — 무대 안이라 마스크가 판까지 함께 자른다(docs/PLAN_stage-visibility.md §3.2).
 /// 슬롯 키는 CutInPanelSlotKey(무대)로 정해져 있다. 닫아도 남는다(마스크가 숨긴다) — 다음 cutin_open이 다시 세우고,

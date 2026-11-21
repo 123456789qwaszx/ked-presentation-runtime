@@ -89,9 +89,6 @@ public sealed partial class YarnCommandBridge
     private void EnqueueShotShakeSpec(string shakeName = null, string intensity = null)
         => Forward("shot_shake", shakeName, intensity);
 
-    private void EnqueueShowAtSpec(string roleKey = null, string faceToken = null, string durationToken = null)
-        => Forward("show", roleKey, faceToken, durationToken);
-
     private void EnqueueNudgeLeftSpec(string roleKey = null, string unitToken = null, string durationToken = null, string easeToken = null)
         => Forward("left", roleKey, unitToken, durationToken, easeToken);
 

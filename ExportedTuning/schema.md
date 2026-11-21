@@ -200,7 +200,7 @@ faceAura (0, 950) · handLeft (−80, 0) · handRight (80, 0). 엔트리 6건.
 
 ### `role-anchor.json` — `RoleAnchorTuningDBSO`
 
-`cast` / `show` / `set_anchor`가 캐릭터를 역할 기본 자리에 세울 때 쓰는 값(`cast`는 런타임 파서가 SetAnchor까지 팬아웃한다).
+`cast`가 캐릭터를 역할 기본 자리에 세울 때 쓰는 값(런타임 파서가 `cast`를 SetAnchor까지 팬아웃한다).
 키는 캐릭터 키 하나다 — 대소문자를 가리지 않고, 같은 키가 둘이면 나중 것이 이긴다. 변형은 키에 들어가지 않는다.
 
 초상은 원본 픽셀 크기 그대로 그리므로(§4) `visualScale`이 곧 **캔버스 px ÷ 그림 px**다. `offset`은

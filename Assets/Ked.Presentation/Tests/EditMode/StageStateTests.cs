@@ -20,10 +20,10 @@ namespace Ked.Presentation.Tests
         public void Arg는_범위_밖과_빈_값에_fallback을_준다()
         {
             // yarn의 생략 인자가 빈 문자열로 오는 경우가 있다 — 둘을 같이 다뤄야 한다.
-            StageCommand cmd = Cmd("show", "c1", "");
+            StageCommand cmd = Cmd("face", "c1", "");
 
             Assert.That(cmd.Arg(0), Is.EqualTo("c1"));
-            Assert.That(cmd.Arg(1, "e1"), Is.EqualTo("e1"), "빈 문자열은 fallback");
+            Assert.That(cmd.Arg(1, "1"), Is.EqualTo("1"), "빈 문자열은 fallback");
             Assert.That(cmd.Arg(9, "기본"), Is.EqualTo("기본"), "범위 밖은 fallback");
             Assert.That(cmd.Arg(9), Is.Null);
             Assert.That(cmd.Arg(-1, "기본"), Is.EqualTo("기본"));

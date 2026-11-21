@@ -1,15 +1,14 @@
 namespace Ked.Presentation.Core
 {
     /// <summary>
-    /// show · fade — 등장과 가시성.
+    /// 역할 앵커 · fade — 인물이 서는 자리와 가시성.
     ///
-    /// show는 한 커맨드가 아니라 묶음이다: 축 리셋 + 역할 앵커 + 가시성 두 장.
-    /// 축 리셋 + 역할 앵커(ApplyRoleAnchor)는 cast도 같이 쓴다 — 런타임 파서가 cast를 SetAnchor까지 팬아웃한다.
+    /// 축 리셋 + 역할 앵커(ApplyRoleAnchor)는 cast가 쓴다 — 런타임 파서가 cast를 SetAnchor까지 팬아웃한다.
     /// 리셋 목록은 리그 스키마 지식이라 목표 계산이 아니라 여기가 갖는다.
     /// </summary>
     public static partial class StageReducer
     {
-        // SetAnchorCommandCharR의 리셋 목록(두 플래그 모두 켜진 경로 — show와 cast가 같이 쓴다).
+        // SetAnchorCommandCharR의 리셋 목록(두 플래그 모두 켜진 경로 — cast가 쓴다).
         private static readonly string[] SetAnchorResetPositionIds =
         {
             "CharSlot_Track", "CharSlot_Track_X", "CharSlot_Track_Y",
@@ -20,7 +19,7 @@ namespace Ked.Presentation.Core
 
         private static readonly string[] SetAnchorResetEulerIds =
         {
-            // CharSlot_SwayPivot은 목록에 없다 — rotate_by의 표적인데 show가 되돌리지
+            // CharSlot_SwayPivot은 목록에 없다 — rotate_by의 표적인데 cast가 되돌리지
             // 않는 것이 런타임 실동작이다(StagingBundleTargetTests가 고정).
             "CharSlot_Rotation",
             "CharacterPortrait_Rotation", "CharacterPortrait_SwayPivot", "CharacterPortrait_Shake",
@@ -33,31 +32,9 @@ namespace Ked.Presentation.Core
             "CharacterPortrait_ActingScale", "CharacterPortrait_ActingScale_X", "CharacterPortrait_ActingScale_Y",
         };
 
-        private static bool ApplyShow(
-            StageState state, in StageCommand cmd, StageReducerTuning tuning, out string reason)
-        {
-            if (!TryGetSpawnedSlot(state, cmd, out string slotKey, out reason))
-                return false;
-
-            ApplyRoleAnchor(state, cmd, slotKey, tuning);
-
-            // 초상 사이징. faceToken의 기본값은 "e1"(생략된 인자)이고,
-            // **명시적으로 빈 토큰은 "2"다** — 다른 규칙이라 별칭 파서가 나눠 본다.
-            string emotionKey = PortraitKeyNormalizer.ParseShowFaceAlias(cmd.Arg(1, "e1"));
-
-            if (!ApplyPortraitSizing(state, slotKey, emotionKey, tuning, out string sizingReason))
-                state.AddUnhandled(cmd, sizingReason);
-
-            // 가시성 두 장: 리그 루트 + 초상 스프라이트 루트.
-            state.Apply(NodeTargets.FadeIn(StageState.NodeKeyOf(slotKey, RigSchemaLoader.RootKey)));
-            state.Apply(NodeTargets.FadeIn(StageState.NodeKeyOf(slotKey, "CharacterPortraitSprite_Root")));
-
-            return true;
-        }
-
         /// <summary>
         /// 축 리셋 + 역할 앵커 — 런타임 SetAnchorCommandCharR(두 리셋 플래그 모두 켜짐) 그대로.
-        /// show와 cast가 같이 쓴다: 런타임 파서가 cast를 배역 → pose → face → SetAnchor로 팬아웃한다
+        /// cast가 쓴다: 런타임 파서가 cast를 배역 → pose → face → SetAnchor로 팬아웃한다
         /// (StageCommandParser.CharRigSetup.EnqueueCastCharacterSpec).
         /// </summary>
         private static void ApplyRoleAnchor(

@@ -5,7 +5,7 @@ namespace Ked.Presentation.Core
 {
     public static partial class NodeTargets
     {
-        // ── set_anchor / show ────────────────────────────────────────
+        // ── set_anchor(cast가 낸다) ──────────────────────────────────
         //
         // 캐릭터를 역할 기본 자리에 세우고 연기 축들을 초기화한다.
         // 리셋 대상 노드 목록은 리그 스키마 지식이므로 코드에 박지 않고 인자로 받는다 —

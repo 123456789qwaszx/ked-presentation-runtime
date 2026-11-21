@@ -153,7 +153,7 @@ stage_mask는 **보이는 범위만** 맡는다. 샷의 뜻(줌하며 열리기 
 
 ```
 <<slot c1_cut stage01 mid>>                   인서트 리그를 덮는 무대에 새로
-<<show c1_cut …>>  <<size …>>  <<place …>>    내용은 열기 전에 확정한다
+<<cast c1_cut …>>  <<fade_in c1_cut 0s>>     내용은 열기 전에 확정한다
 <<stage_mask slant_in stage01>>                       연다
 …
 <<stage_mask slant_out stage01>>                      닫는다

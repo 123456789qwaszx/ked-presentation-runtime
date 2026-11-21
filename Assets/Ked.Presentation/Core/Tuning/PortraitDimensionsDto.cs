@@ -162,33 +162,6 @@ namespace Ked.Presentation.Core
             return "";
         }
 
-        /// <summary>
-        /// show의 faceToken → 표정 인자. `e1`·`emo2`·`emotion3`·`face4`의 접두사를 벗긴다.
-        /// **빈 토큰은 "2"다** — 생략된 인자의 기본값("e1")과는 다른 규칙이니 헷갈리지 말 것.
-        /// (런타임 ShowFaceAliasParser와 같다)
-        /// </summary>
-        public static string ParseShowFaceAlias(string token)
-        {
-            if (string.IsNullOrWhiteSpace(token))
-                return "2";
-
-            string s = token.Trim().ToLowerInvariant();
-
-            if (s.StartsWith("emotion", StringComparison.Ordinal))
-                return s.Substring("emotion".Length);
-
-            if (s.StartsWith("emo", StringComparison.Ordinal))
-                return s.Substring("emo".Length);
-
-            if (s.StartsWith("face", StringComparison.Ordinal))
-                return s.Substring("face".Length);
-
-            if (s.StartsWith("e", StringComparison.Ordinal))
-                return s.Substring(1);
-
-            return token.Trim();
-        }
-
         private static bool IsAsciiDigit(char c) => c >= '0' && c <= '9';
     }
 }
