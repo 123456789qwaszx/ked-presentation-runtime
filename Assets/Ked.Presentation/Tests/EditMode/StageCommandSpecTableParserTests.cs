@@ -147,6 +147,17 @@ public sealed class StageCommandSpecTableParserTests
         Assert.That(size.Args[2].Choices, Is.EqualTo(new[] { SizeToken.KeepY }));
     }
 
+    [Test]
+    public void pause를_적지_않았을_때의_길이가_줄_읽기와_같다()
+    {
+        // 파서 표에는 pause의 생략값이 없다 — 핸들러가 제 값으로 간다. 줄 읽기(지연의 셈)가 같은 값을 써야 한다.
+        List<CommandSpecBase> output = new();
+        Assert.That(new StageCommandParser(null).TryParse(new StageCommand("pause", Array.Empty<string>()), output), Is.True);
+
+        Assert.That(output, Has.Count.EqualTo(1));
+        Assert.That(((WaitCommandSpec)output[0]).duration, Is.EqualTo(YarnLineReader.DefaultPauseSeconds).Within(1e-6f));
+    }
+
     // ── 표의 원문을 읽는다 ──────────────────────────────────────────────────────────
 
     private readonly struct TableDefault

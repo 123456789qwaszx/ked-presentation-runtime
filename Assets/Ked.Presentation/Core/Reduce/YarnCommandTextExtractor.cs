@@ -584,13 +584,13 @@ namespace Ked.Presentation.Core
             return tokens;
         }
 
-        private static string StripComment(string line)
+        internal static string StripComment(string line)
         {
             int index = line.IndexOf("//", StringComparison.Ordinal);
             return index < 0 ? line : line.Substring(0, index);
         }
 
-        private static string StripTags(string line, out string lineId)
+        internal static string StripTags(string line, out string lineId)
         {
             lineId = null;
 
