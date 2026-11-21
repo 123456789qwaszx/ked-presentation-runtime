@@ -92,20 +92,6 @@ namespace Ked.Presentation.Core
             return true;
         }
 
-        private static bool ApplyShotTo(
-            StageState state, in StageCommand cmd, StageReducerTuning tuning, out string reason)
-        {
-            // 파서 표: shot_to(zoom, x, y, duration="0.45s", ease).
-            if (!TryReadNumber(cmd, 0, "zoom", out float zoom, out reason) ||
-                !TryReadUnits(cmd, 1, tuning, out Vec2 pan, out reason))
-            {
-                return false;
-            }
-
-            state.Shot = ShotIntents.To(state.Shot, zoom, pan);
-            return true;
-        }
-
         private static bool ApplyShotTrack(
             StageState state, in StageCommand cmd, StageReducerTuning tuning, out string reason)
         {

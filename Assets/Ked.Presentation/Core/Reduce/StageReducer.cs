@@ -207,10 +207,9 @@ namespace Ked.Presentation.Core
                 // motion — 채널마다 마지막 키가 타깃이다. 샘플링하지 않는다(MotionMath.TargetFor).
                 case "motion": return ApplyMotion(state, cmd, tuning, out reason);
 
-                // shot — 축마다 하나(shot_<축>)와 묶음 둘(shot_to · shot_focus_to), 되돌리기 둘.
+                // shot — 축마다 하나(shot_<축>)와 묶음 하나(shot_focus_to), 되돌리기 둘.
                 case "shot_zoom":  return ApplyShotZoom(state, cmd, out reason);
                 case "shot_pan":   return ApplyShotPan(state, cmd, tuning, out reason);
-                case "shot_to":    return ApplyShotTo(state, cmd, tuning, out reason);
                 case "shot_track": return ApplyShotTrack(state, cmd, tuning, out reason);
                 case "shot_dolly": return ApplyShotDolly(state, cmd, out reason);
                 case "shot_roll":  return ApplyShotRoll(state, cmd, out reason);

@@ -17,9 +17,6 @@ namespace Ked.Presentation.Core
         public static ShotIntentState Pan(in ShotIntentState from, Vec2 pan)
             => from.WithLens(from.Zoom, pan, from.FocusPointInRigSpace);
 
-        // shot_to - 줌과 팬을 절대값으로.
-        public static ShotIntentState To(in ShotIntentState from, float zoom, Vec2 pan)
-            => from.WithLens(zoom, pan, from.FocusPointInRigSpace);
 
         // shot_track - 카메라가 서는 자리를 절대값으로. mid 면의 그 무대 점이 화면 가운데에 온다.
         public static ShotIntentState Track(in ShotIntentState from, Vec2 track)

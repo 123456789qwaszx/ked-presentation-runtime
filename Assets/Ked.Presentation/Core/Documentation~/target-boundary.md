@@ -189,7 +189,7 @@ yarn 4묶음 기준. "이관 안 함"은 **조용히 버린 것이 아니라 판
 
 ### shot
 
-`shot_to` · `shot_zoom` · `shot_pan` · `shot_track` · `shot_dolly` · `shot_roll` · `shot_reset` · `shot_reset_all` · `shot_focus_to` 전부(2026-11-17 — 종전 5종).
+`shot_zoom` · `shot_pan` · `shot_track` · `shot_dolly` · `shot_roll` · `shot_reset` · `shot_reset_all` · `shot_focus_to` 전부(2026-11-17 — 종전 5종).
 `shot_<축>`은 그 축 하나를 절대값으로 놓고 나머지는 그대로 둔다 — `ShotIntents`의 함수가 전부 `from`을 받아 제 축만 바꾼다. 상대값 명령은 없다.
 `ShotIntentMath`가 zoom · dolly→배율 규약(0.05)의 유일한 자리다 — 커맨드와 적용측이 같이 본다.
 

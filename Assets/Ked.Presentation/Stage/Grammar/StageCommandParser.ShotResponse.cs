@@ -7,8 +7,9 @@ public sealed partial class StageCommandParser
     // shot 계열도 place·size와 같은 모양이다: 마지막 위치 인자가 이징이고,
     // 미지정이면 스펙 기본값(OutCubic). 해석은 YarnEaseParser 한 자리를 함께 쓴다.
     //
-    // 어휘: shot_<축>은 그 축 하나를 절대값으로 놓는다(줌 · 팬 · 롤 · 달리 · 트랙). 묶음은 shot_to(줌 + 팬)와
-    // shot_focus_to(줌 + 팬을 풀어서) 둘뿐이고, 되돌리기는 shot_reset(렌즈만) · shot_reset_all(통째로)이다.
+    // 어휘: shot_<축>은 그 축 하나를 절대값으로 놓는다(줌 · 팬 · 롤 · 달리 · 트랙). 묶음은 shot_focus_to(줌 + 팬을 풀어서)
+    // 하나뿐이고, 되돌리기는 shot_reset(렌즈만) · shot_reset_all(통째로)이다. 줌과 팬을 함께 놓으려면 둘을 나란히 적는다 —
+    // 전환이 축마다 따로라 서로 덮지 않는다.
     // shot_shake는 축이 아니다 — 구도 위에 얹혔다가 0으로 돌아오는 흔들림 클립을 튼다.
     //
     // 값 인자에는 생략값이 없다. 빠졌거나 읽지 못하면 소리 내고 아무것도 내지 않는다 — 대신 갈 뜻 있는 값이 없다
@@ -33,20 +34,6 @@ public sealed partial class StageCommandParser
         };
 
         Emit(spec);
-    }
-
-    private void EnqueueShotToSpec(StageCommand c, string zoomToken, string xToken, string yToken, string durationToken, string easeToken)
-    {
-        if (!TryShotNumber(c, zoomToken, "zoom", out float zoom) || !TryShotUnits(c, xToken, yToken, out Vector2 pan))
-            return;
-
-        Emit(new ShotToCommandSpec
-        {
-            zoom = zoom,
-            pan = pan,
-            duration = YarnDurationParser.Parse(durationToken),
-            ease = YarnEaseParser.Parse(easeToken),
-        });
     }
 
     private void EnqueueShotZoomSpec(StageCommand c, string zoomToken, string durationToken, string easeToken)

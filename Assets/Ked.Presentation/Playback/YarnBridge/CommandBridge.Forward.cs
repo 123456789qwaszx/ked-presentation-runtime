@@ -62,9 +62,6 @@ public sealed partial class YarnCommandBridge
     private void EnqueueShotFocusToSpec(string roleKey = null, string focusName = null, string screenPointName = null, string zoom = null, string durationToken = null, string easeToken = null)
         => Forward("shot_focus_to", roleKey, focusName, screenPointName, zoom, durationToken, easeToken);
 
-    private void EnqueueShotToSpec(string zoom = null, string xToken = null, string yToken = null, string durationToken = null, string easeToken = null)
-        => Forward("shot_to", zoom, xToken, yToken, durationToken, easeToken);
-
     private void EnqueueShotZoomSpec(string zoom = null, string durationToken = null, string easeToken = null)
         => Forward("shot_zoom", zoom, durationToken, easeToken);
 

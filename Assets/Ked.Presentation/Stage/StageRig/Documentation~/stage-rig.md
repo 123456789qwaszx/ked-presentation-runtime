@@ -289,7 +289,7 @@ slot / bg_spawn
   CharRigSlotResolver     registry.Get(무대) + EnsureLayer(d)
   리그 루트 → Layer.Content,  CharacterRigRefs.StandOn(무대, 층) — 리그가 사는 동안 그대로
 
-shot_to / shot_zoom / shot_pan / shot_track / shot_dolly / shot_roll / shot_reset(_all) / shot_focus_to
+shot_zoom / shot_pan / shot_track / shot_dolly / shot_roll / shot_reset(_all) / shot_focus_to
   ShotIntentCommandBase   BuildTargetState → 새 intent, Axes → 조준하는 축
   PresentationShotResponseSystem.Follow(intent, axes)
     → 그 축의 트윈이 intent의 제 조각을 보간(D9 · D12) → 한 벌을 통째로 다시 푼다

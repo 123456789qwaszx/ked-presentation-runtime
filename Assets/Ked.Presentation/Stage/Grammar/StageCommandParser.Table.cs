@@ -37,7 +37,6 @@ public sealed partial class StageCommandParser
         ["sibling_back"] = (p, c) => p.EnqueueCharacterSiblingBackSpec(c.Arg(0)),
         // shot — 값 인자(zoom · x · y · n · 도)에는 생략값이 없다. 빠지면 그 줄은 실행하지 않는다(StageCommandParser.ShotResponse).
         ["shot_focus_to"] = (p, c) => p.EnqueueShotFocusToSpec(c.Arg(0), c.Arg(1, "body"), c.Arg(2, "center"), Float(c, 3, 2.5f), c.Arg(4, "1.2s"), c.Arg(5, "")),
-        ["shot_to"] = (p, c) => p.EnqueueShotToSpec(c, c.Arg(0), c.Arg(1), c.Arg(2), c.Arg(3, "0.45s"), c.Arg(4, "")),
         ["shot_zoom"] = (p, c) => p.EnqueueShotZoomSpec(c, c.Arg(0), c.Arg(1, "0.45s"), c.Arg(2, "")),
         ["shot_pan"] = (p, c) => p.EnqueueShotPanSpec(c, c.Arg(0), c.Arg(1), c.Arg(2, "0.45s"), c.Arg(3, "")),
         ["shot_track"] = (p, c) => p.EnqueueShotTrackSpec(c, c.Arg(0), c.Arg(1), c.Arg(2, "0.45s"), c.Arg(3, "")),
