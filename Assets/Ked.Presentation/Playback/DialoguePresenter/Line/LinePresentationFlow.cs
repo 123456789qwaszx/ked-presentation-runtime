@@ -72,7 +72,7 @@ public sealed class LinePresentationFlow
         // 줄에 들어선다 — 앞 줄의 서두르기와 보이스가 끝나고, 글의 표지와 쌓인 <<at>>이 이 줄의 앵커가 된다.
         // 여기서부터 이 줄이 제 연출을 모두 실행한다: 앞 앵커 → start(머리) → 글 표지 → end(docs/PLAN_line-anchor.md §4).
         _stepHead.Enter();
-        _inlineCommands.Begin(ctx.Line.TextWithoutCharacterName);
+        _inlineCommands.Begin(ctx.Line.TextWithoutCharacterName, ctx.Token.HurryUpToken);
 
         // 앞 앵커 — 대사창이 열리기 전. 시크가 지나가는 줄과 시크로 닿은 줄은 기다리지 않고 끝값으로 놓는다(A11).
         // 시크가 살아 있는 동안이라야 명령이 압축된다 — 시크를 끝내기 전에 한다.
@@ -106,7 +106,6 @@ public sealed class LinePresentationFlow
         _lineDisplayState.SetLineAutoAdvance(autoAdvance, autoHold);
 
         // 머리(at 없는 명령) 바로 뒤에 start의 <<at>>. 글 표지 · end는 타자기가 글자 자리에서 연다.
-        _stepHead.ReleaseLineWaits(meta.lineId);
         _stepHead.Play(snap: ctx.IsRapidSkip || seekPassThrough, seekPassThrough: seekPassThrough);
         _inlineCommands.PlayStart();
         SetPhase(ctx, LinePresentationPhase.LineEnteredCommitted);
@@ -166,9 +165,15 @@ public sealed class LinePresentationFlow
             return;
         }
 
-        // 타자기가 닿지 않은 자리 — <<at end>>, 표지를 잃은 것, 글 끝의 표지, 다 보이기 전에 넘어간 줄, 글 칸이 없는 줄.
-        // 넘어간 줄의 끝 상태는 접힘과 같아야 한다. 끊긴 줄(위)은 실행하지 않는다 — 장면을 다시 접는다.
-        _inlineCommands.PlayRemaining();
+        // 타자기가 닿지 않은 앵커 — 글 끝의 표지, end, 표지를 잃은 것, 다 보이기 전에 넘어간 줄, 글 칸이 없는 줄.
+        // 관문(AR3)을 지나 차례로 열고, end의 간격만큼 머문다(AR4). 넘어간 줄은 기다리지 않는다 — 끝 상태는 접힘과 같아야 한다.
+        // 끊긴 줄(위 · 아래)은 실행하지 않는다 — 장면을 다시 접는다.
+        await _inlineCommands.OpenRemainingAsync(ctx.Run, ctx.Token.NextContentToken);
+
+        if (!ctx.Run.IsValid) {
+            await CompleteStaleAfterTypewriterAsync(ctx, waitForAdvance);
+            return;
+        }
 
         // Phase: DisplayCommitted
         _lineDisplayState.MarkLineDisplayCompleted("normal");

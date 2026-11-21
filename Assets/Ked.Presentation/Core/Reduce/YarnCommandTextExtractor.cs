@@ -77,8 +77,8 @@ namespace Ked.Presentation.Core
         public const string PauseCommand = "pause";
 
         /// <summary>
-        /// 기다리는 명령인가 — pause · screen_cover(덮기). 대사 줄의 머리 · 자리에는 쓸 수 없고 무대 스텝에서만 기다린다
-        /// (docs/PLAN_line-beat.md D3 · R8). 재생에서는 무대 파서가 이 둘의 스펙에 wait를 세운다 — 두 목록이 같아야 한다
+        /// 기다리는 명령인가 — pause · screen_cover(덮기). 그 앵커의 뒤 명령을 붙잡고, 다음 앵커는 그것이 끝난 뒤에 열린다
+        /// (docs/PLAN_line-anchor.md A7 · AR3). 재생에서는 무대 파서가 이 둘의 스펙에 wait를 세운다 — 두 목록이 같아야 한다
         /// (EditMode 시험이 맞춰 본다). screen_cover_clear는 기다리지 않는다.
         /// </summary>
         public static bool IsWaitingCommand(string name) => name == PauseCommand || name == "screen_cover";
@@ -341,19 +341,9 @@ namespace Ked.Presentation.Core
                 {
                     group.Anchors.Add(anchor);
 
+                    // 기다리는 명령(pause · screen_cover)은 어느 앵커에서나 쓴다(docs/PLAN_line-anchor.md A7) — 접을 것은 같다.
                     foreach (AtCommand at in anchor.Commands)
-                    {
-                        // 재생은 아직 앞 앵커에서만 기다린다(docs/PLAN_line-anchor.md A7은 N3에서 연다) —
-                        // start의 기다림은 내리고(오류), 글 표지 · end의 것은 실행하지 않는다.
-                        if (anchor.Kind != LineAnchorKind.Pre && IsWaitingCommand(at.Command.Name))
-                        {
-                            warnings?.Add(anchor.Kind == LineAnchorKind.Start
-                                ? $"{at.Command.Source} 대사 줄 머리의 기다리는 명령 {at.Command} — 대사 줄에는 시간이 없다. 줄 앞의 앞 앵커(옛 표기는 <<step>>)에서 기다린다."
-                                : $"{at.Command.Source} {at} — 기다리는 명령은 대사 줄의 자리에 쓸 수 없다(재생은 실행하지 않는다).");
-                        }
-
                         group.Commands.Add(at.Command);
-                    }
                 }
 
                 foreach (string problem in problems)

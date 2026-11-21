@@ -441,13 +441,13 @@ namespace Ked.Presentation.Tests
             Assert.That(YarnCommandTextExtractor.CharacterPrefixLength(plain), Is.EqualTo(length));
         }
 
-        // ── 추출기: 대사 줄에는 시간이 없다 (docs/PLAN_line-beat.md D3 · R8) ─────
+        // ── 추출기: 기다리는 명령은 어느 앵커에서나 (docs/PLAN_line-anchor.md A7 — line-beat D3 · R8을 바꿨다) ─────
 
         [Test]
-        public void 대사_줄_머리의_기다리는_명령은_경고한다()
+        public void 기다리는_명령은_어느_앵커에서나_쓰고_경고하지_않는다()
         {
             const string yarn =
-                "title: Head\n" +
+                "title: Waits\n" +
                 "---\n" +
                 "<<fade_out s1>>\n" +
                 "<<pause 12fr>>\n" +
@@ -456,39 +456,23 @@ namespace Ked.Presentation.Tests
                 "<<screen_cover_clear 0.5s>>\n" +
                 "<<pause 0.3s>>\n" +
                 "<<face s1 02>>\n" +
-                "하린: 여기.\n" +
-                "<<screen_cover>>\n" +
-                "하린: 저기.\n" +
-                "===\n";
-
-            List<string> warnings = new();
-            List<YarnLineGroup> groups = YarnCommandTextExtractor.Extract(yarn, "head.yarn", warnings);
-
-            // 무대 스텝의 pause · screen_cover(4 · 5행)는 된다. 걷기(7행)는 기다리지 않는다.
-            Assert.That(warnings.Count, Is.EqualTo(2), string.Join("\n", warnings));
-            Assert.That(warnings[0], Does.StartWith("head.yarn:8 ").And.Contain("pause"));
-            Assert.That(warnings[1], Does.StartWith("head.yarn:11 ").And.Contain("screen_cover"));
-
-            // 폴드는 그대로 접는다 — pause는 접을 것이 없다.
-            Assert.That(groups[0].Commands.Select(c => c.Name),
-                Is.EqualTo(new[] { "fade_out", "pause", "screen_cover", "screen_cover_clear", "pause", "face" }));
-        }
-
-        [Test]
-        public void 자리의_기다리는_명령은_경고한다()
-        {
-            const string yarn =
-                "title: AtWait\n" +
-                "---\n" +
                 "<<at a pause 1s>>\n" +
+                "<<at a face s1 03>>\n" +
+                "<<at end screen_cover white 0.2s>>\n" +
                 "하린: 여[beat=a/]기.\n" +
                 "===\n";
 
-            // 글 안의 표지다 — 첫 글자 앞의 표지는 앞 앵커라 기다려도 된다(docs/PLAN_line-anchor.md A5).
             List<string> warnings = new();
-            YarnCommandTextExtractor.Extract(yarn, "atwait.yarn", warnings);
+            YarnLineGroup line = YarnCommandTextExtractor.Extract(yarn, "waits.yarn", warnings).Single();
 
-            Assert.That(warnings.Single(), Does.StartWith("atwait.yarn:3 ").And.Contain("자리에 쓸 수 없다"));
+            Assert.That(warnings, Is.Empty, string.Join("\n", warnings));
+
+            // 폴드는 그대로 접는다 — pause는 접을 것이 없다.
+            Assert.That(line.Commands.Select(c => c.Name), Is.EqualTo(new[]
+            {
+                "fade_out", "pause", "screen_cover", "screen_cover_clear", "pause", "face", "pause", "face", "screen_cover",
+            }));
+            Assert.That(line.Anchors.Select(a => a.Name), Is.EqualTo(new[] { "~0", "start", "a", "end" }));
         }
 
         [TestCase("pause", true)]

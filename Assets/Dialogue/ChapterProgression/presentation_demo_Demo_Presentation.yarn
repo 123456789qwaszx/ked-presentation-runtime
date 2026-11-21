@@ -509,6 +509,34 @@ rrr
 <<at a motion s2 nod>>
 시구레: 표지 이름은 그 줄 안에서만 써요. [beat=a/]여기서 끄덕.
 
+// ── 줄의 앵커 (docs/PLAN_line-anchor.md) — 한 줄이 제 연출을 모두 갖는다: 앞 앵커 → start → 글 표지 → end ──
+// 첫 글자 앞의 표지는 앞 앵커다 — 대사창이 닫히고, 열리기 전에 실행된다. pause는 그 앵커의 뒤 명령만 늦춘다.
+// <<gap 이름 길이>>는 그 앵커가 열린 뒤 다음 앵커가 열리기까지의 최소 시간이다. start · end는 글에 표지를 두지 않는다.
+// 앞 연출 중에 클릭하면 남은 앞 연출이 끝값으로 놓이고 대사는 제 속도로 나온다. 되감기로 이 줄에 닿으면 앞 연출은 끝값이다.
+<<at in fade_out s2 15fr>>
+<<at in pause 15fr>>
+<<at in face s1 05>>
+<<gap in 1s>>
+<<at start motion s1 nod>>
+하린: [beat=in/]대사창이 닫히고, 시구레가 나가고, 반 초 뒤에 내 표정이 바뀌었어. 1초를 채운 뒤에 이 줄이 열리며 내가 끄덕였고.
+
+// 글 표지 사이의 간격 — 글이 먼저 닿아도 간격이 찰 때까지 타자기가 그 글자 앞에서 기다린다. 클릭하면 간격 없이 간다.
+<<at start face s1 3>>
+<<gap start 2s>>
+<<at a face_swap s1 05 13fr>>
+<<gap a 1s>>
+<<at b motion s1 nod>>
+하린: 여기서 [beat=a/]2초를 채우고 표정이 바뀌고, [beat=b/]또 1초를 채우고 끄덕여.
+
+// 어느 앵커에서나 pause — 다음 앵커는 앞 앵커의 명령이 다 시작된 뒤에 열린다. end의 간격은 넘김을 받기 전의 최소 시간이다.
+<<at start face s1 3>>
+<<at a fade_in s2 15fr>>
+<<at a pause 1s>>
+<<at a motion s2 nod>>
+<<at end emoji s2 star>>
+<<gap end 1s>>
+시구레: 제가 [beat=a/]들어오고 1초 뒤에 끄덕여요. 다 보이면 별이 뜨고, 1초 머문 뒤에 넘길 수 있어요.
+
 시구레: 여기까지예요. 되감기(R)로 아무 줄이나 돌아갈 수 있고, 타이틀의 ‘이어하기’로 다시 올 수 있어요. #line:ln_6mq0fm7a
 
 <<fade_out s3 15fr>>

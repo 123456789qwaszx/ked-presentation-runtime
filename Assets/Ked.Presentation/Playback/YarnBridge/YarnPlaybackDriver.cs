@@ -22,9 +22,16 @@ public sealed class YarnPlaybackDriver
     // 줄에 들어갈 때 그 줄의 앵커로 가져간다(InlineCommandTrack.Begin). 붙을 줄이 없으면 노드 끝의 스텝이 머리 뒤에(PlayStrayAt).
     private readonly List<AtCommand> _collectedAt = new();
 
+    // <<gap 이름 길이>> — 다음 대사 줄의 앵커에 붙는 간격(docs/PLAN_line-anchor.md A8). <<at>>과 같이 줄에 들어갈 때 가져간다.
+    private readonly List<GapCommand> _collectedGaps = new();
+
     // 이 단위(줄 · 노드 끝의 스텝)가 실행기의 스텝을 열었나 — 처음 실행하는 묶음이 연다.
     // 여는 것이 앞 단위의 남은 전환을 마무리하는 경계다. 그 뒤의 묶음은 덧붙는다(docs/PLAN_line-anchor.md A13).
     private bool _unitOpened;
+
+    // 이 단위에서 기다리는 명령(pause · screen_cover)을 실행했나 — 다음 앵커의 관문(AR3 ①)이 본다.
+    // 기다림이 없는 줄은 명령이 그 자리에서 다 시작되므로 관문이 볼 것이 없다.
+    private bool _unitHasWaits;
 
     private CommandRunScope CurrentScope => _scopeProvider?.CurrentScope;
 
@@ -72,8 +79,24 @@ public sealed class YarnPlaybackDriver
         return ats;
     }
 
+    public void EnqueueGap(in GapCommand gap) => _collectedGaps.Add(gap);
+
+    // 쌓인 <<gap>>을 가져간다 — 쓴 순서.
+    public List<GapCommand> TakeCollectedGaps()
+    {
+        var gaps = new List<GapCommand>(_collectedGaps);
+        _collectedGaps.Clear();
+        return gaps;
+    }
+
     // 새 단위(줄 · 노드 끝의 스텝)에 들어선다 — 이 단위가 처음 실행하는 묶음이 실행기의 스텝을 연다.
-    public void BeginUnit() => _unitOpened = false;
+    public void BeginUnit()
+    {
+        _unitOpened = false;
+        _unitHasWaits = false;
+    }
+
+    public bool UnitHasWaits => _unitHasWaits;
 
     // 다음 앞 앵커(<<step>>이 닫은 구간)를 실행한다 — 쓴 순서로 하나씩. 더 없으면 false.
     // 하나씩 꺼내므로, 도중에 끊긴 줄의 남은 것은 정지가 버린다(TryDiscardPending).
@@ -111,6 +134,9 @@ public sealed class YarnPlaybackDriver
 
     private void Play(List<CommandSpecBase> specs)
     {
+        for (int i = 0; i < specs.Count && !_unitHasWaits; i++)
+            _unitHasWaits = specs[i] != null && specs[i].wait;
+
         CommandRunScope scope = CurrentScope;
 
         if (_unitOpened)
@@ -122,26 +148,6 @@ public sealed class YarnPlaybackDriver
 
         _unitOpened = true;
         _executor.PlaySpecs(specs, scope);
-    }
-
-    // 대사 줄의 머리에는 기다림이 없다(docs/PLAN_line-beat.md D3 · Q1) — 머리에 쌓인 명령의 기다림(wait)을 내린다.
-    // pause는 아무것도 아니게 되고, 덮기는 덮되 기다리지 않는다. 내린 것이 있으면 요약을 돌려준다(오류 로그용).
-    // 앞 앵커(<<step>>이 닫은 구간)는 건드리지 않는다 — 거기서는 기다린다.
-    public bool TryReleaseWaits(out string summary)
-    {
-        var released = new List<CommandSpecBase>();
-
-        foreach (CommandSpecBase spec in _collectedSpecs)
-        {
-            if (spec == null || !spec.wait)
-                continue;
-
-            spec.wait = false;
-            released.Add(spec);
-        }
-
-        summary = released.Count > 0 ? Describe(released) : string.Empty;
-        return released.Count > 0;
     }
 
     // 쌓인 명령을 실행하지 않고 버린다. 버린 것이 있으면 개수와 요약("이름×개수, …")을 돌려준다(로그용).
@@ -157,6 +163,7 @@ public sealed class YarnPlaybackDriver
         count = specs.Count + _collectedAt.Count;
 
         _pendingAll.Clear();
+        _collectedGaps.Clear();
 
         if (count == 0)
         {

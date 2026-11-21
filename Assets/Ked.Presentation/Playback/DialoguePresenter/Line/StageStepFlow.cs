@@ -47,7 +47,7 @@ public sealed class StageStepFlow
         }
     }
 
-    // 앞 앵커를 차례로 열고, 앵커마다 그 명령이 다 시작될 때까지 기다린다(AR3 ①). 대사창은 닫는다. 넘김 입력은 필요 없다.
+    // 앞 앵커를 차례로 열고, 앵커마다 그 명령이 다 시작되고(AR3 ①) 간격이 찰 때까지(②) 기다린다. 대사창은 닫는다. 넘김 입력은 필요 없다.
     // 입력은 남은 앞 앵커를 서두른다(A12) — 끝값으로 놓이고, 그 줄의 도는 전환도 함께 마무리된다(A13). start부터는 제 속도다.
     // run이 무효가 되면(정지 · 되감기 · 대화 끝) 기다림을 놓는다 — 남은 것은 실행하지 않는다(정지가 버린다).
     public async YarnTask RunLinePreludeAsync(LinePresentationRun run)
@@ -70,6 +70,10 @@ public sealed class StageStepFlow
                     immediate: rapidSkip || _playbackState.IsSpeedUpMode);
 
                 while (run.IsValid && IsForegroundPlaying(scope))
+                    await YarnTask.Yield();
+
+                // AR3 ② — 표지로 연 앞 앵커의 간격(<<gap>>). 서두르거나 빨리 넘기면 없다.
+                while (run.IsValid && _inlineCommands.IsGapPending)
                     await YarnTask.Yield();
             }
 
@@ -107,6 +111,9 @@ public sealed class StageStepFlow
     // - 시크 중: 표적은 언제나 줄이므로 지나가는 것이다 — 명령만 압축 실행한다(시크 통과 줄과 같다).
     public bool TryPlayWithoutWaiting()
     {
+        // 붙을 줄이 없는 <<gap>>은 버린다 — 다음 노드의 줄로 새지 않게.
+        _inlineCommands.DropStrayGaps();
+
         if (!_stepHead.HasPending)
             return true;
 

@@ -1,5 +1,3 @@
-using UnityEngine;
-
 // 스텝의 머리 — 쌓인 명령을 실행하고 그 뒤를 맞춘다. 줄과 노드 끝의 암묵 스텝이 같이 쓴다.
 // 한 단위(줄 · 노드 끝의 스텝)의 차례: Enter → (앞 앵커 TryPlayNextPreBatch …) → Play(머리).
 public sealed class StepHead
@@ -32,18 +30,6 @@ public sealed class StepHead
 
     // 이 줄이 낼 보이스의 키 — 머리의 명령에서 읽는다. 명령을 실행하기 전에 읽는다 — 실행하면 쌓인 것이 비워진다.
     public string FindVoiceKey() => LineVoiceController.FindLineVoiceKey(_playbackDriver.Collected);
-
-    // 대사 줄의 머리에는 기다림이 없다(docs/PLAN_line-beat.md D3) — 기다리는 명령(pause · screen_cover)은 오류를 남기고
-    // 기다리지 않게 실행한다(Q1 — 보이는 실수로 남게). 시간으로 짜는 일은 줄의 앞 앵커(옛 표기는 <<step>>)에서 한다.
-    public void ReleaseLineWaits(string lineId)
-    {
-        if (_playbackDriver.TryReleaseWaits(out string summary))
-        {
-            Debug.LogError(
-                $"[대사 줄 머리] {lineId}: 기다리는 명령({summary})은 대사 줄 머리에 쓸 수 없다 — 기다리지 않고 실행한다. " +
-                "시간으로 짜는 일은 줄의 앞 앵커(옛 표기는 <<step>>)에서 한다(docs/PLAN_line-anchor.md A7).");
-        }
-    }
 
     // 단위(줄 · 노드 끝의 스텝)에 들어선다 — 앞 스텝의 서두르기와 앞 줄의 보이스가 여기서 끝난다.
     // 이 단위가 처음 실행하는 묶음이 실행기의 스텝을 연다 — 앞 단위의 남은 전환을 마무리하는 경계는 여기 하나다(A13).

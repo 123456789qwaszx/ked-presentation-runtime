@@ -74,6 +74,10 @@ public sealed partial class YarnCommandBridge
         // <<at 표지 명령 …>> — 다음 대사 줄의 표지 [beat=표지/] 자리에서 실행할 명령(docs/PLAN_line-beat.md).
         runner.AddCommandHandler<string, string[]>(
             LineBeatSchedule.AtCommandName, CollectAt);
+
+        // <<gap 이름 길이>> — 다음 대사 줄의 그 앵커가 열린 뒤 다음 앵커가 열리기까지의 최소 시간(docs/PLAN_line-anchor.md A8).
+        runner.AddCommandHandler<string, string[]>(
+            LineBeatSchedule.GapCommandName, CollectGap);
     }
     
     private void BindEmoji(DialogueRunner runner)
@@ -427,11 +431,29 @@ public sealed partial class YarnCommandBridge
         _playbackDriver.EnqueueAt(at);
     }
 
+    // <<gap 이름 길이>> — 모으기만 한다. 줄에 들어갈 때 그 줄의 앵커에 붙는다(InlineCommandTrack.Begin).
+    private void CollectGap(string anchor, params string[] rest)
+    {
+        string[] args = new string[(rest?.Length ?? 0) + 1];
+        args[0] = anchor;
+
+        if (rest != null)
+            rest.CopyTo(args, 1);
+
+        if (!LineBeatSchedule.TryReadGap(args, "gap", out GapCommand gap, out string error))
+        {
+            Debug.LogError($"[줄의 자리] {AuthoredText(LineBeatSchedule.GapCommandName, args)} — {error}. 간격을 두지 않는다.");
+            return;
+        }
+
+        _playbackDriver.EnqueueGap(gap);
+    }
+
     // 줄의 앵커에 놓인 명령(<<at>>)을 스펙으로 풀어 output 뒤에 붙인다. authored는 로그용 — 대본에 쓴 꼴.
     // output에 이미 든 것은 같은 앵커의 앞 명령이다 — 대상 판정이 그 선언(actor · slot · cast)을 본다.
-    // 전경 명령(wait — pause · screen_cover)은 앞 앵커에서만 받는다(allowWait) — 대사창이 열린 뒤에는
-    // 타자기도 넘김도 멈추지 않는다(docs/PLAN_line-beat.md R8 — docs/PLAN_line-anchor.md A7은 N3에서 연다).
-    public bool TryParseInline(in StageCommand command, string authored, List<CommandSpecBase> output, bool allowWait = false)
+    // 전경 명령(wait — pause · screen_cover)도 받는다 — 그 앵커의 뒤 명령을 붙잡고, 다음 앵커는 그것이 끝난 뒤에 열린다
+    // (docs/PLAN_line-anchor.md A7 · AR3).
+    public bool TryParseInline(in StageCommand command, string authored, List<CommandSpecBase> output)
     {
         _parsed.Clear();
 
@@ -439,15 +461,6 @@ public sealed partial class YarnCommandBridge
         {
             Debug.LogError($"[줄의 자리] 무대 파서가 모르는 커맨드 '{command.Name}': {authored}. 실행하지 않는다.");
             return false;
-        }
-
-        for (int i = 0; i < _parsed.Count && !allowWait; i++)
-        {
-            if (_parsed[i].wait)
-            {
-                Debug.LogError($"[줄의 자리] 기다리는 명령(pause · screen_cover)은 start · 글 표지 · end에 쓸 수 없다 — 줄의 앞 앵커에 쓴다: {authored}. 실행하지 않는다.");
-                return false;
-            }
         }
 
         if (!_roleGate.TryAccept(output, _parsed, out string reason))

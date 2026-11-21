@@ -287,7 +287,11 @@ public partial class SampleBootstrap
             _rigBlur);
 
         // 대사 줄의 앵커(<<at>> · [beat]) — 줄에 들어갈 때 앵커를 짓고, 앞 앵커는 줄이, 글 표지는 타자기가 글자 자리에서 연다.
-        InlineCommandTrack inlineCommands = new(commandBridge, yarnPlaybackDriver);
+        InlineCommandTrack inlineCommands = new(
+            commandBridge,
+            yarnPlaybackDriver,
+            _presentationScopeSession,
+            _playbackState);
 
         // 글 없는 구간 — 줄의 앞 앵커와 노드 끝의 암묵 스텝. 줄이 앞 앵커를 제 것으로 실행한다.
         StageStepFlow stageStepFlow = new(
