@@ -352,7 +352,7 @@ namespace Ked.Presentation.Tests
 
         private EmojiRefs Stand(EmojiRigBuilder builder, EmojiDefinition definition)
         {
-            GameObject go = new("s1_CharSlot_Scale", typeof(RectTransform));
+            GameObject go = new("s1_CharacterPortrait_DepthScale", typeof(RectTransform));
             _spawned.Add(go);
 
             RectTransform locator = builder.EnsureLocator((RectTransform)go.transform, "s1_");

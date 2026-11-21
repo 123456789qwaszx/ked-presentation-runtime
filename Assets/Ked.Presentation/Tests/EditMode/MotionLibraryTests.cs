@@ -9,7 +9,7 @@ public class MotionLibraryTests
 {
     private const string Nod = @"{ ""name"": ""nod"", ""rig"": ""character"", ""duration"": 0.6, ""end"": ""commit"",
         ""channels"": [
-          { ""node"": ""CharacterPortrait_Track_Move_Y"", ""kind"": ""position"",
+          { ""node"": ""CharacterPortrait_Track_Move"", ""kind"": ""position"",
             ""y"": [ { ""t"": 0, ""v"": 0, ""inTangent"": 0, ""outTangent"": -120 },
                      { ""t"": 0.3, ""v"": -18, ""inTangent"": 0, ""outTangent"": 0 },
                      { ""t"": 0.6, ""v"": 0, ""inTangent"": 60, ""outTangent"": 0 } ] },
@@ -18,7 +18,7 @@ public class MotionLibraryTests
         ] }";
 
     private const string Head = @"{ ""name"": ""x"", ""duration"": 1, ";
-    private const string TrackX = @"""channels"": [ { ""node"": ""CharSlot_Track_X"", ""kind"": ""position"", ""x"": [ { ""t"": 0, ""v"": 0 }, { ""t"": 1, ""v"": 1 } ] } ] }";
+    private const string TrackX = @"""channels"": [ { ""node"": ""CharSlot_Track"", ""kind"": ""position"", ""x"": [ { ""t"": 0, ""v"": 0 }, { ""t"": 1, ""v"": 1 } ] } ] }";
 
     private static string Doc(params string[] motions)
         => @"{ ""schema"": ""motions/2"", ""motions"": [" + string.Join(",", motions) + "] }";
@@ -51,9 +51,9 @@ public class MotionLibraryTests
 
     [TestCase(Head + TrackX, "end")]
     [TestCase(Head + @"""end"": ""hold"", " + TrackX, "end")]
-    [TestCase(Head + @"""end"": ""commit"", ""channels"": [ { ""node"": ""CharSlot_Track_X"", ""kind"": ""slide"", ""x"": [ { ""t"": 0, ""v"": 0 }, { ""t"": 1, ""v"": 1 } ] } ] }", "kind")]
-    [TestCase(Head + @"""end"": ""commit"", ""channels"": [ { ""node"": ""CharSlot_Track_Focus"", ""kind"": ""position"", ""x"": [ { ""t"": 0, ""v"": 0 }, { ""t"": 1, ""v"": 1 } ] } ] }", "Track_Focus")]
-    [TestCase(Head + @"""end"": ""commit"", ""channels"": [ { ""node"": ""CharSlot_Track_X"", ""kind"": ""position"", ""x"": [ { ""t"": 0, ""v"": 0 }, { ""t"": 0.5, ""v"": 1 } ] } ] }", "길이")]
+    [TestCase(Head + @"""end"": ""commit"", ""channels"": [ { ""node"": ""CharSlot_Track"", ""kind"": ""slide"", ""x"": [ { ""t"": 0, ""v"": 0 }, { ""t"": 1, ""v"": 1 } ] } ] }", "kind")]
+    [TestCase(Head + @"""end"": ""commit"", ""channels"": [ { ""node"": ""CharFocus_Track"", ""kind"": ""position"", ""x"": [ { ""t"": 0, ""v"": 0 }, { ""t"": 1, ""v"": 1 } ] } ] }", "포커스 계층")]
+    [TestCase(Head + @"""end"": ""commit"", ""channels"": [ { ""node"": ""CharSlot_Track"", ""kind"": ""position"", ""x"": [ { ""t"": 0, ""v"": 0 }, { ""t"": 0.5, ""v"": 1 } ] } ] }", "길이")]
     public void 어긋난_모션은_경고하고_무시한다(string motionJson, string expectInWarning)
     {
         LogAssert.Expect(LogType.Warning, new Regex("MotionLibrary.*무시.*" + Regex.Escape(expectInWarning)));
@@ -153,7 +153,7 @@ public class MotionLibraryTests
         LogAssert.Expect(LogType.Warning, new Regex("MotionLibrary.*schema 'motions/1'"));
 
         const string v1 = @"{ ""schema"": ""motions/1"", ""motions"": [ { ""name"": ""x"", ""rig"": ""character"", ""duration"": 1, ""end"": ""commit"",
-            ""channels"": [ { ""node"": ""CharSlot_Track_X"", ""kind"": ""position"", ""mode"": ""absolute"", ""x"": [ { ""t"": 0, ""v"": 5 }, { ""t"": 1, ""v"": 1 } ] } ] } ] }";
+            ""channels"": [ { ""node"": ""CharSlot_Track"", ""kind"": ""position"", ""mode"": ""absolute"", ""x"": [ { ""t"": 0, ""v"": 5 }, { ""t"": 1, ""v"": 1 } ] } ] } ] }";
 
         MotionLibrary library = MotionLibrary.Parse(v1, "test");
 

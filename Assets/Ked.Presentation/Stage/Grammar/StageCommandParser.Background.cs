@@ -14,7 +14,7 @@ using UnityEngine;
 ///   bg_sprite             →  SetSprite(키), SourcePixels(원본 픽셀 크기 그대로, 가운데), 레이캐스트 끔
 ///   bg_fade_in / out      →  FadeIn/Out  → CharacterPortraitSprite_Root
 ///   bg_move               →  MoveBy      → CharSlot_Track            (move_by와 같은 축)
-///   bg_scale              →  ScaleTo     → CharacterPortrait_ActingScale (가운데 피벗 — CharSlot_Scale은 발 피벗이다)
+///   bg_scale              →  ScaleTo     → CharacterPortrait_ActingScale (가운데 피벗 — 깊이 CharacterPortrait_DepthScale은 발 피벗이다)
 ///
 /// bg_size · bg_place · bg_slot00/01/02는 두지 않는다 — 크기는 bg_scale, 무대 · 층은 bg_spawn의 인자다.
 /// </summary>

@@ -134,14 +134,14 @@ namespace Ked.Presentation.Tests.UnityParity
             RectTransform track = _refs.GetRect(CharacterRigNode.CharSlot_Track);
             track.anchoredPosition = new Vector2(123f, -45f);
 
-            RectTransform scale = _refs.GetRect(CharacterRigNode.CharSlot_Scale);
+            RectTransform scale = _refs.GetRect(CharacterRigNode.CharacterPortrait_DepthScale);
             scale.localScale = new Vector3(1.5f, 1.5f, 1f);
 
             StageState state = Capture();
 
             Assert.That(state.Nodes.GetState("c1/CharSlot_Track").AnchoredPosition,
                 Is.EqualTo(new Vec2(123f, -45f)));
-            Assert.That(state.Nodes.GetState("c1/CharSlot_Scale").LocalScale.XY,
+            Assert.That(state.Nodes.GetState("c1/CharacterPortrait_DepthScale").LocalScale.XY,
                 Is.EqualTo(new Vec2(1.5f, 1.5f)));
         }
 
@@ -151,8 +151,9 @@ namespace Ked.Presentation.Tests.UnityParity
             StageState state = Capture();
 
             Assert.That(state.Nodes.GetParentKey("c1/__root"), Is.Null);
-            Assert.That(state.Nodes.GetParentKey("c1/CharSlot_Track_Focus"), Is.EqualTo("c1/__root"));
-            Assert.That(state.Nodes.GetParentKey("c1/CharSlot_Track"), Is.EqualTo("c1/CharSlot_Track_Idle"));
+            Assert.That(state.Nodes.GetParentKey("c1/CharFocus_Track"), Is.EqualTo("c1/__root"));
+            Assert.That(state.Nodes.GetParentKey("c1/CharSlot_Track"), Is.EqualTo("c1/CharFocus_Track"));
+            Assert.That(state.Nodes.GetParentKey("c1/CharacterPortrait_VisualOffset"), Is.EqualTo("c1/CharacterPortrait_DepthScale"));
         }
 
         [Test]

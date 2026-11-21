@@ -92,8 +92,8 @@ namespace Ked.Presentation.Core
         // 무대 지점은 카메라가 중립일 때 그 화면 지점과 겹치는 무대 위 자리다. 이 노드 트리에는 카메라 ·
         // 깊이 층 프레이밍 노드가 없다 — 그것이 곧 카메라 중립이고, 런타임도 배치를 같은 중립으로 푼다(IStageViewNeutral).
 
-        /// <summary>스펙 기본 moveTarget (브리지: CharacterRigNode.CharSlot_Track_Focus).</summary>
-        public const string PlaceFocusMoveNodeId = "CharSlot_Track_Focus";
+        /// <summary>스펙 기본 moveTarget (브리지: CharacterRigNode.CharFocus_Track).</summary>
+        public const string PlaceFocusMoveNodeId = "CharFocus_Track";
 
         public static bool TryPlaceFocus(
             StageState state,
@@ -146,8 +146,8 @@ namespace Ked.Presentation.Core
         //
         // size 계열 — depth 프리셋 적용(focus 보존 보정 포함). DepthY 위치 + DepthScale 배율 두 장.
 
-        public const string DepthYNodeId = "CharSlot_DepthY";
-        public const string DepthScaleNodeId = "CharSlot_DepthScale";
+        public const string DepthYNodeId = "CharacterPortrait_DepthOffset";
+        public const string DepthScaleNodeId = "CharacterPortrait_DepthScale";
 
         /// <param name="preserveFocusToken">
         /// 보존할 focus 프리셋 토큰. **항상 커맨드 인자에서 온다**(브리지 기본값 "bust").

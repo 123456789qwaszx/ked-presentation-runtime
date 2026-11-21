@@ -189,7 +189,7 @@ namespace Ked.Presentation.Tests.UnityParity
         [Test]
         public void 리그_모양_바닥_pivot과_스케일()
         {
-            // CharSlot_DepthScale / SwayPivot / Scale 계열의 모양:
+            // CharacterPortrait_DepthScale / SwayPivot / Scale 계열의 모양:
             // 바닥 pivot 노드가 연달아 오고 그 위에 스케일이 걸린다.
             RectNodeState[] chain =
             {

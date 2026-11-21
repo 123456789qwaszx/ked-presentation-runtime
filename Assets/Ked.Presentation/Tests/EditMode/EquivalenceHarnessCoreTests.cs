@@ -34,7 +34,7 @@ namespace Ked.Presentation.Tests
             "\n" +
             "첫 번째 대사다.\n" +
             "\n" +
-            "<<left @4 3u>>\n" +
+            "<<move_by @4 -3u 0u>>\n" +
             "<<fade_in @4>>\n" +
             "\n" +
             "두 번째 대사다.\n" +
@@ -91,7 +91,7 @@ namespace Ked.Presentation.Tests
 
             Assert.That(story.Groups[1].LineText, Is.EqualTo("두 번째 대사다."));
             Assert.That(story.Groups[1].Commands.Select(c => c.Name),
-                Is.EqualTo(new[] { "left", "fade_in" }));
+                Is.EqualTo(new[] { "move_by", "fade_in" }));
 
             Assert.That(story.Groups[2].LineText, Is.Null);
             Assert.That(story.Groups[2].Commands.Select(c => c.Name), Is.EqualTo(new[] { "shot_reset" }));
@@ -773,8 +773,7 @@ namespace Ked.Presentation.Tests
                 {
                     NodeDto("__root", ""),
                     NodeDto("CharSlot_Track", "__root"),
-                    NodeDto("CharSlot_Track_X", "CharSlot_Track"),
-                    NodeDto("CharacterPortraitSprite_Root", "CharSlot_Track_X"),
+                    NodeDto("CharacterPortraitSprite_Root", "CharSlot_Track"),
                 },
             };
 

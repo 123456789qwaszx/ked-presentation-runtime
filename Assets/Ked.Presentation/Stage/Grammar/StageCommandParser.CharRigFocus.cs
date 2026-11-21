@@ -34,7 +34,7 @@ public sealed partial class StageCommandParser
             roleKey = roleKey,
             focusPreset = CharacterFocusPresetParser.Parse(focus),
             screenPoint = screenPoint,
-            moveNode = CharacterRigNode.CharSlot_Track_Focus,
+            moveNode = CharacterRigNode.CharFocus_Track,
             duration = YarnDurationParser.Parse(durationToken),
             ease = ease
         });
@@ -49,7 +49,7 @@ public sealed partial class StageCommandParser
             roleKey = roleKey,
             focusPreset = CharacterFocusPresetParser.Parse(focus),
             screenPoint = ParseScreenPoint("place", screenPoint),
-            moveNode = CharacterRigNode.CharSlot_Track_Focus,
+            moveNode = CharacterRigNode.CharFocus_Track,
             duration = YarnDurationParser.Parse(durationToken),
             ease = ease
         });

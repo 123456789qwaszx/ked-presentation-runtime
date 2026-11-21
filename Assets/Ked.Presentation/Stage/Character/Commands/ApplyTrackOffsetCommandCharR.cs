@@ -19,17 +19,8 @@ public class ApplyTrackOffsetCommandSpecCharR : CharacterRigCommandSpecBase
     public bool applyFromZero = true;
     
     [Header("Track Layer Reset")]
-    [Tooltip("체크하면 Character_Track / Move / X / Y 를 전부 (0,0)으로 초기화합니다.")]
-    public bool resetAllTrackLayers = true;
-
-    [Tooltip("Char_Track 을 (0,0)으로 초기화.")]
-    public bool resetCharTrack = false;
-
-    [Tooltip("Char_Track_X 를 (0,0)으로 초기화.")]
-    public bool resetCharTrackX = false;
-
-    [Tooltip("Char_Track_Y 를 (0,0)으로 초기화.")]
-    public bool resetCharTrackY = false;
+    [Tooltip("체크하면 슬롯의 자리(CharSlot_Track)를 (0,0)으로 초기화합니다.")]
+    public bool resetCharTrack = true;
 }
 
 public sealed class ApplyTrackOffsetCommandCharR : CommandBase
@@ -76,14 +67,8 @@ public sealed class ApplyTrackOffsetCommandCharR : CommandBase
 
     private void ApplyFinalState()
     {
-        if (_spec.resetAllTrackLayers || _spec.resetCharTrack)
+        if (_spec.resetCharTrack)
             ResetRect(_rigRefs.CharSlot_Track);
-
-        if (_spec.resetAllTrackLayers || _spec.resetCharTrackX)
-            ResetRect(_rigRefs.CharSlot_Track_X);
-
-        if (_spec.resetAllTrackLayers || _spec.resetCharTrackY)
-            ResetRect(_rigRefs.CharSlot_Track_Y);
 
         _rect.DOKill(true);
 

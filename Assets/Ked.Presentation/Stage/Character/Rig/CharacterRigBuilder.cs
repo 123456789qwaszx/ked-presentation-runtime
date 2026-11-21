@@ -181,17 +181,19 @@ public sealed class CharacterRigBuilder
         RectTransform GetRt(CharacterRigSchema.Refs key) => map[key];
         Image GetImg(CharacterRigSchema.Refs key) => map[key].GetComponent<Image>();
 
-        // Slot axis - stage placement
-        refs.CharSlot_Track_Focus = GetRt(CharacterRigSchema.Refs.CharSlot_Track_Focus);
-        refs.CharSlot_DepthY = GetRt(CharacterRigSchema.Refs.CharSlot_DepthY);
-        refs.CharSlot_DepthScale = GetRt(CharacterRigSchema.Refs.CharSlot_DepthScale);
-        refs.CharSlot_Track_Idle = GetRt(CharacterRigSchema.Refs.CharSlot_Track_Idle);
+        // Focus axis
+        refs.CharFocus_Track = GetRt(CharacterRigSchema.Refs.CharFocus_Track);
+        refs.CharFocus_Rotation = GetRt(CharacterRigSchema.Refs.CharFocus_Rotation);
+        refs.CharFocus_Scale = GetRt(CharacterRigSchema.Refs.CharFocus_Scale);
+
+        // Slot axis
         refs.CharSlot_Track = GetRt(CharacterRigSchema.Refs.CharSlot_Track);
-        refs.CharSlot_Track_X = GetRt(CharacterRigSchema.Refs.CharSlot_Track_X);
-        refs.CharSlot_Track_Y = GetRt(CharacterRigSchema.Refs.CharSlot_Track_Y);
         refs.CharSlot_Rotation = GetRt(CharacterRigSchema.Refs.CharSlot_Rotation);
         refs.CharSlot_SwayPivot = GetRt(CharacterRigSchema.Refs.CharSlot_SwayPivot);
-        refs.CharSlot_Scale = GetRt(CharacterRigSchema.Refs.CharSlot_Scale);
+
+        // Portrait depth axis
+        refs.CharacterPortrait_DepthOffset = GetRt(CharacterRigSchema.Refs.CharacterPortrait_DepthOffset);
+        refs.CharacterPortrait_DepthScale = GetRt(CharacterRigSchema.Refs.CharacterPortrait_DepthScale);
 
         // Character casting axis - per-character defaults
         refs.CharacterPortrait_VisualOffset = GetRt(CharacterRigSchema.Refs.CharacterPortrait_VisualOffset);
@@ -200,13 +202,12 @@ public sealed class CharacterRigBuilder
         refs.CharacterPortrait_Track = GetRt(CharacterRigSchema.Refs.CharacterPortrait_Track);
         refs.CharacterPortrait_Rotation = GetRt(CharacterRigSchema.Refs.CharacterPortrait_Rotation);
         refs.CharacterPortrait_Track_Move = GetRt(CharacterRigSchema.Refs.CharacterPortrait_Track_Move);
-        refs.CharacterPortrait_Track_Move_X = GetRt(CharacterRigSchema.Refs.CharacterPortrait_Track_Move_X);
-        refs.CharacterPortrait_Track_Move_Y = GetRt(CharacterRigSchema.Refs.CharacterPortrait_Track_Move_Y);
         refs.CharacterPortrait_SwayPivot = GetRt(CharacterRigSchema.Refs.CharacterPortrait_SwayPivot);
         refs.CharacterPortrait_Shake = GetRt(CharacterRigSchema.Refs.CharacterPortrait_Shake);
         refs.CharacterPortrait_ActingScale = GetRt(CharacterRigSchema.Refs.CharacterPortrait_ActingScale);
-        refs.CharacterPortrait_ActingScale_X = GetRt(CharacterRigSchema.Refs.CharacterPortrait_ActingScale_X);
-        refs.CharacterPortrait_ActingScale_Y = GetRt(CharacterRigSchema.Refs.CharacterPortrait_ActingScale_Y);
+
+        // Portrait mirror
+        refs.CharacterPortrait_Mirror = GetRt(CharacterRigSchema.Refs.CharacterPortrait_Mirror);
 
         // Portrait sprite
         refs.CharacterPortraitSprite_Root = GetRt(CharacterRigSchema.Refs.CharacterPortraitSprite_Root);

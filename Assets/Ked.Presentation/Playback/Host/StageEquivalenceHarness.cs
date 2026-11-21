@@ -40,7 +40,6 @@ using Yarn.Unity;
 //   절차적 연기(sway·idle_breathe·jolt·dip·tap)가 실제로 돌 시간이 생기고,
 //   트윈이 진행 중인 중간 상태가 캡처된다. 실측 예:
 //     CharacterPortrait_SwayPivot.localEulerAngles  캡처=(0,0,7.53) / (0,0,359.62) …
-//     CharSlot_Track_Idle.anchoredPosition          캡처=(0, 7.99) …
 //     CharacterPortraitSpriteOverlay_Root.alpha     캡처=0.018 ~ 0.207 (크로스페이드 중)
 //   값이 매 라인 제각각인 것이 특징이다 — 끝값이 아니라 시간 함수의 스냅샷이라서.
 //

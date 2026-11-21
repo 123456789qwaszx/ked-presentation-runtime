@@ -92,17 +92,15 @@ namespace Ked.Presentation.Tests
                 nodes = new List<RigSchemaNodeDto>
                 {
                     Node("__root", ""),
-                    Node("CharSlot_Track_Focus", "__root"),
-                    Node("CharSlot_DepthY", "CharSlot_Track_Focus"),
-                    Node("CharSlot_DepthScale", "CharSlot_DepthY", bottomPivot: true),
-                    Node("CharSlot_Track_Idle", "CharSlot_DepthScale"),
-                    Node("CharSlot_Track", "CharSlot_Track_Idle"),
-                    Node("CharSlot_Track_X", "CharSlot_Track"),
-                    Node("CharSlot_Track_Y", "CharSlot_Track_X"),
-                    Node("CharSlot_Rotation", "CharSlot_Track_Y"),
+                    Node("CharFocus_Track", "__root"),
+                    Node("CharSlot_Track", "CharFocus_Track"),
+                    Node("CharFocus_Rotation", "CharSlot_Track", bottomPivot: true),
+                    Node("CharFocus_Scale", "CharFocus_Rotation", bottomPivot: true),
+                    Node("CharSlot_Rotation", "CharFocus_Scale"),
                     Node("CharSlot_SwayPivot", "CharSlot_Rotation", bottomPivot: true),
-                    Node("CharSlot_Scale", "CharSlot_SwayPivot", bottomPivot: true),
-                    Node("CharacterPortrait_VisualOffset", "CharSlot_Scale", bottomPivot: true),
+                    Node("CharacterPortrait_DepthOffset", "CharSlot_SwayPivot"),
+                    Node("CharacterPortrait_DepthScale", "CharacterPortrait_DepthOffset", bottomPivot: true),
+                    Node("CharacterPortrait_VisualOffset", "CharacterPortrait_DepthScale", bottomPivot: true),
                 },
             };
 
@@ -240,8 +238,8 @@ namespace Ked.Presentation.Tests
             StageState cast = Fold(tuning,
                 Cmd("slot", "c1"), Cmd("cast", "c1", "bandi"), Cmd("place_center", "c1", "bust"));
 
-            Vec2 plainMove = plain.Nodes.GetState("c1/CharSlot_Track_Focus").AnchoredPosition;
-            Vec2 castMove = cast.Nodes.GetState("c1/CharSlot_Track_Focus").AnchoredPosition;
+            Vec2 plainMove = plain.Nodes.GetState("c1/CharFocus_Track").AnchoredPosition;
+            Vec2 castMove = cast.Nodes.GetState("c1/CharFocus_Track").AnchoredPosition;
 
             Assert.That(castMove.Y - plainMove.Y, Is.EqualTo(10f).Within(Eps),
                 "820 → 810이면 10만큼 덜 내려간다");
@@ -256,7 +254,7 @@ namespace Ked.Presentation.Tests
             StageState state = Fold(NewTuning(), Cmd("slot", "c1"), Cmd("place_right", "c1", "bust"));
 
             Assert.That(state.Nodes.GetState("c1/CharSlot_Track").AnchoredPosition, Is.EqualTo(Vec2.Zero));
-            Assert.That(state.Nodes.GetState("c1/CharSlot_Track_Focus").AnchoredPosition, Is.Not.EqualTo(Vec2.Zero));
+            Assert.That(state.Nodes.GetState("c1/CharFocus_Track").AnchoredPosition, Is.Not.EqualTo(Vec2.Zero));
         }
 
         [Test]
@@ -289,7 +287,7 @@ namespace Ked.Presentation.Tests
 
             Assert.That(after.Unhandled.Count, Is.EqualTo(before.Unhandled.Count), "접혀야 한다");
 
-            Assert.That(after.Nodes.GetState("c1/CharSlot_DepthScale").LocalScale.X,
+            Assert.That(after.Nodes.GetState("c1/CharacterPortrait_DepthScale").LocalScale.X,
                 Is.EqualTo(expectedScale).Within(Eps));
 
             // 보존: 배율이 바뀌어도 focus는 제자리.
@@ -312,8 +310,8 @@ namespace Ked.Presentation.Tests
             StageState byDefault = StageReducer.Apply(before, Cmd("size", "c1", "close"), tuning);
             StageState byFace = StageReducer.Apply(before, Cmd("size", "c1", "close", "face"), tuning);
 
-            float defaultY = byDefault.Nodes.GetState("c1/CharSlot_DepthY").AnchoredPosition.Y;
-            float faceY = byFace.Nodes.GetState("c1/CharSlot_DepthY").AnchoredPosition.Y;
+            float defaultY = byDefault.Nodes.GetState("c1/CharacterPortrait_DepthOffset").AnchoredPosition.Y;
+            float faceY = byFace.Nodes.GetState("c1/CharacterPortrait_DepthOffset").AnchoredPosition.Y;
 
             Assert.That(System.Math.Abs(defaultY - faceY), Is.GreaterThan(1f),
                 "보존 대상이 다르면 보정도 달라야 한다");
@@ -335,7 +333,7 @@ namespace Ked.Presentation.Tests
             StageState state = Fold(NewTuning(), Cmd("slot", "c1"), Cmd("size", "c1", "14", "bust"));
 
             Assert.That(state.Unhandled.Count, Is.EqualTo(0));
-            Assert.That(state.Nodes.GetState("c1/CharSlot_DepthScale").LocalScale.XY.X,
+            Assert.That(state.Nodes.GetState("c1/CharacterPortrait_DepthScale").LocalScale.XY.X,
                 Is.EqualTo(1.38f + 0.082f * 4f).Within(1e-3f));
         }
 
@@ -354,14 +352,14 @@ namespace Ked.Presentation.Tests
             {
                 StageState state = Fold(tuning, Cmd("slot", "c1"), Cmd("size", "c1", label, "bust"));
 
-                Assert.That(state.Nodes.GetState("c1/CharSlot_DepthScale").LocalScale.XY.X,
+                Assert.That(state.Nodes.GetState("c1/CharacterPortrait_DepthScale").LocalScale.XY.X,
                     Is.EqualTo(expected).Within(1e-3f), label);
             }
 
             // 무릎 위: 상한 20이 2.2다(직선 연장이면 1.9였을 자리).
             StageState top = Fold(tuning, Cmd("slot", "c1"), Cmd("size", "c1", "20", "bust"));
 
-            Assert.That(top.Nodes.GetState("c1/CharSlot_DepthScale").LocalScale.XY.X,
+            Assert.That(top.Nodes.GetState("c1/CharacterPortrait_DepthScale").LocalScale.XY.X,
                 Is.EqualTo(2.2f).Within(1e-3f));
         }
 
@@ -374,11 +372,11 @@ namespace Ked.Presentation.Tests
             StageState byLabel = Fold(tuning, Cmd("slot", "c1"), Cmd("size", "c1", "front", "bust"));
             StageState byNumber = Fold(tuning, Cmd("slot", "c1"), Cmd("size", "c1", "16", "bust"));
 
-            Assert.That(byNumber.Nodes.GetState("c1/CharSlot_DepthScale").LocalScale.XY.X,
-                Is.EqualTo(byLabel.Nodes.GetState("c1/CharSlot_DepthScale").LocalScale.XY.X).Within(1e-4f));
+            Assert.That(byNumber.Nodes.GetState("c1/CharacterPortrait_DepthScale").LocalScale.XY.X,
+                Is.EqualTo(byLabel.Nodes.GetState("c1/CharacterPortrait_DepthScale").LocalScale.XY.X).Within(1e-4f));
 
-            Assert.That(byNumber.Nodes.GetState("c1/CharSlot_DepthY").AnchoredPosition.Y,
-                Is.EqualTo(byLabel.Nodes.GetState("c1/CharSlot_DepthY").AnchoredPosition.Y).Within(1e-3f));
+            Assert.That(byNumber.Nodes.GetState("c1/CharacterPortrait_DepthOffset").AnchoredPosition.Y,
+                Is.EqualTo(byLabel.Nodes.GetState("c1/CharacterPortrait_DepthOffset").AnchoredPosition.Y).Within(1e-3f));
         }
 
         [Test]
@@ -390,34 +388,6 @@ namespace Ked.Presentation.Tests
             StageState state = Fold(tuning, Cmd("slot", "c1"), Cmd("size", "c1", "close"));
 
             Assert.That(state.Unhandled.Any(u => u.Reason.Contains("커브")), Is.True);
-        }
-
-        // ── 이징 인자는 폴드에 무해하다 ──────────────────────────────
-
-        [Test]
-        public void scale_계열의_마지막_이징_인자는_폴드에_무해하다()
-        {
-            // 이징은 경로의 모양만 정한다 — 종점(목표 scale)은 그대로다.
-            // 지키는 것은 인자 자리다: 이징 토큰이 붙어도 배율을 읽는 인덱스가 밀리면 안 된다.
-            StageReducerTuning tuning = NewTuning();
-
-            StageState plain = Fold(tuning,
-                Cmd("slot", "c1"), Cmd("scale_by", "c1", "1.5", "24fr"));
-
-            StageState eased = Fold(tuning,
-                Cmd("slot", "c1"), Cmd("scale_by", "c1", "1.5", "24fr", "OutBack"));
-
-            Assert.That(eased.Unhandled.Count, Is.EqualTo(0));
-            Assert.That(eased.Nodes.GetState("c1/CharSlot_Scale").LocalScale.XY.X,
-                Is.EqualTo(plain.Nodes.GetState("c1/CharSlot_Scale").LocalScale.XY.X).Within(Eps));
-
-            // scale_reset도 같다 — 모르는 커브 이름이 붙어도 폴드는 흔들리지 않는다.
-            StageState reset = Fold(tuning,
-                Cmd("slot", "c1"), Cmd("scale_by", "c1", "1.5"),
-                Cmd("scale_reset", "c1", "12fr", "@no_such_curve"));
-
-            Assert.That(reset.Nodes.GetState("c1/CharSlot_Scale").LocalScale.XY.X,
-                Is.EqualTo(1f).Within(Eps));
         }
 
         // ── shot 계열의 이징 인자 ────────────────────────────────────

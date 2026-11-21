@@ -343,18 +343,18 @@ namespace Ked.Presentation.Tests
 
         // ── 장부 ─────────────────────────────────────────────────────
 
-        private RectTransform NewSlotScale(string name)
+        private RectTransform NewStandNode(string name)
         {
             GameObject go = new(name, typeof(RectTransform));
             _spawned.Add(go);
             return (RectTransform)go.transform;
         }
 
-        private static EmojiRefs Stand(EmojiRigRegistry registry, EmojiRigBuilder builder, RectTransform slotScale, string emoji)
+        private static EmojiRefs Stand(EmojiRigRegistry registry, EmojiRigBuilder builder, RectTransform standNode, string emoji)
         {
-            RectTransform locator = builder.EnsureLocator(slotScale, "s1_");
+            RectTransform locator = builder.EnsureLocator(standNode, "s1_");
             EmojiRefs refs = builder.BuildEmoji(locator, "s1_", emoji, new[] { "a" });
-            registry.Register("s1", slotScale, refs);
+            registry.Register("s1", standNode, refs);
             return refs;
         }
 
@@ -363,24 +363,24 @@ namespace Ked.Presentation.Tests
         {
             EmojiRigRegistry registry = new();
             EmojiRigBuilder builder = new();
-            RectTransform slotScale = NewSlotScale("s1_CharSlot_Scale");
+            RectTransform standNode = NewStandNode("s1_CharacterPortrait_DepthScale");
 
-            EmojiRefs star = Stand(registry, builder, slotScale, "star");
-            Stand(registry, builder, slotScale, "twinkle");
+            EmojiRefs star = Stand(registry, builder, standNode, "star");
+            Stand(registry, builder, standNode, "twinkle");
 
-            Assert.That(registry.CountOf("s1", slotScale), Is.EqualTo(2));
-            Assert.That(registry.TryGet("s1", slotScale, "star", out EmojiRefs found), Is.True);
+            Assert.That(registry.CountOf("s1", standNode), Is.EqualTo(2));
+            Assert.That(registry.TryGet("s1", standNode, "star", out EmojiRefs found), Is.True);
             Assert.That(found, Is.SameAs(star));
-            Assert.That(registry.TryGet("s2", slotScale, "star", out _), Is.False);
+            Assert.That(registry.TryGet("s2", standNode, "star", out _), Is.False);
 
-            Assert.That(registry.Remove("s1", slotScale, "star", out EmojiRefs removed), Is.True);
+            Assert.That(registry.Remove("s1", standNode, "star", out EmojiRefs removed), Is.True);
             Assert.That(removed, Is.SameAs(star));
-            Assert.That(registry.Remove("s1", slotScale, "star", out _), Is.False);
+            Assert.That(registry.Remove("s1", standNode, "star", out _), Is.False);
 
             List<EmojiRefs> rest = new();
-            registry.RemoveAll("s1", slotScale, rest);
+            registry.RemoveAll("s1", standNode, rest);
             Assert.That(rest, Has.Count.EqualTo(1));
-            Assert.That(registry.CountOf("s1", slotScale), Is.EqualTo(0));
+            Assert.That(registry.CountOf("s1", standNode), Is.EqualTo(0));
         }
 
         [Test]
@@ -388,19 +388,19 @@ namespace Ked.Presentation.Tests
         {
             EmojiRigRegistry registry = new();
             EmojiRigBuilder builder = new();
-            RectTransform oldScale = NewSlotScale("s1_CharSlot_Scale");
+            RectTransform oldStand = NewStandNode("s1_CharacterPortrait_DepthScale");
 
-            EmojiRefs star = Stand(registry, builder, oldScale, "star");
-            Stand(registry, builder, oldScale, "twinkle");
+            EmojiRefs star = Stand(registry, builder, oldStand, "star");
+            Stand(registry, builder, oldStand, "twinkle");
 
             // 부서진 것.
             builder.DestroyEmoji(star);
-            Assert.That(registry.TryGet("s1", oldScale, "star", out _), Is.False);
-            Assert.That(registry.CountOf("s1", oldScale), Is.EqualTo(1));
+            Assert.That(registry.TryGet("s1", oldStand, "star", out _), Is.False);
+            Assert.That(registry.CountOf("s1", oldStand), Is.EqualTo(1));
 
             // 슬롯이 다시 섰다 — 옛 리그는 아직 살아 있어도(프레임 끝에 부서진다) 그 밑의 것은 잊는다.
-            RectTransform newScale = NewSlotScale("s1_CharSlot_Scale");
-            Assert.That(registry.CountOf("s1", newScale), Is.EqualTo(0));
+            RectTransform newStand = NewStandNode("s1_CharacterPortrait_DepthScale");
+            Assert.That(registry.CountOf("s1", newStand), Is.EqualTo(0));
         }
     }
 }

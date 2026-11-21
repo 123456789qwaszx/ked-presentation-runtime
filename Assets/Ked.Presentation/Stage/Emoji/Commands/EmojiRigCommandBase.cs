@@ -18,19 +18,19 @@ public abstract class EmojiRigCommandSpecBase : CommandSpecBase
 public static class EmojiRigTargets
 {
     /// <summary>
-    /// 대상을 슬롯으로 푼다. 이모지는 캐릭터를 모른다 — 여기서 받는 것은 설 자리(CharSlot_Scale)와 접두뿐이다.
+    /// 대상을 슬롯으로 푼다. 이모지는 캐릭터를 모른다 — 여기서 받는 것은 설 자리(CharacterPortrait_DepthScale)와 접두뿐이다.
     /// </summary>
     public static void Resolve(
         PresentationStage stage,
         string roleKey,
         out string slotKey,
-        out RectTransform charSlotScale,
+        out RectTransform standNode,
         out string rolePrefix)
     {
         slotKey = CharacterRigResolver.ResolveSlotKey(stage, roleKey);
 
         CharacterRigRefs rig = CharacterRigResolver.ResolveRig(stage, roleKey);
-        charSlotScale = rig.CharSlot_Scale;
+        standNode = rig.CharacterPortrait_DepthScale;
 
         // 캐릭터 리그의 접두와 같은 규칙이다(SetupCharRigCommandSpec.ResolvedRolePrefix).
         rolePrefix = slotKey.EndsWith("_", StringComparison.Ordinal) ? slotKey : $"{slotKey}_";

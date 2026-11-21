@@ -49,7 +49,7 @@ test
 
 <<size s1 22 bust 38fr>>
 <<place_center s1 face 25fr>>
-<<up s1 2u 25fr>>
+<<move_by s1 0u 2u 25fr>>
 <<shot_zoom 3 24>>
 <<shot_pan 4 4 24>>
 2. size + place — 커지는 중에도 얼굴이 가운데에 와야 한다.
@@ -195,7 +195,7 @@ test
 <<cutin_open stage01 pink_stars -11.5u -3.25u>>
 시구레: 컷인이에요! 판은 튀어 오르고, 머리는 판 위로 나와요.
 
-<<up c1 2u>>
+<<move_by c1 0u 2u 10fr>>
 qwe
 rrr
 

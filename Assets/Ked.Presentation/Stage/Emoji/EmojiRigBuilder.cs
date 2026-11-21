@@ -7,7 +7,7 @@ using Object = UnityEngine.Object;
 // ─────────────────────────────────────────────────────────────────────
 // EmojiRigSchema로 이모지의 계층을 세우고 부순다. 프리팹을 받지 않는다 — 계층의 주인은 스키마다.
 //
-// 이모지는 캐릭터를 모른다: 이 빌더가 받는 것은 "설 자리"(슬롯의 CharSlot_Scale)와 이름들뿐이다.
+// 이모지는 캐릭터를 모른다: 이 빌더가 받는 것은 "설 자리"(슬롯의 CharacterPortrait_DepthScale)와 이름들뿐이다.
 // 하이어라키 이름은 접두를 붙여 전역에서 하나뿐이게 한다(캐릭터 리그의 rolePrefix와 같은 까닭):
 //
 //   {rolePrefix}Emoji_Locator
@@ -20,19 +20,19 @@ public sealed class EmojiRigBuilder
     /// <summary>
     /// 슬롯의 로케이터를 내준다. 없으면 세우고, 있으면 그것을 다시 쓴다 — 슬롯에 하나다.
     /// </summary>
-    /// <param name="charSlotScale">이모지가 설 자리. 캐릭터 리그의 CharSlot_Scale.</param>
+    /// <param name="standNode">이모지가 설 자리. 캐릭터 리그의 CharacterPortrait_DepthScale.</param>
     /// <param name="rolePrefix">그 슬롯의 접두(예: "harin_"). 비어도 된다.</param>
-    public RectTransform EnsureLocator(RectTransform charSlotScale, string rolePrefix)
+    public RectTransform EnsureLocator(RectTransform standNode, string rolePrefix)
     {
-        if (charSlotScale == null)
-            throw new ArgumentNullException(nameof(charSlotScale));
+        if (standNode == null)
+            throw new ArgumentNullException(nameof(standNode));
 
         string locatorName = NodeName(rolePrefix, null, null, EmojiRigSchema.Refs.Emoji_Locator);
 
-        RectTransform locator = FindDirectChild(charSlotScale, locatorName);
+        RectTransform locator = FindDirectChild(standNode, locatorName);
 
         if (locator == null)
-            locator = CreateNode(charSlotScale, locatorName, EmojiRigSchema.Get(EmojiRigSchema.Refs.Emoji_Locator));
+            locator = CreateNode(standNode, locatorName, EmojiRigSchema.Get(EmojiRigSchema.Refs.Emoji_Locator));
 
         // 초상보다 뒤(= 위)에 그린다.
         locator.SetAsLastSibling();

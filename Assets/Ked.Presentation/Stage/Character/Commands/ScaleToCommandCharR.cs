@@ -7,7 +7,7 @@ using UnityEngine;
 public class ScaleToCommandSpecCharR : CharacterRigCommandSpecBase
 {
     [Header("Node")]
-    public CharacterRigNode node = CharacterRigNode.CharSlot_Scale;
+    public CharacterRigNode node = CharacterRigNode.CharacterPortrait_ActingScale;
 
     [Header("Scale (XY)")]
     public Vector2 toScale = Vector2.one;

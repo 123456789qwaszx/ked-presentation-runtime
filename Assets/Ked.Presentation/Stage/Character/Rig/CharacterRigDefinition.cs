@@ -7,12 +7,15 @@ using UnityEngine.UI;
 // CharacterRigBuilder가 프리팹을 검사해서 여기와 다르면 부수고 다시 세운다.
 //
 // 아래 Nodes의 **순서는 취향이 아니라 규약이다.** 한 노드 = 한 축이고,
-// 자리가 그 노드의 뜻을 정한다:
-//   · 동시에 돌 수 있는 축은 반드시 다른 노드다 — 같은 프로퍼티를 두 트윈이
-//     잡으면 서로를 덮는다 (Track_X / Track_Y가 따로인 이유).
-//   · 스케일이 셋, 회전이 둘인 것은 중복이 아니다. 무엇에 곱해져야 하는가가
-//     달라서 자리가 다르다 — DepthScale은 이동량까지 줄여야 원근이 되고
-//     (최상단), ActingScale은 이동량을 건드리면 안 된다(최하단).
+// 자리가 그 노드의 뜻을 정한다. 리그는 세 덩어리다(docs/PLAN_rig-layers.md):
+//   · 포커스(CharFocus_*) — 대화할 때만 서는 자리. 실제 무대로는 표현하기 힘든 작가 허용의 공간이라
+//     이동 · 회전 · 배율을 모두 갖고, 쓰고 나면 0으로 되돌린다. 이동은 맨 위(무대 값 그대로),
+//     회전 · 배율은 슬롯의 자리 아래(중심이 그 인물의 발밑)다.
+//   · 슬롯(CharSlot_*) — 무대 위의 본래 자리.
+//   · 초상(CharacterPortrait_*) — 그 사람의 크기(깊이)와 배역 앵커, 연기, 그림.
+//     깊이는 초상만 곱한다 — 슬롯의 이동은 어느 크기에서나 화면 값 그대로다.
+//
+// 한 노드에는 한 번에 트윈 하나다. 겹쳐야 하는 움직임은 다른 노드에 걸거나 클립 하나로 짠다.
 //
 // 순서를 바꾸거나 노드를 합치면 컴파일도 되고 예외도 안 나지만 연출이
 // 조용히 망가진다. 고치기 전에 반드시 읽을 것:
@@ -22,17 +25,23 @@ public static class CharacterRigSchema
 {
     public enum Refs
     {
-        // Slot axis - stage placement
-        CharSlot_Track_Focus,
-        CharSlot_DepthY,
-        CharSlot_DepthScale,
-        CharSlot_Track_Idle,
+        // Focus axis - 대화할 때만 서는 자리 (이동)
+        CharFocus_Track,
+
+        // Slot axis - 무대 위의 본래 자리
         CharSlot_Track,
-        CharSlot_Track_X,
-        CharSlot_Track_Y,
+
+        // Focus axis - 발밑을 중심으로 (회전 · 배율)
+        CharFocus_Rotation,
+        CharFocus_Scale,
+
+        // Slot axis - 회전
         CharSlot_Rotation,
         CharSlot_SwayPivot,
-        CharSlot_Scale,
+
+        // Portrait depth axis - 그 사람의 크기
+        CharacterPortrait_DepthOffset,
+        CharacterPortrait_DepthScale,
 
         // Character casting axis - per-character defaults
         CharacterPortrait_VisualOffset,
@@ -41,13 +50,12 @@ public static class CharacterRigSchema
         CharacterPortrait_Track,
         CharacterPortrait_Rotation,
         CharacterPortrait_Track_Move,
-        CharacterPortrait_Track_Move_X,
-        CharacterPortrait_Track_Move_Y,
         CharacterPortrait_SwayPivot,
         CharacterPortrait_Shake,
         CharacterPortrait_ActingScale,
-        CharacterPortrait_ActingScale_X,
-        CharacterPortrait_ActingScale_Y,
+
+        // Portrait mirror - 좌우 반전(mirror)만 쓴다
+        CharacterPortrait_Mirror,
 
         // Portrait sprite
         CharacterPortraitSprite_Root,
@@ -75,39 +83,44 @@ public static class CharacterRigSchema
 
     public static readonly NodeDef[] Nodes =
     {
-        // Slot axis - stage placement
-        new() { Id = Refs.CharSlot_Track_Focus, Parent = null },
-        new() { Id = Refs.CharSlot_DepthY, Parent = Refs.CharSlot_Track_Focus },
-        new() { Id = Refs.CharSlot_DepthScale, Parent = Refs.CharSlot_DepthY, NeedsBottomPivot = true },
-        new() { Id = Refs.CharSlot_Track_Idle, Parent = Refs.CharSlot_DepthScale },
-        new() { Id = Refs.CharSlot_Track, Parent = Refs.CharSlot_Track_Idle },
-        new() { Id = Refs.CharSlot_Track_X, Parent = Refs.CharSlot_Track },
-        new() { Id = Refs.CharSlot_Track_Y, Parent = Refs.CharSlot_Track_X },
-        new() { Id = Refs.CharSlot_Rotation, Parent = Refs.CharSlot_Track_Y },
+        // Focus axis - 대화할 때만 서는 자리 (이동)
+        new() { Id = Refs.CharFocus_Track, Parent = null },
+
+        // Slot axis - 무대 위의 본래 자리
+        new() { Id = Refs.CharSlot_Track, Parent = Refs.CharFocus_Track },
+
+        // Focus axis - 발밑을 중심으로 (회전 · 배율)
+        new() { Id = Refs.CharFocus_Rotation, Parent = Refs.CharSlot_Track, NeedsBottomPivot = true },
+        new() { Id = Refs.CharFocus_Scale, Parent = Refs.CharFocus_Rotation, NeedsBottomPivot = true },
+
+        // Slot axis - 회전
+        new() { Id = Refs.CharSlot_Rotation, Parent = Refs.CharFocus_Scale },
         new() { Id = Refs.CharSlot_SwayPivot, Parent = Refs.CharSlot_Rotation, NeedsBottomPivot = true },
-        new() { Id = Refs.CharSlot_Scale, Parent = Refs.CharSlot_SwayPivot, NeedsBottomPivot = true },
+
+        // Portrait depth axis - 그 사람의 크기. 슬롯의 이동은 곱하지 않는다
+        new() { Id = Refs.CharacterPortrait_DepthOffset, Parent = Refs.CharSlot_SwayPivot },
+        new() { Id = Refs.CharacterPortrait_DepthScale, Parent = Refs.CharacterPortrait_DepthOffset, NeedsBottomPivot = true },
 
         // Character casting axis - per-character defaults
-        new() { Id = Refs.CharacterPortrait_VisualOffset, Parent = Refs.CharSlot_Scale, NeedsBottomPivot = true},
+        new() { Id = Refs.CharacterPortrait_VisualOffset, Parent = Refs.CharacterPortrait_DepthScale, NeedsBottomPivot = true},
 
         // Portrait acting axis
         new() { Id = Refs.CharacterPortrait_Track, Parent = Refs.CharacterPortrait_VisualOffset },
         new() { Id = Refs.CharacterPortrait_Rotation, Parent = Refs.CharacterPortrait_Track },
         new() { Id = Refs.CharacterPortrait_Track_Move, Parent = Refs.CharacterPortrait_Rotation },
-        new() { Id = Refs.CharacterPortrait_Track_Move_X, Parent = Refs.CharacterPortrait_Track_Move },
-        new() { Id = Refs.CharacterPortrait_Track_Move_Y, Parent = Refs.CharacterPortrait_Track_Move_X },
-        new() { Id = Refs.CharacterPortrait_SwayPivot, Parent = Refs.CharacterPortrait_Track_Move_Y, NeedsBottomPivot = true },
+        new() { Id = Refs.CharacterPortrait_SwayPivot, Parent = Refs.CharacterPortrait_Track_Move, NeedsBottomPivot = true },
         new() { Id = Refs.CharacterPortrait_Shake, Parent = Refs.CharacterPortrait_SwayPivot },
         new() { Id = Refs.CharacterPortrait_ActingScale, Parent = Refs.CharacterPortrait_Shake },
-        new() { Id = Refs.CharacterPortrait_ActingScale_X, Parent = Refs.CharacterPortrait_ActingScale },
-        new() { Id = Refs.CharacterPortrait_ActingScale_Y, Parent = Refs.CharacterPortrait_ActingScale_X },
+
+        // Portrait mirror - 배율 연기(ActingScale)와 합치지 않는다: 합치면 배율 모션이 뒤집힌 부호를 덮는다
+        new() { Id = Refs.CharacterPortrait_Mirror, Parent = Refs.CharacterPortrait_ActingScale },
 
         // Portrait sprite
-        new() { Id = Refs.CharacterPortraitSprite_Root, Parent = Refs.CharacterPortrait_ActingScale_Y, NeedsCanvasGroup = true, InitialCanvasGroupAlpha = 0f },
+        new() { Id = Refs.CharacterPortraitSprite_Root, Parent = Refs.CharacterPortrait_Mirror, NeedsCanvasGroup = true, InitialCanvasGroupAlpha = 0f },
         new() { Id = Refs.CharacterPortraitSprite_Image, Parent = Refs.CharacterPortraitSprite_Root, NeedsImage = true },
 
         // Portrait sprite overlay
-        new() { Id = Refs.CharacterPortraitSpriteOverlay_Root, Parent = Refs.CharacterPortrait_ActingScale_Y, NeedsCanvasGroup = true, InitialCanvasGroupAlpha = 0f },
+        new() { Id = Refs.CharacterPortraitSpriteOverlay_Root, Parent = Refs.CharacterPortrait_Mirror, NeedsCanvasGroup = true, InitialCanvasGroupAlpha = 0f },
         new() { Id = Refs.CharacterPortraitSpriteOverlay_Image, Parent = Refs.CharacterPortraitSpriteOverlay_Root, NeedsImage = true },
     };
 }
@@ -115,18 +128,24 @@ public static class CharacterRigSchema
 public enum CharacterRigNode
 {
     RigRoot,
-    
-    // Slot axis - stage placement
-    CharSlot_Track_Focus,
-    CharSlot_DepthY,
-    CharSlot_DepthScale,
-    CharSlot_Track_Idle,
+
+    // Focus axis - 대화할 때만 서는 자리 (이동)
+    CharFocus_Track,
+
+    // Slot axis - 무대 위의 본래 자리
     CharSlot_Track,
-    CharSlot_Track_X,
-    CharSlot_Track_Y,
+
+    // Focus axis - 발밑을 중심으로 (회전 · 배율)
+    CharFocus_Rotation,
+    CharFocus_Scale,
+
+    // Slot axis - 회전
     CharSlot_Rotation,
     CharSlot_SwayPivot,
-    CharSlot_Scale,
+
+    // Portrait depth axis - 그 사람의 크기
+    CharacterPortrait_DepthOffset,
+    CharacterPortrait_DepthScale,
 
     // Character casting axis - per-character defaults
     CharacterPortrait_VisualOffset,
@@ -135,13 +154,12 @@ public enum CharacterRigNode
     CharacterPortrait_Track,
     CharacterPortrait_Rotation,
     CharacterPortrait_Track_Move,
-    CharacterPortrait_Track_Move_X,
-    CharacterPortrait_Track_Move_Y,
     CharacterPortrait_SwayPivot,
     CharacterPortrait_Shake,
     CharacterPortrait_ActingScale,
-    CharacterPortrait_ActingScale_X,
-    CharacterPortrait_ActingScale_Y,
+
+    // Portrait mirror - 좌우 반전(mirror)만 쓴다
+    CharacterPortrait_Mirror,
 
     // Portrait sprite
     CharacterPortraitSprite_Root,
@@ -181,17 +199,19 @@ public sealed class CharacterRigRefs
     // CoC 공식이 필요로 하는 것도 스케일이다. Far 0.68 ~ Close 1.38로 단조증가한다.
     public float SettledDepthScale = 1f;
 
-    // Slot axis - stage placement
-    public RectTransform CharSlot_Track_Focus;
-    public RectTransform CharSlot_DepthY;
-    public RectTransform CharSlot_DepthScale;
-    public RectTransform CharSlot_Track_Idle;
+    // Focus axis - 대화할 때만 서는 자리
+    public RectTransform CharFocus_Track;
+    public RectTransform CharFocus_Rotation;
+    public RectTransform CharFocus_Scale;
+
+    // Slot axis - 무대 위의 본래 자리
     public RectTransform CharSlot_Track;
-    public RectTransform CharSlot_Track_X;
-    public RectTransform CharSlot_Track_Y;
     public RectTransform CharSlot_Rotation;
     public RectTransform CharSlot_SwayPivot;
-    public RectTransform CharSlot_Scale;
+
+    // Portrait depth axis - 그 사람의 크기
+    public RectTransform CharacterPortrait_DepthOffset;
+    public RectTransform CharacterPortrait_DepthScale;
 
     // Character casting axis - per-character defaults
     public RectTransform CharacterPortrait_VisualOffset;
@@ -200,13 +220,12 @@ public sealed class CharacterRigRefs
     public RectTransform CharacterPortrait_Track;
     public RectTransform CharacterPortrait_Rotation;
     public RectTransform CharacterPortrait_Track_Move;
-    public RectTransform CharacterPortrait_Track_Move_X;
-    public RectTransform CharacterPortrait_Track_Move_Y;
     public RectTransform CharacterPortrait_SwayPivot;
     public RectTransform CharacterPortrait_Shake;
     public RectTransform CharacterPortrait_ActingScale;
-    public RectTransform CharacterPortrait_ActingScale_X;
-    public RectTransform CharacterPortrait_ActingScale_Y;
+
+    // Portrait mirror
+    public RectTransform CharacterPortrait_Mirror;
 
     // Portrait sprite
     public RectTransform CharacterPortraitSprite_Root;
@@ -240,17 +259,19 @@ public static class CharacterRigRefsExtensions
         {
             CharacterRigNode.RigRoot => refs.RigRoot,
             
-            // Slot axis - stage placement
-            CharacterRigNode.CharSlot_Track_Focus => refs.CharSlot_Track_Focus,
-            CharacterRigNode.CharSlot_DepthY => refs.CharSlot_DepthY,
-            CharacterRigNode.CharSlot_DepthScale => refs.CharSlot_DepthScale,
-            CharacterRigNode.CharSlot_Track_Idle => refs.CharSlot_Track_Idle,
+            // Focus axis
+            CharacterRigNode.CharFocus_Track => refs.CharFocus_Track,
+            CharacterRigNode.CharFocus_Rotation => refs.CharFocus_Rotation,
+            CharacterRigNode.CharFocus_Scale => refs.CharFocus_Scale,
+
+            // Slot axis
             CharacterRigNode.CharSlot_Track => refs.CharSlot_Track,
-            CharacterRigNode.CharSlot_Track_X => refs.CharSlot_Track_X,
-            CharacterRigNode.CharSlot_Track_Y => refs.CharSlot_Track_Y,
             CharacterRigNode.CharSlot_Rotation => refs.CharSlot_Rotation,
             CharacterRigNode.CharSlot_SwayPivot => refs.CharSlot_SwayPivot,
-            CharacterRigNode.CharSlot_Scale => refs.CharSlot_Scale,
+
+            // Portrait depth axis
+            CharacterRigNode.CharacterPortrait_DepthOffset => refs.CharacterPortrait_DepthOffset,
+            CharacterRigNode.CharacterPortrait_DepthScale => refs.CharacterPortrait_DepthScale,
 
             // Character casting axis - per-character defaults
             CharacterRigNode.CharacterPortrait_VisualOffset => refs.CharacterPortrait_VisualOffset,
@@ -259,13 +280,12 @@ public static class CharacterRigRefsExtensions
             CharacterRigNode.CharacterPortrait_Track => refs.CharacterPortrait_Track,
             CharacterRigNode.CharacterPortrait_Rotation => refs.CharacterPortrait_Rotation,
             CharacterRigNode.CharacterPortrait_Track_Move => refs.CharacterPortrait_Track_Move,
-            CharacterRigNode.CharacterPortrait_Track_Move_X => refs.CharacterPortrait_Track_Move_X,
-            CharacterRigNode.CharacterPortrait_Track_Move_Y => refs.CharacterPortrait_Track_Move_Y,
             CharacterRigNode.CharacterPortrait_SwayPivot => refs.CharacterPortrait_SwayPivot,
             CharacterRigNode.CharacterPortrait_Shake => refs.CharacterPortrait_Shake,
             CharacterRigNode.CharacterPortrait_ActingScale => refs.CharacterPortrait_ActingScale,
-            CharacterRigNode.CharacterPortrait_ActingScale_X => refs.CharacterPortrait_ActingScale_X,
-            CharacterRigNode.CharacterPortrait_ActingScale_Y => refs.CharacterPortrait_ActingScale_Y,
+
+            // Portrait mirror
+            CharacterRigNode.CharacterPortrait_Mirror => refs.CharacterPortrait_Mirror,
 
             // Portrait sprite
             CharacterRigNode.CharacterPortraitSprite_Root => refs.CharacterPortraitSprite_Root,

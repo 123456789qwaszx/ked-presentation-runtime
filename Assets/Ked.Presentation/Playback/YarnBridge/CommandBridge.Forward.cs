@@ -38,17 +38,11 @@ public sealed partial class YarnCommandBridge
     private void EnqueueRotateBySpec(string roleKey = null, string degree = null, string durationToken = null, string easeToken = null)
         => Forward("rotate_by", roleKey, degree, durationToken, easeToken);
 
-    private void EnqueueSizeBySpec(string roleKey = null, string multiplier = null, string durationToken = null, string easeToken = null)
-        => Forward("scale_by", roleKey, multiplier, durationToken, easeToken);
-
     private void EnqueueSetPlaceResetSpecs(string roleKey = null, string durationToken = null)
         => Forward("move_reset", roleKey, durationToken);
 
     private void EnqueueRotateResetSpec(string roleKey = null, string durationToken = null, string easeToken = null)
         => Forward("rotate_reset", roleKey, durationToken, easeToken);
-
-    private void EnqueueSizeResetSpec(string roleKey = null, string durationToken = null, string easeToken = null)
-        => Forward("scale_reset", roleKey, durationToken, easeToken);
 
     private void EnqueueMotionSpec(string roleKey = null, string motionName = null, string modeToken = null)
         => Forward("motion", roleKey, motionName, modeToken);
@@ -85,18 +79,6 @@ public sealed partial class YarnCommandBridge
 
     private void EnqueueShotShakeSpec(string shakeName = null, string intensity = null)
         => Forward("shot_shake", shakeName, intensity);
-
-    private void EnqueueNudgeLeftSpec(string roleKey = null, string unitToken = null, string durationToken = null, string easeToken = null)
-        => Forward("left", roleKey, unitToken, durationToken, easeToken);
-
-    private void EnqueueNudgeRightSpec(string roleKey = null, string unitToken = null, string durationToken = null, string easeToken = null)
-        => Forward("right", roleKey, unitToken, durationToken, easeToken);
-
-    private void EnqueueNudgeUpSpec(string roleKey = null, string unitToken = null, string durationToken = null, string easeToken = null)
-        => Forward("up", roleKey, unitToken, durationToken, easeToken);
-
-    private void EnqueueNudgeDownSpec(string roleKey = null, string unitToken = null, string durationToken = null, string easeToken = null)
-        => Forward("down", roleKey, unitToken, durationToken, easeToken);
 
     private void EnqueuePlaceCharacterFocusSpec(string roleKey = null, string focus = null, string screenPoint = null, string durationToken = null, string easeToken = null)
         => Forward("place", roleKey, focus, screenPoint, durationToken, easeToken);

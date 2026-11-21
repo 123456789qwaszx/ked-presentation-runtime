@@ -32,7 +32,6 @@ public sealed partial class YarnCommandBridge
     private void BindRunnerCommands(DialogueRunner runner)
     {
         RegisterCharFocusPlacementCommands(runner);
-        RegisterCharRigPlacementCommands(runner);
         BindBackground(runner);
         
         BindControl(runner);
@@ -114,16 +113,10 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler<string, string, string, string>(
             "rotate_by", EnqueueRotateBySpec);
 
-        runner.AddCommandHandler<string, string, string, string>(
-            "scale_by", EnqueueSizeBySpec);
-
         runner.AddCommandHandler<string, string>(
             "move_reset", EnqueueSetPlaceResetSpecs);
         runner.AddCommandHandler<string, string, string>(
             "rotate_reset", EnqueueRotateResetSpec);
-
-        runner.AddCommandHandler<string, string, string>(
-            "scale_reset", EnqueueSizeResetSpec);
 
         // 모션 — motions.json의 클립(모션 툴·Animation 창에서 내보낸 것). 길이는 클립이 안다.
         // 세 번째 인자 relative|absolute(생략 relative)가 키 값을 어떻게 읽을지 정한다 — 클립은 mode를 모른다(motions/2).
@@ -164,22 +157,6 @@ public sealed partial class YarnCommandBridge
         // 연기 — 화면 흔들림
         runner.AddCommandHandler<string, string>(
             "shot_shake", EnqueueShotShakeSpec);
-    }
-    
-    private void RegisterCharRigPlacementCommands(DialogueRunner runner)
-    {
-        // Nudge
-        runner.AddCommandHandler<string, string, string, string>(
-            "left", EnqueueNudgeLeftSpec);
-
-        runner.AddCommandHandler<string, string, string, string>(
-            "right", EnqueueNudgeRightSpec);
-
-        runner.AddCommandHandler<string, string, string, string>(
-            "up", EnqueueNudgeUpSpec);
-
-        runner.AddCommandHandler<string, string, string, string>(
-            "down", EnqueueNudgeDownSpec);
     }
     
     private void RegisterCharFocusPlacementCommands(DialogueRunner runner)

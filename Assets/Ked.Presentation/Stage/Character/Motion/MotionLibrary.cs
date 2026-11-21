@@ -14,7 +14,7 @@ using UnityEngine;
 //   "motions": [
 //     { "name": "nod", "rig": "character", "duration": 0.6, "end": "restore",
 //       "channels": [
-//         { "node": "CharacterPortrait_Track_Move_Y", "kind": "position",
+//         { "node": "CharacterPortrait_Track_Move", "kind": "position",
 //           "y": [ { "t": 0, "v": 0, "inTangent": 0, "outTangent": -120 }, … ] }
 //       ] }
 //   ]

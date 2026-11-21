@@ -19,8 +19,8 @@ public sealed class SetDepthCommandSpecCharR : CharacterRigCommandSpecBase
     public Vector2 focusOffset = Vector2.zero;
 
     [Header("Nodes")]
-    public CharacterRigNode depthYNode = CharacterRigNode.CharSlot_DepthY;
-    public CharacterRigNode depthScaleNode = CharacterRigNode.CharSlot_DepthScale;
+    public CharacterRigNode depthYNode = CharacterRigNode.CharacterPortrait_DepthOffset;
+    public CharacterRigNode depthScaleNode = CharacterRigNode.CharacterPortrait_DepthScale;
 
     [Header("Tween")]
     public float duration = 0.4f;

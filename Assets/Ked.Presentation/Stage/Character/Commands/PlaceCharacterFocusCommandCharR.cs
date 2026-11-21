@@ -19,8 +19,8 @@ public sealed class PlaceCharacterFocusCommandSpecCharR : CharacterRigCommandSpe
     public Vector2 screenOffset = Vector2.zero;
 
     [Header("Placement Node")]
-    [Tooltip("Focus placement 전용 축. 보통 CharSlot_Track_Focus를 사용합니다.")]
-    public CharacterRigNode moveNode = CharacterRigNode.CharSlot_Track_Focus;
+    [Tooltip("Focus placement 전용 축. 보통 CharFocus_Track를 사용합니다.")]
+    public CharacterRigNode moveNode = CharacterRigNode.CharFocus_Track;
 
     [Header("Tween")]
     public float duration = 0.4f;
@@ -28,7 +28,7 @@ public sealed class PlaceCharacterFocusCommandSpecCharR : CharacterRigCommandSpe
 }
 
 /// <summary>
-/// place — 캐릭터의 초점(얼굴 · 가슴 · 몸)을 **무대 지점**에 두도록 CharSlot_Track_Focus를 옮긴다.
+/// place — 캐릭터의 초점(얼굴 · 가슴 · 몸)을 **무대 지점**에 두도록 CharFocus_Track를 옮긴다.
 /// 무대 지점은 카메라 중립의 화면 지점과 겹치는 무대 위 자리다 — 화면 구도는 샷이 맡는다.
 /// 같은 줄의 예약(size · move_by 등)은 끝값으로, 샷이 움직이는 무대 노드는 중립값으로 풀어서
 /// 일반 재생 · 롤백 · 코어 폴드가 같은 자리를 낸다(CharacterFocusPlacementSolver).

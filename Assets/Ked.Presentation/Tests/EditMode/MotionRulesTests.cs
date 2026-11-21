@@ -16,7 +16,7 @@ public class MotionRulesTests
         return result;
     }
 
-    private static MotionChannel Channel(string node = "CharacterPortrait_Track_Move_Y", MotionChannelKind kind = MotionChannelKind.Position,
+    private static MotionChannel Channel(string node = "CharacterPortrait_Track_Move", MotionChannelKind kind = MotionChannelKind.Position,
         CurveKey[] x = null, CurveKey[] y = null, CurveKey[] z = null)
         => new() { Node = node, Kind = kind, X = x, Y = y, Z = z };
 
@@ -28,7 +28,7 @@ public class MotionRulesTests
 
     private static MotionChannel Nod => Channel(y: Keys((0f, 0f), (0.3f, -18f), (0.6f, 0f)));
 
-    private static readonly HashSet<string> Rig = new() { "CharacterPortrait_Track_Move_Y", "CharacterPortrait_SwayPivot", "CharSlot_Track_X", "CharSlot_Track_Focus" };
+    private static readonly HashSet<string> Rig = new() { "CharacterPortrait_Track_Move", "CharacterPortrait_SwayPivot", "CharSlot_Track", "CharFocus_Track", "CharFocus_Rotation", "CharFocus_Scale" };
 
     [Test]
     public void 유효한_클립은_통과한다_스키마가_있어도_없어도()
@@ -65,12 +65,16 @@ public class MotionRulesTests
     }
 
     [Test]
-    public void Track_Focus는_키잉할_수_없다()
+    public void 포커스_계층은_키잉할_수_없다()
     {
-        MotionClip clip = Clip(0.6f, Channel("CharSlot_Track_Focus", x: Keys((0f, 0f), (0.6f, 10f))));
+        // 포커스 계층(대화할 때만 서는 자리)은 focus_* 커맨드가 놓고 focus_reset이 되돌린다 — 클립이 키를 주지 않는다.
+        foreach (string node in new[] { "CharFocus_Track", "CharFocus_Rotation", "CharFocus_Scale" })
+        {
+            MotionClip clip = Clip(0.6f, Channel(node, x: Keys((0f, 0f), (0.6f, 10f))));
 
-        Assert.IsFalse(MotionRules.TryValidate(clip, Rig, out string reason));
-        StringAssert.Contains("Track_Focus", reason);
+            Assert.IsFalse(MotionRules.TryValidate(clip, Rig, out string reason), node);
+            StringAssert.Contains("포커스 계층", reason);
+        }
     }
 
     [Test]

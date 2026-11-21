@@ -7,14 +7,14 @@ using UnityEngine;
 //
 // 이모지의 오브젝트는 슬롯의 리그 밑에 산다 — 슬롯이 부서지거나 다시 선언되면(CharacterRigRegistry)
 // 이모지도 함께 부서진다. 이 장부는 그것을 **따로 통보받지 않는다**: 읽고 쓸 때마다 "지금 그 슬롯의
-// CharSlot_Scale 밑에 서 있는 것"만 남기고 나머지를 잊는다(Prune). 캐릭터 쪽 코드가 이모지를 모르게 하려는 것이다.
+// CharacterPortrait_DepthScale 밑에 서 있는 것"만 남기고 나머지를 잊는다(Prune). 캐릭터 쪽 코드가 이모지를 모르게 하려는 것이다.
 // ─────────────────────────────────────────────────────────────────────
 public sealed class EmojiRigRegistry
 {
     private readonly Dictionary<string, Dictionary<string, EmojiRefs>> _bySlot = new(StringComparer.Ordinal);
 
     /// <summary>이모지를 장부에 올린다. 같은 이름은 덮는다(오브젝트는 빌더가 이미 갈았다).</summary>
-    public void Register(string slotKey, RectTransform charSlotScale, EmojiRefs emoji)
+    public void Register(string slotKey, RectTransform standNode, EmojiRefs emoji)
     {
         if (string.IsNullOrEmpty(slotKey))
             throw new ArgumentException("슬롯 키가 비어 있다.", nameof(slotKey));
@@ -22,7 +22,7 @@ public sealed class EmojiRigRegistry
         if (emoji == null)
             throw new ArgumentNullException(nameof(emoji));
 
-        Prune(slotKey, charSlotScale);
+        Prune(slotKey, standNode);
 
         if (!_bySlot.TryGetValue(slotKey, out Dictionary<string, EmojiRefs> emojis))
         {
@@ -33,9 +33,9 @@ public sealed class EmojiRigRegistry
         emojis[emoji.EmojiName] = emoji;
     }
 
-    public bool TryGet(string slotKey, RectTransform charSlotScale, string emojiName, out EmojiRefs emoji)
+    public bool TryGet(string slotKey, RectTransform standNode, string emojiName, out EmojiRefs emoji)
     {
-        Prune(slotKey, charSlotScale);
+        Prune(slotKey, standNode);
 
         emoji = null;
 
@@ -44,9 +44,9 @@ public sealed class EmojiRigRegistry
     }
 
     /// <summary>장부에서 뺀다. 오브젝트를 부수는 것은 부르는 쪽(EmojiRigBuilder.DestroyEmoji)이다.</summary>
-    public bool Remove(string slotKey, RectTransform charSlotScale, string emojiName, out EmojiRefs emoji)
+    public bool Remove(string slotKey, RectTransform standNode, string emojiName, out EmojiRefs emoji)
     {
-        if (!TryGet(slotKey, charSlotScale, emojiName, out emoji))
+        if (!TryGet(slotKey, standNode, emojiName, out emoji))
             return false;
 
         _bySlot[slotKey].Remove(emojiName);
@@ -54,9 +54,9 @@ public sealed class EmojiRigRegistry
     }
 
     /// <summary>그 슬롯에 서 있는 이모지를 전부 장부에서 빼서 results에 담는다.</summary>
-    public void RemoveAll(string slotKey, RectTransform charSlotScale, List<EmojiRefs> results)
+    public void RemoveAll(string slotKey, RectTransform standNode, List<EmojiRefs> results)
     {
-        Prune(slotKey, charSlotScale);
+        Prune(slotKey, standNode);
 
         if (!_bySlot.TryGetValue(slotKey ?? "", out Dictionary<string, EmojiRefs> emojis))
             return;
@@ -66,9 +66,9 @@ public sealed class EmojiRigRegistry
     }
 
     /// <summary>그 슬롯에 서 있는 이모지의 수.</summary>
-    public int CountOf(string slotKey, RectTransform charSlotScale)
+    public int CountOf(string slotKey, RectTransform standNode)
     {
-        Prune(slotKey, charSlotScale);
+        Prune(slotKey, standNode);
 
         return _bySlot.TryGetValue(slotKey ?? "", out Dictionary<string, EmojiRefs> emojis) ? emojis.Count : 0;
     }
@@ -77,7 +77,7 @@ public sealed class EmojiRigRegistry
     public void Clear() => _bySlot.Clear();
 
     // 부서졌거나(null), 옛 리그 밑에 남은 것(재선언 — 옛 리그는 프레임 끝에 부서진다)을 잊는다.
-    private void Prune(string slotKey, RectTransform charSlotScale)
+    private void Prune(string slotKey, RectTransform standNode)
     {
         if (slotKey == null || !_bySlot.TryGetValue(slotKey, out Dictionary<string, EmojiRefs> emojis))
             return;
@@ -91,7 +91,7 @@ public sealed class EmojiRigRegistry
             bool alive = emoji != null
                          && emoji.Emoji_Offset != null
                          && emoji.Emoji_Locator != null
-                         && emoji.Emoji_Locator.parent == charSlotScale;
+                         && emoji.Emoji_Locator.parent == standNode;
 
             if (!alive)
                 (stale ??= new List<string>()).Add(pair.Key);

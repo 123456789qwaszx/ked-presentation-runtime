@@ -165,7 +165,7 @@ public partial class SampleBootstrap
             characterVisualFocusPresetDb,
             characterDepthTuning);
 
-        // Emoji — 슬롯에 딸려 서는 작은 연출. 캐릭터를 모른다: 설 자리(CharSlot_Scale)만 받는다.
+        // Emoji — 슬롯에 딸려 서는 작은 연출. 캐릭터를 모른다: 설 자리(CharacterPortrait_DepthScale)만 받는다.
         _emojis = LoadEmojis();
 
         EmojiRigBuilder emojiRigBuilder = new();

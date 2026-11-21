@@ -35,7 +35,7 @@ public sealed class EmojiLocatorSystem
     private readonly List<Placed> _placed = new();
 
     /// <param name="tuning">캐릭터 + 포즈별 표. null이면 모두 기본 자리다.</param>
-    /// <param name="defaultPosition">표에 없을 때의 자리 — 발(CharSlot_Scale의 아래 가운데)에서 잰 px, y 위.</param>
+    /// <param name="defaultPosition">표에 없을 때의 자리 — 발(CharacterPortrait_DepthScale의 아래 가운데)에서 잰 px, y 위.</param>
     public EmojiLocatorSystem(PresentationStage stage, EmojiLocatorTuningDBSO tuning, Vector2 defaultPosition)
     {
         _stage = stage ?? throw new ArgumentNullException(nameof(stage));

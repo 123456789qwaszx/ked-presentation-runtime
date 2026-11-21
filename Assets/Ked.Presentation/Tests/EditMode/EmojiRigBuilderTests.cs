@@ -27,10 +27,10 @@ namespace Ked.Presentation.Tests
             _spawned.Clear();
         }
 
-        /// <summary>슬롯의 CharSlot_Scale 대역 — 무대 크기의 rect, 발 피벗.</summary>
-        private RectTransform NewSlotScale()
+        /// <summary>슬롯의 CharacterPortrait_DepthScale 대역 — 무대 크기의 rect, 발 피벗.</summary>
+        private RectTransform NewStandNode()
         {
-            GameObject go = new("harin_CharSlot_Scale", typeof(RectTransform));
+            GameObject go = new("harin_CharacterPortrait_DepthScale", typeof(RectTransform));
             _spawned.Add(go);
 
             RectTransform rt = (RectTransform)go.transform;
@@ -40,9 +40,9 @@ namespace Ked.Presentation.Tests
             return rt;
         }
 
-        private static EmojiRefs Build(EmojiRigBuilder builder, RectTransform slotScale, string emoji, params string[] rigs)
+        private static EmojiRefs Build(EmojiRigBuilder builder, RectTransform standNode, string emoji, params string[] rigs)
         {
-            RectTransform locator = builder.EnsureLocator(slotScale, "harin_");
+            RectTransform locator = builder.EnsureLocator(standNode, "harin_");
             return builder.BuildEmoji(locator, "harin_", emoji, rigs);
         }
 
@@ -84,10 +84,10 @@ namespace Ked.Presentation.Tests
         [Test]
         public void 리그_이름마다_두_단이_스키마의_부모대로_선다()
         {
-            RectTransform slotScale = NewSlotScale();
-            EmojiRefs emoji = Build(new EmojiRigBuilder(), slotScale, "flower", "big", "small");
+            RectTransform standNode = NewStandNode();
+            EmojiRefs emoji = Build(new EmojiRigBuilder(), standNode, "flower", "big", "small");
 
-            Assert.That(emoji.Emoji_Locator.parent, Is.SameAs(slotScale));
+            Assert.That(emoji.Emoji_Locator.parent, Is.SameAs(standNode));
             Assert.That(emoji.Emoji_Offset.parent, Is.SameAs(emoji.Emoji_Locator));
             Assert.That(emoji.Rigs, Has.Count.EqualTo(2));
 
@@ -111,8 +111,8 @@ namespace Ked.Presentation.Tests
         [Test]
         public void 노드의_모양이_스키마와_같다()
         {
-            RectTransform slotScale = NewSlotScale();
-            EmojiRefs emoji = Build(new EmojiRigBuilder(), slotScale, "star", "body");
+            RectTransform standNode = NewStandNode();
+            EmojiRefs emoji = Build(new EmojiRigBuilder(), standNode, "star", "body");
             EmojiRigRefs rig = emoji.Rigs[0];
 
             // 로케이터는 발(부모 rect의 아래 가운데)에 붙는다.
@@ -144,7 +144,7 @@ namespace Ked.Presentation.Tests
         [Test]
         public void 하이어라키_이름에_슬롯_이모지_리그가_접두로_붙는다()
         {
-            EmojiRefs emoji = Build(new EmojiRigBuilder(), NewSlotScale(), "flower", "big");
+            EmojiRefs emoji = Build(new EmojiRigBuilder(), NewStandNode(), "flower", "big");
             EmojiRigRefs rig = emoji.Rigs[0];
 
             Assert.That(emoji.Emoji_Locator.name, Is.EqualTo("harin_Emoji_Locator"));
@@ -156,7 +156,7 @@ namespace Ked.Presentation.Tests
         [Test]
         public void 리그를_이름으로_찾는다()
         {
-            EmojiRefs emoji = Build(new EmojiRigBuilder(), NewSlotScale(), "flower", "big", "small");
+            EmojiRefs emoji = Build(new EmojiRigBuilder(), NewStandNode(), "flower", "big", "small");
 
             Assert.That(emoji.TryGetRig("small", out EmojiRigRefs small), Is.True);
             Assert.That(small, Is.SameAs(emoji.Rigs[1]));
@@ -169,31 +169,31 @@ namespace Ked.Presentation.Tests
         [Test]
         public void 로케이터는_슬롯에_하나다_이모지_여럿이_그_밑에_선다()
         {
-            RectTransform slotScale = NewSlotScale();
+            RectTransform standNode = NewStandNode();
             EmojiRigBuilder builder = new();
 
-            EmojiRefs a = Build(builder, slotScale, "star", "body");
-            EmojiRefs b = Build(builder, slotScale, "question", "mark");
+            EmojiRefs a = Build(builder, standNode, "star", "body");
+            EmojiRefs b = Build(builder, standNode, "question", "mark");
 
             Assert.That(b.Emoji_Locator, Is.SameAs(a.Emoji_Locator));
-            Assert.That(slotScale.childCount, Is.EqualTo(1));
+            Assert.That(standNode.childCount, Is.EqualTo(1));
             Assert.That(a.Emoji_Locator.childCount, Is.EqualTo(2));
         }
 
         [Test]
         public void 로케이터는_초상보다_뒤에_그린다()
         {
-            RectTransform slotScale = NewSlotScale();
+            RectTransform standNode = NewStandNode();
             EmojiRigBuilder builder = new();
 
-            RectTransform locator = builder.EnsureLocator(slotScale, "harin_");
+            RectTransform locator = builder.EnsureLocator(standNode, "harin_");
 
             // 로케이터가 선 뒤에 형제가 늘어도, 다시 받으면 맨 뒤로 간다.
             GameObject sibling = new("harin_CharacterPortrait_VisualOffset", typeof(RectTransform));
-            sibling.transform.SetParent(slotScale, false);
+            sibling.transform.SetParent(standNode, false);
 
-            Assert.That(builder.EnsureLocator(slotScale, "harin_"), Is.SameAs(locator));
-            Assert.That(locator.GetSiblingIndex(), Is.EqualTo(slotScale.childCount - 1));
+            Assert.That(builder.EnsureLocator(standNode, "harin_"), Is.SameAs(locator));
+            Assert.That(locator.GetSiblingIndex(), Is.EqualTo(standNode.childCount - 1));
         }
 
         // ── 다시 세우기 · 부수기 ─────────────────────────────────────
@@ -201,13 +201,13 @@ namespace Ked.Presentation.Tests
         [Test]
         public void 같은_이름의_이모지를_다시_세우면_옛것을_부수고_새로_선다()
         {
-            RectTransform slotScale = NewSlotScale();
+            RectTransform standNode = NewStandNode();
             EmojiRigBuilder builder = new();
 
-            EmojiRefs first = Build(builder, slotScale, "flower", "a", "b", "c");
+            EmojiRefs first = Build(builder, standNode, "flower", "a", "b", "c");
             RectTransform oldOffset = first.Emoji_Offset;
 
-            EmojiRefs second = Build(builder, slotScale, "flower", "a");
+            EmojiRefs second = Build(builder, standNode, "flower", "a");
 
             Assert.That(oldOffset == null, Is.True, "옛 오프셋이 부서지지 않았다");
             Assert.That(second.Emoji_Locator.childCount, Is.EqualTo(1));
@@ -217,10 +217,10 @@ namespace Ked.Presentation.Tests
         [Test]
         public void 부수면_이모지는_사라지고_로케이터는_남는다()
         {
-            RectTransform slotScale = NewSlotScale();
+            RectTransform standNode = NewStandNode();
             EmojiRigBuilder builder = new();
 
-            EmojiRefs emoji = Build(builder, slotScale, "flower", "a", "b");
+            EmojiRefs emoji = Build(builder, standNode, "flower", "a", "b");
             RectTransform locator = emoji.Emoji_Locator;
 
             builder.DestroyEmoji(emoji);
@@ -238,9 +238,9 @@ namespace Ked.Presentation.Tests
         [Test]
         public void 이름이_비거나_리그가_없거나_리그_이름이_겹치면_막는다()
         {
-            RectTransform slotScale = NewSlotScale();
+            RectTransform standNode = NewStandNode();
             EmojiRigBuilder builder = new();
-            RectTransform locator = builder.EnsureLocator(slotScale, "harin_");
+            RectTransform locator = builder.EnsureLocator(standNode, "harin_");
 
             Assert.Throws<ArgumentException>(() => builder.BuildEmoji(locator, "harin_", "", new[] { "a" }));
             Assert.Throws<ArgumentException>(() => builder.BuildEmoji(locator, "harin_", "flower", Array.Empty<string>()));

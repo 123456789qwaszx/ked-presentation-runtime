@@ -13,6 +13,9 @@ namespace Ked.Presentation.Tests.UnityParity
     ///
     /// 견본 둘은 ToolExport~/에 있다(~ 폴더라 Unity가 가져오지 않는다). 원본은 툴 저장소
     /// tests/Mt.Authoring.Tests/Fixtures/stage-parity/ @ ea3d82d — 거기서 바뀌면 그대로 복사한다.
+    /// **노드 이름 둘은 손으로 옮겼다**(2026-11-21, docs/PLAN_rig-layers.md): 리그 계층을 바꾸며 사라진 `CharSlot_Track_X` →
+    /// `CharSlot_Track`, `CharSlot_Scale` → `CharacterPortrait_ActingScale`. 키 값 · 포즈 표의 숫자는 그대로다(노드와 무관한 합성 식이다).
+    /// 툴이 새 스키마로 견본을 다시 내면(R7) 그것으로 바꾼다.
     ///   motions.json : 툴 산출물. sway(restore · 회전 z만 · 탄젠트 있음) · step(commit · 위치 x만 · 첫 키가 중립값이 아님)
     ///                  · grow(commit · 배율 x·y)
     ///   poses.json   : 0이 아닌 시작값 위에 relative·absolute로 얹은 툴 미리보기 포즈 34칸. 길이를 지난 6칸이 정지 프레임이다.

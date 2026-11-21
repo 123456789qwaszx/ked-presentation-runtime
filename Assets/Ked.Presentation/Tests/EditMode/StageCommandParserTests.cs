@@ -504,7 +504,7 @@ public class StageCommandParserTests
     public void motion은_저장소의_클립을_그대로_싣고_모르는_이름은_오류_후_아무것도_내지_않는다()
     {
         const string json = @"{ ""schema"": ""motions/2"", ""motions"": [ { ""name"": ""nod"", ""rig"": ""character"", ""duration"": 0.6, ""end"": ""restore"",
-            ""channels"": [ { ""node"": ""CharacterPortrait_Track_Move_Y"", ""kind"": ""position"",
+            ""channels"": [ { ""node"": ""CharacterPortrait_Track_Move"", ""kind"": ""position"",
             ""y"": [ { ""t"": 0, ""v"": 0 }, { ""t"": 0.6, ""v"": 0 } ] } ] } ] }";
 
         StageCommandParser parser = new(null, MotionLibrary.Parse(json, "test"));
@@ -578,7 +578,7 @@ public class StageCommandParserTests
         Assert.Less(move.delta.y, 0f, "부호 있는 단위");
 
         ScaleToCommandSpecCharR scale = (ScaleToCommandSpecCharR)Parse(NewParser(), Cmd("bg_scale", "bg_main", "1.2"))[0];
-        Assert.AreEqual(CharacterRigNode.CharacterPortrait_ActingScale, scale.node, "가운데 피벗 — CharSlot_Scale은 발 피벗");
+        Assert.AreEqual(CharacterRigNode.CharacterPortrait_ActingScale, scale.node, "가운데 피벗 — 깊이(CharacterPortrait_DepthScale)는 발 피벗");
         Assert.IsFalse(scale.relativeToCurrent);
         Assert.AreEqual(1.2f, scale.toScale.x, 1e-6f);
     }
@@ -601,7 +601,7 @@ public class StageCommandParserTests
         + " \"channels\": [ { \"node\": \"Camera_Shake\", \"kind\": \"position\","
         + " \"x\": [ { \"t\": 0, \"v\": 0 }, { \"t\": 0.1, \"v\": 14 }, { \"t\": 0.3, \"v\": 0 } ] } ] },"
         + " { \"name\": \"nod\", \"rig\": \"character\", \"duration\": 0.6, \"end\": \"restore\","
-        + " \"channels\": [ { \"node\": \"CharacterPortrait_Track_Move_Y\", \"kind\": \"position\","
+        + " \"channels\": [ { \"node\": \"CharacterPortrait_Track_Move\", \"kind\": \"position\","
         + " \"y\": [ { \"t\": 0, \"v\": 0 }, { \"t\": 0.6, \"v\": 0 } ] } ] } ] }";
 
     [Test]

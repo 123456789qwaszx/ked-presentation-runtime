@@ -74,9 +74,9 @@ public sealed class SetEmojiCommand : CommandBase
         if (settle && !definition.Stays)
             yield break;
 
-        EmojiRigTargets.Resolve(_stage, _spec.roleKey, out string slotKey, out RectTransform charSlotScale, out string rolePrefix);
+        EmojiRigTargets.Resolve(_stage, _spec.roleKey, out string slotKey, out RectTransform standNode, out string rolePrefix);
 
-        RectTransform locator = _builder.EnsureLocator(charSlotScale, rolePrefix);
+        RectTransform locator = _builder.EnsureLocator(standNode, rolePrefix);
         _locators.Place(slotKey, locator);
 
         string[] rigNames = new string[definition.Rigs.Count];
@@ -89,7 +89,7 @@ public sealed class SetEmojiCommand : CommandBase
         ApplyDefinition(emoji, definition);
 
         if (definition.Stays)
-            _stage.emojis.Register(slotKey, charSlotScale, emoji);
+            _stage.emojis.Register(slotKey, standNode, emoji);
 
         _playback.Play(emoji, definition, settle, _spec.flip);
 

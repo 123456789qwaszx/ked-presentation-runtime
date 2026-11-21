@@ -141,7 +141,7 @@ namespace Ked.Presentation.Tests.UnityParity
             => refs.GetRect(CharacterRigNode.CharacterPortrait_VisualOffset);
 
         private static RectTransform MoveRectOf(CharacterRigRefs refs)
-            => refs.GetRect(CharacterRigNode.CharSlot_Track_Focus);
+            => refs.GetRect(CharacterRigNode.CharFocus_Track);
 
         // CharacterFocusPlacementSolver와 같은 순서: 사슬 → 이동 축 색인 → SolveFocusPlacement.
         private static Vector2 SolvePlace(
@@ -234,7 +234,7 @@ namespace Ked.Presentation.Tests.UnityParity
         {
             // 같은 줄의 size가 깊이 크기를 예약한 상태 — 예약은 끝값으로, 카메라는 중립으로.
             CharacterPlacementTargetLedger ledger = new();
-            RectTransform depthScale = _refs.GetRect(CharacterRigNode.CharSlot_DepthScale);
+            RectTransform depthScale = _refs.GetRect(CharacterRigNode.CharacterPortrait_DepthScale);
             ledger.Publish(depthScale, NodeTarget.LocalScaleXY(depthScale.name, new Vector2(1.58f, 1.58f).ToCore()));
 
             Vector2 atNeutralCamera = SolvePlace(ledger, _refs, _shotRoot, _view);

@@ -78,7 +78,7 @@ namespace Ked.Presentation.Core
     ///
     /// 현재 어휘(v1): slot 계열(리그 스폰) · cast/actor(배역·별칭) ·
     ///   fade_in/out · fade · slide_in/out · place/size 계열 ·
-    ///   nudge/move/scale/rotate 계열 · shot 계열 ·
+    ///   move/rotate 계열 · shot 계열 ·
     ///   초상 축(pose/face/face_swap) · motion(채널마다 마지막 키) · 시간 커맨드(pause — 접을 것이 없다) ·
     ///   배경 bg_*(캐스팅하지 않은 슬롯 — spawn/sprite/fade/move/scale).
     /// 명시적 한계: 오버레이/이펙트/오디오/트랜지션 리그, 대사창,
@@ -95,7 +95,7 @@ namespace Ked.Presentation.Core
     ///   StageReducer.Slot.cs      슬롯 스폰 · 배역/별칭 · 구조 축
     ///   StageReducer.Anchor.cs    역할 앵커(cast) · fade
     ///   StageReducer.Placement.cs place · size
-    ///   StageReducer.Staging.cs   nudge · move · scale · rotate
+    ///   StageReducer.Staging.cs   move · rotate · 초상 축의 배율 · 회전 · motion
     ///   StageReducer.Shot.cs      shot 계열
     ///   StageReducer.Background.cs bg_* (배경 = 캐스팅하지 않은 슬롯)
     /// </summary>
@@ -184,21 +184,13 @@ namespace Ked.Presentation.Core
                 case "size": return ApplySize(state, cmd, tuning, cmd.Arg(1), cmd.Arg(2, "bust"), out reason);
                 case "size_reset": return ApplySize(state, cmd, tuning, "mid", cmd.Arg(1, "bust"), out reason);
 
-                // nudge (unitToken 필수 — 브리지에 기본값이 없다)
-                case "left":  return ApplyNudge(state, cmd, tuning, -1f, 0f, "CharSlot_Track_X", out reason);
-                case "right": return ApplyNudge(state, cmd, tuning, 1f, 0f, "CharSlot_Track_X", out reason);
-                case "up":    return ApplyNudge(state, cmd, tuning, 0f, 1f, "CharSlot_Track_Y", out reason);
-                case "down":  return ApplyNudge(state, cmd, tuning, 0f, -1f, "CharSlot_Track_Y", out reason);
-
                 // 슬라이드 (등장·퇴장) — 정착 상태로는 등장이 항등, 퇴장이 방향 × 거리다.
                 case "slide_in":  return ApplySlideIn(state, cmd, tuning, out reason);
                 case "slide_out": return ApplySlideOut(state, cmd, tuning, out reason);
 
-                // staging 이동/스케일/회전
+                // staging 이동/회전 · 초상 축의 배율/회전
                 case "move_by":      return ApplyMoveBy(state, cmd, tuning, out reason);
                 case "move_reset":   return ApplyMoveReset(state, cmd, out reason);
-                case "scale_by":     return ApplyScaleBy(state, cmd, out reason);
-                case "scale_reset":  return ApplyScaleReset(state, cmd, out reason);
                 case "rotate_by":    return ApplyRotateBy(state, cmd, out reason);
                 case "rotate_reset": return ApplyRotateReset(state, cmd, out reason);
                 case "char_scale_to":  return ApplyPortraitScaleTo(state, cmd, out reason);

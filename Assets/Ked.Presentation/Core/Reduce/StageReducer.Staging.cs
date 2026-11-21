@@ -1,32 +1,12 @@
 namespace Ked.Presentation.Core
 {
     /// <summary>
-    /// nudge · move · scale · rotate — 현재 값에 얹는 상대 변형.
+    /// move · rotate · 초상 축의 배율 · 회전 · motion — 표적 노드와 값만 정하면 끝나는 변형.
     ///
-    /// place/size와 달리 focus를 모른다. 표적 노드와 델타만 정하면 끝이라
     /// 폴드 본문은 전부 "토큰 파싱 → 표적 노드 → 목표 계산 호출" 세 줄 모양이다.
     /// </summary>
     public static partial class StageReducer
     {
-        private static bool ApplyNudge(
-            StageState state, in StageCommand cmd, StageReducerTuning tuning,
-            float xSign, float ySign, string targetId, out string reason)
-        {
-            if (!TryGetSpawnedSlot(state, cmd, out string slotKey, out reason))
-                return false;
-
-            string unitToken = cmd.Arg(1);
-
-            if (!UnitToken.TryParsePixels(unitToken, tuning.ReferenceStageWidth, out float pixels))
-            {
-                reason = $"거리 토큰을 읽지 못했다: '{unitToken}'";
-                return false;
-            }
-
-            ApplyMoveTarget(state, slotKey, targetId, relative: true, new Vec2(pixels * xSign, pixels * ySign));
-            return true;
-        }
-
         private static bool ApplyMoveBy(
             StageState state, in StageCommand cmd, StageReducerTuning tuning, out string reason)
         {
@@ -91,7 +71,7 @@ namespace Ked.Presentation.Core
 
             // 브리지는 Track과 Track_Focus 두 노드에 절대 0을 건다.
             ApplyMoveTarget(state, slotKey, "CharSlot_Track", relative: false, Vec2.Zero);
-            ApplyMoveTarget(state, slotKey, "CharSlot_Track_Focus", relative: false, Vec2.Zero);
+            ApplyMoveTarget(state, slotKey, "CharFocus_Track", relative: false, Vec2.Zero);
             return true;
         }
 
@@ -106,46 +86,9 @@ namespace Ked.Presentation.Core
                 state.Nodes.GetState(nodeKey).AnchoredPosition));
         }
 
-        private static bool ApplyScaleBy(StageState state, in StageCommand cmd, out string reason)
-        {
-            if (!TryGetSpawnedSlot(state, cmd, out string slotKey, out reason))
-                return false;
-
-            if (!NumberToken.TryParseFloat(cmd.Arg(1), out float multiplier))
-            {
-                reason = $"배율을 읽지 못했다: '{cmd.Arg(1)}'";
-                return false;
-            }
-
-            string nodeKey = StageState.NodeKeyOf(slotKey, "CharSlot_Scale");
-
-            state.Apply(NodeTargets.ScaleTo(
-                nodeKey,
-                new NodeTargets.ScaleToArgs(true, new Vec2(multiplier, multiplier)),
-                state.Nodes.GetState(nodeKey).LocalScale.XY));
-
-            return true;
-        }
-
-        private static bool ApplyScaleReset(StageState state, in StageCommand cmd, out string reason)
-        {
-            if (!TryGetSpawnedSlot(state, cmd, out string slotKey, out reason))
-                return false;
-
-            string nodeKey = StageState.NodeKeyOf(slotKey, "CharSlot_Scale");
-
-            state.Apply(NodeTargets.ScaleTo(
-                nodeKey,
-                new NodeTargets.ScaleToArgs(false, Vec2.One),
-                state.Nodes.GetState(nodeKey).LocalScale.XY));
-
-            return true;
-        }
-
-
         // char_scale_to — 초상 축의 절대 배율(브리지: CharacterPortrait_ActingScale).
-        // scale_by가 미는 CharSlot_Scale과는 다른 노드다 — 슬롯을 키우는 것과
-        // 초상만 키우는 것은 다른 일이고, 겹쳐 써도 서로를 덮지 않는다.
+        // size가 놓는 깊이(CharacterPortrait_DepthScale)와는 다른 노드다 — 그 사람의 크기와
+        // 연기의 배율은 다른 일이고, 겹쳐 써도 서로를 덮지 않는다.
         private static bool ApplyPortraitScaleTo(StageState state, in StageCommand cmd, out string reason)
         {
             if (!TryGetSpawnedSlot(state, cmd, out string slotKey, out reason))

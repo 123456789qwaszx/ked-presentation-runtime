@@ -17,7 +17,7 @@ public sealed class MirrorCharacterCommandSpecCharR : CharacterRigCommandSpecBas
     public CharacterMirrorMode mode = CharacterMirrorMode.Toggle;
 
     [Header("Node")]
-    public CharacterRigNode node = CharacterRigNode.CharacterPortrait_ActingScale_X;
+    public CharacterRigNode node = CharacterRigNode.CharacterPortrait_Mirror;
 
     [Header("Tween")]
     public float duration = 0f;

@@ -23,10 +23,11 @@ namespace Ked.Presentation.Core
         public const float Tolerance = 1e-4f;
 
         /// <summary>
-        /// 키잉 금지 노드. Track_Focus는 저작값이 아니라 해(解)다 — focus 프리셋 × ScreenPoint × 정착 체인에서
-        /// 풀려 나온다. 직접 키잉하면 place가 다음에 푸는 값과 싸운다.
+        /// 키잉 금지 노드 — 포커스 계층(대화할 때만 서는 자리). focus_move · focus_rotate · focus_scale이 절대값으로 놓고
+        /// focus_reset이 0으로 되돌리는 자리라, 클립이 키를 주면 돌아갈 본래 값이 흐려진다(docs/PLAN_rig-layers.md L1 · §9 ③).
         /// </summary>
-        public static readonly IReadOnlyCollection<string> ForbiddenNodes = new[] { "CharSlot_Track_Focus" };
+        public static readonly IReadOnlyCollection<string> ForbiddenNodes =
+            new[] { "CharFocus_Track", "CharFocus_Rotation", "CharFocus_Scale" };
 
         /// <summary>캐릭터 리그의 이름(rig-schemas.json의 rigKind). motion 커맨드가 트는 클립의 리그다.</summary>
         public const string CharacterRig = "character";
@@ -36,7 +37,7 @@ namespace Ked.Presentation.Core
 
         /// <summary>
         /// 카메라 리그에서 키를 줄 수 있는 노드는 이것 하나다. 나머지 카메라 노드(팬 · 줌 · 롤 · 달리 · 트랙)는
-        /// 저작값이 아니라 샷 식의 해(解)다 — 직접 키잉하면 샷이 다음에 쓰는 값과 싸운다(Track_Focus와 같은 까닭).
+        /// 저작값이 아니라 샷 식의 해(解)다 — 직접 키잉하면 샷이 다음에 쓰는 값과 싸운다.
         /// </summary>
         public const string CameraShakeNode = "Camera_Shake";
 
@@ -120,7 +121,7 @@ namespace Ked.Presentation.Core
             {
                 if (channel.Node == forbidden)
                 {
-                    reason = $"'{channel.Node}'는 키잉할 수 없다 — 저작값이 아니라 해(解)다";
+                    reason = $"'{channel.Node}'는 키잉할 수 없다 — 포커스 계층은 focus_* 커맨드가 놓는다";
                     return false;
                 }
             }

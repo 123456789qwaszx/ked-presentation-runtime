@@ -12,10 +12,10 @@ public sealed class SetAnchorCommandSpecCharR : CharacterRigCommandSpecBase
     public CharacterRigNode node = CharacterRigNode.CharacterPortrait_VisualOffset;
 
     [Header("Reset")]
-    [Tooltip("체크하면 Anchor 설정 후 CharSlot_Track / Move / X / Y / Rotation / Scale 축을 기본값으로 초기화합니다.")]
+    [Tooltip("체크하면 Anchor 설정 후 슬롯의 자리(CharSlot_Track) · 회전(CharSlot_Rotation)을 기본값으로 초기화합니다. 포커스와 깊이는 건드리지 않습니다.")]
     public bool resetSlotPos = true;
 
-    [Tooltip("체크하면 Anchor 설정 후 CharacterPortrait_Track / Move / X / Y / Rotation / SwayPivot / Shake / ActingScale 축을 기본값으로 초기화합니다.")]
+    [Tooltip("체크하면 Anchor 설정 후 CharacterPortrait_Track / Track_Move / Rotation / SwayPivot / Shake / ActingScale / Mirror 축을 기본값으로 초기화합니다.")]
     public bool resetCharacterPos = true;
 }
 
@@ -125,20 +125,14 @@ public sealed class SetAnchorCommandCharR : CommandBase
         if (_spec.resetSlotPos)
         {
             _resetPositionRects.Add(_rigRefs.CharSlot_Track);
-            _resetPositionRects.Add(_rigRefs.CharSlot_Track_X);
-            _resetPositionRects.Add(_rigRefs.CharSlot_Track_Y);
 
             _resetEulerRects.Add(_rigRefs.CharSlot_Rotation);
-
-            _resetScaleRects.Add(_rigRefs.CharSlot_Scale);
         }
 
         if (_spec.resetCharacterPos)
         {
             _resetPositionRects.Add(_rigRefs.CharacterPortrait_Track);
             _resetPositionRects.Add(_rigRefs.CharacterPortrait_Track_Move);
-            _resetPositionRects.Add(_rigRefs.CharacterPortrait_Track_Move_X);
-            _resetPositionRects.Add(_rigRefs.CharacterPortrait_Track_Move_Y);
             _resetPositionRects.Add(_rigRefs.CharacterPortrait_SwayPivot);
             _resetPositionRects.Add(_rigRefs.CharacterPortrait_Shake);
 
@@ -149,8 +143,7 @@ public sealed class SetAnchorCommandCharR : CommandBase
             _resetScaleRects.Add(_rigRefs.CharacterPortrait_SwayPivot);
             _resetScaleRects.Add(_rigRefs.CharacterPortrait_Shake);
             _resetScaleRects.Add(_rigRefs.CharacterPortrait_ActingScale);
-            _resetScaleRects.Add(_rigRefs.CharacterPortrait_ActingScale_X);
-            _resetScaleRects.Add(_rigRefs.CharacterPortrait_ActingScale_Y);
+            _resetScaleRects.Add(_rigRefs.CharacterPortrait_Mirror);
         }
     }
 

@@ -16,9 +16,8 @@ namespace Ked.Presentation.Tests
         // 실제 캐릭터 리그의 리셋 목록 (SetAnchorCommandCharR의 두 플래그가 모두 켜진 경우).
         private static readonly string[] PositionKeys =
         {
-            "CharSlot_Track", "CharSlot_Track_X", "CharSlot_Track_Y",
+            "CharSlot_Track",
             "CharacterPortrait_Track", "CharacterPortrait_Track_Move",
-            "CharacterPortrait_Track_Move_X", "CharacterPortrait_Track_Move_Y",
             "CharacterPortrait_SwayPivot", "CharacterPortrait_Shake",
         };
 
@@ -30,9 +29,8 @@ namespace Ked.Presentation.Tests
 
         private static readonly string[] ScaleKeys =
         {
-            "CharSlot_Scale",
             "CharacterPortrait_SwayPivot", "CharacterPortrait_Shake",
-            "CharacterPortrait_ActingScale", "CharacterPortrait_ActingScale_X", "CharacterPortrait_ActingScale_Y",
+            "CharacterPortrait_ActingScale", "CharacterPortrait_Mirror",
         };
 
         private const string AnchorKey = "CharacterPortrait_VisualOffset";
@@ -49,7 +47,7 @@ namespace Ked.Presentation.Tests
             // 순서가 어긋나면 조용히 엉뚱한 노드에 값이 들어간다.
             NodeTarget[] targets = Reduce(NodeTargets.RoleAnchorTuning.Default);
 
-            Assert.That(targets.Length, Is.EqualTo(9 + 4 + 6 + 2));
+            Assert.That(targets.Length, Is.EqualTo(5 + 4 + 4 + 2));
 
             int i = 0;
 
@@ -152,11 +150,14 @@ namespace Ked.Presentation.Tests
             // 리셋 값만 보면 "0을 넣었다"까지고, 좌표까지 봐야 사슬이 맞는지 안다.
             RectNodeTree tree = new(RectSpace.Centered(1920f, 1080f));
 
-            tree.Add("CharSlot_Scale", null, RectNodeState.StretchFull
+            // 리셋 키는 부르는 쪽이 준다 — 여기서는 사슬의 좌표를 보려고 앵커의 부모(발 피벗)를 어질렀다가 되돌린다.
+            const string parentKey = "CharacterPortrait_DepthScale";
+
+            tree.Add(parentKey, null, RectNodeState.StretchFull
                 .WithPivot(new Vec2(0.5f, 0f))
                 .WithLocalScale(new Vec3(3f, 3f, 1f)));          // 어질러 둔다
 
-            tree.Add(AnchorKey, "CharSlot_Scale", RectNodeState.StretchFull
+            tree.Add(AnchorKey, parentKey, RectNodeState.StretchFull
                 .WithPivot(new Vec2(0.5f, 0f))
                 .WithAnchoredPosition(new Vec2(777f, 555f)));    // 어질러 둔다
 
@@ -166,19 +167,19 @@ namespace Ked.Presentation.Tests
                 AnchorKey, tuning,
                 resetPositionKeys: null,
                 resetEulerKeys: null,
-                resetScaleKeys: new[] { "CharSlot_Scale" });
+                resetScaleKeys: new[] { parentKey });
 
             foreach (NodeTarget target in targets)
                 target.ApplyTo(tree);
 
-            // CharSlot_Scale: 스케일 1로 복귀, 바닥 pivot이라 로컬 원점이 부모 바닥(-540).
+            // 부모: 스케일 1로 복귀, 바닥 pivot이라 로컬 원점이 부모 바닥(-540).
             // 앵커 노드: 오프셋 (0, 12) → -540 + 12 = -528.
             Vec3 p = tree.TransformPoint(AnchorKey, Vec3.Zero);
 
             Assert.That(p.X, Is.EqualTo(0f).Within(Eps));
             Assert.That(p.Y, Is.EqualTo(-528f).Within(Eps));
 
-            Assert.That(tree.GetState("CharSlot_Scale").LocalScale.XY, Is.EqualTo(Vec2.One));
+            Assert.That(tree.GetState(parentKey).LocalScale.XY, Is.EqualTo(Vec2.One));
         }
 
         // ── 가시성 축 ────────────────────────────────────────────────

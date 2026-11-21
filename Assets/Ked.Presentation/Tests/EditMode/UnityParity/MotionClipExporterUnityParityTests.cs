@@ -67,7 +67,7 @@ namespace Ked.Presentation.Tests.UnityParity
             AnimationCurve y = new(new Keyframe(0f, 0f, 0f, -120f), new Keyframe(0.3f, -18f, 0f, 0f), new Keyframe(0.6f, 0f, 60f, 0f));
             AnimationCurve z = new(new Keyframe(0f, 3f), new Keyframe(0.6f, 0f));
 
-            AnimationUtility.SetEditorCurve(clip, EditorCurveBinding.FloatCurve(PathTo(_refs.CharacterPortrait_Track_Move_Y), typeof(RectTransform), "m_AnchoredPosition.y"), y);
+            AnimationUtility.SetEditorCurve(clip, EditorCurveBinding.FloatCurve(PathTo(_refs.CharacterPortrait_Track_Move), typeof(RectTransform), "m_AnchoredPosition.y"), y);
             AnimationUtility.SetEditorCurve(clip, EditorCurveBinding.FloatCurve(PathTo(_refs.CharacterPortrait_SwayPivot), typeof(Transform), "localEulerAnglesRaw.z"), z);
 
             Assert.IsTrue(MotionClipExporter.TryConvert(clip, "nod", "character", MotionEnd.Commit, CharacterRig(), out MotionClip motion, out List<string> errors),
@@ -78,7 +78,7 @@ namespace Ked.Presentation.Tests.UnityParity
             Assert.AreEqual(2, motion.Channels.Length);
 
             MotionChannel pos = motion.Channels[0];
-            Assert.AreEqual("CharacterPortrait_Track_Move_Y", pos.Node);
+            Assert.AreEqual("CharacterPortrait_Track_Move", pos.Node);
             Assert.AreEqual(MotionChannelKind.Position, pos.Kind);
             Assert.IsFalse(pos.HasX);
             Assert.AreEqual(3, pos.Y.Length);
@@ -133,15 +133,15 @@ namespace Ked.Presentation.Tests.UnityParity
         public void 거부_사유를_전부_모아_돌려준다()
         {
             AnimationClip clip = NewClip();
-            RectTransform node = _refs.CharSlot_Track_X;
+            RectTransform node = _refs.CharSlot_Track;
 
             AnimationCurve plain = new(new Keyframe(0f, 0f), new Keyframe(0.5f, 10f));
             AnimationCurve weighted = new(new Keyframe(0f, 0f, 0f, 0f, 0f, 0.5f) { weightedMode = WeightedMode.Out }, new Keyframe(0.5f, 10f));
 
             AnimationUtility.SetEditorCurve(clip, EditorCurveBinding.FloatCurve(PathTo(node), typeof(Transform), "m_LocalPosition.x"), plain);
-            AnimationUtility.SetEditorCurve(clip, EditorCurveBinding.FloatCurve(PathTo(_refs.CharSlot_Track_Focus), typeof(RectTransform), "m_AnchoredPosition.x"), plain);
-            AnimationUtility.SetEditorCurve(clip, EditorCurveBinding.FloatCurve(PathTo(_refs.CharSlot_Track_Y), typeof(RectTransform), "m_AnchoredPosition.y"), weighted);
-            AnimationUtility.SetEditorCurve(clip, EditorCurveBinding.FloatCurve(PathTo(_refs.CharSlot_Scale), typeof(Transform), "m_LocalScale.z"), plain);
+            AnimationUtility.SetEditorCurve(clip, EditorCurveBinding.FloatCurve(PathTo(_refs.CharFocus_Track), typeof(RectTransform), "m_AnchoredPosition.x"), plain);
+            AnimationUtility.SetEditorCurve(clip, EditorCurveBinding.FloatCurve(PathTo(_refs.CharacterPortrait_Track), typeof(RectTransform), "m_AnchoredPosition.y"), weighted);
+            AnimationUtility.SetEditorCurve(clip, EditorCurveBinding.FloatCurve(PathTo(_refs.CharacterPortrait_ActingScale), typeof(Transform), "m_LocalScale.z"), plain);
 
             Assert.IsFalse(MotionClipExporter.TryConvert(clip, "bad", "character", MotionEnd.Commit, CharacterRig(), out _, out List<string> errors));
 
@@ -151,11 +151,11 @@ namespace Ked.Presentation.Tests.UnityParity
             StringAssert.Contains("z 성분", all);
             Assert.GreaterOrEqual(errors.Count, 3);
 
-            // Track_Focus는 변환은 되지만 규칙에서 걸린다 — 다른 오류가 없을 때 드러난다.
+            // 포커스 계층은 변환은 되지만 규칙에서 걸린다 — 다른 오류가 없을 때 드러난다.
             AnimationClip focusOnly = NewClip();
-            AnimationUtility.SetEditorCurve(focusOnly, EditorCurveBinding.FloatCurve(PathTo(_refs.CharSlot_Track_Focus), typeof(RectTransform), "m_AnchoredPosition.x"), plain);
+            AnimationUtility.SetEditorCurve(focusOnly, EditorCurveBinding.FloatCurve(PathTo(_refs.CharFocus_Track), typeof(RectTransform), "m_AnchoredPosition.x"), plain);
             Assert.IsFalse(MotionClipExporter.TryConvert(focusOnly, "focus", "character", MotionEnd.Commit, CharacterRig(), out _, out errors));
-            StringAssert.Contains("Track_Focus", string.Join("\n", errors));
+            StringAssert.Contains("포커스 계층", string.Join("\n", errors));
 
             // restore인데 마지막 키가 남는다 — 모양 규칙은 막지 않는다(재생이 끝에서 시작값을 되쓴다).
             AnimationClip stays = NewClip();
@@ -169,12 +169,12 @@ namespace Ked.Presentation.Tests.UnityParity
             MotionClipExporter.RigNodeSet rig = CharacterRig();
 
             // 빌더가 세운 리그의 실제 경로 = rig-schemas.json의 기대 경로 — 두 겹(세울 때 스키마, 낼 때 데이터)이 같은 말을 한다.
-            Assert.AreEqual(rig.PathOf["CharacterPortrait_Track_Move_Y"], PathTo(_refs.CharacterPortrait_Track_Move_Y));
-            Assert.AreEqual(rig.PathOf["CharSlot_Track_X"], PathTo(_refs.CharSlot_Track_X));
+            Assert.AreEqual(rig.PathOf["CharacterPortrait_Track_Move"], PathTo(_refs.CharacterPortrait_Track_Move));
+            Assert.AreEqual(rig.PathOf["CharSlot_Track"], PathTo(_refs.CharSlot_Track));
 
             // 끝 이름은 맞지만 부모가 다른 경로 — 스키마 밖 리그에서 만든 클립.
             AnimationClip clip = NewClip();
-            AnimationUtility.SetEditorCurve(clip, EditorCurveBinding.FloatCurve("CharacterPortrait_Track_Move_Y", typeof(RectTransform), "m_AnchoredPosition.y"),
+            AnimationUtility.SetEditorCurve(clip, EditorCurveBinding.FloatCurve("CharacterPortrait_Track_Move", typeof(RectTransform), "m_AnchoredPosition.y"),
                 new AnimationCurve(new Keyframe(0f, 0f), new Keyframe(0.5f, 0f)));
 
             Assert.IsFalse(MotionClipExporter.TryConvert(clip, "stray", "character", MotionEnd.Restore, rig, out _, out List<string> errors));
@@ -225,7 +225,7 @@ namespace Ked.Presentation.Tests.UnityParity
         public void 쓴_JSON을_로더가_같은_개수로_되읽는다()
         {
             AnimationClip clip = NewClip();
-            AnimationUtility.SetEditorCurve(clip, EditorCurveBinding.FloatCurve(PathTo(_refs.CharSlot_Track_X), typeof(RectTransform), "m_AnchoredPosition.x"),
+            AnimationUtility.SetEditorCurve(clip, EditorCurveBinding.FloatCurve(PathTo(_refs.CharSlot_Track), typeof(RectTransform), "m_AnchoredPosition.x"),
                 new AnimationCurve(new Keyframe(0f, 0f), new Keyframe(0.5f, 80f)));
 
             Assert.IsTrue(MotionClipExporter.TryConvert(clip, "step", "character", MotionEnd.Commit, CharacterRig(), out MotionClip motion, out List<string> errors), string.Join("\n", errors));

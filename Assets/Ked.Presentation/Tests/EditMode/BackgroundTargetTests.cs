@@ -50,34 +50,29 @@ namespace Ked.Presentation.Tests
                 nodes = new List<RigSchemaNodeDto>
                 {
                     Node("__root", ""),
-                    Node("CharSlot_Track_Focus", "__root"),
-                    Node("CharSlot_DepthY", "CharSlot_Track_Focus"),
-                    Node("CharSlot_DepthScale", "CharSlot_DepthY", bottomPivot: true),
-                    Node("CharSlot_Track_Idle", "CharSlot_DepthScale"),
-                    Node("CharSlot_Track", "CharSlot_Track_Idle"),
-                    Node("CharSlot_Track_X", "CharSlot_Track"),
-                    Node("CharSlot_Track_Y", "CharSlot_Track_X"),
-                    Node("CharSlot_Rotation", "CharSlot_Track_Y"),
+                    Node("CharFocus_Track", "__root"),
+                    Node("CharSlot_Track", "CharFocus_Track"),
+                    Node("CharFocus_Rotation", "CharSlot_Track", bottomPivot: true),
+                    Node("CharFocus_Scale", "CharFocus_Rotation", bottomPivot: true),
+                    Node("CharSlot_Rotation", "CharFocus_Scale"),
                     Node("CharSlot_SwayPivot", "CharSlot_Rotation", bottomPivot: true),
-                    Node("CharSlot_Scale", "CharSlot_SwayPivot", bottomPivot: true),
-                    Node("CharacterPortrait_VisualOffset", "CharSlot_Scale", bottomPivot: true),
+                    Node("CharacterPortrait_DepthOffset", "CharSlot_SwayPivot"),
+                    Node("CharacterPortrait_DepthScale", "CharacterPortrait_DepthOffset", bottomPivot: true),
+                    Node("CharacterPortrait_VisualOffset", "CharacterPortrait_DepthScale", bottomPivot: true),
                     Node("CharacterPortrait_Track", "CharacterPortrait_VisualOffset"),
                     Node("CharacterPortrait_Rotation", "CharacterPortrait_Track"),
                     Node("CharacterPortrait_Track_Move", "CharacterPortrait_Rotation"),
-                    Node("CharacterPortrait_Track_Move_X", "CharacterPortrait_Track_Move"),
-                    Node("CharacterPortrait_Track_Move_Y", "CharacterPortrait_Track_Move_X"),
-                    Node("CharacterPortrait_SwayPivot", "CharacterPortrait_Track_Move_Y", bottomPivot: true),
+                    Node("CharacterPortrait_SwayPivot", "CharacterPortrait_Track_Move", bottomPivot: true),
                     Node("CharacterPortrait_Shake", "CharacterPortrait_SwayPivot"),
                     Node("CharacterPortrait_ActingScale", "CharacterPortrait_Shake"),
-                    Node("CharacterPortrait_ActingScale_X", "CharacterPortrait_ActingScale"),
-                    Node("CharacterPortrait_ActingScale_Y", "CharacterPortrait_ActingScale_X"),
-                    Node("CharacterPortraitSprite_Root", "CharacterPortrait_ActingScale_Y", canvasGroupAlpha: 0f),
+                    Node("CharacterPortrait_Mirror", "CharacterPortrait_ActingScale"),
+                    Node("CharacterPortraitSprite_Root", "CharacterPortrait_Mirror", canvasGroupAlpha: 0f),
                     Node("CharacterPortraitSprite_Image", "CharacterPortraitSprite_Root"),
                 },
             };
         }
 
-        private const int RigNodeCount = 24;
+        private const int RigNodeCount = 19;
 
         private static StageReducerTuning NewTuning(bool withBackgroundDimensions = true)
         {
@@ -290,14 +285,14 @@ namespace Ked.Presentation.Tests
         [Test]
         public void bg_scale은_가운데_피벗의_ActingScale에_절대값으로_간다()
         {
-            // CharSlot_Scale(발 피벗)이 아니다 — 배경은 화면 가운데에서 커져야 한다(D 대응표).
+            // 깊이(CharacterPortrait_DepthScale, 발 피벗)가 아니다 — 배경은 화면 가운데에서 커져야 한다(D 대응표).
             StageState state = Fold(
                 Cmd("bg_spawn", "bg_main", "class_day"),
                 Cmd("bg_scale", "bg_main", "1.2", "10fr"));
 
             Assert.That(state.Nodes.GetState("bg_main/CharacterPortrait_ActingScale").LocalScale.XY,
                 Is.EqualTo(new Vec2(1.2f, 1.2f)));
-            Assert.That(state.Nodes.GetState("bg_main/CharSlot_Scale").LocalScale.XY,
+            Assert.That(state.Nodes.GetState("bg_main/CharacterPortrait_DepthScale").LocalScale.XY,
                 Is.EqualTo(Vec2.One));
             Assert.That(state.Unhandled, Is.Empty);
         }

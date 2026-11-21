@@ -10,7 +10,7 @@ using UnityEngine.UI;
 // 이모지는 그 리그 여러 개를 Emoji_Offset 밑에 묶은 것이고, 캐릭터를 모른다 —
 // 설 자리(Emoji_Locator)만 받는다.
 //
-//   CharSlot_Scale               (캐릭터 리그 — 이 스키마의 것이 아니다)
+//   CharacterPortrait_DepthScale (캐릭터 리그 — 이 스키마의 것이 아니다. 인물의 크기를 따라간다)
 //    └ Emoji_Locator             슬롯에 하나.   캐릭터 + 바리에이션이 정하는 RootSpace
 //       └ Emoji_Offset           이모지에 하나. 이모지별 오프셋 + 이모지 전체를 움직이는 키  [CanvasGroup]
 //          └ EmojiRig_Place      리그마다.      기본 자리 — 키를 받지 않는다
@@ -73,7 +73,7 @@ public static class EmojiRigSchema
 
     public static readonly NodeDef[] Nodes =
     {
-        // 슬롯의 CharSlot_Scale은 무대 크기로 늘어난 rect이고 피벗이 발(아래 가운데)이다.
+        // 슬롯의 CharacterPortrait_DepthScale(그 사람의 크기)은 무대 크기로 늘어난 rect이고 피벗이 발(아래 가운데)이다.
         // 로케이터는 그 발에 붙는다 — RootSpace 값은 발에서 잰다.
         new()
         {

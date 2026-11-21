@@ -58,7 +58,7 @@ namespace Ked.Presentation.Core
     [Serializable]
     public struct MotionChannel
     {
-        /// <summary>리그 스키마의 노드 id (예: CharacterPortrait_Track_Move_Y). 슬롯 접두사는 없다.</summary>
+        /// <summary>리그 스키마의 노드 id (예: CharacterPortrait_Track_Move). 슬롯 접두사는 없다.</summary>
         public string Node;
 
         public MotionChannelKind Kind;

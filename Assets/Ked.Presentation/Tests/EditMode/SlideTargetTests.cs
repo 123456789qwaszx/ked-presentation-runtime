@@ -65,10 +65,8 @@ namespace Ked.Presentation.Tests
                             nodes = new List<RigSchemaNodeDto>
                             {
                                 Node("__root", ""),
-                                Node("CharSlot_Track_Idle", "__root"),
-                                Node("CharSlot_Track", "CharSlot_Track_Idle"),
-                                Node("CharSlot_Track_X", "CharSlot_Track"),
-                                Node("CharSlot_Track_Y", "CharSlot_Track_X"),
+                                Node("CharFocus_Track", "__root"),
+                                Node("CharSlot_Track", "CharFocus_Track"),
                             },
                         },
                     },

@@ -17,7 +17,7 @@ using UnityEngine;
 // 읽는 것: RectTransform의 m_AnchoredPosition.x/y · m_LocalScale.x/y · localEulerAnglesRaw.x/y/z.
 // 거부하는 것(이유를 전부 적어 돌려준다 — 조용히 빠뜨리지 않는다):
 //   · 다른 속성(m_LocalPosition은 anchoredPosition으로, m_LocalRotation은 회전 보간을 Euler Angles로)
-//   · 스키마에 없는 노드 · Track_Focus · 가중 탄젠트 · 무한 탄젠트(계단 키 — JSON에 Infinity가 없다)
+//   · 스키마에 없는 노드 · 포커스 계층(CharFocus_*) · 가중 탄젠트 · 무한 탄젠트(계단 키 — JSON에 Infinity가 없다)
 //   · MotionRules가 거르는 전부(키 시각·노드·성분 모양). 값의 뜻(relative/absolute)은 파일에 없다 — 대본의 커맨드가 정한다(motions/2)
 //
 // 리그는 런타임 코드가 아니라 **rig-schemas.json**으로 안다 — 이 도구의 의존은 코어(규약)와 데이터 파일뿐이다.

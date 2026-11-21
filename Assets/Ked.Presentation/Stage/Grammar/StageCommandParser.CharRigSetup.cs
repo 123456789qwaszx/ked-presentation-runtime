@@ -58,7 +58,7 @@ public sealed partial class StageCommandParser
         {
             roleKey = roleKey,
             mode = CharacterMirrorModeParser.Parse(directionToken),
-            node = CharacterRigNode.CharacterPortrait_ActingScale_X,
+            node = CharacterRigNode.CharacterPortrait_Mirror,
             duration = 0f,
         });
 
@@ -182,23 +182,6 @@ public sealed partial class StageCommandParser
         });
     }
 
-    private void EnqueueSizeBySpec(string roleKey, float multiplier, string durationToken, string easeToken)
-    {
-        Ease ease = YarnEaseParser.Parse(easeToken);
-
-        Emit(new ScaleToCommandSpecCharR
-        {
-            roleKey = roleKey,
-            node = CharacterRigNode.CharSlot_Scale,
-
-            toScale = new Vector2(multiplier, multiplier),
-            relativeToCurrent = true,
-
-            duration = YarnDurationParser.Parse(durationToken),
-            ease = ease
-        });
-    }
-
     private void EnqueueSetPlaceResetSpecs(string roleKey, string durationToken)
     {
         float duration = YarnDurationParser.Parse(durationToken);
@@ -215,7 +198,7 @@ public sealed partial class StageCommandParser
         var spec2 = new MoveByCommandSpecCharR
         {
             roleKey = roleKey,
-            node = CharacterRigNode.CharSlot_Track_Focus,
+            node = CharacterRigNode.CharFocus_Track,
             useAbsolutePosition = true,
             delta = new Vector2(0, 0),
             duration = duration
@@ -223,22 +206,6 @@ public sealed partial class StageCommandParser
 
         Emit(slotOffsetSpec);
         Emit(spec2);
-    }
-
-    private void EnqueueSizeResetSpec(string roleKey, string durationToken, string easeToken)
-    {
-        Ease ease = YarnEaseParser.Parse(easeToken);
-
-        Emit(new ScaleToCommandSpecCharR
-        {
-            roleKey = roleKey,
-            node = CharacterRigNode.CharSlot_Scale,
-
-            toScale = new Vector2(1, 1),
-
-            duration = YarnDurationParser.Parse(durationToken),
-            ease = ease
-        });
     }
 
     private void EnqueueCharacterSiblingFrontSpec(string roleKey)

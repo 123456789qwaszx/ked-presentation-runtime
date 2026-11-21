@@ -37,14 +37,14 @@ public sealed class ClearEmojiCommand : CommandBase
 
     protected override IEnumerator ExecuteInner(CommandRunScope scope)
     {
-        EmojiRigTargets.Resolve(_stage, _spec.roleKey, out string slotKey, out RectTransform charSlotScale, out _);
+        EmojiRigTargets.Resolve(_stage, _spec.roleKey, out string slotKey, out RectTransform standNode, out _);
 
         bool immediately = scope.ShouldCompressCommandExecution;
 
         if (string.IsNullOrEmpty(_spec.emojiName))
         {
             List<EmojiRefs> all = new();
-            _stage.emojis.RemoveAll(slotKey, charSlotScale, all);
+            _stage.emojis.RemoveAll(slotKey, standNode, all);
 
             foreach (EmojiRefs emoji in all)
                 _playback.Off(emoji, immediately);
@@ -52,7 +52,7 @@ public sealed class ClearEmojiCommand : CommandBase
             yield break;
         }
 
-        if (!_stage.emojis.Remove(slotKey, charSlotScale, _spec.emojiName, out EmojiRefs target))
+        if (!_stage.emojis.Remove(slotKey, standNode, _spec.emojiName, out EmojiRefs target))
         {
             Debug.LogWarning(
                 $"[ClearEmojiCommand] 슬롯 '{slotKey}'에 이모지 '{_spec.emojiName}'이 서 있지 않다. 건너뛴다.");

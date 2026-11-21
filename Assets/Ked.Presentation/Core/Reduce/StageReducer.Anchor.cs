@@ -11,9 +11,8 @@ namespace Ked.Presentation.Core
         // SetAnchorCommandCharR의 리셋 목록(두 플래그 모두 켜진 경로 — cast가 쓴다).
         private static readonly string[] SetAnchorResetPositionIds =
         {
-            "CharSlot_Track", "CharSlot_Track_X", "CharSlot_Track_Y",
+            "CharSlot_Track",
             "CharacterPortrait_Track", "CharacterPortrait_Track_Move",
-            "CharacterPortrait_Track_Move_X", "CharacterPortrait_Track_Move_Y",
             "CharacterPortrait_SwayPivot", "CharacterPortrait_Shake",
         };
 
@@ -27,9 +26,9 @@ namespace Ked.Presentation.Core
 
         private static readonly string[] SetAnchorResetScaleIds =
         {
-            "CharSlot_Scale",
+            // 포커스(CharFocus_*)와 깊이(CharacterPortrait_Depth*)는 목록에 없다 — cast는 그 둘을 건드리지 않는다.
             "CharacterPortrait_SwayPivot", "CharacterPortrait_Shake",
-            "CharacterPortrait_ActingScale", "CharacterPortrait_ActingScale_X", "CharacterPortrait_ActingScale_Y",
+            "CharacterPortrait_ActingScale", "CharacterPortrait_Mirror",
         };
 
         /// <summary>
