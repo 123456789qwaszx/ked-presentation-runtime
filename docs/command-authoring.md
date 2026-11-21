@@ -53,6 +53,7 @@ XxxSlot (무대 노드의 주인)
 | 시간축 | 무대 트윈은 `SetUpdate(true)`(실시간). stage_mask · 컷인 · 팝업 · 플래시 · `IntentTransition` 모두 같다 |
 | 주입 | 커맨드 생성자는 `(spec, 프리셋, 레지스트리 …)`를 받아 그대로 둔다 — `?? throw` 같은 방어 코드를 붙이지 않는다. 연결 확인은 조립(팩토리)이 한다 |
 | 검사 자리 | 어휘 검사는 파서, 끝 상태 검사는 폴드. 실행 층에서 같은 것을 다시 막지 않는다 |
+| 명세 표 | 파서 표(`StageCommandParser.Table.cs`)에 이름을 더하거나 인자 · 생략값을 바꾸면 코어 `Core/Spec/StageCommandSpecTable.Core.cs`에 종류 하나와 인자 칸을 적는다 — 어긋나면 EditMode 시험(`StageCommandSpecTableParserTests`)이 실패한다. 적은 뒤 `Ked/U12/Export Command Specs`로 JSON을 다시 낸다([PLAN_command-spec.md](PLAN_command-spec.md)) |
 | 파일 | 커맨드마다 파일 하나(스펙은 그 커맨드 파일 위에). 이름은 `XxxCommand` · `XxxCommandSpec` |
 | 스펙 | `[Header("Target")]` 등으로 칸을 묶는다 |
 | 이름 | `ResolveRefs` · `_resolveAttempted`(2026-11-06 `ResolveTargets`에서 바꿨다) |

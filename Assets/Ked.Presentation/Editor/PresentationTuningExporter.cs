@@ -84,6 +84,7 @@ public static class PresentationTuningExporter
         ExportLayerProfile(outDir);
         ExportPortraitDimensions(outDir, warnings);
         ExportBackgroundDimensions(outDir, warnings);
+        ExportCommandSpecs(outDir);
         WriteReport(outDir, warnings);
 
         Debug.Log($"[PresentationTuningExporter] 완료. out={outDir}, 경고 {warnings.Count}건");
@@ -449,6 +450,29 @@ public static class PresentationTuningExporter
     {
         string json = JsonUtility.ToJson(Ked.Presentation.Core.LayerProfileCurve.Default.ToDto(), true);
         File.WriteAllText(Path.Combine(outDir, "presets", "layer-profile.json"), json);
+    }
+
+    // ── 커맨드 명세 표 ───────────────────────────────────────────────
+    //
+    // 커맨드마다 종류 하나와 인자 칸(이름 · 갈래 · 생략값) — 코어 StageCommandSpecTable을 그대로 낸다.
+    // 연출을 고치는 툴(ked-story-tools)이 따른다. 포크는 제 어휘(StageCommandSpecTable.Fork.cs)를 덧붙인 채로 낸다.
+    // 씬이 필요 없어 따로도 낸다.
+
+    [MenuItem("Ked/U12/Export Command Specs")]
+    public static void ExportCommandSpecsOnly()
+    {
+        string outDir = Path.Combine(Path.GetDirectoryName(Application.dataPath)!, "ExportedTuning");
+        Directory.CreateDirectory(outDir);
+        ExportCommandSpecs(outDir);
+
+        Debug.Log($"[PresentationTuningExporter] 커맨드 명세 표를 냈다. out={outDir}");
+    }
+
+    private static void ExportCommandSpecs(string outDir)
+    {
+        var dto = Ked.Presentation.Core.CommandSpecsFile.ToDto(Ked.Presentation.Core.StageCommandSpecTable.Default);
+        string json = JsonUtility.ToJson(dto, true);
+        File.WriteAllText(Path.Combine(outDir, Ked.Presentation.Core.CommandSpecsFile.FileName), json);
     }
 
     // ── 초상 치수 ────────────────────────────────────────────────────

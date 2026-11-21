@@ -315,6 +315,32 @@ MonoBehaviour.entries[] : { character(캐릭터), variant(포즈 — 비면 그 
 
 ---
 
+## 4c. `command-specs.json`
+
+커맨드의 **명세 표** — 커맨드마다 종류 하나와 인자 칸(이름 · 갈래 · 생략값). 코어 `StageCommandSpecTable.Default`를 그대로 낸 것이고,
+연출을 고치는 툴(ked-story-tools)이 따른다. 씬에서 재는 값이 없어 메뉴 `Ked / U12 / Export Command Specs`로 따로도 낸다.
+DTO는 `Core/Tuning/CommandSpecsFileDto.cs`(`command-specs/1`), 설계는 `docs/PLAN_command-spec.md`.
+
+| 필드 | 뜻 |
+|---|---|
+| `kinds[]` | 종류 일곱 — `key` · `label` · `director`(종류 필터에 오르는 넷인가) |
+| `argKinds[]` | 인자의 갈래 — `slot` · `distance` · `angle` · `scale` · `duration` · `ease` · `name` · `token` · `number` · `level` |
+| `lineStructure[]` · `legacyStructure[]` | 커맨드가 아니라 줄의 구조인 이름(`at` · `gap`)과 옛 표기(`step`) — 표 밖이다 |
+| `commands[].kind` | `kinds[].key` 가운데 하나 |
+| `commands[].waits` | 끝날 때까지 그 앵커의 뒤 커맨드를 붙잡는다(`pause` · `screen_cover`) |
+| `commands[].immediate` | 바로 실행하는 명령 — **`<<at>>`을 붙이지 않는다**. 무대 파서의 표에 없다 |
+| `commands[].fork` | 포크가 덧붙인 어휘(`StageCommandSpecTable.Fork.cs`) |
+| `args[].hasDefault` · `defaultValue` | 파서 표의 생략값. `hasDefault`가 거짓이면 표에 생략값이 없다 — `defaultValue`의 `""`는 "없다"가 아니라 JsonUtility가 null을 낸 꼴이다. `hasDefault`가 참이고 `""`면 비워 두는 것이 생략값이다(이징) |
+| `args[].optional` | 적지 않아도 되는가 — 생략값이 없어도 핸들러가 제 값으로 가면 참(`note`에 적는다) |
+| `args[].flag` | 낱말 칸 — `choices`의 낱말일 때만 자리를 차지하고, 아니면 뒤 칸이 당겨진다(`size`의 `keep_y`) |
+| `args[].catalog` | 갈래가 `name`일 때 어느 목록에서 고르는가 |
+| `args[].choices[]` | 갈래가 `token`일 때 고를 낱말 |
+
+파서 표(`Stage/Grammar/StageCommandParser.Table.cs`)와 이름 · 인자 수 · 생략값이 어긋나면 EditMode 시험이 실패한다 —
+이 파일은 그 시험을 지난 표에서 나온다.
+
+---
+
 ## 5. `export-report.json`
 
 | 필드 | 뜻 |
