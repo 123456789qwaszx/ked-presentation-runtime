@@ -112,3 +112,6 @@ tests/**/obj/
 
 # Yarn Spinner가 컴파일마다 다시 쓰는 커맨드 정의 — 이 PC의 절대 경로와 줄 번호가 들어 있다
 ProjectSettings/Packages/dev.yarnspinner/*-generated.ysls.json
+
+# Claude Code의 개인 설정 — 기계마다 다르다
+.claude/settings.local.json
