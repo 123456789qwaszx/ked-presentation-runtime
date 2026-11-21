@@ -1,0 +1,174 @@
+# 리그의 계층 — 포커스 · 슬롯 · 초상
+
+2026-11-21 · 브랜치 `feat/rig-layers`(dev에서) · 상태: **설계 — 코드는 아직 손대지 않았다** · 앞선 일: [PLAN_line-anchor.md](PLAN_line-anchor.md)
+
+## 0. 한 문장
+
+**캐릭터 리그는 세 덩어리다 — 포커스(대화할 때만 서는 자리, 작가 허용의 공간) · 슬롯(무대 위의 본래 자리) · 초상(그 사람의 크기와 연기).**
+커맨드는 이 계층에서 나온다: 어느 계층의 어느 노드를 적힌 값으로 놓는가.
+
+## 1. 왜 다시 쓰는가
+
+`feat/command-prune`(합치지 않았다)에서 커맨드를 "무대를 읽는가 · 여럿을 내는가"로만 재단해 걷었다. 그 커맨드가 리그의 어느 계층을 위해
+있었는지는 묻지 않았고, 그 결과 `place`(포커스 계층)를 `move_by`(슬롯 계층)로 풀어 적어 두 계층을 섞었다. 본래 자리와 나온 자리가 한 노드에
+있으면 돌아갈 곳이 사라진다. 그래서 커맨드가 아니라 계층에서 다시 출발한다.
+
+## 2. 정한 것 (소유자, 2026-11-21)
+
+| # | 결정 |
+|---|---|
+| L1 | **포커스 계층**은 대화할 때만 서는 자리다. 멀리 있던 인물이 말할 때만 그 자리에 나왔다가 본래 자리로 돌아간다. 실제 무대를 조작해서는 표현하기 힘든 작가 허용의 연출을 위한 공간이라 이동 · 회전 · 배율을 모두 가진다. 쓰고 나면 0으로 되돌린다. 슬롯 · 액팅 계층과 따로 둔다. |
+| L2 | 포커스 계층의 노드는 **셋으로 나눈다**(한 노드에 트윈 둘을 걸 수 없다). 이동은 맨 위, 회전 · 배율은 슬롯의 자리 아래에 두어 중심이 그 인물의 발밑이 되게 한다. |
+| L3 | 포커스 계층의 커맨드는 놓기 셋과 걷기 하나다 — `focus_move` · `focus_rotate` · `focus_scale` · `focus_reset`. 값은 절대값이다. 블러의 `focus_on` · `focus_clear`는 `depth_focus_on` · `depth_focus_clear`로 바꾼다(쓰는 대본이 없다). |
+| L4 | **`place 슬롯 x y`** 를 둔다 — 슬롯의 본래 자리(`CharSlot_Track`)를 절대값으로 놓는다. 초점 프리셋 · 화면 지점 이름을 받던 옛 `place` 계열(역산)은 걷는다. |
+| L5 | **깊이는 슬롯에 영향을 주지 않게 내린다.** 깊이가 곱하는 것은 초상(연기)이다. `CharSlot_DepthY`는 `DepthOffset`으로 부르고, 초상(`CharacterPortrait_*`)에 속한다. — 정확한 자리는 §5 |
+| L6 | **`size`만 남긴다.** 깊이의 Y(`DepthOffset`)와 배율(`DepthScale`)을 놓는다. Y 옵션을 끄면 Y는 지금 값 그대로 둔다. 레벨(라벨) 말고 **배율도 직접 받는다**. 무대를 재서 초점을 붙잡는 일은 하지 않는다. |
+| L7 | `CharSlot_Scale`을 걷는다 — `scale_by` · `scale_reset`이 함께 사라진다. 크기는 `size`(그 사람의 크기)와 `focus_scale`(작가 허용) 둘이다. |
+| L8 | `CharSlot_Track_Idle`을 걷는다. idle이 필요하면 `CharacterPortrait_Track_Move_*`를 쓴다. |
+| L9 | 이모지는 `DepthScale` 밑에 선다 — 인물이 커지면 머리도 올라가니 크기를 따라가야 한다. |
+| L10 | 초점(가슴 · 얼굴 점)을 재는 노드는 깊이 아래여야 한다 — 크기를 바꾸면 초점도 따라와야 한다. — 정확한 노드는 §5 |
+| L11 | 화면 지점 · 캐릭터 초점으로 값을 푸는 일은 런타임 커맨드로 두지 않는다. 계산은 코어의 순수 함수로, 부르는 쪽은 도구다. AI의 경로는 지금 고려하지 않는다. |
+
+## 3. 계층
+
+지금(dev):
+
+```
+CharSlot_Track_Focus            place 계열(역산)
+ └ CharSlot_DepthY              size
+    └ CharSlot_DepthScale       size                       [발밑]
+       └ CharSlot_Track_Idle    (쓰는 것 없음)
+          └ CharSlot_Track      move_by · slide_in/out
+             └ CharSlot_Track_X / _Y   left · right · up · down
+                └ CharSlot_Rotation
+                   └ CharSlot_SwayPivot   rotate_by         [발밑]
+                      └ CharSlot_Scale    scale_by          [발밑]   ← 이모지가 서는 자리
+                         └ CharacterPortrait_VisualOffset   cast(배역 앵커) ← 초점을 재는 노드
+                            └ CharacterPortrait_Track … 액팅 … Sprite / Overlay
+```
+
+바꾼 뒤 — 깊이의 자리는 §5의 (나)로 그렸다:
+
+```
+CharFocus_Track                 focus_move                 ← 포커스: 맨 위, 무대 값 그대로
+ └ CharSlot_Track               place(절대) · move_by(상대) · slide_in/out      ← 슬롯: 본래 자리
+    └ CharSlot_Track_X / _Y     left · right · up · down
+       └ CharFocus_Rotation     focus_rotate               [발밑]              ← 포커스
+          └ CharFocus_Scale     focus_scale                [발밑]              ← 포커스
+             └ CharSlot_Rotation
+                └ CharSlot_SwayPivot   rotate_by           [발밑]
+                   └ CharacterPortrait_DepthOffset   size의 Y(옵션)            ← 초상: 그 사람의 크기
+                      └ CharacterPortrait_DepthScale size  [발밑]   ← 이모지가 서는 자리
+                         └ CharacterPortrait_VisualOffset   cast(배역 앵커) ← 초점을 재는 노드
+                            └ CharacterPortrait_Track … 액팅 … Sprite / Overlay
+```
+
+- 포커스의 회전 · 배율이 맨 위가 아닌 까닭: 맨 위 노드의 중심은 화면 아래 가운데다. 옆에 선 인물은 키우면 옆으로 밀리고 돌리면 호를 그린다.
+  슬롯의 자리 아래에 두면 중심이 그 인물의 발밑이다. 계층은 하나다 — `focus_reset`이 셋을 함께 되돌린다.
+- 깊이가 곱하는 범위가 줄어든다. 지금은 슬롯의 이동(`move_by` · `left` …)까지 곱하지만, 바꾼 뒤에는 초상(배역 앵커 · 연기 · 그림)만 곱한다.
+  `left 1u` · `place`의 값은 어느 크기에서나 화면 값 그대로다. (`rig-axis-order.md` §3.3 · §4는 이 반대를 적고 있다 — 다시 쓴다.)
+- 리그 계층의 정본은 프리팹이 아니라 `CharacterRigSchema.Nodes`(코드)다. 빌더가 프리팹을 거기에 맞춘다 — 구조 변경은 그 배열을 고치는 일이다.
+
+## 4. 커맨드
+
+| 계층 | 커맨드 | 인자 | 노드 | 값 |
+|---|---|---|---|---|
+| 포커스 | `focus_move` | `슬롯 x y [길이] [이징]` | `CharFocus_Track` | 절대 — 0 0이 본래 자리 |
+| 포커스 | `focus_rotate` | `슬롯 도 [길이] [이징]` | `CharFocus_Rotation` | 절대 — 0이 본래 각도 |
+| 포커스 | `focus_scale` | `슬롯 배율 [길이] [이징]` | `CharFocus_Scale` | 절대 — 1이 본래 크기 |
+| 포커스 | `focus_reset` | `슬롯 [길이] [이징]` | 위 셋 | 셋을 함께 걷는다 |
+| 슬롯 | `place` | `슬롯 x y [길이] [이징]` | `CharSlot_Track` | 절대 — 본래 자리 |
+| 슬롯 | `move_by` · `move_reset` | (그대로) | `CharSlot_Track` | 상대 / 0으로. `move_reset`은 포커스를 건드리지 않는다 |
+| 슬롯 | `slide_in` · `slide_out` | (그대로) | `CharSlot_Track` | |
+| 슬롯 | `left` · `right` · `up` · `down` | (그대로) | `CharSlot_Track_X` · `_Y` | 상대 |
+| 슬롯 | `rotate_by` · `rotate_reset` | (그대로) | `CharSlot_SwayPivot` | 상대 / 0으로 |
+| 초상 | `size` | `슬롯 <레벨·라벨·x배율> [keep_y] [길이] [이징]` | `DepthOffset` · `DepthScale` | 절대 |
+| 초상 | `size_reset` | (그대로) | 〃 | mid로 |
+| 초상 | `char_move_to` · `char_rotate_to` · `char_scale_to` · `motion` · `mirror` · `face` … | (그대로) | `CharacterPortrait_*` | |
+| 블러 | `depth_focus_on` · `depth_focus_clear` | (옛 `focus_on` · `focus_clear` — 이름만) | | |
+
+`size`의 세부(제안 — 확인 받을 것):
+
+- `size s1 14` · `size s1 front` — 레벨(라벨). level 커브의 Y와 배율을 놓는다.
+- `size s1 14 keep_y` — 배율만 놓고 Y는 지금 값 그대로 둔다.
+- `size s1 x1.04` — 배율을 직접 놓는다(절대값). 레벨이 없어 Y의 근거가 없으므로 **Y는 건드리지 않는다**.
+- 셋째 칸이 `keep_y`가 아니면 길이로 읽는다.
+
+걷는 것:
+
+| 커맨드 | 까닭 |
+|---|---|
+| `place <초점> <지점>` · `place_left` · `place_center` · `place_right` | 역산. 초점을 화면 지점에 놓는 값은 도구가 풀어 `place x y`나 `focus_move x y`로 적는다(L11) |
+| `scale_by` · `scale_reset` | 노드(`CharSlot_Scale`)가 사라진다(L7) |
+| `size`의 셋째 칸(보존할 초점) | 무대를 재지 않는다(L6) |
+| `show` · `shot_to` · `shot_focus_to` | 앞서 정한 것 — §8 |
+
+## 5. 확인할 것 하나 — 깊이의 자리
+
+L5는 "`VisualOffset`보다도 아래"로 정했다. 문서를 쓰며 배역 앵커의 실값을 보니 그 자리에 대가가 있다. 둘 다 **슬롯에 영향을 주지 않는 것은 같다**
+— 차이는 배역 앵커(`VisualOffset`)를 깊이가 곱하느냐 하나다.
+
+배역 앵커는 21명 중 13명이 기본값이 아니다(런타임 · 작업공간 덤프가 같다): harin · sigure · kasmi는 오프셋 y 271 · 배율 0.498,
+tyrant는 (−30, −800) · 5, Amber는 (330, 0) · 10.
+
+| | (가) `VisualOffset` **아래** — L5에 적힌 대로 | (나) `VisualOffset` **바로 위** — `CharSlot_Scale`이 있던 자리 |
+|---|---|---|
+| 이모지(`DepthScale` 밑, L9) | 배역 앵커의 배율을 같이 받는다 — harin의 이모지는 절반, Amber는 10배가 된다. 머리 자리 표(발에서 잰 px)도 같이 곱해진다. 이모지 쪽에서 앵커를 되돌리는 보정이 새로 필요하다 | 지금과 같다(지금 서는 `CharSlot_Scale`이 바로 그 자리다) |
+| 크기의 중심 | 앵커가 옮긴 뒤의 바닥이다 — harin은 지금보다 271px 위. 같은 배율에서 서는 자리가 지금의 `scale_by`와 달라진다 | 지금의 `scale_by`와 같다 |
+| 작업공간(`scale_by` 1,445곳) | `size x배율`로 바꾸면서 `script.py`의 자리 식도 바꿔야 한다 | `size x배율`로 바꾸기만 하면 된다(상대값 → 절대값) |
+| 초점을 재는 노드(L10) | `VisualOffset`에서 깊이 아래의 노드로 옮긴다. 초점 표의 값(`VisualOffset` 기준 px)의 뜻이 달라진다 | 그대로 `VisualOffset`이다 — 이미 깊이 아래다 |
+
+**(나)를 권한다.** 정하신 뜻(슬롯에 영향 없음 · 초상 소속 · 이모지가 크기를 따라감 · 초점이 크기를 따라감)이 모두 그대로이고, 새로 생기는 보정이 없다.
+이름은 초상 소속(`CharacterPortrait_DepthOffset` · `_DepthScale`)으로 둔다. §3의 그림은 (나)다.
+
+## 6. 바뀌는 곳
+
+| 자리 | 무엇 |
+|---|---|
+| `Stage/Character/Rig/CharacterRigDefinition.cs` · `CharacterRigBuilder.cs` | `CharacterRigSchema.Nodes` · `Refs` · `CharacterRigNode` · 참조. 프리팹은 빌더가 다시 세운다 |
+| `Stage/Grammar` · `Playback/YarnBridge` | 파서 표 · 브리지 등록 · 전달 — `place` · `size` · `focus_*` · `depth_focus_*`, 걷는 이름들 |
+| `Stage/Character/Commands` | `SetDepthCommandCharR`(Y 옵션 · 배율 · 초점 보존 걷기) · `SetAnchorCommandCharR`(리셋 목록에서 `CharSlot_Scale`) · `PlaceCharacterFocusCommandCharR`(걷기). 포커스 커맨드는 있는 것(`MoveBy` 절대 · `RotateTo` · `ScaleTo`)에 노드만 준다 |
+| `Stage/Emoji` | 설 자리를 `CharSlot_Scale` → `DepthScale`(다섯 파일) |
+| `Stage/Character/Placement` · `PortraitStudio` · `Diagnostics` | 초점을 재는 노드(§5가 (가)일 때만) |
+| `Stage/Blur` | 커맨드 이름만(`depth_focus_*`). 깊이 값(`SettledDepthScale`)은 `size`가 그대로 적는다 |
+| `Core/Reduce` · `Core/Motion` | 폴드(`place` · `size` · `focus_*` · `move_reset` · 리셋 목록) · 노드 이름 상수 · `MotionRules`의 키잉 금지 노드 |
+| `Tests/EditMode` | 합성 리그를 적어 둔 시험(리듀서 · 초점 · 배경 · 슬라이드 · 이모지 …)과 Unity 대조 시험 |
+| `ExportedTuning/rig-schemas.json` | 리그가 바뀌면 **Unity에서 다시 내야 한다**(소유자) |
+| `Assets/Dialogue` | 데모 · 예제 4편 — `place` 계열 31곳 · `size` 19곳 · `shot_focus_to` 1곳. 포커스 계층을 쓰는 예를 하나 둔다 |
+| 문서 | `rig-axis-order.md`(다시 쓴다) · `settled-chain.md` · `target-boundary.md` · `stage-rig.md` · `schema.md` |
+
+## 7. 단계 (§5가 정해진 뒤)
+
+Unity는 한 묶음이 함께 컴파일돼야 하므로, 커밋은 나누되 R1~R3은 한 번에 확인한다.
+
+| 단계 | 무엇 | 확인 |
+|---|---|---|
+| R1 | 코어 — 노드 이름 · 폴드 · 리셋 목록 · 걷는 커맨드 · 시험의 합성 리그 | 코어 시험(.NET) |
+| R2 | 리그 — 스키마 배열 · 참조 · 빌더 · 이모지의 설 자리 | Unity(소유자) |
+| R3 | 커맨드 — 파서 표 · 브리지 · 실행 | Unity(소유자) |
+| R4 | 데모 · 예제 대본을 새 어휘로, 문서 | 옛 대본(옛 코어) ↔ 새 대본(새 코어)의 무대 대조 — `feat/command-prune`에서 쓴 방법 |
+| R5 | 덤프 다시 내기 · 등가성 하네스 | Unity(소유자) |
+| R6 | 작업공간 — 포크 들이기 · `script.py`(`scale_by` → `size x배율`) · `yarn_check.py` · 다시 내기 · 녹화 | 줄의 앵커 N4와 함께. 그 전까지 작업공간은 영향이 없다 |
+| R7 | 모션 툴의 코어 사본 · 스키마 | 런타임이 정해진 뒤 |
+
+## 8. `feat/command-prune`에서 가져올 것
+
+| 그 브랜치의 일 | 여기서 |
+|---|---|
+| `show` 걷기(`a50034ea`) · `shot_to` 걷기(`c6a8aa3d`) | 계층과 무관하다 — 그대로 가져온다 |
+| `shot_focus x y`(`31aacead`) · `shot_focus_to` 걷기 | 뜻은 그대로. 커밋이 `place` 걷기 위에 얹혀 있어 다시 적는다 |
+| `size`에서 초점 보존 떼기(`b688df44`) | 방향은 같다(L6). 인자와 노드가 달라져 다시 한다 |
+| `place` 계열 걷기(`8a44f6ed`) | 역산을 걷는 것은 같다(L4). **데모를 `move_by`로 풀어 적은 것은 버린다** — `place x y`와 포커스 계층으로 다시 적는다 |
+| 값을 푸는 변환기 · 두 겹의 대조(옛 코어 ↔ 새 코어) | 그대로 쓴다 |
+| 계획서 `PLAN_command-prune.md` | 이 문서가 대신한다. 그 브랜치는 합치지 않는다 |
+
+## 9. 남은 물음
+
+| # | 무엇 | 제안 |
+|---|---|---|
+| ① | §5 — 깊이의 자리 | (나) |
+| ② | `cast`가 되돌리는 것 — 지금은 슬롯의 이동 축과 초상의 연기 축이다. 포커스와 깊이는 건드리지 않는다 | 그대로 둔다 |
+| ③ | 포커스 노드에 모션 클립의 키를 허용할지 — 지금 `Track_Focus`는 금지다(역산의 해였기 때문) | 금지를 그대로 둔다. 필요해지면 연다 |
+| ④ | `size_reset`의 뜻 — 지금은 mid 레벨로 간다 | 그대로 둔다 |
+| ⑤ | 정착 장부(리그 커맨드가 끝값을 적어 두는 곳) — 역산 커맨드가 사라지면 읽는 쪽이 진단 뷰와 대조 시험뿐이다 | 이 일이 끝난 뒤 따로 정한다 |
+| ⑥ | 샷의 초점은 줌과 한 전환이다 — 한 줄에 `shot_zoom`과 `shot_focus`를 다른 길이로 적으면 뒤의 길이로 함께 간다 | 그대로 둔다. 거슬리면 초점을 제 축으로 나눈다 |
