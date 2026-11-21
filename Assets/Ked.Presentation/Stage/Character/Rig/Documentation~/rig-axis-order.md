@@ -224,7 +224,7 @@ CharSlot_Track_Focus          place 계열          ← 슬롯 축 (무대 배�
                       └ CharSlot_SwayPivot   rotate_by · rotate_reset   [bottom pivot]
                          └ CharSlot_Scale    scale_by · scale_reset     [bottom pivot]
                             │
-                            └ CharacterPortrait_VisualOffset   set_anchor · show   ← 배역 축 [bottom pivot]
+                            └ CharacterPortrait_VisualOffset   cast(set_anchor)   ← 배역 축 [bottom pivot]
                                │
                                └ CharacterPortrait_Track        ← 초상 연기 축
                                   └ ..._Rotation
@@ -237,7 +237,7 @@ CharSlot_Track_Focus          place 계열          ← 슬롯 축 (무대 배�
                                                        └ ..._ActingScale_X   mirror
                                                           └ ..._ActingScale_Y
                                                              ├ Sprite_Root  fade_in/out  [CG α=0]
-                                                             │  └ Sprite_Image   show · face · pose
+                                                             │  └ Sprite_Image   cast · face · pose
                                                              └ Overlay_Root  face_swap   [CG α=0]
                                                                 └ Overlay_Image
 ```
@@ -290,7 +290,7 @@ CharSlot_Track_Focus          place 계열          ← 슬롯 축 (무대 배�
 
 **`VisualOffset`이 두 축의 이음매** — 슬롯 축 끝, 연기 축 시작. 스프라이트마다 그려진
 중심이 다른 것을 보정하는 자리이고, 연기 **위**에 있어서 연기가 보정된 위치를 기준으로
-일어난다. `set_anchor`/`show`가 여기를 잡는다.
+일어난다. `cast`가 내는 set_anchor가 여기를 잡는다.
 
 **bottom pivot 다섯 곳** (`DepthScale` · `CharSlot_SwayPivot` · `CharSlot_Scale` ·
 `VisualOffset` · `Portrait_SwayPivot`) — 서 있는 인물의 기준점은 발이다. 깊이로 작아져도,

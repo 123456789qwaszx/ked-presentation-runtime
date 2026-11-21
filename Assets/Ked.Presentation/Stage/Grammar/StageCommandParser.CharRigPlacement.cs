@@ -1,54 +1,9 @@
-using Ked.Presentation.Core;
 using DG.Tweening;
 using UnityEngine;
 
 public sealed partial class StageCommandParser
 {
-    private const string DefaultShowFaceToken = "e1";
-    private const string DefaultShowDurationToken = "18fr";
-    
     private const string DefaultNudgeDurationToken = "10fr";
-    
-    #region Show
-    private void EnqueueShowAtSpec(string roleKey, string faceToken, string durationToken)
-    {
-        var spec0SetAnchor = new SetAnchorCommandSpecCharR
-        {
-            roleKey = roleKey,
-            resetSlotPos = true,
-            resetCharacterPos = true
-        };
-        
-        var spec1SetPortraitSprite = new SetPortraitSpriteCommandSpecCharR
-        {
-            roleKey = roleKey,
-            portrait = new PortraitIdentity { emotion = ShowFaceAliasParser.Parse(faceToken) }
-        };
-        
-        var spec2FadeInCharRigRoot = new FadeCommandSpecCharR
-        {
-            node = CharacterRigNode.RigRoot,
-            targetAlpha = NodeTargets.FadeInAlpha,
-            
-            roleKey = roleKey,
-            duration = YarnDurationParser.Parse(durationToken)
-        };
-        
-        var spec3FadeInPortraitSprite = new FadeCommandSpecCharR
-        {
-            node = CharacterRigNode.CharacterPortraitSprite_Root,
-            targetAlpha = NodeTargets.FadeInAlpha,
-            
-            roleKey = roleKey,
-            duration = YarnDurationParser.Parse(durationToken)
-        };
-
-        Emit(spec0SetAnchor);
-        Emit(spec1SetPortraitSprite);
-        Emit(spec2FadeInCharRigRoot);
-        Emit(spec3FadeInPortraitSprite);
-    }
-    #endregion
     
     #region Nudge
     private void EnqueueDirectionalNudgeSpec(

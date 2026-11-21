@@ -476,90 +476,25 @@ namespace Ked.Presentation.Tests
             Assert.That(reset.Nodes.GetState("c1/CharSlot_SwayPivot").LocalEulerAngles, Is.EqualTo(Vec3.Zero));
         }
 
-        // ── show ─────────────────────────────────────────────────────
+        // ── cast의 역할 앵커 (런타임 파서: cast → pose → face → SetAnchor) ──
 
         [Test]
-        public void show는_연기_축을_리셋하고_배역_앵커를_입힌다()
-        {
-            StageState state = Fold(
-                Cmd("slot", "c1"),
-                Cmd("cast", "c1", "tyrant"),
-                Cmd("move_by", "c1", "3u", "0u"),
-                Cmd("rotate_by", "c1", "20"),   // SwayPivot — show가 되돌리지 않는 축
-                Cmd("scale_by", "c1", "2"),
-                Cmd("show", "c1"));
-
-            // 리셋 축.
-            Assert.That(state.Nodes.GetState("c1/CharSlot_Track").AnchoredPosition, Is.EqualTo(Vec2.Zero));
-            Assert.That(state.Nodes.GetState("c1/CharSlot_Scale").LocalScale.XY, Is.EqualTo(Vec2.One));
-            Assert.That(state.Nodes.GetState("c1/CharSlot_Rotation").LocalEulerAngles, Is.EqualTo(Vec3.Zero));
-
-            // 런타임 실동작: rotate_by의 표적(CharSlot_SwayPivot)은 show가 되돌리지 않는다.
-            Assert.That(state.Nodes.GetState("c1/CharSlot_SwayPivot").LocalEulerAngles.Z,
-                Is.EqualTo(20f).Within(Eps));
-
-            // 배역 앵커: tyrant = offset (-30, -800), scale 5 (실제 덤프의 비기본값 엔트리).
-            RectNodeState anchor = state.Nodes.GetState("c1/CharacterPortrait_VisualOffset");
-            Assert.That(anchor.AnchoredPosition, Is.EqualTo(new Vec2(-30f, -800f)));
-            Assert.That(anchor.LocalScale.XY, Is.EqualTo(new Vec2(5f, 5f)));
-
-            // 가시성 두 장.
-            Assert.That(state.GetAlpha("c1/__root"), Is.EqualTo(1f));
-            Assert.That(state.GetAlpha("c1/CharacterPortraitSprite_Root"), Is.EqualTo(1f));
-
-            // 초상 폭: faceToken 생략 → "e1" → 표정 "1" → "01".
-            Assert.That(PortraitWidthOf(state, "c1"), Is.EqualTo(620f).Within(Eps));
-            Assert.That(state.Unhandled, Is.Empty);
-        }
-
-        [Test]
-        public void show의_faceToken은_별칭을_벗는다()
-        {
-            StageState alias = Fold(
-                Cmd("slot", "c1"), Cmd("cast", "c1", "tyrant"), Cmd("show", "c1", "emo2"));
-
-            Assert.That(PortraitWidthOf(alias, "c1"), Is.EqualTo(540f).Within(Eps));
-
-            StageState shortForm = Fold(
-                Cmd("slot", "c1"), Cmd("cast", "c1", "tyrant"), Cmd("show", "c1", "e2"));
-
-            Assert.That(PortraitWidthOf(shortForm, "c1"), Is.EqualTo(540f).Within(Eps));
-        }
-
-        [Test]
-        public void 배역이_없으면_show_앵커는_기본값이고_사이징만_기록된다()
-        {
-            StageState state = Fold(Cmd("slot", "c1"), Cmd("show", "c1"));
-
-            RectNodeState anchor = state.Nodes.GetState("c1/CharacterPortrait_VisualOffset");
-            Assert.That(anchor.AnchoredPosition, Is.EqualTo(Vec2.Zero));
-            Assert.That(anchor.LocalScale.XY, Is.EqualTo(Vec2.One));
-
-            Assert.That(state.GetAlpha("c1/CharacterPortraitSprite_Root"), Is.EqualTo(1f),
-                "사이징이 빠져도 가시성은 접힌다");
-            Assert.That(state.Unhandled.Count, Is.EqualTo(1));
-            Assert.That(state.Unhandled[0].Reason, Does.Contain("배역이 없다"));
-        }
-
-        [Test]
-        public void role_anchor_튜닝이_없으면_show가_소리를_낸다()
+        public void role_anchor_튜닝이_없으면_cast가_소리를_낸다()
         {
             StageReducerTuning tuning = NewTuning();
             tuning.RoleAnchors = null;
 
-            StageState state = Fold(tuning, Cmd("slot", "c1"), Cmd("show", "c1"));
+            StageState state = Fold(tuning, Cmd("slot", "c1"), Cmd("cast", "c1", "tyrant"));
 
             Assert.That(state.Unhandled.Any(u => u.Reason.Contains("role-anchor")), Is.True,
                 "실측 덤프에 비기본값 엔트리(tyrant·Amber)가 있다 — 침묵하면 그 장면이 어긋난다");
         }
 
-        // ── cast의 역할 앵커 (런타임 파서: cast → pose → face → SetAnchor) ──
-
         [Test]
         public void cast는_배역_앵커를_입힌다()
         {
             // 런타임 파서가 cast를 SetAnchor까지 팬아웃한다(StageCommandParser.CharRigSetup.EnqueueCastCharacterSpec).
-            // show를 한 번도 쓰지 않는 대본(샘플 전부)도 이 앵커로 선다.
+            // 인물은 이 앵커로 선다.
             StageState state = Fold(Cmd("slot", "c1"), Cmd("cast", "c1", "tyrant"));
 
             RectNodeState anchor = state.Nodes.GetState("c1/CharacterPortrait_VisualOffset");
@@ -571,17 +506,23 @@ namespace Ked.Presentation.Tests
         [Test]
         public void 움직인_뒤의_cast는_연기_축을_되돌린다()
         {
-            // 런타임 cast의 SetAnchor는 두 리셋 플래그가 모두 켜진 채 나간다(EnqueueSetAnchorSpecs 기본값) —
-            // show와 같은 리셋 목록이다. 항목이 없는 캐릭터(parkeunseol)는 앵커가 기본값(0/1)이다.
+            // 런타임 cast의 SetAnchor는 두 리셋 플래그가 모두 켜진 채 나간다(EnqueueSetAnchorSpecs 기본값).
+            // 항목이 없는 캐릭터(parkeunseol)는 앵커가 기본값(0/1)이다.
             StageState state = Fold(
                 Cmd("slot", "c1"),
                 Cmd("cast", "c1", "tyrant"),
                 Cmd("move_by", "c1", "3u", "0u"),
+                Cmd("rotate_by", "c1", "20"),   // SwayPivot — cast가 되돌리지 않는 축
                 Cmd("scale_by", "c1", "2"),
                 Cmd("cast", "c1", "parkeunseol"));
 
             Assert.That(state.Nodes.GetState("c1/CharSlot_Track").AnchoredPosition, Is.EqualTo(Vec2.Zero));
             Assert.That(state.Nodes.GetState("c1/CharSlot_Scale").LocalScale.XY, Is.EqualTo(Vec2.One));
+            Assert.That(state.Nodes.GetState("c1/CharSlot_Rotation").LocalEulerAngles, Is.EqualTo(Vec3.Zero));
+
+            // 런타임 실동작: rotate_by의 표적(CharSlot_SwayPivot)은 리셋 목록에 없다.
+            Assert.That(state.Nodes.GetState("c1/CharSlot_SwayPivot").LocalEulerAngles.Z,
+                Is.EqualTo(20f).Within(Eps));
 
             RectNodeState anchor = state.Nodes.GetState("c1/CharacterPortrait_VisualOffset");
             Assert.That(anchor.AnchoredPosition, Is.EqualTo(Vec2.Zero));
@@ -613,7 +554,7 @@ namespace Ked.Presentation.Tests
         public void 스폰은_덤프의_초기_alpha를_반영한다()
         {
             // 실제 리그에서 초상·오버레이·이모지 루트는 alpha 0으로 태어난다.
-            // 기본값 1로 두면 show 전 구간이 전부 어긋난다.
+            // 기본값 1로 두면 fade_in 전 구간이 전부 어긋난다.
             StageState state = Fold(Cmd("slot", "c1"));
 
             Assert.That(state.GetAlpha("c1/CharacterPortraitSprite_Root"), Is.EqualTo(0f));
@@ -644,17 +585,16 @@ namespace Ked.Presentation.Tests
         }
 
         [Test]
-        public void show는_초기_alpha_0을_1로_올린다()
+        public void fade_in은_초기_alpha_0을_1로_올린다()
         {
-            // 스폰 직후 0 → show가 1. 첫 리포트에서 Sprite_Root만 419건이었던 이유다
-            // (show 이후로는 폴드도 캡처도 1이라 맞았다).
+            // 스폰 직후 0 → fade_in이 1. 첫 리포트에서 Sprite_Root만 419건이었던 이유다.
             StageState spawned = Fold(Cmd("slot", "c1"));
             Assert.That(spawned.GetAlpha("c1/CharacterPortraitSprite_Root"), Is.EqualTo(0f));
 
-            StageState shown = StageReducer.Apply(spawned, Cmd("show", "c1"), NewTuning());
+            StageState shown = StageReducer.Apply(spawned, Cmd("fade_in", "c1"), NewTuning());
             Assert.That(shown.GetAlpha("c1/CharacterPortraitSprite_Root"), Is.EqualTo(1f));
 
-            // show가 안 건드리는 이모지 루트는 0 그대로 — 캡처도 0이다.
+            // fade_in이 안 건드리는 이모지 루트는 0 그대로 — 캡처도 0이다.
             Assert.That(shown.GetAlpha("c1/EmojiSlot00_Root"), Is.EqualTo(0f));
         }
 
@@ -664,7 +604,7 @@ namespace Ked.Presentation.Tests
             // 브리지 표적: CharacterPortraitSprite_Root.
             StageState state = Fold(
                 Cmd("slot", "c1"),
-                Cmd("show", "c1"),
+                Cmd("fade_in", "c1"),
                 Cmd("fade_out", "c1"));
 
             Assert.That(state.GetAlpha("c1/CharacterPortraitSprite_Root"), Is.EqualTo(0f));
@@ -677,7 +617,7 @@ namespace Ked.Presentation.Tests
         [Test]
         public void fade는_목표_alpha까지_접고_범위_밖은_자른다()
         {
-            StageState state = Fold(Cmd("slot", "c1"), Cmd("show", "c1"));
+            StageState state = Fold(Cmd("slot", "c1"), Cmd("fade_in", "c1"));
 
             StageState half = StageReducer.Apply(state, Cmd("fade", "c1", "0.5", "12fr"), NewTuning());
             Assert.That(half.GetAlpha("c1/CharacterPortraitSprite_Root"), Is.EqualTo(0.5f));
@@ -841,7 +781,7 @@ namespace Ked.Presentation.Tests
         [Test]
         public void 폴드_중_예외는_기록이_되고_이전_상태는_무사하다()
         {
-            // VisualOffset이 없는 손상 리그: show의 앵커 타깃이 트리에서 터진다.
+            // VisualOffset이 없는 손상 리그: cast의 앵커 타깃이 트리에서 터진다.
             StageReducerTuning tuning = NewTuning();
             tuning.RigSchemas.rigs[0].nodes.RemoveAll(n => n.id == "CharacterPortrait_VisualOffset");
             tuning.RigSchemas.rigs[0].nodes.RemoveAll(n => n.parent == "CharacterPortrait_VisualOffset");
@@ -851,7 +791,7 @@ namespace Ked.Presentation.Tests
             StageState before = Fold(tuning, Cmd("slot", "c1"));
             int unhandledBefore = before.Unhandled.Count;
 
-            StageState after = StageReducer.Apply(before, Cmd("show", "c1"), tuning);
+            StageState after = StageReducer.Apply(before, Cmd("cast", "c1", "tyrant"), tuning);
 
             Assert.That(after.Unhandled.Count, Is.GreaterThan(unhandledBefore));
             Assert.That(after.Unhandled.Any(u => u.Reason.Contains("폴드 중 예외")), Is.True);

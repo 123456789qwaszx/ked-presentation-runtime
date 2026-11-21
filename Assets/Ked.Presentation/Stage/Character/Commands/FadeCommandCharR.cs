@@ -19,7 +19,7 @@ public sealed class FadeCommandSpecCharR : CharacterRigCommandSpecBase
 }
 
 /// <summary>
-/// 리그 노드의 CanvasGroup을 목표 alpha까지 페이드한다 — fade_in · fade_out · bg_fade_in/out · show가 모두 이것 하나다.
+/// 리그 노드의 CanvasGroup을 목표 alpha까지 페이드한다 — fade_in · fade_out · fade · bg_fade_in/out이 모두 이것 하나다.
 /// 확정하면 보이는 동안만 입력을 받는다(alpha가 0이면 interactable · blocksRaycasts를 끈다).
 /// </summary>
 public sealed class FadeCommandCharR : ClaimTweenCommandBase

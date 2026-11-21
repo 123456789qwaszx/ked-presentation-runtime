@@ -16,8 +16,8 @@ namespace Ked.Presentation.Core
         public Vec2 BaseResolution;
 
         /// <summary>
-        /// presets/role-anchor.json — show/set_anchor의 캐릭터별 앵커.
-        /// 없으면(null) show가 Default로 접되 Unhandled로 소리를 낸다 —
+        /// presets/role-anchor.json — cast가 입히는 캐릭터별 앵커.
+        /// 없으면(null) cast가 Default로 접되 Unhandled로 소리를 낸다 —
         /// 실측 덤프에 비기본값 엔트리가 있으므로(tyrant·Amber) 침묵하면 그 장면이 어긋난다.
         /// </summary>
         public RoleAnchorTuningBodyDto RoleAnchors;
@@ -77,7 +77,7 @@ namespace Ked.Presentation.Core
     /// 이 기록이 "아직 못 접는 것"의 유일한 진실이고, 수렴의 작업 목록이 된다.
     ///
     /// 현재 어휘(v1): slot 계열(리그 스폰) · cast/actor(배역·별칭) ·
-    ///   show(리셋+앵커+사이징+가시성) · fade_in/out · fade · slide_in/out · place/size 계열 ·
+    ///   fade_in/out · fade · slide_in/out · place/size 계열 ·
     ///   nudge/move/scale/rotate 계열 · shot 계열 ·
     ///   초상 축(pose/face/face_swap) · motion(채널마다 마지막 키) · 시간 커맨드(pause — 접을 것이 없다) ·
     ///   배경 bg_*(캐스팅하지 않은 슬롯 — spawn/sprite/fade/move/scale).
@@ -93,7 +93,7 @@ namespace Ked.Presentation.Core
     /// 파일 구성 — 이 파일은 공개 API·디스패치·공용 helper만 갖는다.
     /// 폴드 본문은 디스패치의 구획을 그대로 따라 partial로 나뉜다:
     ///   StageReducer.Slot.cs      슬롯 스폰 · 배역/별칭 · 구조 축
-    ///   StageReducer.Show.cs      show · fade
+    ///   StageReducer.Anchor.cs    역할 앵커(cast) · fade
     ///   StageReducer.Placement.cs place · size
     ///   StageReducer.Staging.cs   nudge · move · scale · rotate
     ///   StageReducer.Shot.cs      shot 계열
@@ -165,9 +165,6 @@ namespace Ked.Presentation.Core
                 case "pose": return ApplyPose(state, cmd, out reason);
                 case "face": return ApplyFace(state, cmd, tuning, out reason);
                 case "face_swap": return ApplyFace(state, cmd, tuning, out reason);
-
-                // show — SetAnchor(리셋+역할 앵커) + 초상 사이징 + 가시성.
-                case "show": return ApplyShow(state, cmd, tuning, out reason);
 
                 // fade — 브리지와 같은 표적(CharacterPortraitSprite_Root).
                 case "fade_in": return ApplyFade(state, cmd, visible: true, out reason);
