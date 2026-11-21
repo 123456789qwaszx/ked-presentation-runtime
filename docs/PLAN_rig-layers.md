@@ -1,6 +1,6 @@
 # 리그의 계층 — 포커스 · 슬롯 · 초상
 
-2026-11-21 · 브랜치 `feat/rig-layers`(dev에서) · 상태: **R1~R4 끝(코어 시험 · 대본 대조) — Unity 확인(R5)을 기다린다** · 앞선 일: [PLAN_line-anchor.md](PLAN_line-anchor.md)
+2026-11-21 · 브랜치 `feat/rig-layers`(dev에서) · 상태: **R1~R5 끝 — dev에 합쳤다(2026-11-22). 남은 것: R6 작업공간(N4와 함께) · R7 모션 툴** · 앞선 일: [PLAN_line-anchor.md](PLAN_line-anchor.md)
 
 ## 0. 한 문장
 
@@ -200,7 +200,9 @@ Unity는 한 묶음이 함께 컴파일돼야 하므로, 커밋은 나누되 R1~
 | `f6a998fc` · `1c0661ed` | §8 | `show` · `shot_to`를 걷었다(`feat/command-prune`에서 가져왔다) |
 | `45e25d09` | R1 · R2 | 리그를 20노드로. 스키마 · 참조 · 빌더 · cast의 리셋 목록(런타임 · 코어) · 이모지의 설 자리 · 키잉 금지(포커스 셋) · 노드와 함께 사라지는 커맨드(`left` · `right` · `up` · `down` · `scale_by` · `scale_reset`). `rig-schemas.json` · 프리팹 · 제작 씬 · `nod.anim` · `bow.anim`은 손으로 맞췄다 — R5에서 Unity로 다시 낸다 |
 | `0d6c790e` | R1 · R3 | 커맨드 — `place x y` · `focus_move` · `focus_rotate` · `focus_scale` · `focus_reset` · `size`의 `keep_y` · `x배율`(코어 `SizeToken`) · `move_reset`은 슬롯만 · `depth_focus_on` · `depth_focus_clear` · `shot_focus x y`. 옛 `place` 계열 · `shot_focus_to` · 초점 보존을 걷었다. 보조 계산 `NodeTargets.TrySolveFocusPlacement` |
-| (이 커밋) | R4 | 데모 · 예제 4편을 새 어휘로, 문서 |
+| `35db98dd` | R4 | 데모 · 예제 4편을 새 어휘로, 문서 |
+| `c9f448ab` | R5 | Unity가 싣는 NUnit 3.5에 없는 `Using<T>(bool 비교식)`을 축마다 `Within`으로 — 순수 시험을 NUnit 3.5로도 컴파일해 본다 |
+| (이 커밋) | R5 | 소유자가 Unity에서 확인했다(컴파일 · 시험). 덤프를 다시 냈다 — `rig-schemas.json`은 손으로 맞춘 것과 내용이 같다. 같이 바뀐 것: `emoji-locator.json`(harin a의 자리) · `surface-layout.json`(새 필드) · `layer-profile.json`(소수 표기). Unity가 다시 만들던 `StageCutInFlashGraphic.cs.meta`(`6fe3b861`에서 빠졌다)를 넣었다 |
 
 ### R4 — 대본을 옮긴 방법과 결과
 

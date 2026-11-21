@@ -11,6 +11,21 @@
                 "image": {
                     "instanceID": 0
                 },
+                "usePortrait": false,
+                "overrideBoxColor": false,
+                "boxColor": {
+                    "r": 0.0,
+                    "g": 0.0,
+                    "b": 0.0,
+                    "a": 0.0
+                },
+                "overrideLineColor": false,
+                "lineColor": {
+                    "r": 0.0,
+                    "g": 0.0,
+                    "b": 0.0,
+                    "a": 0.0
+                },
                 "kind": 5,
                 "lineAnchorMin": {
                     "x": 0.07999999821186066,
@@ -82,6 +97,21 @@
                 "overrideImage": false,
                 "image": {
                     "instanceID": 0
+                },
+                "usePortrait": false,
+                "overrideBoxColor": false,
+                "boxColor": {
+                    "r": 0.0,
+                    "g": 0.0,
+                    "b": 0.0,
+                    "a": 0.0
+                },
+                "overrideLineColor": false,
+                "lineColor": {
+                    "r": 0.0,
+                    "g": 0.0,
+                    "b": 0.0,
+                    "a": 0.0
                 },
                 "kind": 1,
                 "lineAnchorMin": {
@@ -155,6 +185,21 @@
                 "image": {
                     "instanceID": 0
                 },
+                "usePortrait": false,
+                "overrideBoxColor": false,
+                "boxColor": {
+                    "r": 0.0,
+                    "g": 0.0,
+                    "b": 0.0,
+                    "a": 0.0
+                },
+                "overrideLineColor": false,
+                "lineColor": {
+                    "r": 0.0,
+                    "g": 0.0,
+                    "b": 0.0,
+                    "a": 0.0
+                },
                 "kind": 0,
                 "lineAnchorMin": {
                     "x": 0.3199999928474426,
@@ -226,6 +271,21 @@
                 "overrideImage": false,
                 "image": {
                     "instanceID": 0
+                },
+                "usePortrait": false,
+                "overrideBoxColor": false,
+                "boxColor": {
+                    "r": 0.0,
+                    "g": 0.0,
+                    "b": 0.0,
+                    "a": 0.0
+                },
+                "overrideLineColor": false,
+                "lineColor": {
+                    "r": 0.0,
+                    "g": 0.0,
+                    "b": 0.0,
+                    "a": 0.0
                 },
                 "kind": 2,
                 "lineAnchorMin": {
@@ -299,6 +359,21 @@
                 "image": {
                     "instanceID": 0
                 },
+                "usePortrait": false,
+                "overrideBoxColor": false,
+                "boxColor": {
+                    "r": 0.0,
+                    "g": 0.0,
+                    "b": 0.0,
+                    "a": 0.0
+                },
+                "overrideLineColor": false,
+                "lineColor": {
+                    "r": 0.0,
+                    "g": 0.0,
+                    "b": 0.0,
+                    "a": 0.0
+                },
                 "kind": 3,
                 "lineAnchorMin": {
                     "x": 0.07999999821186066,
@@ -370,6 +445,21 @@
                 "overrideImage": false,
                 "image": {
                     "instanceID": 0
+                },
+                "usePortrait": false,
+                "overrideBoxColor": false,
+                "boxColor": {
+                    "r": 0.0,
+                    "g": 0.0,
+                    "b": 0.0,
+                    "a": 0.0
+                },
+                "overrideLineColor": false,
+                "lineColor": {
+                    "r": 0.0,
+                    "g": 0.0,
+                    "b": 0.0,
+                    "a": 0.0
                 },
                 "kind": 4,
                 "lineAnchorMin": {
