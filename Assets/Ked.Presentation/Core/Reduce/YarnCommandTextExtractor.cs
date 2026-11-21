@@ -321,7 +321,23 @@ namespace Ked.Presentation.Core
                 for (int m = 0; m < markers.Count; m++)
                     markers[m] = new BeatMarker(markers[m].Name, Math.Max(0, markers[m].Position - bodyStart));
 
-                foreach (LineAnchor anchor in LineBeatSchedule.BuildAnchors(markers, pending, pendingGaps, problems, legacySteps))
+                // 재생의 차례에 맞춘다 — at 없는 명령(옛 표기)은 미리 풀려 머리 배치로 실행되고, start의 <<at>>은 그 바로 뒤다.
+                // 그래서 한 줄에 둘을 섞어 쓰면 at 없는 것이 먼저다. 다른 앵커의 차례는 바뀌지 않는다.
+                List<AtCommand> ordered = new(pending.Count);
+
+                for (int k = 0; k < pending.Count; k++)
+                {
+                    if (pendingBare[k] && pending[k].Beat == LineBeatSchedule.StartBeat)
+                        ordered.Add(pending[k]);
+                }
+
+                for (int k = 0; k < pending.Count; k++)
+                {
+                    if (!pendingBare[k] || pending[k].Beat != LineBeatSchedule.StartBeat)
+                        ordered.Add(pending[k]);
+                }
+
+                foreach (LineAnchor anchor in LineBeatSchedule.BuildAnchors(markers, ordered, pendingGaps, problems, legacySteps))
                 {
                     group.Anchors.Add(anchor);
 

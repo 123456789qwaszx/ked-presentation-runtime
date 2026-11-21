@@ -269,8 +269,7 @@ public partial class SampleBootstrap
             yarnPlaybackDriver,
             stageCommandParser,
             _presentationStage,
-            dialogueBoxPresentationController,
-            customLinePresenter);
+            dialogueBoxPresentationController);
 
         YarnLineBoundary yarnLineBoundary = new(
             _backlogRecorder,
@@ -287,19 +286,10 @@ public partial class SampleBootstrap
             _sceneBgm,
             _rigBlur);
 
-        // 대사 줄의 자리(<<at>> · [beat]) — 줄에 들어갈 때 목록을 짓고, 타자기가 글자 자리에서 지난다.
+        // 대사 줄의 앵커(<<at>> · [beat]) — 줄에 들어갈 때 앵커를 짓고, 앞 앵커는 줄이, 글 표지는 타자기가 글자 자리에서 연다.
         InlineCommandTrack inlineCommands = new(commandBridge, yarnPlaybackDriver);
 
-        _linePresentationFlow = new LinePresentationFlow(
-            yarnLineBoundary,
-            _lineDisplayState,
-            _seekState,
-            dialogueBoxPresentationController,
-            ellipsisBreathTypewriter,
-            stepHead,
-            inlineCommands,
-            lineHurrySpeed);
-
+        // 글 없는 구간 — 줄의 앞 앵커와 노드 끝의 암묵 스텝. 줄이 앞 앵커를 제 것으로 실행한다.
         StageStepFlow stageStepFlow = new(
             stepHead,
             inlineCommands,
@@ -308,6 +298,17 @@ public partial class SampleBootstrap
             dialogueBoxPresentationController,
             _playbackState,
             _presentationScopeSession);
+
+        _linePresentationFlow = new LinePresentationFlow(
+            yarnLineBoundary,
+            _lineDisplayState,
+            _seekState,
+            dialogueBoxPresentationController,
+            ellipsisBreathTypewriter,
+            stepHead,
+            stageStepFlow,
+            inlineCommands,
+            lineHurrySpeed);
 
         customLinePresenter.Initialize(
             dialogueRunner,

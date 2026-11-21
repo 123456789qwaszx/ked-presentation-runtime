@@ -10,7 +10,7 @@ public sealed class PlaybackRuntimeState
     private float _timeScale = 1f;
 
     // 스텝 서두르기 — 전경(pause)이 도는 동안의 클릭이 켠다. 그 스텝의 남은 명령이 압축된다(PresentationSessionContext).
-    // 다음 스텝의 머리(StepHead)가 내린다 — 다음 스텝으로 새지 않는다.
+    // 다음 줄에 들어설 때(StepHead.Enter) 내린다 — 다음 줄로 새지 않는다. 줄의 앞 앵커를 서두른 것은 start 앞에서 내린다.
     private bool _isStepHurried;
 
     public bool IsAutoMode => _isAutoMode;

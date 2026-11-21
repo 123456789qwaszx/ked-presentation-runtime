@@ -12,6 +12,7 @@ public sealed class LinePresentationFlow
     private readonly DialogueBoxPresentationController _boxPresentation;
     private readonly EllipsisBreathTypewriter _typewriter;
     private readonly StepHead _stepHead;
+    private readonly StageStepFlow _stageStep;
     private readonly InlineCommandTrack _inlineCommands;
     private readonly LineHurrySpeedController _lineHurrySpeed;
 
@@ -22,6 +23,7 @@ public sealed class LinePresentationFlow
         DialogueBoxPresentationController boxPresentation,
         EllipsisBreathTypewriter typewriter,
         StepHead stepHead,
+        StageStepFlow stageStep,
         InlineCommandTrack inlineCommands,
         LineHurrySpeedController lineHurrySpeed)
     {
@@ -31,6 +33,7 @@ public sealed class LinePresentationFlow
         _boxPresentation = boxPresentation;
         _typewriter = typewriter;
         _stepHead = stepHead;
+        _stageStep = stageStep;
         _inlineCommands = inlineCommands;
         _lineHurrySpeed = lineHurrySpeed;
     }
@@ -63,17 +66,49 @@ public sealed class LinePresentationFlow
         if (autoAdvance)
             LineAdvanceTag.TryGetAuto(ctx.Line.Metadata, out autoHold);
 
-        _lineDisplayState.SetLineAutoAdvance(autoAdvance, autoHold);
+        bool seekPassThrough = ctx.SeekDecision == SeekLineDecision.SkipVisualAndDispatchSeekNext;
+        bool seekArrived = ctx.SeekDecision == SeekLineDecision.TargetLineReached;
 
-        if (ctx.SeekDecision == SeekLineDecision.TargetLineReached)
+        // 줄에 들어선다 — 앞 줄의 서두르기와 보이스가 끝나고, 글의 표지와 쌓인 <<at>>이 이 줄의 앵커가 된다.
+        // 여기서부터 이 줄이 제 연출을 모두 실행한다: 앞 앵커 → start(머리) → 글 표지 → end(docs/PLAN_line-anchor.md §4).
+        _stepHead.Enter();
+        _inlineCommands.Begin(ctx.Line.TextWithoutCharacterName);
+
+        // 앞 앵커 — 대사창이 열리기 전. 시크가 지나가는 줄과 시크로 닿은 줄은 기다리지 않고 끝값으로 놓는다(A11).
+        // 시크가 살아 있는 동안이라야 명령이 압축된다 — 시크를 끝내기 전에 한다.
+        bool hasPrelude = _stageStep.HasLinePrelude;
+
+        if (hasPrelude && (seekPassThrough || seekArrived))
+        {
+            _stageStep.PlayLinePreludeSnapped();
+            hasPrelude = false;
+        }
+
+        if (seekArrived)
             _seekState.End(SeekEndReason.Arrived);
 
-        bool seekPassThrough = ctx.SeekDecision == SeekLineDecision.SkipVisualAndDispatchSeekNext;
+        if (hasPrelude)
+        {
+            // Phase: Prelude — 대사창을 닫고 앞 앵커를 차례로 연다. 이 줄의 화면 수명은 여기서 시작한다.
+            ctx.Run = beginRun();
+            SetPhase(ctx, LinePresentationPhase.Prelude);
+
+            await _stageStep.RunLinePreludeAsync(ctx.Run);
+
+            if (!ctx.Run.IsValid) {
+                await CompleteStaleAfterBoxAsync(ctx, waitForAdvance);
+                return;
+            }
+        }
+
+        // start — 대사창이 열리는 때. #auto의 머무름은 여기서부터 잰다(AR11).
+        _lineDisplayState.MarkLineStarted();
+        _lineDisplayState.SetLineAutoAdvance(autoAdvance, autoHold);
+
+        // 머리(at 없는 명령) 바로 뒤에 start의 <<at>>. 글 표지 · end는 타자기가 글자 자리에서 연다.
         _stepHead.ReleaseLineWaits(meta.lineId);
         _stepHead.Play(snap: ctx.IsRapidSkip || seekPassThrough, seekPassThrough: seekPassThrough);
-
-        // 표지 자리의 명령(<<at>>)은 이 줄의 스텝에 덧붙는다. 글자 자리에서 타자기가 실행한다.
-        _inlineCommands.Begin(ctx.Line.TextWithoutCharacterName);
+        _inlineCommands.PlayStart();
         SetPhase(ctx, LinePresentationPhase.LineEnteredCommitted);
         
         if (seekPassThrough) {
@@ -81,8 +116,8 @@ public sealed class LinePresentationFlow
             return;
         }
 
-        // Phase: VisualRunStarted
-        ctx.Run = beginRun();
+        // Phase: VisualRunStarted — 앞 앵커가 열어 둔 화면 수명이 있으면 그대로 쓴다.
+        ctx.Run ??= beginRun();
         SetPhase(ctx, LinePresentationPhase.VisualRunStarted);
 
         DialogueBoxPresentationContext boxCtx = new(
@@ -153,7 +188,7 @@ public sealed class LinePresentationFlow
     {
         SetPhase(ctx, LinePresentationPhase.SeekPassThrough);
 
-        // 타자기가 돌지 않는다 — 표지 자리의 명령은 줄 머리 명령 바로 뒤에 실행 순서대로 압축 실행된다.
+        // 타자기가 돌지 않는다 — 글 표지 · end의 명령은 start 바로 뒤에 앵커의 차례대로 압축 실행된다.
         _inlineCommands.PlayRemaining();
 
         _boxPresentation.CloseAll();

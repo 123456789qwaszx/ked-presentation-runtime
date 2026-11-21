@@ -90,7 +90,8 @@ public sealed class RollbackHistory
     }
 
     // 되감기 한 칸의 표적. 줄에 서 있으면 그 앞 줄이다.
-    // 무대 스텝 중이면 마지막 줄(방금 넘긴 줄)이다 — 무대 스텝은 기준점이 아니라서 "지금"이 그 줄의 뒤다.
+    // 노드 끝의 암묵 스텝 중이면 마지막 줄(방금 넘긴 줄)이다 — 그 스텝은 기준점이 아니라서 "지금"이 그 줄의 뒤다.
+    // 줄의 앞 앵커가 도는 중은 줄에 서 있는 것이다 — 그 줄은 도착할 때 이미 기록됐다(docs/PLAN_line-anchor.md A10).
     public bool GetRollbackPoint(bool duringStageStep, out RollbackPoint target)
     {
         target = default;

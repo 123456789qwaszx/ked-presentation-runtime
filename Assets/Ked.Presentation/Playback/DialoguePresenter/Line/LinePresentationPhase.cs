@@ -11,6 +11,11 @@ public enum LinePresentationPhase
     // the seek target match count. No current-line state, backlog, or rollback point has been written yet.
     LineRuntimeStateResolved = 20,
 
+    // The line has been committed (backlog and rollback points recorded) and its pre anchors are playing:
+    // the dialogue box is closed and no text is shown yet (docs/PLAN_line-anchor.md A5).
+    // Only lines that have pre anchors and are not reached by a seek pass through here.
+    Prelude = 25,
+
     // The line has been committed as the current line.
     // Backlog and rollback points have been recorded according to the resolved record decision,
     // and collected commands have been played.

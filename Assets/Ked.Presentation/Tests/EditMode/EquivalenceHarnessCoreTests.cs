@@ -337,6 +337,28 @@ namespace Ked.Presentation.Tests
         }
 
         [Test]
+        public void start에는_at_없는_명령이_먼저이고_at_start가_그_뒤다()
+        {
+            // 재생이 그렇다 — at 없는 명령은 미리 풀려 머리 배치로 실행되고, start의 <<at>>은 그 바로 뒤에 덧붙는다.
+            const string yarn =
+                "title: StartOrder\n" +
+                "---\n" +
+                "<<at start emoji s1 note>>\n" +
+                "<<face s1 02>>\n" +
+                "<<at start motion s1 nod>>\n" +
+                "<<fade_in s1>>\n" +
+                "하린: 여기.\n" +
+                "===\n";
+
+            List<string> warnings = new();
+            YarnLineGroup line = YarnCommandTextExtractor.Extract(yarn, "startorder.yarn", warnings).Single();
+
+            Assert.That(warnings, Is.Empty);
+            Assert.That(line.Anchors.Select(a => a.Name), Is.EqualTo(new[] { "start", "end" }));
+            Assert.That(line.Commands.Select(c => c.Name), Is.EqualTo(new[] { "face", "fade_in", "emoji", "motion" }));
+        }
+
+        [Test]
         public void 첫_글자_앞의_표지는_화자가_있어도_없어도_앞_앵커다()
         {
             const string yarn =

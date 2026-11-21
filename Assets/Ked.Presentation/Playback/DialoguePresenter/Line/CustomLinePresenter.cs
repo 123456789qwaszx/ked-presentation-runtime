@@ -8,7 +8,8 @@ public interface ILineAborter
     void AbortCurrentLine();
 }
 
-// 무대 스텝(<<step>> · 노드 끝)을 실행한다. 기다릴 것이 없으면 그 자리에서 끝난 태스크를 돌려준다.
+// 노드 끝의 암묵 스텝(붙을 줄이 없이 남은 명령)을 실행한다. 기다릴 것이 없으면 그 자리에서 끝난 태스크를 돌려준다.
+// <<step>>은 이것을 부르지 않는다 — 구간을 닫기만 하고, 다음 대사 줄이 앞 앵커로 실행한다(docs/PLAN_line-anchor.md A6).
 public interface IStageStepRunner
 {
     YarnTask RunStageStepAsync();

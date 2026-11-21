@@ -10,7 +10,6 @@ public sealed partial class YarnCommandBridge
     private readonly StageCommandParser _parser;
     private readonly CommandRoleGate _roleGate;
     private readonly DialogueBoxPresentationController _dialogueBoxPresentation;
-    private readonly IStageStepRunner _stageStep;
 
     // Forward가 쓰는 스크래치 — 커맨드 하나가 스펙 여럿을 낳는다(show·cast·bg_spawn).
     private readonly List<CommandSpecBase> _parsed = new();
@@ -20,14 +19,12 @@ public sealed partial class YarnCommandBridge
         YarnPlaybackDriver playbackDriver,
         StageCommandParser parser,
         PresentationStage stage,
-        DialogueBoxPresentationController dialogueBoxPresentation,
-        IStageStepRunner stageStep)
+        DialogueBoxPresentationController dialogueBoxPresentation)
     {
         _playbackDriver = playbackDriver;
         _parser = parser;
         _roleGate = new CommandRoleGate(stage);
         _dialogueBoxPresentation = dialogueBoxPresentation;
-        _stageStep = stageStep;
 
         BindRunnerCommands(runner);
     }
@@ -70,8 +67,9 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler(
             "surface_reset", ResetSurfaceLayout);
 
+        // <<step>>(옛 표기) — 실행하지 않는다. 여기까지 쌓인 명령이 다음 대사 줄의 앞 앵커 하나다(docs/PLAN_line-anchor.md A6).
         runner.AddCommandHandler(
-            "step", RunStageStep);
+            "step", CloseStageStep);
 
         // <<at 표지 명령 …>> — 다음 대사 줄의 표지 [beat=표지/] 자리에서 실행할 명령(docs/PLAN_line-beat.md).
         runner.AddCommandHandler<string, string[]>(
@@ -400,7 +398,8 @@ public sealed partial class YarnCommandBridge
             return;
         }
 
-        if (!_roleGate.TryAccept(_playbackDriver.Collected, _parsed, out string reason))
+        // 줄이 도착하기 전에 그 줄의 명령이 모두 풀린다 — 앞 앵커(<<step>>이 닫은 구간)가 세울 슬롯도 선언으로 본다.
+        if (!_roleGate.TryAccept(_playbackDriver.PendingAll, _parsed, out string reason))
         {
             Debug.LogError($"[YarnCommandBridge] {AuthoredText(commandName, args)} — {reason}. 실행하지 않는다.");
             return;
@@ -428,10 +427,11 @@ public sealed partial class YarnCommandBridge
         _playbackDriver.EnqueueAt(at);
     }
 
-    // 줄의 자리에 놓인 명령(<<at>>)을 스펙으로 풀어 output 뒤에 붙인다. authored는 로그용 — 대본에 쓴 꼴.
-    // output에 이미 든 것은 같은 자리의 앞 명령이다 — 대상 판정이 그 선언(actor · slot · cast)을 본다.
-    // 전경 명령(wait — pause · screen_cover)은 받지 않는다 — 대사 줄은 타자기도 넘김도 멈추지 않는다(docs/PLAN_line-beat.md R8).
-    public bool TryParseInline(in StageCommand command, string authored, List<CommandSpecBase> output)
+    // 줄의 앵커에 놓인 명령(<<at>>)을 스펙으로 풀어 output 뒤에 붙인다. authored는 로그용 — 대본에 쓴 꼴.
+    // output에 이미 든 것은 같은 앵커의 앞 명령이다 — 대상 판정이 그 선언(actor · slot · cast)을 본다.
+    // 전경 명령(wait — pause · screen_cover)은 앞 앵커에서만 받는다(allowWait) — 대사창이 열린 뒤에는
+    // 타자기도 넘김도 멈추지 않는다(docs/PLAN_line-beat.md R8 — docs/PLAN_line-anchor.md A7은 N3에서 연다).
+    public bool TryParseInline(in StageCommand command, string authored, List<CommandSpecBase> output, bool allowWait = false)
     {
         _parsed.Clear();
 
@@ -441,11 +441,11 @@ public sealed partial class YarnCommandBridge
             return false;
         }
 
-        for (int i = 0; i < _parsed.Count; i++)
+        for (int i = 0; i < _parsed.Count && !allowWait; i++)
         {
             if (_parsed[i].wait)
             {
-                Debug.LogError($"[줄의 자리] 기다리는 명령(pause · screen_cover)은 대사 줄의 자리에 쓸 수 없다 — 무대 스텝(<<step>>)에 쓴다: {authored}. 실행하지 않는다.");
+                Debug.LogError($"[줄의 자리] 기다리는 명령(pause · screen_cover)은 start · 글 표지 · end에 쓸 수 없다 — 줄의 앞 앵커에 쓴다: {authored}. 실행하지 않는다.");
                 return false;
             }
         }
