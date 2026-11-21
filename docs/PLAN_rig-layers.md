@@ -28,6 +28,10 @@
 | L9 | 이모지는 `DepthScale` 밑에 선다 — 인물이 커지면 머리도 올라가니 크기를 따라가야 한다. |
 | L10 | 초점(가슴 · 얼굴 점)을 재는 노드는 깊이 아래여야 한다 — 크기를 바꾸면 초점도 따라와야 한다. 깊이가 `VisualOffset` 위로 가므로 재는 노드는 지금의 `VisualOffset` 그대로다(§5) |
 | L11 | 화면 지점 · 캐릭터 초점으로 값을 푸는 일은 런타임 커맨드로 두지 않는다. 계산은 코어의 순수 함수로, 부르는 쪽은 도구다. AI의 경로는 지금 고려하지 않는다. |
+| L12 | **좌우 · 상하를 따로 둔 노드를 걷는다** — `CharSlot_Track_X` · `CharSlot_Track_Y` · `CharacterPortrait_Track_Move_X` · `CharacterPortrait_Track_Move_Y`. 더하기만 하던 층이고, 좌우와 상하를 다른 박자로 움직이는 일은 클립 하나(채널 안의 x · y 키)로 짠다. `left` · `right` · `up` · `down`도 함께 걷는다 — `move_by`가 대신한다. |
+| L13 | **겹치는 이동은 클립 하나로 짠다.** 한 노드에는 한 번에 트윈 하나다 — 서로 다른 때에 시작한 이동이 한 노드에서 겹치면 뒤의 것이 앞의 것을 끝값으로 보낸다. 이 규칙은 그대로 두고, 겹쳐야 하는 움직임은 한 스텝의 클립 하나로 적는다. |
+| L14 | `CharacterPortrait_ActingScale_Y`를 걷는다(쓰는 것이 없다). `CharSlot_Rotation`은 남긴다. |
+| L15 | `CharacterPortrait_ActingScale_X`는 `mirror`의 노드다 — 이름을 **`CharacterPortrait_Mirror`** 로 바꾼다. 배율 연기(`ActingScale`)와 합치지 않는다: 합치면 배율 모션이 뒤집힌 부호를 덮는다. |
 
 ## 3. 계층
 
@@ -47,26 +51,40 @@ CharSlot_Track_Focus            place 계열(역산)
                             └ CharacterPortrait_Track … 액팅 … Sprite / Overlay
 ```
 
-바꾼 뒤 — 깊이의 자리는 §5의 (나)로 그렸다:
+바꾼 뒤(25노드 → 20노드):
 
 ```
 CharFocus_Track                 focus_move                 ← 포커스: 맨 위, 무대 값 그대로
  └ CharSlot_Track               place(절대) · move_by(상대) · slide_in/out      ← 슬롯: 본래 자리
-    └ CharSlot_Track_X / _Y     left · right · up · down
-       └ CharFocus_Rotation     focus_rotate               [발밑]              ← 포커스
-          └ CharFocus_Scale     focus_scale                [발밑]              ← 포커스
-             └ CharSlot_Rotation
-                └ CharSlot_SwayPivot   rotate_by           [발밑]
-                   └ CharacterPortrait_DepthOffset   size의 Y(옵션)            ← 초상: 그 사람의 크기
-                      └ CharacterPortrait_DepthScale size  [발밑]   ← 이모지가 서는 자리
-                         └ CharacterPortrait_VisualOffset   cast(배역 앵커) ← 초점을 재는 노드
-                            └ CharacterPortrait_Track … 액팅 … Sprite / Overlay
+    └ CharFocus_Rotation        focus_rotate               [발밑]              ← 포커스
+       └ CharFocus_Scale        focus_scale                [발밑]              ← 포커스
+          └ CharSlot_Rotation   (쓰는 커맨드 없음 — 남긴다)
+             └ CharSlot_SwayPivot   rotate_by              [발밑]
+                └ CharacterPortrait_DepthOffset   size의 Y(옵션)               ← 초상: 그 사람의 크기
+                   └ CharacterPortrait_DepthScale size     [발밑]   ← 이모지가 서는 자리
+                      └ CharacterPortrait_VisualOffset     [발밑]   cast(배역 앵커) ← 초점을 재는 노드
+                         └ CharacterPortrait_Track         char_move_to — 놓고 머무는 자리
+                            └ CharacterPortrait_Rotation   모션
+                               └ CharacterPortrait_Track_Move      모션 — 지나가는 몸짓
+                                  └ CharacterPortrait_SwayPivot    char_rotate_to · 모션  [발밑]
+                                     └ CharacterPortrait_Shake     모션
+                                        └ CharacterPortrait_ActingScale   char_scale_to · 모션
+                                           └ CharacterPortrait_Mirror     mirror (옛 ActingScale_X)
+                                              ├ CharacterPortraitSprite_Root → _Image          fade · face · pose
+                                              └ CharacterPortraitSpriteOverlay_Root → _Image   face_swap
 ```
+
+| | 노드 |
+|---|---|
+| 걷는다(7) | `CharSlot_Track_Idle` · `CharSlot_Track_X` · `CharSlot_Track_Y` · `CharSlot_Scale` · `CharacterPortrait_Track_Move_X` · `CharacterPortrait_Track_Move_Y` · `CharacterPortrait_ActingScale_Y` |
+| 새로 둔다(2) | `CharFocus_Rotation` · `CharFocus_Scale` |
+| 이름 · 자리를 바꾼다 | `CharSlot_Track_Focus` → `CharFocus_Track` · `CharSlot_DepthY` → `CharacterPortrait_DepthOffset`(자리도) · `CharSlot_DepthScale` → `CharacterPortrait_DepthScale`(자리도) · `CharacterPortrait_ActingScale_X` → `CharacterPortrait_Mirror` |
 
 - 포커스의 회전 · 배율이 맨 위가 아닌 까닭: 맨 위 노드의 중심은 화면 아래 가운데다. 옆에 선 인물은 키우면 옆으로 밀리고 돌리면 호를 그린다.
   슬롯의 자리 아래에 두면 중심이 그 인물의 발밑이다. 계층은 하나다 — `focus_reset`이 셋을 함께 되돌린다.
-- 깊이가 곱하는 범위가 줄어든다. 지금은 슬롯의 이동(`move_by` · `left` …)까지 곱하지만, 바꾼 뒤에는 초상(배역 앵커 · 연기 · 그림)만 곱한다.
-  `left 1u` · `place`의 값은 어느 크기에서나 화면 값 그대로다. (`rig-axis-order.md` §3.3 · §4는 이 반대를 적고 있다 — 다시 쓴다.)
+- 깊이가 곱하는 범위가 줄어든다. 지금은 슬롯의 이동(`move_by` …)까지 곱하지만, 바꾼 뒤에는 초상(배역 앵커 · 연기 · 그림)만 곱한다.
+  `move_by` · `place`의 값은 어느 크기에서나 화면 값 그대로다. (`rig-axis-order.md` §3.3 · §4는 이 반대를 적고 있다 — 다시 쓴다.)
+- 초상의 위치 노드는 둘이 남는다 — 놓고 머무는 자리(`CharacterPortrait_Track`)와 지나가는 몸짓(`CharacterPortrait_Track_Move`). 머무는 값 위에서 몸짓이 돌 수 있어야 한다.
 - 리그 계층의 정본은 프리팹이 아니라 `CharacterRigSchema.Nodes`(코드)다. 빌더가 프리팹을 거기에 맞춘다 — 구조 변경은 그 배열을 고치는 일이다.
 
 ## 4. 커맨드
@@ -80,7 +98,6 @@ CharFocus_Track                 focus_move                 ← 포커스: 맨 �
 | 슬롯 | `place` | `슬롯 x y [길이] [이징]` | `CharSlot_Track` | 절대 — 본래 자리 |
 | 슬롯 | `move_by` · `move_reset` | (그대로) | `CharSlot_Track` | 상대 / 0으로. `move_reset`은 포커스를 건드리지 않는다 |
 | 슬롯 | `slide_in` · `slide_out` | (그대로) | `CharSlot_Track` | |
-| 슬롯 | `left` · `right` · `up` · `down` | (그대로) | `CharSlot_Track_X` · `_Y` | 상대 |
 | 슬롯 | `rotate_by` · `rotate_reset` | (그대로) | `CharSlot_SwayPivot` | 상대 / 0으로 |
 | 초상 | `size` | `슬롯 <레벨·라벨·x배율> [keep_y] [길이] [이징]` | `DepthOffset` · `DepthScale` | 절대 |
 | 초상 | `size_reset` | (그대로) | 〃 | mid로 |
@@ -100,6 +117,7 @@ CharFocus_Track                 focus_move                 ← 포커스: 맨 �
 |---|---|
 | `place <초점> <지점>` · `place_left` · `place_center` · `place_right` | 역산. 초점을 화면 지점에 놓는 값은 도구가 풀어 `place x y`나 `focus_move x y`로 적는다(L11) |
 | `scale_by` · `scale_reset` | 노드(`CharSlot_Scale`)가 사라진다(L7) |
+| `left` · `right` · `up` · `down` | 노드(`CharSlot_Track_X` · `_Y`)가 사라진다(L12) — `move_by x 0u` · `move_by 0u y` |
 | `size`의 셋째 칸(보존할 초점) | 무대를 재지 않는다(L6) |
 | `show` · `shot_to` · `shot_focus_to` | 앞서 정한 것 — §8 |
 
@@ -129,14 +147,15 @@ tyrant는 (−30, −800) · 5, Amber는 (330, 0) · 10.
 |---|---|
 | `Stage/Character/Rig/CharacterRigDefinition.cs` · `CharacterRigBuilder.cs` | `CharacterRigSchema.Nodes` · `Refs` · `CharacterRigNode` · 참조. 프리팹은 빌더가 다시 세운다 |
 | `Stage/Grammar` · `Playback/YarnBridge` | 파서 표 · 브리지 등록 · 전달 — `place` · `size` · `focus_*` · `depth_focus_*`, 걷는 이름들 |
-| `Stage/Character/Commands` | `SetDepthCommandCharR`(Y 옵션 · 배율 · 초점 보존 걷기) · `SetAnchorCommandCharR`(리셋 목록에서 `CharSlot_Scale`) · `PlaceCharacterFocusCommandCharR`(걷기). 포커스 커맨드는 있는 것(`MoveBy` 절대 · `RotateTo` · `ScaleTo`)에 노드만 준다 |
+| `Stage/Character/Commands` | `SetDepthCommandCharR`(Y 옵션 · 배율 · 초점 보존 걷기) · `SetAnchorCommandCharR`(리셋 목록에서 걷는 노드들) · `MirrorCharacterCommandCharR`(노드 이름) · `PlaceCharacterFocusCommandCharR`(걷기). 포커스 커맨드는 있는 것(`MoveBy` 절대 · `RotateTo` · `ScaleTo`)에 노드만 준다 |
 | `Stage/Emoji` | 설 자리를 `CharSlot_Scale` → `DepthScale`(다섯 파일) |
 | `Stage/Character/Placement` · `PortraitStudio` · `Diagnostics` | 초점을 재는 노드(§5가 (가)일 때만) |
 | `Stage/Blur` | 커맨드 이름만(`depth_focus_*`). 깊이 값(`SettledDepthScale`)은 `size`가 그대로 적는다 |
 | `Core/Reduce` · `Core/Motion` | 폴드(`place` · `size` · `focus_*` · `move_reset` · 리셋 목록) · 노드 이름 상수 · `MotionRules`의 키잉 금지 노드 |
 | `Tests/EditMode` | 합성 리그를 적어 둔 시험(리듀서 · 초점 · 배경 · 슬라이드 · 이모지 …)과 Unity 대조 시험 |
 | `ExportedTuning/rig-schemas.json` | 리그가 바뀌면 **Unity에서 다시 내야 한다**(소유자) |
-| `Assets/Dialogue` | 데모 · 예제 4편 — `place` 계열 31곳 · `size` 19곳 · `shot_focus_to` 1곳. 포커스 계층을 쓰는 예를 하나 둔다 |
+| `Assets/Dialogue` | 데모 · 예제 4편 — `place` 계열 31곳 · `size` 19곳 · `shot_focus_to` 1곳 · `up` 2곳. 포커스 계층을 쓰는 예를 하나 둔다. `motions.json`의 `nod`는 `CharacterPortrait_Track_Move`로 옮긴다(키 값은 그대로) |
+| `Tests/EditMode/UnityParity/ToolExport~/motions.json` | 모션 툴이 내보낸 견본 — `CharSlot_Track_X` · `CharSlot_Scale`에 키가 있다. 남는 노드의 견본으로 다시 받는다(R7과 맞물린다) |
 | 문서 | `rig-axis-order.md`(다시 쓴다) · `settled-chain.md` · `target-boundary.md` · `stage-rig.md` · `schema.md` |
 
 ## 7. 단계 (§5가 정해진 뒤)
