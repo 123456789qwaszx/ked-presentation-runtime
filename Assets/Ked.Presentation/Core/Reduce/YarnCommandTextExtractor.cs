@@ -21,11 +21,23 @@ namespace Ked.Presentation.Core
         public string LineId;
 
         /// <summary>
-        /// 이 줄에서 실행되는 커맨드 — 줄 머리의 것(쓴 순서), 그 뒤에 표지 자리의 것(&lt;&lt;at&gt;&gt;),
-        /// 마지막에 &lt;&lt;at end …&gt;&gt;. 순서는 재생과 같은 LineBeatSchedule이 정한다(docs/PLAN_line-beat.md R2 · R3).
+        /// 이 줄에서 실행되는 커맨드 — 앵커의 차례(앞 앵커 → start → 글 표지 → end), 그 안에서는 쓴 순서.
+        /// 순서는 재생과 같은 LineBeatSchedule.BuildAnchors가 정한다(docs/PLAN_line-anchor.md AR1 · AR2).
         /// 줄이 끝났을 때의 무대가 이 열을 접은 것과 같다.
         /// </summary>
         public readonly List<StageCommand> Commands = new();
+
+        /// <summary>
+        /// 이 줄의 앵커 — 열리는 차례. 앵커 하나가 스텝 하나다(docs/PLAN_line-anchor.md A1 · A2).
+        /// start · end는 명령이 없어도 있다. 꼬리 그룹(줄이 없다)이면 비어 있다.
+        /// </summary>
+        public readonly List<LineAnchor> Anchors = new();
+
+        /// <summary>
+        /// 화자 이름과 표지를 뺀 글 — 앵커의 글자 자리가 이 글의 자리다(재생의 TextWithoutCharacterName과 같다).
+        /// 스텝마다의 대사 조각은 LineBeatSchedule.Segment(Body, Anchors, i). 꼬리 그룹이면 null.
+        /// </summary>
+        public string Body;
     }
 
     /// <summary>노드 하나의 라인 그룹들. 한 파일에 여러 노드가 있다(Setup + Story).</summary>
@@ -33,6 +45,12 @@ namespace Ked.Presentation.Core
     {
         public string NodeName;
         public readonly List<YarnLineGroup> Groups = new();
+
+        /// <summary>옛 표기 — 이 노드의 &lt;&lt;step&gt;&gt; 수. 앞 앵커의 경계로 읽었다(docs/PLAN_line-anchor.md §9 — N5에서 오류).</summary>
+        public int LegacySteps;
+
+        /// <summary>옛 표기 — 이 노드의 at 없는 명령 수. start의 것으로 읽었다(§10 Q1 — N5에서 오류).</summary>
+        public int BareCommands;
     }
 
     /// <summary>
@@ -50,8 +68,8 @@ namespace Ked.Presentation.Core
     public static class YarnCommandTextExtractor
     {
         /// <summary>
-        /// 무대 스텝 — 여기까지 쌓인 커맨드를 대사 없이 실행하는 스텝 경계다. 무대 커맨드가 아니다.
-        /// 접힘은 줄 단위로 쌓으므로 그룹을 가르지 않는다: 앞의 커맨드는 다음 대사의 그룹에 그대로 든다.
+        /// 무대 스텝(옛 표기) — 여기까지의 at 없는 커맨드가 다음 대사 줄의 앞 앵커 하나다. 무대 커맨드가 아니다.
+        /// 그룹을 가르지 않는다: 앞의 커맨드는 다음 대사의 그룹에 그대로 든다(docs/PLAN_line-anchor.md A6 · §9).
         /// </summary>
         public const string StageStepCommand = "step";
 
@@ -86,32 +104,70 @@ namespace Ked.Presentation.Core
 
             List<YarnNodeGroups> nodes = new();
             YarnNodeGroups node = null;
-            YarnLineGroup current = new();
             string pendingTitle = null;
             bool inHeader = true;
 
-            // <<at 표지 명령>> — 다음 대사 줄의 것. 그 줄에서 머리 명령 뒤에 표지 순서로 접는다(R3).
-            List<AtCommand> pendingAt = new();
+            // 다음 대사 줄의 것 — 쓴 순서. 그 줄에 닿으면 앵커로 나뉜다(LineBeatSchedule.BuildAnchors).
+            // at 없는 명령(옛 표기)은 start의 것으로 싣고 pendingBare에 적는다(§10 Q1).
+            List<AtCommand> pending = new();
+            List<bool> pendingBare = new();
+            List<GapCommand> pendingGaps = new();
             List<BeatMarker> markers = new();
             List<string> problems = new();
 
-            // 이 줄 그룹에서 대사 줄 머리가 시작하는 자리 — 그 앞은 무대 스텝(<<step>>)의 것이다.
-            int headStart = 0;
+            // 옛 표기의 무대 스텝 — 이 줄 앞에 닫힌 것의 수와, 아직 닫히지 않은 것이 시작하는 자리.
+            int legacySteps = 0;
+            int stepStart = 0;
 
             string[] lines = yarnText.Replace("\r\n", "\n").Split('\n');
 
-            // R1 — <<at>> 다음이 대사 줄이 아니다. 재생은 경고하고 그 스텝의 머리 뒤에 붙인다 — 접기도 그렇게.
-            void FlushStrayAt(string where, string source)
+            void ResetPending()
             {
-                if (pendingAt.Count == 0)
-                    return;
+                pending.Clear();
+                pendingBare.Clear();
+                pendingGaps.Clear();
+                legacySteps = 0;
+                stepStart = 0;
+            }
 
-                warnings?.Add($"{source} <<at>> {pendingAt.Count}개 다음이 대사 줄이 아니라 {where}이다 — 붙을 줄이 없어 그 스텝의 머리 뒤에 둔다.");
+            // AR10 — <<at>> · <<gap>> 다음이 대사 줄이 아니다. 재생은 경고하고 at을 그 자리의 명령 뒤에 붙인다 — 접기도 그렇게.
+            // 간격은 붙을 앵커가 없어 버린다.
+            void SettleStray(string where, string source)
+            {
+                List<AtCommand> stray = new();
 
-                foreach (AtCommand at in pendingAt)
-                    current.Commands.Add(at.Command);
+                for (int k = 0; k < pending.Count; )
+                {
+                    if (pendingBare[k])
+                    {
+                        k++;
+                        continue;
+                    }
 
-                pendingAt.Clear();
+                    stray.Add(pending[k]);
+                    pending.RemoveAt(k);
+                    pendingBare.RemoveAt(k);
+
+                    if (k < stepStart)
+                        stepStart--;
+                }
+
+                if (stray.Count > 0)
+                {
+                    warnings?.Add($"{source} <<at>> {stray.Count}개 다음이 대사 줄이 아니라 {where}이다 — 붙을 줄이 없어 그 스텝의 머리 뒤에 둔다.");
+
+                    foreach (AtCommand at in stray)
+                    {
+                        pending.Add(new AtCommand(LineBeatSchedule.StartBeat, at.Command));
+                        pendingBare.Add(true);
+                    }
+                }
+
+                if (pendingGaps.Count > 0)
+                {
+                    warnings?.Add($"{source} <<gap>> {pendingGaps.Count}개 다음이 대사 줄이 아니라 {where}이다 — 붙을 앵커가 없어 버린다.");
+                    pendingGaps.Clear();
+                }
             }
 
             void FlushNode()
@@ -119,14 +175,20 @@ namespace Ked.Presentation.Core
                 if (node == null)
                     return;
 
-                // 꼬리 커맨드(대사 없이 노드가 끝나는 경우)도 버리지 않는다.
-                if (current.Commands.Count > 0)
-                    node.Groups.Add(current);
+                // 꼬리 커맨드(대사 없이 노드가 끝나는 경우)도 버리지 않는다 — 노드 끝의 암묵 스텝이 쓴 순서로 실행한다.
+                if (pending.Count > 0)
+                {
+                    YarnLineGroup tail = new();
+
+                    foreach (AtCommand at in pending)
+                        tail.Commands.Add(at.Command);
+
+                    node.Groups.Add(tail);
+                }
 
                 nodes.Add(node);
                 node = null;
-                current = new YarnLineGroup();
-                headStart = 0;
+                ResetPending();
             }
 
             for (int i = 0; i < lines.Length; i++)
@@ -157,7 +219,7 @@ namespace Ked.Presentation.Core
 
                 if (line == "===")
                 {
-                    FlushStrayAt("노드 끝", $"{sourceName}:{i + 1}");
+                    SettleStray("노드 끝", $"{sourceName}:{i + 1}");
                     FlushNode();
                     inHeader = true;
                     continue;
@@ -169,15 +231,46 @@ namespace Ked.Presentation.Core
                     {
                         if (command.Name == StageStepCommand)
                         {
-                            FlushStrayAt("무대 스텝", command.Source);
-                            headStart = current.Commands.Count;
+                            // 옛 표기 — 여기까지의 at 없는 명령이 앞 앵커 하나다. 빈 스텝은 스텝이 아니다(지금 그대로).
+                            string stepName = LineBeatSchedule.LegacyStepName(legacySteps);
+                            bool any = false;
+
+                            for (int k = stepStart; k < pending.Count; k++)
+                            {
+                                if (!pendingBare[k])
+                                    continue;
+
+                                pending[k] = new AtCommand(stepName, pending[k].Command);
+                                any = true;
+                            }
+
+                            if (any)
+                                legacySteps++;
+
+                            stepStart = pending.Count;
+                            node.LegacySteps++;
                             continue;
                         }
 
                         if (command.Name == LineBeatSchedule.AtCommandName)
                         {
                             if (LineBeatSchedule.TryReadAt(command.Args, command.Source, out AtCommand at, out string error))
-                                pendingAt.Add(at);
+                            {
+                                pending.Add(at);
+                                pendingBare.Add(false);
+                            }
+                            else
+                            {
+                                warnings?.Add($"{command.Source} {error}: {line}");
+                            }
+
+                            continue;
+                        }
+
+                        if (command.Name == LineBeatSchedule.GapCommandName)
+                        {
+                            if (LineBeatSchedule.TryReadGap(command.Args, command.Source, out GapCommand gap, out string error))
+                                pendingGaps.Add(gap);
                             else
                                 warnings?.Add($"{command.Source} {error}: {line}");
 
@@ -191,7 +284,9 @@ namespace Ked.Presentation.Core
                                 "이 추출기는 선형 파일 전용이다. 결과를 믿지 말 것.");
                         }
 
-                        current.Commands.Add(command);
+                        pending.Add(new AtCommand(LineBeatSchedule.StartBeat, command));
+                        pendingBare.Add(true);
+                        node.BareCommands++;
                     }
                     else
                     {
@@ -203,48 +298,101 @@ namespace Ked.Presentation.Core
 
                 if (line.StartsWith("->", StringComparison.Ordinal))
                 {
-                    FlushStrayAt("선택지", $"{sourceName}:{i + 1}");
+                    SettleStray("선택지", $"{sourceName}:{i + 1}");
                     warnings?.Add($"{sourceName}:{i + 1} 옵션(->)은 다루지 않는다 — 선형 파일 전용.");
                     continue;
                 }
 
-                // 대사 라인 = 경계. 표지 자리의 명령은 줄 머리 커맨드 뒤에 실행 순서대로 붙는다 — 재생과 같은 함수가 정한다.
+                // 대사 라인 = 경계. 쌓인 것이 이 줄의 앵커로 나뉜다 — 재생과 같은 함수가 정한다.
                 string text = StripTags(line, out string lineId);
                 string lineSource = $"{sourceName}:{i + 1}";
 
                 markers.Clear();
                 problems.Clear();
-                current.LineText = StripLineMarkers(text, markers);
 
-                // R8 — 대사 줄에는 시간이 없다. 재생은 머리의 기다림을 내리고(오류), 자리의 것은 실행하지 않는다.
-                for (int h = headStart; h < current.Commands.Count; h++)
+                YarnLineGroup group = new();
+                group.LineText = StripLineMarkers(text, markers);
+                group.LineId = lineId;
+
+                // 표지의 자리를 화자 이름을 뺀 글의 자리로 옮긴다 — 재생과 같은 자리다. 자리 0이 앞 앵커다(A5).
+                int bodyStart = CharacterPrefixLength(group.LineText);
+                group.Body = group.LineText.Substring(bodyStart);
+
+                for (int m = 0; m < markers.Count; m++)
+                    markers[m] = new BeatMarker(markers[m].Name, Math.Max(0, markers[m].Position - bodyStart));
+
+                foreach (LineAnchor anchor in LineBeatSchedule.BuildAnchors(markers, pending, pendingGaps, problems, legacySteps))
                 {
-                    if (IsWaitingCommand(current.Commands[h].Name))
-                        warnings?.Add($"{current.Commands[h].Source} 대사 줄 머리의 기다리는 명령 {current.Commands[h]} — 대사 줄에는 시간이 없다. 줄 앞에 <<step>>을 두고 거기서 기다린다.");
-                }
+                    group.Anchors.Add(anchor);
 
-                foreach (AtCommand at in pendingAt)
-                {
-                    if (IsWaitingCommand(at.Command.Name))
-                        warnings?.Add($"{at.Command.Source} {at} — 기다리는 명령은 대사 줄의 자리에 쓸 수 없다(재생은 실행하지 않는다).");
-                }
+                    foreach (AtCommand at in anchor.Commands)
+                    {
+                        // 재생은 아직 앞 앵커에서만 기다린다(docs/PLAN_line-anchor.md A7은 N3에서 연다) —
+                        // start의 기다림은 내리고(오류), 글 표지 · end의 것은 실행하지 않는다.
+                        if (anchor.Kind != LineAnchorKind.Pre && IsWaitingCommand(at.Command.Name))
+                        {
+                            warnings?.Add(anchor.Kind == LineAnchorKind.Start
+                                ? $"{at.Command.Source} 대사 줄 머리의 기다리는 명령 {at.Command} — 대사 줄에는 시간이 없다. 줄 앞의 앞 앵커(옛 표기는 <<step>>)에서 기다린다."
+                                : $"{at.Command.Source} {at} — 기다리는 명령은 대사 줄의 자리에 쓸 수 없다(재생은 실행하지 않는다).");
+                        }
 
-                foreach (ScheduledCommand scheduled in LineBeatSchedule.Build(markers, pendingAt, problems))
-                    current.Commands.Add(scheduled.At.Command);
+                        group.Commands.Add(at.Command);
+                    }
+                }
 
                 foreach (string problem in problems)
                     warnings?.Add($"{lineSource} {problem}");
 
-                pendingAt.Clear();
-                current.LineId = lineId;
-                node?.Groups.Add(current);
-                current = new YarnLineGroup();
-                headStart = 0;
+                node?.Groups.Add(group);
+                ResetPending();
             }
+
+            if (node != null)
+                SettleStray("파일 끝", $"{sourceName}:{lines.Length}");
 
             FlushNode();
 
             return nodes;
+        }
+
+        /// <summary>
+        /// 화자 이름("세이나: ")의 길이 — 줄 머리의 첫 ':'까지와 뒤따르는 공백. 화자가 없으면 0.
+        /// Yarn이 줄 머리의 "이름:"을 화자로 떼는 것을 따른다 — 재생의 표지 자리는 화자를 뺀 글의 자리다.
+        /// \: 는 화자 표시가 아니고, ':' 앞에 마크업이 오면 화자가 없는 것으로 본다. plain은 표지를 뺀 글이다.
+        /// </summary>
+        public static int CharacterPrefixLength(string plain)
+        {
+            if (string.IsNullOrEmpty(plain))
+                return 0;
+
+            for (int i = 0; i < plain.Length; i++)
+            {
+                char c = plain[i];
+
+                if (c == '\\')
+                {
+                    i++;
+                    continue;
+                }
+
+                if (c == '[')
+                    return 0;
+
+                if (c != ':')
+                    continue;
+
+                if (i == 0)
+                    return 0;
+
+                int end = i + 1;
+
+                while (end < plain.Length && char.IsWhiteSpace(plain[end]))
+                    end++;
+
+                return end;
+            }
+
+            return 0;
         }
 
         /// <summary>"&lt;&lt;cmd a "b c" d&gt;&gt;" → StageCommand. 따옴표 인자를 존중한다.</summary>

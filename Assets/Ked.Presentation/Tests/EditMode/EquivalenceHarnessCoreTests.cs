@@ -186,7 +186,6 @@ namespace Ked.Presentation.Tests
             Assert.That(groups[1].Commands.Select(c => c.Name), Is.EqualTo(new[] { "fade_out" }), "at은 다음 줄로 새지 않는다");
         }
 
-        [TestCase("<<step>>", "무대 스텝")]
         [TestCase("-> 고른다", "선택지")]
         public void at_다음이_대사_줄이_아니면_경고하고_그_스텝의_머리_뒤에_둔다(string next, string where)
         {
@@ -243,6 +242,183 @@ namespace Ked.Presentation.Tests
             Assert.That(groups[0].Commands.Select(c => c.Args[1]), Is.EqualTo(new[] { "03", "02" }));
         }
 
+        // ── 추출기: 줄의 앵커 (docs/PLAN_line-anchor.md A3–A8 · AR1 · AR10) ─────
+
+        [Test]
+        public void 새_표기의_줄은_앵커로_나뉘고_그_차례로_접힌다()
+        {
+            const string yarn =
+                "title: Anchor_Sample\n" +
+                "---\n" +
+                "<<at end emoji s2 sweat>>\n" +
+                "<<at in fade_out s1 0.5s>>\n" +
+                "<<at a face_swap s2 03 0.3s>>\n" +
+                "<<at in pause 0.5s>>\n" +
+                "<<gap in 1s>>\n" +
+                "<<at start face s2 05>>\n" +
+                "<<gap a 12fr>>\n" +
+                "세이나: [beat=in/]아, 음…… [beat=a/]이건 비밀인데. #line:ln_anchor\n" +
+                "===\n";
+
+            List<string> warnings = new();
+            YarnNodeGroups node = YarnCommandTextExtractor.ExtractNodes(yarn, "anchor.yarn", warnings).Single();
+            YarnLineGroup line = node.Groups.Single();
+
+            Assert.That(warnings, Is.Empty, "앞 앵커의 pause는 된다");
+            Assert.That(node.LegacySteps, Is.EqualTo(0));
+            Assert.That(node.BareCommands, Is.EqualTo(0));
+
+            Assert.That(line.LineText, Is.EqualTo("세이나: 아, 음…… 이건 비밀인데."));
+            Assert.That(line.Body, Is.EqualTo("아, 음…… 이건 비밀인데."));
+            Assert.That(line.Commands.Select(c => c.Name), Is.EqualTo(new[] { "fade_out", "pause", "face", "face_swap", "emoji" }));
+
+            // 물음 1 — 이 줄은 몇 스텝인가. 물음 2 — 스텝마다 어떤 명령과 어떤 대사인가.
+            Assert.That(line.Anchors.Select(a => a.Name), Is.EqualTo(new[] { "in", "start", "a", "end" }));
+            Assert.That(line.Anchors.Select(a => a.Kind), Is.EqualTo(new[]
+            {
+                LineAnchorKind.Pre, LineAnchorKind.Start, LineAnchorKind.Text, LineAnchorKind.End,
+            }));
+            Assert.That(line.Anchors[0].Gap, Is.EqualTo(1f).Within(1e-6f));
+            Assert.That(line.Anchors[2].Gap, Is.EqualTo(0.4f).Within(1e-6f));
+            Assert.That(line.Anchors[0].Commands.Select(c => c.Command.Name), Is.EqualTo(new[] { "fade_out", "pause" }));
+            Assert.That(
+                Enumerable.Range(0, line.Anchors.Count).Select(i => LineBeatSchedule.Segment(line.Body, line.Anchors, i)),
+                Is.EqualTo(new[] { "", "아, 음…… ", "이건 비밀인데.", "" }));
+        }
+
+        [Test]
+        public void 옛_표기의_무대_스텝은_앞_앵커로_at_없는_명령은_start로_읽고_센다()
+        {
+            const string yarn =
+                "title: Legacy\n" +
+                "---\n" +
+                "<<fade_out c1>>\n" +
+                "<<pause 0.5s>>\n" +
+                "<<step>>\n" +
+                "<<step>>\n" +
+                "<<fade_in c2>>\n" +
+                "<<at a face c2 02>>\n" +
+                "하린: 여기[beat=a/]다.\n" +
+                "===\n";
+
+            List<string> warnings = new();
+            YarnNodeGroups node = YarnCommandTextExtractor.ExtractNodes(yarn, "legacy.yarn", warnings).Single();
+            YarnLineGroup line = node.Groups.Single();
+
+            Assert.That(warnings, Is.Empty);
+            Assert.That(node.LegacySteps, Is.EqualTo(2), "쓴 수 — 빈 스텝도 센다");
+            Assert.That(node.BareCommands, Is.EqualTo(3));
+
+            Assert.That(line.Anchors.Select(a => a.Name), Is.EqualTo(new[] { "~0", "start", "a", "end" }), "빈 스텝은 스텝이 아니다");
+            Assert.That(line.Anchors[0].Legacy, Is.True);
+            Assert.That(line.Anchors[0].Kind, Is.EqualTo(LineAnchorKind.Pre));
+            Assert.That(line.Commands.Select(c => c.Name), Is.EqualTo(new[] { "fade_out", "pause", "fade_in", "face" }));
+        }
+
+        [Test]
+        public void at은_무대_스텝보다_앞에_써도_그_줄의_앵커의_것이다()
+        {
+            // 옛 규칙(line-beat R1)은 이것을 떠도는 at으로 보았다 — 이제 <<step>>은 실행하지 않는 경계라, at은 다음 줄에 닿는다.
+            const string yarn =
+                "title: AtBeforeStep\n" +
+                "---\n" +
+                "<<at a face s1 02>>\n" +
+                "<<fade_in s1>>\n" +
+                "<<step>>\n" +
+                "하린: 여[beat=a/]기.\n" +
+                "===\n";
+
+            List<string> warnings = new();
+            YarnLineGroup line = YarnCommandTextExtractor.Extract(yarn, "atstep.yarn", warnings).Single();
+
+            Assert.That(warnings, Is.Empty);
+            Assert.That(line.Anchors.Select(a => a.Name), Is.EqualTo(new[] { "~0", "start", "a", "end" }));
+            Assert.That(line.Commands.Select(c => c.Name), Is.EqualTo(new[] { "fade_in", "face" }));
+        }
+
+        [Test]
+        public void 첫_글자_앞의_표지는_화자가_있어도_없어도_앞_앵커다()
+        {
+            const string yarn =
+                "title: Pre\n" +
+                "---\n" +
+                "<<at in fade_in s1>>\n" +
+                "<<at a face s1 02>>\n" +
+                "하린: [beat=in/]여[beat=a/]기.\n" +
+                "<<at in fade_out s1>>\n" +
+                "<<at z face s1 03>>\n" +
+                "[beat=in/]화자 없는 글[beat=z/]\n" +
+                "===\n";
+
+            List<string> warnings = new();
+            List<YarnLineGroup> groups = YarnCommandTextExtractor.Extract(yarn, "pre.yarn", warnings);
+
+            Assert.That(warnings, Is.Empty);
+
+            Assert.That(groups[0].Anchors.Select(a => a.Kind), Is.EqualTo(new[]
+            {
+                LineAnchorKind.Pre, LineAnchorKind.Start, LineAnchorKind.Text, LineAnchorKind.End,
+            }));
+            Assert.That(groups[0].Anchors[2].Position, Is.EqualTo(1), "화자를 뺀 글의 자리");
+            Assert.That(groups[0].Commands.Select(c => c.Name), Is.EqualTo(new[] { "fade_in", "face" }));
+
+            Assert.That(groups[1].Body, Is.EqualTo("화자 없는 글"));
+            Assert.That(groups[1].Anchors.Select(a => a.Name), Is.EqualTo(new[] { "in", "start", "z", "end" }));
+            Assert.That(groups[1].Anchors[2].Position, Is.EqualTo("화자 없는 글".Length), "글 끝의 표지는 글 표지다");
+        }
+
+        [Test]
+        public void gap_다음이_대사_줄이_아니면_경고하고_버린다()
+        {
+            const string yarn =
+                "title: StrayGap\n" +
+                "---\n" +
+                "대사다.\n" +
+                "<<fade_out s1>>\n" +
+                "<<gap start 1s>>\n" +
+                "===\n";
+
+            List<string> warnings = new();
+            List<YarnLineGroup> groups = YarnCommandTextExtractor.Extract(yarn, "straygap.yarn", warnings);
+
+            Assert.That(warnings.Single(), Does.Contain("<<gap>>").And.Contain("노드 끝"));
+            Assert.That(groups.Last().Commands.Select(c => c.Name), Is.EqualTo(new[] { "fade_out" }));
+            Assert.That(groups.Last().Anchors, Is.Empty, "꼬리 그룹에는 앵커가 없다");
+        }
+
+        [Test]
+        public void 꼴이_틀린_gap과_앵커가_없는_gap은_경고한다()
+        {
+            const string yarn =
+                "title: BadGap\n" +
+                "---\n" +
+                "<<gap start>>\n" +
+                "<<gap x 1s>>\n" +
+                "하린: 여기.\n" +
+                "===\n";
+
+            List<string> warnings = new();
+            YarnLineGroup line = YarnCommandTextExtractor.Extract(yarn, "badgap.yarn", warnings).Single();
+
+            Assert.That(warnings.Count, Is.EqualTo(2), string.Join("\n", warnings));
+            Assert.That(warnings[0], Does.StartWith("badgap.yarn:3 ").And.Contain("<<gap 이름 길이>>"));
+            Assert.That(warnings[1], Does.StartWith("badgap.yarn:5 ").And.Contain("[beat=x/]가 없다"));
+            Assert.That(line.Anchors.All(a => a.Gap == 0f), Is.True);
+        }
+
+        [TestCase("세이나: 아, 음", 5)]
+        [TestCase("세이나:아", 4)]
+        [TestCase("아, 음……", 0)]
+        [TestCase("09:15|운월", 3)]
+        [TestCase("값은 3\\: 2다", 0)]
+        [TestCase("[b]굵게[/b]: 글", 0)]
+        [TestCase(": 글", 0)]
+        [TestCase("", 0)]
+        public void 화자_이름의_길이(string plain, int length)
+        {
+            Assert.That(YarnCommandTextExtractor.CharacterPrefixLength(plain), Is.EqualTo(length));
+        }
+
         // ── 추출기: 대사 줄에는 시간이 없다 (docs/PLAN_line-beat.md D3 · R8) ─────
 
         [Test]
@@ -283,9 +459,10 @@ namespace Ked.Presentation.Tests
                 "title: AtWait\n" +
                 "---\n" +
                 "<<at a pause 1s>>\n" +
-                "하린: [beat=a/]여기.\n" +
+                "하린: 여[beat=a/]기.\n" +
                 "===\n";
 
+            // 글 안의 표지다 — 첫 글자 앞의 표지는 앞 앵커라 기다려도 된다(docs/PLAN_line-anchor.md A5).
             List<string> warnings = new();
             YarnCommandTextExtractor.Extract(yarn, "atwait.yarn", warnings);
 
