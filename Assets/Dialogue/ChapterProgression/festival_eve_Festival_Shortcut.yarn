@@ -1,11 +1,11 @@
 title: Festival_Shortcut
 ---
 
-<<face s2 4>>
-<<motion s2 nod>>
+<<at start face s2 4>>
+<<at start motion s2 nod>>
 시구레: 마른 칸은 살리고, 빈 칸만 스티커로 채워요. #line:ln_jfze1fzb
 
-<<face s1 4>>
+<<at start face s1 4>>
 하린: 지금 요령은 {stat("요령")}점이야. 방금 그 선택지가 올린 거지. #line:ln_rbxvmjp0
 
 하린: 대사는 스탯을 읽기만 해. 바꾸는 건 진행 선택지뿐이야. #line:ln_j1v81kqe

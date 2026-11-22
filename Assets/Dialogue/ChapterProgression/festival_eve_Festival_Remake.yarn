@@ -1,11 +1,11 @@
 title: Festival_Remake
 ---
 
-<<face s1 2>>
-<<motion s1 nod>>
+<<at start face s1 2>>
+<<at start motion s1 nod>>
 하린: 좋아, 처음부터 다시. 붓부터 새로 빨아 올게. #line:ln_kdy67tc8
 
-<<face s2 1>>
+<<at start face s2 1>>
 시구레: 지금 성실은 {stat("성실")}점이에요. 방금 그 선택지가 올린 거예요. #line:ln_2ibajvnq
 
 시구레: 대사는 스탯을 읽기만 해요. 바꾸는 건 진행 선택지뿐이고요. #line:ln_prrx0d33

@@ -1,26 +1,26 @@
 title: Festival_Classroom
 ---
-<<shot_reset 0fr>>
-<<bg_spawn bg_main class_lunch>>
-<<slot s1 stage00 mid>>
-<<cast s1 harin a 1>>
-<<slot s2 stage00 mid>>
-<<cast s2 sigure a 1>>
+<<at start shot_reset 0fr>>
+<<at start bg_spawn bg_main class_lunch>>
+<<at start slot s1 stage00 mid>>
+<<at start cast s1 harin a 1>>
+<<at start slot s2 stage00 mid>>
+<<at start cast s2 sigure a 1>>
 
-<<bg_fade_in bg_main 30fr>>
-<<bgm audio/bgm_idoberg-relaxing-guitar-loop-v5-245859 2s>>
-<<place s1 11.52u 1.092u 0fr>>
-<<size s1 mid 0fr>>
-<<fade_in s1 23fr>>
+<<at start bg_fade_in bg_main 30fr>>
+<<at start bgm audio/bgm_idoberg-relaxing-guitar-loop-v5-245859 2s>>
+<<at start place s1 11.52u 1.092u 0fr>>
+<<at start size s1 mid 0fr>>
+<<at start fade_in s1 23fr>>
 하린: 축제가 내일인데, 우리 반 간판이 아직 반쯤 비어 있어. #line:ln_b76q68hg
 
-<<size s2 mid 0fr>>
-<<place s2 -11.52u 1.092u 0fr>>
-<<slide_in s2 left 2u 18fr>>
-<<fade_in s2 18fr>>
+<<at start size s2 mid 0fr>>
+<<at start place s2 -11.52u 1.092u 0fr>>
+<<at start slide_in s2 left 2u 18fr>>
+<<at start fade_in s2 18fr>>
 시구레: 칠도 반쯤 말랐네요. 이대로 걸기엔 좀 애매해요. #line:ln_rxvmhx0i
 
-<<face s1 3>>
+<<at start face s1 3>>
 하린: 문제는 시간이야. 처음부터 다시 그릴지, 있는 걸로 마무리할지. #line:ln_q1me6jy8
 
 하린: 선택은 대사 안에 없어. 에피소드가 끝나면 진행 쪽이 묻고, 고른 쪽 스탯이 올라. #line:ln_4i38h8b3

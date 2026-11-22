@@ -2,13 +2,13 @@ title: Festival_Staffroom_Kasmi
 ---
 
 <<if stat("요령") >= 3>>
-    <<slot s3 stage00 mid>>
-    <<cast s3 kasmi a 1>>
-    <<place s3 0u 1.092u 0fr>>
-    <<size s3 mid 0fr>>
-    <<fade_in s3 18fr>>
+    <<at start slot s3 stage00 mid>>
+    <<at start cast s3 kasmi a 1>>
+    <<at start place s3 0u 1.092u 0fr>>
+    <<at start size s3 mid 0fr>>
+    <<at start fade_in s3 18fr>>
     카스미: 부탁한 마무리, 다 해서 갖다 놨어. #line:ln_m208n5x2
-    <<fade_out s3 15fr>>
+    <<at start fade_out s3 15fr>>
     하린: 카스미가 여기 있는 건 아까 그 선택지를 골랐기 때문이야. #line:ln_2wwvdc98
 <<endif>>
 ===
