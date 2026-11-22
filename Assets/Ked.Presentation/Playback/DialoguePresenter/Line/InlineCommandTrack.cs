@@ -11,8 +11,7 @@ using Yarn.Unity;
 //
 //   <<at in fade_in s2>>               앞 앵커 in — 첫 글자 앞의 표지. 대사창이 열리기 전(줄이 차례로 연다)
 //   <<gap in 1s>>                      in이 열리고 최소 1초 뒤에 다음 앵커
-//   <<face s2 05>>                     머리 — at 없는 명령(옛 표기). start와 같은 때다(StepHead)
-//   <<at start emoji s2 note>>         start — 머리 바로 뒤
+//   <<at start face s2 05>>            start — 대사창이 열리며
 //   <<at a face_swap s2 03 0.3s>>      글 표지 a — 타자기가 그 글자를 드러내기 직전
 //   <<at end emoji s2 sweat>>          타자기 끝
 //   세이나: [beat=in/]아, 음…… [beat=a/]이건 비밀인데.
@@ -21,7 +20,7 @@ using Yarn.Unity;
 // - 관문(AR3): 다음 앵커는 ① 앞 앵커의 명령이 모두 시작되고(기다리는 명령이 끝나고) ② 앞 앵커의 간격이 지난 뒤에 열린다.
 //   타자기는 표지 자리에서만 선다 — 그 글자 앞에서 관문을 기다린다. 그래서 글의 길이나 입력이 앵커의 차례를 바꾸지 못한다.
 // - 실행기의 새 스텝이 아니다 — 그 줄의 스텝에 덧붙는다(YarnPlaybackDriver.PlayInStep). 좌표도 아니다.
-// - 줄 하나의 앵커 목록이다: 줄에 들어갈 때 Begin, 앞 앵커는 TryPlayNextPreAnchor, 머리 뒤에 PlayStart,
+// - 줄 하나의 앵커 목록이다: 줄에 들어갈 때 Begin, 앞 앵커는 TryPlayNextPreAnchor, 대사창이 열리기 전에 PlayStart,
 //   글자마다 타자기가 지나고, 줄 끝에 OpenRemainingAsync. 시크가 지나가는 줄은 PlayRemaining(기다리지 않는다).
 //   끊긴 줄(run 무효)의 남은 것은 실행하지 않는다 — 다음 Begin이 지운다.
 // - 명령 글은 닿았을 때 푼다 — 대상 슬롯은 그때의 무대로 판정한다.
@@ -130,7 +129,7 @@ public sealed class InlineCommandTrack : IActionMarkupHandler
         }
     }
 
-    // start — 머리 명령(at 없는 것) 바로 뒤, 대사창이 열리기 전에.
+    // start — 대사창이 열리기 전에. 그 뒤 줄이 블러 · 장면 BGM을 맞춘다(StepHead.Settle).
     public void PlayStart()
     {
         if (_startIndex < _anchors.Count)
@@ -166,7 +165,7 @@ public sealed class InlineCommandTrack : IActionMarkupHandler
             Open(_anchors[_next++]);
     }
 
-    // 노드 끝의 스텝, 머리 뒤 — <<at>> 다음에 대사 줄이 없었다(AR10). 사라지지 않게, 머리보다 앞서지 않게 쓴 순서로 덧붙인다.
+    // 노드 끝의 스텝, 남은 at 없는 명령 뒤 — <<at>> 다음에 대사 줄이 없었다(AR10). 사라지지 않게, 그 명령보다 앞서지 않게 쓴 순서로 덧붙인다.
     public void PlayStrayAt()
     {
         if (_playbackDriver.CollectedAt.Count == 0)

@@ -1,8 +1,9 @@
 using System.Collections.Generic;
+using Ked.Presentation.Core;
 using UnityEngine;
 
 // 보이스는 줄 소속 이벤트다 — 새 줄에 들어오면 앞 줄의 보이스를 짧게 줄이며 끝낸다.
-// 서두르기·선택지는 줄 진입이 아니라 끊지 않는다. 새 줄의 보이스는 그 뒤 PlayCollected에서 나온다.
+// 서두르기·선택지는 줄 진입이 아니라 끊지 않는다. 새 줄의 보이스는 그 뒤 start의 명령에서 나온다.
 public sealed class LineVoiceController
 {
     private const float LineEndFadeSeconds = 0.06f;
@@ -29,30 +30,33 @@ public sealed class LineVoiceController
         _voice?.FadeOut(LineEndFadeSeconds);
     }
 
-    // 줄의 보이스 = 그 줄 머리에서 실행할 마지막 voice. 뒤에 stop_voice가 있으면 없다.
-    // 키 없이 클립만 든 스펙은 기록할 수 없어 빠진다.
-    public static string FindLineVoiceKey(IReadOnlyList<CommandSpecBase> lineSpecs)
+    // 줄의 보이스 = 그 줄의 start에서 실행할 마지막 voice(<<at start voice 키>>). 뒤에 stop_voice가 있으면 없다.
+    // 다른 앵커의 voice는 줄의 보이스가 아니다 — 줄 가운데서 트는 소리다.
+    public static string FindLineVoiceKey(IReadOnlyList<AtCommand> lineAts)
     {
         string key = null;
 
-        if (lineSpecs == null)
+        if (lineAts == null)
             return null;
 
-        for (int i = 0; i < lineSpecs.Count; i++)
+        for (int i = 0; i < lineAts.Count; i++)
         {
-            switch (lineSpecs[i])
-            {
-                case PlayVoiceCommandSpec play:
-                    key = string.IsNullOrWhiteSpace(play.clipKey) ? null : play.clipKey;
-                    break;
-                case StopVoiceCommandSpec:
-                    key = null;
-                    break;
-            }
+            if (lineAts[i].Beat != LineBeatSchedule.StartBeat)
+                continue;
+
+            StageCommand command = lineAts[i].Command;
+
+            if (command.Name == VoiceCommand)
+                key = command.Arg(0);
+            else if (command.Name == StopVoiceCommand)
+                key = null;
         }
 
-        return key;
+        return string.IsNullOrWhiteSpace(key) ? null : key;
     }
+
+    private const string VoiceCommand = "voice";
+    private const string StopVoiceCommand = "stop_voice";
 
     // 백로그 다시 듣기. 같은 채널이라 지금 흐르는 보이스를 덮는다.
     public bool Replay(string voiceKey)

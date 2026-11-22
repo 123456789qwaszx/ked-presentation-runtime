@@ -120,7 +120,7 @@ Ked.Presentation.Editor (에디터 전용) ────────────�
 
 Stage의 `Yarn.Unity` 참조는 여전히 **0**이다 — 코어가 Yarn을 모르는 상태가 U13-b(순수 코어 추출)의 전제다.
 Yarn을 아는 것은 Playback부터다. 대사창 표면 레이아웃(`surface_*`)은 재생 쪽이라 브리지에 남는다.
-대사창 표시는 커맨드가 아니라 줄 태그(`#boxhide` · `#boxfadein` …)가 정한다(2026-11-03 `box_hide/show/close` 제거). 대사 없이 연출만 하는 자리는 무대 스텝 `<<step>>`이다 — 대사창을 닫는다(2026-11-16).
+대사창 표시는 커맨드가 아니라 줄 태그(`#boxhide` · `#boxfadein` …)가 정한다(2026-11-03 `box_hide/show/close` 제거). 대사창이 열리기 전에 연출만 하는 자리는 그 줄의 앞 앵커(첫 글자 앞의 `[beat=이름/]`)다 — 대사창을 닫는다(docs/PLAN_line-anchor.md · `<<step>>`은 2026-11-22에 걷었다).
 
 ## 5. ⚠ `partial class`는 어셈블리를 넘을 수 없다
 

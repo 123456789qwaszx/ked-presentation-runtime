@@ -57,42 +57,44 @@ Yarn Spinner를 기반으로 제작한 **비주얼 노벨 화면 연출 런타�
 트랜지션을 한 번씩 지나갑니다. 공개된 예제 초상화(harin·sigure·kasmi)와 저장소에 있는 배경·음원만 씁니다.
 
 ```yarn
-<<bg_sprite bg_main class_day>>
-<<bg_fade_in bg_main 30fr>>
-<<bgm audio/bgm_idoberg-relaxing-guitar-loop-v5-245859 2s>>
-<<place s1 0u 1.092u 0fr>>
-<<size s1 mid 0fr>>
-<<fade_in s1 23fr>>
-하린: 배경이 들어오고, 음악이 깔리고, 내가 걸어 들어왔어.
+<<at in bg_sprite bg_main class_day>>
+<<at in bg_fade_in bg_main 30fr>>
+<<at in bgm audio/bgm_idoberg-relaxing-guitar-loop-v5-245859 2s>>
+<<gap in 15fr>>
+<<at start place s1 0u 1.092u 0fr>>
+<<at start size s1 mid 0fr>>
+<<at start fade_in s1 23fr>>
+하린: [beat=in/]배경이 들어오고, 음악이 깔리고, 내가 걸어 들어왔어.
 ```
 
-명령은 쓰인 자리가 아니라 **다음 대사의 머리**에서 한꺼번에 실행됩니다. 대사 없이 연출만 보이려면 `<<step>>`을 씁니다 —
-그때까지 쌓인 명령을 실행하고, 대사창을 닫고, `pause`가 끝나면 클릭 없이 다음으로 갑니다(백로그와 되감기에는 남지 않습니다).
-노드 끝에 남은 명령은 `<<step>>`이 없어도 실행된 뒤 노드가 끝납니다. `pause`가 도는 동안 클릭하면 그 연출을 끝 상태로 보내고 진행합니다.
-**대사 줄에는 시간이 없습니다** — 대사 줄 머리에 기다리는 명령(`pause` · `screen_cover`)을 쓰면 오류를 남기고 기다리지 않고 실행합니다.
-"배경이 들어오고 조금 뒤에 인물"처럼 시간으로 짜는 일은 줄 앞의 `<<step>>`에서 합니다.
+**한 줄이 제 연출을 모두 갖습니다.** 명령은 줄 앞에 `<<at 앵커 명령 한 줄>>`로 쓰고, 그 줄의 **앵커**가 열릴 때 쓴 순서로 실행됩니다.
+앵커는 열리는 차례로 넷입니다([PLAN_line-anchor.md](docs/PLAN_line-anchor.md)).
+
+| 앵커 | 쓰는 법 | 열리는 때 |
+|---|---|---|
+| 앞 앵커 | 첫 글자 **앞**의 표지 `[beat=이름/]` | 줄이 도착하면. 대사창이 닫혀 있다 — 대사 없이 연출만 보이는 자리다 |
+| `start` | 표지 없음 | 대사창이 열리며 |
+| 글 표지 | 글 안 · 글 끝의 `[beat=이름/]` | 타자기가 그 글자를 드러내기 직전 |
+| `end` | 표지 없음 | 타자기가 끝날 때 |
+
+- `pause` · `screen_cover`(기다리는 명령)는 그 앵커의 뒤 명령만 늦춥니다 — 어느 앵커에서나 씁니다. 다음 앵커는 앞 앵커의 명령이 모두 시작된 뒤에 열립니다.
+- `<<gap 앵커 길이>>`는 그 앵커가 열린 뒤 다음 앵커가 열리기까지의 최소 시간입니다. 글이 덜 쳐졌으면 타자기가 표지 앞에서 기다립니다.
+- 앞 연출 중에 클릭하면 남은 앞 연출이 끝값으로 놓이고 대사는 제 속도로 나옵니다. 빨리 넘기기 · 되감기로 지나가도 같은 차례로 끝값이 놓입니다.
+- 표지는 글에 남지 않고, 번역문은 표지만 옮깁니다 — 명령은 모든 언어에 하나입니다.
+- **`at` 없이 쓰는 것은 노드 끝뿐입니다.** 붙을 줄이 없이 남은 명령은 대사창을 닫고 쓴 순서로 실행된 뒤 노드가 끝납니다(백로그와 되감기에는 남지 않습니다).
+  대사 줄 앞의 `at` 없는 명령은 오류를 남기고 실행하지 않습니다. 예외는 쌓지 않고 바로 실행하는 명령(`surface_layout` · `surface_reset`)과 Yarn의 문(`set` · `wait` …)입니다.
 
 ```yarn
-<<fade_out s1 15fr>>
-<<pause 15fr>>
-<<step>>
-<<fade_in s2 15fr>>
-시구레: 자리를 바꿨어요.
+<<at in fade_out s1 15fr>>
+<<gap in 15fr>>
+<<at start fade_in s2 15fr>>
+<<at start face s2 3>>
+<<at a face_swap s2 05 13fr>>
+<<at end emoji s2 star>>
+시구레: [beat=in/]자리를 바꿨어요. [beat=a/]여기서 표정이 바뀌어요.
 ```
 
-대사 **글 중간**에서 명령을 실행하려면 글에는 자리 표지 `[beat=이름/]`만 두고, 명령은 줄 앞에 `<<at 이름 명령 한 줄>>`로 씁니다.
-타자기가 그 글자를 드러내기 직전에 실행되고, 표지는 글에 남지 않습니다. `<<at end …>>`는 타자기가 끝날 때입니다.
-번역문은 표지만 옮깁니다 — 명령은 모든 언어에 하나입니다. 자리에는 기다리는 명령(`pause` · `screen_cover`)을 쓸 수 없습니다 — 그런 일은 `<<step>>`에서 합니다
-([PLAN_line-beat.md](docs/PLAN_line-beat.md)).
-
-```yarn
-<<face s1 3>>
-<<at a face_swap s1 05 13fr>>
-<<at end emoji s1 star>>
-하린: 말하는 도중에도 바꿀 수 있지. [beat=a/]바로 여기서 바뀌어.
-```
-
-입력 없이 넘어가는 줄은 줄 태그 `#auto`입니다. 머무를 시간을 주려면 `#auto=1.8s` — 줄이 들어온 때부터 그만큼 머물고 글이 다 보이면 넘어갑니다.
+입력 없이 넘어가는 줄은 줄 태그 `#auto`입니다. 머무를 시간을 주려면 `#auto=1.8s` — 대사창이 열린 때부터 그만큼 머물고 글이 다 보이면 넘어갑니다.
 
 화면을 덮었다 걷는 일(암전)은 `screen_cover` · `screen_cover_clear`입니다. 덮개는 무대 셋과 컷인 · 팝업을 모두 덮고 대사창 · HUD는 덮지 않습니다.
 `screen_cover`는 다 덮일 때까지 기다리므로 그 뒤의 무대 정리는 늘 덮인 밑에서 일어나고, `screen_cover_clear`는 기다리지 않고 다음 줄로 넘어가도 제 길이로 걷힙니다.
@@ -100,14 +102,13 @@ Yarn Spinner를 기반으로 제작한 **비주얼 노벨 화면 연출 런타�
 `all`은 무대 전체(속말 · 회상), `far`는 배경만(인물을 띄울 때)입니다. 세기 0이 걷기, `stage_dim_reset`이 전부 걷기입니다([PLAN_screen-cover.md](docs/PLAN_screen-cover.md)).
 
 ```yarn
-<<screen_cover black 0.6s>>
-<<bg_sprite bg_main street_day>>
-<<pause 0.4s>>
-<<screen_cover_clear 0.5s>>
-<<step>>
-<<stage_dim all 0.45 0.27s>>
-(정말 괜찮을까……)
-<<stage_dim all 0 0.23s>>
+<<at in screen_cover black 0.6s>>
+<<at in bg_sprite bg_main street_day>>
+<<at in pause 0.4s>>
+<<at in screen_cover_clear 0.5s>>
+<<at start stage_dim all 0.45 0.27s>>
+[beat=in/](정말 괜찮을까……)
+<<at start stage_dim all 0 0.23s>>
 하린: 응, 괜찮아.
 ```
 

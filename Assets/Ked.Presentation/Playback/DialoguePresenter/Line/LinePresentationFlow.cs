@@ -70,8 +70,10 @@ public sealed class LinePresentationFlow
         bool seekArrived = ctx.SeekDecision == SeekLineDecision.TargetLineReached;
 
         // 줄에 들어선다 — 앞 줄의 서두르기와 보이스가 끝나고, 글의 표지와 쌓인 <<at>>이 이 줄의 앵커가 된다.
-        // 여기서부터 이 줄이 제 연출을 모두 실행한다: 앞 앵커 → start(머리) → 글 표지 → end(docs/PLAN_line-anchor.md §4).
+        // 여기서부터 이 줄이 제 연출을 모두 실행한다: 앞 앵커 → start → 글 표지 → end(docs/PLAN_line-anchor.md §4).
+        // 쌓인 at 없는 명령은 이 줄의 것이 아니다 — 오류로 적고 실행하지 않는다(§9 N5).
         _stepHead.Enter();
+        _stepHead.DropUnanchored();
         _inlineCommands.Begin(ctx.Line.TextWithoutCharacterName, ctx.Token.HurryUpToken);
 
         // 앞 앵커 — 대사창이 열리기 전. 시크가 지나가는 줄과 시크로 닿은 줄은 기다리지 않고 끝값으로 놓는다(A11).
@@ -105,9 +107,9 @@ public sealed class LinePresentationFlow
         _lineDisplayState.MarkLineStarted();
         _lineDisplayState.SetLineAutoAdvance(autoAdvance, autoHold);
 
-        // 머리(at 없는 명령) 바로 뒤에 start의 <<at>>. 글 표지 · end는 타자기가 글자 자리에서 연다.
-        _stepHead.Play(snap: ctx.IsRapidSkip || seekPassThrough, seekPassThrough: seekPassThrough);
+        // start의 <<at>> — 그 명령이 다 돈 뒤에 블러 · 장면 BGM을 맞춘다. 글 표지 · end는 타자기가 글자 자리에서 연다.
         _inlineCommands.PlayStart();
+        _stepHead.Settle(snap: ctx.IsRapidSkip || seekPassThrough, seekPassThrough: seekPassThrough);
         SetPhase(ctx, LinePresentationPhase.LineEnteredCommitted);
         
         if (seekPassThrough) {

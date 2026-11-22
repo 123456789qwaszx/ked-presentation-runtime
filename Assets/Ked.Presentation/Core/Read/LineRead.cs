@@ -47,7 +47,7 @@ namespace Ked.Presentation.Core
         /// <summary>인자를 명세 표의 칸에 맞춘 것. 표에 없으면 비어 있다.</summary>
         public List<BoundArg> Bound = new();
 
-        /// <summary>이 커맨드가 속한 앵커의 이름. 바로 실행하는 명령이면 null.</summary>
+        /// <summary>이 커맨드가 속한 앵커의 이름. 앵커 밖(바로 실행하는 명령 · at 없는 명령)이면 null.</summary>
         public string Anchor;
 
         /// <summary>
@@ -68,9 +68,6 @@ namespace Ked.Presentation.Core
         /// <summary>원문에서의 줄 번호(1부터).</summary>
         public int Line;
 
-        /// <summary>옛 표기인가 — &lt;&lt;at&gt;&gt; 없이 쓴 것(바로 실행하는 명령은 아니다).</summary>
-        public bool Bare;
-
         /// <summary>그 앵커의 같은 종류 안에서 몇 번째인가(0부터) — 주소의 마지막 칸. 표에 없으면 -1.</summary>
         public int KindIndex = -1;
 
@@ -83,13 +80,10 @@ namespace Ked.Presentation.Core
     /// <summary>줄의 스텝 하나 — 앵커 하나에서 시작되는 뭉치(대사 조각 + 커맨드, docs/PLAN_line-anchor.md A1).</summary>
     public sealed class LineReadStep
     {
-        /// <summary>앵커의 이름 — 표지 이름 · start · end. 옛 무대 스텝을 읽은 것은 "~0" · "~1" ….</summary>
+        /// <summary>앵커의 이름 — 표지 이름 · start · end.</summary>
         public string Name;
 
         public LineAnchorKind Kind;
-
-        /// <summary>옛 표기의 무대 스텝(&lt;&lt;step&gt;&gt;)을 읽은 앞 앵커다.</summary>
-        public bool Legacy;
 
         /// <summary>화자 이름을 뺀 글의 글자 자리. 앞 앵커 · start는 0, end는 LineBeatSchedule.LineEnd.</summary>
         public int Position;
@@ -143,7 +137,7 @@ namespace Ked.Presentation.Core
         public string Indent = string.Empty;
 
         /// <summary>
-        /// 이 줄의 커맨드 묶음(&lt;&lt;at&gt;&gt; · &lt;&lt;gap&gt;&gt; · 옛 표기)이 원문의 어디서 어디까지인가 — 대사 줄은 들지 않는다.
+        /// 이 줄의 커맨드 묶음(&lt;&lt;at&gt;&gt; · &lt;&lt;gap&gt;&gt; · 앵커 밖의 것)이 원문의 어디서 어디까지인가 — 대사 줄은 들지 않는다.
         /// 툴은 이 범위만 다시 쓴다. 묶음이 없으면 빈 범위이고 Start는 대사 줄의 머리다(끼워 넣을 자리).
         /// 묶음 사이의 빈 줄 · 주석 줄은 범위에 든다.
         /// </summary>
@@ -158,14 +152,14 @@ namespace Ked.Presentation.Core
         /// </summary>
         public readonly List<LineReadCommand> Immediate = new();
 
-        /// <summary>이 줄에서 찾은 문제 — 짝이 없는 at · gap, 표에 없는 명령, at을 붙인 즉시 명령 ….</summary>
+        /// <summary>
+        /// at 없이 쓴 무대 명령 — 원문 검사의 오류다. 재생은 실행하지 않는다(docs/PLAN_line-anchor.md §9 N5).
+        /// 묶음의 범위(Block)에는 든다 — 툴이 묶음을 다시 쓰면 사라진다.
+        /// </summary>
+        public readonly List<LineReadCommand> Unanchored = new();
+
+        /// <summary>이 줄에서 찾은 문제 — 짝이 없는 at · gap, at 없는 명령, 표에 없는 명령, at을 붙인 즉시 명령 ….</summary>
         public readonly List<string> Problems = new();
-
-        /// <summary>옛 표기 — 이 줄 앞의 &lt;&lt;step&gt;&gt; 수.</summary>
-        public int LegacySteps;
-
-        /// <summary>옛 표기 — at 없이 쓴 커맨드 수(바로 실행하는 명령은 세지 않는다).</summary>
-        public int BareCommands;
 
         /// <summary>이름으로 스텝을 찾는다. 없으면 null.</summary>
         public LineReadStep Step(string name)

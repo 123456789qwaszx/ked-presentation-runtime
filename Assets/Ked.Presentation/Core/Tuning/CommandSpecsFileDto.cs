@@ -10,8 +10,7 @@ namespace Ked.Presentation.Core
     //     "schema": "command-specs/1",
     //     "kinds":    [ { "key": "camera", "label": "카메라", "director": true }, … ],
     //     "argKinds": [ "slot", "distance", … ],
-    //     "lineStructure":   [ "at", "gap" ],     커맨드가 아니라 줄의 구조 — 표 밖이다
-    //     "legacyStructure": [ "step" ],          옛 표기 — 읽기만 한다
+    //     "lineStructure": [ "at", "gap" ],     커맨드가 아니라 줄의 구조 — 표 밖이다
     //     "commands": [
     //       { "name": "move_by", "kind": "placement", "summary": "…", "waits": false, "immediate": false, "fork": false,
     //         "args": [ { "name": "slot", "label": "슬롯", "kind": "slot", "hasDefault": false, "defaultValue": "",
@@ -34,7 +33,6 @@ namespace Ked.Presentation.Core
         public List<CommandKindDto> kinds;
         public List<string> argKinds;
         public List<string> lineStructure;
-        public List<string> legacyStructure;
         public List<CommandSpecDto> commands;
     }
 
@@ -94,7 +92,6 @@ namespace Ked.Presentation.Core
                 kinds = new List<CommandKindDto>(),
                 argKinds = new List<string>(),
                 lineStructure = new List<string> { LineBeatSchedule.AtCommandName, LineBeatSchedule.GapCommandName },
-                legacyStructure = new List<string> { YarnCommandTextExtractor.StageStepCommand },
                 commands = new List<CommandSpecDto>(),
             };
 

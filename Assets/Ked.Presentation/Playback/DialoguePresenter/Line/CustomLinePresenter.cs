@@ -8,8 +8,7 @@ public interface ILineAborter
     void AbortCurrentLine();
 }
 
-// 노드 끝의 암묵 스텝(붙을 줄이 없이 남은 명령)을 실행한다. 기다릴 것이 없으면 그 자리에서 끝난 태스크를 돌려준다.
-// <<step>>은 이것을 부르지 않는다 — 구간을 닫기만 하고, 다음 대사 줄이 앞 앵커로 실행한다(docs/PLAN_line-anchor.md A6).
+// 노드 끝의 암묵 스텝(붙을 줄이 없이 남은 명령 — docs/PLAN_line-anchor.md A6)을 실행한다. 기다릴 것이 없으면 그 자리에서 끝난 태스크를 돌려준다.
 public interface IStageStepRunner
 {
     YarnTask RunStageStepAsync();
@@ -96,7 +95,7 @@ public sealed class CustomLinePresenter : DialoguePresenterBase, ILineAborter, I
         }
     }
 
-    // 무대 스텝은 줄과 같은 화면 수명(AbortCurrentLine · 대화 끝이 끊는다)과 같은 배수 통로를 쓴다 —
+    // 노드 끝의 스텝은 줄과 같은 화면 수명(AbortCurrentLine · 대화 끝이 끊는다)과 같은 배수 통로를 쓴다 —
     // Yarn은 명령의 태스크가 끝나면 Continue()를 쓰므로, 정지 뒤에 늦게 끝나면 줄과 똑같이 새 대화의 줄을 먹는다.
     public YarnTask RunStageStepAsync()
     {

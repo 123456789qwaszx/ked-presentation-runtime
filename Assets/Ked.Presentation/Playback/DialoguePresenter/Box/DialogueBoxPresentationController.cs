@@ -144,7 +144,7 @@ public partial class DialogueBoxPresentationController
             return;
         }
 
-        // 촬영소의 인물은 줄 머리의 명령으로 이미 서 있다. 아직 한 프레임도 찍히지 않았어도 칸은 켠다 —
+        // 촬영소의 인물은 그 줄의 앞 앵커 · start의 명령으로 이미 서 있다. 아직 한 프레임도 찍히지 않았어도 칸은 켠다 —
         // 그 프레임 끝에 찍힌다. 인물이 없다는 판정(HasSubject)은 촬영소가 다음 LateUpdate에야 알므로 여기서 묻지 않는다.
         _box.SetPortrait(_portraitStudio.Texture, _portraitStudio.ReadCellRect);
     }

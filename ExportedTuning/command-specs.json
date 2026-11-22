@@ -53,9 +53,6 @@
         "at",
         "gap"
     ],
-    "legacyStructure": [
-        "step"
-    ],
     "commands": [
         {
             "name": "pause",

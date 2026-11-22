@@ -66,10 +66,6 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler(
             "surface_reset", ResetSurfaceLayout);
 
-        // <<step>>(옛 표기) — 실행하지 않는다. 여기까지 쌓인 명령이 다음 대사 줄의 앞 앵커 하나다(docs/PLAN_line-anchor.md A6).
-        runner.AddCommandHandler(
-            "step", CloseStageStep);
-
         // <<at 표지 명령 …>> — 다음 대사 줄의 표지 [beat=표지/] 자리에서 실행할 명령(docs/PLAN_line-beat.md).
         runner.AddCommandHandler<string, string[]>(
             LineBeatSchedule.AtCommandName, CollectAt);
@@ -372,15 +368,14 @@ public sealed partial class YarnCommandBridge
             return;
         }
 
-        // 줄이 도착하기 전에 그 줄의 명령이 모두 풀린다 — 앞 앵커(<<step>>이 닫은 구간)가 세울 슬롯도 선언으로 본다.
-        if (!_roleGate.TryAccept(_playbackDriver.PendingAll, _parsed, out string reason))
+        // at 없는 명령은 노드 끝의 것이다(대사 줄이 오면 버린다 — StepHead.DropUnanchored). 앞서 쌓인 선언을 대상 판정이 본다.
+        if (!_roleGate.TryAccept(_playbackDriver.Collected, _parsed, out string reason))
         {
             Debug.LogError($"[YarnCommandBridge] {AuthoredText(commandName, args)} — {reason}. 실행하지 않는다.");
             return;
         }
 
-        for (int i = 0; i < _parsed.Count; i++)
-            _playbackDriver.Enqueue(_parsed[i]);
+        _playbackDriver.Enqueue(new StageCommand(commandName, Written(args)), _parsed);
     }
 
     // <<at 표지 명령 …>> — 모으기만 한다. 명령 글은 닿았을 때 푼다(TryParseInline) — 대상 슬롯은 그때의 무대로 판정한다.
@@ -441,6 +436,22 @@ public sealed partial class YarnCommandBridge
 
         output.AddRange(_parsed);
         return true;
+    }
+
+    // Yarn은 적지 않은 인자를 null로 준다 — 대본에 쓴 것만.
+    private static string[] Written(string[] args)
+    {
+        int count = 0;
+
+        while (count < args.Length && args[count] != null)
+            count++;
+
+        if (count == args.Length)
+            return args;
+
+        string[] written = new string[count];
+        System.Array.Copy(args, written, count);
+        return written;
     }
 
     private static string AuthoredText(string commandName, string[] args)

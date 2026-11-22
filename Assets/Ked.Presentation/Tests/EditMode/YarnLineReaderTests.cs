@@ -68,7 +68,6 @@ namespace Ked.Presentation.Tests
             Assert.That(fade.Kind, Is.EqualTo(CommandKind.Placement));
             Assert.That(fade.Anchor, Is.EqualTo("in"));
             Assert.That(fade.Line, Is.EqualTo(5), "머리 두 줄(title · ---) 뒤의 셋째 줄");
-            Assert.That(fade.Bare, Is.False);
             Assert.That(fade.Bound.Select(b => b.Spec.Name), Is.EqualTo(new[] { "slot", "alpha", "duration" }));
             Assert.That(fade.Bound.Select(b => b.Value), Is.EqualTo(new[] { "s2", "0.72", "0.5s" }));
             Assert.That(fade.Duration, Is.EqualTo(0.5f));
@@ -294,30 +293,28 @@ namespace Ked.Presentation.Tests
         }
 
         [Test]
-        public void 옛_표기도_읽는다()
+        public void at_없는_명령은_앵커에_넣지_않고_오류로_적는다()
         {
+            // 재생은 실행하지 않는다(docs/PLAN_line-anchor.md §9 N5) — 줄 읽기도 앵커에 넣지 않는다.
             LineRead line = Read(Node(
                 "<<fade_out s1 15fr>>",
-                "<<pause 15fr>>",
                 "<<step>>",
                 "<<at start motion s2 nod>>",
-                "<<fade_in s2 15fr>>",
                 "시구레: 자리를 바꿨어요. #line:swap"), "swap");
 
-            Assert.That(line.Steps.Select(s => s.Name), Is.EqualTo(new[] { "~0", "start", "end" }));
-            Assert.That(line.Steps[0].Legacy, Is.True);
-            Assert.That(line.Steps[0].Kind, Is.EqualTo(LineAnchorKind.Pre));
-            Assert.That(Names(line.Steps[0]), Is.EqualTo(new[] { "fade_out", "pause" }));
-            Assert.That(line.Steps[0].Settle, Is.EqualTo(0.5f));
+            Assert.That(line.Steps.Select(s => s.Name), Is.EqualTo(new[] { "start", "end" }));
+            Assert.That(Names(line.Step("start")), Is.EqualTo(new[] { "motion" }));
 
-            // start에는 at 없는 명령이 먼저, <<at start>>가 그 뒤다(재생의 차례).
-            Assert.That(Names(line.Step("start")), Is.EqualTo(new[] { "fade_in", "motion" }));
-            Assert.That(line.Step("start").Commands.Select(c => c.Bare), Is.EqualTo(new[] { true, false }));
-            Assert.That(line.Step("start").Commands.Select(c => c.Line), Is.EqualTo(new[] { 7, 6 }));
+            Assert.That(line.Unanchored.Select(c => c.Name), Is.EqualTo(new[] { "fade_out", "step" }));
+            Assert.That(line.Unanchored.Select(c => c.Line), Is.EqualTo(new[] { 3, 4 }));
+            Assert.That(line.Unanchored[0].Kind, Is.EqualTo(CommandKind.Placement));
+            Assert.That(line.Unanchored[0].Anchor, Is.Null);
+            Assert.That(line.Unanchored[1].Kind, Is.Null, "걷은 <<step>>은 명세 표에 없다");
 
-            Assert.That(line.LegacySteps, Is.EqualTo(1));
-            Assert.That(line.BareCommands, Is.EqualTo(3));
-            Assert.That(line.Problems, Is.Empty, "옛 표기는 아직 문제로 올리지 않는다(N5에서 오류)");
+            // at 없는 명령 둘 + 표에 없는 명령 하나(step).
+            Assert.That(line.Problems.Count(p => p.Contains("at 없는 명령")), Is.EqualTo(2), string.Join("\n", line.Problems));
+            Assert.That(line.Problems, Has.Count.EqualTo(3));
+            Assert.That(line.Block.FirstLine, Is.EqualTo(3), "묶음의 범위에는 든다");
         }
 
         [Test]
@@ -328,13 +325,13 @@ namespace Ked.Presentation.Tests
                 "<<at start face s1 3>>",
                 "하린: 대사창이 넓어졌어. #line:wide"), "wide");
 
-            // 브리지가 쌓지 않고 Yarn이 만난 때 실행한다 — start의 명령이 아니고, 옛 표기도 아니다.
+            // 브리지가 쌓지 않고 Yarn이 만난 때 실행한다 — start의 명령이 아니고, at 없는 명령의 오류도 아니다.
             Assert.That(Names(line.Step("start")), Is.EqualTo(new[] { "face" }));
             Assert.That(line.Immediate.Select(c => c.Name), Is.EqualTo(new[] { "surface_layout" }));
             Assert.That(line.Immediate[0].Anchor, Is.Null);
             Assert.That(line.Immediate[0].Kind, Is.EqualTo(CommandKind.Setup));
             Assert.That(line.Immediate[0].Line, Is.EqualTo(3));
-            Assert.That(line.BareCommands, Is.EqualTo(0));
+            Assert.That(line.Unanchored, Is.Empty);
             Assert.That(line.Problems, Is.Empty);
             Assert.That(line.Block.FirstLine, Is.EqualTo(3), "묶음의 범위에는 든다");
         }
@@ -360,10 +357,12 @@ namespace Ked.Presentation.Tests
 
             LineRead plain = Read(yarn, "fork");
 
-            Assert.That(plain.Step("start").Commands.Select(c => c.Name), Is.EqualTo(new[] { "messenger_open", "cutin_panel" }));
-            Assert.That(plain.Step("start").Commands.Select(c => c.Kind), Is.EqualTo(new CommandKind?[] { null, null }));
-            Assert.That(plain.Step("start").Commands[1].KindIndex, Is.EqualTo(-1));
-            Assert.That(plain.Problems, Has.Count.EqualTo(2));
+            // 공개 표는 포크의 어휘를 모른다 — at 없는 messenger_open은 오류이고, 둘 다 표에 없다.
+            Assert.That(plain.Step("start").Commands.Select(c => c.Name), Is.EqualTo(new[] { "cutin_panel" }));
+            Assert.That(plain.Step("start").Commands[0].Kind, Is.Null);
+            Assert.That(plain.Step("start").Commands[0].KindIndex, Is.EqualTo(-1));
+            Assert.That(plain.Unanchored.Select(c => c.Name), Is.EqualTo(new[] { "messenger_open" }));
+            Assert.That(plain.Problems, Has.Count.EqualTo(3), string.Join("\n", plain.Problems));
 
             // 포크가 제 어휘를 덧붙인 표로 읽으면 가려진다.
             StageCommandSpecTable fork = StageCommandSpecTable.Core.With(new[]
@@ -382,6 +381,7 @@ namespace Ked.Presentation.Tests
             Assert.That(read.Step("start").Commands.Select(c => c.Name), Is.EqualTo(new[] { "cutin_panel" }));
             Assert.That(read.Step("start").Commands[0].Kind, Is.EqualTo(CommandKind.Screen));
             Assert.That(read.Immediate.Select(c => c.Name), Is.EqualTo(new[] { "messenger_open" }));
+            Assert.That(read.Unanchored, Is.Empty);
         }
 
         [Test]
@@ -402,7 +402,7 @@ namespace Ked.Presentation.Tests
         [Test]
         public void 예제_대본을_추출기와_같은_차례로_읽는다()
         {
-            // 선형인 대본에서는 추출기(접힘)와 줄 읽기가 같은 커맨드 열을 낸다 — 바로 실행하는 명령만 다르게 싣는다.
+            // 선형인 대본에서는 추출기(접힘)와 줄 읽기가 같은 커맨드 열을 낸다.
             string dir = Path.Combine("Assets", "Dialogue", "ChapterProgression");
 
             if (!Directory.Exists(dir))
@@ -427,9 +427,7 @@ namespace Ked.Presentation.Tests
 
                 for (int i = 0; i < groups.Count; i++)
                 {
-                    string[] folded = groups[i].Commands
-                        .Where(c => !StageCommandSpecTable.Default.IsImmediate(c.Name))
-                        .Select(c => c.ToString()).ToArray();
+                    string[] folded = groups[i].Commands.Select(c => c.ToString()).ToArray();
                     string[] read = file.Lines[i].Steps
                         .SelectMany(s => s.Commands)
                         .Select(c => new StageCommand(c.Name, c.Args, $"{path}:{c.Line}").ToString()).ToArray();

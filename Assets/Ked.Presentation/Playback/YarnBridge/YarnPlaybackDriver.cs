@@ -7,19 +7,14 @@ public sealed class YarnPlaybackDriver
     private readonly CommandExecutor _executor;
     private readonly ICommandRunScopeProvider _scopeProvider;
 
-    // 지금 열린 구간 — 다음 대사 줄의 머리(at 없는 명령). <<step>>을 만나면 앞 앵커 하나로 닫힌다(CloseStep).
+    // at 없는 명령 — 노드 끝에만 쓴다. 붙을 줄이 없이 남으면 노드 끝의 암묵 스텝이 쓴 순서로 실행한다(docs/PLAN_line-anchor.md A6).
+    // 대사 줄이 오면 원문의 오류다 — 실행하지 않고 버린다(§9 N5, DropUnanchored). 아직 실행하지 않은 선언(slot · cast · actor)을
+    // 대상 판정이 본다(CommandRoleGate). 대본에 쓴 꼴(_collectedCommands)은 오류를 적을 때 쓴다 — 명령 하나가 스펙 여럿을 낳는다.
     private readonly List<CommandSpecBase> _collectedSpecs = new();
+    private readonly List<StageCommand> _collectedCommands = new();
 
-    // <<step>>이 닫은 구간들 — 다음 대사 줄의 앞 앵커(옛 표기, docs/PLAN_line-anchor.md A6 · §9). 쓴 순서.
-    // 줄이 도착한 뒤에 그 줄이 차례로 실행한다. 붙을 줄이 없으면 노드 끝의 암묵 스텝이 실행한다.
-    private readonly List<List<CommandSpecBase>> _preBatches = new();
-
-    // 위 둘을 쓴 순서로 — 아직 실행하지 않은 선언(slot · cast · actor)을 대상 판정이 본다(CommandRoleGate).
-    // 줄이 도착하기 전에 그 줄의 명령이 모두 풀리므로, 앞 앵커가 세운 슬롯을 머리 명령이 가리킬 수 있어야 한다.
-    private readonly List<CommandSpecBase> _pendingAll = new();
-
-    // <<at 표지 명령>> — 다음 대사 줄의 것. 머리 배치(_collectedSpecs)에 섞지 않는다(docs/PLAN_line-beat.md I1).
-    // 줄에 들어갈 때 그 줄의 앵커로 가져간다(InlineCommandTrack.Begin). 붙을 줄이 없으면 노드 끝의 스텝이 머리 뒤에(PlayStrayAt).
+    // <<at 표지 명령>> — 다음 대사 줄의 것. 줄에 들어갈 때 그 줄의 앵커로 가져간다(InlineCommandTrack.Begin).
+    // 붙을 줄이 없으면 노드 끝의 스텝이 남은 명령 뒤에(PlayStrayAt).
     private readonly List<AtCommand> _collectedAt = new();
 
     // <<gap 이름 길이>> — 다음 대사 줄의 앵커에 붙는 간격(docs/PLAN_line-anchor.md A8). <<at>>과 같이 줄에 들어갈 때 가져간다.
@@ -41,30 +36,33 @@ public sealed class YarnPlaybackDriver
         _scopeProvider = scopeProvider;
     }
 
-    public void Enqueue(CommandSpecBase spec)
+    // at 없는 명령 하나 — 그 명령이 풀린 스펙들과 대본에 쓴 꼴.
+    public void Enqueue(in StageCommand authored, IReadOnlyList<CommandSpecBase> specs)
     {
-        _collectedSpecs.Add(spec);
-        _pendingAll.Add(spec);
+        _collectedCommands.Add(authored);
+
+        for (int i = 0; i < specs.Count; i++)
+            _collectedSpecs.Add(specs[i]);
     }
 
+    // 쌓인 at 없는 명령의 스펙 — 쓴 순서. 대상 판정의 문맥이다.
     public IReadOnlyList<CommandSpecBase> Collected => _collectedSpecs;
 
-    // 다음 대사 줄을 기다리는 명령 모두(앞 앵커 + 머리) — 쓴 순서. 대상 판정의 문맥이다.
-    public IReadOnlyList<CommandSpecBase> PendingAll => _pendingAll;
+    public bool HasPending => _collectedSpecs.Count > 0 || _collectedAt.Count > 0;
 
-    public int PreBatchCount => _preBatches.Count;
-
-    public bool HasPending => _collectedSpecs.Count > 0 || _preBatches.Count > 0 || _collectedAt.Count > 0;
-
-    // <<step>>(옛 표기) — 여기까지 쌓인 명령이 다음 대사 줄의 앞 앵커 하나다. 실행하지 않는다.
-    // 빈 구간은 앵커가 아니다(쌓인 명령이 없는 무대 스텝은 스텝이 아니었다).
-    public void CloseStep()
+    // 대사 줄이 왔다 — 쌓인 at 없는 명령은 그 줄의 것이 아니다. 실행하지 않고 버리고, 대본에 쓴 꼴을 돌려준다(오류로 적는다).
+    public bool TryDropUnanchored(out List<StageCommand> dropped)
     {
-        if (_collectedSpecs.Count == 0)
-            return;
+        if (_collectedCommands.Count == 0 && _collectedSpecs.Count == 0)
+        {
+            dropped = null;
+            return false;
+        }
 
-        _preBatches.Add(new List<CommandSpecBase>(_collectedSpecs));
+        dropped = new List<StageCommand>(_collectedCommands);
+        _collectedCommands.Clear();
         _collectedSpecs.Clear();
+        return true;
     }
 
     public void EnqueueAt(in AtCommand at) => _collectedAt.Add(at);
@@ -98,35 +96,18 @@ public sealed class YarnPlaybackDriver
 
     public bool UnitHasWaits => _unitHasWaits;
 
-    // 다음 앞 앵커(<<step>>이 닫은 구간)를 실행한다 — 쓴 순서로 하나씩. 더 없으면 false.
-    // 하나씩 꺼내므로, 도중에 끊긴 줄의 남은 것은 정지가 버린다(TryDiscardPending).
-    public bool TryPlayNextPreBatch()
-    {
-        if (_preBatches.Count == 0)
-            return false;
-
-        List<CommandSpecBase> specs = _preBatches[0];
-        _preBatches.RemoveAt(0);
-
-        Play(specs);
-        return true;
-    }
-
-    // 머리 — 지금 열린 구간을 실행한다.
+    // 노드 끝의 암묵 스텝 — 남은 at 없는 명령을 쓴 순서로 실행한다.
     public void PlayCollected()
     {
         var specs = new List<CommandSpecBase>(_collectedSpecs);
         _collectedSpecs.Clear();
-
-        // 이 줄의 것을 모두 가져갔다 — 앞 앵커는 머리보다 먼저 실행된다.
-        if (_preBatches.Count == 0)
-            _pendingAll.Clear();
+        _collectedCommands.Clear();
 
         Play(specs);
     }
 
     // 이 단위에 덧붙여 실행한다 — <<at>>의 앵커. 쌓인 명령은 건드리지 않는다.
-    // 이 단위의 첫 묶음이면(머리보다 먼저 열리는 앞 앵커) 실행기의 스텝을 연다.
+    // 이 단위의 첫 묶음이면 실행기의 스텝을 연다.
     public void PlayInStep(IReadOnlyList<CommandSpecBase> specs)
     {
         Play(new List<CommandSpecBase>(specs));
@@ -153,16 +134,11 @@ public sealed class YarnPlaybackDriver
     // 쌓인 명령을 실행하지 않고 버린다. 버린 것이 있으면 개수와 요약("이름×개수, …")을 돌려준다(로그용).
     public bool TryDiscardPending(out int count, out string summary)
     {
-        var specs = new List<CommandSpecBase>();
-
-        foreach (List<CommandSpecBase> batch in _preBatches)
-            specs.AddRange(batch);
-
-        specs.AddRange(_collectedSpecs);
+        var specs = new List<CommandSpecBase>(_collectedSpecs);
 
         count = specs.Count + _collectedAt.Count;
 
-        _pendingAll.Clear();
+        _collectedCommands.Clear();
         _collectedGaps.Clear();
 
         if (count == 0)
@@ -176,7 +152,6 @@ public sealed class YarnPlaybackDriver
         if (_collectedAt.Count > 0)
             summary += (summary.Length > 0 ? ", " : "") + $"<<at>>×{_collectedAt.Count}";
 
-        _preBatches.Clear();
         _collectedSpecs.Clear();
         _collectedAt.Clear();
         return true;

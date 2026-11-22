@@ -24,7 +24,7 @@ namespace Ked.Presentation.Tests
         {
             Assert.That(Table.Contains(LineBeatSchedule.AtCommandName), Is.False);
             Assert.That(Table.Contains(LineBeatSchedule.GapCommandName), Is.False);
-            Assert.That(Table.Contains(YarnCommandTextExtractor.StageStepCommand), Is.False);
+            Assert.That(Table.Contains("step"), Is.False, "걷은 옛 표기다");
         }
 
         [Test]
@@ -209,7 +209,6 @@ namespace Ked.Presentation.Tests
 
             Assert.That(dto.schema, Is.EqualTo(CommandSpecsFile.Schema));
             Assert.That(dto.lineStructure, Is.EqualTo(new[] { "at", "gap" }));
-            Assert.That(dto.legacyStructure, Is.EqualTo(new[] { "step" }));
             Assert.That(dto.kinds.Count, Is.EqualTo(CommandKinds.All.Length));
 
             List<string> problems = new();

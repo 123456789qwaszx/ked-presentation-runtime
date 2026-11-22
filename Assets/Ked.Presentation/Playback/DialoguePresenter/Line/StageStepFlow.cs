@@ -1,10 +1,9 @@
 using Yarn.Unity;
 
 // 글 없이 명령만 도는 구간 — 대사창을 닫고, 묶음마다 그 명령이 다 시작될 때까지(전경 — pause가 끝날 때까지) 기다린다.
-//   줄의 앞 앵커(docs/PLAN_line-anchor.md A5 · A6)   줄이 도착한 뒤, 그 줄의 것으로. 옛 표기의 <<step>>이 닫은 구간과
-//                                                     첫 글자 앞의 표지([beat] + <<at>>).
-//   노드 끝의 암묵 스텝                               붙을 줄이 없이 남은 명령. 줄이 아니다 — 백로그 · 되감기 기준점 · 줄 좌표에 들지 않는다.
-// PLAN_stage-step-inline-markup.md §3의 무대 스텝에서 왔다 — <<step>>은 이제 실행하지 않고 구간을 닫기만 한다.
+//   줄의 앞 앵커(docs/PLAN_line-anchor.md A5)   줄이 도착한 뒤, 그 줄의 것으로 — 첫 글자 앞의 표지([beat] + <<at>>).
+//   노드 끝의 암묵 스텝(A6)                     붙을 줄이 없이 남은 명령. 줄이 아니다 — 백로그 · 되감기 기준점 · 줄 좌표에 들지 않는다.
+// PLAN_stage-step-inline-markup.md §3의 무대 스텝에서 왔다 — 그 <<step>>은 걷었다(줄의 앵커 §9 N5).
 public sealed class StageStepFlow
 {
     private readonly StepHead _stepHead;
@@ -36,10 +35,10 @@ public sealed class StageStepFlow
     // ── 줄의 앞 앵커 ─────────────────────────────────────────────────────────
 
     // 이 줄에 앞 앵커가 있나. 줄에 들어선 뒤(StepHead.Enter · InlineCommandTrack.Begin)에 묻는다.
-    public bool HasLinePrelude => _stepHead.HasPreBatch || _inlineCommands.HasPreAnchors;
+    public bool HasLinePrelude => _inlineCommands.HasPreAnchors;
 
     // 앞 앵커를 기다리지 않고 끝값으로 놓는다 — 시크가 지나가는 줄과 시크로 닿은 줄(A11).
-    // 시크가 살아 있는 동안 부른다(명령이 압축된다). 장면 BGM은 의도만 쌓는다 — 머리가 맞춘다.
+    // 시크가 살아 있는 동안 부른다(명령이 압축된다). 장면 BGM은 의도만 쌓는다 — start가 맞춘다.
     public void PlayLinePreludeSnapped()
     {
         while (TryPlayNextPreAnchor(snap: true, seekPassThrough: true))
@@ -90,13 +89,9 @@ public sealed class StageStepFlow
         }
     }
 
-    // 다음 앞 앵커 — 옛 표기의 <<step>>이 닫은 구간(쓴 순서), 그 뒤에 첫 글자 앞의 표지(글의 표지 순서).
-    // 접힘과 같은 차례다(LineBeatSchedule.BuildAnchors).
+    // 다음 앞 앵커 — 첫 글자 앞의 표지(글의 표지 순서). 접힘과 같은 차례다(LineBeatSchedule.BuildAnchors).
     private bool TryPlayNextPreAnchor(bool snap, bool seekPassThrough)
     {
-        if (_stepHead.TryPlayNextPreBatch(snap, seekPassThrough))
-            return true;
-
         if (!_inlineCommands.TryPlayNextPreAnchor())
             return false;
 
@@ -120,15 +115,12 @@ public sealed class StageStepFlow
         if (!_seekState.IsSeeking)
             return false;
 
-        while (TryPlayNextTailBatch(snap: true, seekPassThrough: true))
-        {
-        }
-
+        TryPlayTail(snap: true, seekPassThrough: true);
         return true;
     }
 
     // 남은 명령을 실행하고 대사창을 닫은 뒤 전경(pause)이 끝날 때까지 기다린다. 넘김 입력은 필요 없다.
-    // <<step>>이 닫은 구간이 있으면 구간마다 따로 — 줄이 아니라서 구간마다 실행기의 스텝이다(남은 전환을 마무리한다).
+    // 줄이 아니라서 실행기의 스텝 하나다(앞 줄의 남은 전환을 마무리한다).
     // run이 무효가 되면(정지 · 되감기 · 대화 끝) 기다림을 놓는다.
     public async YarnTask RunAsync(LinePresentationRun run)
     {
@@ -138,13 +130,10 @@ public sealed class StageStepFlow
         {
             CommandRunScope scope = _scopeProvider.CurrentScope;
 
-            while (run.IsValid)
+            bool rapidSkip = _playbackState.IsRapidSkipMode;
+
+            if (run.IsValid && TryPlayTail(snap: rapidSkip, seekPassThrough: false))
             {
-                bool rapidSkip = _playbackState.IsRapidSkipMode;
-
-                if (!TryPlayNextTailBatch(snap: rapidSkip, seekPassThrough: false))
-                    break;
-
                 await _boxPresentation.HideForStageStepAsync(
                     run,
                     immediate: rapidSkip || _playbackState.IsSpeedUpMode);
@@ -162,17 +151,13 @@ public sealed class StageStepFlow
         }
     }
 
-    // 다음 묶음 — <<step>>이 닫은 구간을 쓴 순서로 하나씩, 마지막에 남은 명령과 붙을 줄이 없던 <<at>>(AR10).
-    private bool TryPlayNextTailBatch(bool snap, bool seekPassThrough)
+    // 남은 명령을 쓴 순서로, 그 뒤에 붙을 줄이 없던 <<at>>(AR10). 실행할 것이 없으면 false.
+    private bool TryPlayTail(bool snap, bool seekPassThrough)
     {
         if (!_stepHead.HasPending)
             return false;
 
         _stepHead.Enter();
-
-        if (_stepHead.TryPlayNextPreBatch(snap, seekPassThrough))
-            return true;
-
         _stepHead.Play(snap, seekPassThrough);
         _inlineCommands.PlayStrayAt();
         return true;

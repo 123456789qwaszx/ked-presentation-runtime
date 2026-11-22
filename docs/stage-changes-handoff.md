@@ -1,4 +1,6 @@
-# 런타임 밖에 반영할 것 — 화면 덮개 · 어둡게 · 컷인 · 팝업 · 무대 마스크 · 줄의 자리 · 명령 이름 (2026-11-17)
+# 런타임 밖에 반영할 것 — 화면 덮개 · 어둡게 · 컷인 · 팝업 · 무대 마스크 · 줄의 자리 · 명령 이름 · 옛 표기 걷기 (2026-11-17 ~ 22)
+
+> **2026-11-22 — 줄의 앵커 N5: `<<step>>`과 대사 줄 앞의 at 없는 명령을 걷었다. 소비처가 할 일은 §5** — 이 아래 §1.4의 "줄 머리 · 무대 스텝" 이야기는 그 전의 것이다.
 
 > 상태: **반영 중** — 런타임은 끝났고(공개 런타임 `refactor/actor-view`), 작업공간이 포크 · 줄의 자리를 반영했다(§4, 2026-11-17). **명령 이름을 바꿨다(§2)** — 소비처는 아직이다. 덮개 · 어둡게 카드와 툴 · 추출기도 아직이다.
 > 반영하는 쪽은 이 문서 하나를 보고 일을 시작한다. 반영을 마치면 §4 표에 적는다.
@@ -40,6 +42,8 @@
 - 코어의 코드는 이번 일로 바뀌지 않았다(주석 · 문서만) — 코어 사본(모션 툴)은 이 일 때문에 동기화할 것이 없다. 줄의 자리(§1.4)는 코어를 바꾼다.
 
 ### 1.4 줄의 자리 — `<<at>>` · `[beat]` · `#auto=길이` (PLAN_line-beat.md, 진행 중)
+
+> 뒤에 바뀌었다 — [PLAN_line-anchor.md](PLAN_line-anchor.md)(줄의 앵커): `start` 앵커 · 어느 앵커에서나 `pause` · `<<gap>>` · 앞 앵커(2026-11-21), 그리고 `<<step>>` · at 없는 명령 걷기(2026-11-22, §5).
 
 글 안에 명령을 두던 `[cmd="명령"/]`을 **자리와 명령으로 가른다** — 번역 파일에 명령이 실리지 않게. 런타임은 L1–L5까지 했다 — 옛 `[cmd]`는 걷었다.
 L3부터는 옛 대본이 그대로 돌지 않는다 — 대사 줄 머리의 `pause`가 오류가 되고 `<<Nfr>>`은 모르는 명령이다. 작업공간은 L3을 L4(다시 낸 대본)와 **함께** 들인다.
@@ -138,3 +142,49 @@ L3부터는 옛 대본이 그대로 돌지 않는다 — 대사 줄 머리의 `p
 - 커밋 해시는 작업공간 저장소(비공개)의 것이다.
 - 작업공간의 `[cmd]`는 0곳이다 — 작업공간 쪽에서는 L5(`[cmd]` 걷기)를 막지 않는다. 다른 소비처(모션 툴의 코어 사본 · 추출기 · 저작 툴)는 따로 본다.
 - 작업공간에 아직 반영하지 않은 것: §1.1 덮개(`screen_cover` — B01~B03 · W01, 작업공간 Unity 확인 뒤에 한다) · 어둡게(`screen_dim` — §2 이름이 정해진 뒤). §1.2는 지금 대본에 걸리는 곳이 없다 — 열린 컷인 · 팝업 위의 `tx` 0, 컷인을 쓴 무대를 `tx` 인서트로 다시 여는 곳 0, `tx_stage_mask_clear`는 시험 대본 한 곳뿐.
+
+## 5. 줄의 앵커 N5 — 옛 표기를 걷었다 (2026-11-22)
+
+근거: [PLAN_line-anchor.md](PLAN_line-anchor.md) §9 N5 · §12 「N5에서 한 것」. 런타임 `feat/drop-old-notation`(`dev`에서). 소비처가 모두 옮긴 것을 소유자가 확인한 뒤에 걷었다.
+
+### 5.1 대본의 규칙 — 지금
+
+| | 규칙 |
+|---|---|
+| 줄의 명령 | **모두 `<<at 앵커 명령 …>>`이다.** 앵커는 앞 앵커(첫 글자 앞의 `[beat=이름/]`) · `start`(표지 없음 — 대사창이 열리며) · 글 표지 · `end`(표지 없음 — 타자기 끝). 간격은 `<<gap 앵커 길이>>` |
+| at 없는 명령 | **노드 끝에만 쓴다** — 붙을 줄이 없이 남은 명령이 암묵 스텝 하나로 쓴 순서대로 실행된다(대사창을 닫고, 기다리는 명령이 끝날 때까지). 대사 줄 앞에 쓰면 **오류이고 실행하지 않는다** — 재생 로그 `[줄의 자리] <<…>> — at 없는 명령이다. 줄의 명령은 <<at 앵커 명령 …>>으로 쓴다(at 없이 쓰는 것은 노드 끝뿐이다). 실행하지 않는다.`, 원문 검사(코어 추출기 · 줄 읽기)도 같은 말을 낸다 |
+| at 없이 쓰는 것이 맞는 것 | 바로 실행하는 명령 — 명세 표의 `Immediate`(공개: `surface_layout` · `surface_reset`, 포크: `messenger_open` · `messenger_close`). Yarn의 문 · 흐름(`set` · `declare` · `call` · `wait` · `enum` · `if` · `else` · `jump` · `detour` …). 여기에 `<<at>>`을 붙이면 파서로 넘어가 모르는 명령이 된다 |
+| `<<step>>` | **없다** — 등록을 걷었다. 남아 있으면 Yarn이 모르는 명령으로 소리 낸다(원문 검사에서는 at 없는 명령의 오류 하나). 대사창이 열리기 전의 연출은 그 줄의 앞 앵커로, 길이는 `<<gap>>`으로(그 구간의 `pause` · `screen_cover` 길이의 합 — 간격은 앵커가 열린 때부터 잰다) |
+| 옛 `<<step>>` 구간의 옮기는 법 | 공개 대본을 옮긴 규칙(작업공간 N4와 같다): 구간 → 그 줄의 첫 글자 앞 표지 `[beat=in/]`(화자 이름 뒤) + `<<at in …>>`, 구간의 맨 끝 `pause` → `<<gap in 합>>`, 그 밖의 `pause`는 `<<at in pause …>>`, 머리 명령 → `<<at start …>>`. 차례가 같으면 끝 상태가 같다 |
+| 줄의 보이스 | `<<at start voice 키>>`가 그 줄의 보이스다(백로그의 다시 듣기 키). 다른 앵커의 `voice`는 줄 가운데서 트는 소리다 |
+
+### 5.2 코어에서 바뀐 것 — 코어 사본을 쓰는 곳
+
+| 걷었다 | 대신 |
+|---|---|
+| `LineBeatSchedule.Build` · `ScheduledCommand` | `LineBeatSchedule.BuildAnchors` · `Flatten` |
+| `LineBeatSchedule.LegacyStepName` · `LineAnchor.Legacy` · `BuildAnchors(…, legacySteps)` | 없다 — 앞 앵커는 글의 표지뿐이다 |
+| `YarnCommandTextExtractor.StageStepCommand` · `YarnNodeGroups.LegacySteps` · `BareCommands` | 대사 줄 앞의 at 없는 명령은 경고하고 접지 않는다. 노드 끝의 것은 꼬리 그룹(암묵 스텝). 판정은 `IsYarnControl` · `IsYarnStatement`(새로, 공개) · `StageCommandSpecTable.IsImmediate`. 오류의 말은 `UnanchoredProblem` |
+| `LineRead.LegacySteps` · `BareCommands` · `LineReadStep.Legacy` · `LineReadCommand.Bare` | `LineRead.Unanchored`(대사 줄 앞의 at 없는 명령 — 줄의 문제에도 적힌다) |
+| `command-specs.json`의 `legacyStructure` | 없다(`lineStructure`만) |
+
+추출기가 접는 열도 조금 바뀌었다 — `if` · `detour` · `set` · `surface_*` 같은 것이 명령 열에 실리지 않는다(전에는 Unhandled로 남았다). 선택지(`->`) 앞의 `<<at>>`은 다음 대사 줄로 간다(재생과 같다).
+
+### 5.3 소비처마다 할 일
+
+| 소비처 | 할 일 |
+|---|---|
+| 작업공간 `ked-vn-workspace` — 포크 | `feat/drop-old-notation`을 들인다. 겹치는 파일: `YarnPlaybackDriver.cs`(`Enqueue(StageCommand, specs)` · `TryDropUnanchored` — `CloseStep` · `TryPlayNextPreBatch` · `PreBatchCount` · `PendingAll`이 없다), `CommandBridge.cs` · `CommandBridge.Control.cs`(`step` 등록 · `CloseStageStep`이 없다, `Forward`가 `Collected`를 문맥으로), `StepHead.cs`(`DropUnanchored`, `HasPreBatch` · `TryPlayNextPreBatch`가 없다), `LinePresentationFlow.cs`(줄에 들어서면 `DropUnanchored`, `start`는 `PlayStart` 뒤에 `Settle`), `StageStepFlow.cs`(`TryPlayTail`), `LineVoiceController.cs`(보이스 키를 `AtCommand`에서). 포크 코드가 드라이버의 옛 이름을 부르면 고친다. 포크의 `StageCommandSpecTable.Fork.cs`는 그대로 — 다시 낸 `command-specs.json`(`runtime/ExportedTuning/`)에서 `legacyStructure`가 빠진다 |
+| 작업공간 — 대본 | **`ch05_01` 노드 끝의 `<<step>>` 한 줄을 지운다.** 꼬리 명령 넷은 at 없이 그대로 두면 암묵 스텝 하나로 실행된다. `<<step>>`이 넷 사이에 있었다면 두 구간이 한 묶음이 된다 — 차례와 기다림은 같고, 구간 사이에서 앞 구간의 남은 전환을 마무리하던 경계만 없어진다. 그 밖의 대본은 at 없는 명령이 바로 실행하는 것뿐이어야 한다(2026-11-22 셈: 22곳) — 코어 추출기의 경고 0으로 확인한다 |
+| 작업공간 — 도구 | `tools/stage/yarn_check.py` — 대사 줄 앞의 at 없는 명령은 **오류**(바로 실행하는 명령 · Yarn의 문은 뺀다), `<<step>>`은 모르는 명령. 대본을 내는 도구(`script.py` · `anchors.py` · 초안의 `compose.py`)는 `<<step>>`과 at 없는 머리 명령을 내지 않는다(노드 끝의 꼬리만 at 없이). 카드의 커맨드 글도 같다 |
+| 작업공간 — 재생 확인 | 첫 줄의 `start`에 `bgm`이 있는 장면 — 전에는 장면 BGM을 `start`의 명령보다 먼저 맞춰 끊었다가 다시 틀 수 있었다(N4 이후의 새 표기 대본). 이제 `start`의 명령 뒤에 맞춘다 — 녹화에서 BGM이 이어지는지 본다. 백로그의 보이스 다시 듣기가 `<<at start voice …>>` 줄에서 된다 |
+| 모션 툴 `ked-motion-tool-characterRig` | 코어 사본(R7에서 전체 동기화)에 위 §5.2가 들어온다. 툴의 코드(`src/Mt.*`)는 이 타입들을 부르지 않는다(2026-11-17 확인) — 사본과 사본의 시험만 맞춘다 |
+| 추출기 `ked-staging-extractor` | 내는 대본이 §5.1을 따른다 — `<<step>>`을 내지 않고, 대사 줄의 명령은 모두 `<<at 앵커 …>>`, 줄 앞의 시간은 앞 앵커 표지와 `<<gap>>`으로. §3.3의 "줄 앞 무대 스텝"은 앞 앵커로 읽는다 |
+| 저작 툴 `ked-story-compositor` | 내는 대본이 §5.1을 따른다. **이 저장소의 예제 대본(데모 · festival_eve)은 이 툴의 `samples/RuntimeSamples`가 정본이다(README)** — 여기서 새 표기로 옮겼으므로 정본도 같게 옮겨야 다음 저장 때 옛 표기로 돌아가지 않는다. 오라클 `Vn.StageOracle`과 코어 사본은 §5.2 — `Build` · `LegacySteps` · `BareCommands`를 부르는 곳을 고친다 |
+| 연출 고치기 툴 `ked-story-tools` | 코어 사본(`src/Ked.Presentation.Core` · 시험 사본 `tests/Ked.Presentation.Core.Tests`)을 다시 들인다. `src/St.Authoring/Editing/LineEditor.cs`가 `LegacySteps` · `BareCommands`로 옛 표기의 줄을 막는다 — `LineRead.Unanchored`로 바꾼다(그 줄의 묶음을 다시 쓰면 at 없는 명령이 사라진다 — 막을지, 지우는 것으로 보일지 정한다). 명세 표 JSON의 `legacyStructure`를 읽는 곳이 있으면 뺀다 |
+| 연출 감독 `ked-story-director` | 할 일 없다 — 무대 어휘를 쓰지 않는다 |
+
+### 5.4 반영 기록
+
+| 날 | 소비처 | 무엇을 | 어디(커밋) |
+|---|---|---|---|

@@ -1,6 +1,6 @@
 # 줄의 앵커 — 한 줄이 제 연출을 모두 갖는다 (2026-11-21)
 
-> 상태: **런타임 끝(N1 – N3, Unity 확인 2026-11-21)** — 브랜치 `feat/line-anchor`(`dev`에서). 옛 표기와 새 표기가 함께 돈다. 남은 것은 소비처 이행(N4 — 미뤘다)과 옛 표기 걷기(N5). 진행은 §12.
+> 상태: **끝(N1 – N5)** — N1 – N3 Unity 확인(2026-11-21), N4는 작업공간이 끝냈다(2026-11-22), **N5(옛 표기 걷기)는 브랜치 `feat/drop-old-notation` — Unity 확인 전**. 줄의 명령은 모두 `<<at>>`이고 `<<step>>`은 없다. 진행은 §12, 소비처가 할 일은 [stage-changes-handoff.md](stage-changes-handoff.md) §5.
 > 기준: `dev` @ `6fe3b861`.
 > 출발: 연출 검토의 병목(ked-vn-workspace 세션, 2026-11-21) — AI가 카드로 낸 초안 연출을 사람이 보고 고치는데, 대사 하나에 명령이 열 줄 넘게 엮여 무엇을 고칠지 찾기 어렵다.
 > 앞선 계획: [PLAN_line-beat.md](PLAN_line-beat.md)(표지와 `at`) — 이 계획이 그 D2 · D3 · R8 · R9의 일부를 바꾼다(§2 A4 · A7 · A11). [PLAN_stage-step-inline-markup.md](PLAN_stage-step-inline-markup.md)(무대 스텝) — 이 계획이 무대 스텝을 걷는다(A6).
@@ -194,7 +194,7 @@ line-beat §5.2의 I1–I6을 그대로 지킨다. 달라지는 것만 적는다
 
 | | 물음 | 결정 |
 |---|---|---|
-| Q1 | `at` 없는 명령을 만나면 | N1–N4에서는 `start`의 것으로 읽고 원문 검사가 경고한다. N5에서 오류로 바꾼다 |
+| Q1 | `at` 없는 명령을 만나면 | N1–N4에서는 `start`의 것으로 읽고 원문 검사가 경고한다. N5에서 오류로 바꾼다 — **바꿨다(2026-11-22): 대사 줄 앞이면 오류이고 실행하지 않는다(소유자). 노드 끝은 암묵 스텝 그대로다** |
 | Q2 | 장면 세우기(`slot` · `cast` · `bg_spawn` · `portrait` — 편의 첫 줄 앞에 50~70개)의 자리 | 첫 줄의 앞 앵커 하나에 모은다 — 따로 된 갈래를 두지 않는다. 장면 단위라 맞다(소유자) |
 | Q3 | 간격 명령의 이름, `end` 뒤의 간격 | 이름은 `gap`. `end` 뒤도 받는다 — 넘김을 받기 전의 최소 시간(AR4) |
 | Q4 | 한 줄 안에서 스텝이 넘어갈 때 앞 스텝의 아직 도는 전환을 저절로 끝낼 것인가 — 지금은 무대 스텝 → 줄 머리에서는 끝내고(30배로 돌린다 — `ClaimTweenCommandBase.OnStepLifetimeFinished` · 샷 축), 머리 → 표지 → `end`에서는 끝내지 않는다 | **끝내지 않는다 — 마무리 경계는 줄 도착 하나다(A13).** 스텝마다 끝내면 겹치는 연출을 못 만들고, 지금과 똑같이 두면 규칙이 앵커의 갈래마다 둘이 된다. 지금의 화면과 달라질 수 있는 곳은 작다 — 작업공간 무대 스텝 1,035개 가운데 끝날 때 전환이 남은 것은 26개(`screen_cover_clear` 25 · `move_by` 1 — 0.06초), 모션 · 이모지 클립이 든 102개는 길이를 대본에서 알 수 없어 세지 못했다. N2에서 녹화로 확인한다 |
@@ -215,7 +215,8 @@ line-beat §5.2의 I1–I6을 그대로 지킨다. 달라지는 것만 적는다
 | N1 | `9c28c522` | 끝(Unity 확인 — 컴파일 · EditMode 시험 · 데모 재생, 소유자 2026-11-21) — 아래 |
 | N2 | `c69be4f9` | 끝(Unity 확인 — 소유자 2026-11-21) — 아래 |
 | N3 | `7a471df3` | 끝(Unity 확인 — 소유자 2026-11-21) — 아래 |
-| N4 | | **미룬다** — 작업공간이 레피아 이벤트 7 ~ 9편을 재현하는 중이다(소유자 2026-11-21). 그 일이 끝난 뒤에 한다 — 할 일은 맨 아래 「N4에서 할 일」 |
+| N4 | 작업공간 `2679d3c` · `c85d66b` · `6d9f08e` | 끝(2026-11-22) — ked-story-tools `docs/handoff/workspace-n4.md` 6절. 미뤄 둔 때의 메모는 맨 아래 「N4에서 할 일」 |
+| N5 | `feat/drop-old-notation` | 코드 끝 · **Unity 확인 전** — 맨 아래 「N5에서 한 것」. 소비처가 옮긴 것을 소유자가 확인했다(2026-11-22) |
 
 **N1에서 한 것**
 
@@ -314,3 +315,46 @@ line-beat §5.2의 I1–I6을 그대로 지킨다. 달라지는 것만 적는다
 | 확인 | `yarn_check` 오류 0 · 코어 추출기로 뽑은 명령 열이 다시 내기 전과 같다(차례가 같으면 끝 상태가 같다 — 장면 세우기를 앞 앵커로 옮긴 첫 줄도 차례는 같다) · 녹화 한두 편 | — |
 
 - 새 표기로 옮기면 앞 앵커에서 시작한 전환이 `start`를 넘어 이어지는 것(A13)과, 표지 사이의 간격 · `end`의 간격을 쓸 수 있다 — 지금의 끝 `pause`는 "앞 앵커의 간격"과 같은 일을 한다(AR3 ①이 사슬이 끝나기를 기다린다).
+
+**N5에서 한 것(2026-11-22)**
+
+정한 것(소유자): 소비처(작업공간 · 모션 툴 · 추출기 · compositor)는 모두 옮겼다. **대사 줄 앞의 at 없는 명령은 오류를 남기고 실행하지 않는다**(start에서 실행하지 않는다). 노드 끝의 것은 암묵 스텝이다.
+
+| 층 | 걷은 것 · 바꾼 것 |
+|---|---|
+| 코어 `LineBeatSchedule` | `Build` · `ScheduledCommand`(재생이 N2에서 앵커로 옮긴 뒤 시험만 썼다) · `LegacyStepName` · `LineAnchor.Legacy` · `BuildAnchors`의 `legacySteps` 인자 |
+| 코어 추출기 | `<<step>>`의 경계 · at 없는 명령을 `start`로 읽는 길 · `YarnNodeGroups.LegacySteps` · `BareCommands` · `StageStepCommand`. 대사 줄 앞의 at 없는 명령은 **경고(원문 검사의 오류)하고 접지 않는다**(재생과 같다 — `UnanchoredProblem`). 노드 끝의 것은 꼬리 그룹(암묵 스텝)이다. 바로 실행하는 명령(명세 표의 `Immediate`)과 Yarn의 문 · 흐름(`set` · `wait` · `if` · `detour` …)은 무대 명령이 아니라 접지 않는다(전에는 `start`에 실려 Unhandled로 남았다). 선택지(`->`) 앞의 `<<at>>`은 다음 대사 줄로 간다(재생과 같다 — 전에는 그 자리의 머리로 옮겼다) |
+| 코어 줄 읽기 | `LineReadStep.Legacy` · `LineReadCommand.Bare` · `LineRead.LegacySteps` · `BareCommands`. 대사 줄 앞의 at 없는 명령은 `LineRead.Unanchored`(앵커 밖, 줄의 문제). 흐름 · 문의 판정은 추출기의 `IsYarnControl` · `IsYarnStatement` 한 곳 |
+| 코어 명세 표 JSON | `legacyStructure`(`["step"]`)를 걷었다 — `command-specs.json`을 다시 냈다 |
+| 브리지 | `<<step>>` 등록(`CloseStageStep`). at 없는 명령은 대본에 쓴 꼴과 함께 쌓는다(`YarnPlaybackDriver.Enqueue`) |
+| 드라이버 | `_preBatches` · `CloseStep` · `TryPlayNextPreBatch` · `PreBatchCount` · `_pendingAll` · `PendingAll`. 쌓인 at 없는 명령은 노드 끝 전용이다 — 대사 줄이 오면 `TryDropUnanchored`가 버린다 |
+| 줄 재생 | 줄에 들어서면 쌓인 at 없는 명령을 오류로 적고 버린다(`StepHead.DropUnanchored`). 머리 배치(`StepHead.Play`)는 노드 끝 전용 — 줄의 `start`는 `PlayStart` 뒤에 `Settle`(블러 · 장면 BGM을 맞춘다) |
+| 보이스 키 | 줄의 보이스(백로그의 다시 듣기)를 `start`의 `<<at start voice 키>>`에서 읽는다(`LineVoiceController.FindLineVoiceKey(AtCommand)`) — 전에는 at 없는 머리 명령에서만 읽었다 |
+| 노드 끝의 스텝 | `<<step>>`이 닫은 구간이 없으니 묶음 하나다(`StageStepFlow.TryPlayTail`) |
+| 대본 | 공개 대본 10편(데모 · festival_eve 9)을 새 표기로 — `<<step>>` 10 → 앞 앵커 `in`(구간 끝의 `pause` 하나 → `<<gap in 15fr>>`), at 없는 머리 명령 → `<<at start …>>`. 노드 끝의 꼬리는 그대로(at 없이). 데모의 설명 주석 · 글 한 줄 · 노드 끝 절의 설명을 고쳤다. `real_test_Mirage_Tavern.yarn`은 `.gitignore`된 옛 대본이라 손대지 않았다(걷힌 어휘 · at 없는 명령 190곳이 오류로 나온다) |
+| 문서 | README의 연출 스크립트 예제 · `ASSEMBLY-BOUNDARY.md` · 앞선 계획서 둘(PLAN_line-beat · PLAN_stage-step-inline-markup)의 머리 · `PLAN_command-spec.md` · `ExportedTuning/schema.md` · 재생 코드의 주석 |
+
+**달라지는 것**
+
+| | 전 | 뒤 |
+|---|---|---|
+| 대사 줄 앞의 at 없는 명령 | `start`에서 실행(머리) | 오류(`[줄의 자리] <<…>> — at 없는 명령이다 …`)를 남기고 **실행하지 않는다** |
+| `<<step>>` | 앞 앵커의 경계 | 등록이 없다 — Yarn이 모르는 명령으로 소리 낸다. 노드 끝의 꼬리에 있었다면 그 경계가 없어져 꼬리는 암묵 스텝 하나가 된다(구간마다의 마무리 경계가 사라진다) |
+| `start`의 `<<at>>` 뒤의 블러 · 장면 BGM 맞추기 | `start`의 `<<at>>`보다 **먼저** 했다(머리 배치 뒤) — `<<at start bgm …>>`이면 장면 BGM이 의도 없이 맞춰져(끊기고) 그 뒤 다시 튼다 | `start`의 명령이 다 돈 뒤에 한다 — 옛 머리 명령과 같은 때 |
+| 줄의 보이스 키 | at 없는 머리의 `voice`만 | `<<at start voice …>>` |
+| 접힘의 꼬리 · 줄 | `if` · `detour` · `set` · `surface_*`가 명령 열에 실려 Unhandled로 남았다 | 싣지 않는다 |
+
+**확인(Unity 밖)**
+
+- 코어 시험 — 코어와 순수 시험을 .NET 8로 빌드해 Unity의 NUnit 3.5로: 기준 604 → **599, 모두 통과**(옛 표기만 보던 시험 다섯을 걷었다 — `Build`의 차례 · `Build`의 표지 없는 at · 빈 목록 · 옛 무대 스텝 앞 앵커 둘, 그리고 추출기의 옛 표기 셋을 새 시험 넷으로 바꿨다). 파서 대조 시험 6은 실제 무대 어셈블리(`Library/ScriptAssemblies`)에 대고 통과.
+- 컴파일 — Core(`netstandard2.1` · C# 9) · **Playback 전체**(Yarn Spinner · TMP · UGUI · DOTween · Newtonsoft · Unity 6000.3.16 모듈과 `Library/ScriptAssemblies`의 Stage · CommandExecutor에 대고) · EditMode 시험 어셈블리 전체 — 오류 0.
+- 대본 — 공개 대본 15편을 고치기 전(옛 코어 · 옛 대본)과 뒤(새 코어 · 새 대본)로 접어, 줄마다 앵커의 갈래 · 글자 자리 · 앵커의 길이(간격과 기다림의 합 가운데 큰 쪽) · `pause`를 뺀 명령 열을 맞댔다 — **데모는 같다**(고친 글 한 줄의 글자 자리만 밀렸다). festival_eve는 `if` · `endif` · `detour`가 명령 열에서 빠진 것만 다르다. 새 대본의 at 없는 명령 오류 0.
+- **Unity 재생은 보지 않았다** — 아래.
+
+**Unity에서 볼 것(N5)**
+
+1. 컴파일 · EditMode 시험(599 + Unity 쪽 시험).
+2. 데모 재생 — 옮긴 절(첫 줄 · 화면 덮개의 ①–⑤ · 컷인 덮기 등 `<<step>>` 10곳)이 전과 같은가. 첫 줄의 장면 BGM이 이어지는가. 노드 끝의 퇴장(꼬리)이 실행되고 노드가 끝나는가. 콘솔에 `[줄의 자리] … at 없는 명령` 오류가 없는가.
+3. 진행 예제(festival_eve) — 장면 머리 · 조건 분기 카드(`<<detour>>`)의 연출이 전과 같은가. 교무실 장면 끝의 퇴장(꼬리).
+4. 빨리 넘기기(Ctrl) · 되감기(R) · 이어하기로 지나가도 끝 상태가 같은가(등가성 하네스가 조용한가).
+5. (선택) 대사 줄 앞에 at 없는 명령을 하나 넣어 보면 오류가 나고 실행되지 않는가 — 그리고 노드 끝에 두면 실행되는가.

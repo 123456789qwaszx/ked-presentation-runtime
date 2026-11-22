@@ -325,7 +325,7 @@ DTO는 `Core/Tuning/CommandSpecsFileDto.cs`(`command-specs/1`), 설계는 `docs/
 |---|---|
 | `kinds[]` | 종류 일곱 — `key` · `label` · `director`(종류 필터에 오르는 넷인가) |
 | `argKinds[]` | 인자의 갈래 — `slot` · `distance` · `angle` · `scale` · `duration` · `ease` · `name` · `token` · `number` · `level` |
-| `lineStructure[]` · `legacyStructure[]` | 커맨드가 아니라 줄의 구조인 이름(`at` · `gap`)과 옛 표기(`step`) — 표 밖이다 |
+| `lineStructure[]` | 커맨드가 아니라 줄의 구조인 이름(`at` · `gap`) — 표 밖이다 |
 | `commands[].kind` | `kinds[].key` 가운데 하나 |
 | `commands[].waits` | 끝날 때까지 그 앵커의 뒤 커맨드를 붙잡는다(`pause` · `screen_cover`) |
 | `commands[].immediate` | 바로 실행하는 명령 — **`<<at>>`을 붙이지 않는다**. 무대 파서의 표에 없다 |

@@ -18,8 +18,9 @@ namespace Ked.Presentation.Core
     ///   분기 · 선택지(if · else · jump · -&gt; …)는 묶음을 끊는다. 그 위에 남은 at · gap은 어느 줄의 것인지
     ///   원문으로 알 수 없으므로 파일의 문제로 적는다(원문 검사의 오류 — docs/PLAN_line-anchor.md AR10).
     ///
-    /// 옛 표기도 읽는다(BuildAnchors가 하는 대로) — &lt;&lt;step&gt;&gt;은 앞 앵커의 경계, at 없는 명령은 start.
-    /// 다만 바로 실행하는 명령(명세 표의 Immediate)은 옛 표기가 아니다 — 앵커에 넣지 않고 따로 싣는다.
+    /// 줄의 명령은 모두 &lt;&lt;at&gt;&gt;이다. 대사 줄 앞의 at 없는 명령은 원문 검사의 오류다 — 재생처럼 실행하지 않으므로
+    /// 앵커에 넣지 않고 LineRead.Unanchored에 싣는다. 바로 실행하는 명령(명세 표의 Immediate)과 Yarn의 문은 at 없이 쓰는
+    /// 것이 맞다 — 앵커 밖의 것으로 LineRead.Immediate에 싣는다. 노드 끝에 줄 없이 남은 명령(암묵 스텝)은 줄이 아니라 읽지 않는다.
     /// </summary>
     public static class YarnLineReader
     {
@@ -83,7 +84,7 @@ namespace Ked.Presentation.Core
                         strayBare++;
                 }
 
-                // 옛 표기의 at 없는 명령이 노드 끝에 줄 없이 남는 것은 암묵 스텝이다 — 문제가 아니다(줄이 없어 읽을 주소도 없다).
+                // at 없는 명령이 노드 끝에 줄 없이 남는 것은 암묵 스텝이다 — 문제가 아니다(줄이 없어 읽을 주소도 없다).
                 if (strayBare > 0 && !nodeEnd)
                     file.Problems.Add($"{sourceName}:{lineNumber} at 없는 명령 {strayBare}개 다음이 대사 줄이 아니라 {where}이다 — 어느 줄의 것인지 알 수 없다");
 
@@ -147,7 +148,7 @@ namespace Ked.Presentation.Core
                         continue;
                     }
 
-                    if (IsBranch(command.Name))
+                    if (YarnCommandTextExtractor.IsYarnControl(command.Name))
                     {
                         Break("분기", lineNumber);
                         continue;
@@ -221,10 +222,7 @@ namespace Ked.Presentation.Core
             /// <summary>&lt;&lt;gap 이름 길이&gt;&gt;</summary>
             Gap,
 
-            /// <summary>옛 표기의 &lt;&lt;step&gt;&gt;</summary>
-            Step,
-
-            /// <summary>옛 표기 — at 없이 쓴 무대 커맨드. start의 것(또는 &lt;&lt;step&gt;&gt;이 닫은 앞 앵커의 것).</summary>
+            /// <summary>at 없이 쓴 무대 커맨드 — 대사 줄 앞이면 오류(실행하지 않는다), 노드 끝이면 암묵 스텝.</summary>
             Bare,
 
             /// <summary>바로 실행하는 명령 — 앵커 밖.</summary>
@@ -240,15 +238,12 @@ namespace Ked.Presentation.Core
             public int Line;
             public AtCommand At;
             public GapCommand Gap;
-            public string LegacyAnchor;
+            public StageCommand Command;
         }
 
         private static Pending Classify(
             in StageCommand command, int lineNumber, StageCommandSpecTable specs, List<string> fileProblems, string line)
         {
-            if (command.Name == YarnCommandTextExtractor.StageStepCommand)
-                return new Pending { Role = Role.Step, Line = lineNumber };
-
             if (command.Name == LineBeatSchedule.AtCommandName)
             {
                 if (LineBeatSchedule.TryReadAt(command.Args, command.Source, out AtCommand at, out string error))
@@ -267,80 +262,36 @@ namespace Ked.Presentation.Core
                 return new Pending { Role = Role.Broken, Line = lineNumber };
             }
 
-            bool immediate = specs.IsImmediate(command.Name) || IsYarnStatement(command.Name);
+            bool immediate = specs.IsImmediate(command.Name) || YarnCommandTextExtractor.IsYarnStatement(command.Name);
 
             return new Pending
             {
                 Role = immediate ? Role.Immediate : Role.Bare,
                 Line = lineNumber,
-                At = new AtCommand(LineBeatSchedule.StartBeat, command),
+                Command = command,
             };
         }
 
         private static void BuildSteps(
             LineRead read, List<Pending> pending, List<BeatMarker> markers, StageCommandSpecTable specs, List<string> problems)
         {
-            // 옛 표기의 무대 스텝 — <<step>>까지의 at 없는 명령이 앞 앵커 하나다. 빈 스텝은 스텝이 아니다(추출기와 같다).
-            int legacySteps = 0;
-            int stepStart = 0;
-
-            for (int k = 0; k < pending.Count; k++)
-            {
-                if (pending[k].Role != Role.Step)
-                    continue;
-
-                string stepName = LineBeatSchedule.LegacyStepName(legacySteps);
-                bool any = false;
-
-                for (int b = stepStart; b < k; b++)
-                {
-                    if (pending[b].Role != Role.Bare)
-                        continue;
-
-                    pending[b].LegacyAnchor = stepName;
-                    any = true;
-                }
-
-                if (any)
-                    legacySteps++;
-
-                stepStart = k + 1;
-                read.LegacySteps++;
-            }
-
-            // 재생의 차례 — start에는 at 없는 명령이 먼저, <<at start>>가 그 뒤다(추출기와 같다).
             // 같은 StageCommand가 둘일 수 있으므로 줄 번호는 차례로 잇는다: 앵커마다 쓴 순서가 지켜진다.
             List<AtCommand> ordered = new(pending.Count);
             Dictionary<string, Queue<Pending>> origin = new(StringComparer.Ordinal);
             List<GapCommand> gaps = new();
             Dictionary<string, int> gapLines = new(StringComparer.Ordinal);
 
-            void Take(Pending item, AtCommand at)
-            {
-                ordered.Add(at);
-
-                if (!origin.TryGetValue(at.Beat, out Queue<Pending> queue))
-                    origin.Add(at.Beat, queue = new Queue<Pending>());
-
-                queue.Enqueue(item);
-            }
-
-            foreach (Pending item in pending)
-            {
-                if (item.Role == Role.Bare && item.LegacyAnchor == null)
-                    Take(item, item.At);
-            }
-
             foreach (Pending item in pending)
             {
                 switch (item.Role)
                 {
-                    case Role.Bare when item.LegacyAnchor != null:
-                        Take(item, new AtCommand(item.LegacyAnchor, item.At.Command));
-                        break;
-
                     case Role.At:
-                        Take(item, item.At);
+                        ordered.Add(item.At);
+
+                        if (!origin.TryGetValue(item.At.Beat, out Queue<Pending> queue))
+                            origin.Add(item.At.Beat, queue = new Queue<Pending>());
+
+                        queue.Enqueue(item);
                         break;
 
                     case Role.Gap:
@@ -351,13 +302,18 @@ namespace Ked.Presentation.Core
 
                         break;
 
+                    case Role.Bare:
+                        problems.Add(YarnCommandTextExtractor.UnanchoredProblem(item.Command));
+                        read.Unanchored.Add(ReadCommand(item.Command, item.Line, null, specs, problems));
+                        break;
+
                     case Role.Immediate:
-                        read.Immediate.Add(ReadCommand(item.At.Command, item.Line, null, bare: false, specs, problems));
+                        read.Immediate.Add(ReadCommand(item.Command, item.Line, null, specs, problems));
                         break;
                 }
             }
 
-            List<LineAnchor> anchors = LineBeatSchedule.BuildAnchors(markers, ordered, gaps, problems, legacySteps);
+            List<LineAnchor> anchors = LineBeatSchedule.BuildAnchors(markers, ordered, gaps, problems);
 
             // 표지가 없는 at은 end에서 실행된다(AR9) — 원래 이름의 줄에서 찾는다.
             Dictionary<string, int> kindCounts = new(StringComparer.Ordinal);
@@ -370,7 +326,6 @@ namespace Ked.Presentation.Core
                 {
                     Name = anchor.Name,
                     Kind = anchor.Kind,
-                    Legacy = anchor.Legacy,
                     Position = anchor.Position,
                     Text = LineBeatSchedule.Segment(read.Body, anchors, i),
                     Gap = anchor.Gap,
@@ -383,9 +338,8 @@ namespace Ked.Presentation.Core
                 foreach (AtCommand at in anchor.Commands)
                 {
                     Pending item = origin[at.Beat].Dequeue();
-                    bool bare = item.Role == Role.Bare;
 
-                    LineReadCommand command = ReadCommand(at.Command, item.Line, step.Name, bare, specs, problems);
+                    LineReadCommand command = ReadCommand(at.Command, item.Line, step.Name, specs, problems);
                     command.Delay = running;
 
                     if (command.Spec != null)
@@ -405,9 +359,6 @@ namespace Ked.Presentation.Core
                         running += command.Hold;
                     }
 
-                    if (bare)
-                        read.BareCommands++;
-
                     step.Commands.Add(command);
                 }
 
@@ -417,7 +368,7 @@ namespace Ked.Presentation.Core
         }
 
         private static LineReadCommand ReadCommand(
-            in StageCommand source, int lineNumber, string anchor, bool bare, StageCommandSpecTable specs, List<string> problems)
+            in StageCommand source, int lineNumber, string anchor, StageCommandSpecTable specs, List<string> problems)
         {
             LineReadCommand command = new()
             {
@@ -425,12 +376,11 @@ namespace Ked.Presentation.Core
                 Args = source.Args,
                 Anchor = anchor,
                 Line = lineNumber,
-                Bare = bare,
             };
 
             if (!specs.TryGet(source.Name, out StageCommandSpec spec))
             {
-                if (!IsYarnStatement(source.Name))
+                if (!YarnCommandTextExtractor.IsYarnStatement(source.Name))
                     problems.Add($"<<{source.Name}>> — 명세 표에 없는 명령이다. 종류와 인자 칸을 모른다");
 
                 return command;
@@ -461,45 +411,6 @@ namespace Ked.Presentation.Core
                 command.Duration = DefaultPauseSeconds;
 
             return command;
-        }
-
-        // 묶음을 끊는 것 — 그 뒤의 줄이 재생에서 앞의 커맨드를 받는다는 보장이 없다.
-        private static bool IsBranch(string name)
-        {
-            switch (name)
-            {
-                case "if":
-                case "elseif":
-                case "else":
-                case "endif":
-                case "jump":
-                case "detour":
-                case "return":
-                case "stop":
-                case "once":
-                case "endonce":
-                    return true;
-
-                default:
-                    return false;
-            }
-        }
-
-        // Yarn이 스스로 실행하는 문 — 무대 커맨드가 아니고 흐름을 가르지도 않는다. 묶음 안에 있어도 된다.
-        private static bool IsYarnStatement(string name)
-        {
-            switch (name)
-            {
-                case "set":
-                case "declare":
-                case "call":
-                case "wait":
-                case "enum":
-                    return true;
-
-                default:
-                    return false;
-            }
         }
     }
 }

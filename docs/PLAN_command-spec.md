@@ -51,7 +51,7 @@
 | C1 | `portrait` · `portrait_close`의 종류 | **세우기**(초안대로) | 촬영소에 리그를 세우고 캐스팅하는 일이다 — `slot` + `cast`와 같은 결이고, 줄의 앵커 Q2가 장면 세우기로 꼽았다. 초상의 표정 · 몸짓은 슬롯 키 `portrait`에 `face` · `motion`으로 쓰므로 연기 필터에는 그쪽이 오른다 | 화면(대사창의 그림이다) — 편 중간에 인물을 자주 바꾼다면 필터에 올라야 한다 |
 | C2 | `depth_focus_on` · `depth_focus_clear`의 종류 | **화면**(초안대로) | 슬롯을 인자로 받지만 바뀌는 것은 그 사람이 아니라 나머지 무대 전체의 흐림이다. `stage_blur`와 같은 블러 계통이라 한 필터에서 함께 보여야 한다 | 카메라(초점 · 피사계 심도는 렌즈의 일이다) · 자리와 구도(`char_visual_defocus`와 쓰임이 겹친다) |
 | C3 | 바로 실행하는 명령(`surface_layout` · `surface_reset`)의 표기 | **명세 표에 넣고 `Immediate`로 가린다. 종류는 세우기** | 모든 커맨드가 정확히 한 종류를 갖는다(P1). 툴은 `Immediate`를 보고 `<<at>>` 없이 적고, 줄 읽기는 앵커에 넣지 않고 따로 싣는다(`LineRead.Immediate`). N5의 "at 없는 명령은 오류"도 `IsImmediate`로 가린다. 포크의 `messenger_open` · `messenger_close`는 `.Fork.cs`에 `immediate: true`로 적는다 | 표 밖에 이름 목록만 둔다 — 종류 · 인자 칸이 없어 툴이 보여 줄 수 없다 |
-| C3b | `at` · `gap` · `step` | **표 밖**(계획서대로) — JSON에는 `lineStructure: [at, gap]` · `legacyStructure: [step]`로 이름만 낸다 | 커맨드가 아니라 줄의 구조다 | — |
+| C3b | `at` · `gap` | **표 밖**(계획서대로) — JSON에는 `lineStructure: [at, gap]`로 이름만 낸다(`step`은 N5에서 걷었다 — `legacyStructure`도 걷었다) | 커맨드가 아니라 줄의 구조다 | — |
 
 뒤에 종류를 옮기려면 `StageCommandSpecTable.Core.cs`의 그 줄을 옮기고 JSON을 다시 낸다.
 
@@ -82,8 +82,8 @@
 - **지연** — 같은 앵커에서 앞선 기다리는 명령(`pause` · `screen_cover`)의 길이의 합이다. `pause`는 걸러지지 않고 목록에 남으며(종류 "시간"), 종류로 걸러 보아도 뒤 커맨드의 지연으로 남는다. 기다리는 명령은 `Waits` · `Hold`로 표시한다.
 - **앵커의 길이**(`LineReadStep.Length`) — 간격과 기다림의 합 가운데 큰 쪽이다. 간격은 앵커가 열린 때부터 잰다(넘겨받은 문서 6절).
 - **원문에서의 위치** — `LineRead.Block`이 그 줄의 커맨드 묶음의 범위다(줄 번호와 글자 자리 — 받은 글 그대로의 자리라 CRLF에서도 맞다). 대사 줄은 들지 않는다. 묶음이 없으면 빈 범위이고 대사 줄의 머리를 가리킨다. 커맨드 · 간격마다 줄 번호가 있다.
-- **옛 표기** — `<<step>>`은 앞 앵커(`~0` · `~1` …)의 경계, `at` 없는 명령은 `start`(`Bare`). 줄마다 `LegacySteps` · `BareCommands`로 센다. 문제로 올리지는 않는다(N5에서 오류).
-- **바로 실행하는 명령** — `at` 없이 쓴 것이 옛 표기가 아니다. 앵커에 넣지 않고 `LineRead.Immediate`에 싣는다. `<<at 이름 surface_layout …>>`처럼 `at`을 붙이면 줄의 문제로 적는다.
+- **at 없는 명령**(N5 — 2026-11-22에 바꿨다) — 대사 줄 앞의 것은 원문 검사의 오류다. 재생처럼 앵커에 넣지 않고 `LineRead.Unanchored`에 싣고 줄의 문제로 적는다. 노드 끝의 것(암묵 스텝)은 줄이 아니라 읽지 않는다. 처음에는 옛 표기로 읽었다(`<<step>>` → 앞 앵커 `~0` …, at 없는 명령 → `start`, `LegacySteps` · `BareCommands`) — 걷었다.
+- **바로 실행하는 명령** — `at` 없이 쓴 것이 오류가 아니다. 앵커에 넣지 않고 `LineRead.Immediate`에 싣는다. `<<at 이름 surface_layout …>>`처럼 `at`을 붙이면 줄의 문제로 적는다.
 - **표에 없는 명령** — 종류 없이 싣고 줄의 문제로 적는다. 포크의 대본은 포크의 표(`Default` 또는 JSON을 되읽은 표)로 읽는다.
 - 주소의 마지막 칸은 `LineReadCommand.KindIndex`다 — 그 앵커의 같은 종류 안에서 몇 번째인가.
 
@@ -138,4 +138,4 @@ Unity에서 다시 낸 `command-specs.json`은 든 파일과 내용이 같다(�
 ## 8. 남은 것
 
 - 타자기의 식을 한 곳으로(§4.1) — 할지 말지.
-- K5(도구 연결) · N5(옛 표기 걷기 — `at` 없는 명령의 오류는 `StageCommandSpecTable.IsImmediate`로 가린다) — 넘겨받은 문서 4절 · 5절.
+- K5(도구 연결) — 넘겨받은 문서 4절. N5(옛 표기 걷기)는 끝났다 — [PLAN_line-anchor.md](PLAN_line-anchor.md) §12.

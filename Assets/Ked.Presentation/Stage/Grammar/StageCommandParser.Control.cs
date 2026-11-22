@@ -4,7 +4,7 @@ public sealed partial class StageCommandParser
 {
     private const float DefaultPauseSeconds = 0.18f;
 
-    // <<pause 시간>> — 다른 커맨드와 같은 시간 토큰(12fr · 0.5s · 0.5). 전경이다 — 무대 스텝에서만 기다린다.
+    // <<pause 시간>> — 다른 커맨드와 같은 시간 토큰(12fr · 0.5s · 0.5). 전경이다 — 그 앵커의 뒤 명령을 붙잡는다(docs/PLAN_line-anchor.md A7).
     private void EnqueueWaitSpec(string durationToken)
         => Emit(new WaitCommandSpec
         {
