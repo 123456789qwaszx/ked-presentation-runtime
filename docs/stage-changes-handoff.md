@@ -145,7 +145,7 @@ L3부터는 옛 대본이 그대로 돌지 않는다 — 대사 줄 머리의 `p
 
 ## 5. 줄의 앵커 N5 — 옛 표기를 걷었다 (2026-11-22)
 
-근거: [PLAN_line-anchor.md](PLAN_line-anchor.md) §9 N5 · §12 「N5에서 한 것」. 런타임 `feat/drop-old-notation`(`dev`에서). 소비처가 모두 옮긴 것을 소유자가 확인한 뒤에 걷었다.
+근거: [PLAN_line-anchor.md](PLAN_line-anchor.md) §9 N5 · §12 「N5에서 한 것」 · 「N5의 Unity 확인과 마무리」. 런타임 `dev`(`feat/drop-old-notation`을 합쳤다). 소비처가 모두 옮긴 것을 소유자가 확인한 뒤에 걷었다.
 
 ### 5.1 대본의 규칙 — 지금
 
@@ -180,8 +180,8 @@ L3부터는 옛 대본이 그대로 돌지 않는다 — 대사 줄 머리의 `p
 | 작업공간 — 재생 확인 | 첫 줄의 `start`에 `bgm`이 있는 장면 — 전에는 장면 BGM을 `start`의 명령보다 먼저 맞춰 끊었다가 다시 틀 수 있었다(N4 이후의 새 표기 대본). 이제 `start`의 명령 뒤에 맞춘다 — 녹화에서 BGM이 이어지는지 본다. 백로그의 보이스 다시 듣기가 `<<at start voice …>>` 줄에서 된다 |
 | 모션 툴 `ked-motion-tool-characterRig` | 코어 사본(R7에서 전체 동기화)에 위 §5.2가 들어온다. 툴의 코드(`src/Mt.*`)는 이 타입들을 부르지 않는다(2026-11-17 확인) — 사본과 사본의 시험만 맞춘다 |
 | 추출기 `ked-staging-extractor` | 내는 대본이 §5.1을 따른다 — `<<step>>`을 내지 않고, 대사 줄의 명령은 모두 `<<at 앵커 …>>`, 줄 앞의 시간은 앞 앵커 표지와 `<<gap>>`으로. §3.3의 "줄 앞 무대 스텝"은 앞 앵커로 읽는다 |
-| 저작 툴 `ked-story-compositor` | 내는 대본이 §5.1을 따른다. **이 저장소의 예제 대본(데모 · festival_eve)은 이 툴의 `samples/RuntimeSamples`가 정본이다(README)** — 여기서 새 표기로 옮겼으므로 정본도 같게 옮겨야 다음 저장 때 옛 표기로 돌아가지 않는다. 오라클 `Vn.StageOracle`과 코어 사본은 §5.2 — `Build` · `LegacySteps` · `BareCommands`를 부르는 곳을 고친다 |
-| 연출 고치기 툴 `ked-story-tools` | 코어 사본(`src/Ked.Presentation.Core` · 시험 사본 `tests/Ked.Presentation.Core.Tests`)을 다시 들인다. `src/St.Authoring/Editing/LineEditor.cs`가 `LegacySteps` · `BareCommands`로 옛 표기의 줄을 막는다 — `LineRead.Unanchored`로 바꾼다(그 줄의 묶음을 다시 쓰면 at 없는 명령이 사라진다 — 막을지, 지우는 것으로 보일지 정한다). 명세 표 JSON의 `legacyStructure`를 읽는 곳이 있으면 뺀다 |
+| 저작 툴 `ked-story-compositor` | 내는 대본이 §5.1을 따른다. **이 저장소의 예제 대본(데모 · festival_eve)은 이 툴의 `samples/RuntimeSamples`가 정본이다(README)** — 여기서 새 표기로 옮겼으므로 정본도 같게 옮겨야 다음 저장 때 옛 표기로 돌아가지 않는다. **데모의 대사 줄 93개에 `#line:`을 새로 붙였다**(이제 116줄 모두) — 정본에도 같은 ID로 옮긴다. 다시 내면서 ID를 새로 지으면 저장 · 되감기 · 백로그의 좌표와 연출 고치기 툴의 주소가 또 바뀐다. 오라클 `Vn.StageOracle`과 코어 사본은 §5.2 — `Build` · `LegacySteps` · `BareCommands`를 부르는 곳을 고친다 |
+| 연출 고치기 툴 `ked-story-tools` | 코어 사본(`src/Ked.Presentation.Core` · 시험 사본 `tests/Ked.Presentation.Core.Tests`)을 다시 들인다. `src/St.Authoring/Editing/LineEditor.cs`가 `LegacySteps` · `BareCommands`로 옛 표기의 줄을 막는다 — `LineRead.Unanchored`로 바꾼다 — 툴은 묶음의 한 줄씩 고치므로 at 없는 명령 줄은 그대로 남는다(실행되지 않는다). 그 줄을 막을지, 고치며 그 명령을 보이게 할지 정한다. 명세 표 JSON의 `legacyStructure`를 읽는 곳이 있으면 뺀다. 런타임 데모 대본의 대사 줄은 이제 모두 `#line:`이 있다(계획서 U4) |
 | 연출 감독 `ked-story-director` | 할 일 없다 — 무대 어휘를 쓰지 않는다 |
 
 ### 5.4 반영 기록

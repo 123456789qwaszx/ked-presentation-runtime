@@ -28,58 +28,58 @@ title: Demo_Presentation
 <<at start place s1 11.52u 1.092u 15fr>>
 <<at start size s1 mid 15fr>>
 <<at start size s2 mid 15fr>>
-준비. 하린은 오른쪽, 시구레는 왼쪽.
+준비. 하린은 오른쪽, 시구레는 왼쪽. #line:ln_6pycdybk
 
 <<at start actor @2 s1>>
 <<at start place @2 -11.52u -1.671u 0fr>>
-test
+test #line:ln_155oxtz7
 
 <<at start place s1 0u 1.092u 38fr>>
-1. place — 하린의 가슴이 가운데에 선다(초점을 지점에 두는 값은 풀어 적었다).
+1. place — 하린의 가슴이 가운데에 선다(초점을 지점에 두는 값은 풀어 적었다). #line:ln_q74sviz7
 <<at start portrait harin a 1>>
-하린: 초상이 보이는가. #portrait
+하린: 초상이 보이는가. #portrait #line:ln_x1o9ro5n
 <<at start face portrait 2>>
-하린: 초상의 표정은 슬롯 portrait에 쓴다 — 무대의 하린은 그대로다. #portrait
-나: 화자가 '나'이면 태그 없이도 초상 줄이다 — 화자 정책 표가 고른다.
-나: 속말은 어두운 창에 흰 글자다. 초상은 그대로 보인다. #thought
-나: 다시 대사 — 창과 글자의 색이 돌아온다.
-하린: 태그도 없고 표에도 없는 화자의 줄은 보통 대사창이다.
+하린: 초상의 표정은 슬롯 portrait에 쓴다 — 무대의 하린은 그대로다. #portrait #line:ln_zqdg2w3l
+나: 화자가 '나'이면 태그 없이도 초상 줄이다 — 화자 정책 표가 고른다. #line:ln_l9tzql8i
+나: 속말은 어두운 창에 흰 글자다. 초상은 그대로 보인다. #thought #line:ln_1n2fvu0i
+나: 다시 대사 — 창과 글자의 색이 돌아온다. #line:ln_3xx0bzn1
+하린: 태그도 없고 표에도 없는 화자의 줄은 보통 대사창이다. #line:ln_kir0gshy
 
 <<at start size s1 22 38fr>>
 <<at start place s1 0u 2.054u 38fr>>
 <<at start shot_zoom 3 24>>
 <<at start shot_pan 4 4 24>>
-2. size + place — 커지면서 얼굴이 가운데에 선다.
+2. size + place — 커지면서 얼굴이 가운데에 선다. #line:ln_l5sn3pkz
 
 <<at start rotate_by s1 12 38fr>>
 <<at start place s1 3.363u -2.32u 38fr>>
-3. rotate_by + place — 기우는 만큼 자리를 풀어 적었다. 얼굴이 가운데에 선다.
+3. rotate_by + place — 기우는 만큼 자리를 풀어 적었다. 얼굴이 가운데에 선다. #line:ln_jli4ufh1
 
 <<at start mirror s1 toggle>>
 <<at start place s1 3.363u -2.32u 25fr>>
 <<at start shot_reset>>
-4. mirror + place — 좌우가 바뀌어도 얼굴은 가운데 그대로다.
+4. mirror + place — 좌우가 바뀌어도 얼굴은 가운데 그대로다. #line:ln_reosfhyp
 
 <<at start place s2 -11.52u 1.092u 25fr>>
 <<at start slide_in s2 left 4u 38fr>>
-5. place + slide_in — 시구레가 미끄러져 들어와 가슴이 왼쪽 지점에 선다.
+5. place + slide_in — 시구레가 미끄러져 들어와 가슴이 왼쪽 지점에 선다. #line:ln_n3nwk0do
 
 <<at start move_by s1 7.092u 0u 50fr>>
-6-1. 이 줄은 하린이 움직이는 도중에 바로 넘긴다.
+6-1. 이 줄은 하린이 움직이는 도중에 바로 넘긴다. #line:ln_4ue11rb4
 
 <<at start move_by s1 7.092u 0u 50fr>>
-6-2. 앞 이동이 끝값으로 확정된 뒤 이어서 간다 — 두 번의 move_by가 다 더해져 있어야 한다.
+6-2. 앞 이동이 끝값으로 확정된 뒤 이어서 간다 — 두 번의 move_by가 다 더해져 있어야 한다. #line:ln_pvp3bn88
 
 <<at start size s1 mid 60fr>>
 <<at start rotate_by s1 -12 60fr>>
 <<at start place s1 11.52u 1.092u 60fr>>
-7. 이 줄도 도중에 바로 넘긴다(스텝 경계 가속). 다음 줄에서 하린의 가슴이 오른쪽 지점에 있어야 한다.
+7. 이 줄도 도중에 바로 넘긴다(스텝 경계 가속). 다음 줄에서 하린의 가슴이 오른쪽 지점에 있어야 한다. #line:ln_0pzcy7ib
 
-8. 확인 줄. 여기서 되감기(R)로 1~7 줄에 돌아가 본다 — 일반 재생 때와 같은 자리에 서야 한다.
+8. 확인 줄. 여기서 되감기(R)로 1~7 줄에 돌아가 본다 — 일반 재생 때와 같은 자리에 서야 한다. #line:ln_btdd0gdm
 
 <<at start mirror s1 right>>
 <<at start rotate_reset s1 0fr>>
-정리.
+정리. #line:ln_saur44na
 
 <<at start stage_blur front 0.5>>
 <<at start char_visual_dim s1 2 8fr>>
@@ -153,24 +153,24 @@ test
 
 // ── 카메라의 몸 · 롤 · 흔들림 ───────────────────────────────────
 <<at start shot_dolly 4 90fr>>
-시구레: 이번엔 카메라가 몸째로 다가가요. 줌과 달리 가까운 사람이 더 크게, 먼 배경은 덜 커져요.
+시구레: 이번엔 카메라가 몸째로 다가가요. 줌과 달리 가까운 사람이 더 크게, 먼 배경은 덜 커져요. #line:ln_m73wa3yy
 
 <<at start shot_track 1.5u 0u 75fr>>
-시구레: 옆으로 걸어가면 가까운 것이 더 많이 밀려요. 이 줄을 넘겨도 카메라는 제 속도로 가요.
+시구레: 옆으로 걸어가면 가까운 것이 더 많이 밀려요. 이 줄을 넘겨도 카메라는 제 속도로 가요. #line:ln_8dx3s4kc
 
 <<at start shot_zoom 2 13fr>>
 <<at start shot_shake shake_hit>>
-하린: 쾅! 걸어가는 중에 렌즈로 한 번 더 당기고, 화면을 흔들었어.
+하린: 쾅! 걸어가는 중에 렌즈로 한 번 더 당기고, 화면을 흔들었어. #line:ln_4o499oya
 
 <<at start shot_roll 3 15fr>>
-하린: 화면을 기울일 수도 있고.
+하린: 화면을 기울일 수도 있고. #line:ln_5vngcngs
 
 <<at start shot_roll 0 15fr>>
 <<at start shot_reset 15fr>>
-하린: shot_reset은 렌즈만 되돌려. 카메라는 아직 다가서서 옆에 선 채야.
+하린: shot_reset은 렌즈만 되돌려. 카메라는 아직 다가서서 옆에 선 채야. #line:ln_uu2stuzu
 
 <<at start shot_reset_all 25fr>>
-시구레: 통째로 되돌리면 처음 자리예요.
+시구레: 통째로 되돌리면 처음 자리예요. #line:ln_6r5hxhav
 
 <<at start screen_vignette dream 0.6 25fr>>
 <<at start screen_noise memory 0.4 25fr>>
@@ -200,14 +200,14 @@ test
 <<at start place c1 -11.52u -1.671u 0fr>>
 <<at start fade_in c1 0fr>>
 <<at start cutin_open stage01 pink_stars -11.5u -3.25u>>
-시구레: 컷인이에요! 판은 튀어 오르고, 머리는 판 위로 나와요.
+시구레: 컷인이에요! 판은 튀어 오르고, 머리는 판 위로 나와요. #line:ln_1oo8e9fj
 
 <<at start move_by c1 0u 3.416u 10fr>>
-qwe
-rrr
+qwe #line:ln_60n8o26q
+rrr #line:ln_bh3cbhhh
 
 <<at start cutin_close stage01>>
-시구레: 닫을 때는 살짝 커졌다가 쏙 들어가요.
+시구레: 닫을 때는 살짝 커졌다가 쏙 들어가요. #line:ln_pwdmnu4q
 
 <<at start fade_out c1 0fr>>
 <<at start slot c2 stage01 mid>>
@@ -216,10 +216,10 @@ rrr
 <<at start place c2 11.52u -2.423u 0fr>>
 <<at start fade_in c2 0fr>>
 <<at start cutin_open stage01 blue_question 11.5u -3.25u>>
-카스미: 오른쪽에도 열 수 있어. 판은 갸웃하는 파랑으로.
+카스미: 오른쪽에도 열 수 있어. 판은 갸웃하는 파랑으로. #line:ln_28jslmbz
 
 <<at start cutin_close stage01>>
-카스미: 닫으면 본 무대만 남아.
+카스미: 닫으면 본 무대만 남아. #line:ln_ew3b6oa0
 
 // 창 안의 인물은 닫힌 뒤(다음 줄)에 치운다 — 같은 줄이면 판이 닫히기 전에 사라진다.
 <<at start fade_out c2 0fr>>
@@ -228,51 +228,51 @@ rrr
 // 팝업은 그림 하나다. 뒤를 어둡게 까는 것은 대본이 stage_dim으로 한다 — 그림 바로 뒤인 front 층의 판(그 무대의 far ~ front와 아래 무대를 덮는다).
 <<at start stage_dim front 0.47 0.45s Linear stage02>>
 <<at start popup stage02 sample_letter>>
-하린: 그림 팝업이야. 뒤는 stage_dim으로 깔았고, 그림은 가운데에 떠.
+하린: 그림 팝업이야. 뒤는 stage_dim으로 깔았고, 그림은 가운데에 떠. #line:ln_ii87698y
 
 <<at start popup stage02 sample_seedling>>
-하린: 열린 채로 다시 쓰면 그림을 새로 세워 — 새 그림이 페이드 인해.
+하린: 열린 채로 다시 쓰면 그림을 새로 세워 — 새 그림이 페이드 인해. #line:ln_tzrb5clp
 
 <<at start popup_close stage02>>
 <<at start stage_dim front 0 0.3s Linear stage02>>
-하린: 닫을 때 깔아 둔 뒤도 같이 걷어.
+하린: 닫을 때 깔아 둔 뒤도 같이 걷어. #line:ln_h32ur7ln
 
 // ── 이모지 (docs/emoji-rig.md · docs/emoji-format.md) — 슬롯에 딸려 서는 작은 연출. 정의와 움직임은 emojis.json ──
 // star는 머무는 이모지(등장 → 머묾을 되풀이 → emoji_off에서 퇴장), question · twinkle은 한 번 재생하고 스스로 사라진다.
 <<at start emoji s1 star>>
-하린: 이모지야. 튀어나와서 내 머리 곁에 머물러.
+하린: 이모지야. 튀어나와서 내 머리 곁에 머물러. #line:ln_53pd9var
 
 <<at start emoji s2 question>>
-시구레: 이건 잠깐 떴다가 스스로 사라져요. 내릴 필요가 없어요.
+시구레: 이건 잠깐 떴다가 스스로 사라져요. 내릴 필요가 없어요. #line:ln_w8tsjkin
 
 <<at start emoji s1 twinkle>>
-하린: 그림 여러 장으로 된 것도 있어. 조각마다 따로 움직여.
+하린: 그림 여러 장으로 된 것도 있어. 조각마다 따로 움직여. #line:ln_jo13q6s2
 
 <<at start emoji_off s1 star>>
-하린: 머무는 건 내리라고 해야 내려가. 내려갈 때의 움직임도 있어.
+하린: 머무는 건 내리라고 해야 내려가. 내려갈 때의 움직임도 있어. #line:ln_87ram6wz
 
 // 좌우 — 이모지는 오른쪽을 보는 인물을 기준으로 만든다. 인물이 뒤집혀 있으면 통째로 거울에 비친다(docs/emoji-rig.md §3.1).
 // question의 그림은 upright라 자리만 반대쪽으로 가고 그림은 바로 선다.
 <<at start mirror s2 toggle>>
 <<at start emoji s2 star>>
-시구레: 돌아서 있으면 이모지도 반대쪽에 떠요.
+시구레: 돌아서 있으면 이모지도 반대쪽에 떠요. #line:ln_lfrie5s5
 
 <<at start emoji s2 question>>
-시구레: 물음표는 자리만 반대쪽으로 가고, 글자는 뒤집히지 않아요.
+시구레: 물음표는 자리만 반대쪽으로 가고, 글자는 뒤집히지 않아요. #line:ln_180oefi2
 
 <<at start emoji_off s2>>
-시구레: 내린 다음에 다시 돌아설게요.
+시구레: 내린 다음에 다시 돌아설게요. #line:ln_l3w1ekwm
 
 <<at start mirror s2 toggle>>
-시구레: 됐어요.
+시구레: 됐어요. #line:ln_wkz64xe1
 
 // 반대쪽 — 셋째 칸 flip이면 정의의 반대쪽에 세운다(docs/PLAN_emoji-side.md). 머리의 자리는 그대로이고 이모지가 거울에 비친다.
 // 인물이 뒤집혀 있으면 그 위에서 한 번 더 — 두 번 뒤집혀 정의의 쪽이다. question은 upright라 반대쪽에서도 글자가 바로 선다.
 <<at start emoji s1 star flip>>
-하린: 같은 별인데 이번엔 반대쪽에 띄웠어. 돌아서지 않아도 돼.
+하린: 같은 별인데 이번엔 반대쪽에 띄웠어. 돌아서지 않아도 돼. #line:ln_t8roq9og
 
 <<at start emoji s2 question flip>>
-시구레: 물음표도 반대쪽으로 — 글자는 그대로예요.
+시구레: 물음표도 반대쪽으로 — 글자는 그대로예요. #line:ln_ag3ba4gw
 
 <<at in emoji_off s1 star>>
 
@@ -288,7 +288,7 @@ rrr
 <<at in place s2 11.52u 1.092u 0fr>>
 <<at in pause 0.1s>>
 <<at in screen_cover_clear 0.3s>>
-하린: [beat=in/]툭 끊고 자리를 바꿨어. 바뀌는 건 안 보였지?
+하린: [beat=in/]툭 끊고 자리를 바꿨어. 바뀌는 건 안 보였지? #line:ln_fc3v7j75
 
 // ② 장소 옮기기 — 배경과 사람을 통째로 바꾸고, 검게 0.4초 머문다.
 <<at in screen_cover black 0.5s>>
@@ -298,15 +298,15 @@ rrr
 <<at in place s1 0u 1.092u 0fr>>
 <<at in pause 0.4s>>
 <<at in screen_cover_clear 0.5s>>
-하린: [beat=in/]교실로 돌아왔어. 검게 덮인 동안 배경도 사람도 바꿨어.
+하린: [beat=in/]교실로 돌아왔어. 검게 덮인 동안 배경도 사람도 바꿨어. #line:ln_5bp492c2
 
 // ③ 검은 화면 위 대사 — 덮은 채 줄이 지나간다. 대사창은 보이고, 넘길 때까지 검다. 걷기는 다음 줄의 start에서.
 <<at in screen_cover black 0.6s>>
-[beat=in/]그날 저녁.
-아무도 남지 않은 교실에 불이 꺼졌다.
+[beat=in/]그날 저녁. #line:ln_hh4xz8p8
+아무도 남지 않은 교실에 불이 꺼졌다. #line:ln_ftcasvmz
 <<at start bg_sprite bg_main studio_evening>>
 <<at start screen_cover_clear 0.8s>>
-하린: 검은 화면 위에 글이 뜨는 동안, 화면은 넘길 때까지 검어.
+하린: 검은 화면 위에 글이 뜨는 동안, 화면은 넘길 때까지 검어. #line:ln_xej4hlaf
 
 // ④ 흰 화면으로 회상에 들어가고 나온다. 비네트는 덮개 위에 얹힌다 — 하얗게 덮인 동안에도 가장자리가 어둡다.
 <<at in screen_cover white 0.5s>>
@@ -314,13 +314,13 @@ rrr
 <<at in screen_vignette dream 0.5 0fr>>
 <<at in pause 0.2s>>
 <<at in screen_cover_clear 0.6s>>
-하린: [beat=in/]하얗게 덮었다 걷으면 회상으로 들어가는 느낌이야.
+하린: [beat=in/]하얗게 덮었다 걷으면 회상으로 들어가는 느낌이야. #line:ln_bt2mc7oj
 
 <<at in screen_cover white 0.5s>>
 <<at in screen_vignette_clear 0fr>>
 <<at in bg_sprite bg_main studio_evening>>
 <<at in screen_cover_clear 0.6s>>
-하린: [beat=in/]다시 하얗게 — 지금으로 돌아왔어.
+하린: [beat=in/]다시 하얗게 — 지금으로 돌아왔어. #line:ln_lihenkzl
 
 // ⑤ 컷인도 덮인다 — 열린 컷인 위로 덮었다 걷는다. 덮인 동안 컷인 판도 보이면 안 된다.
 <<at start slot c3 stage01 mid>>
@@ -329,15 +329,15 @@ rrr
 <<at start place c3 -11.52u -1.671u 0fr>>
 <<at start fade_in c3 0fr>>
 <<at start cutin_open stage01 pink_stars -11.5u -3.25u>>
-시구레: 컷인을 열었어요.
+시구레: 컷인을 열었어요. #line:ln_qr4nde2m
 
 <<at in screen_cover black 0.4s>>
 <<at in pause 0.3s>>
 <<at in screen_cover_clear 0.4s>>
-시구레: [beat=in/]덮개는 컷인 창까지 덮어요. 걷히면 그대로 있고요.
+시구레: [beat=in/]덮개는 컷인 창까지 덮어요. 걷히면 그대로 있고요. #line:ln_8bu9n67l
 
 <<at start cutin_close stage01>>
-시구레: 닫을게요.
+시구레: 닫을게요. #line:ln_1jr3i89e
 
 <<at in fade_out c3 0fr>>
 
@@ -349,7 +349,7 @@ rrr
 <<at in pause 0.6s>>
 <<at in shot_reset_all 0fr>>
 <<at in screen_cover_clear 0.4s>>
-하린: [beat=in/]검은 동안 카메라를 기울이고 넓히고 흔들었어. 덮개는 끝까지 화면 전체였어?
+하린: [beat=in/]검은 동안 카메라를 기울이고 넓히고 흔들었어. 덮개는 끝까지 화면 전체였어? #line:ln_eszsjqdf
 
 // ── 어둡게 (docs/PLAN_screen-cover.md §3.2) — 무대 리그의 층마다 선 검은 판. 캐릭터는 그대로이고, 판이 위에서 가린다 ──
 // <<stage_dim 층|all 세기 [길이] [이징] [무대]>> — all = 그 무대의 가장 앞 층의 판(무대 전체), far = 먼 층의 판(배경만 — 배경은 far,
@@ -358,36 +358,36 @@ rrr
 <<at start place s1 -11.52u 1.092u 0fr>>
 <<at start place s2 11.52u 1.092u 0fr>>
 <<at start fade_in s2 15fr>>
-시구레: 다시 나왔어요.
+시구레: 다시 나왔어요. #line:ln_bcwxugd9
 
 // ① 속말 — 무대 전체(배경 + 인물)를 어둡게, 두 줄 이어서. 줄이 바뀌어도 끊기지 않아야 한다.
 <<at start stage_dim all 0.45 0.27s>>
-(정말 괜찮을까……)
-(티 내지 말자.)
+(정말 괜찮을까……) #line:ln_5sqk24ib
+(티 내지 말자.) #line:ln_ftl895vw
 <<at start stage_dim all 0 0.23s>>
-하린: 응, 괜찮아.
+하린: 응, 괜찮아. #line:ln_sq4b0hia
 
 // ② 판정 — 배경만 가라앉고 두 사람은 밝다.
 <<at start stage_dim far 0.6 0.3s>>
-시구레: 합격이에요.
+시구레: 합격이에요. #line:ln_xqk6ps6p
 
 // 판은 곱해진다 — 배경만 어두운 위에 무대 전체를 더하면 배경은 더 어둡다.
 <<at start stage_dim all 0.45 0.3s>>
-(합격……? 정말로?)
+(합격……? 정말로?) #line:ln_fx3xpl2m
 <<at start stage_dim_reset 0.3s>>
-하린: 정말?
+하린: 정말? #line:ln_rk3tioy2
 
 // ③ 어두운 동안 들어온 인물 · 이모지 · 바뀐 배경도 같이 어둡다.
 <<at start stage_dim all 0.45 0.3s>>
-시구레: 어두운 동안에…
+시구레: 어두운 동안에… #line:ln_v4xeb32c
 <<at start place s3 0u 1.092u 0fr>>
 <<at start fade_in s3 0.4s>>
 <<at start emoji s3 question>>
-카스미: 들어와도 같이 어두워. 이모지도.
+카스미: 들어와도 같이 어두워. 이모지도. #line:ln_hu3ukixz
 <<at start bg_sprite bg_main class_day>>
-카스미: 배경을 바꿔도.
+카스미: 배경을 바꿔도. #line:ln_tzirokkz
 <<at start stage_dim all 0 0.3s>>
-카스미: 걷었어.
+카스미: 걷었어. #line:ln_pav7nb6i
 
 // ④ 컷인은 그 무대에 걸 때만 어둡다 — 본 무대 배경만 가라앉히고, 다음 줄에서 컷인 창 안만 어둡게.
 <<at start slot c4 stage01 mid>>
@@ -397,15 +397,15 @@ rrr
 <<at start fade_in c4 0fr>>
 <<at start cutin_open stage01 pink_stars -11.5u -3.25u>>
 <<at start stage_dim far 0.6 0.3s>>
-시구레: 컷인은 밝고, 본 무대 배경만 가라앉았어요.
+시구레: 컷인은 밝고, 본 무대 배경만 가라앉았어요. #line:ln_g7ij4fwe
 
 <<at start stage_dim far 0 0.3s>>
 <<at start stage_dim all 0.45 0.3s Linear stage01>>
-시구레: 이번엔 컷인 창 안만 어두워요.
+시구레: 이번엔 컷인 창 안만 어두워요. #line:ln_ceptafbv
 
 <<at start stage_dim_reset 0.2s>>
 <<at start cutin_close stage01>>
-시구레: 닫을게요.
+시구레: 닫을게요. #line:ln_pjfc3uzh
 
 <<at in fade_out c4 0fr>>
 
@@ -414,23 +414,23 @@ rrr
 <<at in bg_sprite bg_main studio_evening>>
 <<at in stage_dim all 0.2 0fr>>
 <<at in screen_cover_clear 0.6s>>
-하린: [beat=in/]회상 안은 한 톤 낮춰.
+하린: [beat=in/]회상 안은 한 톤 낮춰. #line:ln_n5curm8d
 
 <<at in screen_cover white 0.5s>>
 <<at in stage_dim_reset 0fr>>
 <<at in bg_sprite bg_main class_day>>
 <<at in screen_cover_clear 0.6s>>
-하린: [beat=in/]돌아왔어.
+하린: [beat=in/]돌아왔어. #line:ln_jhts4vbx
 
 // ⑥ 어두운 채 넓히고 기울인다 — 판은 층과 함께 움직이지만 넉넉히 커서, 무대 창 안에 판의 가장자리가 드러나면 안 된다.
 <<at start stage_dim all 0.5 0.3s>>
 <<at start shot_zoom -4 0.6s>>
 <<at start shot_roll 6 0.6s>>
-하린: 어두운 채 넓히고 기울여도 고르게 어두워?
+하린: 어두운 채 넓히고 기울여도 고르게 어두워? #line:ln_44lx76mk
 
 <<at start shot_reset_all 0.4s>>
 <<at start stage_dim_reset 0.3s>>
-하린: 원래대로.
+하린: 원래대로. #line:ln_s7d7fqhm
 
 // ── stage_mask와 컷인 · 팝업 (docs/PLAN_stage-visibility.md) — 보이는 범위는 마스크 하나, 무대에 그려지는 것은 모두 리그 ──
 // 컷인 판 · 팝업 그림도 무대 안의 리그라 stage_mask(마스크)가 함께 자른다. stage_mask는 틀(컷인 창)을 모른다 — 열린 컷인은 뒤의 cutin_close가 정리한다.
@@ -443,57 +443,57 @@ rrr
 <<at start place c5 -11.52u -1.671u 0fr>>
 <<at start fade_in c5 0fr>>
 <<at start cutin_open stage01 pink_stars -11.5u -3.25u>>
-카스미: 컷인을 열고…
+카스미: 컷인을 열고… #line:ln_385sgtin
 
 <<at start cutin_close stage01>>
-카스미: 닫았어.
+카스미: 닫았어. #line:ln_lkpjo871
 
 <<at start bg_fade_out stage01_cutin_panel 0fr>>
 <<at start stage_mask slant_in stage01>>
-카스미: 같은 무대를 사선 패널로 다시 열었어. 왼쪽 패널 안에 내가 보여? 컷인 판은 없어야 해.
+카스미: 같은 무대를 사선 패널로 다시 열었어. 왼쪽 패널 안에 내가 보여? 컷인 판은 없어야 해. #line:ln_jfunk6k6
 
 <<at start stage_mask slant_out stage01>>
-카스미: 패널을 닫을게.
+카스미: 패널을 닫을게. #line:ln_u1s9dfwx
 
 // ② 열린 컷인 위에 stage_mask — iris_out(화면 전체 원이 가운데로 줄어든다).
 //    볼 것: 판과 인물이 함께 원 모양으로 닫힌다. 마스크는 하나라 stage_mask가 시작하면 네 점 대신 원이 자른다 — 판 아래 잘려 있던 몸도 원 안에서는 보인다.
 <<at start cutin_open stage01 pink_stars -11.5u -3.25u>>
-카스미: 이번엔 컷인을 연 채로…
+카스미: 이번엔 컷인을 연 채로… #line:ln_4lzi8usm
 
 <<at start stage_mask iris_out stage01>>
-카스미: stage_mask로 닫았어.
+카스미: stage_mask로 닫았어. #line:ln_l37mjry8
 
 <<at start cutin_close stage01>>
-카스미: 정리.
+카스미: 정리. #line:ln_w69nj322
 
 // ③ 열린 팝업 위에 stage_mask — 팝업 그림은 그 무대(stage02) 안의 리그라 stage_mask 모양대로 잘린다.
 //    볼 것: 그림이 띠가 닫히는 모양대로 함께 닫히나.
 <<at start popup stage02 sample_letter>>
-하린: 팝업을 열고…
+하린: 팝업을 열고… #line:ln_gqe62t5t
 
 <<at start stage_mask daze_close stage02>>
-하린: 같은 무대를 stage_mask로 닫았어.
+하린: 같은 무대를 stage_mask로 닫았어. #line:ln_ogfpphyd
 
 <<at start popup_close stage02>>
-하린: 정리.
+하린: 정리. #line:ln_ixjqaofp
 
 // ④ 열린 컷인 위에 마스크 지우기 — 무대 셋의 마스크를 한 번에 다 보이게 한다(②에서 닫은 stage01 · ③에서 닫은 stage02도 되돌린다).
 //    볼 것: 마스크가 없으니 판과 인물이 다 보인다(판 아래 몸까지). 틀은 그대로라 다음 줄의 cutin_close가 팝 아웃으로 닫는다.
 <<at start cutin_open stage01 pink_stars -11.5u -3.25u>>
-시구레: 컷인을 열고…
+시구레: 컷인을 열고… #line:ln_ss91vlhp
 
 <<at start stage_mask_reset>>
-시구레: 마스크를 모두 지웠어요.
+시구레: 마스크를 모두 지웠어요. #line:ln_sacwph9s
 
 <<at start fade_out c5 0fr>>
 <<at start cutin_close stage01>>
-시구레: 정리했어요.
+시구레: 정리했어요. #line:ln_e8tvo7lk
 
 // ── 자동 줄의 머무름 (docs/PLAN_line-beat.md R9) — #auto=길이: 줄이 들어온 때부터 그 길이만큼 머물고 스스로 넘어간다 ──
 // 글 카드(장소 카드 · 장제목)가 머무는 시간이다. 머무는 동안 클릭하면 바로 넘어가고, 빨리 넘기기(Ctrl)는 머무르지 않는다.
-하린: 이 줄은 2초 머물고 저절로 넘어가. #auto=2s
-하린: 이 줄도 3초 머무는데, 그 사이에 클릭하면 바로 넘어가. #auto=3s
-하린: 여기부터는 입력을 기다려.
+하린: 이 줄은 2초 머물고 저절로 넘어가. #auto=2s #line:ln_fwy704q3
+하린: 이 줄도 3초 머무는데, 그 사이에 클릭하면 바로 넘어가. #auto=3s #line:ln_7pn2o71t
+하린: 여기부터는 입력을 기다려. #line:ln_vw4ymy5w
 
 // ── 줄의 자리 (docs/PLAN_line-beat.md) — 글에는 자리 표지 [beat=이름/]만, 명령은 줄 앞의 <<at 이름 명령>> ──
 // 번역문은 표지만 옮긴다 — 명령은 모든 언어에 하나다. start는 대사창이 열리며(표지 없이), 표지는 그 글자가 드러나기 직전,
@@ -503,10 +503,10 @@ rrr
 <<at b motion s1 nod>>
 <<at b face_swap s1 3 13fr>>
 <<at end emoji s1 star>>
-하린: 대사창이 열리며 표정이 바뀌고, [beat=a/]여기서 돌아오고, [beat=b/]여기서 끄덕이며 다시 바뀌어. 다 보이면 별이 떠.
+하린: 대사창이 열리며 표정이 바뀌고, [beat=a/]여기서 돌아오고, [beat=b/]여기서 끄덕이며 다시 바뀌어. 다 보이면 별이 떠. #line:ln_5hr3ug6u
 
 <<at a motion s2 nod>>
-시구레: 표지 이름은 그 줄 안에서만 써요. [beat=a/]여기서 끄덕.
+시구레: 표지 이름은 그 줄 안에서만 써요. [beat=a/]여기서 끄덕. #line:ln_wvhwprfb
 
 // ── 줄의 앵커 (docs/PLAN_line-anchor.md) — 한 줄이 제 연출을 모두 갖는다: 앞 앵커 → start → 글 표지 → end ──
 // 첫 글자 앞의 표지는 앞 앵커다 — 대사창이 닫히고, 열리기 전에 실행된다. pause는 그 앵커의 뒤 명령만 늦춘다.
@@ -517,7 +517,7 @@ rrr
 <<at in face s1 05>>
 <<gap in 1s>>
 <<at start motion s1 nod>>
-하린: [beat=in/]대사창이 닫히고, 시구레가 나가고, 반 초 뒤에 내 표정이 바뀌었어. 1초를 채운 뒤에 이 줄이 열리며 내가 끄덕였고.
+하린: [beat=in/]대사창이 닫히고, 시구레가 나가고, 반 초 뒤에 내 표정이 바뀌었어. 1초를 채운 뒤에 이 줄이 열리며 내가 끄덕였고. #line:ln_ghpgl56d
 
 // 글 표지 사이의 간격 — 글이 먼저 닿아도 간격이 찰 때까지 타자기가 그 글자 앞에서 기다린다. 클릭하면 간격 없이 간다.
 <<at start face s1 3>>
@@ -525,7 +525,7 @@ rrr
 <<at a face_swap s1 05 13fr>>
 <<gap a 1s>>
 <<at b motion s1 nod>>
-하린: 여기서 [beat=a/]2초를 채우고 표정이 바뀌고, [beat=b/]또 1초를 채우고 끄덕여.
+하린: 여기서 [beat=a/]2초를 채우고 표정이 바뀌고, [beat=b/]또 1초를 채우고 끄덕여. #line:ln_ljgi5gz6
 
 // 어느 앵커에서나 pause — 다음 앵커는 앞 앵커의 명령이 다 시작된 뒤에 열린다. end의 간격은 넘김을 받기 전의 최소 시간이다.
 <<at start face s1 3>>
@@ -534,7 +534,7 @@ rrr
 <<at a motion s2 nod>>
 <<at end emoji s2 star>>
 <<gap end 1s>>
-시구레: 제가 [beat=a/]들어오고 1초 뒤에 끄덕여요. 다 보이면 별이 뜨고, 1초 머문 뒤에 넘길 수 있어요.
+시구레: 제가 [beat=a/]들어오고 1초 뒤에 끄덕여요. 다 보이면 별이 뜨고, 1초 머문 뒤에 넘길 수 있어요. #line:ln_xr583ywh
 
 시구레: 여기까지예요. 되감기(R)로 아무 줄이나 돌아갈 수 있고, 타이틀의 ‘이어하기’로 다시 올 수 있어요. #line:ln_6mq0fm7a
 

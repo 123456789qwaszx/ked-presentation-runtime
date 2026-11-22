@@ -201,18 +201,31 @@ namespace Ked.Presentation.Tests.UnityParity
         }
 
         [Test]
-        public void 정착_예약이_겹친_상태에서도_depth_보정이_종전과_같다()
+        public void 정착_예약이_겹친_depth_보정은_예약을_실제로_놓은_종전의_답과_같다()
         {
             // 실사용 조건: 포커스의 이동 · 배율에 예약이 걸린 채로 size가 온다.
+            //
+            // 예약을 장부에 둔 채 오라클과 견주지 않는다. 오라클은 초점을 정착 값으로 재지만 보정 벡터는 라이브
+            // 부모(DepthY.parent)로 옮긴다. 리그 계층을 바꾼 뒤(45e25d09) 포커스의 배율(CharFocus_Scale)은 DepthOffset의
+            // 조상이라, 예약된 배율 1.2가 그 변환에서 빠지고 오라클의 보정이 1.2배 커진다(옛 계층에서 예약하던 CharSlot_Scale은
+            // DepthY 아래라 변환에 들지 않았다). 맞는 답은 정착한 무대에서 초점을 지키는 값이다 — 예약을 실제로 놓은 리그에서
+            // 오라클이 내는 답이 그것이고, 코어는 장부만 읽고 같은 답을 내야 한다.
             CharacterPlacementTargetLedger ledger = new();
-            ledger.Publish(MoveRect, NodeTarget.AnchoredPosition(MoveRect.name, new Vector2(-460.8f, 60f).ToCore()));
-            ledger.Publish(Rect(CharacterRigNode.CharFocus_Scale), NodeTarget.LocalScaleXY(Rect(CharacterRigNode.CharFocus_Scale).name, new Vector2(1.2f, 1.2f).ToCore()));
+            Vector2 movePosition = new(-460.8f, 60f);
+            Vector2 focusScale = new(1.2f, 1.2f);
+            RectTransform focusScaleRect = Rect(CharacterRigNode.CharFocus_Scale);
+            ledger.Publish(MoveRect, NodeTarget.AnchoredPosition(MoveRect.name, movePosition.ToCore()));
+            ledger.Publish(focusScaleRect, NodeTarget.LocalScaleXY(focusScaleRect.name, focusScale.ToCore()));
 
             Vector2 raw = new(0f, -320f);
             Vector2 targetScale = new(1.38f, 1.38f);
 
-            Vector2 expected = LegacySolveDepthY(ledger, BustOffset, raw, targetScale);
+            // 코어는 리그를 건드리지 않으므로 먼저 잰다.
             Vector2 actual = CoreSolveDepthY(ledger, BustOffset, raw, targetScale);
+
+            MoveRect.anchoredPosition = movePosition;
+            focusScaleRect.localScale = new Vector3(focusScale.x, focusScale.y, focusScaleRect.localScale.z);
+            Vector2 expected = LegacySolveDepthY(new CharacterPlacementTargetLedger(), BustOffset, raw, targetScale);
 
             AssertVector2(actual, expected, "예약이 겹친 depth 보정");
         }

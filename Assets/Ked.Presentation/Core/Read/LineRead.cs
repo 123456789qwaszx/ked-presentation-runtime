@@ -154,7 +154,7 @@ namespace Ked.Presentation.Core
 
         /// <summary>
         /// at 없이 쓴 무대 명령 — 원문 검사의 오류다. 재생은 실행하지 않는다(docs/PLAN_line-anchor.md §9 N5).
-        /// 묶음의 범위(Block)에는 든다 — 툴이 묶음을 다시 쓰면 사라진다.
+        /// 묶음의 범위(Block)에는 든다 — 원문의 그 줄은 누가 지우기 전까지 남는다(실행되지 않을 뿐이다).
         /// </summary>
         public readonly List<LineReadCommand> Unanchored = new();
 
