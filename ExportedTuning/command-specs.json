@@ -12,8 +12,18 @@
             "director": true
         },
         {
+            "key": "expression",
+            "label": "표정",
+            "director": true
+        },
+        {
             "key": "acting",
             "label": "연기",
+            "director": true
+        },
+        {
+            "key": "emoji",
+            "label": "이모지",
             "director": true
         },
         {
@@ -394,7 +404,7 @@
         },
         {
             "name": "face",
-            "kind": "acting",
+            "kind": "expression",
             "summary": "표정을 바로 바꾼다",
             "waits": false,
             "immediate": false,
@@ -428,7 +438,7 @@
         },
         {
             "name": "face_swap",
-            "kind": "acting",
+            "kind": "expression",
             "summary": "표정을 페이드로 바꾼다",
             "waits": false,
             "immediate": false,
@@ -523,7 +533,7 @@
         },
         {
             "name": "emoji",
-            "kind": "acting",
+            "kind": "emoji",
             "summary": "이모지를 세운다",
             "waits": false,
             "immediate": false,
@@ -571,7 +581,7 @@
         },
         {
             "name": "emoji_off",
-            "kind": "acting",
+            "kind": "emoji",
             "summary": "이모지를 내린다",
             "waits": false,
             "immediate": false,

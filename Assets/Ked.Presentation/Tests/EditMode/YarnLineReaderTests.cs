@@ -79,7 +79,8 @@ namespace Ked.Presentation.Tests
                 CommandKind.Placement, CommandKind.Time, CommandKind.Placement,
             }));
 
-            Assert.That(line.Step("a").Commands[0].Kind, Is.EqualTo(CommandKind.Acting));
+            Assert.That(line.Step("a").Commands[0].Kind, Is.EqualTo(CommandKind.Expression), "face_swap은 표정(D13)");
+            Assert.That(line.Step("end").Commands[0].Kind, Is.EqualTo(CommandKind.Emoji));
             Assert.That(line.Step("end").Commands[0].Duration, Is.Null, "이모지의 길이는 대본에 없다");
             Assert.That(line.Step("a").GapLine, Is.EqualTo(9));
         }

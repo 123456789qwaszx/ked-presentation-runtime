@@ -7,7 +7,8 @@ namespace Ked.Presentation.Core
     /// 커맨드의 종류 — 연출가가 화면에서 무엇을 고치는가(ked-story-tools docs/PLAN.md §4.1).
     /// 팩토리의 갈래(누가 실행하는가)와 1:1이 아니라 명세 표가 커맨드마다 하나씩 적는다.
     /// 기준은 리그다 — 카메라 리그는 카메라, 캐릭터 리그의 포커스 · 슬롯 계층은 자리와 구도,
-    /// 초상 계층의 연기 축은 연기, 스테이지 리그와 화면 전체는 화면.
+    /// 초상 계층의 연기 축은 연기, 스테이지 리그와 화면 전체는 화면. 초상의 얼굴(표정)과 인물 곁의 감정 아이콘(이모지)은
+    /// 연기에서 떼어 제 종류로 둔다 — 연출가가 따로 고친다(ked-story-tools docs/PLAN.md D13).
     /// </summary>
     public enum CommandKind
     {
@@ -17,8 +18,14 @@ namespace Ked.Presentation.Core
         /// <summary>자리와 구도 — 누가 어디에 얼마나 크게 어느 쪽을 보고 서 있는가.</summary>
         Placement,
 
-        /// <summary>연기 — 표정 · 포즈 · 모션 · 이모지 · 초상 계층의 연기 축.</summary>
+        /// <summary>표정 — 초상의 얼굴을 바꾼다(face · face_swap).</summary>
+        Expression,
+
+        /// <summary>연기 — 포즈 · 모션 · 초상 계층의 연기 축.</summary>
         Acting,
+
+        /// <summary>이모지 — 인물 곁의 감정 아이콘을 세우고 내린다(emoji · emoji_off).</summary>
+        Emoji,
 
         /// <summary>화면 — 스테이지 리그(마스크 · 블러 · 어둡게)와 화면 전체(덮개 · 섬광 · 컷인 · 팝업 · 배경).</summary>
         Screen,
@@ -38,8 +45,8 @@ namespace Ked.Presentation.Core
     {
         public static readonly CommandKind[] All =
         {
-            CommandKind.Camera, CommandKind.Placement, CommandKind.Acting, CommandKind.Screen,
-            CommandKind.Setup, CommandKind.Sound, CommandKind.Time,
+            CommandKind.Camera, CommandKind.Placement, CommandKind.Expression, CommandKind.Acting, CommandKind.Emoji,
+            CommandKind.Screen, CommandKind.Setup, CommandKind.Sound, CommandKind.Time,
         };
 
         public static string Key(CommandKind kind)
@@ -48,7 +55,9 @@ namespace Ked.Presentation.Core
             {
                 case CommandKind.Camera: return "camera";
                 case CommandKind.Placement: return "placement";
+                case CommandKind.Expression: return "expression";
                 case CommandKind.Acting: return "acting";
+                case CommandKind.Emoji: return "emoji";
                 case CommandKind.Screen: return "screen";
                 case CommandKind.Setup: return "setup";
                 case CommandKind.Sound: return "sound";
@@ -63,7 +72,9 @@ namespace Ked.Presentation.Core
             {
                 case CommandKind.Camera: return "카메라";
                 case CommandKind.Placement: return "자리와 구도";
+                case CommandKind.Expression: return "표정";
                 case CommandKind.Acting: return "연기";
+                case CommandKind.Emoji: return "이모지";
                 case CommandKind.Screen: return "화면";
                 case CommandKind.Setup: return "세우기";
                 case CommandKind.Sound: return "소리";
@@ -72,10 +83,10 @@ namespace Ked.Presentation.Core
             }
         }
 
-        /// <summary>연출가의 넷인가 — 종류 필터에 오르는 것(카메라 · 자리와 구도 · 연기 · 화면).</summary>
+        /// <summary>연출가의 종류인가 — 종류 필터에 오르는 것(카메라 · 자리와 구도 · 표정 · 연기 · 이모지 · 화면).</summary>
         public static bool IsDirectorKind(CommandKind kind)
-            => kind == CommandKind.Camera || kind == CommandKind.Placement ||
-               kind == CommandKind.Acting || kind == CommandKind.Screen;
+            => kind == CommandKind.Camera || kind == CommandKind.Placement || kind == CommandKind.Expression ||
+               kind == CommandKind.Acting || kind == CommandKind.Emoji || kind == CommandKind.Screen;
 
         public static bool TryParse(string key, out CommandKind kind)
         {

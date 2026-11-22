@@ -18,11 +18,15 @@ namespace Ked.Presentation.Core
         //   mirror · size · size_reset  노드는 초상이지만 보는 방향 · 그 사람의 크기는 자리와 구도
         //   char_visual*                듣는 사람을 어둡게 — 자리와 구도(소유자 D3)
         //   bg_*                        캐스팅하지 않은 슬롯이지만 배경은 화면(bg_spawn은 세우기)
+        //   face · face_swap            초상의 연기 축이지만 얼굴은 표정 — 연출가가 따로 고친다(D13)
+        //   emoji · emoji_off           이모지 리그지만 감정 아이콘은 이모지 — 같다(D13)
         private static IEnumerable<StageCommandSpec> BuildCoreSpecs()
         {
             const CommandKind camera = CommandKind.Camera;
             const CommandKind placement = CommandKind.Placement;
+            const CommandKind expression = CommandKind.Expression;
             const CommandKind acting = CommandKind.Acting;
+            const CommandKind emoji = CommandKind.Emoji;
             const CommandKind screen = CommandKind.Screen;
             const CommandKind setup = CommandKind.Setup;
             const CommandKind sound = CommandKind.Sound;
@@ -49,18 +53,18 @@ namespace Ked.Presentation.Core
                 new[] { Name("preset", "배치", "surface_layout") }, immediate: true);
             yield return new("surface_reset", setup, "대사창의 배치를 되돌린다", immediate: true);
 
-            // ── 연기 ──
+            // ── 연기 · 표정 · 이모지 — 초상의 얼굴과 감정 아이콘은 제 종류다(D13) ──
             yield return new("pose", acting, "포즈를 바꾼다",
                 new[] { Slot(), Name("pose", "포즈", "pose") });
-            yield return new("face", acting, "표정을 바로 바꾼다",
+            yield return new("face", expression, "표정을 바로 바꾼다",
                 new[] { Slot(), Name("face", "표정", "face") });
-            yield return new("face_swap", acting, "표정을 페이드로 바꾼다",
+            yield return new("face_swap", expression, "표정을 페이드로 바꾼다",
                 new[] { Slot(), Name("face", "표정", "face"), Duration("13fr") });
             yield return new("motion", acting, "모션 클립을 튼다(길이는 클립이 안다)",
                 new[] { Slot(), Name("motion", "모션", "motion"), Word("mode", "읽는 법", MotionModeToken.Relative, MotionModeToken.Relative, MotionModeToken.Absolute) });
-            yield return new("emoji", acting, "이모지를 세운다",
+            yield return new("emoji", emoji, "이모지를 세운다",
                 new[] { Slot(), Name("emoji", "이모지", "emoji"), Word("side", "쪽", "", EmojiSideToken.Flip) });
-            yield return new("emoji_off", acting, "이모지를 내린다",
+            yield return new("emoji_off", emoji, "이모지를 내린다",
                 new[] { Slot(), Name("emoji", "이모지", "emoji", "", note: "비우면 그 슬롯의 이모지 전부") });
             yield return new("char_move_to", acting, "초상을 옮긴다(연기 축)",
                 new[] { Slot(), X(null), Y(null), Duration("13fr") });

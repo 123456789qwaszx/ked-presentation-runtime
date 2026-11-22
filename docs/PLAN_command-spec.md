@@ -42,7 +42,7 @@
 
 ### 1.2 종류 배정
 
-계획서 §4.1의 초안 그대로다 — 카메라 9 · 자리와 구도 27 · 연기 9 · 화면 25 · 세우기 6(+2) · 소리 6 · 시간 1. 리그와 어긋나게 둔 것은 `StageCommandSpecTable.Core.cs`의 머리에 적었다.
+계획서 §4.1의 초안 그대로다 — 카메라 9 · 자리와 구도 27 · 연기 9 · 화면 25 · 세우기 6(+2) · 소리 6 · 시간 1. (2026-11-22 C4 뒤 — 표정 2 · 연기 5 · 이모지 2.) 리그와 어긋나게 둔 것은 `StageCommandSpecTable.Core.cs`의 머리에 적었다.
 
 ## 2. 정한 것 (소유자, 2026-11-22 — 제안대로)
 
@@ -51,6 +51,7 @@
 | C1 | `portrait` · `portrait_close`의 종류 | **세우기**(초안대로) | 촬영소에 리그를 세우고 캐스팅하는 일이다 — `slot` + `cast`와 같은 결이고, 줄의 앵커 Q2가 장면 세우기로 꼽았다. 초상의 표정 · 몸짓은 슬롯 키 `portrait`에 `face` · `motion`으로 쓰므로 연기 필터에는 그쪽이 오른다 | 화면(대사창의 그림이다) — 편 중간에 인물을 자주 바꾼다면 필터에 올라야 한다 |
 | C2 | `depth_focus_on` · `depth_focus_clear`의 종류 | **화면**(초안대로) | 슬롯을 인자로 받지만 바뀌는 것은 그 사람이 아니라 나머지 무대 전체의 흐림이다. `stage_blur`와 같은 블러 계통이라 한 필터에서 함께 보여야 한다 | 카메라(초점 · 피사계 심도는 렌즈의 일이다) · 자리와 구도(`char_visual_defocus`와 쓰임이 겹친다) |
 | C3 | 바로 실행하는 명령(`surface_layout` · `surface_reset`)의 표기 | **명세 표에 넣고 `Immediate`로 가린다. 종류는 세우기** | 모든 커맨드가 정확히 한 종류를 갖는다(P1). 툴은 `Immediate`를 보고 `<<at>>` 없이 적고, 줄 읽기는 앵커에 넣지 않고 따로 싣는다(`LineRead.Immediate`). N5의 "at 없는 명령은 오류"도 `IsImmediate`로 가린다. 포크의 `messenger_open` · `messenger_close`는 `.Fork.cs`에 `immediate: true`로 적는다 | 표 밖에 이름 목록만 둔다 — 종류 · 인자 칸이 없어 툴이 보여 줄 수 없다 |
+| C4 | 표정과 이모지를 연기에서 뗀다(소유자 2026-11-22 — ked-story-tools D13) | **표정**(`expression` — `face` · `face_swap`) · **이모지**(`emoji` — `emoji` · `emoji_off`)를 새 종류로, 둘 다 연출가의 종류(필터에 오른다). 연기에는 `pose` · `motion` · `char_*_to`가 남는다 | 연출 참고집(ked-vn-workspace)이 감정 아이콘 카드를 따로 쌓았고, 표정은 몸짓과 따로 고친다 — 한 필터에 섞이면 찾기 어렵다. 리그로는 둘 다 초상 · 이모지 리그라 연기였다 — 이 둘만 리그에서 벗어나게 둔다(`StageCommandSpecTable.Core.cs` 머리). 열거의 차례는 카메라 · 자리와 구도 · 표정 · 연기 · 이모지 · 화면 · …이다 — 정수값을 저장하는 곳은 없다(JSON은 키) | 연기에 두고 툴에서만 가른다 — 정본이 둘이 된다 |
 | C3b | `at` · `gap` | **표 밖**(계획서대로) — JSON에는 `lineStructure: [at, gap]`로 이름만 낸다(`step`은 N5에서 걷었다 — `legacyStructure`도 걷었다) | 커맨드가 아니라 줄의 구조다 | — |
 
 뒤에 종류를 옮기려면 `StageCommandSpecTable.Core.cs`의 그 줄을 옮기고 JSON을 다시 낸다.

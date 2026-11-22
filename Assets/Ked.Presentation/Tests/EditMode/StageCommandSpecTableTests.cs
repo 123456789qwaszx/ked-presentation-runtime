@@ -58,6 +58,14 @@ namespace Ked.Presentation.Tests
             Assert.That(Spec("size").Kind, Is.EqualTo(CommandKind.Placement));
             Assert.That(Spec("shot_shake").Kind, Is.EqualTo(CommandKind.Camera));
             Assert.That(Spec("motion").Kind, Is.EqualTo(CommandKind.Acting));
+
+            // 초상의 얼굴과 감정 아이콘은 연기에서 떼어 제 종류로 둔다(D13).
+            Assert.That(Table.OfKind(CommandKind.Expression).Select(s => s.Name), Is.EquivalentTo(new[] { "face", "face_swap" }));
+            Assert.That(Table.OfKind(CommandKind.Emoji).Select(s => s.Name), Is.EquivalentTo(new[] { "emoji", "emoji_off" }));
+            Assert.That(CommandKinds.All.Where(CommandKinds.IsDirectorKind), Is.EqualTo(new[]
+            {
+                CommandKind.Camera, CommandKind.Placement, CommandKind.Expression, CommandKind.Acting, CommandKind.Emoji, CommandKind.Screen,
+            }));
             Assert.That(Spec("pause").Kind, Is.EqualTo(CommandKind.Time));
 
             // 시간은 pause 하나다 — 필터에 오르지 않고 뒤 커맨드의 지연으로 보인다.
@@ -80,7 +88,6 @@ namespace Ked.Presentation.Tests
                 Assert.That(back, Is.EqualTo(kind));
             }
 
-            Assert.That(CommandKinds.All.Count(CommandKinds.IsDirectorKind), Is.EqualTo(4));
             Assert.That(CommandKinds.TryParse("없는_종류", out _), Is.False);
         }
 
