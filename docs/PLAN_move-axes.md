@@ -1,6 +1,6 @@
 # 이동의 축 — 슬롯의 Move_X · Move_Y와 left · right · up · down (2026-11-23)
 
-> 상태: **계획 확정(소유자 2026-11-23 — M1 ~ M10). X1 ~ X3 끝(리그 22노드 · 커맨드 넷 · `move_by` · `slide` 걷기) — 소유자 확인(Unity · 덤프 다시 내기) 남음. §10(덧그림)은 따로** · 브랜치 `feat/move-axes`(`dev`에서) · 단계별 기록은 §11
+> 상태: **끝 — 계획 확정(소유자 2026-11-23 — M1 ~ M10). X1 ~ X3(리그 22노드 · 커맨드 넷 · `move_by` · `slide` 걷기)과 §10(덧그림) 끝, 소유자 확인(Unity · 덤프 다시 내기) 끝 — `dev`에 합쳤다(2026-11-23). 남은 것: §8의 다른 저장소(`stage-changes-handoff.md` §6.3)** · 브랜치 `feat/move-axes`(`dev`에서) · 단계별 기록은 §11
 > 앞선 일: [PLAN_rig-layers.md](PLAN_rig-layers.md)(리그의 계층 — 20노드. 이 계획이 그 L-결정 가운데 "축별 노드를 걷는다"를 슬롯 계층에서만 뒤집는다)
 
 ## 0. 한 문장
@@ -144,7 +144,7 @@ CharFocus_Track                 focus_move
 - `place`가 놓는 것은 슬롯의 본래 자리이고 인물의 그림은 배역 앵커만큼 떨어져 선다 — 덧그림이 가리키는 것이 "슬롯의 자리"인지 "얼굴 · 가슴이 오는 곳"인지 화면에 적는다. 얼굴을 지점에 놓는 값은 코어의 `NodeTargets.TrySolveFocusPlacement`가 푼다(L11 — 부르는 쪽은 도구).
 - 재생 중에 켜고 끈다(개발용 — 빌드에는 넣지 않는다). 구현을 시작할 때 두 파일을 읽고 이 절을 채운다.
 
-> 상태: **설계 확정(소유자 2026-11-23 — D1 ~ D4는 제안대로) · 구현 끝 — 소유자 확인(10.4) 전** · 브랜치 `feat/screen-point-overlay`(`feat/move-axes` 위에서 — D4) · 두 파일을 읽고 채웠다.
+> 상태: **설계 확정(소유자 2026-11-23 — D1 ~ D4는 제안대로) · 구현 끝 · 소유자 확인(10.4) 끝 — `dev`에 합쳤다(2026-11-23)** · 브랜치 `feat/screen-point-overlay`(`feat/move-axes` 위에서 — D4) · 두 파일을 읽고 채웠다.
 
 ### 10.1 지금 있는 것
 
@@ -224,6 +224,9 @@ CharFocus_Track                 focus_move
   끄면 전처럼 라이브 카메라로 잰다(설계에 더한 칸). 처음에는 꺼 둔다.
 - 조립: 둘 다 null이면 건너뛴다. 씬: `DebugView` 묶음의 태그 `EditorOnly`(D2) · 조립의 격자 칸 · 걷은 칸. README의 키 표에 F1 · F2.
 - 확인: 순수 시험 602 통과(.NET 8), Roslyn 진단 — 새 오류는 Unity 형(GUI · Input …)을 못 찾는 것뿐이다(우리 형의 멤버 오류 0). 그리기 · 키 · 빌드에서 빠지는지는 소유자(10.4).
+- 소유자 확인(2026-11-23): 10.4. 씬의 `DebugView` 묶음은 §10 전부터 꺼져 있었고(`m_IsActive: 0`) 구현에서 켜지 않았다 — 덧그림 둘이 그 아래라 F1 · F2가 듣지 않는다.
+  소유자가 확인하며 켰고 그대로 넣었다(태그 `EditorOnly`라 빌드에는 없고, 두 덧그림은 처음에 숨어 있다). Unity가 함께 적은 것: `CharacterFocusDebugView`의 새 칸(코드의 기본값) ·
+  `SampleBootstrap`의 `storyFolder` · `storyChapters`(스토리 공간의 칸 — 씬이 아직 적지 않았던 기본값).
 
 ## 11. 단계별 기록
 
@@ -289,4 +292,12 @@ CharFocus_Track                 focus_move
 3. `Ked/Motion/Export motions.json` — `nod` · `bow`가 그대로 나오는지(X1에서 고친 `.anim`의 바인딩). 원하면 `Ked/Motion/Create Authoring Rig`로 제작 리그를 다시 세워 견준다.
 4. 데모 재생 · 되감기 · 빨리 넘기기 — 5번 줄(시구레가 왼쪽 밖에서), 6-1 · 6-2(도중에 넘기기), 7번 줄(하린이 오른쪽 지점으로 — `move_reset 60fr`과 함께), 시구레의 등장, 컷인의 `up c1`, 진행 예제 교실 장면의 등장.
 5. 등가성 하네스 랩드스킵 재판정.
+
+> 2026-11-23 소유자가 1 ~ 5를 확인했다(§10.4도 함께). 2의 덤프는 내용이 같다 — `rig-schemas.json` · `command-specs.json`과 `presets/` 넷은 줄 끝만 달랐고,
+> `export-report.json`은 시각만 바뀌었다(그대로 넣었다). 3의 `motions.json`은 작업 트리에 차이가 없다.
+
+### 합치기
+
+- 2026-11-23 `dev`에 fast-forward로 합쳤다(`dbf4bfd9..090cf756`) — X1 `79f6f187` · X2 `b758d788` · X3 `26d78d15` · §10 `090cf756`.
+  그 위의 커밋 하나가 확인 결과 · 다시 낸 덤프 · 씬(§10.6) · 상태를 적는다.
 

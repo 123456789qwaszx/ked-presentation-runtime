@@ -819,6 +819,8 @@ MonoBehaviour:
   example: 0
   festivalEveChapterJson: {fileID: 4900000, guid: d256bcdce1b8afb41ba14c16cc873ff1, type: 3}
   presentationDemoChapterJson: {fileID: 4900000, guid: 28f7bfc519ec417f90666484dd37705b, type: 3}
+  storyFolder: Assets/Dialogue/Story
+  storyChapters: []
   stage: {fileID: 1739354825}
   audioSystem: {fileID: 32255926}
   speakerPolicyDb: {fileID: 11400000, guid: b3c354f8ae9671f47880c5bb9b74e4f9, type: 2}
@@ -1291,7 +1293,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &909332830
 Transform:
   m_ObjectHideFlags: 0
@@ -1916,6 +1918,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CharacterFocusDebugView
   markerRoot: {fileID: 758585424}
+  toggleKey: 283
+  visible: 0
+  measureCameraNeutral: 1
+  drawSlotMarker: 1
+  aimWithMouse: 1
+  aimPreset: 20
+  slotMarkerColor: {r: 1, g: 1, b: 1, a: 0.95}
+  textColor: {r: 1, g: 1, b: 1, a: 1}
+  textBackground: {r: 0, g: 0, b: 0, a: 0.6}
+  fontSize: 13
   focusTuningDb: {fileID: 11400000, guid: b77af4e295606b446ae4f74dad106f5f, type: 2}
   points:
   - enabled: 1

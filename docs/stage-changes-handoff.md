@@ -195,7 +195,7 @@ L3부터는 옛 대본이 그대로 돌지 않는다 — 대사 줄 머리의 `p
 
 ## 6. 이동의 축 — 슬롯의 움직임 넷, `move_by` · `slide` 걷기 (2026-11-23)
 
-근거: [PLAN_move-axes.md](PLAN_move-axes.md) — 결정 M1 ~ M10, 쓰는 꼴 §4.2 · 쓰는 규칙 §4.3, 단계별 기록 §11. 런타임 브랜치 `feat/move-axes`(`dev`에서).
+근거: [PLAN_move-axes.md](PLAN_move-axes.md) — 결정 M1 ~ M10, 쓰는 꼴 §4.2 · 쓰는 규칙 §4.3, 단계별 기록 §11. 런타임은 `dev`에 합쳤다(2026-11-23, `dbf4bfd9..090cf756` — X1 ~ X3과 계획서 §10의 덧그림 — 그 위에 확인 커밋 하나).
 
 ### 6.1 대본에서 바뀐 것
 
@@ -239,7 +239,7 @@ L3부터는 옛 대본이 그대로 돌지 않는다 — 대사 줄 머리의 `p
 
 | 소비처 | 할 일 |
 |---|---|
-| 작업공간 `ked-vn-workspace` — 포크 | `feat/move-axes`를 들인다. 겹치는 파일: `CharacterRigDefinition.cs` · `CharacterRigBuilder.cs` · `SetAnchorCommandCharR.cs` · `CharacterRigCommandFactory.cs` · `CharacterRigCommandBase.cs` · `StageCommandParser.Table.cs` · `.CharRigSetup.cs` · `.CharRigPresentation.cs` · `CommandBridge.cs` · `CommandBridge.Forward.cs`. 포크 코드가 `SlideCommandSpecCharR` · `SlideMotion` · `CharRigDirection` · `move_by`를 쓰면 고친다. `StageCommandSpecTable.Fork.cs`가 `Direction()`을 쓰면 고친다(걷었다). 포크의 리그 프리팹 · 제작 씬 · `.anim`이 있으면 같은 손질(노드 둘을 끼우고 경로 · CRC32) — 프리팹을 두지 않으면 빌더가 스키마로 세운다. `runtime/ExportedTuning`의 `rig-schemas.json` · `command-specs.json`을 다시 낸다 |
+| 작업공간 `ked-vn-workspace` — 포크 | 런타임 `dev`의 `dbf4bfd9` 다음부터(X1 ~ X3 · §10 · 확인 커밋)를 들인다. 겹치는 파일: `CharacterRigDefinition.cs` · `CharacterRigBuilder.cs` · `SetAnchorCommandCharR.cs` · `CharacterRigCommandFactory.cs` · `CharacterRigCommandBase.cs` · `StageCommandParser.Table.cs` · `.CharRigSetup.cs` · `.CharRigPresentation.cs` · `CommandBridge.cs` · `CommandBridge.Forward.cs` — §10의 덧그림이 함께 오므로 포크가 `SampleBootstrap.cs` · `.Presentation.cs` · `ScreenFocusGridOverlay.cs` · `CharacterFocusDebugView.cs` · `PresentationSample.unity`를 고쳤으면 그것도. 포크 코드가 `SlideCommandSpecCharR` · `SlideMotion` · `CharRigDirection` · `move_by`를 쓰면 고친다. `StageCommandSpecTable.Fork.cs`가 `Direction()`을 쓰면 고친다(걷었다). 포크의 리그 프리팹 · 제작 씬 · `.anim`이 있으면 같은 손질(노드 둘을 끼우고 경로 · CRC32) — 프리팹을 두지 않으면 빌더가 스키마로 세운다. `runtime/ExportedTuning`의 `rig-schemas.json` · `command-specs.json`을 다시 낸다 |
 | 작업공간 — 도구 · 대본 | 계획서 §8: `tools/stage/script.py` · 카드(`cards.json`의 커맨드) · 초안 도구를 새 어휘로 — 첫 자리 · 시작 자리 → `move_reset 0fr` + `place`, 그 사이의 움직임 → 넷(§4.3의 규칙). `yarn_check.py`는 `move_by` · `slide_in` · `slide_out`을 모르는 명령으로. 30편 · 스토리 공간을 다시 내고(재현 대본 `move_by` 2,888 · 스토리 공간 2,718, 2026-11-23 셈) 대표 편을 녹화해 앞 녹화와 견준다. 넘길 일은 작업공간 `docs/handoff-1123-move-axes.md`에 |
 | 연출 고치기 툴 `ked-story-tools` | 코어 사본(`src/Ked.Presentation.Core` · 시험 사본)을 다시 들인다 — `SlideMotion`이 사라지고 `NodeTargets.TryGetSlotMove`가 생긴다. 툴이 `SlideMotion`(slide의 궤적 · 기본값)을 부르면 고친다. 명세 표 JSON은 넷을 내고 셋이 없다 — 커맨드 고르기 · 칸 그리기가 표에서 오면 따로 할 일은 없다. 데모 견본(`presentation_demo_Demo_Presentation.yarn`)을 다시 들인다. 폴드가 줄마다 그 슬롯의 자리(Track + Move_X + Move_Y)를 아니 "지금 어디인가"를 보여 줄 수 있다(§4.3 — 할지는 툴에서 정한다) |
 | 모션 툴 `ked-motion-tool-characterRig` | 코어 사본과 리그 덤프(`rig-schemas.json`, 22노드)를 다시 들인다. 노드 id가 그대로라 저작본의 키 · 씬의 자리(`CharSlot_Track`)는 그대로다. 툴이 계층을 경로로 다루면(Unity 내보내기 · 그림) 새 경로를 쓴다. `MotionRules`의 키잉 금지는 그대로 포커스 셋 — Move_X · _Y는 `CharSlot_Track`처럼 키를 줄 수 있다 |
@@ -250,7 +250,7 @@ L3부터는 옛 대본이 그대로 돌지 않는다 — 대사 줄 머리의 `p
 ### 6.4 이 저장소에서 확인한 것
 
 - 옛 대본을 옛 코어(`dev`)로, 새 대본을 새 코어로 접어 대사 · 스텝마다 슬롯의 측정 노드(`VisualOffset`)의 꼴(원점 · 두 축) · α와 샷 · Unhandled를 견줬다 — 데모 · `festival_eve_Festival_Classroom` 839곳이 0px 차이로 같다(튐은 트윈 중의 모양이라 끝 상태에 없다).
-- 순수 시험(.NET 8), 명세 표 ↔ 파서 표 대조, Unity 쪽 코드의 Roslyn 진단(새 오류 0). Unity 컴파일 · EditMode · 데모 재생 · 덤프 다시 내기는 소유자.
+- 순수 시험(.NET 8), 명세 표 ↔ 파서 표 대조, Unity 쪽 코드의 Roslyn 진단(새 오류 0). Unity 컴파일 · EditMode · `motions.json` · 데모 재생 · 되감기 · 빨리 넘기기 · 랩드스킵 재판정 · 덧그림 · 덤프 다시 내기는 소유자가 확인했다(2026-11-23) — 다시 낸 덤프는 내용이 같다(`export-report.json`의 시각만).
 
 ### 6.5 반영 기록
 
