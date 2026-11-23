@@ -25,6 +25,7 @@ public class StageCommandParserTests
     public void 표에_있는_이름을_안다()
     {
         Assert.IsTrue(StageCommandParser.Knows("move_by"));
+        Assert.IsTrue(StageCommandParser.Knows("left"));
         Assert.IsTrue(StageCommandParser.Knows("stage_mask"));
         Assert.IsTrue(StageCommandParser.Knows("pause"));
         Assert.IsFalse(StageCommandParser.Knows("1fr"), "프레임 별칭은 걷었다 — <<pause 1fr>>(docs/PLAN_line-beat.md D4)");
@@ -123,10 +124,6 @@ public class StageCommandParserTests
     [TestCase("show")]
     [TestCase("shot_to")]
     [TestCase("shot_focus_to")]
-    [TestCase("left")]
-    [TestCase("right")]
-    [TestCase("up")]
-    [TestCase("down")]
     [TestCase("scale_by")]
     [TestCase("scale_reset")]
     [TestCase("focus_on")]
@@ -256,16 +253,66 @@ public class StageCommandParserTests
     }
 
     [Test]
-    public void move_reset은_move_by가_쓰는_노드_하나를_0으로_놓는다()
+    public void move_reset은_움직임의_두_노드를_0으로_놓는다()
     {
+        // 본래 자리(Track)는 건드리지 않는다(docs/PLAN_move-axes.md M6). 노드가 둘이라 스펙도 둘이다.
         List<CommandSpecBase> specs = Parse(NewParser(), Cmd("move_reset", "c1", "12fr"));
+
+        Assert.AreEqual(2, specs.Count);
+
+        MoveByCommandSpecCharR x = (MoveByCommandSpecCharR)specs[0];
+        MoveByCommandSpecCharR y = (MoveByCommandSpecCharR)specs[1];
+        Assert.AreEqual(CharacterRigNode.CharSlot_Move_X, x.node);
+        Assert.AreEqual(CharacterRigNode.CharSlot_Move_Y, y.node);
+
+        foreach (MoveByCommandSpecCharR reset in new[] { x, y })
+        {
+            Assert.AreEqual("c1", reset.roleKey);
+            Assert.IsTrue(reset.useAbsolutePosition);
+            Assert.AreEqual(Vector2.zero, reset.delta);
+            Assert.AreEqual(12f / 30f, reset.duration, 1e-6f, "12fr");
+        }
+    }
+
+    // 1u = 1920 / 48 = 40px.
+    [TestCase("left", CharacterRigNode.CharSlot_Move_X, -120f, 0f)]
+    [TestCase("right", CharacterRigNode.CharSlot_Move_X, 120f, 0f)]
+    [TestCase("up", CharacterRigNode.CharSlot_Move_Y, 0f, 120f)]
+    [TestCase("down", CharacterRigNode.CharSlot_Move_Y, 0f, -120f)]
+    public void 슬롯의_움직임은_제_노드를_상대값으로_민다(string name, CharacterRigNode node, float x, float y)
+    {
+        List<CommandSpecBase> specs = Parse(NewParser(), Cmd(name, "c1", "3u", "12fr", "Linear"));
 
         Assert.AreEqual(1, specs.Count);
 
-        MoveByCommandSpecCharR reset = (MoveByCommandSpecCharR)specs[0];
-        Assert.AreEqual(CharacterRigNode.CharSlot_Track, reset.node);
-        Assert.IsTrue(reset.useAbsolutePosition);
-        Assert.AreEqual(Vector2.zero, reset.delta);
+        MoveByCommandSpecCharR move = (MoveByCommandSpecCharR)specs[0];
+        Assert.AreEqual("c1", move.roleKey);
+        Assert.AreEqual(node, move.node);
+        Assert.IsFalse(move.useAbsolutePosition, "상대값 — 쌓인다");
+        Assert.AreEqual(x, move.delta.x, 1e-4f);
+        Assert.AreEqual(y, move.delta.y, 1e-4f);
+        Assert.AreEqual(12f / 30f, move.duration, 1e-6f);
+        Assert.AreEqual(DG.Tweening.Ease.Linear, move.ease);
+    }
+
+    [Test]
+    public void 슬롯의_움직임은_생략하면_0_4초_OutCubic이고_음수는_반대_방향이다()
+    {
+        MoveByCommandSpecCharR move = (MoveByCommandSpecCharR)Parse(NewParser(), Cmd("left", "c1", "-2u"))[0];
+
+        Assert.AreEqual(80f, move.delta.x, 1e-4f, "left -2u = right 2u");
+        Assert.AreEqual(0.4f, move.duration, 1e-6f);
+        Assert.AreEqual(DG.Tweening.Ease.OutCubic, move.ease);
+    }
+
+    [Test]
+    public void 거리가_없는_슬롯의_움직임은_아무것도_내지_않는다()
+    {
+        LogAssert.Expect(LogType.Error, new Regex("<<right>>에 거리가 없다"));
+        Assert.IsEmpty(Parse(NewParser(), Cmd("right", "c1")));
+
+        LogAssert.Expect(LogType.Error, new Regex("<<down>>의 거리를 읽지 못했다"));
+        Assert.IsEmpty(Parse(NewParser(), Cmd("down", "c1", "멀리")));
     }
 
     [Test]

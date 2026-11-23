@@ -76,9 +76,13 @@ namespace Ked.Presentation.Core
             // ── 자리와 구도 ──
             yield return new("place", placement, "슬롯의 본래 자리를 놓는다(절대값)",
                 new[] { Slot(), X("0u"), Y("0u"), Duration("0.4s"), Ease() });
+            yield return new("left", placement, "슬롯을 왼쪽으로 민다(상대값 — 쌓인다)", SlotMove());
+            yield return new("right", placement, "슬롯을 오른쪽으로 민다(상대값 — 쌓인다)", SlotMove());
+            yield return new("up", placement, "슬롯을 위로 민다(상대값 — 쌓인다)", SlotMove());
+            yield return new("down", placement, "슬롯을 아래로 민다(상대값 — 쌓인다)", SlotMove());
             yield return new("move_by", placement, "슬롯을 지금 자리에서 옮긴다(상대값)",
                 new[] { Slot(), X("0u"), Y("0u"), Duration("0.4s"), Ease() });
-            yield return new("move_reset", placement, "move_by로 옮긴 것을 본래 자리로",
+            yield return new("move_reset", placement, "쌓인 움직임(left · right · up · down)을 걷는다 — 본래 자리는 그대로",
                 new[] { Slot(), Duration("0.4s") });
             yield return new("rotate_by", placement, "슬롯을 지금 각도에서 기울인다(상대값)",
                 new[] { Slot(), Angle("0"), Duration("0.4s"), Ease() });
@@ -285,6 +289,10 @@ namespace Ked.Presentation.Core
 
         private static CommandArgSpec Direction(string defaultToken)
             => new("direction", "방향", ArgKind.Token, defaultToken, choices: new[] { "left", "right", "up", "down" });
+
+        // left · right · up · down — 거리에는 생략값이 없다(꼭 적는다). 음수는 반대 방향이다.
+        private static CommandArgSpec[] SlotMove()
+            => new[] { Slot(), Req("distance", "거리", ArgKind.Distance), Duration("0.4s"), Ease() };
 
         private static CommandArgSpec[] CharVisual(string defaultDuration)
             => new[] { Slot(), Number("intensity", "세기", "1"), Duration(defaultDuration) };

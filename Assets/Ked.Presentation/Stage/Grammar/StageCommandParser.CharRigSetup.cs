@@ -185,12 +185,53 @@ public sealed partial class StageCommandParser
     // ── 슬롯의 자리 · 포커스 (docs/PLAN_rig-layers.md §4) ──────────────
     // 코어 폴드(StageReducer.Placement)가 접는 노드와 같아야 "재생 = 정지 프레임"이 유지된다.
 
-    // move_reset — move_by가 쓰는 그 노드(Track)를 0으로. 포커스는 focus_reset이 걷는다.
+    // left · right · up · down — 본래 자리 위의 움직임(docs/PLAN_move-axes.md §4). 상대값이라 쌓인다. 가로는 Move_X, 세로는 Move_Y라
+    // 둘을 나란히 적으면 함께 돈다(대각선). 노드와 방향은 코어의 표(NodeTargets.TryGetSlotMove) 하나를 폴드와 함께 본다.
+    // 거리에는 생략값이 없다 — 빠졌거나 읽지 못하면 소리 내고 아무것도 내지 않는다(폴드도 Unhandled로 남긴다). 음수는 반대 방향이다.
+    private void EnqueueSlotMoveSpec(StageCommand c, string roleKey, string distanceToken, string durationToken, string easeToken)
+    {
+        if (!NodeTargets.TryGetSlotMove(c.Name, out string nodeId, out Vec2 direction))
+        {
+            Debug.LogError($"[StageCommandParser] <<{c.Name}>>은 슬롯의 움직임이 아니다 — 표가 어긋났다. 이 커맨드는 실행하지 않는다.");
+            return;
+        }
+
+        if (distanceToken == null)
+        {
+            Debug.LogError($"[StageCommandParser] <<{c.Name}>>에 거리가 없다 — 거리는 꼭 적는다. 이 커맨드는 실행하지 않는다.");
+            return;
+        }
+
+        if (!UnitToken.TryParseSignedPixels(distanceToken, UnitToken.DefaultReferenceStageWidth, out float distance))
+        {
+            Debug.LogError($"[StageCommandParser] <<{c.Name}>>의 거리를 읽지 못했다 ('{distanceToken}'). 이 커맨드는 실행하지 않는다.");
+            return;
+        }
+
+        Emit(new MoveByCommandSpecCharR
+        {
+            roleKey = roleKey,
+            node = nodeId == NodeTargets.SlotMoveYNodeId ? CharacterRigNode.CharSlot_Move_Y : CharacterRigNode.CharSlot_Move_X,
+            useAbsolutePosition = false,
+            delta = (direction * distance).ToUnity(),
+            duration = YarnDurationParser.Parse(durationToken),
+            ease = YarnEaseParser.Parse(easeToken)
+        });
+    }
+
+    // move_reset — 쌓인 움직임(Move_X · _Y)을 0으로. 본래 자리(place의 Track)는 그대로다(docs/PLAN_move-axes.md M6).
+    // 노드가 둘이라 스펙도 둘이다(한 노드에 트윈 하나). 포커스는 focus_reset이 걷는다.
     private void EnqueueMoveResetSpec(string roleKey, string durationToken)
+    {
+        EmitMoveReset(roleKey, CharacterRigNode.CharSlot_Move_X, durationToken);
+        EmitMoveReset(roleKey, CharacterRigNode.CharSlot_Move_Y, durationToken);
+    }
+
+    private void EmitMoveReset(string roleKey, CharacterRigNode node, string durationToken)
         => Emit(new MoveByCommandSpecCharR
         {
             roleKey = roleKey,
-            node = CharacterRigNode.CharSlot_Track,
+            node = node,
             useAbsolutePosition = true,
             delta = Vector2.zero,
             duration = YarnDurationParser.Parse(durationToken)

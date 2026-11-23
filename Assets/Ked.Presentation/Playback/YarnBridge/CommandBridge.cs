@@ -160,6 +160,16 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler<string, string, string, string, string>(
             "place", EnqueuePlaceSpec);
 
+        // 슬롯의 움직임 — <<left 슬롯 거리 [길이] [이징]>> · right · up · down. 상대값이라 쌓인다(docs/PLAN_move-axes.md)
+        runner.AddCommandHandler<string, string, string, string>(
+            "left", EnqueueLeftSpec);
+        runner.AddCommandHandler<string, string, string, string>(
+            "right", EnqueueRightSpec);
+        runner.AddCommandHandler<string, string, string, string>(
+            "up", EnqueueUpSpec);
+        runner.AddCommandHandler<string, string, string, string>(
+            "down", EnqueueDownSpec);
+
         // 포커스 — 대화할 때만 서는 자리. focus_reset이 셋을 함께 걷는다
         runner.AddCommandHandler<string, string, string, string, string>(
             "focus_move", EnqueueFocusMoveSpec);

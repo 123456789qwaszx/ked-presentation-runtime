@@ -12,7 +12,7 @@ public sealed class SetAnchorCommandSpecCharR : CharacterRigCommandSpecBase
     public CharacterRigNode node = CharacterRigNode.CharacterPortrait_VisualOffset;
 
     [Header("Reset")]
-    [Tooltip("체크하면 Anchor 설정 후 슬롯의 자리(CharSlot_Track) · 회전(CharSlot_Rotation)을 기본값으로 초기화합니다. 포커스와 깊이는 건드리지 않습니다.")]
+    [Tooltip("체크하면 Anchor 설정 후 슬롯의 자리(CharSlot_Track) · 움직임(CharSlot_Move_X · _Y) · 회전(CharSlot_Rotation)을 기본값으로 초기화합니다. 포커스와 깊이는 건드리지 않습니다.")]
     public bool resetSlotPos = true;
 
     [Tooltip("체크하면 Anchor 설정 후 CharacterPortrait_Track / Track_Move / Rotation / SwayPivot / Shake / ActingScale / Mirror 축을 기본값으로 초기화합니다.")]
@@ -125,6 +125,8 @@ public sealed class SetAnchorCommandCharR : CommandBase
         if (_spec.resetSlotPos)
         {
             _resetPositionRects.Add(_rigRefs.CharSlot_Track);
+            _resetPositionRects.Add(_rigRefs.CharSlot_Move_X);
+            _resetPositionRects.Add(_rigRefs.CharSlot_Move_Y);
 
             _resetEulerRects.Add(_rigRefs.CharSlot_Rotation);
         }

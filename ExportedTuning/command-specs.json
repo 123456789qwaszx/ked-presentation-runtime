@@ -858,6 +858,238 @@
             ]
         },
         {
+            "name": "left",
+            "kind": "placement",
+            "summary": "슬롯을 왼쪽으로 민다(상대값 — 쌓인다)",
+            "waits": false,
+            "immediate": false,
+            "fork": false,
+            "args": [
+                {
+                    "name": "slot",
+                    "label": "슬롯",
+                    "kind": "slot",
+                    "hasDefault": false,
+                    "defaultValue": "",
+                    "optional": false,
+                    "flag": false,
+                    "catalog": "",
+                    "choices": [],
+                    "note": ""
+                },
+                {
+                    "name": "distance",
+                    "label": "거리",
+                    "kind": "distance",
+                    "hasDefault": false,
+                    "defaultValue": "",
+                    "optional": false,
+                    "flag": false,
+                    "catalog": "",
+                    "choices": [],
+                    "note": ""
+                },
+                {
+                    "name": "duration",
+                    "label": "길이",
+                    "kind": "duration",
+                    "hasDefault": true,
+                    "defaultValue": "0.4s",
+                    "optional": true,
+                    "flag": false,
+                    "catalog": "",
+                    "choices": [],
+                    "note": ""
+                },
+                {
+                    "name": "ease",
+                    "label": "이징",
+                    "kind": "ease",
+                    "hasDefault": true,
+                    "defaultValue": "",
+                    "optional": true,
+                    "flag": false,
+                    "catalog": "",
+                    "choices": [],
+                    "note": ""
+                }
+            ]
+        },
+        {
+            "name": "right",
+            "kind": "placement",
+            "summary": "슬롯을 오른쪽으로 민다(상대값 — 쌓인다)",
+            "waits": false,
+            "immediate": false,
+            "fork": false,
+            "args": [
+                {
+                    "name": "slot",
+                    "label": "슬롯",
+                    "kind": "slot",
+                    "hasDefault": false,
+                    "defaultValue": "",
+                    "optional": false,
+                    "flag": false,
+                    "catalog": "",
+                    "choices": [],
+                    "note": ""
+                },
+                {
+                    "name": "distance",
+                    "label": "거리",
+                    "kind": "distance",
+                    "hasDefault": false,
+                    "defaultValue": "",
+                    "optional": false,
+                    "flag": false,
+                    "catalog": "",
+                    "choices": [],
+                    "note": ""
+                },
+                {
+                    "name": "duration",
+                    "label": "길이",
+                    "kind": "duration",
+                    "hasDefault": true,
+                    "defaultValue": "0.4s",
+                    "optional": true,
+                    "flag": false,
+                    "catalog": "",
+                    "choices": [],
+                    "note": ""
+                },
+                {
+                    "name": "ease",
+                    "label": "이징",
+                    "kind": "ease",
+                    "hasDefault": true,
+                    "defaultValue": "",
+                    "optional": true,
+                    "flag": false,
+                    "catalog": "",
+                    "choices": [],
+                    "note": ""
+                }
+            ]
+        },
+        {
+            "name": "up",
+            "kind": "placement",
+            "summary": "슬롯을 위로 민다(상대값 — 쌓인다)",
+            "waits": false,
+            "immediate": false,
+            "fork": false,
+            "args": [
+                {
+                    "name": "slot",
+                    "label": "슬롯",
+                    "kind": "slot",
+                    "hasDefault": false,
+                    "defaultValue": "",
+                    "optional": false,
+                    "flag": false,
+                    "catalog": "",
+                    "choices": [],
+                    "note": ""
+                },
+                {
+                    "name": "distance",
+                    "label": "거리",
+                    "kind": "distance",
+                    "hasDefault": false,
+                    "defaultValue": "",
+                    "optional": false,
+                    "flag": false,
+                    "catalog": "",
+                    "choices": [],
+                    "note": ""
+                },
+                {
+                    "name": "duration",
+                    "label": "길이",
+                    "kind": "duration",
+                    "hasDefault": true,
+                    "defaultValue": "0.4s",
+                    "optional": true,
+                    "flag": false,
+                    "catalog": "",
+                    "choices": [],
+                    "note": ""
+                },
+                {
+                    "name": "ease",
+                    "label": "이징",
+                    "kind": "ease",
+                    "hasDefault": true,
+                    "defaultValue": "",
+                    "optional": true,
+                    "flag": false,
+                    "catalog": "",
+                    "choices": [],
+                    "note": ""
+                }
+            ]
+        },
+        {
+            "name": "down",
+            "kind": "placement",
+            "summary": "슬롯을 아래로 민다(상대값 — 쌓인다)",
+            "waits": false,
+            "immediate": false,
+            "fork": false,
+            "args": [
+                {
+                    "name": "slot",
+                    "label": "슬롯",
+                    "kind": "slot",
+                    "hasDefault": false,
+                    "defaultValue": "",
+                    "optional": false,
+                    "flag": false,
+                    "catalog": "",
+                    "choices": [],
+                    "note": ""
+                },
+                {
+                    "name": "distance",
+                    "label": "거리",
+                    "kind": "distance",
+                    "hasDefault": false,
+                    "defaultValue": "",
+                    "optional": false,
+                    "flag": false,
+                    "catalog": "",
+                    "choices": [],
+                    "note": ""
+                },
+                {
+                    "name": "duration",
+                    "label": "길이",
+                    "kind": "duration",
+                    "hasDefault": true,
+                    "defaultValue": "0.4s",
+                    "optional": true,
+                    "flag": false,
+                    "catalog": "",
+                    "choices": [],
+                    "note": ""
+                },
+                {
+                    "name": "ease",
+                    "label": "이징",
+                    "kind": "ease",
+                    "hasDefault": true,
+                    "defaultValue": "",
+                    "optional": true,
+                    "flag": false,
+                    "catalog": "",
+                    "choices": [],
+                    "note": ""
+                }
+            ]
+        },
+        {
             "name": "move_by",
             "kind": "placement",
             "summary": "슬롯을 지금 자리에서 옮긴다(상대값)",
@@ -930,7 +1162,7 @@
         {
             "name": "move_reset",
             "kind": "placement",
-            "summary": "move_by로 옮긴 것을 본래 자리로",
+            "summary": "쌓인 움직임(left · right · up · down)을 걷는다 — 본래 자리는 그대로",
             "waits": false,
             "immediate": false,
             "fork": false,

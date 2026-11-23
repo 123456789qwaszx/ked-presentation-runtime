@@ -69,8 +69,10 @@ namespace Ked.Presentation.Core
             if (!TryGetSpawnedSlot(state, cmd, out string slotKey, out reason))
                 return false;
 
-            // 브리지는 Track에 절대 0을 건다 — move_by가 쓰는 그 노드다. 포커스는 focus_reset이 걷는다.
-            ApplyMoveTarget(state, slotKey, "CharSlot_Track", relative: false, Vec2.Zero);
+            // 쌓인 움직임(Move_X · _Y)만 0으로 — 본래 자리(place의 Track)는 그대로다(docs/PLAN_move-axes.md M6).
+            // 브리지도 두 노드에 절대 0을 건다. 포커스는 focus_reset이 걷는다.
+            ApplyMoveTarget(state, slotKey, NodeTargets.SlotMoveXNodeId, relative: false, Vec2.Zero);
+            ApplyMoveTarget(state, slotKey, NodeTargets.SlotMoveYNodeId, relative: false, Vec2.Zero);
             return true;
         }
 

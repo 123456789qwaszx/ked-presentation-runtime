@@ -1,6 +1,6 @@
 # 이동의 축 — 슬롯의 Move_X · Move_Y와 left · right · up · down (2026-11-23)
 
-> 상태: **계획 확정(소유자 2026-11-23 — M1 ~ M10). X1 끝(리그 22노드) — X2 · X3 남음** · 브랜치 `feat/move-axes`(`dev`에서) · 단계별 기록은 §11
+> 상태: **계획 확정(소유자 2026-11-23 — M1 ~ M10). X1 · X2 끝(리그 22노드 · 커맨드 넷) — X3 남음** · 브랜치 `feat/move-axes`(`dev`에서) · 단계별 기록은 §11
 > 앞선 일: [PLAN_rig-layers.md](PLAN_rig-layers.md)(리그의 계층 — 20노드. 이 계획이 그 L-결정 가운데 "축별 노드를 걷는다"를 슬롯 계층에서만 뒤집는다)
 
 ## 0. 한 문장
@@ -164,4 +164,20 @@ CharFocus_Track                 focus_move
 - 손으로 맞춘 것(Q1): `rig-schemas.json`(노드 둘 — `CharSlot_Track`의 값 그대로, 부모만), `CharacterRig.prefab` · `MotionAuthoring.unity`(게임 오브젝트 둘을 끼우고 다시 이었다), `nod.anim` · `bow.anim`(경로와 그 CRC32).
 - 시험: 합성 리그 셋(리듀서 · 배경 · 포커스)에 노드 둘. Unity 시험 하나를 더했다 — 스키마와 덤프가 같은 사슬(Track → Move_X → Move_Y → 포커스 회전)을 갖는가.
 - 확인: 순수 시험 598을 .NET 8로 돌려 통과. Unity 쪽 코드는 클라우드에서 엔진 없이 컴파일해 전과 견줬다(새 오류 0) — Unity 컴파일 · EditMode는 소유자.
+
+### X2 — 커맨드 넷 · `move_reset` · 초기화 목록
+
+- 코어: 넷의 노드와 방향을 표 하나로 둔다 — `NodeTargets.TryGetSlotMove`(left −X · right +X · up +Y · down −Y). 파서와 폴드가 같은 표를 본다.
+  폴드 `ApplySlotMove`(상대, `UnitToken.TryParseSignedPixels` — 음수는 반대 방향). 거리에는 생략값이 없다 — 빠졌거나 못 읽으면 Unhandled.
+- `move_reset`은 Move_X · _Y에 절대 0(스펙 둘) — 본래 자리(Track)는 그대로다(M6). 코어 폴드도 같다.
+- 초기화 목록(Q4): `SetAnchor`의 resetSlotPos에 Move_X · _Y — 런타임 `SetAnchorCommandCharR`과 코어 `StageReducer.Anchor`가 같은 차례(Track · Move_X · Move_Y).
+- 파서 표 · 브리지 등록 · 전달. 런타임 스펙은 지금의 `MoveByCommandSpecCharR`(상대) 그대로다 — 노드만 Move_X · _Y. Move_X의 세로 · Move_Y의 가로는 아무도 쓰지 않으므로
+  `MoveByCommandCharR`에 축 하나만 거는 길을 따로 두지 않았다(§6의 그 줄).
+- 명세 표: 넷(자리와 구도 · 슬롯 · 거리(꼭) · 길이 0.4s · 이징), `move_reset`의 요약. `command-specs.json` 85 → 89(X3에서 −3 → 86).
+  손으로 고치지 않고 코어의 `CommandSpecsFile.ToDto`를 .NET에서 돌려 냈다 — 같은 생성기가 고치기 전 파일을 바이트까지 같게 낸다.
+- 시험: 리듀서(넷이 쌓인다 · 음수 · 거리 없음 · `move_reset`은 움직임만 · `place`는 움직임을 걷지 않는다 · 기울기와 크기에 곱해지지 않는다 · `cast`가 움직임을 되돌린다),
+  파서(넷의 노드 · 부호 · 생략값 · 거리 없음 · `move_reset`의 두 스펙), 명세 표(넷의 칸), 앵커 목록.
+  "걷은 이름"에서 넷을 뺐다 — 슬롯의 움직임으로 돌아왔다.
+- 확인: 순수 시험 605 통과(.NET 8). 명세 표 ↔ 파서 표 대조(`StageCommandSpecTableParserTests`)는 파서를 표의 원문에서 읽은 이름으로 바꿔 끼워 돌려 통과.
+  Unity 쪽 코드는 엔진 없이 Roslyn으로 메서드 본문까지 진단해 고치기 전(dev)과 견줬다 — X1 · X2를 합쳐 새 오류 0(X1의 확인은 선언만 보는 컴파일이었다).
 

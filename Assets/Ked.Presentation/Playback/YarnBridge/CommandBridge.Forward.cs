@@ -83,6 +83,18 @@ public sealed partial class YarnCommandBridge
     private void EnqueuePlaceSpec(string roleKey = null, string xToken = null, string yToken = null, string durationToken = null, string easeToken = null)
         => Forward("place", roleKey, xToken, yToken, durationToken, easeToken);
 
+    private void EnqueueLeftSpec(string roleKey = null, string distanceToken = null, string durationToken = null, string easeToken = null)
+        => Forward("left", roleKey, distanceToken, durationToken, easeToken);
+
+    private void EnqueueRightSpec(string roleKey = null, string distanceToken = null, string durationToken = null, string easeToken = null)
+        => Forward("right", roleKey, distanceToken, durationToken, easeToken);
+
+    private void EnqueueUpSpec(string roleKey = null, string distanceToken = null, string durationToken = null, string easeToken = null)
+        => Forward("up", roleKey, distanceToken, durationToken, easeToken);
+
+    private void EnqueueDownSpec(string roleKey = null, string distanceToken = null, string durationToken = null, string easeToken = null)
+        => Forward("down", roleKey, distanceToken, durationToken, easeToken);
+
     private void EnqueueFocusMoveSpec(string roleKey = null, string xToken = null, string yToken = null, string durationToken = null, string easeToken = null)
         => Forward("focus_move", roleKey, xToken, yToken, durationToken, easeToken);
 

@@ -137,6 +137,23 @@ namespace Ked.Presentation.Tests
         }
 
         [Test]
+        public void 슬롯의_움직임_넷은_자리와_구도이고_거리를_꼭_적는다()
+        {
+            // docs/PLAN_move-axes.md §4 — 슬롯 · 거리 · 길이(0.4s) · 이징.
+            foreach (string name in new[] { "left", "right", "up", "down" })
+            {
+                StageCommandSpec spec = Spec(name);
+
+                Assert.That(spec.Kind, Is.EqualTo(CommandKind.Placement), name);
+                Assert.That(spec.Args.Select(a => a.Name), Is.EqualTo(new[] { "slot", "distance", "duration", "ease" }), name);
+                Assert.That(spec.Args[1].Kind, Is.EqualTo(ArgKind.Distance), name);
+                Assert.That(spec.Args[1].Default, Is.Null, name + " — 거리에는 생략값이 없다");
+                Assert.That(spec.Args[2].Default, Is.EqualTo("0.4s"), name);
+                Assert.That(spec.DurationArgIndex, Is.EqualTo(2), name);
+            }
+        }
+
+        [Test]
         public void 길이_칸의_자리()
         {
             Assert.That(Spec("move_by").DurationArgIndex, Is.EqualTo(3));

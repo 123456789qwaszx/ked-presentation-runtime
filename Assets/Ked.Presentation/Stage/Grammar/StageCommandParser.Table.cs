@@ -45,6 +45,11 @@ public sealed partial class StageCommandParser
         ["shot_shake"] = (p, c) => p.EnqueueShotShakeSpec(c.Arg(0), Float(c, 1, 1f)),
         // 리그의 세 덩어리(docs/PLAN_rig-layers.md §4) — 전부 절대값이다. 거리 · 각도 · 배율은 move_by와 같은 생략값(0 · 1).
         ["place"] = (p, c) => p.EnqueuePlaceSpec(c.Arg(0), c.Arg(1, "0u"), c.Arg(2, "0u"), c.Arg(3, "0.4s"), c.Arg(4, "")),
+        // 슬롯의 움직임 — 본래 자리 위에서 상대값으로 쌓는다(docs/PLAN_move-axes.md §4). 거리에는 생략값이 없다.
+        ["left"] = (p, c) => p.EnqueueSlotMoveSpec(c, c.Arg(0), c.Arg(1), c.Arg(2, "0.4s"), c.Arg(3, "")),
+        ["right"] = (p, c) => p.EnqueueSlotMoveSpec(c, c.Arg(0), c.Arg(1), c.Arg(2, "0.4s"), c.Arg(3, "")),
+        ["up"] = (p, c) => p.EnqueueSlotMoveSpec(c, c.Arg(0), c.Arg(1), c.Arg(2, "0.4s"), c.Arg(3, "")),
+        ["down"] = (p, c) => p.EnqueueSlotMoveSpec(c, c.Arg(0), c.Arg(1), c.Arg(2, "0.4s"), c.Arg(3, "")),
         ["focus_move"] = (p, c) => p.EnqueueFocusMoveSpec(c.Arg(0), c.Arg(1, "0u"), c.Arg(2, "0u"), c.Arg(3, "0.4s"), c.Arg(4, "")),
         ["focus_rotate"] = (p, c) => p.EnqueueFocusRotateSpec(c.Arg(0), Float(c, 1, 0f), c.Arg(2, "0.4s"), c.Arg(3, "")),
         ["focus_scale"] = (p, c) => p.EnqueueFocusScaleSpec(c.Arg(0), Float(c, 1, 1f), c.Arg(2, "0.4s"), c.Arg(3, "")),

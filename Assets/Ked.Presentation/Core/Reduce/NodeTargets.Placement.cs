@@ -99,6 +99,22 @@ namespace Ked.Presentation.Core
         public const string SlotMoveXNodeId = "CharSlot_Move_X";
         public const string SlotMoveYNodeId = "CharSlot_Move_Y";
 
+        /// <summary>
+        /// 슬롯의 움직임 커맨드(left · right · up · down) → 노드와 방향(단위 벡터). 넷이 아니면 false.
+        /// 값은 상대다 — 지금 값에서 방향 × 거리만큼 민다(쌓인다). 런타임 파서와 폴드가 이 표 하나를 본다.
+        /// </summary>
+        public static bool TryGetSlotMove(string commandName, out string nodeId, out Vec2 direction)
+        {
+            switch (commandName)
+            {
+                case "left": nodeId = SlotMoveXNodeId; direction = new Vec2(-1f, 0f); return true;
+                case "right": nodeId = SlotMoveXNodeId; direction = new Vec2(1f, 0f); return true;
+                case "up": nodeId = SlotMoveYNodeId; direction = new Vec2(0f, 1f); return true;
+                case "down": nodeId = SlotMoveYNodeId; direction = new Vec2(0f, -1f); return true;
+                default: nodeId = null; direction = Vec2.Zero; return false;
+            }
+        }
+
         /// <summary>초상의 깊이 — 그 사람의 크기. size가 놓는다.</summary>
         public const string DepthOffsetNodeId = "CharacterPortrait_DepthOffset";
         public const string DepthScaleNodeId = "CharacterPortrait_DepthScale";
