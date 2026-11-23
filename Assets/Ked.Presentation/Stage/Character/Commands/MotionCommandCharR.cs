@@ -135,7 +135,7 @@ public sealed class MotionCommandCharR : CommandBase
         }
     }
 
-    // DOKill → 시작값 → 종점(코어) → 게시. move_by·rotate_to와 같은 순서다.
+    // DOKill → 시작값 → 종점(코어) → 게시. MoveBy · RotateTo와 같은 순서다.
     private void Claim()
     {
         _claimed = true;

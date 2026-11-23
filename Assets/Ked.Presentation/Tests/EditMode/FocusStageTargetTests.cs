@@ -314,13 +314,14 @@ namespace Ked.Presentation.Tests
         [Test]
         public void 커지고_기운_뒤에도_명중한다()
         {
-            // 자리 노드 아래에 포커스 회전 · 배율, 슬롯 회전, 깊이가 있다 — 그것까지 넣어 푼다.
+            // 자리 노드 아래에 슬롯의 움직임, 포커스 회전 · 배율, 슬롯 회전, 깊이가 있다 — 그것까지 넣어 푼다.
             StageReducerTuning tuning = NewTuning();
 
             StageState before = Fold(tuning,
                 Cmd("slot", "c1"),
                 Cmd("size", "c1", "close"),
-                Cmd("move_by", "c1", "-3u", "1u"),
+                Cmd("left", "c1", "3u"),
+                Cmd("up", "c1", "1u"),
                 Cmd("rotate_by", "c1", "12"),
                 Cmd("focus_rotate", "c1", "-5"),
                 Cmd("focus_scale", "c1", "1.1"));
@@ -342,7 +343,7 @@ namespace Ked.Presentation.Tests
             // 대본에 남는 것은 풀린 값이다 — place x y(절대값)로 접으면 같은 무대가 나온다.
             StageReducerTuning tuning = NewTuning();
 
-            StageState before = Fold(tuning, Cmd("slot", "c1"), Cmd("size", "c1", "front"), Cmd("move_by", "c1", "2u", "0u"));
+            StageState before = Fold(tuning, Cmd("slot", "c1"), Cmd("size", "c1", "front"), Cmd("right", "c1", "2u"));
             Vec2 solved = Solve(before, "c1", "bust", "left", tuning, NodeTargets.SlotTrackNodeId);
 
             StageState written = StageReducer.Apply(before, Cmd("place", "c1", U(solved.X), U(solved.Y)), tuning);
@@ -424,15 +425,16 @@ namespace Ked.Presentation.Tests
         {
             StageState state = Fold(NewTuning(),
                 Cmd("slot", "c1"),
-                Cmd("move_by", "c1", "5u", "5u"),
-                Cmd("place", "c1", "-3u", "1.5u", "24fr", "OutBack"));
+                Cmd("place", "c1", "5u", "5u", "0fr"),
+                Cmd("place", "c1", "-3u", "1.5u", "24fr", "OutBack"));   // 절대값 — 앞의 것에 얹지 않는다
 
             Assert.That(state.Unhandled, Is.Empty);
             Assert.That(state.Nodes.GetState("c1/CharSlot_Track").AnchoredPosition, Is.EqualTo(new Vec2(-120f, 60f)));
 
-            // move_by는 그 위에 얹는다 — 같은 노드다.
-            StageState moved = StageReducer.Apply(state, Cmd("move_by", "c1", "1u", "0u"), NewTuning());
-            Assert.That(moved.Nodes.GetState("c1/CharSlot_Track").AnchoredPosition, Is.EqualTo(new Vec2(-80f, 60f)));
+            // 움직임은 그 아래 제 노드에 쌓인다 — 본래 자리는 그대로다(docs/PLAN_move-axes.md).
+            StageState moved = StageReducer.Apply(state, Cmd("right", "c1", "1u"), NewTuning());
+            Assert.That(moved.Nodes.GetState("c1/CharSlot_Track").AnchoredPosition, Is.EqualTo(new Vec2(-120f, 60f)));
+            Assert.That(moved.Nodes.GetState("c1/CharSlot_Move_X").AnchoredPosition, Is.EqualTo(new Vec2(40f, 0f)));
         }
 
         [Test]
@@ -531,7 +533,8 @@ namespace Ked.Presentation.Tests
 
             StageState moved = Fold(tuning,
                 Cmd("slot", "c1"),
-                Cmd("move_by", "c1", "-6u", "2u"),
+                Cmd("left", "c1", "6u"),
+                Cmd("up", "c1", "2u"),
                 Cmd("rotate_by", "c1", "12"),
                 Cmd("size", "c1", "close"));
 
@@ -554,7 +557,7 @@ namespace Ked.Presentation.Tests
         [Test]
         public void 깊이는_슬롯의_자리를_곱하지_않는다()
         {
-            // 깊이는 초상만 곱한다(docs/PLAN_rig-layers.md L5) — move_by · place의 값은 어느 크기에서나 화면 값 그대로다.
+            // 깊이는 초상만 곱한다(docs/PLAN_rig-layers.md L5) — place · left · right · up · down의 값은 어느 크기에서나 화면 값 그대로다.
             StageReducerTuning tuning = NewTuning();
             Vec2 FeetOf(StageState s) => SettledFocusMath.FocusPointInRigSpace(
                 s.Nodes.BuildChainTo("c1/CharacterPortrait_VisualOffset"), s.Nodes.RootSpace, Vec2.Zero);
@@ -562,7 +565,7 @@ namespace Ked.Presentation.Tests
             foreach (string depth in new[] { "far", "mid", "close", "x0.5" })
             {
                 StageState a = Fold(tuning, Cmd("slot", "c1"), Cmd("size", "c1", depth, "keep_y"));
-                StageState b = Fold(tuning, Cmd("slot", "c1"), Cmd("size", "c1", depth, "keep_y"), Cmd("move_by", "c1", "-6u", "0u"));
+                StageState b = Fold(tuning, Cmd("slot", "c1"), Cmd("size", "c1", depth, "keep_y"), Cmd("left", "c1", "6u"));
 
                 Assert.That(FeetOf(b).X - FeetOf(a).X, Is.EqualTo(-240f).Within(Eps), depth);
             }

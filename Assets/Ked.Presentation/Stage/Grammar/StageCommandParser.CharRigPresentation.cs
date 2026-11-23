@@ -38,37 +38,6 @@ public sealed partial class StageCommandParser
         });
     }
 
-    // slide_in · slide_out(slot, dir, dist, dur, ease, punch) — 커맨드는 하나(SlideCommandCharR), 종류만 다르다.
-    // in/out은 방향이 아니라 "지금 위치가 어느 끝이냐"다. ease · punch의 생략값은 종류별 코어 값(SlideMotion).
-    private void EnqueueSlideSpec(
-        SlideMotion.Kind kind, string roleKey, string direction, string distanceToken, string durationToken, string easeToken, string punchToken)
-        => Emit(new SlideCommandSpecCharR
-        {
-            roleKey = roleKey,
-            kind = kind,
-            direction = CharRigDirectionParser.ParseSlideDirection(direction),
-            distance = YarnUnitParser.Parse(distanceToken),
-            duration = YarnDurationParser.Parse(durationToken),
-            ease = YarnEaseParser.Parse(easeToken, SlideMotion.EaseOf(kind).ToDOTween()),
-            punch = ParsePunch(kind, punchToken)
-        });
-
-    // 튐의 양 — 거리와 같은 단위 토큰("0.6u" · "0.6")을 받는다. 못 읽으면 소리 내고 종류별 기본값.
-    private static float ParsePunch(SlideMotion.Kind kind, string token)
-    {
-        float fallback = SlideMotion.PunchPixels(kind);
-
-        if (string.IsNullOrWhiteSpace(token))
-            return fallback;
-
-        if (UnitToken.TryParsePixels(token, UnitToken.DefaultReferenceStageWidth, out float pixels))
-            return pixels;
-
-        Debug.LogWarning($"[StageCommandParser] slide punch '{token}'를 읽지 못했다. 기본값 {fallback}px로 간다.");
-
-        return fallback;
-    }
-
     private void EnqueueMoveByUnitCharSpec(string roleKey, string xToken, string yToken, string durationToken)
         => Emit(new MoveByCommandSpecCharR
         {

@@ -32,9 +32,6 @@ public sealed partial class YarnCommandBridge
     private void EnqueueMirrorSetSpec(string roleKey = null, string directionToken = null)
         => Forward("mirror", roleKey, directionToken);
 
-    private void EnqueueSetAnchorOffsetSpecs(string roleKey = null, string xToken = null, string yToken = null, string durationToken = null, string easeToken = null)
-        => Forward("move_by", roleKey, xToken, yToken, durationToken, easeToken);
-
     private void EnqueueRotateBySpec(string roleKey = null, string degree = null, string durationToken = null, string easeToken = null)
         => Forward("rotate_by", roleKey, degree, durationToken, easeToken);
 
@@ -122,12 +119,6 @@ public sealed partial class YarnCommandBridge
 
     private void EnqueueFadeToSpec(string roleKey = null, string alpha = null, string durationToken = null)
         => Forward("fade", roleKey, alpha, durationToken);
-
-    private void EnqueueSlideInSpec(string roleKey = null, string direction = null, string distanceToken = null, string durationToken = null, string easeToken = null, string punchToken = null)
-        => Forward("slide_in", roleKey, direction, distanceToken, durationToken, easeToken, punchToken);
-
-    private void EnqueueSlideOutSpec(string roleKey = null, string direction = null, string distanceToken = null, string durationToken = null, string easeToken = null, string punchToken = null)
-        => Forward("slide_out", roleKey, direction, distanceToken, durationToken, easeToken, punchToken);
 
     private void EnqueueMoveByUnitCharSpec(string roleKey = null, string xToken = null, string yToken = null, string durationToken = null)
         => Forward("char_move_to", roleKey, xToken, yToken, durationToken);

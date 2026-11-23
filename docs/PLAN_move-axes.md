@@ -1,6 +1,6 @@
 # 이동의 축 — 슬롯의 Move_X · Move_Y와 left · right · up · down (2026-11-23)
 
-> 상태: **계획 확정(소유자 2026-11-23 — M1 ~ M10). X1 · X2 끝(리그 22노드 · 커맨드 넷) — X3 남음** · 브랜치 `feat/move-axes`(`dev`에서) · 단계별 기록은 §11
+> 상태: **계획 확정(소유자 2026-11-23 — M1 ~ M10). X1 ~ X3 끝(리그 22노드 · 커맨드 넷 · `move_by` · `slide` 걷기) — 소유자 확인(Unity · 덤프 다시 내기) 남음. §10(덧그림)은 따로** · 브랜치 `feat/move-axes`(`dev`에서) · 단계별 기록은 §11
 > 앞선 일: [PLAN_rig-layers.md](PLAN_rig-layers.md)(리그의 계층 — 20노드. 이 계획이 그 L-결정 가운데 "축별 노드를 걷는다"를 슬롯 계층에서만 뒤집는다)
 
 ## 0. 한 문장
@@ -180,4 +180,32 @@ CharFocus_Track                 focus_move
   "걷은 이름"에서 넷을 뺐다 — 슬롯의 움직임으로 돌아왔다.
 - 확인: 순수 시험 605 통과(.NET 8). 명세 표 ↔ 파서 표 대조(`StageCommandSpecTableParserTests`)는 파서를 표의 원문에서 읽은 이름으로 바꿔 끼워 돌려 통과.
   Unity 쪽 코드는 엔진 없이 Roslyn으로 메서드 본문까지 진단해 고치기 전(dev)과 견줬다 — X1 · X2를 합쳐 새 오류 0(X1의 확인은 선언만 보는 컴파일이었다).
+
+### X3 — 대본 · 걷기 · 문서
+
+- 대본(Q2 — git이 추적하는 6곳): 데모 5곳 · `festival_eve_Festival_Classroom` 1곳을 §4.2 · §4.3의 꼴로.
+  - 등장(`slide_in s2 left 2u 18fr`, 셋) → `move_reset s2 0fr` · `place … 0fr` · `left s2 2u 0fr` · `fade_in` · `right s2 2u 18fr`. 데모 5번 줄의 `place … 25fr`은 같은 줄의 `slide_in`이
+    그 트윈을 바로 끝값으로 보내던 것이라 `0fr`로 적었다.
+  - 옆걸음(`move_by s1 7.092u 0u 50fr`, 둘) → `right s1 7.092u 50fr`. 컷인 안의 `move_by c1 0u 3.416u 10fr` → `up c1 3.416u 10fr`.
+  - Q3: 데모 7번 줄의 `place s1 11.52u 1.092u 60fr` 앞에 `move_reset s1 60fr`.
+  - 대사 글 둘(`ln_n3nwk0do` · `ln_pvp3bn88`)이 걷은 이름을 말하고 있어 고쳤다. 줄 ID는 그대로다.
+- 걷었다: 파서 표의 셋 · `EnqueueSetAnchorOffsetSpecs` · `EnqueueSlideSpec` · `ParsePunch` · 브리지 등록 셋 · `SlideCommandCharR`(스펙 · 팩토리 줄) ·
+  `CharRigDirection` · `CharRigDirectionParser`(slide만 썼다 — M9의 목록 밖이지만 함께 걷었다) · 코어 `SlideMotion` · 폴드의 셋 · 명세 표의 셋과 칸 손 `Direction()` ·
+  시험 `SlideMotionParityTests` · `SlideTargetTests`. `bg_move`의 폴드는 `ApplyBackgroundMove`로 이름만 바꿨다(§4.1 — 그대로).
+- 시험: `move_by`로 슬롯을 밀던 시험은 `left` · `right` · `up` · `down`(움직임 노드를 본다) 또는 `place`(본래 자리를 본다)로 옮겼다. 걷은 셋은 파서가 모르고 폴드가 Unhandled로 남긴다.
+- 명세 표 89 → 86(`command-specs.json` — X2와 같은 생성기).
+- 문서: README(자리와 움직임 · 예) · `command-authoring.md`(한 커맨드 한 노드 · 걷은 이름) · `PLAN_rig-layers.md`(머리에 한 줄) · `rig-axis-order.md`(22노드 · 계층 그림 · 합치면 안 되는 것) ·
+  `target-boundary.md` · `settled-chain.md` · `stage-rig.md` · `emoji-rig.md`. 소비처가 할 일은 `stage-changes-handoff.md` §6.
+- 대조(R4의 방법): 옛 대본을 옛 코어(`dev`)로, 새 대본을 새 코어로 접어 대사 · 스텝마다 슬롯의 측정 노드(`VisualOffset`)의 꼴(원점 · 두 축) · α · 샷 · Unhandled를 견줬다 —
+  두 편 839곳이 0px 차이로 같다(튐은 트윈 중의 모양이라 끝 상태에 없다).
+- 확인: 순수 시험 592 통과(.NET 8 — 걷은 시험만큼 줄었다), 명세 표 ↔ 파서 표 대조 통과, Roslyn 진단 새 오류 0(사라진 것은 지운 파일의 것뿐).
+
+### X3 뒤 — Unity에서 할 일(소유자)
+
+1. 컴파일 · EditMode 전체.
+2. `Ked/U12/Export Presentation Tuning Dump` — `rig-schemas.json`이 X1에서 손으로 맞춘 것과 같은지(같아야 한다), `command-specs.json`이 X2 · X3의 생성기와 같은지(같아야 한다).
+   `git diff ExportedTuning`으로 본다 — 그 밖의 덤프가 바뀌었으면 이 일과 상관이 있는지 본다. 명세 표만은 `Ked/U12/Export Command Specs`.
+3. `Ked/Motion/Export motions.json` — `nod` · `bow`가 그대로 나오는지(X1에서 고친 `.anim`의 바인딩). 원하면 `Ked/Motion/Create Authoring Rig`로 제작 리그를 다시 세워 견준다.
+4. 데모 재생 · 되감기 · 빨리 넘기기 — 5번 줄(시구레가 왼쪽 밖에서), 6-1 · 6-2(도중에 넘기기), 7번 줄(하린이 오른쪽 지점으로 — `move_reset 60fr`과 함께), 시구레의 등장, 컷인의 `up c1`, 진행 예제 교실 장면의 등장.
+5. 등가성 하네스 랩드스킵 재판정.
 

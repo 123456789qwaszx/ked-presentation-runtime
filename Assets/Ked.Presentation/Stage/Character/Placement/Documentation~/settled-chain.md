@@ -66,7 +66,7 @@
 |---|---|---|
 | `CharacterFocusPointResolver` | 진단 뷰(`CharacterFocusDebugView`) | 캐릭터 초점의 무대 좌표와 그 점이 선 층 |
 
-**쓰는 쪽**: 클레임-트윈 리그 커맨드 전부(move_by · scale_by · rotate_by · place · size · slide_in/out · mirror)가 `Reserve`으로, `MotionCommandCharR`(commit 모션)이 `Publish` · `Clear`로. 이 중 체인 위에 있어 실제로 읽히는 노드는 `Track` · `Track_Focus` · `DepthY` · `DepthScale` · `Scale` · `SwayPivot`이다.
+**쓰는 쪽**: 클레임-트윈 리그 커맨드 전부(place · left/right/up/down · move_reset · rotate_by · focus_* · size · mirror)가 `Reserve`으로, `MotionCommandCharR`(commit 모션)이 `Publish` · `Clear`로. 이 중 체인 위에 있어 실제로 읽히는 노드는 `Track` · `Track_Focus` · `DepthY` · `DepthScale` · `Scale` · `SwayPivot`이다.
 
 ### 언제 비어 있나
 

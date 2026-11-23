@@ -57,6 +57,8 @@ XxxSlot (무대 노드의 주인)
 | 파일 | 커맨드마다 파일 하나(스펙은 그 커맨드 파일 위에). 이름은 `XxxCommand` · `XxxCommandSpec` |
 | 스펙 | `[Header("Target")]` 등으로 칸을 묶는다 |
 | 이름 | `ResolveRefs` · `_resolveAttempted`(2026-11-06 `ResolveTargets`에서 바꿨다) |
+| 한 커맨드 한 노드 | 리그 커맨드는 노드 하나를 적힌 값으로 놓는다. 둘을 함께 놓는 일은 대본이 나란히 적는다 — `place`가 쌓인 움직임을 저절로 걷지 않고 `move_reset` → `place`로 적는 것처럼([PLAN_move-axes.md](PLAN_move-axes.md) M10). 노드가 여럿인 커맨드(`focus_reset` · `move_reset`)는 노드마다 스펙 하나를 낸다 |
+| 걷은 이름 | 별칭을 두지 않는다 — 모르는 명령이 된다(`move_by` · `slide_in` · `slide_out`, 명령 이름 바꾸기 · N5와 같은 결). 바꾼 런타임을 들이는 날 대본 · 카드 · 도구도 함께 바꾼다 |
 
 ## 5. 쓰기 전에 보여 준다
 

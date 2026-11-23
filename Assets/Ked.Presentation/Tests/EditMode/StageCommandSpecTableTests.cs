@@ -35,7 +35,7 @@ namespace Ked.Presentation.Tests
 
             Assert.That(immediate, Is.EquivalentTo(new[] { "surface_layout", "surface_reset" }));
             Assert.That(Table.IsImmediate("surface_layout"), Is.True);
-            Assert.That(Table.IsImmediate("move_by"), Is.False);
+            Assert.That(Table.IsImmediate("place"), Is.False);
             Assert.That(Table.IsImmediate("없는_이름"), Is.False);
             Assert.That(Table.IsImmediate(null), Is.False);
         }
@@ -156,7 +156,7 @@ namespace Ked.Presentation.Tests
         [Test]
         public void 길이_칸의_자리()
         {
-            Assert.That(Spec("move_by").DurationArgIndex, Is.EqualTo(3));
+            Assert.That(Spec("place").DurationArgIndex, Is.EqualTo(3));
             Assert.That(Spec("size").DurationArgIndex, Is.EqualTo(3));
             Assert.That(Spec("pause").DurationArgIndex, Is.EqualTo(0));
             Assert.That(Spec("motion").DurationArgIndex, Is.EqualTo(-1), "모션의 길이는 대본에 없다");
@@ -167,7 +167,7 @@ namespace Ked.Presentation.Tests
         public void 인자를_칸에_맞춘다()
         {
             List<string> problems = new();
-            List<BoundArg> bound = Spec("move_by").Bind(new[] { "s1", "120u", "", "0.4s" }, problems);
+            List<BoundArg> bound = Spec("place").Bind(new[] { "s1", "120u", "", "0.4s" }, problems);
 
             Assert.That(problems, Is.Empty);
             Assert.That(bound.Select(b => b.Spec.Name), Is.EqualTo(new[] { "slot", "x", "y", "duration", "ease" }));
@@ -223,7 +223,7 @@ namespace Ked.Presentation.Tests
             Assert.That(dto.commands.Where(c => c.fork).Select(c => c.name), Is.EqualTo(new[] { "cutin_panel", "messenger_open" }));
 
             // 같은 이름을 조용히 덮지 않는다.
-            Assert.Throws<ArgumentException>(() => StageCommandSpecTable.Core.With(new[] { new StageCommandSpec("move_by", CommandKind.Screen, "") }));
+            Assert.Throws<ArgumentException>(() => StageCommandSpecTable.Core.With(new[] { new StageCommandSpec("place", CommandKind.Screen, "") }));
         }
 
         [Test]

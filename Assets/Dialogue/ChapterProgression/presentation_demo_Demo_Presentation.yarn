@@ -60,18 +60,21 @@ test #line:ln_155oxtz7
 <<at start shot_reset>>
 4. mirror + place — 좌우가 바뀌어도 얼굴은 가운데 그대로다. #line:ln_reosfhyp
 
-<<at start place s2 -11.52u 1.092u 25fr>>
-<<at start slide_in s2 left 4u 38fr>>
-5. place + slide_in — 시구레가 미끄러져 들어와 가슴이 왼쪽 지점에 선다. #line:ln_n3nwk0do
+<<at start move_reset s2 0fr>>
+<<at start place s2 -11.52u 1.092u 0fr>>
+<<at start left s2 4u 0fr>>
+<<at start right s2 4u 38fr>>
+5. place + left · right — 시구레가 왼쪽 밖에서 들어와 가슴이 왼쪽 지점에 선다. #line:ln_n3nwk0do
 
-<<at start move_by s1 7.092u 0u 50fr>>
+<<at start right s1 7.092u 50fr>>
 6-1. 이 줄은 하린이 움직이는 도중에 바로 넘긴다. #line:ln_4ue11rb4
 
-<<at start move_by s1 7.092u 0u 50fr>>
-6-2. 앞 이동이 끝값으로 확정된 뒤 이어서 간다 — 두 번의 move_by가 다 더해져 있어야 한다. #line:ln_pvp3bn88
+<<at start right s1 7.092u 50fr>>
+6-2. 앞 이동이 끝값으로 확정된 뒤 이어서 간다 — 두 번의 right가 다 더해져 있어야 한다. #line:ln_pvp3bn88
 
 <<at start size s1 mid 60fr>>
 <<at start rotate_by s1 -12 60fr>>
+<<at start move_reset s1 60fr>>
 <<at start place s1 11.52u 1.092u 60fr>>
 7. 이 줄도 도중에 바로 넘긴다(스텝 경계 가속). 다음 줄에서 하린의 가슴이 오른쪽 지점에 있어야 한다. #line:ln_0pzcy7ib
 
@@ -87,9 +90,11 @@ test #line:ln_155oxtz7
 
 
 <<at start size s2 mid 0fr>>
+<<at start move_reset s2 0fr>>
 <<at start place s2 -11.52u 1.092u 0fr>>
-<<at start slide_in s2 left 2u 18fr>>
+<<at start left s2 2u 0fr>>
 <<at start fade_in s2 18fr>>
+<<at start right s2 2u 18fr>>
 <<at start place s1 11.52u 1.092u 20fr>>
 시구레: 옆으로 미끄러져 들어오면, 먼저 있던 사람은 자리를 비켜 줘요. #line:ln_4m8a87j3
 
@@ -202,7 +207,7 @@ test #line:ln_155oxtz7
 <<at start cutin_open stage01 pink_stars -11.5u -3.25u>>
 시구레: 컷인이에요! 판은 튀어 오르고, 머리는 판 위로 나와요. #line:ln_1oo8e9fj
 
-<<at start move_by c1 0u 3.416u 10fr>>
+<<at start up c1 3.416u 10fr>>
 qwe #line:ln_60n8o26q
 rrr #line:ln_bh3cbhhh
 

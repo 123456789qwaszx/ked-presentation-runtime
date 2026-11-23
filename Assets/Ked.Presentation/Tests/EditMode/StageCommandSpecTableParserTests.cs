@@ -33,9 +33,6 @@ public sealed class StageCommandSpecTableParserTests
     private static readonly Dictionary<string, string> Constants = new()
     {
         ["MotionModeToken.Relative"] = MotionModeToken.Relative,
-        ["SlideMotion.DefaultInDirection"] = SlideMotion.DefaultInDirection,
-        ["SlideMotion.DefaultOutDirection"] = SlideMotion.DefaultOutDirection,
-        ["SlideMotion.DefaultDistanceToken"] = SlideMotion.DefaultDistanceToken,
         ["ScreenCoverPresetDBSO.DefaultPresetKey"] = ScreenCoverPresetDBSO.DefaultPresetKey,
         ["ScreenNoisePresetDBSO.DefaultPresetKey"] = ScreenNoisePresetDBSO.DefaultPresetKey,
         ["DefaultDepthDurationToken"] = PrivateConst("DefaultDepthDurationToken"),

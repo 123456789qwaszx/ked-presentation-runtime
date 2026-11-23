@@ -32,7 +32,7 @@ public sealed class SetDepthCommandSpecCharR : CharacterRigCommandSpecBase
 /// <summary>
 /// size — 그 사람의 크기. 깊이 레벨의 Y(DepthOffset)와 배율(DepthScale)을 그대로 놓는다. 무대를 재지 않는다 —
 /// level 커브가 낸 값(또는 적힌 배율)이 곧 목표다. keep_y · x배율이면 Y를 건드리지 않는다(docs/PLAN_rig-layers.md L6).
-/// 깊이는 초상만 곱한다 — 슬롯의 자리(place · move_by)는 어느 크기에서나 그대로다.
+/// 깊이는 초상만 곱한다 — 슬롯의 자리 · 움직임(place · left · right · up · down)은 어느 크기에서나 그대로다.
 /// 코어 폴드(NodeTargets.TrySetDepth)와 같은 값을 낸다.
 /// </summary>
 public sealed class SetDepthCommandCharR : ClaimTweenCommandBase

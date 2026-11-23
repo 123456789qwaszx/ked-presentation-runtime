@@ -94,6 +94,22 @@ Yarn Spinner를 기반으로 제작한 **비주얼 노벨 화면 연출 런타�
 시구레: [beat=in/]자리를 바꿨어요. [beat=a/]여기서 표정이 바뀌어요.
 ```
 
+인물의 **본래 자리**는 `place 슬롯 x y`(절대값)가 놓고, 그 위의 움직임은 `left` · `right` · `up` · `down 슬롯 거리 [길이] [이징]`이 제 노드에 쌓아 갑니다(상대값).
+가로와 세로는 다른 노드라 나란히 적으면 대각선으로 함께 돕니다. `place`는 시작 자리를 정할 때만 씁니다 — 장면 머리, 퇴장했다가 다시 설 때,
+아예 다른 자리로 배정할 때. 그때는 쌓인 움직임을 먼저 걷습니다(`move_reset 슬롯 0fr` → `place`). 들어오는 움직임은 움직임 노드를 밀어 두었다가
+0으로 되돌리는 것이라 `place`의 값이 바뀌지 않습니다([PLAN_move-axes.md](docs/PLAN_move-axes.md) §4.2 · §4.3).
+
+```yarn
+<<at start move_reset s2 0fr>>
+<<at start place s2 -11.52u 1.092u 0fr>>
+<<at start left s2 2u 0fr>>
+<<at start fade_in s2 18fr>>
+<<at start right s2 2u 18fr>>
+시구레: 옆에서 들어와 제자리에 서요.
+<<at start right s2 3u>>
+시구레: 한 걸음 비켜설게요.
+```
+
 입력 없이 넘어가는 줄은 줄 태그 `#auto`입니다. 머무를 시간을 주려면 `#auto=1.8s` — 대사창이 열린 때부터 그만큼 머물고 글이 다 보이면 넘어갑니다.
 
 화면을 덮었다 걷는 일(암전)은 `screen_cover` · `screen_cover_clear`입니다. 덮개는 무대 셋과 컷인 · 팝업을 모두 덮고 대사창 · HUD는 덮지 않습니다.
@@ -171,7 +187,7 @@ Yarn Spinner를 기반으로 제작한 **비주얼 노벨 화면 연출 런타�
 
 연출 커맨드는 트윈을 시작하기 전에 "끝나면 노드가 어떤 값이어야 하는가"를 먼저 정합니다.
 이 계산을 엔진 의존이 없는 순수 C# 함수로 떼어 두었습니다 — 노드는 `NodeTargets`, 카메라는 `ShotIntents`이고,
-메서드 이름은 대본 커맨드 이름을 따릅니다(`move_by` → `NodeTargets.MoveBy`).
+메서드 이름은 실행 커맨드를 따릅니다(`MoveByCommandCharR` → `NodeTargets.MoveBy` — `place` · `left` · `right` · `up` · `down`이 지납니다).
 
 떼어 낸 이유는 나온 값 하나가 세 곳에 쓰이기 때문입니다.
 

@@ -15,9 +15,11 @@ title: Festival_Classroom
 하린: 축제가 내일인데, 우리 반 간판이 아직 반쯤 비어 있어. #line:ln_b76q68hg
 
 <<at start size s2 mid 0fr>>
+<<at start move_reset s2 0fr>>
 <<at start place s2 -11.52u 1.092u 0fr>>
-<<at start slide_in s2 left 2u 18fr>>
+<<at start left s2 2u 0fr>>
 <<at start fade_in s2 18fr>>
+<<at start right s2 2u 18fr>>
 시구레: 칠도 반쯤 말랐네요. 이대로 걸기엔 좀 애매해요. #line:ln_rxvmhx0i
 
 <<at start face s1 3>>

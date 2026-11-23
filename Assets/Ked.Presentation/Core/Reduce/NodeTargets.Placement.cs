@@ -89,7 +89,7 @@ namespace Ked.Presentation.Core
         public const string FocusRotationNodeId = "CharFocus_Rotation";
         public const string FocusScaleNodeId = "CharFocus_Scale";
 
-        /// <summary>슬롯 — 무대 위의 본래 자리. place(절대) · move_by(상대) · slide가 쓴다.</summary>
+        /// <summary>슬롯 — 무대 위의 본래 자리. place가 절대값으로 놓는다(배경 슬롯은 bg_move가 상대값으로 민다).</summary>
         public const string SlotTrackNodeId = "CharSlot_Track";
 
         /// <summary>
@@ -195,7 +195,7 @@ namespace Ked.Presentation.Core
         // ── size (depth) ────────────────────────────────────────
         //
         // size — 그 사람의 크기. 깊이의 Y(DepthOffset)와 배율(DepthScale)을 놓는다. 무대를 재지 않는다 —
-        // 커브가 낸 값(또는 적힌 배율)이 곧 목표다. 깊이는 초상만 곱한다: 슬롯의 자리(place · move_by)는 그대로다.
+        // 커브가 낸 값(또는 적힌 배율)이 곧 목표다. 깊이는 초상만 곱한다: 슬롯의 자리 · 움직임(place · left · right · up · down)은 그대로다.
 
         /// <param name="depthToken">레벨(숫자) · 라벨 · x배율(SizeToken).</param>
         /// <param name="keepY">true면 Y를 지금 값 그대로 둔다(타깃을 내지 않는다). x배율은 늘 Y를 건드리지 않는다.</param>

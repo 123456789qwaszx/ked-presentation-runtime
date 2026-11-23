@@ -81,21 +81,6 @@ public sealed partial class StageCommandParser
             }
         });
 
-    private void EnqueueSetAnchorOffsetSpecs(string roleKey, string xToken, string yToken, string durationToken, string easeToken)
-    {
-        Ease ease = YarnEaseParser.Parse(easeToken);
-
-        Emit(new MoveByCommandSpecCharR
-        {
-            roleKey = roleKey,
-            node = CharacterRigNode.CharSlot_Track,
-            useAbsolutePosition = false,
-            delta = new Vector2(ParseSignedUnit(xToken), ParseSignedUnit(yToken)),
-            duration = YarnDurationParser.Parse(durationToken),
-            ease = ease
-        });
-    }
-
     // motion(slot, name, mode) — motions.json의 클립을 그대로 싣는다. 길이는 클립이 안다.
     // mode(relative|absolute)는 클립이 아니라 이 커맨드가 정한다 — 생략값은 표에 있다(relative).
     // 모르는 이름·낱말은 소리 내고 아무것도 내지 않는다 — 대신 재생할 기본 모션이 없다(이징의 OutCubic과 다른 점).
@@ -237,7 +222,8 @@ public sealed partial class StageCommandParser
             duration = YarnDurationParser.Parse(durationToken)
         });
 
-    // place — 슬롯의 본래 자리를 절대값으로. move_by(상대)와 같은 노드다.
+    // place — 슬롯의 본래 자리(Track)를 절대값으로. 그 위의 움직임(left · right · up · down)은 아래의 제 노드다 —
+    // place는 쌓인 움직임을 걷지 않는다. 다시 세울 때는 대본이 move_reset을 먼저 적는다(docs/PLAN_move-axes.md M10).
     private void EnqueuePlaceSpec(string roleKey, string xToken, string yToken, string durationToken, string easeToken)
         => EmitAbsoluteMove(roleKey, CharacterRigNode.CharSlot_Track, xToken, yToken, durationToken, easeToken);
 

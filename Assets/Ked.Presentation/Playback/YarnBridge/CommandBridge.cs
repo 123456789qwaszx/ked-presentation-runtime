@@ -104,8 +104,6 @@ public sealed partial class YarnCommandBridge
     
     private void BindCharRigStaging(DialogueRunner runner)
     {
-        runner.AddCommandHandler<string, string, string, string, string>(
-            "move_by", EnqueueSetAnchorOffsetSpecs);
         runner.AddCommandHandler<string, string, string, string>(
             "rotate_by", EnqueueRotateBySpec);
 
@@ -200,12 +198,6 @@ public sealed partial class YarnCommandBridge
         runner.AddCommandHandler<string, string, string>(
             "fade", EnqueueFadeToSpec);
 
-        runner.AddCommandHandler<string, string, string, string, string, string>(
-            "slide_in", EnqueueSlideInSpec);
-
-        runner.AddCommandHandler<string, string, string, string, string, string>(
-            "slide_out", EnqueueSlideOutSpec);
-        
         runner.AddCommandHandler<string, string, string, string>(
             "char_move_to", EnqueueMoveByUnitCharSpec);
         

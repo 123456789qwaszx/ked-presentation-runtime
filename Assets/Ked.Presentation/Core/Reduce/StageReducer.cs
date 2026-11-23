@@ -77,7 +77,7 @@ namespace Ked.Presentation.Core
     /// 이 기록이 "아직 못 접는 것"의 유일한 진실이고, 수렴의 작업 목록이 된다.
     ///
     /// 현재 어휘(v1): slot 계열(리그 스폰) · cast/actor(배역·별칭) ·
-    ///   fade_in/out · fade · slide_in/out · place · left/right/up/down · focus_* · size 계열 ·
+    ///   fade_in/out · fade · place · left/right/up/down · focus_* · size 계열 ·
     ///   move/rotate 계열 · shot 계열 ·
     ///   초상 축(pose/face/face_swap) · motion(채널마다 마지막 키) · 시간 커맨드(pause — 접을 것이 없다) ·
     ///   배경 bg_*(캐스팅하지 않은 슬롯 — spawn/sprite/fade/move/scale).
@@ -194,12 +194,10 @@ namespace Ked.Presentation.Core
                 case "size": return ApplySize(state, cmd, tuning, cmd.Arg(1), SizeToken.IsKeepY(cmd.Arg(2)), out reason);
                 case "size_reset": return ApplySize(state, cmd, tuning, "mid", keepY: false, out reason);
 
-                // 슬라이드 (등장·퇴장) — 정착 상태로는 등장이 항등, 퇴장이 방향 × 거리다.
-                case "slide_in":  return ApplySlideIn(state, cmd, tuning, out reason);
-                case "slide_out": return ApplySlideOut(state, cmd, tuning, out reason);
+                // move_by · slide_in · slide_out은 걷었다(docs/PLAN_move-axes.md M4 · M9) — 케이스가 없다. 남은 대본은 Unhandled로 드러난다.
+                // 들고 나는 움직임은 left · right · up · down으로 적는다(§4.2).
 
                 // staging 이동/회전 · 초상 축의 배율/회전
-                case "move_by":      return ApplyMoveBy(state, cmd, tuning, out reason);
                 case "move_reset":   return ApplyMoveReset(state, cmd, out reason);   // Move_X · _Y만 — 본래 자리는 그대로
                 case "rotate_by":    return ApplyRotateBy(state, cmd, out reason);
                 case "rotate_reset": return ApplyRotateReset(state, cmd, out reason);
@@ -238,7 +236,7 @@ namespace Ked.Presentation.Core
                 case "bg_sprite": return ApplyBackgroundSprite(state, cmd, tuning, out reason);
                 case "bg_fade_in":  return ApplyFade(state, cmd, visible: true, out reason);
                 case "bg_fade_out": return ApplyFade(state, cmd, visible: false, out reason);
-                case "bg_move":  return ApplyMoveBy(state, cmd, tuning, out reason);
+                case "bg_move":  return ApplyBackgroundMove(state, cmd, tuning, out reason);
                 case "bg_scale": return ApplyPortraitScaleTo(state, cmd, out reason);
 
                 // 컷인 — 끝 상태만(StageReducer.CutIn). 파서 표: cutin_open(무대="stage01", 판, x="0u", y="0u", 배율="1") · cutin_close(무대="stage01")

@@ -5,7 +5,7 @@ namespace Ked.Presentation.Core
     /// 결과가 인자에 적혀 있다. 여기는 토큰 해석과 배선만 맡는다.
     ///
     ///   포커스  focus_move · focus_rotate · focus_scale · focus_reset   CharFocus_Track · _Rotation · _Scale
-    ///   슬롯    place                                                   CharSlot_Track (move_by · slide와 같은 노드)
+    ///   슬롯    place                                                   CharSlot_Track — 본래 자리(절대)
     ///   슬롯    left · right · up · down · move_reset                   CharSlot_Move_X · _Y — 본래 자리 위의 움직임(상대, 쌓인다)
     ///   초상    size · size_reset                                       CharacterPortrait_DepthOffset · _DepthScale
     /// </summary>
@@ -141,7 +141,7 @@ namespace Ked.Presentation.Core
 
         // ── 공용 ──────────────────────────────────────────────
 
-        // x · y(단위 토큰). 생략하면 0u — move_by와 같은 생략값이다.
+        // x · y(단위 토큰). 생략하면 0u.
         private static bool TryReadPosition(
             in StageCommand cmd, StageReducerTuning tuning, out Vec2 position, out string reason)
         {

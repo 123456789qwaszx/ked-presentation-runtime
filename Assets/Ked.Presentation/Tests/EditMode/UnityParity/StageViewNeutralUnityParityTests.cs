@@ -256,7 +256,8 @@ namespace Ked.Presentation.Tests.UnityParity
         [Test]
         public void 슬라이드_끝값을_게시하면_place는_화면_밖_출발점을_읽지_않는다()
         {
-            // slide_in: 끝값 = 현재 위치. CreateTween이 rect를 출발점(화면 밖)으로 밀어 둔다.
+            // 옛 slide_in(2026-11-23에 걷었다)의 꼴: 끝값 = 현재 위치, 트윈이 rect를 출발점(화면 밖)으로 밀어 둔다.
+            // 같은 줄의 트윈이 체인 위에서 출발점에 있을 때의 성질이라 그대로 고정한다.
             RectTransform track = _refs.GetRect(CharacterRigNode.CharSlot_Track);
             Vector2 settled = track.anchoredPosition;
 

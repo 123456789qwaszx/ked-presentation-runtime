@@ -1,6 +1,6 @@
 # 리그 축 순서 — 계층이 규약인 이유
 
-`CharacterRigSchema.Nodes`의 20줄짜리 배열은 **순서만 보여주고 순서의 이유는 보여주지 않는다.**
+`CharacterRigSchema.Nodes`의 22줄짜리 배열은 **순서만 보여주고 순서의 이유는 보여주지 않는다.**
 트랜스폼 계층은 결과만 남고 의도가 안 남는 구조라, 이유를 여기 남긴다.
 
 ## 0. 두 문장
@@ -106,7 +106,7 @@ far 레이어에 이미지 한 장을 높이 맞춤으로 깔고·갈아 끼우�
 | 대본 | 노드 |
 |---|---|
 | `bg_fade_in/out` | `CharacterPortraitSprite_Root` (α) |
-| `bg_move` | `CharSlot_Track` — `move_by`와 같은 축 |
+| `bg_move` | `CharSlot_Track` — 본래 자리에 상대값(배경은 움직임 노드를 쓰지 않는다) |
 | `bg_scale` | `CharacterPortrait_ActingScale` — 가운데 피벗. 깊이(`CharacterPortrait_DepthScale`)는 발 피벗이라 배경이 아래 가운데에서 커진다 |
 | `bg_sprite` | `CharacterPortraitSprite_Image` — 종횡비는 초상 DB가 아니라 `background-dimensions.json`, 레이캐스트는 끈다 |
 
@@ -200,7 +200,7 @@ CharacterRigSchema.Nodes            코드      ← 유일한 소유자
 ## 3. 축 순서 — 자리가 뜻을 정한다
 
 > 2026-11-21에 세 덩어리로 다시 세웠다(재생 저장소 `docs/PLAN_rig-layers.md`). 그 전의 계층(25노드 — 깊이가 맨 위에서 슬롯의 이동까지
-> 곱하고, 좌우 · 상하가 따로였다)은 그 계획서 §3에 있다.
+> 곱하고, 좌우 · 상하가 따로였다)은 그 계획서 §3에 있다. 2026-11-23에 슬롯의 움직임 노드 둘을 더했다(20 → 22노드, `docs/PLAN_move-axes.md`).
 
 ### 3.1 세 덩어리
 
@@ -209,7 +209,7 @@ CharacterRigSchema.Nodes            코드      ← 유일한 소유자
 | 덩어리 | 노드 | 뜻 |
 |---|---|---|
 | **포커스** `CharFocus_*` | `_Track` · `_Rotation` · `_Scale` | 대화할 때만 서는 자리. 멀리 있던 인물이 말할 때만 나왔다가 본래 자리로 돌아간다. 실제 무대로는 표현하기 힘든 **작가 허용**의 공간이라 이동 · 회전 · 배율을 다 갖고, 쓰고 나면 `focus_reset`으로 0에 돌린다 |
-| **슬롯** `CharSlot_*` | `_Track` · `_Rotation` · `_SwayPivot` | 무대 위의 본래 자리 |
+| **슬롯** `CharSlot_*` | `_Track` · `_Move_X` · `_Move_Y` · `_Rotation` · `_SwayPivot` | 무대 위의 본래 자리(`Track` — `place`)와 그 위의 움직임(`Move_X` · `_Y` — `left` · `right` · `up` · `down`) |
 | **초상** `CharacterPortrait_*` | 깊이 · 배역 앵커 · 연기 · 반전 · 그림 | 그 사람의 크기와 연기 |
 
 ### 3.2 한 노드 = 한 축
@@ -218,40 +218,48 @@ CharacterRigSchema.Nodes            코드      ← 유일한 소유자
 그래서 **동시에 돌아야 하는 축은 다른 노드로 나누고, 한 노드에서 겹쳐야 하는 움직임은 클립 하나로 짠다** — 좌우와 상하를 다른 박자로
 움직이는 일은 한 채널 안의 x · y 키다. 더하기만 하던 층(`Track_X` · `_Y` · `Track_Move_X` · `_Y`)은 이렇게 해서 걷었다.
 
+슬롯에서는 2026-11-23에 다시 나눴다(`docs/PLAN_move-axes.md`). 본래 자리와 그 위의 움직임이 한 노드(`Track`)에 있으면 `place`를 다시 걸 때
+움직임이 덮이고 `move_reset`이 본래 자리까지 0으로 보낸다. 또 한 노드에 트윈 하나라 가로와 세로를 따로 걸 수 없었다. 그래서 `place`(절대)는
+`Track`, `left` · `right`는 `Move_X`, `up` · `down`은 `Move_Y`(상대 — 쌓인다)를 쓴다. 움직임 노드는 슬롯에만 있다 — 초상의 이동(`Track_Move`)은
+모션의 것이라 섞지 않는다.
+
 ### 3.3 전체 계층과 커맨드 대응
 
 ```
 CharFocus_Track                     focus_move                 ← 포커스: 맨 위 — 무대 값 그대로
- └ CharSlot_Track                   place(절대) · move_by(상대) · slide_in/out · move_reset   ← 슬롯: 본래 자리
-    └ CharFocus_Rotation            focus_rotate               [발밑]   ← 포커스
-       └ CharFocus_Scale            focus_scale                [발밑]   ← 포커스
-          └ CharSlot_Rotation       (쓰는 커맨드 없음)
-             └ CharSlot_SwayPivot   rotate_by · rotate_reset   [발밑]
-                │
-                └ CharacterPortrait_DepthOffset   size의 Y                ← 초상: 그 사람의 크기
-                   └ CharacterPortrait_DepthScale size의 배율    [발밑]   ← 이모지가 서는 자리
-                      └ CharacterPortrait_VisualOffset   cast(set_anchor) [발밑]   ← 배역 앵커 · 초점을 재는 노드
-                         └ CharacterPortrait_Track         char_move_to — 놓고 머무는 자리
-                            └ ..._Rotation                 모션
-                               └ ..._Track_Move            모션 — 지나가는 몸짓
-                                  └ ..._SwayPivot          char_rotate_to · 모션   [발밑]
-                                     └ ..._Shake           모션
-                                        └ ..._ActingScale  char_scale_to · 모션
-                                           └ ..._Mirror    mirror
-                                              ├ Sprite_Root  fade_in/out  [CG α=0]
-                                              │  └ Sprite_Image   cast · face · pose
-                                              └ Overlay_Root  face_swap   [CG α=0]
-                                                 └ Overlay_Image
+ └ CharSlot_Track                   place(절대) — 시작 자리                ← 슬롯: 본래 자리
+    └ CharSlot_Move_X               left · right(상대 — 쌓인다) · move_reset   ← 슬롯: 그 위의 움직임
+       └ CharSlot_Move_Y            up · down(상대 — 쌓인다) · move_reset
+          └ CharFocus_Rotation      focus_rotate               [발밑]   ← 포커스
+             └ CharFocus_Scale      focus_scale                [발밑]   ← 포커스
+                └ CharSlot_Rotation       (쓰는 커맨드 없음)
+                   └ CharSlot_SwayPivot   rotate_by · rotate_reset   [발밑]
+                      │
+                      └ CharacterPortrait_DepthOffset   size의 Y                ← 초상: 그 사람의 크기
+                         └ CharacterPortrait_DepthScale size의 배율    [발밑]   ← 이모지가 서는 자리
+                            └ CharacterPortrait_VisualOffset   cast(set_anchor) [발밑]   ← 배역 앵커 · 초점을 재는 노드
+                               └ CharacterPortrait_Track         char_move_to — 놓고 머무는 자리
+                                  └ ..._Rotation                 모션
+                                     └ ..._Track_Move            모션 — 지나가는 몸짓
+                                        └ ..._SwayPivot          char_rotate_to · 모션   [발밑]
+                                           └ ..._Shake           모션
+                                              └ ..._ActingScale  char_scale_to · 모션
+                                                 └ ..._Mirror    mirror
+                                                    ├ Sprite_Root  fade_in/out  [CG α=0]
+                                                    │  └ Sprite_Image   cast · face · pose
+                                                    └ Overlay_Root  face_swap   [CG α=0]
+                                                       └ Overlay_Image
 ```
 
-`focus_reset`은 포커스의 셋을 함께 되돌린다. `move_reset`은 슬롯의 자리만 걷는다. `cast`는 슬롯의 자리 · 회전과 초상의 연기 축을
-되돌리고, 포커스와 깊이는 건드리지 않는다.
+`focus_reset`은 포커스의 셋을 함께 되돌린다. `move_reset`은 슬롯의 움직임(`Move_X` · `_Y`)만 걷는다 — 본래 자리는 그대로다.
+`cast`는 슬롯의 자리 · 움직임 · 회전과 초상의 연기 축을 되돌리고, 포커스와 깊이는 건드리지 않는다. `place`는 쌓인 움직임을 걷지 않는다 —
+다시 세울 때 대본이 `move_reset 슬롯 0fr` → `place`로 적는다(커맨드 하나가 한 노드를 놓는다).
 
 ### 3.4 깊이가 초상에 있는 이유 — 슬롯을 곱하지 않는다
 
 깊이(`DepthOffset` · `DepthScale`)는 슬롯 아래, 배역 앵커 바로 위다. 곱하는 것은 **그 사람**(배역 앵커 · 연기 · 그림)이고, 슬롯의 자리는 곱하지 않는다.
 
-- `place` · `move_by`의 값은 어느 크기에서나 **화면 값 그대로**다. `move_by 1u`는 far에서도 close에서도 화면 1u다. 대본에 적힌 자리를 그대로 읽을 수 있다.
+- `place` · `left` · `right` · `up` · `down`의 값은 어느 크기 · 기울기에서나 **화면 값 그대로**다. `right 1u`는 far에서도 close에서도 화면 1u다. 대본에 적힌 자리를 그대로 읽을 수 있다.
 - 크기를 바꾸면 그 사람이 발밑을 중심으로 커지고, 배역 앵커 · 몸짓의 진폭도 함께 커진다(멀리 있는 사람은 덜 흔들린다).
 - 이모지가 `DepthScale` 밑에 서므로 머리 위의 이모지도 인물의 크기를 따라간다.
 - 초점(가슴 · 얼굴 점)을 재는 노드(`VisualOffset`)가 깊이 아래이므로 크기를 바꾸면 초점도 따라온다.
@@ -289,7 +297,7 @@ CharFocus_Track                     focus_move                 ← 포커스: �
 | `CharacterPortrait_Rotation` | `Track_Move`의 **위** | 기울면 연기 움직임이 기울기를 **따라간다** |
 
 무대 배치에서는 회전이 이동에 새면 안 된다 — "오른쪽으로 100" 했는데 캐릭터가 기울어 있다고 비스듬히 가면 배치가 무너진다.
-그래서 슬롯의 `Track`이 회전들보다 위다. 연기에서는 정반대다. 몸이 기울었으면 그 위에서 일어나는 흔들림도 같이 기울어야 실제 몸처럼 보인다.
+그래서 슬롯의 `Track` · `Move_X` · `Move_Y`가 회전들보다 위다. 연기에서는 정반대다. 몸이 기울었으면 그 위에서 일어나는 흔들림도 같이 기울어야 실제 몸처럼 보인다.
 그래서 초상의 `Rotation`이 위, `Track_Move`가 아래다. **같은 회전인데 요구가 반대라 자리가 반대다.**
 
 ### 3.8 나머지 자리들
@@ -329,8 +337,10 @@ CharFocus_Track                     focus_move                 ← 포커스: �
 | 합치고 싶어지는 것 | 합치면 생기는 일 |
 |---|---|
 | `CharFocus_Track` + `CharSlot_Track` | 나온 자리와 본래 자리가 한 노드에 있으면 **돌아갈 곳이 사라진다** |
+| `CharSlot_Track` + `CharSlot_Move_*` | 본래 자리와 그 위의 움직임이 한 노드면 `place`가 움직임을 덮고, `move_reset`이 본래 자리까지 0으로 보낸다 |
+| `CharSlot_Move_X` + `_Y` | 한 노드에 트윈 하나 — 가로와 세로를 따로 걸 수 없다(같은 때의 둘은 뒤 것이 앞 것을 끝값으로 보낸다) |
 | `DepthScale` + `ActingScale` | 연기 확대가 배역 앵커 · 이모지까지 키운다 — 연기가 확대로 보인다 |
-| `DepthScale`을 슬롯 위로 | 적힌 자리가 크기만큼 곱해진다 — `move_by 1u`가 크기마다 다른 거리가 된다 |
+| `DepthScale`을 슬롯 위로 | 적힌 자리가 크기만큼 곱해진다 — `right 1u`가 크기마다 다른 거리가 된다 |
 | `ActingScale` + `Mirror` | 배율 모션이 뒤집힌 부호를 덮는다 |
 | `CharSlot_SwayPivot` + `Portrait_Rotation` | 슬롯 회전이 이동 방향을 비틀거나, 연기가 몸 기울기를 무시한다 |
 | 포커스의 회전 · 배율을 맨 위로 | 옆에 선 인물이 화면 아래 가운데를 중심으로 커지고 돈다 — 옆으로 밀리고 호를 그린다 |
@@ -365,7 +375,7 @@ CharFocus_Track                     focus_move                 ← 포커스: �
 
 **이 반복은 중복이 아니라 의도다.** 넷은 서로 다른 것을 정한다:
 
-* **존재하는 노드 ≠ 겨눌 수 있는 노드.** 1과 3이 지금 20개로 겹치는 것은 우연이고,
+* **존재하는 노드 ≠ 겨눌 수 있는 노드.** 1과 3이 지금 22개로 겹치는 것은 우연이고,
   타입은 그 둘이 갈라질 수 있음을 표현한다. 하나로 합치면 구조용 보조 노드를 추가하는
   순간 **커맨드가 그것을 겨눌 수 있게 된다.** `CharacterRigNode`은 API 표면이다 —
   화면 효과 리그에 이 enum이 없는 것이 그 증거다(거기서는 `ControllerKind`로 겨눈다).

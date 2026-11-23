@@ -80,28 +80,12 @@ namespace Ked.Presentation.Core
             yield return new("right", placement, "슬롯을 오른쪽으로 민다(상대값 — 쌓인다)", SlotMove());
             yield return new("up", placement, "슬롯을 위로 민다(상대값 — 쌓인다)", SlotMove());
             yield return new("down", placement, "슬롯을 아래로 민다(상대값 — 쌓인다)", SlotMove());
-            yield return new("move_by", placement, "슬롯을 지금 자리에서 옮긴다(상대값)",
-                new[] { Slot(), X("0u"), Y("0u"), Duration("0.4s"), Ease() });
             yield return new("move_reset", placement, "쌓인 움직임(left · right · up · down)을 걷는다 — 본래 자리는 그대로",
                 new[] { Slot(), Duration("0.4s") });
             yield return new("rotate_by", placement, "슬롯을 지금 각도에서 기울인다(상대값)",
                 new[] { Slot(), Angle("0"), Duration("0.4s"), Ease() });
             yield return new("rotate_reset", placement, "슬롯의 기울기를 0으로",
                 new[] { Slot(), Duration("0.4s"), Ease() });
-            yield return new("slide_in", placement, "미끄러져 들어온다",
-                new[]
-                {
-                    Slot(), Direction(SlideMotion.DefaultInDirection), Distance("distance", "거리", SlideMotion.DefaultDistanceToken), Duration("13fr"),
-                    Opt("ease", "이징", ArgKind.Ease, "적지 않으면 들어올 때의 기본 이징"),
-                    Opt("punch", "튐", ArgKind.Distance, "적지 않으면 들어올 때의 기본 튐"),
-                });
-            yield return new("slide_out", placement, "미끄러져 나간다",
-                new[]
-                {
-                    Slot(), Direction(SlideMotion.DefaultOutDirection), Distance("distance", "거리", SlideMotion.DefaultDistanceToken), Duration("13fr"),
-                    Opt("ease", "이징", ArgKind.Ease, "적지 않으면 나갈 때의 기본 이징"),
-                    Opt("punch", "튐", ArgKind.Distance, "적지 않으면 나갈 때의 기본 튐"),
-                });
             yield return new("fade_in", placement, "나타난다",
                 new[] { Slot(), Duration("18fr") });
             yield return new("fade_out", placement, "사라진다",
@@ -286,9 +270,6 @@ namespace Ked.Presentation.Core
 
         private static CommandArgSpec Word(string name, string label, string defaultToken, params string[] choices)
             => new(name, label, ArgKind.Token, defaultToken, choices: choices);
-
-        private static CommandArgSpec Direction(string defaultToken)
-            => new("direction", "방향", ArgKind.Token, defaultToken, choices: new[] { "left", "right", "up", "down" });
 
         // left · right · up · down — 거리에는 생략값이 없다(꼭 적는다). 음수는 반대 방향이다.
         private static CommandArgSpec[] SlotMove()

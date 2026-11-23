@@ -30,11 +30,11 @@ namespace Ked.Presentation.Tests
             "<<at start cast c1 bandi a 3>>\n" +
             "<<at start actor @4 c1>>\n" +
             "//<<at start mirror @4>>\n" +
-            "<<at start move_by @4 2u 0u 24fr>>\n" +
+            "<<at start right @4 2u 24fr>>\n" +
             "\n" +
             "첫 번째 대사다.\n" +
             "\n" +
-            "<<at start move_by @4 -3u 0u>>\n" +
+            "<<at start left @4 3u>>\n" +
             "<<at start fade_in @4>>\n" +
             "\n" +
             "두 번째 대사다.\n" +
@@ -87,11 +87,11 @@ namespace Ked.Presentation.Tests
 
             Assert.That(story.Groups[0].LineText, Is.EqualTo("첫 번째 대사다."));
             Assert.That(story.Groups[0].Commands.Select(c => c.Name),
-                Is.EqualTo(new[] { "beat", "cast", "actor", "move_by" }));
+                Is.EqualTo(new[] { "beat", "cast", "actor", "right" }));
 
             Assert.That(story.Groups[1].LineText, Is.EqualTo("두 번째 대사다."));
             Assert.That(story.Groups[1].Commands.Select(c => c.Name),
-                Is.EqualTo(new[] { "move_by", "fade_in" }));
+                Is.EqualTo(new[] { "left", "fade_in" }));
 
             Assert.That(story.Groups[2].LineText, Is.Null);
             Assert.That(story.Groups[2].Commands.Select(c => c.Name), Is.EqualTo(new[] { "shot_reset" }));
@@ -493,8 +493,8 @@ namespace Ked.Presentation.Tests
         {
             StageCommand move = ExtractSample()[1].Groups[0].Commands[3];
 
-            Assert.That(move.Name, Is.EqualTo("move_by"));
-            Assert.That(move.Args, Is.EqualTo(new[] { "@4", "2u", "0u", "24fr" }));
+            Assert.That(move.Name, Is.EqualTo("right"));
+            Assert.That(move.Args, Is.EqualTo(new[] { "@4", "2u", "24fr" }));
         }
 
         // ── 추출기: 라인 ID ──────────────────────────────────────────
@@ -741,7 +741,9 @@ namespace Ked.Presentation.Tests
                 {
                     NodeDto("__root", ""),
                     NodeDto("CharSlot_Track", "__root"),
-                    NodeDto("CharacterPortraitSprite_Root", "CharSlot_Track"),
+                    NodeDto("CharSlot_Move_X", "CharSlot_Track"),
+                    NodeDto("CharSlot_Move_Y", "CharSlot_Move_X"),
+                    NodeDto("CharacterPortraitSprite_Root", "CharSlot_Move_Y"),
                 },
             };
 

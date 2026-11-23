@@ -74,7 +74,7 @@ CharSlot_Scale                 (캐릭터 리그 — 지금 있는 노드)
 
 | 따라가는 것(위에 있다) | 까닭 |
 |---|---|
-| 무대 배치 — `place` · `move_by` · `left`/`right`/`up`/`down` · `slide` | 인물이 가는 곳에 이모지가 간다 |
+| 무대 배치 — `place` · `left`/`right`/`up`/`down` | 인물이 가는 곳에 이모지가 간다 |
 | 깊이 — `CharSlot_DepthY` · `CharSlot_DepthScale` | 멀리 있는 인물의 이모지는 작고, 움직임도 줄어든다(원근) |
 | 슬롯 회전과 배율 — `rotate_by` · `scale_by` (발 피벗) | 인물이 기울면 이모지도 발을 중심으로 같이 기운다 |
 

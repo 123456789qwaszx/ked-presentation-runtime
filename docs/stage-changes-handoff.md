@@ -1,4 +1,6 @@
-# 런타임 밖에 반영할 것 — 화면 덮개 · 어둡게 · 컷인 · 팝업 · 무대 마스크 · 줄의 자리 · 명령 이름 · 옛 표기 걷기 (2026-11-17 ~ 22)
+# 런타임 밖에 반영할 것 — 화면 덮개 · 어둡게 · 컷인 · 팝업 · 무대 마스크 · 줄의 자리 · 명령 이름 · 옛 표기 걷기 · 이동의 축 (2026-11-17 ~ 23)
+
+> **2026-11-23 — 이동의 축: 슬롯에 움직임 노드 둘(22노드)과 `left` · `right` · `up` · `down`, `move_reset`의 뜻이 바뀌고 `move_by` · `slide_in` · `slide_out`을 걷었다. 소비처가 할 일은 §6.**
 
 > **2026-11-22 — 줄의 앵커 N5: `<<step>>`과 대사 줄 앞의 at 없는 명령을 걷었다. 소비처가 할 일은 §5** — 이 아래 §1.4의 "줄 머리 · 무대 스텝" 이야기는 그 전의 것이다.
 
@@ -190,3 +192,68 @@ L3부터는 옛 대본이 그대로 돌지 않는다 — 대사 줄 머리의 `p
 |---|---|---|---|
 | 11-22 | 작업공간 `ked-vn-workspace` | 포크에 `c39986c2..417bf41e`를 얹었다 — 충돌은 `CommandBridge.cs` 하나(메신저 등록 곁의 `step` 등록을 걷음). `ch05_01` 노드 끝의 `<<step>>`을 지웠다. `yarn_check.py`(노드 끝의 `<<step>>`도 오류) · `anchors.py`(꼬리의 `<<step>>`을 걷는다) · 카드 빌더(`legacyStructure`를 읽지 않는다). 내는 대본은 다시 내어 바이트까지 같다. 포크 코어를 .NET 8로 컴파일해 그 추출기 · 줄 읽기로 대본 162편(작업공간 37 · 스토리 공간 111 · 공개 예제 14)을 읽어 at 없는 명령 경고 0(바로 실행하는 명령 39는 at 없이 쓰는 것이 맞다). 이어 `fbb7e3a2`(D13)도 들이고 참고집의 종류 표(`catalog/kinds.json`)를 맞췄다(`4b67bdc`). Unity 컴파일 · 시험 · 재생은 확인 전 | `71c0225`(비공개 저장소) |
 | 11-22 | 연출 고치기 툴 `ked-story-tools` | 코어 사본(코어 · 순수 시험 넷 · 데모 견본)을 `417bf41e`로 다시 들였다. `LineEditor`는 `LineRead.Unanchored`로 막는다 — at 없는 명령이 든 줄은 읽기만이고, 그 명령은 스텝에 들지 않아 그리지 않으며 까닭에 이름을 적는다(`<<step>>`도 그 하나). 고쳐 주는 동작(at을 붙여 옮기기)은 두지 않았다 — 실행되지 않던 것이 실행되기 시작한다. 데모 116줄 모두 고칠 수 있음을 시험이 본다. `legacyStructure`를 읽는 곳은 없었다. 빌드 · 시험 799 통과(소유자) | `6cb7742` |
+
+## 6. 이동의 축 — 슬롯의 움직임 넷, `move_by` · `slide` 걷기 (2026-11-23)
+
+근거: [PLAN_move-axes.md](PLAN_move-axes.md) — 결정 M1 ~ M10, 쓰는 꼴 §4.2 · 쓰는 규칙 §4.3, 단계별 기록 §11. 런타임 브랜치 `feat/move-axes`(`dev`에서).
+
+### 6.1 대본에서 바뀐 것
+
+| 어휘 | 전 | 지금 |
+|---|---|---|
+| `left` · `right` · `up` · `down` | 없었다(2026-11-21에 노드와 함께 걷었다) | **새로** — `슬롯 거리 [길이=0.4s] [이징]`. `left` · `right`는 `CharSlot_Move_X`, `up` · `down`은 `CharSlot_Move_Y`. 상대값이라 쌓인다. 거리는 꼭 적는다(빠지면 오류 · 실행하지 않는다), 음수는 반대 방향. 가로 · 세로가 다른 노드라 나란히 적으면 함께 돈다 |
+| `move_reset 슬롯 [길이]` | `CharSlot_Track`을 0으로(본래 자리까지) | **Move_X · _Y만 0으로** — 본래 자리(`place`의 값)는 그대로다 |
+| `cast` | 슬롯의 Track · 회전 · 초상의 연기 축을 되돌린다 | 슬롯의 움직임(Move_X · _Y)도 되돌린다 |
+| `place 슬롯 x y` | 그대로 — `CharSlot_Track` 절대값 | 그대로. **쌓인 움직임을 걷지 않는다** — 다시 세울 때 `move_reset 슬롯 0fr` → `place` |
+| `move_by` · `slide_in` · `slide_out` | 상대 이동 · 미끄러져 들고 남(튐 인자 있음) | **걷었다 — 모르는 명령(오류)이다.** 별칭을 두지 않는다. 튐(punch)은 사라졌다 |
+| `bg_move` | 배경 슬롯의 Track에 상대값 | 그대로(이번 범위 밖) |
+
+옮기는 꼴 — 공개 대본은 이렇게 옮겼고, 차례 · 길이 · 이징이 같으면 끝 상태가 같다(아래 6.4의 대조):
+
+| 옛 꼴 | 새 꼴 |
+|---|---|
+| 서 있는 동안의 `move_by 슬롯 x y 길이 이징` | 0이 아닌 축마다 하나 — `right`/`left 슬롯 거리 길이 이징`(거리는 x의 크기), `up`/`down 슬롯 거리 길이 이징`(y의 크기). 길이 · 이징이 같으면 한 줄의 `move_by`와 화면이 같다 |
+| 첫 자리를 놓던 `move_by … 0fr` | `move_reset 슬롯 0fr` → `place 슬롯 x y 0fr` — x · y는 그때까지 쌓인 값(절대값). 도구가 접어 푼다 |
+| `slide_in 슬롯 방향 거리 길이 [이징]` | `방향 슬롯 거리 0fr` → (나란히 `fade_in`) → `반대 방향 슬롯 거리 길이 [이징]`. 예: `slide_in s2 left 2u 18fr` → `left s2 2u 0fr` · `right s2 2u 18fr`. 이징 생략은 둘 다 OutCubic이라 같다 |
+| `slide_out 슬롯 방향 거리 길이 [이징]` | `방향 슬롯 거리 길이 이징` — **slide_out의 기본 이징은 InCubic이었다.** 넷의 기본은 OutCubic이라 같은 화면이면 `InCubic`을 적는다. slide의 생략값은 방향 left(in) · right(out), 거리 12u, 길이 13fr였다 |
+| 움직임이 쌓인 뒤의 `place` | 그 앞에 `move_reset 슬롯` — 화면 안에서 옮겨 가는 것이면 `place`와 같은 길이(이징이 같으면 두 트윈의 합이 옛 `place` 하나와 같다), 다시 세우는 것이면 `0fr` |
+
+- 쌓인 값 때문에 "지금 어디인가"를 대본에서 바로 읽을 수 없다 — 코어의 폴드가 줄마다 그 슬롯의 자리(Track + Move_X + Move_Y)를 안다(§4.3).
+- 공개 대본: 데모 · `festival_eve_Festival_Classroom`의 6곳(`move_by` 3 · `slide_in` 3)과 그 뒤 데모 7번 줄의 `place` 앞 `move_reset s1 60fr`.
+  대사 글 둘을 고쳤다 — `ln_n3nwk0do`("5. place + left · right …") · `ln_pvp3bn88`("… 두 번의 right가 …"). 줄 ID는 그대로다.
+  `.git/info/exclude`로 빠진 `Assets/Dialogue/RealTest/real_test_Mirage_Tavern.yarn`(at 없는 옛 표기)의 5곳(`slide_in` 2 · `slide_out` 3)은 손대지 않았다.
+
+### 6.2 리그 · 코어에서 바뀐 것
+
+| 무엇 | 바뀐 것 |
+|---|---|
+| 리그 | 20 → 22노드. `CharSlot_Track` → **`CharSlot_Move_X` → `CharSlot_Move_Y`** → `CharFocus_Rotation`. 걷은 노드 · 이름을 바꾼 노드는 없다 — 노드 id로 쓰는 것(`motions.json`의 채널 · 저작본의 키 · 씬의 자리 `CharSlot_Track`)은 그대로다. **경로는 바뀐다** — `CharFocus_Rotation` 아래 모든 노드의 경로에 `CharSlot_Move_X/CharSlot_Move_Y/`가 낀다(Unity의 `.anim` 바인딩 · 제작 리그) |
+| 덤프 | `rig-schemas.json`(22노드) · `command-specs.json`(85 → 86 — `left` · `right` · `up` · `down` 더하기, `move_by` · `slide_in` · `slide_out` 빼기, `move_reset`의 요약) |
+| 코어 — 새로 | `NodeTargets.SlotMoveXNodeId` · `SlotMoveYNodeId` · `TryGetSlotMove(이름, out 노드, out 방향)`(파서와 폴드가 같은 표를 본다). 폴드 `left` · `right` · `up` · `down` |
+| 코어 — 뜻이 바뀜 | `move_reset`의 폴드(Move_X · _Y만), `cast`의 리셋 목록(Track · Move_X · Move_Y · …) |
+| 코어 — 걷음 | `SlideMotion`(방향 낱말 · 기본값 · 튐 모양) · 폴드의 `move_by` · `slide_in` · `slide_out`(이제 Unhandled — "이관되지 않은 커맨드") · 명세 표의 칸 손 `Direction()` |
+| 런타임 — 걷음 | `SlideCommandCharR` · `SlideCommandSpecCharR` · `CharRigDirection` · `CharRigDirectionParser` · 파서의 `EnqueueSetAnchorOffsetSpecs` · `EnqueueSlideSpec` · 브리지 등록 셋 |
+| 런타임 — 새로 | 파서 `EnqueueSlotMoveSpec`(지금의 `MoveByCommandSpecCharR`을 상대값으로, 노드만 Move_X · _Y) · 브리지 등록 넷 |
+
+### 6.3 소비처마다 할 일
+
+| 소비처 | 할 일 |
+|---|---|
+| 작업공간 `ked-vn-workspace` — 포크 | `feat/move-axes`를 들인다. 겹치는 파일: `CharacterRigDefinition.cs` · `CharacterRigBuilder.cs` · `SetAnchorCommandCharR.cs` · `CharacterRigCommandFactory.cs` · `CharacterRigCommandBase.cs` · `StageCommandParser.Table.cs` · `.CharRigSetup.cs` · `.CharRigPresentation.cs` · `CommandBridge.cs` · `CommandBridge.Forward.cs`. 포크 코드가 `SlideCommandSpecCharR` · `SlideMotion` · `CharRigDirection` · `move_by`를 쓰면 고친다. `StageCommandSpecTable.Fork.cs`가 `Direction()`을 쓰면 고친다(걷었다). 포크의 리그 프리팹 · 제작 씬 · `.anim`이 있으면 같은 손질(노드 둘을 끼우고 경로 · CRC32) — 프리팹을 두지 않으면 빌더가 스키마로 세운다. `runtime/ExportedTuning`의 `rig-schemas.json` · `command-specs.json`을 다시 낸다 |
+| 작업공간 — 도구 · 대본 | 계획서 §8: `tools/stage/script.py` · 카드(`cards.json`의 커맨드) · 초안 도구를 새 어휘로 — 첫 자리 · 시작 자리 → `move_reset 0fr` + `place`, 그 사이의 움직임 → 넷(§4.3의 규칙). `yarn_check.py`는 `move_by` · `slide_in` · `slide_out`을 모르는 명령으로. 30편 · 스토리 공간을 다시 내고(재현 대본 `move_by` 2,888 · 스토리 공간 2,718, 2026-11-23 셈) 대표 편을 녹화해 앞 녹화와 견준다. 넘길 일은 작업공간 `docs/handoff-1123-move-axes.md`에 |
+| 연출 고치기 툴 `ked-story-tools` | 코어 사본(`src/Ked.Presentation.Core` · 시험 사본)을 다시 들인다 — `SlideMotion`이 사라지고 `NodeTargets.TryGetSlotMove`가 생긴다. 툴이 `SlideMotion`(slide의 궤적 · 기본값)을 부르면 고친다. 명세 표 JSON은 넷을 내고 셋이 없다 — 커맨드 고르기 · 칸 그리기가 표에서 오면 따로 할 일은 없다. 데모 견본(`presentation_demo_Demo_Presentation.yarn`)을 다시 들인다. 폴드가 줄마다 그 슬롯의 자리(Track + Move_X + Move_Y)를 아니 "지금 어디인가"를 보여 줄 수 있다(§4.3 — 할지는 툴에서 정한다) |
+| 모션 툴 `ked-motion-tool-characterRig` | 코어 사본과 리그 덤프(`rig-schemas.json`, 22노드)를 다시 들인다. 노드 id가 그대로라 저작본의 키 · 씬의 자리(`CharSlot_Track`)는 그대로다. 툴이 계층을 경로로 다루면(Unity 내보내기 · 그림) 새 경로를 쓴다. `MotionRules`의 키잉 금지는 그대로 포커스 셋 — Move_X · _Y는 `CharSlot_Track`처럼 키를 줄 수 있다 |
+| 저작 툴 `ked-story-compositor` | 예제 대본의 정본(`samples/RuntimeSamples`)에 데모 · `festival_eve_Festival_Classroom`의 바뀐 줄을 같은 `#line` ID로 옮긴다(대사 글 둘 — 6.1). 다음 저장 때 옛 어휘로 돌아가지 않게. 내는 대본이 `move_by` · `slide_*`를 내지 않게 — 자리는 `place`, 그 사이는 넷(§4.3). 오라클 `Vn.StageOracle`과 코어 사본은 6.2 — `SlideMotion`을 부르는 곳을 고친다 |
+| 추출기 `ked-staging-extractor` | 내는 대본에 `move_by` · `slide_*`가 있으면 넷과 `place`로(이 세션에서 확인하지 못했다) |
+| 연출 감독 `ked-story-director` | 할 일 없다 — 무대 어휘를 쓰지 않는다 |
+
+### 6.4 이 저장소에서 확인한 것
+
+- 옛 대본을 옛 코어(`dev`)로, 새 대본을 새 코어로 접어 대사 · 스텝마다 슬롯의 측정 노드(`VisualOffset`)의 꼴(원점 · 두 축) · α와 샷 · Unhandled를 견줬다 — 데모 · `festival_eve_Festival_Classroom` 839곳이 0px 차이로 같다(튐은 트윈 중의 모양이라 끝 상태에 없다).
+- 순수 시험(.NET 8), 명세 표 ↔ 파서 표 대조, Unity 쪽 코드의 Roslyn 진단(새 오류 0). Unity 컴파일 · EditMode · 데모 재생 · 덤프 다시 내기는 소유자.
+
+### 6.5 반영 기록
+
+| 날 | 소비처 | 무엇을 | 어디(커밋) |
+|---|---|---|---|
+

@@ -1,5 +1,7 @@
 # 리그의 계층 — 포커스 · 슬롯 · 초상
 
+> 2026-11-23: L12(좌우 · 상하를 따로 둔 노드를 걷는다)를 **슬롯 계층에서만 뒤집었다** — 슬롯에 `CharSlot_Move_X` · `_Move_Y`와 `left` · `right` · `up` · `down`을 다시 두고 `move_by` · `slide_in` · `slide_out`을 걷었다(22노드, [PLAN_move-axes.md](PLAN_move-axes.md)). 아래 §3 · §4의 `move_by` · `slide`는 그 전의 것이다.
+
 2026-11-21 · 브랜치 `feat/rig-layers`(dev에서) · 상태: **R1~R5 끝 — dev에 합쳤다(2026-11-22). 남은 것: R6 작업공간(N4와 함께) · R7 모션 툴** · 앞선 일: [PLAN_line-anchor.md](PLAN_line-anchor.md)
 
 ## 0. 한 문장

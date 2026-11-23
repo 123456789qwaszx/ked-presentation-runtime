@@ -24,7 +24,6 @@ public sealed partial class StageCommandParser
         ["face"] = (p, c) => p.EnqueueSetPortraitFaceSpec(c.Arg(0), c.Arg(1)),
         ["face_swap"] = (p, c) => p.EnqueueSetEmotionPortraitWipeSpec(c.Arg(0), c.Arg(1), c.Arg(2, "13fr")),
         ["mirror"] = (p, c) => p.EnqueueMirrorSetSpec(c.Arg(0), c.Arg(1, "")),
-        ["move_by"] = (p, c) => p.EnqueueSetAnchorOffsetSpecs(c.Arg(0), c.Arg(1, "0u"), c.Arg(2, "0u"), c.Arg(3, "0.4s"), c.Arg(4, "")),
         ["rotate_by"] = (p, c) => p.EnqueueRotateBySpec(c.Arg(0), Float(c, 1, 0f), c.Arg(2, "0.4s"), c.Arg(3, "")),
         ["move_reset"] = (p, c) => p.EnqueueMoveResetSpec(c.Arg(0), c.Arg(1, "0.4s")),
         ["rotate_reset"] = (p, c) => p.EnqueueRotateResetSpec(c.Arg(0), c.Arg(1, "0.4s"), c.Arg(2, "")),
@@ -43,7 +42,8 @@ public sealed partial class StageCommandParser
         ["shot_reset"] = (p, c) => p.EnqueueShotResetSpec(all: false, c.Arg(0, "0.3s"), c.Arg(1, "")),
         ["shot_reset_all"] = (p, c) => p.EnqueueShotResetSpec(all: true, c.Arg(0, "0.3s"), c.Arg(1, "")),
         ["shot_shake"] = (p, c) => p.EnqueueShotShakeSpec(c.Arg(0), Float(c, 1, 1f)),
-        // 리그의 세 덩어리(docs/PLAN_rig-layers.md §4) — 전부 절대값이다. 거리 · 각도 · 배율은 move_by와 같은 생략값(0 · 1).
+        // 리그의 세 덩어리(docs/PLAN_rig-layers.md §4) — 전부 절대값이다. 거리 · 각도 · 배율의 생략값은 0 · 1.
+        // move_by · slide_in · slide_out은 걷었다(docs/PLAN_move-axes.md M4 · M9) — 별칭을 두지 않는다. 모르는 명령이다.
         ["place"] = (p, c) => p.EnqueuePlaceSpec(c.Arg(0), c.Arg(1, "0u"), c.Arg(2, "0u"), c.Arg(3, "0.4s"), c.Arg(4, "")),
         // 슬롯의 움직임 — 본래 자리 위에서 상대값으로 쌓는다(docs/PLAN_move-axes.md §4). 거리에는 생략값이 없다.
         ["left"] = (p, c) => p.EnqueueSlotMoveSpec(c, c.Arg(0), c.Arg(1), c.Arg(2, "0.4s"), c.Arg(3, "")),
@@ -65,9 +65,6 @@ public sealed partial class StageCommandParser
         ["fade_in"] = (p, c) => p.EnqueueFadeInSpec(c.Arg(0), c.Arg(1, "18fr")),
         ["fade_out"] = (p, c) => p.EnqueueFadeOutSpec(c.Arg(0), c.Arg(1, "18fr")),
         ["fade"] = (p, c) => p.EnqueueFadeToSpec(c.Arg(0), Float(c, 1, 1f), c.Arg(2, "18fr")),
-        // ease · punch를 생략하면 종류별 코어 기본값(SlideMotion) — 툴 프리뷰와 같은 값.
-        ["slide_in"] = (p, c) => p.EnqueueSlideSpec(SlideMotion.Kind.In, c.Arg(0), c.Arg(1, SlideMotion.DefaultInDirection), c.Arg(2, SlideMotion.DefaultDistanceToken), c.Arg(3, "13fr"), c.Arg(4), c.Arg(5)),
-        ["slide_out"] = (p, c) => p.EnqueueSlideSpec(SlideMotion.Kind.Out, c.Arg(0), c.Arg(1, SlideMotion.DefaultOutDirection), c.Arg(2, SlideMotion.DefaultDistanceToken), c.Arg(3, "13fr"), c.Arg(4), c.Arg(5)),
         ["char_move_to"] = (p, c) => p.EnqueueMoveByUnitCharSpec(c.Arg(0), c.Arg(1), c.Arg(2), c.Arg(3, "13fr")),
         ["char_scale_to"] = (p, c) => p.EnqueueScaleSpec(c.Arg(0), Float(c, 1, 0f), c.Arg(2, "13fr"), c.Arg(3, "")),
         ["char_rotate_to"] = (p, c) => p.EnqueuePortraitRotateToSpec(c.Arg(0), Float(c, 1, 0f), c.Arg(2, "13fr"), c.Arg(3, "")),

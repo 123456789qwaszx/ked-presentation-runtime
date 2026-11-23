@@ -24,7 +24,7 @@ public class StageCommandParserTests
     [Test]
     public void 표에_있는_이름을_안다()
     {
-        Assert.IsTrue(StageCommandParser.Knows("move_by"));
+        Assert.IsTrue(StageCommandParser.Knows("place"));
         Assert.IsTrue(StageCommandParser.Knows("left"));
         Assert.IsTrue(StageCommandParser.Knows("stage_mask"));
         Assert.IsTrue(StageCommandParser.Knows("pause"));
@@ -124,6 +124,9 @@ public class StageCommandParserTests
     [TestCase("show")]
     [TestCase("shot_to")]
     [TestCase("shot_focus_to")]
+    [TestCase("move_by")]
+    [TestCase("slide_in")]
+    [TestCase("slide_out")]
     [TestCase("scale_by")]
     [TestCase("scale_reset")]
     [TestCase("focus_on")]
@@ -132,6 +135,7 @@ public class StageCommandParserTests
     {
         // 무대를 읽어 값을 푸는 것 · 이름 하나가 여럿을 내는 것은 커맨드가 아니다. 노드와 함께 사라진 커맨드도 있다.
         // 블러의 초점은 depth_focus_on · depth_focus_clear로 이름을 바꿨다(docs/PLAN_rig-layers.md §4).
+        // move_by · slide_in · slide_out은 별칭 없이 걷었다 — 자리는 place, 그 위의 움직임은 left · right · up · down(docs/PLAN_move-axes.md).
         Assert.IsFalse(StageCommandParser.Knows(name));
     }
 
@@ -190,7 +194,7 @@ public class StageCommandParserTests
         Assert.AreEqual(CharacterRigNode.CharFocus_Track, focus.node);
         Assert.IsTrue(focus.useAbsolutePosition);
         Assert.AreEqual(new Vector2(80f, -40f), focus.delta);
-        Assert.AreEqual(0.4f, focus.duration, 1e-6f, "생략 0.4s — move_by와 같다");
+        Assert.AreEqual(0.4f, focus.duration, 1e-6f, "생략 0.4s — place와 같다");
     }
 
     [Test]
@@ -561,7 +565,7 @@ public class StageCommandParserTests
     public void 빈_문자열_인자도_생략으로_친다()
     {
         // Yarn의 생략 인자가 빈 문자열로 오는 경우가 있다 — StageCommand.Arg 규약과 같다.
-        List<CommandSpecBase> specs = Parse(NewParser(), Cmd("move_by", "c1", "", "", "", ""));
+        List<CommandSpecBase> specs = Parse(NewParser(), Cmd("place", "c1", "", "", "", ""));
 
         MoveByCommandSpecCharR move = (MoveByCommandSpecCharR)specs[0];
 
@@ -746,7 +750,7 @@ public class StageCommandParserTests
         Assert.AreEqual(13f / 30f, fade.duration, 1e-5f, "생략값 13fr");
 
         MoveByCommandSpecCharR move = (MoveByCommandSpecCharR)Parse(NewParser(), Cmd("bg_move", "bg_main", "2u", "-1u"))[0];
-        Assert.AreEqual(CharacterRigNode.CharSlot_Track, move.node, "move_by와 같은 축");
+        Assert.AreEqual(CharacterRigNode.CharSlot_Track, move.node, "배경은 본래 자리에 상대값 — 캐릭터의 움직임 노드가 아니다");
         Assert.IsFalse(move.useAbsolutePosition);
         Assert.Less(move.delta.y, 0f, "부호 있는 단위");
 

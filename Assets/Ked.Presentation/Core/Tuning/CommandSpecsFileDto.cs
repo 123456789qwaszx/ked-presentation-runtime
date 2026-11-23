@@ -12,7 +12,7 @@ namespace Ked.Presentation.Core
     //     "argKinds": [ "slot", "distance", … ],
     //     "lineStructure": [ "at", "gap" ],     커맨드가 아니라 줄의 구조 — 표 밖이다
     //     "commands": [
-    //       { "name": "move_by", "kind": "placement", "summary": "…", "waits": false, "immediate": false, "fork": false,
+    //       { "name": "place", "kind": "placement", "summary": "…", "waits": false, "immediate": false, "fork": false,
     //         "args": [ { "name": "slot", "label": "슬롯", "kind": "slot", "hasDefault": false, "defaultValue": "",
     //                     "optional": false, "flag": false, "catalog": "", "choices": [], "note": "" }, … ] }
     //     ]

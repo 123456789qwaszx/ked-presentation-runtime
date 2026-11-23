@@ -13,7 +13,7 @@ using UnityEngine;
 ///                            (캐릭터 slot처럼 숨은 채 선다 — bg_fade_in으로 들인다. 배역 있는 슬롯을 덮으면 배역을 푼다)
 ///   bg_sprite             →  SetSprite(키), SourcePixels(원본 픽셀 크기 그대로, 가운데), 레이캐스트 끔
 ///   bg_fade_in / out      →  FadeIn/Out  → CharacterPortraitSprite_Root
-///   bg_move               →  MoveBy      → CharSlot_Track            (move_by와 같은 축)
+///   bg_move               →  MoveBy      → CharSlot_Track            (본래 자리에 상대값 — 캐릭터의 움직임 노드는 쓰지 않는다)
 ///   bg_scale              →  ScaleTo     → CharacterPortrait_ActingScale (가운데 피벗 — 깊이 CharacterPortrait_DepthScale은 발 피벗이다)
 ///
 /// bg_size · bg_place · bg_slot00/01/02는 두지 않는다 — 크기는 bg_scale, 무대 · 층은 bg_spawn의 인자다.
