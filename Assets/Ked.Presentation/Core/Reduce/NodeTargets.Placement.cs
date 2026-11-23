@@ -6,10 +6,18 @@ namespace Ked.Presentation.Core
     /// 화면 지점 프리셋의 rig-space 좌표. 초점을 무대 지점에 놓는 값을 도구가 풀 때 쓴다(NodeTargets.TrySolveFocusPlacement).
     ///
     /// 주의: 이 비율은 게임별 값이므로 원칙적으로는 tuning 데이터가 맞다(target-boundary.md 백로그).
-    /// 같은 값을 눈금으로 그리는 곳이 하나 있다(Samples의 ScreenFocusGridOverlay) — 함께 고친다.
+    /// 화면 지점 덧그림(Samples의 ScreenFocusGridOverlay)은 사본을 두지 않고 이 이름 · 좌표를 부른다.
     /// </summary>
     public static class ScreenPointRatios
     {
+        /// <summary>TryResolve가 아는 이름 전부 — 바깥 아홉(가운데 · 변 · 모서리)과 안 넷.</summary>
+        public static readonly string[] Names =
+        {
+            "center", "left", "right", "top", "bottom",
+            "tl", "tr", "bl", "br",
+            "inner_tl", "inner_tr", "inner_bl", "inner_br",
+        };
+
         public const float OuterXRatio = 0.24f;
         public const float OuterYRatio = 0.16f;
         public const float InnerXRatio = 0.14f;
@@ -153,6 +161,18 @@ namespace Ked.Presentation.Core
 
             return TrySolveFocusPlacement(state, slotKey, focusOffset, desired, moveNodeId, out anchoredPosition, out reason);
         }
+
+        /// <summary>
+        /// 초점을 무대 지점에 두는 <c>place</c> 값 — 쌓인 움직임을 걷고(<c>move_reset</c>) 다시 세울 때(docs/PLAN_move-axes.md §4.3 · §10).
+        /// 자리 노드(Track · Move_X · Move_Y)는 회전 · 깊이 · 포커스의 회전 · 배율보다 위라 자리를 옮기면 초점이 그대로 평행이동한다 —
+        /// 그래서 지금의 초점 하나로 답이 닫힌다. Track을 푸는 TrySolveFocusPlacement와 같은 답이다(시험이 고정한다).
+        /// </summary>
+        /// <param name="slotTrack">CharSlot_Track의 지금 값(정착값).</param>
+        /// <param name="slotMove">CharSlot_Move_X + CharSlot_Move_Y의 지금 값(정착값).</param>
+        /// <param name="focusInRigSpace">초점의 지금 무대 좌표(카메라 중립).</param>
+        /// <param name="desiredInRigSpace">초점을 둘 무대 지점.</param>
+        public static Vec2 PlaceForFocusAt(Vec2 slotTrack, Vec2 slotMove, Vec2 focusInRigSpace, Vec2 desiredInRigSpace)
+            => slotTrack + slotMove + (desiredInRigSpace - focusInRigSpace);
 
         /// <summary>초점의 로컬 오프셋과 무대 지점을 값으로 받는 꼴 — 좌우 반전처럼 호출부가 오프셋을 손본 뒤 부를 때.</summary>
         public static bool TrySolveFocusPlacement(

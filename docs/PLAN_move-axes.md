@@ -144,6 +144,87 @@ CharFocus_Track                 focus_move
 - `place`가 놓는 것은 슬롯의 본래 자리이고 인물의 그림은 배역 앵커만큼 떨어져 선다 — 덧그림이 가리키는 것이 "슬롯의 자리"인지 "얼굴 · 가슴이 오는 곳"인지 화면에 적는다. 얼굴을 지점에 놓는 값은 코어의 `NodeTargets.TrySolveFocusPlacement`가 푼다(L11 — 부르는 쪽은 도구).
 - 재생 중에 켜고 끈다(개발용 — 빌드에는 넣지 않는다). 구현을 시작할 때 두 파일을 읽고 이 절을 채운다.
 
+> 상태: **설계 확정(소유자 2026-11-23 — D1 ~ D4는 제안대로) · 구현 끝 — 소유자 확인(10.4) 전** · 브랜치 `feat/screen-point-overlay`(`feat/move-axes` 위에서 — D4) · 두 파일을 읽고 채웠다.
+
+### 10.1 지금 있는 것
+
+| | `ScreenFocusGridOverlay`(`Samples/Scripts/Stage`, 기본 어셈블리) | `CharacterFocusDebugView`(`Stage/Diagnostics`, `Ked.Presentation.Stage`) |
+|---|---|---|
+| 그리는 것 | 화면 비율의 선 — 바깥 ±0.24 W · ±0.16 H, 안 ±0.14 W · ±0.09 H — 와 지점 13개의 이름. `OnGUI` | 캐스팅된 슬롯의 초점 넷(Feet · Body · Bust · Face). 정착값(장부)으로 잰 무대 좌표에 UI `Image` 점, 씬 뷰에는 기즈모 |
+| 좌표 | 씬에 놓인 `StageViewportLayer`(무대 마운트)의 rect. `_uiCamera`는 늘 null이다(오버레이 캔버스를 가정) | 각 리그의 `Stage.Root`(리그 좌표 계산의 경계) — `CharacterFocusPointResolver` |
+| 값 | 없다 — 이름만. 비율은 코어 `ScreenPointRatios`를 손으로 옮긴 사본이고(코어 주석: "함께 고친다"), 이름도 코어와 다르다(`top_left` · `third_ul` ↔ 코어 `tl` · `inner_tl`) | 없다 — 점만 |
+| 켜고 끄기 | 인스펙터의 `_show`뿐(키 없음) | 인스펙터의 칸뿐 |
+| 빌드 | 들어간다(조건부 컴파일 없음, 씬 오브젝트 `DebugView` 아래) | 들어간다. 조립(`SampleBootstrap.Presentation`)이 `Initialize`를 부른다(null 검사 없음) |
+| 그 밖 | — | 지켜보는 슬롯이 씬 값 `c1` ~ `c4`다 — 데모의 `s1` ~ `s3`는 안 보이고 컷인의 `c1` · `c2`만 보인다 |
+
+### 10.2 그리는 것
+
+**(1) 격자 — 슬롯의 자리(`place 슬롯 x y`)의 좌표**
+
+- 그리는 공간은 본 무대(`stage00`)의 `Stage_Root`다. 무대 리그에서 "안 움직이는" 노드이고 리그 좌표의 경계다 — `place`의 값은 카메라가 중립일 때의 이 좌표다.
+  그래서 샷이 줌 · 팬하면 인물은 격자에서 벗어나 보인다(격자는 움직이지 않는다). 머리글에 그렇게 적는다.
+- 나누기: 가로 N · 세로 M(기본 4 × 4, 인스펙터로 바꾼다). 금은 무대 rect의 i/N 자리 — 무대의 크기에서 센다(폭 1920이면 ±12u · ±24u, 2340이면 ±14.625u · ±29.25u).
+- 글: 세로 금마다 x, 가로 금마다 y, 교점마다 `x y` — `place`에 그대로 적는 값. 1u의 px는 **파서와 같은 것**을 쓴다:
+  `UnitToken.PixelsPerUnit(UnitToken.DefaultReferenceStageWidth)`(지금 40px — 파서가 이 상수로 u를 px로 바꾼다. 폴드는 `base-resolution.json`의 1920을 쓴다 — 지금은 같은 값이다).
+  소수는 셋째 자리까지, 뒤의 0은 뗀다(`14.625` · `12`).
+- 머리글 한 줄(화면 왼쪽 위): `격자 = 슬롯의 자리(place 슬롯 x y) · 무대 2340 × 1080 · 1u = 40px · 카메라 중립의 좌표`.
+- 이름 있는 지점(D3): 코어 `ScreenPointRatios`의 13점(도구의 `TrySolveFocusPlacement`가 쓰는 것)을 따로 켜는 층으로 — 이름은 코어의 것, 값은 u로.
+  비율을 손으로 옮겨 두지 않고 `ScreenPointRatios.TryResolve`를 부른다(사본을 걷는다 — 코어 주석도 고친다).
+
+**(2) 인물마다 — `CharacterFocusDebugView`를 넓힌다**
+
+- 지켜보는 슬롯: 목록 대신 **캐스팅된 슬롯 전부**(`CharacterRigRegistry.CollectAliveRigEntries`), 폴드 밖(대사창 초상 · 컷인 판 · 그림 팝업)은 뺀다. 무대는 가리지 않는다(컷인 무대의 인물도 그 무대의 `Stage.Root`로).
+- **슬롯의 자리 표지(십자)**: `CharSlot_Track` + `Move_X` + `Move_Y`의 정착값이 그 무대에 놓이는 점. 글: `s1 place 11.52 1.092` — 쌓인 움직임이 있으면 `+ 2 0` 처럼 따로.
+  §4.3의 "지금 어디인가"를 대본 밖에서 읽는다(움직임이 쌓여 대본에서는 바로 읽히지 않는다).
+- 초점 넷(지금 그대로) 곁에 그 점의 좌표(u)를 작게.
+- 이 글로 "격자가 가리키는 것은 슬롯의 자리이고, 그림은 배역 앵커만큼 떨어져 선다"가 화면에서 보인다 — 십자와 초점이 함께 서 있으므로.
+- 겨눔(D1): 마우스를 무대 위에 두면 겨눈 초점(기본 Bust) 하나에 대해 인물마다 "그 초점을 여기에 두는 값"을 적는다 — `move_reset 슬롯 0fr` → `place 슬롯 x y`의 x y.
+  식은 `place' = (Track + Move) + (P − 초점)`. 자리 노드가 회전 · 깊이 · 포커스의 회전 · 배율보다 위라(M2) 자리를 옮기면 초점이 그대로 평행이동하므로 이 식이 정확하다 —
+  코어 `NodeTargets.TrySolveFocusPlacement`(Track을 풀 때)와 같은 답이다. 둘이 같다는 것을 순수 시험이 고정한다(자세를 잡은 리그에서).
+
+**(3) 켜고 끄기 · 빌드**
+
+- 재생 중 키: `F1` 격자 · `F2` 인물 표지(인스펙터로 바꾼다). 지금 쓰는 키(Space · Ctrl · R · A · S · Esc)와 겹치지 않는다. 처음에는 꺼 둔다.
+- 빌드에서 빼는 법(D2): 씬의 `DebugView` 묶음에 태그 `EditorOnly` — Unity가 빌드에서 그 오브젝트를 걷는다. 코드는 그대로 컴파일되고 조립은 뷰가 없으면 건너뛴다(null 검사 하나).
+
+### 10.3 바뀌는 곳
+
+| 파일 | 무엇 |
+|---|---|
+| `Samples/Scripts/Stage/ScreenFocusGridOverlay.cs` | 다시 쓴다 — 격자 · u 글 · 머리글 · 이름 있는 지점(코어를 부른다) · 키. 무대는 조립이 건넨다(`Initialize(PresentationStage)`) — 씬의 `StageShot_Root` 칸을 걷는다 |
+| `Stage/Diagnostics/CharacterFocusDebugView.cs` | 슬롯 자동 · 자리 표지 · 좌표 글 · (D1) 겨눔 · 키. 지금의 점 그리기는 그대로 |
+| `Samples/Scripts/Bootstrap/SampleBootstrap.Presentation.cs` · `SampleBootstrap.cs` | 격자에 무대를 건넨다 · 둘 다 null이면 건너뛴다 |
+| `Samples/Scenes/PresentationSample.unity` | `DebugView`의 태그(D2) · 격자의 칸(걷은 `StageShot_Root`) · `observedSlotKeys`(걷는다) — Unity에서 다시 저장 |
+| `Core/Reduce/NodeTargets.Placement.cs` | `ScreenPointRatios`의 주석("같은 값을 눈금으로 그리는 곳 — 함께 고친다") — 덧그림이 코어를 부르므로 사본이 없어진다 |
+| 시험 | 순수: (D1이면) 평행이동 식 = `TrySolveFocusPlacement`. 덧그림 자체는 Unity에서 소유자가 본다 |
+
+### 10.4 확인(소유자)
+
+재생 중 F1 · F2. 데모 1번 줄(하린 `place s1 0u 1.092u` — 십자가 가운데 금 위 1.092), 장부 확인의 "준비" 줄(`11.52u` · `-11.52u` — 이름 있는 지점 `right` · `left`와 겹친다),
+6-1 · 6-2 뒤(`+ 14.184 0`이 따로 적힌다), 게임 뷰를 19.5:9로 바꿔 격자 · 값이 무대 폭(2340)을 따르는지, 빌드에 들어가지 않는지.
+
+### 10.5 정한 것 (소유자, 2026-11-23)
+
+| # | 물음 | 정한 것 |
+|---|---|---|
+| D1 | 겨눔(마우스 자리에 초점을 두는 `place` 값)을 이번에 넣는가 | 넣는다 — 식이 한 줄이고 코어의 답과 시험으로 견준다 |
+| D2 | 빌드에서 빼는 법 | 태그 `EditorOnly` + 조립의 null 검사 |
+| D3 | 옛 비율 선(이름 있는 13점) | 따로 켜는 층으로 남긴다 — 코어를 불러 이름 · u 값으로 |
+| D4 | 브랜치 | 자리 표지가 Move_X · _Y를 읽으므로 `feat/move-axes` 위에서 딴다(`feat/screen-point-overlay`) — `dev`에서 따면 Move가 없다 |
+
+### 10.6 기록
+
+- 코어: `ScreenPointRatios.Names`(13점의 이름 — 덧그림이 이 표를 그린다), `UnitToken.FormatUnits`(px → 대본의 u 글, 소수 셋째 자리 · 뒤의 0 떼기 · -0 없음),
+  `NodeTargets.PlaceForFocusAt`(겨눔의 식). 시험: 글 여덟 · 이름표 하나 · 겨눔 하나(`move_reset 0fr` → `place`로 접으면 초점이 그 지점에 서고,
+  움직임을 걷은 무대에서 Track을 푼 `TrySolveFocusPlacement`와 같은 답 — 크기 · 기울기 · 포커스의 회전 · 배율 · 쌓인 움직임이 있는 자세에서).
+- `ScreenFocusGridOverlay`를 다시 썼다 — 무대는 조립이 건넨다(`Initialize(StageRigRegistry)`, 씬의 `StageShot_Root` 칸을 걷었다). 4 × 4(인스펙터로 바꾼다) ·
+  금마다 · 교점마다의 u · 머리글 · Shift+F1 이름 있는 지점(코어를 부른다) · **마우스 자리의 값**(설계에 더했다 — 격자 사이의 자리도 읽는다). 처음에는 꺼 둔다.
+- `CharacterFocusDebugView`: F2 · 캐스팅된 슬롯 전부(폴드 밖 · 배경은 뺀다 — 씬의 `c1` ~ `c4` 목록을 걷었다) · 슬롯의 자리 십자와 `place` · 움직임 · 포커스의 값 ·
+  겨눈 초점(기본 Bust)의 좌표 · 겨눔. 값은 카메라 중립으로 잰다(`measureCameraNeutral`, 조립이 샷 시스템을 중립으로 건넨다) — 초점 점도 같은 좌표에 선다.
+  끄면 전처럼 라이브 카메라로 잰다(설계에 더한 칸). 처음에는 꺼 둔다.
+- 조립: 둘 다 null이면 건너뛴다. 씬: `DebugView` 묶음의 태그 `EditorOnly`(D2) · 조립의 격자 칸 · 걷은 칸. README의 키 표에 F1 · F2.
+- 확인: 순수 시험 602 통과(.NET 8), Roslyn 진단 — 새 오류는 Unity 형(GUI · Input …)을 못 찾는 것뿐이다(우리 형의 멤버 오류 0). 그리기 · 키 · 빌드에서 빠지는지는 소유자(10.4).
+
 ## 11. 단계별 기록
 
 ### 구현을 시작하며 맞춘 것 (소유자, 2026-11-23)

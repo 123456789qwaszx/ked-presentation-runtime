@@ -184,7 +184,11 @@ public partial class SampleBootstrap : MonoBehaviour, IRigPrefabSource
     [SerializeField] private PortraitFramePresetDBSO portraitFramePreset;
 
     [Header("NodeDebug")]
+    [Tooltip("인물 표지(F2) — 초점 · 슬롯의 자리 · 겨눔. 씬의 DebugView 묶음은 태그 EditorOnly라 빌드에서는 비어 있다.")]
     [SerializeField] private CharacterFocusDebugView characterFocusDebugView;
+
+    [Tooltip("화면 지점 덧그림(F1) — place에 적는 값의 격자(docs/PLAN_move-axes.md §10). 빌드에서는 비어 있다.")]
+    [SerializeField] private ScreenFocusGridOverlay screenFocusGridOverlay;
 
     // 이번 조립의 예제. 인스펙터 값 또는 타이틀에서 고른 것(SampleExampleSwitch).
     private SampleExample _example;

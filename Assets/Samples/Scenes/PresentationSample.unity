@@ -850,6 +850,7 @@ MonoBehaviour:
   popupPreset: {fileID: 11400000, guid: 2f018c6cbaa99114992e4c2649dbc24e, type: 2}
   portraitFramePreset: {fileID: 11400000, guid: d40cbc0bb2d3b244f95ed8aac09f5088, type: 2}
   characterFocusDebugView: {fileID: 1719686628}
+  screenFocusGridOverlay: {fileID: 1928200879}
 --- !u!1 &608895336
 GameObject:
   m_ObjectHideFlags: 0
@@ -1286,7 +1287,7 @@ GameObject:
   - component: {fileID: 909332830}
   m_Layer: 0
   m_Name: DebugView
-  m_TagString: Untagged
+  m_TagString: EditorOnly
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1915,11 +1916,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CharacterFocusDebugView
   markerRoot: {fileID: 758585424}
-  observedSlotKeys:
-  - c1
-  - c2
-  - c3
-  - c4
   focusTuningDb: {fileID: 11400000, guid: b77af4e295606b446ae4f74dad106f5f, type: 2}
   points:
   - enabled: 1
@@ -2183,21 +2179,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5995e693da0a5b4dbeed2cebed61c48, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ScreenFocusGridOverlay
-  StageShot_Root: {fileID: 144827249}
-  _show: 1
-  _showGridLines: 1
-  _showFocusPoints: 1
-  _showLabels: 1
-  _lineColor: {r: 0.95512486, g: 1, b: 0, a: 0.75}
-  _innerLineColor: {r: 1, g: 0.95, b: 0, a: 0.35}
+  _toggleKey: 282
+  _show: 0
+  _showNamedPoints: 0
+  _stageKey: stage00
+  _columns: 4
+  _rows: 4
+  _showMouse: 1
+  _lineColor: {r: 1, g: 0.85, b: 0, a: 0.65}
+  _edgeColor: {r: 1, g: 0.85, b: 0, a: 0.35}
   _pointColor: {r: 1, g: 0.95, b: 0, a: 1}
-  _innerPointColor: {r: 0.65, g: 1, b: 1, a: 1}
-  _labelColor: {r: 0.01886791, g: 0.017906018, b: 0, a: 1}
-  _lineThickness: 3
-  _innerLineThickness: 2
-  _pointSize: 12
-  _innerPointSize: 8
-  _labelFontSize: 14
+  _namedPointColor: {r: 0.65, g: 1, b: 1, a: 1}
+  _textColor: {r: 1, g: 0.95, b: 0.6, a: 1}
+  _textBackground: {r: 0, g: 0, b: 0, a: 0.6}
+  _lineThickness: 2
+  _pointSize: 7
+  _fontSize: 13
 --- !u!4 &1928200880
 Transform:
   m_ObjectHideFlags: 0

@@ -111,9 +111,13 @@ public partial class SampleBootstrap
         _presentationResponseRig = new PresentationShotResponseSystem(_stageRigs, LayerProfileCurve.Default);
         _screenEffectRig = EnsureScreenEffectRig();
 
-        characterFocusDebugView.Initialize(
-            _presentationStage,
-            characterFocusTuningDb);
+        // 개발용 덧그림 — 씬의 DebugView 묶음은 태그 EditorOnly라 빌드에는 없다(docs/PLAN_move-axes.md §10).
+        // 값은 카메라 중립의 무대 좌표로 잰다 — 배치 커맨드가 쓰는 것과 같은 중립(샷 시스템)을 건넨다.
+        if (characterFocusDebugView != null)
+            characterFocusDebugView.Initialize(_presentationStage, characterFocusTuningDb, _presentationResponseRig);
+
+        if (screenFocusGridOverlay != null)
+            screenFocusGridOverlay.Initialize(_stageRigs);
     }
 
 

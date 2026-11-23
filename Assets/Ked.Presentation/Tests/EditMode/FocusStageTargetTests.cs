@@ -217,6 +217,65 @@ namespace Ked.Presentation.Tests
             Assert.That(ScreenPointRatios.TryResolve(new Vec2(1920f, 1080f), "그런곳없음", out _), Is.False);
         }
 
+        [Test]
+        public void 이름표의_이름은_모두_풀린다()
+        {
+            // 화면 지점 덧그림이 이 표를 그대로 그린다(docs/PLAN_move-axes.md §10).
+            Assert.That(ScreenPointRatios.Names.Length, Is.EqualTo(13));
+
+            foreach (string name in ScreenPointRatios.Names)
+                Assert.That(ScreenPointRatios.TryResolve(new Vec2(2340f, 1080f), name, out _), Is.True, name);
+        }
+
+        // ── 겨눔 — 초점을 지점에 두는 place 값(docs/PLAN_move-axes.md §10 D1) ──────────
+
+        [Test]
+        public void 겨눔의_식은_자리를_푸는_계산과_같다()
+        {
+            // 자리 노드가 회전 · 깊이 · 포커스의 회전 · 배율보다 위라, 자리를 옮기면 초점이 평행이동한다(M2).
+            // 그래서 place' = (Track + Move) + (P − 초점) — 움직임을 걷고(move_reset) 다시 세우는 값이다.
+            StageReducerTuning tuning = NewTuning();
+
+            // 배역 없이 — 이 합성 리그에는 초상의 연기 축이 없어 cast의 앵커 리셋이 설 자리가 없다(초점은 base 오프셋).
+            StageState posed = Fold(tuning,
+                Cmd("slot", "c1"),
+                Cmd("size", "c1", "close"),
+                Cmd("place", "c1", "-3u", "1u", "0fr"),
+                Cmd("right", "c1", "5u"),
+                Cmd("down", "c1", "2u"),
+                Cmd("rotate_by", "c1", "12"),
+                Cmd("focus_rotate", "c1", "-5"),
+                Cmd("focus_scale", "c1", "1.1"));
+
+            Assert.That(posed.Unhandled, Is.Empty);
+
+            ScreenPointRatios.TryResolve(posed.Nodes.RootSpace.Size, "tr", out Vec2 desired);
+
+            Vec2 track = posed.Nodes.GetState("c1/CharSlot_Track").AnchoredPosition;
+            Vec2 move = posed.Nodes.GetState("c1/CharSlot_Move_X").AnchoredPosition
+                        + posed.Nodes.GetState("c1/CharSlot_Move_Y").AnchoredPosition;
+
+            Vec2 aimed = NodeTargets.PlaceForFocusAt(track, move, FocusOf(posed, "c1", "bust", tuning), desired);
+
+            // 대본이 적는 그대로 — move_reset 0fr → place x y 0fr — 접으면 초점이 그 지점에 선다.
+            StageState written = StageReducer.ApplyAll(posed, new[]
+            {
+                Cmd("move_reset", "c1", "0fr"),
+                Cmd("place", "c1", U(aimed.X), U(aimed.Y), "0fr"),
+            }, tuning);
+
+            Vec2 focus = FocusOf(written, "c1", "bust", tuning);
+            Assert.That(focus.X, Is.EqualTo(desired.X).Within(1e-2f));
+            Assert.That(focus.Y, Is.EqualTo(desired.Y).Within(1e-2f));
+
+            // 같은 답 — 움직임을 걷은 무대에서 Track을 푼 값.
+            StageState reset = StageReducer.Apply(posed, Cmd("move_reset", "c1", "0fr"), tuning);
+            Vec2 solved = Solve(reset, "c1", "bust", "tr", tuning, NodeTargets.SlotTrackNodeId);
+
+            Assert.That(aimed.X, Is.EqualTo(solved.X).Within(1e-2f));
+            Assert.That(aimed.Y, Is.EqualTo(solved.Y).Within(1e-2f));
+        }
+
         // ── focus 오프셋 합 ──────────────────────────────────────────
 
         [Test]
