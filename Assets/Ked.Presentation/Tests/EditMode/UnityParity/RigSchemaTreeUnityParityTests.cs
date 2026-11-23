@@ -311,6 +311,30 @@ namespace Ked.Presentation.Tests.UnityParity
             }
         }
 
+        [Test]
+        public void 슬롯의_움직임은_본래_자리와_포커스_회전_사이에_선다()
+        {
+            // docs/PLAN_move-axes.md M1 · M2 — Move_X · _Y는 CharSlot_Track 바로 아래, 회전 · 깊이보다 위다.
+            // 스키마(코드)와 덤프(코어가 읽는 것)가 같은 사슬을 갖는지 함께 본다.
+            Dictionary<string, string> schema = new();
+
+            foreach (CharacterRigSchema.NodeDef def in CharacterRigSchema.Nodes)
+                schema[def.Id.ToString()] = def.Parent?.ToString();
+
+            Assert.That(schema["CharSlot_Move_X"], Is.EqualTo("CharSlot_Track"));
+            Assert.That(schema["CharSlot_Move_Y"], Is.EqualTo("CharSlot_Move_X"));
+            Assert.That(schema["CharFocus_Rotation"], Is.EqualTo("CharSlot_Move_Y"));
+
+            RigSchemaRigDto rig = FindRig(LoadDump(), "character");
+            Dictionary<string, string> dump = new();
+
+            foreach (RigSchemaNodeDto node in rig.nodes)
+                dump[node.id] = node.parent;
+
+            foreach (string id in new[] { "CharSlot_Move_X", "CharSlot_Move_Y", "CharFocus_Rotation" })
+                Assert.That(dump[id], Is.EqualTo(schema[id]), $"덤프의 '{id}' 부모가 스키마와 다르다 — 다시 내보낸다");
+        }
+
         private static void AssertVec3(Vec3 actual, Vector3 expected, string what)
         {
             Assert.That(actual.X, Is.EqualTo(expected.x).Within(Eps), $"{what} X — 코어={actual} 유니티={expected}");

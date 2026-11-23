@@ -52,7 +52,9 @@ namespace Ked.Presentation.Tests
                     Node("__root", ""),
                     Node("CharFocus_Track", "__root"),
                     Node("CharSlot_Track", "CharFocus_Track"),
-                    Node("CharFocus_Rotation", "CharSlot_Track", bottomPivot: true),
+                    Node("CharSlot_Move_X", "CharSlot_Track"),
+                    Node("CharSlot_Move_Y", "CharSlot_Move_X"),
+                    Node("CharFocus_Rotation", "CharSlot_Move_Y", bottomPivot: true),
                     Node("CharFocus_Scale", "CharFocus_Rotation", bottomPivot: true),
                     Node("CharSlot_Rotation", "CharFocus_Scale"),
                     Node("CharSlot_SwayPivot", "CharSlot_Rotation", bottomPivot: true),
@@ -72,7 +74,7 @@ namespace Ked.Presentation.Tests
             };
         }
 
-        private const int RigNodeCount = 19;
+        private const int RigNodeCount = 21;
 
         private static StageReducerTuning NewTuning(bool withBackgroundDimensions = true)
         {

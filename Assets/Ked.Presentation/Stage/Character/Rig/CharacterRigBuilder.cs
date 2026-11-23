@@ -188,6 +188,8 @@ public sealed class CharacterRigBuilder
 
         // Slot axis
         refs.CharSlot_Track = GetRt(CharacterRigSchema.Refs.CharSlot_Track);
+        refs.CharSlot_Move_X = GetRt(CharacterRigSchema.Refs.CharSlot_Move_X);
+        refs.CharSlot_Move_Y = GetRt(CharacterRigSchema.Refs.CharSlot_Move_Y);
         refs.CharSlot_Rotation = GetRt(CharacterRigSchema.Refs.CharSlot_Rotation);
         refs.CharSlot_SwayPivot = GetRt(CharacterRigSchema.Refs.CharSlot_SwayPivot);
 

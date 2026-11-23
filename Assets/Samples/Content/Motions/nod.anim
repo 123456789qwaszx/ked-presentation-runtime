@@ -52,7 +52,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_AnchoredPosition.y
-    path: CharFocus_Track/CharSlot_Track/CharFocus_Rotation/CharFocus_Scale/CharSlot_Rotation/CharSlot_SwayPivot/CharacterPortrait_DepthOffset/CharacterPortrait_DepthScale/CharacterPortrait_VisualOffset/CharacterPortrait_Track/CharacterPortrait_Rotation/CharacterPortrait_Track_Move
+    path: CharFocus_Track/CharSlot_Track/CharSlot_Move_X/CharSlot_Move_Y/CharFocus_Rotation/CharFocus_Scale/CharSlot_Rotation/CharSlot_SwayPivot/CharacterPortrait_DepthOffset/CharacterPortrait_DepthScale/CharacterPortrait_VisualOffset/CharacterPortrait_Track/CharacterPortrait_Rotation/CharacterPortrait_Track_Move
     classID: 224
     script: {fileID: 0}
     flags: 0
@@ -65,7 +65,7 @@ AnimationClip:
   m_ClipBindingConstant:
     genericBindings:
     - serializedVersion: 2
-      path: 540407927
+      path: 821265272
       attribute: 538195251
       script: {fileID: 0}
       typeID: 224
@@ -130,7 +130,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_AnchoredPosition.y
-    path: CharFocus_Track/CharSlot_Track/CharFocus_Rotation/CharFocus_Scale/CharSlot_Rotation/CharSlot_SwayPivot/CharacterPortrait_DepthOffset/CharacterPortrait_DepthScale/CharacterPortrait_VisualOffset/CharacterPortrait_Track/CharacterPortrait_Rotation/CharacterPortrait_Track_Move
+    path: CharFocus_Track/CharSlot_Track/CharSlot_Move_X/CharSlot_Move_Y/CharFocus_Rotation/CharFocus_Scale/CharSlot_Rotation/CharSlot_SwayPivot/CharacterPortrait_DepthOffset/CharacterPortrait_DepthScale/CharacterPortrait_VisualOffset/CharacterPortrait_Track/CharacterPortrait_Rotation/CharacterPortrait_Track_Move
     classID: 224
     script: {fileID: 0}
     flags: 0

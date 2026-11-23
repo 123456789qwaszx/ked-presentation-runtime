@@ -1,6 +1,6 @@
 # 이동의 축 — 슬롯의 Move_X · Move_Y와 left · right · up · down (2026-11-23)
 
-> 상태: **계획 확정(소유자 2026-11-23 — M1 ~ M10). 구현 전.** 코드는 아직 고치지 않았다 · 브랜치(예정) `feat/move-axes`(`dev`에서)
+> 상태: **계획 확정(소유자 2026-11-23 — M1 ~ M10). X1 끝(리그 22노드) — X2 · X3 남음** · 브랜치 `feat/move-axes`(`dev`에서) · 단계별 기록은 §11
 > 앞선 일: [PLAN_rig-layers.md](PLAN_rig-layers.md)(리그의 계층 — 20노드. 이 계획이 그 L-결정 가운데 "축별 노드를 걷는다"를 슬롯 계층에서만 뒤집는다)
 
 ## 0. 한 문장
@@ -143,3 +143,25 @@ CharFocus_Track                 focus_move
 - 값은 무대의 크기에서 센다(고정 1920이 아니다 — 작업공간의 재현 화면은 폭 2340이다). 1u의 px는 코어의 것(`UnitToken` · `ReferenceStageWidth`)을 쓴다.
 - `place`가 놓는 것은 슬롯의 본래 자리이고 인물의 그림은 배역 앵커만큼 떨어져 선다 — 덧그림이 가리키는 것이 "슬롯의 자리"인지 "얼굴 · 가슴이 오는 곳"인지 화면에 적는다. 얼굴을 지점에 놓는 값은 코어의 `NodeTargets.TrySolveFocusPlacement`가 푼다(L11 — 부르는 쪽은 도구).
 - 재생 중에 켜고 끈다(개발용 — 빌드에는 넣지 않는다). 구현을 시작할 때 두 파일을 읽고 이 절을 채운다.
+
+## 11. 단계별 기록
+
+### 구현을 시작하며 맞춘 것 (소유자, 2026-11-23)
+
+계획서와 코드가 어긋난 곳을 고치기 전에 물었다.
+
+| # | 어긋난 곳 | 정한 것 |
+|---|---|---|
+| Q1 | §6 · §7에 프리팹 · 제작 씬 · `.anim`이 없다 — 노드 둘이 `CharSlot_Track`과 `CharFocus_Rotation` 사이에 끼어 그 아래 노드의 경로가 모두 바뀐다. 덤프도 X3에서야 다시 내면 `RigSchemaTreeUnityParityTests`가 X1부터 실패한다 | R2처럼 X1에서 손으로 맞추고, X3의 덤프 다시 내기로 확인한다 |
+| Q2 | "공개 대본 11곳" 가운데 git이 추적하는 대본은 6곳이다(`move_by` 3 · `slide_in` 3 · `slide_out` 0). 남은 5곳(`slide_in` 2 · `slide_out` 3)은 `.git/info/exclude`로 빠진 `Assets/Dialogue/RealTest/real_test_Mirage_Tavern.yarn` — at 없는 옛 표기라 R4도 손대지 않았다 | 그대로 둔다 |
+| Q3 | 데모 6-1 · 6-2의 `move_by s1 7.092u`가 `right`(Move_X)로 가면 이어지는 7번 줄 `place s1 11.52u 1.092u 60fr`이 그 이동을 덮지 않는다(하린이 25.7u에 선다) — "`place` 50은 그대로"가 이 한 곳에서는 서지 않는다 | 그 `place` 앞에 `move_reset s1 60fr` — 길이 · 이징(OutCubic)이 같아 두 트윈의 합이 전과 같은 화면이다 |
+| Q4 | M7의 "`slot`으로 앵커를 다시 놓을 때"는 코드에서 `cast`다 — Track · Rotation을 되돌리는 목록은 `SetAnchor`(resetSlotPos)의 것이고 `cast`가 낸다. `slot` · 장면 경계는 리그를 새로 세워(스키마 초기값) Move가 저절로 0이다 | `SetAnchor`의 목록(런타임 · 코어 `StageReducer.Anchor`)에 더한다 |
+
+### X1 — 리그
+
+- 스키마 · `Refs` · `CharacterRigNode` · `CharacterRigRefs` · `GetComponent` · 빌더의 `BuildRefs`에 `CharSlot_Move_X` · `CharSlot_Move_Y`. `CharFocus_Rotation`의 부모가 `CharSlot_Move_Y`로. 커맨드는 그대로다(`move_by`가 아직 Track).
+- 코어의 노드 상수 `NodeTargets.SlotMoveXNodeId` · `SlotMoveYNodeId`.
+- 손으로 맞춘 것(Q1): `rig-schemas.json`(노드 둘 — `CharSlot_Track`의 값 그대로, 부모만), `CharacterRig.prefab` · `MotionAuthoring.unity`(게임 오브젝트 둘을 끼우고 다시 이었다), `nod.anim` · `bow.anim`(경로와 그 CRC32).
+- 시험: 합성 리그 셋(리듀서 · 배경 · 포커스)에 노드 둘. Unity 시험 하나를 더했다 — 스키마와 덤프가 같은 사슬(Track → Move_X → Move_Y → 포커스 회전)을 갖는가.
+- 확인: 순수 시험 598을 .NET 8로 돌려 통과. Unity 쪽 코드는 클라우드에서 엔진 없이 컴파일해 전과 견줬다(새 오류 0) — Unity 컴파일 · EditMode는 소유자.
+

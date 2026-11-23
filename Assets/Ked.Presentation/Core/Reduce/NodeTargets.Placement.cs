@@ -92,6 +92,13 @@ namespace Ked.Presentation.Core
         /// <summary>슬롯 — 무대 위의 본래 자리. place(절대) · move_by(상대) · slide가 쓴다.</summary>
         public const string SlotTrackNodeId = "CharSlot_Track";
 
+        /// <summary>
+        /// 슬롯 — 본래 자리 위의 움직임(docs/PLAN_move-axes.md). 가로(Move_X)와 세로(Move_Y)가 다른 노드라 함께 돈다.
+        /// 회전 · 깊이보다 위라 어느 기울기 · 크기에서나 화면 값 그대로다.
+        /// </summary>
+        public const string SlotMoveXNodeId = "CharSlot_Move_X";
+        public const string SlotMoveYNodeId = "CharSlot_Move_Y";
+
         /// <summary>초상의 깊이 — 그 사람의 크기. size가 놓는다.</summary>
         public const string DepthOffsetNodeId = "CharacterPortrait_DepthOffset";
         public const string DepthScaleNodeId = "CharacterPortrait_DepthScale";

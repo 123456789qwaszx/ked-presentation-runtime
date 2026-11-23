@@ -10,8 +10,9 @@ using UnityEngine.UI;
 // 자리가 그 노드의 뜻을 정한다. 리그는 세 덩어리다(docs/PLAN_rig-layers.md):
 //   · 포커스(CharFocus_*) — 대화할 때만 서는 자리. 실제 무대로는 표현하기 힘든 작가 허용의 공간이라
 //     이동 · 회전 · 배율을 모두 갖고, 쓰고 나면 0으로 되돌린다. 이동은 맨 위(무대 값 그대로),
-//     회전 · 배율은 슬롯의 자리 아래(중심이 그 인물의 발밑)다.
-//   · 슬롯(CharSlot_*) — 무대 위의 본래 자리.
+//     회전 · 배율은 슬롯의 움직임 아래(중심이 그 인물의 발밑)다.
+//   · 슬롯(CharSlot_*) — 무대 위의 본래 자리(Track — place)와 그 위의 움직임(Move_X · Move_Y —
+//     left · right · up · down, docs/PLAN_move-axes.md). 가로와 세로를 따로 걸 수 있게 노드가 둘이다.
 //   · 초상(CharacterPortrait_*) — 그 사람의 크기(깊이)와 배역 앵커, 연기, 그림.
 //     깊이는 초상만 곱한다 — 슬롯의 이동은 어느 크기에서나 화면 값 그대로다.
 //
@@ -30,6 +31,10 @@ public static class CharacterRigSchema
 
         // Slot axis - 무대 위의 본래 자리
         CharSlot_Track,
+
+        // Slot axis - 본래 자리 위의 움직임 (가로 · 세로)
+        CharSlot_Move_X,
+        CharSlot_Move_Y,
 
         // Focus axis - 발밑을 중심으로 (회전 · 배율)
         CharFocus_Rotation,
@@ -89,8 +94,12 @@ public static class CharacterRigSchema
         // Slot axis - 무대 위의 본래 자리
         new() { Id = Refs.CharSlot_Track, Parent = Refs.CharFocus_Track },
 
+        // Slot axis - 본래 자리 위의 움직임. 회전 · 깊이보다 위라 어느 기울기 · 크기에서나 화면 값 그대로다
+        new() { Id = Refs.CharSlot_Move_X, Parent = Refs.CharSlot_Track },
+        new() { Id = Refs.CharSlot_Move_Y, Parent = Refs.CharSlot_Move_X },
+
         // Focus axis - 발밑을 중심으로 (회전 · 배율)
-        new() { Id = Refs.CharFocus_Rotation, Parent = Refs.CharSlot_Track, NeedsBottomPivot = true },
+        new() { Id = Refs.CharFocus_Rotation, Parent = Refs.CharSlot_Move_Y, NeedsBottomPivot = true },
         new() { Id = Refs.CharFocus_Scale, Parent = Refs.CharFocus_Rotation, NeedsBottomPivot = true },
 
         // Slot axis - 회전
@@ -134,6 +143,10 @@ public enum CharacterRigNode
 
     // Slot axis - 무대 위의 본래 자리
     CharSlot_Track,
+
+    // Slot axis - 본래 자리 위의 움직임 (가로 · 세로)
+    CharSlot_Move_X,
+    CharSlot_Move_Y,
 
     // Focus axis - 발밑을 중심으로 (회전 · 배율)
     CharFocus_Rotation,
@@ -204,8 +217,10 @@ public sealed class CharacterRigRefs
     public RectTransform CharFocus_Rotation;
     public RectTransform CharFocus_Scale;
 
-    // Slot axis - 무대 위의 본래 자리
+    // Slot axis - 무대 위의 본래 자리와 그 위의 움직임
     public RectTransform CharSlot_Track;
+    public RectTransform CharSlot_Move_X;
+    public RectTransform CharSlot_Move_Y;
     public RectTransform CharSlot_Rotation;
     public RectTransform CharSlot_SwayPivot;
 
@@ -266,6 +281,8 @@ public static class CharacterRigRefsExtensions
 
             // Slot axis
             CharacterRigNode.CharSlot_Track => refs.CharSlot_Track,
+            CharacterRigNode.CharSlot_Move_X => refs.CharSlot_Move_X,
+            CharacterRigNode.CharSlot_Move_Y => refs.CharSlot_Move_Y,
             CharacterRigNode.CharSlot_Rotation => refs.CharSlot_Rotation,
             CharacterRigNode.CharSlot_SwayPivot => refs.CharSlot_SwayPivot,
 

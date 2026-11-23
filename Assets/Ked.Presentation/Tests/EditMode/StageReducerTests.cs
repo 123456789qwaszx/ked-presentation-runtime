@@ -8,7 +8,7 @@ namespace Ked.Presentation.Tests
     /// <summary>
     /// 리듀서 폴드 골든.
     ///
-    /// 리그는 실제 캐릭터 스키마와 같은 부모 사슬의 합성 20노드다 — 실제 덤프와의
+    /// 리그는 실제 캐릭터 스키마와 같은 부모 사슬의 합성 22노드다 — 실제 덤프와의
     /// 대조는 UnityParity·등가성 하네스의 일이고, 여기서는 폴드 규율을 고정한다.
     /// 기본값·표적은 전부 브리지 실측에서 왔다(각 테스트 주석).
     /// </summary>
@@ -55,7 +55,9 @@ namespace Ked.Presentation.Tests
                     Node("__root", ""),
                     Node("CharFocus_Track", "__root"),
                     Node("CharSlot_Track", "CharFocus_Track"),
-                    Node("CharFocus_Rotation", "CharSlot_Track", bottomPivot: true),
+                    Node("CharSlot_Move_X", "CharSlot_Track"),
+                    Node("CharSlot_Move_Y", "CharSlot_Move_X"),
+                    Node("CharFocus_Rotation", "CharSlot_Move_Y", bottomPivot: true),
                     Node("CharFocus_Scale", "CharFocus_Rotation", bottomPivot: true),
                     Node("CharSlot_Rotation", "CharFocus_Scale"),
                     Node("CharSlot_SwayPivot", "CharSlot_Rotation", bottomPivot: true),
@@ -77,7 +79,7 @@ namespace Ked.Presentation.Tests
             };
         }
 
-        private const int RigNodeCount = 20;
+        private const int RigNodeCount = 22;
 
         private static StageReducerTuning NewTuning()
         {
