@@ -50,7 +50,7 @@ public sealed class AutoEdgeTests
                 Node("C", "교실")));
 
         Assert.That(result.IsValid, Is.False);
-        Assert.That(Messages(result), Does.Contain("유일한 간선"));
+        Assert.That(Messages(result), Does.Contain("only edge"));
     }
 
     [Test]
@@ -63,7 +63,7 @@ public sealed class AutoEdgeTests
             Chapter("A", Node("A", "교실", auto), Node("B", "교실")));
 
         Assert.That(result.IsValid, Is.False);
-        Assert.That(Messages(result), Does.Contain("스탯 변화"));
+        Assert.That(Messages(result), Does.Contain("stat changes"));
     }
 
     [Test]
@@ -79,7 +79,7 @@ public sealed class AutoEdgeTests
             Chapter("A", Node("A", "교실", auto), Node("B", "교실")));
 
         Assert.That(result.IsValid, Is.False);
-        Assert.That(Messages(result), Does.Contain("조건"));
+        Assert.That(Messages(result), Does.Contain("conditions"));
     }
 
     [Test]

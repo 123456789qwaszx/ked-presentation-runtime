@@ -150,7 +150,7 @@ namespace Ked.Progression
                 return episode;
 
             throw new InvalidOperationException(
-                $"에피소드 '{episodeId}'가 챕터 '{Definition.ChapterId}'에 없다.");
+                $"Episode '{episodeId}' is not in chapter '{Definition.ChapterId}'.");
         }
         
         #endregion

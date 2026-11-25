@@ -53,7 +53,7 @@ namespace Ked.Progression
         {
             if (IsRunning)
             {
-                _log?.Warning("[RUN] 이미 실행 중이다. 새 요청을 무시한다.");
+                _log?.Warning("[RUN] Already running. Ignoring the new request.");
                 return;
             }
 
@@ -79,7 +79,7 @@ namespace Ked.Progression
             catch (OperationCanceledException)
                 when (cancellation.IsCancellationRequested)
             {
-                _log?.Info("[RUN] CANCELLED — 현재 Scene pending은 commit하지 않는다.");
+                _log?.Info("[RUN] CANCELLED — the current scene's pending choices are not committed.");
             }
             catch (Exception error)
             {
@@ -152,7 +152,7 @@ namespace Ked.Progression
             if (session == null)
                 return Task.CompletedTask;
 
-            _log?.Info("[REPLAY] REQUEST — 현재 Scene을 유지하고 root부터 다시 실행한다.");
+            _log?.Info("[REPLAY] REQUEST — keeping the current scene and running again from its root.");
             return _sceneRunner.RequestReplayAsync(session);
         }
 

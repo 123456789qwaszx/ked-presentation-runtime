@@ -59,7 +59,7 @@ public sealed class SceneBoundaryTests
         Assert.That(result.IsValid, Is.False);
         Assert.That(result.HasErrors, Is.True);
         Assert.That(Messages(result), Does.Contain("복도"));
-        Assert.That(Messages(result), Does.Contain("한 자리에서만"));
+        Assert.That(Messages(result), Does.Contain("one place only"));
     }
 
     [Test]

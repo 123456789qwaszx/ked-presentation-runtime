@@ -53,10 +53,10 @@ namespace Ked.Progression
         public void RecordChoice(SceneChoice choice, int anchor)
         {
             if (choice.Source == SceneChoiceSource.Recorded)
-                throw new InvalidOperationException("이미 기록된 선택을 pending history에 다시 추가할 수 없다.");
+                throw new InvalidOperationException("A choice already recorded can't be added to the pending history again.");
 
             if (PathCursor != _picks.Count)
-                throw new InvalidOperationException("소비되지 않은 이전 진행 선택 기록이 남아 있다.");
+                throw new InvalidOperationException("Unconsumed earlier progression choices remain.");
 
             _picks.Add(new ProgressionPick
             {
